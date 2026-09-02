@@ -53,8 +53,7 @@ a{color:var(--blue)}
 .splash{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .35s}
 .splash.hide{opacity:0;pointer-events:none}
 .splash-logo{width:86px;height:auto}
-.splash-name{font-size:1.15rem;font-weight:400;letter-spacing:.22em;color:var(--dim)}
-.splash-name b{font-weight:800;color:var(--txt)}
+.splash-name{font-size:1.2rem}
 .splash-msg{color:var(--dim);font-size:.85rem;text-align:center;padding:0 24px}
 .spinner{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -64,9 +63,7 @@ a{color:var(--blue)}
   backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
   border-bottom:1px solid var(--line);padding-top:var(--safe-t)}
 .topbar-inner{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;min-height:52px}
-.brand{display:flex;align-items:center;gap:9px;cursor:pointer;padding:0;
-  font-size:.95rem;font-weight:400;letter-spacing:.14em;color:var(--dim)}
-.brand b{font-weight:800;color:var(--txt);letter-spacing:.06em}
+.brand{display:flex;align-items:center;gap:9px;cursor:pointer;padding:0;color:var(--txt)}
 .brand-logo{width:21px;height:27px;object-fit:contain;flex:none}
 .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
 .view{max-width:900px;margin:0 auto;padding:16px 16px 24px;animation:fade .22s ease}
@@ -81,6 +78,12 @@ a{color:var(--blue)}
 .tab svg{width:25px;height:25px;fill:currentColor}
 .tab.on{color:var(--acc)}
 .tab:active{transform:scale(.94)}
+
+/* Logotipo tipográfico: FR pequeño y elevado, al modo de un símbolo de marca */
+.wordmark{font-weight:500;font-size:1rem;letter-spacing:.19em;line-height:1;
+  white-space:nowrap;display:inline-block}
+.wordmark sup{font-size:.5em;font-weight:700;letter-spacing:.08em;
+  vertical-align:.72em;margin-left:.34em;color:var(--acc);top:0}
 
 /* ---------- primitives ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px}
@@ -311,3 +314,31 @@ code{font-family:var(--mono);
 .aviso .row-icon{background:transparent}
 .avisos{max-width:900px;margin:0 auto;padding:12px 16px 0}
 .avisos:empty{display:none}
+
+/* ---------- bóveda de claves ---------- */
+.guia-tit{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  padding:11px 0 3px;font-size:.9rem;font-weight:600;color:var(--acc)}
+.guia-tit svg{width:8px;height:13px;fill:none;stroke:currentColor;stroke-width:2.4;
+  stroke-linecap:round;transition:transform .2s}
+.guia-tit.abierta svg{transform:rotate(90deg)}
+.guia{padding-top:8px}
+.guia .instr li{font-size:.88rem;margin-bottom:9px}
+.guia code{font-size:.78rem}
+.copiable{display:flex;align-items:center;gap:8px;background:var(--card2);
+  border-radius:var(--r-s);padding:8px 8px 8px 11px}
+.copiable code{background:none;padding:0;font-size:.74rem;overflow-x:auto;
+  white-space:nowrap;flex:1;min-width:0}
+
+/* ---------- bóveda de claves ---------- */
+.guia-tit{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  padding:11px 0 3px;font-size:.9rem;font-weight:600;color:var(--acc)}
+.guia-tit svg{width:8px;height:13px;fill:none;stroke:currentColor;stroke-width:2.4;
+  stroke-linecap:round;transition:transform .2s}
+.guia-tit.abierta svg{transform:rotate(90deg)}
+.guia{padding-top:8px}
+.guia .instr li{font-size:.88rem;margin-bottom:9px}
+.guia code{font-size:.78rem}
+.copiable{display:flex;align-items:center;gap:8px;background:var(--card2);
+  border-radius:var(--r-s);padding:8px 8px 8px 11px}
+.copiable code{background:none;padding:0;font-size:.74rem;overflow-x:auto;
+  white-space:nowrap;flex:1;min-width:0}

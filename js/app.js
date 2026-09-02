@@ -108,7 +108,7 @@
       <div style="padding:26px 0 6px" class="center">
         <img src="icons/logo.svg" alt="Training FR" width="94" height="119"
              style="margin:0 auto 12px">
-        <div class="splash-name">TRAINING <b>FR</b></div>
+        <div class="splash-name wordmark">TRAINING<sup>FR</sup></div>
       </div>
       <h1 class="center">¿Dónde vas a entrenar?</h1>
       <p class="muted center">Con esto te muestro solo los ejercicios que puedes hacer de verdad,
@@ -1323,6 +1323,18 @@
         </div>
       </div>
 
+      <div class="list-title">Claves y conexiones</div>
+      <div class="list">
+        <div class="list-row tap" data-a="claves">
+          <span class="row-icon">${raw(icon('llave'))}</span>
+          <div class="grow">
+            <div class="list-row-title">Bóveda de claves</div>
+            <div class="list-row-sub">${resumenClaves()}</div>
+          </div>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </div>
+      </div>
+
       <div class="sec-title"><h2>Mi cuenta</h2></div>
       ${raw(vistaCuenta())}
 
@@ -1374,6 +1386,7 @@
 
   viewAjustes.mount = function (root) {
     bind(root, '[data-a=lugar2]', lugarSheet);
+    bind(root, '[data-a=claves]', function () { go('claves'); });
     mountCuenta(root);
 
     /* --- descarga para uso sin conexión --- */
@@ -1512,6 +1525,15 @@
       };
     }
   };
+
+  /* Qué servicios están ya configurados, para la fila de la bóveda */
+  function resumenClaves() {
+    const puestas = [];
+    if (g.IA && IA.activa()) puestas.push('Gemini');
+    if (g.Spotify && Spotify.configurado()) puestas.push('Spotify');
+    if (Sync.configurado()) puestas.push('Supabase');
+    return puestas.length ? puestas.join(' · ') : 'Gemini, Spotify y sincronización';
+  }
 
   /* ================= cuenta y sincronización ================= */
 

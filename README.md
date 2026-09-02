@@ -152,30 +152,43 @@ cualquiera leer o escribir filas que no sean suyas.
 
 ## Servicios opcionales
 
-Los tres son gratuitos y se configuran desde la propia app; **las claves se guardan en el
-navegador, nunca en el repositorio**. Sin ellos la app funciona entera: los cálculos, las
-rutinas, el progreso y las alertas no dependen de ninguno.
+Los tres son gratuitos y se configuran en un solo sitio: **Ajustes → Bóveda de claves**,
+donde cada uno tiene su paso a paso desplegable, la dirección de retorno lista para copiar
+y, en el caso de Gemini, un botón para comprobar que la clave responde.
+
+**Las claves se guardan en el navegador, nunca en el repositorio.** Sin ellas la app
+funciona entera: los cálculos, las rutinas, el progreso y las alertas no dependen de
+ninguno de estos servicios.
 
 ### Entrenador con IA — Google Gemini
 
-Crea una clave en [aistudio.google.com/apikey](https://aistudio.google.com/apikey) y pégala
-en **Perfil → Entrenador con IA**. La capa gratuita tiene un límite diario que sobra para
-uso personal; al superarlo la app avisa y sigue funcionando.
+1. Entra en [aistudio.google.com/apikey](https://aistudio.google.com/apikey) con tu cuenta
+   de Google y pulsa **Create API key**.
+2. Copia la clave (empieza por `AIza`) y pégala en la bóveda.
+3. Pulsa **Probar**: si responde, ya está.
+
+La capa gratuita tiene un límite diario que sobra para uso personal; al superarlo la app
+avisa y sigue funcionando.
 
 Al preguntar se envían a Google tu perfil, tus rutinas y tu progreso. Si no quieres que
 salgan de tu dispositivo, no configures esta parte.
 
 ### Música — Spotify
 
-**Spotify solo permite cambiar la reproducción (play, pausa, siguiente) a las cuentas
-Premium.** Es una limitación de su plataforma. Con cuenta gratuita puedes ver qué suena y
-usar el reproductor incrustado, que reproduce fragmentos.
+Con **Spotify Premium** funcionan los controles completos: play, pausa y cambio de tema
+desde la pantalla de entrenamiento. Sin Premium, Spotify solo deja ver qué suena y usar el
+reproductor incrustado; es una limitación de su plataforma, no de la app.
 
 1. En [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) pulsa
-   **Create app**.
-2. En **Redirect URIs** pon la dirección de tu app
-   (`https://TU-USUARIO.github.io/training-fr/`), marca **Web API** y guarda.
-3. Copia el **Client ID** y pégalo en **Perfil → Música**.
+   **Create app**. Nombre y descripción, los que quieras.
+2. En **Redirect URIs** pega la dirección de retorno que muestra la bóveda —tiene que
+   coincidir carácter por carácter—, marca **Web API** y guarda.
+3. En **Settings** de esa app copia el **Client ID** y pégalo en la bóveda. El
+   *Client Secret* no hace falta: la app usa PKCE, que no necesita secretos.
+4. Pulsa **Conectar** para autorizar tu cuenta.
+
+Al publicar en internet, vuelve al panel y añade también la dirección definitiva en
+**Redirect URIs**: la de desarrollo y la de producción son distintas.
 
 ### Alertas con la app cerrada
 

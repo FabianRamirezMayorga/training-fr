@@ -247,10 +247,8 @@
           <li>Pulsa <b>Create API key</b> y copia la clave.</li>
           <li>Pégala aquí abajo. Se guarda solo en este dispositivo.</li>
         </ol>
-        <label class="tiny">CLAVE DE API</label>
-        <input id="ia-key" type="password" autocomplete="off" spellcheck="false"
-               placeholder="AIza..." style="margin:5px 0 12px">
-        <button class="btn primary block" data-a="guardarIA">Guardar</button>
+        <button class="btn primary block" data-a="boveda" style="margin-top:6px">
+          ${raw(icon('llave'))} Ir a la bóveda de claves</button>
       </div>
 
       <p class="tiny" style="margin-top:12px">La capa gratuita tiene un límite diario que
@@ -261,13 +259,7 @@
   V.entrenador.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
 
-    bind(root, '[data-a=guardarIA]', function () {
-      try {
-        IA.guardarConfig(root.querySelector('#ia-key').value);
-        render();
-        UI.toast('Entrenador activado');
-      } catch (e) { UI.toast(e.message); }
-    });
+    bind(root, '[data-a=boveda]', function () { go('claves'); });
 
     const caja = root.querySelector('#ia-respuesta');
     const cargando = function (texto) {
@@ -289,12 +281,7 @@
     bindAll(root, '[data-ia]', function (el) {
       const a = el.dataset.ia;
       if (a === 'nutricion') return go('nutricion');
-      if (a === 'config') {
-        IA.borrarConfig();
-        render();
-        UI.toast('Introduce la clave de nuevo');
-        return;
-      }
+      if (a === 'config') return go('claves');
 
       cargando(a === 'analizar' ? 'Revisando tus entrenamientos…' : 'Revisando tus rutinas…');
       window.scrollTo({ top: caja.offsetTop - 80, behavior: 'smooth' });
@@ -338,27 +325,16 @@
         <h1>Música</h1>
         <p class="muted">Controla Spotify desde la pantalla de entrenamiento, sin salir de la app.</p>
 
-        <div class="card" style="border-color:var(--warn)">
-          <div style="font-weight:600;margin-bottom:4px">Antes de empezar</div>
-          <p class="muted" style="margin:0">Spotify solo deja <b>cambiar</b> la reproducción
-          (play, pausa, siguiente) a las cuentas <b>Premium</b>. Con cuenta gratuita podrás
-          ver qué suena y usar el reproductor incrustado, que es lo que permite su plataforma.</p>
+        <div class="card">
+          <p class="muted">Necesita el Client ID de una app de Spotify, que se crea en un
+          minuto y es gratis. Tienes el paso a paso en la bóveda.</p>
+          <button class="btn primary block" data-a="boveda">
+            ${raw(icon('llave'))} Ir a la bóveda de claves</button>
         </div>
 
-        <div class="card">
-          <ol class="instr">
-            <li>Entra en <a href="https://developer.spotify.com/dashboard" target="_blank"
-              rel="noopener noreferrer">developer.spotify.com/dashboard</a> y pulsa
-              <b>Create app</b>. Nombre y descripción, los que quieras.</li>
-            <li>En <b>Redirect URIs</b> escribe exactamente:<br>
-              <code class="tiny">${Spotify.urlRetorno()}</code></li>
-            <li>Marca <b>Web API</b>, guarda y copia el <b>Client ID</b>.</li>
-          </ol>
-          <label class="tiny">CLIENT ID</label>
-          <input id="sp-id" autocomplete="off" spellcheck="false" placeholder="32 caracteres"
-                 style="margin:5px 0 12px">
-          <button class="btn primary block" data-a="guardarSp">Guardar</button>
-        </div>`;
+        <p class="tiny" style="margin-top:12px">Con Spotify Premium tendrás los controles
+        completos (play, pausa y cambio de tema). Sin Premium, Spotify solo permite ver qué
+        suena y usar el reproductor incrustado.</p>`;
     }
 
     return html`
@@ -406,13 +382,7 @@
   V.musica.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
 
-    bind(root, '[data-a=guardarSp]', function () {
-      try {
-        Spotify.guardarConfig(root.querySelector('#sp-id').value, '');
-        render();
-        UI.toast('Guardado. Ahora conecta tu cuenta.');
-      } catch (e) { UI.toast(e.message); }
-    });
+    bind(root, '[data-a=boveda]', function () { go('claves'); });
 
     bind(root, '[data-a=conectar]', function () {
       Spotify.entrar().catch(function (e) { UI.toast(e.message); });
