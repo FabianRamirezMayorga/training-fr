@@ -102,6 +102,18 @@ que has abierto los ejercicios al menos una vez.
   alternar al vuelo.
 - **Tu cuenta por correo** *(opcional)* — entras con un enlace que te llega al email,
   sin contraseñas, y tus rutinas e historial se sincronizan entre todos tus dispositivos.
+- **Perfil y hábitos** — peso, altura, edad, actividad, sueño, tipo de dieta, alergias y
+  lesiones. Con eso calcula tu metabolismo basal, tu gasto diario, las calorías objetivo,
+  el reparto de macronutrientes y el agua del día. Registro de peso con evolución.
+- **Objetivos** — metas de peso, entrenamientos por semana, racha, volumen o récord en un
+  ejercicio. Se actualizan solas con lo que entrenas y te avisan al cumplirse.
+- **Alertas** — recordatorios por día y hora para entrenar, beber agua, comer o pesarte,
+  con exportación al calendario del móvil.
+- **Alimentación** — calorías y macros calculados, y menú semanal con lista de la compra
+  generado por la IA respetando tu dieta y tus alergias.
+- **Entrenador con IA** *(opcional)* — analiza tu progreso, revisa tus rutinas y responde
+  a lo que le preguntes, conociendo tu perfil y tu historial.
+- **Música** *(opcional)* — controla Spotify desde la pantalla de entrenamiento.
 
 ---
 
@@ -138,6 +150,51 @@ cualquiera leer o escribir filas que no sean suyas.
 
 ---
 
+## Servicios opcionales
+
+Los tres son gratuitos y se configuran desde la propia app; **las claves se guardan en el
+navegador, nunca en el repositorio**. Sin ellos la app funciona entera: los cálculos, las
+rutinas, el progreso y las alertas no dependen de ninguno.
+
+### Entrenador con IA — Google Gemini
+
+Crea una clave en [aistudio.google.com/apikey](https://aistudio.google.com/apikey) y pégala
+en **Perfil → Entrenador con IA**. La capa gratuita tiene un límite diario que sobra para
+uso personal; al superarlo la app avisa y sigue funcionando.
+
+Al preguntar se envían a Google tu perfil, tus rutinas y tu progreso. Si no quieres que
+salgan de tu dispositivo, no configures esta parte.
+
+### Música — Spotify
+
+**Spotify solo permite cambiar la reproducción (play, pausa, siguiente) a las cuentas
+Premium.** Es una limitación de su plataforma. Con cuenta gratuita puedes ver qué suena y
+usar el reproductor incrustado, que reproduce fragmentos.
+
+1. En [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) pulsa
+   **Create app**.
+2. En **Redirect URIs** pon la dirección de tu app
+   (`https://TU-USUARIO.github.io/training-fr/`), marca **Web API** y guarda.
+3. Copia el **Client ID** y pégalo en **Perfil → Música**.
+
+### Alertas con la app cerrada
+
+Una web no puede despertar el móvil por su cuenta sin un servidor de notificaciones, que
+sí costaría dinero. La app cubre lo que sí es posible gratis: avisos del sistema mientras
+está abierta, recordatorios pendientes al abrirla y **exportación al calendario del
+móvil**, que es lo único que avisa de verdad con la app cerrada.
+
+---
+
+## Aviso
+
+Las calorías, los macronutrientes y los planes de comidas son estimaciones para población
+general (fórmula de Mifflin-St Jeor). No son consejo médico ni sustituyen a un dietista o
+a un médico, especialmente si tienes alguna condición de salud, estás embarazada o
+tomas medicación.
+
+---
+
 ## Desarrollo
 
 No hay que instalar nada. Para verla en local basta con servir la carpeta:
@@ -150,7 +207,7 @@ Estructura:
 
 ```
 index.html              maquetación y orden de carga
-css/styles.css          estilos (tema oscuro y claro)
+css/styles.css          estilos (tema oscuro y claro, tipografía del sistema Apple)
 js/i18n.js              traducción del catálogo al español
 js/store.js             persistencia en localStorage
 js/ui.js                utilidades, animación de los ejercicios
@@ -159,6 +216,13 @@ js/templates.js         rutinas de ejemplo
 js/planner.js           generador del plan semanal (splits y selección de ejercicios)
 js/offline.js           descarga de imágenes para uso sin conexión
 js/sync.js              cuenta por correo y sincronización (API REST de Supabase)
+js/perfil.js            datos corporales y cálculos (IMC, metabolismo, calorías, macros)
+js/objetivos.js         metas con seguimiento automático
+js/alertas.js           recordatorios, avisos del sistema y exportación al calendario
+js/ia.js                entrenador con IA sobre Gemini
+js/spotify.js           control de música con autorización PKCE
+js/vistas.js            perfil, objetivos y alertas
+js/vistas2.js           alimentación, entrenador y música
 js/workout.js           modo entrenamiento
 js/app.js               router y vistas
 sw.js                   service worker (uso sin conexión)

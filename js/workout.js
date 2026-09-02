@@ -172,6 +172,8 @@
         <div class="prog"><i style="width:${pct}%"></i></div>
       </div>
 
+      <div id="wo-musica"></div>
+
       <div class="card" style="padding:0;overflow:hidden">
         ${raw(ex ? UI.demoHTML(ex, { speed: 800 }) : '')}
         <div style="padding:13px">
@@ -257,6 +259,7 @@
     const entry = a.entries[a.idx];
 
     UI.mountDemos(root);
+    pintarMusica(root);
 
     /* cronómetro total */
     const clock = root.querySelector('#wo-clock');
@@ -367,6 +370,18 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       };
     });
+  }
+
+  /* Reproductor de Spotify durante la sesión, si está conectado */
+  function pintarMusica(root) {
+    const host = root.querySelector('#wo-musica');
+    if (!host || !g.Spotify || !Spotify.activa()) return;
+
+    Spotify.sonando().then(function (s) {
+      if (!s) return;
+      host.innerHTML = g.Reproductor.html(s);
+      g.Reproductor.montar(host);
+    }).catch(function () { /* sin música sonando o sin permiso: no molesta */ });
   }
 
   function doFinish() {

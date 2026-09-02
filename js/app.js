@@ -34,6 +34,7 @@
       progreso: viewProgreso, ajustes: viewAjustes, plan: viewPlan,
       bienvenida: viewBienvenida
     };
+    Object.assign(views, g.VISTAS || {});
 
     /* Lo primero de todo es saber dónde entrena: sin eso no se puede filtrar nada */
     if (!Store.settings().gear && route.name !== 'bienvenida') {
@@ -47,6 +48,7 @@
 
     if (fn.mount) fn.mount(viewEl);
     UI.mountDemos(viewEl);
+    pintarAvisos();
 
     const chip = actionsEl.querySelector('[data-a=lugar]');
     if (chip) chip.onclick = lugarSheet;
@@ -1716,6 +1718,35 @@
     });
   }
 
+  /* Recordatorios que tocaban y aún no has visto */
+  function pintarAvisos() {
+    const host = document.getElementById('avisos');
+    if (!host) return;
+    const p = Alertas.pendientes();
+    if (!p.length) { host.innerHTML = ''; return; }
+
+    host.innerHTML = p.slice(0, 2).map(function (x) {
+      const t = Alertas.TIPOS[x.tipo] || Alertas.TIPOS.libre;
+      return html`<div class="aviso">
+        <span class="row-icon">${raw(icon(t.icono))}</span>
+        <div class="grow">
+          <div style="font-weight:600;font-size:.95rem">${x.titulo}</div>
+          <div class="tiny">${x.mensaje || x.hora}</div>
+        </div>
+        <button class="btn sm" data-visto="${x.id}">Vale</button>
+      </div>`;
+    }).join('');
+
+    host.querySelectorAll('[data-visto]').forEach(function (b) {
+      b.onclick = function () {
+        const arr = Alertas.lista().slice();
+        const al = arr.find(function (x) { return x.id === b.dataset.visto; });
+        if (al) { al.ultima = Date.now(); Store.setSetting('alertas', arr); }
+        pintarAvisos();
+      };
+    });
+  }
+
   /* ================= utilidades ================= */
 
   function bind(root, sel, fn) {
@@ -1800,13 +1831,18 @@
 
     window.addEventListener('hashchange', render);
 
-    /* si venimos del enlace del correo, primero se abre la sesión */
+    /* si venimos del enlace del correo o de autorizar Spotify, se resuelve antes de pintar */
     const entrando = Sync.configurado()
       ? Sync.capturarRedireccion().catch(function () { return false; })
       : Promise.resolve(false);
 
-    Promise.all([Data.load(), entrando]).then(function (res) {
+    const spotify = Spotify.configurado()
+      ? Spotify.capturarRedireccion().catch(function () { return { ok: false }; })
+      : Promise.resolve({ ok: false });
+
+    Promise.all([Data.load(), entrando, spotify]).then(function (res) {
       const reciénEntrado = res[1];
+      const sp = res[2] || {};
       const splash = document.getElementById('splash');
       splash.classList.add('hide');
       setTimeout(function () { splash.remove(); }, 400);
@@ -1825,6 +1861,22 @@
         }).catch(function () { /* sin conexión: se sincroniza más tarde */ });
       }
 
+      if (sp.ok) UI.toast('Spotify conectado');
+      else if (sp.error) UI.toast(sp.error);
+
+      /* recordatorios: revisan cada minuto mientras la app esté abierta */
+      Alertas.arrancar(function () { pintarAvisos(); });
+      pintarAvisos();
+
+      /* metas recién cumplidas */
+      const logradas = Objetivos.revisar();
+      if (logradas.length) {
+        setTimeout(function () {
+          UI.toast('Objetivo cumplido: ' + Objetivos.etiqueta(logradas[0]));
+          Alertas.avisar('Objetivo cumplido', Objetivos.etiqueta(logradas[0]));
+        }, 1200);
+      }
+
       /* en segundo plano se guardan las imágenes de lo que ya tienes planificado */
       setTimeout(function () { Offline.precargarRutinas(); }, 2500);
     }).catch(function (err) {
@@ -1833,7 +1885,11 @@
     });
   }
 
-  g.App = { go: go, render: render, exerciseSheet: exerciseSheet };
+  g.App = {
+    go: go, render: render, exerciseSheet: exerciseSheet,
+    bind: bind, bindAll: bindAll, aplicarTema: aplicarTema,
+    lugarSheet: lugarSheet, cuantosEn: cuantosEn, temaEfectivo: temaEfectivo
+  };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
