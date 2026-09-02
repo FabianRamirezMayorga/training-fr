@@ -37,7 +37,7 @@ Necesitas una cuenta gratuita en [github.com](https://github.com).
 2. Desde esta carpeta, en la terminal:
 
 ```bash
-git remote add origin https://github.com/TU-USUARIO/training-fr.git
+git remote add origin https://github.com/FabianRamirezMayorga/training-fr.git
 ```
 
 ```bash
@@ -49,7 +49,7 @@ git push -u origin main
 
 4. Al cabo de un minuto la app estará en:
 
-   `https://TU-USUARIO.github.io/training-fr/`
+   `https://FabianRamirezMayorga.github.io/training-fr/`
 
 Esa URL es pública, con HTTPS, y no caduca. Cada `git push` la actualiza.
 
@@ -140,7 +140,7 @@ create policy "solo lo mio" on public.estado
 ```
 
 4. En **Authentication → URL Configuration**, añade la dirección de tu app
-   (`https://TU-USUARIO.github.io/training-fr/`) en **Site URL** y en **Redirect URLs**.
+   (`https://FabianRamirezMayorga.github.io/training-fr/`) en **Site URL** y en **Redirect URLs**.
 5. En la app: **Ajustes → Mi cuenta → Activar la sincronización**, pega la URL y la clave,
    y entra con tu correo.
 
