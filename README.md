@@ -125,9 +125,6 @@ sw.js                   service worker (uso sin conexión)
 Al cambiar la lista de archivos hay que subir `VERSION` en `sw.js` para que los
 navegadores que ya tienen la app instalada se actualicen.
 
-```
-```
-
 ## Créditos
 
 Ejercicios, imágenes e instrucciones: [free-exercise-db](https://github.com/yuhonas/free-exercise-db),
