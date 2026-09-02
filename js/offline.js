@@ -4,7 +4,7 @@
 (function (g) {
   'use strict';
 
-  const CACHE = 'gymflow-v2-media';
+  const CACHE = 'trainingfr-v1-media';
   const CONCURRENCIA = 6;
 
   function soportado() { return 'caches' in window; }

@@ -8,7 +8,7 @@
   const CDN = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/';
   const MIRROR = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/';
   const JSON_PATH = 'dist/exercises.json';
-  const CACHE_KEY = 'gymflow.catalog.v1';
+  const CACHE_KEY = 'trainingfr.catalog.v1';
 
   let list = [];
   let byId = {};

@@ -4,7 +4,8 @@
 (function (g) {
   'use strict';
 
-  const KEY = 'gymflow.v1';
+  const KEY = 'trainingfr.v1';
+  const KEY_ANTERIOR = 'gymflow.v1';   // la app se llamaba GymFlow
 
   const DEFAULTS = {
     version: 1,
@@ -19,7 +20,12 @@
 
   function load() {
     try {
-      const raw = localStorage.getItem(KEY);
+      let raw = localStorage.getItem(KEY);
+      /* datos guardados con el nombre anterior: se conservan */
+      if (!raw) {
+        const viejo = localStorage.getItem(KEY_ANTERIOR);
+        if (viejo) { raw = viejo; localStorage.setItem(KEY, viejo); localStorage.removeItem(KEY_ANTERIOR); }
+      }
       if (!raw) return clone(DEFAULTS);
       const data = JSON.parse(raw);
       return Object.assign(clone(DEFAULTS), data, {
@@ -31,9 +37,13 @@
     }
   }
 
+  let silencioso = false;
+
   function save() {
     try {
+      if (!silencioso) state.updatedAt = Date.now();
       localStorage.setItem(KEY, JSON.stringify(state));
+      if (!silencioso && g.Sync && Sync.activa()) Sync.programarSubida();
       return true;
     } catch (e) {
       console.error('No se pudo guardar:', e);
@@ -229,10 +239,24 @@
   /* ---------- copia de seguridad ---------- */
   function exportJSON() { return JSON.stringify(state, null, 2); }
 
+  /* El estado tal cual, para subirlo a la nube */
+  function exportar() { return clone(state); }
+
+  /* Reemplaza el estado con el de la nube sin volver a sellar la hora:
+     así la marca de tiempo sigue siendo la del dispositivo que hizo el cambio. */
+  function importar(data) {
+    state = Object.assign(clone(DEFAULTS), data, {
+      settings: Object.assign({}, DEFAULTS.settings, (data && data.settings) || {})
+    });
+    silencioso = true;
+    save();
+    silencioso = false;
+  }
+
   function importJSON(text) {
     const data = JSON.parse(text);
     if (!data || typeof data !== 'object' || !Array.isArray(data.routines)) {
-      throw new Error('El archivo no tiene el formato de una copia de GymFlow.');
+      throw new Error('El archivo no tiene el formato de una copia de Training FR.');
     }
     state = Object.assign(clone(DEFAULTS), data, {
       settings: Object.assign({}, DEFAULTS.settings, data.settings || {})
@@ -252,6 +276,7 @@
     sessions: sessions, addSession: addSession, deleteSession: deleteSession,
     historyOf: historyOf, prOf: prOf, lastPerformance: lastPerformance,
     volumeOf: volumeOf, stats: stats, weeklyVolume: weeklyVolume, dayKey: dayKey,
-    exportJSON: exportJSON, importJSON: importJSON, wipe: wipe, uid: uid
+    exportJSON: exportJSON, importJSON: importJSON, wipe: wipe, uid: uid,
+    exportar: exportar, importar: importar
   };
 })(window);

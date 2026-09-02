@@ -1,15 +1,16 @@
 :root{
   --bg:#0f1115; --bg2:#161a21; --card:#191e26; --card2:#212836;
   --line:#2a3140; --txt:#e8ecf3; --dim:#95a0b3; --dim2:#6c7789;
-  --acc:#3ddc84; --acc-d:#0f2e1e; --warn:#ffb020; --bad:#ff5c5c;
-  --blue:#5aa9ff;
+  --brand-1:#29abe2; --brand-2:#8cc63f;
+  --acc:#8cc63f; --acc-d:#1d2f10; --on-acc:#0e1a05;
+  --warn:#ffb020; --bad:#ff5c5c; --blue:#29abe2;
   --r:14px; --r-s:10px;
   --safe-b: env(safe-area-inset-bottom, 0px);
 }
 html[data-theme="light"]{
   --bg:#f4f6fa; --bg2:#ffffff; --card:#ffffff; --card2:#eef1f7;
   --line:#dde3ec; --txt:#141922; --dim:#5c6779; --dim2:#8a94a6;
-  --acc:#12a05a; --acc-d:#dff5e9;
+  --acc:#5f9425; --acc-d:#eaf5dc; --on-acc:#ffffff; --blue:#1b87b8;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -33,7 +34,9 @@ a{color:var(--blue)}
 /* ---------- splash ---------- */
 .splash{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .35s}
 .splash.hide{opacity:0;pointer-events:none}
-.splash-logo{font-size:2rem;font-weight:800;letter-spacing:-.5px;background:linear-gradient(100deg,var(--acc),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
+.splash-logo{width:150px;height:auto}
+.splash-name{font-size:1.15rem;font-weight:400;letter-spacing:.22em;color:var(--dim)}
+.splash-name b{font-weight:800;color:var(--txt)}
 .splash-msg{color:var(--dim);font-size:.85rem;text-align:center;padding:0 24px}
 .spinner{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -41,8 +44,10 @@ a{color:var(--blue)}
 /* ---------- layout ---------- */
 .topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .topbar-inner{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;min-height:52px}
-.brand{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:-.3px;cursor:pointer}
-.brand-icon{width:22px;height:22px;color:var(--acc)}
+.brand{display:flex;align-items:center;gap:9px;cursor:pointer;padding:0;
+  font-size:.95rem;font-weight:400;letter-spacing:.14em;color:var(--dim)}
+.brand b{font-weight:800;color:var(--txt);letter-spacing:.06em}
+.brand-logo{width:34px;height:24px;object-fit:contain}
 .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
 .view{max-width:900px;margin:0 auto;padding:16px 16px 24px;animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}}
@@ -72,7 +77,7 @@ a{color:var(--blue)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:.65em 1.05em;border-radius:var(--r-s);background:var(--card2);border:1px solid var(--line);font-weight:600;font-size:.9rem;transition:transform .1s,filter .15s}
 .btn:active{transform:scale(.96)}
 .btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.btn.primary{background:var(--acc);color:#08130c;border-color:transparent}
+.btn.primary{background:var(--acc);color:var(--on-acc);border-color:transparent}
 .btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
 .btn.ghost{background:transparent}
 .btn.block{width:100%}
@@ -123,7 +128,7 @@ a{color:var(--blue)}
 .setgrid input{text-align:center;padding:.5em .3em}
 .chk{width:34px;height:34px;border-radius:9px;border:1.6px solid var(--line);background:var(--card2);display:flex;align-items:center;justify-content:center}
 .chk.on{background:var(--acc);border-color:var(--acc)}
-.chk svg{width:17px;height:17px;stroke:#08130c;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.chk svg{width:17px;height:17px;stroke:var(--on-acc);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0}
 .chk.on svg{opacity:1}
 
 /* ---------- stats ---------- */
@@ -137,7 +142,7 @@ a{color:var(--blue)}
 .bars .b span{font-size:.62rem;color:var(--dim2);font-weight:600}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
 .cal .d{aspect-ratio:1;border-radius:6px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:.62rem;color:var(--dim2)}
-.cal .d.on{background:var(--acc);color:#08130c;font-weight:800}
+.cal .d.on{background:var(--acc);color:var(--on-acc);font-weight:800}
 .cal .d.today{outline:2px solid var(--blue)}
 
 /* ---------- workout mode ---------- */
@@ -145,7 +150,7 @@ a{color:var(--blue)}
 .prog{height:5px;background:var(--card2);border-radius:999px;overflow:hidden}
 .prog i{display:block;height:100%;background:var(--acc);transition:width .35s}
 .rest{position:fixed;left:0;right:0;bottom:calc(80px + var(--safe-b));z-index:55;padding:0 16px}
-.rest-in{max-width:900px;margin:0 auto;background:var(--acc);color:#08130c;border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 28px rgba(0,0,0,.4);animation:up .3s}
+.rest-in{max-width:900px;margin:0 auto;background:var(--acc);color:var(--on-acc);border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 28px rgba(0,0,0,.4);animation:up .3s}
 @keyframes up{from{transform:translateY(20px);opacity:0}}
 .rest-in svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .rest-in b{font-size:1.5rem;font-variant-numeric:tabular-nums;font-weight:800;display:block}
@@ -197,3 +202,11 @@ a{color:var(--blue)}
 /* ---------- progreso de descarga sin conexión ---------- */
 .dl{height:8px;background:var(--card2);border-radius:999px;overflow:hidden;margin:10px 0 6px}
 .dl i{display:block;height:100%;width:0;background:var(--acc);transition:width .25s}
+
+/* ---------- bloque de código (SQL de configuración) ---------- */
+pre{background:var(--card2);border:1px solid var(--line);border-radius:var(--r-s);
+  padding:11px 12px;overflow-x:auto;font-size:.72rem;line-height:1.5;margin:0 0 14px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--txt);
+  white-space:pre;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--card2);padding:.15em .4em;border-radius:5px;word-break:break-all}

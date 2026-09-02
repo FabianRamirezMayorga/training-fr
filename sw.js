@@ -1,7 +1,7 @@
 /* sw.js — service worker.
    Deja la app usable sin conexión: los archivos propios se precargan y las
    imágenes del catálogo se guardan la primera vez que se ven. */
-const VERSION = 'gymflow-v2';
+const VERSION = 'trainingfr-v1';
 const SHELL = VERSION + '-shell';
 const MEDIA = VERSION + '-media';
 const MAX_MEDIA = 4000;         // imágenes guardadas como máximo (~200 MB)
@@ -10,10 +10,10 @@ const FILES = [
   './', './index.html',
   './css/styles.css',
   './js/i18n.js', './js/store.js', './js/ui.js', './js/data.js',
-  './js/templates.js', './js/planner.js', './js/offline.js',
+  './js/templates.js', './js/planner.js', './js/offline.js', './js/sync.js',
   './js/workout.js', './js/app.js',
   './manifest.webmanifest',
-  './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png'
+  './icons/logo.svg', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png'
 ];
 
 self.addEventListener('install', function (e) {
@@ -68,8 +68,9 @@ self.addEventListener('fetch', function (e) {
     return;
   }
 
-  /* Nunca cachear la API de traducción */
+  /* Nunca cachear la traducción ni las llamadas a la cuenta */
   if (url.hostname.indexOf('mymemory') !== -1) return;
+  if (url.hostname.indexOf('supabase.co') !== -1) return;
 
   /* Archivos propios: red primero para recibir actualizaciones, caché como respaldo */
   if (url.origin === location.origin) {

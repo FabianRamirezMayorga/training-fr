@@ -41,7 +41,7 @@
     }
     const fn = views[route.name] || viewInicio;
 
-    actionsEl.innerHTML = route.name === 'bienvenida' ? '' : lugarChip();
+    actionsEl.innerHTML = route.name === 'bienvenida' ? temaChip() : lugarChip() + temaChip();
     viewEl.innerHTML = fn();
     window.scrollTo(0, route.name === 'ejercicios' ? window.scrollY : 0);
 
@@ -50,6 +50,13 @@
 
     const chip = actionsEl.querySelector('[data-a=lugar]');
     if (chip) chip.onclick = lugarSheet;
+
+    const chipTema = actionsEl.querySelector('[data-a=tema]');
+    if (chipTema) chipTema.onclick = function () {
+      Store.setSetting('theme', temaEfectivo() === 'light' ? 'dark' : 'light');
+      aplicarTema();
+      render();
+    };
 
     document.querySelectorAll('.tabbar').forEach(function (t) {
       t.hidden = route.name === 'bienvenida';
@@ -96,10 +103,10 @@
 
   function viewBienvenida() {
     return html`
-      <div style="padding:28px 0 10px" class="center">
-        <div style="font-size:2rem;font-weight:800;letter-spacing:-.5px;
-             background:linear-gradient(100deg,var(--acc),var(--blue));
-             -webkit-background-clip:text;background-clip:text;color:transparent">GymFlow</div>
+      <div style="padding:26px 0 6px" class="center">
+        <img src="icons/logo.svg" alt="Training FR" width="130" height="94"
+             style="margin:0 auto 10px">
+        <div class="splash-name">TRAINING <b>FR</b></div>
       </div>
       <h1 class="center">¿Dónde vas a entrenar?</h1>
       <p class="muted center">Con esto te muestro solo los ejercicios que puedes hacer de verdad,
@@ -149,7 +156,7 @@
     const nombre = Store.settings().name;
 
     return html`
-      <h1>Hola${nombre ? ', ' + nombre : ''} 👋</h1>
+      <h1>Hola${nombre ? ', ' + nombre : ''}</h1>
       <p class="muted">${st.week === 0 ? 'Aún no has entrenado esta semana. Buen momento para empezar.'
         : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
         : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.'}</p>
@@ -453,7 +460,7 @@
     const pr = Store.prOf(ex.id);
     const hist = Store.historyOf(ex.id).slice(0, 6);
     const fav = Store.isFav(ex.id);
-    const cached = localStorage.getItem('gymflow.tr.' + ex.id);
+    const cached = localStorage.getItem('trainingfr.tr.' + ex.id);
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">${raw(icon('back'))} Volver</button>
@@ -557,7 +564,7 @@
     });
 
     Promise.all(peticiones).then(function (frases) {
-      localStorage.setItem('gymflow.tr.' + ex.id, JSON.stringify(frases));
+      localStorage.setItem('trainingfr.tr.' + ex.id, JSON.stringify(frases));
       const ol = document.getElementById('instr');
       if (ol) ol.innerHTML = frases.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
       btn.remove();
@@ -1296,15 +1303,16 @@
         <div class="hr"></div>
         <div class="row between"><span>Tema</span>
           <div class="row" style="gap:6px">
-            <button class="chip ${s.theme === 'dark' ? 'on' : ''}" data-theme="dark">Oscuro</button>
             <button class="chip ${s.theme === 'light' ? 'on' : ''}" data-theme="light">Claro</button>
+            <button class="chip ${s.theme === 'dark' ? 'on' : ''}" data-theme="dark">Oscuro</button>
+            <button class="chip ${s.theme === 'auto' ? 'on' : ''}" data-theme="auto">Sistema</button>
           </div>
         </div>
         <div class="hr"></div>
         <div class="row between"><span>Descanso por defecto</span>
           <div class="row" style="gap:6px;max-width:130px">
             <input id="s-rest" type="number" min="0" max="600" step="15" value="${s.rest}"
-                   style="text-align:center"><span class="tiny">seg</span>
+                   style="text-align:center"><span class="tiny nowrap">seg</span>
           </div>
         </div>
         <div class="hr"></div>
@@ -1312,6 +1320,9 @@
           <button class="chip ${s.sound ? 'on' : ''}" data-a="sound">${s.sound ? 'Activado' : 'Apagado'}</button>
         </div>
       </div>
+
+      <div class="sec-title"><h2>Mi cuenta</h2></div>
+      ${raw(vistaCuenta())}
 
       <div class="sec-title"><h2>Copia de seguridad</h2></div>
       <div class="card">
@@ -1340,8 +1351,8 @@
 
       <div class="sec-title"><h2>Instalar en el móvil</h2></div>
       <div class="card">
-        <p class="muted">GymFlow funciona como una app: ábrela en el navegador del móvil y usa
-        <b>«Añadir a la pantalla de inicio»</b> (Android: menú ⋮ · iPhone: botón Compartir).
+        <p class="muted">Training FR funciona como una app: ábrela en el navegador del móvil y usa
+        <b>«Añadir a la pantalla de inicio»</b> (en Android, desde el menú del navegador; en iPhone, desde el botón Compartir).
         Después arranca a pantalla completa y funciona sin conexión.</p>
         <button class="btn primary block" data-a="install" hidden id="btn-install">Instalar aplicación</button>
       </div>
@@ -1352,14 +1363,16 @@
       </div>
 
       <p class="tiny center" style="margin-top:22px">
-        GymFlow · Catálogo de ejercicios de
+        Training FR · Catálogo de ejercicios de
         <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener noreferrer">free-exercise-db</a>
-        (dominio público).<br>Los datos no salen de tu dispositivo.
+        (dominio público).<br>Tus datos se quedan en tu dispositivo salvo que
+        actives la sincronización con tu correo.
       </p>`;
   }
 
   viewAjustes.mount = function (root) {
     bind(root, '[data-a=lugar2]', lugarSheet);
+    mountCuenta(root);
 
     /* --- descarga para uso sin conexión --- */
     const estadoEl = root.querySelector('#dl-estado');
@@ -1450,7 +1463,7 @@
       const blob = new Blob([Store.exportJSON()], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'gymflow-' + Store.dayKey(Date.now()) + '.json';
+      a.download = 'training-fr-' + Store.dayKey(Date.now()) + '.json';
       a.click();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
       UI.toast('Copia descargada');
@@ -1498,6 +1511,211 @@
     }
   };
 
+  /* ================= cuenta y sincronización ================= */
+
+  function vistaCuenta() {
+    /* 1. sin configurar: hace falta el proyecto gratuito de Supabase */
+    if (!Sync.configurado()) {
+      return html`
+        <div class="card">
+          <p class="muted">Entra con tu correo y tus rutinas, tu historial y tus marcas
+          estarán en todos tus dispositivos. Sin contraseñas: recibes un enlace y ya está.</p>
+          <p class="tiny">Para activarlo hay que crear una base de datos gratuita (una sola vez,
+          cinco minutos). Te guío paso a paso.</p>
+          <button class="btn primary block" data-a="configsync" style="margin-top:8px">
+            ${raw(icon('nube'))} Activar la sincronización</button>
+        </div>`;
+    }
+
+    /* 2. configurado pero sin sesión: pedir el correo */
+    if (!Sync.activa()) {
+      return html`
+        <div class="card">
+          <label class="tiny">TU CORREO</label>
+          <input id="sync-mail" type="email" inputmode="email" autocomplete="email"
+                 placeholder="tucorreo@ejemplo.com" value="${Store.settings().name ? '' : ''}"
+                 style="margin:5px 0 10px">
+          <button class="btn primary block" data-a="enviarenlace">
+            ${raw(icon('correo'))} Enviarme el enlace de acceso</button>
+          <p class="tiny" style="margin-top:9px">Te llega un correo con un enlace. Al pulsarlo
+          vuelves aquí ya dentro. Revisa la carpeta de spam la primera vez.</p>
+          <button class="btn ghost sm block" data-a="configsync" style="margin-top:6px">
+            Cambiar la configuración</button>
+        </div>`;
+    }
+
+    /* 3. sesión abierta */
+    const ultimo = Sync.ultimoSync();
+    return html`
+      <div class="card">
+        <div class="row between">
+          <div class="grow">
+            <div style="font-weight:700">${Sync.email()}</div>
+            <div class="tiny">${ultimo ? 'Última sincronización: ' + UI.fecha(ultimo)
+              : 'Todavía sin sincronizar'}</div>
+          </div>
+          <span class="chip solid">Conectado</span>
+        </div>
+        <div class="row" style="margin-top:11px">
+          <button class="btn grow" data-a="sincronizar">${raw(icon('nube'))} Sincronizar ahora</button>
+          <button class="btn icon" data-a="salir" aria-label="Cerrar sesión">${raw(icon('salir'))}</button>
+        </div>
+        <p class="tiny" style="margin-top:9px">Los cambios se suben solos. En otro dispositivo,
+        entra con este mismo correo y lo tendrás todo.</p>
+      </div>`;
+  }
+
+  /* Asistente de configuración: URL y clave del proyecto, más el SQL de la tabla */
+  function configSyncSheet() {
+    const c = Sync.config() || {};
+    UI.modal(html`
+      <h2>Activar la sincronización</h2>
+      <p class="muted">Se hace una vez y es gratis. Guarda tus datos en tu propia base de datos.</p>
+
+      <ol class="instr" style="margin:14px 0">
+        <li>Entra en <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">supabase.com</a>,
+          crea una cuenta y pulsa <b>New project</b>. Elige cualquier nombre y contraseña.</li>
+        <li>Cuando termine, ve a <b>Project Settings → API</b> y copia la <b>Project URL</b>
+          y la clave <b>anon public</b>.</li>
+        <li>Ve a <b>SQL Editor</b>, pega el bloque de abajo y pulsa <b>Run</b>. Crea la tabla
+          donde se guardan tus datos, protegida para que solo tú puedas verlos.</li>
+        <li>Ve a <b>Authentication → URL Configuration</b> y añade esta dirección en
+          <b>Redirect URLs</b>:<br><code class="tiny">${Sync.urlRetorno()}</code></li>
+      </ol>
+
+      <div class="row between" style="margin-bottom:6px">
+        <span class="tiny">SQL PARA CREAR LA TABLA</span>
+        <button class="btn sm" data-a="copiarsql">${raw(icon('copy'))} Copiar</button>
+      </div>
+      <pre id="sql-box">${Sync.SQL}</pre>
+
+      <label class="tiny">PROJECT URL</label>
+      <input id="cfg-url" placeholder="https://xxxxxxxx.supabase.co" value="${c.url || ''}"
+             autocomplete="off" spellcheck="false" style="margin:5px 0 10px">
+      <label class="tiny">CLAVE ANON PUBLIC</label>
+      <input id="cfg-key" placeholder="eyJhbGciOi..." value="${c.key || ''}"
+             autocomplete="off" spellcheck="false" style="margin:5px 0 12px">
+
+      <button class="btn primary block" data-a="guardarcfg">Guardar y continuar</button>
+      ${raw(c.url ? '<button class="btn danger block sm" data-a="borrarcfg" style="margin-top:8px">' +
+        'Desconectar y borrar la configuración</button>' : '')}`,
+      function (el) {
+        el.querySelector('[data-a=copiarsql]').onclick = function () {
+          const t = el.querySelector('#sql-box').textContent;
+          if (navigator.clipboard) navigator.clipboard.writeText(t);
+          UI.toast('SQL copiado');
+        };
+        el.querySelector('[data-a=guardarcfg]').onclick = function () {
+          try {
+            Sync.guardarConfig(el.querySelector('#cfg-url').value, el.querySelector('#cfg-key').value);
+            UI.closeModal();
+            render();
+            UI.toast('Configuración guardada. Ahora entra con tu correo.');
+          } catch (e) {
+            UI.toast(e.message);
+          }
+        };
+        const borrar = el.querySelector('[data-a=borrarcfg]');
+        if (borrar) borrar.onclick = function () {
+          UI.confirm('Desconectar', 'Se borrará la configuración y la sesión de este dispositivo. ' +
+            'Tus datos locales y los de la nube no se tocan.', 'Desconectar', true).then(function (ok) {
+            if (ok) { Sync.borrarConfig(); UI.closeModal(); render(); UI.toast('Desconectado'); }
+          });
+        };
+      });
+  }
+
+  function mountCuenta(root) {
+    bind(root, '[data-a=configsync]', configSyncSheet);
+
+    bind(root, '[data-a=enviarenlace]', function (btn) {
+      const campo = root.querySelector('#sync-mail');
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
+      Sync.enviarEnlace(campo.value).then(function (dir) {
+        UI.modal(html`
+          <h2>Revisa tu correo</h2>
+          <p class="muted">Hemos enviado un enlace de acceso a <b>${dir}</b>.
+          Ábrelo en este mismo dispositivo y entrarás automáticamente.</p>
+          <p class="tiny">Si no aparece en unos minutos, mira en spam.</p>
+          <button class="btn primary block" data-x="ok">Entendido</button>`,
+          function (el) { el.querySelector('[data-x=ok]').onclick = UI.closeModal; });
+      }).catch(function (e) {
+        UI.toast(e.message || 'No se pudo enviar el enlace');
+      }).then(function () {
+        render();
+      });
+    });
+
+    bind(root, '[data-a=sincronizar]', function (btn) {
+      btn.disabled = true;
+      const antes = btn.innerHTML;
+      btn.textContent = 'Sincronizando…';
+      Sync.sincronizar().then(function (r) {
+        UI.toast(r === 'bajado' ? 'Datos actualizados desde la nube'
+          : r === 'subido' ? 'Tus datos están guardados en la nube'
+          : 'Ya estaba todo al día');
+        aplicarTema();
+        render();
+      }).catch(function (e) {
+        btn.disabled = false;
+        btn.innerHTML = antes;
+        UI.toast(e.message || 'No se pudo sincronizar');
+      });
+    });
+
+    bind(root, '[data-a=salir]', function () {
+      UI.confirm('Cerrar sesión',
+        'Tus datos seguirán en este dispositivo y en la nube. Podrás volver a entrar cuando quieras.',
+        'Cerrar sesión').then(function (ok) {
+        if (ok) Sync.salir().then(function () { render(); UI.toast('Sesión cerrada'); });
+      });
+    });
+  }
+
+  /* Al volver del enlace del correo: decidir qué hacer con lo que ya hay aquí */
+  function trasEntrar() {
+    const hayLocal = Sync.hayDatosLocales();
+
+    return Sync.bajar().then(function (remoto) {
+      const tieneRemoto = remoto && remoto.data &&
+        ((remoto.data.routines || []).length || (remoto.data.sessions || []).length);
+
+      if (hayLocal && tieneRemoto) {
+        return new Promise(function (resolve) {
+          UI.modal(html`
+            <h2>Ya tenías datos guardados</h2>
+            <p class="muted">En la nube hay rutinas de este correo y en este dispositivo también.
+            ¿Con cuáles te quedas?</p>
+            <div class="stack" style="margin-top:14px">
+              <button class="btn primary block" data-x="bajar">
+                Usar los de la nube (${(remoto.data.routines || []).length} rutinas)</button>
+              <button class="btn block" data-x="subir">
+                Usar los de este dispositivo (${Store.routines().length} rutinas)</button>
+            </div>
+            <p class="tiny" style="margin-top:10px">La opción que no elijas se reemplaza.
+            Si quieres conservar ambas, cancela y exporta antes una copia desde Ajustes.</p>`,
+            function (el) {
+              el.querySelector('[data-x=bajar]').onclick = function () {
+                UI.closeModal(); resolve(Sync.sincronizar('bajar'));
+              };
+              el.querySelector('[data-x=subir]').onclick = function () {
+                UI.closeModal(); resolve(Sync.sincronizar('subir'));
+              };
+            });
+        });
+      }
+      return Sync.sincronizar();
+    }).then(function () {
+      aplicarTema();
+      render();
+      UI.toast('Has entrado como ' + Sync.email());
+    }).catch(function (e) {
+      render();
+      UI.toast(e.message || 'Entraste, pero no se pudo sincronizar todavía');
+    });
+  }
+
   /* ================= utilidades ================= */
 
   function bind(root, sel, fn) {
@@ -1510,11 +1728,35 @@
     });
   }
 
-  function aplicarTema() {
+  /* Tema: claro, oscuro o el del sistema operativo */
+  const consultaSistema = window.matchMedia
+    ? window.matchMedia('(prefers-color-scheme: light)') : null;
+
+  function temaEfectivo() {
     const t = Store.settings().theme;
+    if (t === 'auto') return consultaSistema && consultaSistema.matches ? 'light' : 'dark';
+    return t === 'light' ? 'light' : 'dark';
+  }
+
+  function aplicarTema() {
+    const t = temaEfectivo();
     document.documentElement.dataset.theme = t;
     const meta = document.querySelector('meta[name=theme-color]');
     if (meta) meta.content = t === 'light' ? '#f4f6fa' : '#0f1115';
+  }
+
+  if (consultaSistema && consultaSistema.addEventListener) {
+    consultaSistema.addEventListener('change', function () {
+      if (Store.settings().theme === 'auto') { aplicarTema(); render(); }
+    });
+  }
+
+  /* Botón de la barra superior para alternar claro / oscuro de un toque */
+  function temaChip() {
+    const claro = temaEfectivo() === 'light';
+    return html`<button class="btn icon" data-a="tema"
+      aria-label="${claro ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}">
+      ${raw(icon(claro ? 'luna' : 'sol'))}</button>`;
   }
 
   /* hoja de detalle rápida, usada desde el modo entrenamiento */
@@ -1524,7 +1766,7 @@
       <div class="tiny" style="margin-bottom:10px">${ex.name}</div>
       ${raw(UI.demoHTML(ex, { speed: 800 }))}
       <ol class="instr" style="margin-top:14px">
-        ${raw((JSON.parse(localStorage.getItem('gymflow.tr.' + ex.id) || 'null') || ex.instructions)
+        ${raw((JSON.parse(localStorage.getItem('trainingfr.tr.' + ex.id) || 'null') || ex.instructions)
           .map(function (s) { return '<li>' + esc(s) + '</li>'; }).join(''))}
       </ol>
       <button class="btn block" data-x="cerrar">Cerrar</button>`,
@@ -1558,7 +1800,13 @@
 
     window.addEventListener('hashchange', render);
 
-    Data.load().then(function () {
+    /* si venimos del enlace del correo, primero se abre la sesión */
+    const entrando = Sync.configurado()
+      ? Sync.capturarRedireccion().catch(function () { return false; })
+      : Promise.resolve(false);
+
+    Promise.all([Data.load(), entrando]).then(function (res) {
+      const reciénEntrado = res[1];
       const splash = document.getElementById('splash');
       splash.classList.add('hide');
       setTimeout(function () { splash.remove(); }, 400);
@@ -1567,6 +1815,14 @@
 
       if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         navigator.serviceWorker.register('sw.js').catch(function () { /* opcional */ });
+      }
+
+      if (reciénEntrado) trasEntrar();
+      else if (Sync.activa()) {
+        /* al abrir la app se traen los cambios hechos en otro dispositivo */
+        Sync.sincronizar().then(function (r) {
+          if (r === 'bajado') { aplicarTema(); render(); UI.toast('Datos actualizados desde la nube'); }
+        }).catch(function () { /* sin conexión: se sincroniza más tarde */ });
       }
 
       /* en segundo plano se guardan las imágenes de lo que ya tienes planificado */
