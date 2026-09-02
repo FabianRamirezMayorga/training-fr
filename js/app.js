@@ -7,7 +7,7 @@
   const actionsEl = document.getElementById('topbar-actions');
 
   let route = { name: 'inicio', arg: null };
-  let exFilters = { q: '', group: '', equipment: '', level: '', favs: false };
+  let exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', favs: false, todo: false };
   let exLimit = 40;
 
   /* ================= router ================= */
@@ -31,16 +31,29 @@
     const views = {
       inicio: viewInicio, ejercicios: viewEjercicios, ejercicio: viewEjercicio,
       rutinas: viewRutinas, rutina: viewRutina, entrenar: viewEntrenar,
-      progreso: viewProgreso, ajustes: viewAjustes
+      progreso: viewProgreso, ajustes: viewAjustes, plan: viewPlan,
+      bienvenida: viewBienvenida
     };
+
+    /* Lo primero de todo es saber dónde entrena: sin eso no se puede filtrar nada */
+    if (!Store.settings().gear && route.name !== 'bienvenida') {
+      route = { name: 'bienvenida', arg: null };
+    }
     const fn = views[route.name] || viewInicio;
 
-    actionsEl.innerHTML = '';
+    actionsEl.innerHTML = route.name === 'bienvenida' ? '' : lugarChip();
     viewEl.innerHTML = fn();
     window.scrollTo(0, route.name === 'ejercicios' ? window.scrollY : 0);
 
     if (fn.mount) fn.mount(viewEl);
     UI.mountDemos(viewEl);
+
+    const chip = actionsEl.querySelector('[data-a=lugar]');
+    if (chip) chip.onclick = lugarSheet;
+
+    document.querySelectorAll('.tabbar').forEach(function (t) {
+      t.hidden = route.name === 'bienvenida';
+    });
 
     document.querySelectorAll('.tab').forEach(function (t) {
       const target = t.dataset.nav;
@@ -49,6 +62,79 @@
         (target === 'rutinas' && (route.name === 'rutina' || route.name === 'entrenar')) ||
         (target === 'ejercicios' && route.name === 'ejercicio'));
     });
+  }
+
+  /* ================= dónde entrenas ================= */
+
+  /* Cuenta cuántos ejercicios del catálogo puedes hacer en cada sitio */
+  function cuantosEn(gear) {
+    return Data.all().filter(function (ex) { return Data.gearAllows(gear, ex.equipment); }).length;
+  }
+
+  function lugarChip() {
+    const gset = Data.GEAR[Store.settings().gear];
+    if (!gset) return '';
+    return html`<button class="chip" data-a="lugar">${raw(icon('dumbbell'))} ${gset.label}</button>`;
+  }
+
+  function tarjetasLugar(actual) {
+    return Object.keys(Data.GEAR).map(function (k) {
+      const gset = Data.GEAR[k];
+      return html`
+        <button class="rt-item" data-lugar="${k}" style="width:100%;text-align:left;padding:13px;
+                ${actual === k ? 'border-color:var(--acc);background:var(--acc-d)' : ''}">
+          <div class="grow">
+            <div style="font-weight:700;font-size:.95rem">${gset.label}</div>
+            <div class="tiny">${gset.note}</div>
+            <div class="tiny" style="color:var(--acc);margin-top:2px">
+              ${UI.num(cuantosEn(k))} ejercicios disponibles</div>
+          </div>
+          ${raw(actual === k ? '<span class="chip solid">Actual</span>' : '')}
+        </button>`;
+    }).join('');
+  }
+
+  function viewBienvenida() {
+    return html`
+      <div style="padding:28px 0 10px" class="center">
+        <div style="font-size:2rem;font-weight:800;letter-spacing:-.5px;
+             background:linear-gradient(100deg,var(--acc),var(--blue));
+             -webkit-background-clip:text;background-clip:text;color:transparent">GymFlow</div>
+      </div>
+      <h1 class="center">¿Dónde vas a entrenar?</h1>
+      <p class="muted center">Con esto te muestro solo los ejercicios que puedes hacer de verdad,
+      y las rutinas que te genere usarán únicamente ese material.</p>
+      <div class="stack" style="margin-top:18px">${raw(tarjetasLugar(''))}</div>
+      <p class="tiny center" style="margin-top:16px">Podrás cambiarlo cuando quieras
+      desde el botón de arriba o en Ajustes.</p>`;
+  }
+
+  viewBienvenida.mount = function (root) {
+    bindAll(root, '[data-lugar]', function (el) {
+      Store.setSetting('gear', el.dataset.lugar);
+      planState.gear = el.dataset.lugar;
+      exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', favs: false, todo: false };
+      go('inicio');
+      UI.toast('Listo. Verás solo ejercicios de ' + Data.GEAR[el.dataset.lugar].label.toLowerCase());
+    });
+  };
+
+  function lugarSheet() {
+    UI.modal(html`
+      <h2>¿Dónde entrenas?</h2>
+      <p class="muted">Cambia el sitio y el catálogo se ajusta al momento.</p>
+      <div class="stack">${raw(tarjetasLugar(Store.settings().gear))}</div>`,
+      function (el) {
+        el.querySelectorAll('[data-lugar]').forEach(function (b) {
+          b.onclick = function () {
+            Store.setSetting('gear', b.dataset.lugar);
+            planState.gear = b.dataset.lugar;
+            UI.closeModal();
+            render();
+            UI.toast('Ahora entrenas ' + Data.GEAR[b.dataset.lugar].label.toLowerCase());
+          };
+        });
+      });
   }
 
   /* ================= inicio ================= */
@@ -88,6 +174,16 @@
       ${raw(deHoy.length ? html`
         <div class="sec-title"><h2>Toca hoy (${hoy})</h2></div>
         <div class="stack">${raw(deHoy.map(routineCard).join(''))}</div>` : '')}
+
+      <div class="card" style="margin-top:14px;border-color:var(--acc)">
+        <div class="row between">
+          <div class="grow">
+            <div style="font-weight:700">Organiza tu semana</div>
+            <div class="tiny">Reparto los grupos musculares por día según tu tiempo</div>
+          </div>
+          <button class="btn primary sm" data-a="plan">Crear plan</button>
+        </div>
+      </div>
 
       <div class="sec-title">
         <h2>Mis rutinas</h2>
@@ -147,6 +243,7 @@
   viewInicio.mount = function (root) {
     bind(root, '[data-a=resume]', function () { go('entrenar'); });
     bind(root, '[data-a=nueva]', function () { go('rutina', 'nueva'); });
+    bind(root, '[data-a=plan]', function () { go('plan'); });
     bind(root, '[data-a=plantillas]', function () { go('rutinas'); });
     bind(root, '[data-a=verprogreso]', function () { go('progreso'); });
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
@@ -168,17 +265,52 @@
 
   /* ================= ejercicios ================= */
 
+  function gearActual() {
+    return exFilters.todo ? '' : (Store.settings().gear || '');
+  }
+
+  /* Músculos que se muestran como secciones, según el grupo elegido */
+  function musculosVisibles() {
+    if (exFilters.group) {
+      const gr = I18N.GROUPS.find(function (x) { return x.id === exFilters.group; });
+      return gr ? gr.muscles : [];
+    }
+    return I18N.GROUPS.reduce(function (acc, gr) { return acc.concat(gr.muscles); }, []);
+  }
+
   function viewEjercicios() {
-    const res = Data.search(exFilters);
-    const shown = res.slice(0, exLimit);
+    const gear = gearActual();
+    const base = {
+      q: exFilters.q, group: exFilters.group, muscle: exFilters.muscle,
+      equipment: exFilters.equipment, level: exFilters.level, favs: exFilters.favs, gear: gear
+    };
+    const res = Data.search(base);
+
+    /* Se segmenta por músculo salvo que haya una búsqueda concreta en marcha */
+    const segmentar = !exFilters.q && !exFilters.muscle && !exFilters.favs && !exFilters.equipment;
+    const gset = Data.GEAR[Store.settings().gear];
+    const lugar = gset ? gset.label.toLowerCase() : '';
+
+    const secciones = segmentar ? musculosVisibles().map(function (m) {
+      return { muscle: m, lista: Data.search(Object.assign({}, base, { muscle: m })) };
+    }).filter(function (s) { return s.lista.length; }) : [];
 
     return html`
-      <h1>Ejercicios</h1>
-      <p class="muted">${Data.all().length} ejercicios con animación de la técnica correcta.</p>
+      <div class="row between">
+        <h1 style="margin:0">Ejercicios</h1>
+        <button class="chip ${exFilters.todo ? '' : 'on'}" data-a="togglegear">
+          ${exFilters.todo ? 'Solo mi material' : 'Ver todo'}
+        </button>
+      </div>
+      <p class="muted" style="margin-top:6px">
+        ${UI.num(res.length)} ejercicios${raw(exFilters.todo
+          ? ' del catálogo completo'
+          : ' que puedes hacer ' + esc(lugar))}, con la técnica animada.
+      </p>
 
       <div class="search-wrap" style="margin-bottom:10px">
         ${raw(icon('search'))}
-        <input id="ex-q" type="search" placeholder="Buscar: peso muerto, sentadilla, pecho…"
+        <input id="ex-q" type="search" placeholder="Buscar: peso muerto, glúteo, femoral…"
                value="${exFilters.q}" autocomplete="off">
       </div>
 
@@ -191,10 +323,17 @@
         }).join(''))}
       </div>
 
-      <div class="row" style="margin-bottom:12px">
+      ${raw(exFilters.muscle ? html`
+        <div class="row wrap" style="gap:6px;margin-bottom:12px">
+          <button class="chip on" data-a="quitarmusculo">${I18N.muscle(exFilters.muscle)} ×</button>
+        </div>` : '')}
+
+      <div class="row" style="margin-bottom:14px">
         <select id="ex-eq" class="grow">
           <option value="">Todo el material</option>
-          ${raw(Object.keys(I18N.EQUIP).map(function (k) {
+          ${raw(Object.keys(I18N.EQUIP).filter(function (k) {
+            return !gear || Data.gearAllows(gear, k);
+          }).map(function (k) {
             return '<option value="' + esc(k) + '"' + (exFilters.equipment === k ? ' selected' : '') +
                    '>' + esc(I18N.EQUIP[k]) + '</option>';
           }).join(''))}
@@ -208,17 +347,37 @@
         </select>
       </div>
 
-      <div class="tiny" style="margin-bottom:8px">${res.length} resultados</div>
+      ${raw(segmentar ? secciones.map(function (s) {
+        return html`
+          <div class="sec-title" style="margin:18px 0 8px">
+            <h2 style="font-size:1.02rem">${I18N.muscle(s.muscle)}
+              <span class="tiny" style="font-weight:600">${s.lista.length}</span></h2>
+            <button class="btn sm ghost" data-vermusculo="${s.muscle}">Ver todos</button>
+          </div>
+          <div class="carousel">
+            ${raw(s.lista.slice(0, 12).map(exCard).join(''))}
+            ${raw(s.lista.length > 12
+              ? '<button class="ex-card more" data-vermusculo="' + esc(s.muscle) + '">' +
+                '<b>+' + (s.lista.length - 12) + '</b><span>ver todos</span></button>'
+              : '')}
+          </div>`;
+      }).join('') : '')}
 
-      ${raw(shown.length ? html`
-        <div class="grid">${raw(shown.map(exCard).join(''))}</div>
+      ${raw(!segmentar ? (res.length ? html`
+        <div class="grid">${raw(res.slice(0, exLimit).map(exCard).join(''))}</div>
         ${raw(res.length > exLimit
           ? '<button class="btn block" data-a="mas" style="margin-top:14px">Ver más (' +
             (res.length - exLimit) + ' restantes)</button>' : '')}`
       : html`<div class="empty">${raw(icon('search'))}
-          <p>Ningún ejercicio coincide con la búsqueda.</p>
-          <button class="btn sm" data-a="limpiar">Limpiar filtros</button>
-        </div>`)}`;
+          <p>Ningún ejercicio coincide${raw(gear ? ' entre los que puedes hacer ' + esc(lugar) : '')}.</p>
+          <div class="row" style="justify-content:center;gap:8px">
+            <button class="btn sm" data-a="limpiar">Limpiar filtros</button>
+            ${raw(gear ? '<button class="btn sm primary" data-a="togglegear">Buscar en todo el catálogo</button>' : '')}
+          </div>
+        </div>`) : '')}
+
+      ${raw(segmentar && !secciones.length
+        ? '<div class="empty"><p>No hay ejercicios para este filtro.</p></div>' : '')}`;
   }
 
   function exCard(ex) {
@@ -251,10 +410,22 @@
     };
 
     bindAll(root, '[data-grp]', function (el) {
-      exFilters.group = el.dataset.grp; exFilters.favs = false; exLimit = 40; render();
+      exFilters.group = el.dataset.grp; exFilters.favs = false; exFilters.muscle = '';
+      exLimit = 40; render();
     });
     bind(root, '[data-favs]', function () {
-      exFilters.favs = !exFilters.favs; exFilters.group = ''; exLimit = 40; render();
+      exFilters.favs = !exFilters.favs; exFilters.group = ''; exFilters.muscle = '';
+      exLimit = 40; render();
+    });
+    bindAll(root, '[data-vermusculo]', function (el) {
+      exFilters.muscle = el.dataset.vermusculo; exLimit = 40; render();
+    });
+    bind(root, '[data-a=quitarmusculo]', function () { exFilters.muscle = ''; render(); });
+    bindAll(root, '[data-a=togglegear]', function () {
+      exFilters.todo = !exFilters.todo; exLimit = 40; render();
+      UI.toast(exFilters.todo
+        ? 'Mostrando el catálogo completo'
+        : 'Mostrando solo lo que puedes hacer donde entrenas');
     });
     root.querySelector('#ex-eq').onchange = function (e) {
       exFilters.equipment = e.target.value; exLimit = 40; render();
@@ -267,7 +438,8 @@
       const pos = window.scrollY; render(); window.scrollTo(0, pos);
     });
     bind(root, '[data-a=limpiar]', function () {
-      exFilters = { q: '', group: '', equipment: '', level: '', favs: false }; exLimit = 40; render();
+      exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', favs: false, todo: exFilters.todo };
+      exLimit = 40; render();
     });
     bindAll(root, '[data-ex]', function (el) { go('ejercicio', el.dataset.ex); });
   };
@@ -440,8 +612,13 @@
     return html`
       <div class="row between">
         <h1>Rutinas</h1>
-        <button class="btn primary sm" data-a="nueva">${raw(icon('plus'))} Nueva</button>
+        <button class="btn sm" data-a="nueva">${raw(icon('plus'))} Nueva</button>
       </div>
+
+      <button class="btn primary block" data-a="plan" style="margin:6px 0 4px">
+        ${raw(icon('flag'))} Organizar mi semana automáticamente
+      </button>
+      <p class="tiny">Eliges días, tiempo y objetivo; yo reparto los músculos y los ejercicios.</p>
 
       ${raw(rutinas.length ? html`
         <div class="stack" style="margin-top:8px">${raw(rutinas.map(routineCard).join(''))}</div>`
@@ -469,6 +646,7 @@
 
   viewRutinas.mount = function (root) {
     bind(root, '[data-a=nueva]', function () { go('rutina', 'nueva'); });
+    bind(root, '[data-a=plan]', function () { go('plan'); });
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
     bindAll(root, '[data-train]', function (el) { empezar(el.dataset.train); });
     bindAll(root, '[data-tpl]', function (el) {
@@ -476,6 +654,202 @@
       const r = Store.saveRoutine(Templates.toRoutine(tpl));
       UI.toast('Rutina copiada. Ya puedes editarla.');
       go('rutina', r.id);
+    });
+  };
+
+  /* ================= asistente: plan semanal ================= */
+
+  const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+  let planState = {
+    days: ['Lun', 'Mar', 'Jue', 'Vie'],
+    minutes: 60,
+    gear: 'gym',
+    goal: 'hipertrofia',
+    level: 'intermediate',
+    preview: null
+  };
+
+  function viewPlan() {
+    const p = planState;
+    /* el lugar siempre viene de lo que eligió al entrar; aquí solo se muestra */
+    p.gear = Store.settings().gear || 'gym';
+
+    if (p.preview) return planPreview(p);
+
+    return html`
+      <h1>Crea tu plan semanal</h1>
+      <p class="muted">Responde cuatro cosas y te organizo la semana: qué grupo muscular
+      toca cada día y con qué ejercicios, ajustado al tiempo que tengas.</p>
+
+      <div class="card">
+        <div class="row between" style="margin-bottom:9px">
+          <b>¿Qué días entrenas?</b>
+          <span class="chip solid" id="p-ndias">${p.days.length} días</span>
+        </div>
+        <div class="row wrap" style="gap:6px">
+          ${raw(DIAS.map(function (d) {
+            return '<button class="chip ' + (p.days.indexOf(d) !== -1 ? 'on' : '') +
+                   '" data-pday="' + d + '">' + d + '</button>';
+          }).join(''))}
+        </div>
+        <div class="tiny" style="margin-top:9px" id="p-split"></div>
+      </div>
+
+      <div class="card">
+        <b>¿Cuánto dura cada sesión?</b>
+        <div class="row wrap" style="gap:6px;margin-top:9px">
+          ${raw([30, 45, 60, 75, 90].map(function (m) {
+            return '<button class="chip ' + (p.minutes === m ? 'on' : '') +
+                   '" data-pmin="' + m + '">' + m + ' min</button>';
+          }).join(''))}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row between">
+          <div class="grow">
+            <b>Entrenas ${raw(esc((Data.GEAR[p.gear] || Data.GEAR.gym).label.toLowerCase()))}</b>
+            <div class="tiny">Solo usaré ejercicios que puedas hacer ahí</div>
+          </div>
+          <button class="btn sm" data-a="cambiarlugar">Cambiar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <b>¿Cuál es tu objetivo?</b>
+        <div class="row wrap" style="gap:6px;margin-top:9px">
+          ${raw(Object.keys(Planner.GOALS).map(function (k) {
+            return '<button class="chip ' + (p.goal === k ? 'on' : '') +
+                   '" data-pgoal="' + k + '">' + esc(Planner.GOALS[k].label) + '</button>';
+          }).join(''))}
+        </div>
+        <div class="hr"></div>
+        <b>¿Qué experiencia tienes?</b>
+        <div class="row wrap" style="gap:6px;margin-top:9px">
+          ${raw(Object.keys(I18N.LEVEL).map(function (k) {
+            return '<button class="chip ' + (p.level === k ? 'on' : '') +
+                   '" data-plevel="' + k + '">' + esc(I18N.LEVEL[k]) + '</button>';
+          }).join(''))}
+        </div>
+      </div>
+
+      <button class="btn primary block" data-a="generar" style="margin-top:16px">
+        ${raw(icon('flag'))} Generar mi plan
+      </button>`;
+  }
+
+  function planPreview(p) {
+    const plan = p.preview;
+    return html`
+      <button class="btn sm ghost" data-a="volver" style="margin-bottom:10px">
+        ${raw(icon('back'))} Cambiar respuestas</button>
+      <h1>Tu plan de ${plan.length} días</h1>
+      <p class="muted">Así queda tu semana. Al guardarlo se crea una rutina por día,
+      y podrás editarlas como quieras.</p>
+
+      <div class="stack">
+        ${raw(plan.map(function (r, i) {
+          return html`
+            <div class="card">
+              <div class="row between" style="align-items:flex-start">
+                <div class="grow">
+                  <div style="font-weight:700">${r.name}</div>
+                  <div class="tiny">${r.exercises.length} ejercicios · ~${Planner.estimate(r)} min ·
+                    ${r.muscles.map(I18N.muscle).join(' · ')}</div>
+                </div>
+                <button class="btn icon sm" data-pdet="${i}" aria-label="Ver ejercicios">
+                  ${raw(icon('down'))}</button>
+              </div>
+              <div class="stack" data-pbody="${i}" hidden style="margin-top:10px">
+                ${raw(r.exercises.map(function (re, k) {
+                  const ex = Data.get(re.exId);
+                  return html`
+                    <div class="rt-item">
+                      <div class="rt-idx">${k + 1}</div>
+                      <img src="${ex ? Data.img(ex, 0) : Data.PLACEHOLDER}" alt="" loading="lazy">
+                      <div class="grow">
+                        <div style="font-weight:600;font-size:.84rem">${ex ? ex.nameEs : re.exId}</div>
+                        <div class="tiny">${re.sets} × ${re.reps} · descanso ${re.rest}s ·
+                          ${ex ? I18N.muscle(ex.primaryMuscles[0]) : ''}</div>
+                      </div>
+                    </div>`;
+                }).join(''))}
+              </div>
+            </div>`;
+        }).join(''))}
+      </div>
+
+      <div class="row" style="margin-top:16px">
+        <button class="btn grow" data-a="otra">${raw(icon('copy'))} Otra propuesta</button>
+        <button class="btn primary grow" data-a="guardarplan">${raw(icon('check'))} Guardar plan</button>
+      </div>
+      <p class="tiny center" style="margin-top:10px">Guardar añade ${plan.length} rutinas nuevas;
+      no se borra nada de lo que ya tengas.</p>`;
+  }
+
+  viewPlan.mount = function (root) {
+    const p = planState;
+
+    function refrescarSplit() {
+      const el = root.querySelector('#p-split');
+      if (!el) return;
+      const n = Math.min(6, Math.max(1, p.days.length));
+      const split = Planner.SPLITS[n];
+      el.innerHTML = p.days.length
+        ? 'Con ' + p.days.length + (p.days.length === 1 ? ' día' : ' días') + ' te propongo: ' +
+          esc(split.map(function (s) { return s.name; }).join(' · '))
+        : 'Elige al menos un día.';
+      const chip = root.querySelector('#p-ndias');
+      if (chip) chip.textContent = p.days.length + (p.days.length === 1 ? ' día' : ' días');
+    }
+    refrescarSplit();
+
+    bindAll(root, '[data-pday]', function (el) {
+      const d = el.dataset.pday;
+      const i = p.days.indexOf(d);
+      if (i === -1) {
+        if (p.days.length >= 6) { UI.toast('Seis días es el máximo recomendable'); return; }
+        p.days.push(d);
+        p.days.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
+      } else p.days.splice(i, 1);
+      el.classList.toggle('on', i === -1);
+      refrescarSplit();
+    });
+
+    bindAll(root, '[data-pmin]', function (el) { p.minutes = Number(el.dataset.pmin); render(); });
+    bind(root, '[data-a=cambiarlugar]', lugarSheet);
+    bindAll(root, '[data-pgoal]', function (el) { p.goal = el.dataset.pgoal; render(); });
+    bindAll(root, '[data-plevel]', function (el) { p.level = el.dataset.plevel; render(); });
+
+    bind(root, '[data-a=generar]', function () {
+      if (!p.days.length) { UI.toast('Elige al menos un día de entrenamiento'); return; }
+      p.preview = Planner.generate(p);
+      render();
+      window.scrollTo(0, 0);
+    });
+
+    bind(root, '[data-a=volver]', function () { p.preview = null; render(); });
+    bind(root, '[data-a=otra]', function () {
+      p.preview = Planner.generate(p);
+      render();
+      UI.toast('Nueva propuesta generada');
+    });
+
+    bindAll(root, '[data-pdet]', function (el) {
+      const body = root.querySelector('[data-pbody="' + el.dataset.pdet + '"]');
+      if (body) body.hidden = !body.hidden;
+    });
+
+    bind(root, '[data-a=guardarplan]', function () {
+      p.preview.forEach(function (r) {
+        Store.saveRoutine({ id: null, name: r.name, note: r.note, days: r.days, exercises: r.exercises });
+      });
+      const n = p.preview.length;
+      p.preview = null;
+      UI.toast('Plan guardado: ' + n + ' rutinas creadas');
+      go('rutinas');
+      Offline.precargarRutinas();
     });
   };
 
@@ -621,8 +995,8 @@
         draft.exercises.push(Store.newRoutineExercise(ex.id));
         const saved = Store.saveRoutine(draft);
         UI.closeModal();
+        /* una rutina nueva ya tiene id: se navega a él para no perder el borrador */
         go('rutina', saved.id);
-        render();
       });
     });
 
@@ -655,10 +1029,10 @@
 
   /* Selector de ejercicio con buscador, reutilizado por el editor de rutinas */
   function pickExerciseSheet(onPick) {
-    let q = '', grupo = '';
+    let q = '', grupo = '', todo = false;
 
     function lista() {
-      return Data.search({ q: q, group: grupo }).slice(0, 30);
+      return Data.search({ q: q, group: grupo, gear: todo ? '' : Store.settings().gear }).slice(0, 30);
     }
 
     function pinta(el) {
@@ -676,6 +1050,20 @@
       el.querySelectorAll('[data-p]').forEach(function (b) {
         b.onclick = function () { onPick(Data.get(b.dataset.p)); };
       });
+
+      const info = el.querySelector('#pick-info');
+      const gset = Data.GEAR[Store.settings().gear];
+      if (info) {
+        info.textContent = todo || !gset
+          ? 'Mostrando el catálogo completo'
+          : 'Solo lo que puedes hacer ' + gset.label.toLowerCase();
+      }
+      const btnAll = el.querySelector('[data-pickall]');
+      if (btnAll) {
+        btnAll.classList.toggle('on', todo);
+        btnAll.textContent = todo ? 'Solo mi material' : 'Ver todo el catálogo';
+        btnAll.onclick = function () { todo = !todo; pinta(el); };
+      }
     }
 
     UI.modal(html`
@@ -690,7 +1078,11 @@
           return '<button class="chip" data-g="' + gr.id + '">' + esc(gr.label) + '</button>';
         }).join(''))}
       </div>
-      <div class="stack" id="pick-list" style="margin-top:6px"></div>`,
+      <div class="row between" style="margin:2px 0 8px">
+        <span class="tiny" id="pick-info"></span>
+        <button class="chip" data-pickall>Ver todo</button>
+      </div>
+      <div class="stack" id="pick-list"></div>`,
       function (el) {
         pinta(el);
         const inp = el.querySelector('#pick-q');
@@ -776,8 +1168,10 @@
       <div class="card">
         <div class="bars">
           ${raw(semanas.map(function (w) {
-            return html`<div class="b" title="${UI.kg(w.volume)}">
-              <i style="height:${Math.max(3, Math.round(w.volume / max * 100))}%"></i>
+            return html`<div class="b" title="${UI.kg(w.volume)}"
+                 data-h="${Math.max(3, Math.round(w.volume / max * 100))}">
+              <em>${w.volume ? UI.num(w.volume) : ''}</em>
+              <i></i>
               <span>${UI.fechaCorta(w.from)}</span></div>`;
           }).join(''))}
         </div>
@@ -841,6 +1235,20 @@
   }
 
   viewProgreso.mount = function (root) {
+    /* las barras arrancan a cero y crecen escalonadas en el siguiente fotograma */
+    requestAnimationFrame(function () {
+      root.querySelectorAll('.bars .b').forEach(function (b, i) {
+        setTimeout(function () {
+          b.classList.add('in');
+          const bar = b.querySelector('i');
+          if (bar) bar.style.height = b.dataset.h + '%';
+        }, i * 55);
+      });
+      root.querySelectorAll('.cal .d').forEach(function (d, i) {
+        d.style.animationDelay = (i * 8) + 'ms';
+      });
+    });
+
     bindAll(root, '[data-ex]', function (el) { go('ejercicio', el.dataset.ex); });
     bindAll(root, '[data-ses]', function (el) {
       const d = root.querySelector('[data-detail="' + el.dataset.ses + '"]');
@@ -864,6 +1272,18 @@
       <div class="card">
         <label class="tiny">TU NOMBRE</label>
         <input id="s-name" value="${s.name}" placeholder="¿Cómo te llamas?" style="margin-top:5px">
+      </div>
+
+      <div class="card">
+        <div class="row between">
+          <div class="grow">
+            <b>Dónde entrenas</b>
+            <div class="tiny">${raw(Data.GEAR[s.gear]
+              ? esc(Data.GEAR[s.gear].label) + ' · ' + UI.num(cuantosEn(s.gear)) + ' ejercicios'
+              : 'Sin elegir')}</div>
+          </div>
+          <button class="btn sm" data-a="lugar2">Cambiar</button>
+        </div>
       </div>
 
       <div class="card">
@@ -904,6 +1324,20 @@
         <input type="file" id="s-file" accept="application/json,.json" hidden>
       </div>
 
+      <div class="sec-title"><h2>Uso sin conexión</h2></div>
+      <div class="card">
+        <p class="muted">Descarga las imágenes de los ejercicios y la app funcionará entera
+        sin internet: en el gimnasio sin cobertura, en el metro o sin datos.</p>
+        <div class="tiny" id="dl-estado">Comprobando lo que ya tienes guardado…</div>
+        <div class="dl" id="dl-barra" hidden><i></i></div>
+        <div class="stack" style="margin-top:10px">
+          <button class="btn" data-dl="rutinas">Descargar mis rutinas</button>
+          <button class="btn" data-dl="esenciales">Descargar los ejercicios principales</button>
+          <button class="btn" data-dl="todos">Descargar el catálogo completo</button>
+          <button class="btn ghost sm" data-dl="vaciar">Liberar espacio</button>
+        </div>
+      </div>
+
       <div class="sec-title"><h2>Instalar en el móvil</h2></div>
       <div class="card">
         <p class="muted">GymFlow funciona como una app: ábrela en el navegador del móvil y usa
@@ -925,6 +1359,76 @@
   }
 
   viewAjustes.mount = function (root) {
+    bind(root, '[data-a=lugar2]', lugarSheet);
+
+    /* --- descarga para uso sin conexión --- */
+    const estadoEl = root.querySelector('#dl-estado');
+    const barra = root.querySelector('#dl-barra');
+
+    function pintarEstado() {
+      Offline.estado().then(function (e) {
+        estadoEl.textContent = e.guardadas
+          ? e.guardadas + ' imágenes guardadas (~' + e.mb + ' MB). Esos ejercicios ya funcionan sin internet.'
+          : 'Todavía no has guardado ninguna imagen.';
+      }).catch(function () {
+        estadoEl.textContent = 'Este navegador no permite guardar contenido sin conexión.';
+      });
+    }
+    pintarEstado();
+
+    bindAll(root, '[data-dl]', function (el) {
+      const modo = el.dataset.dl;
+
+      if (modo === 'vaciar') {
+        UI.confirm('Liberar espacio',
+          'Se borrarán las imágenes guardadas. La app seguirá funcionando con internet.',
+          'Liberar', true).then(function (ok) {
+          if (ok) Offline.vaciar().then(pintarEstado).then(function () { UI.toast('Espacio liberado'); });
+        });
+        return;
+      }
+
+      const exs = modo === 'rutinas' ? Offline.deMisRutinas()
+        : modo === 'esenciales' ? Offline.esenciales() : Offline.todos();
+      const urls = Offline.urlsDe(exs);
+
+      if (!urls.length) {
+        UI.toast(modo === 'rutinas' ? 'Aún no tienes rutinas que descargar' : 'Nada que descargar');
+        return;
+      }
+
+      const mb = Math.round(urls.length * 55 / 1024);
+      const seguir = modo === 'todos'
+        ? UI.confirm('Descargar el catálogo completo',
+            urls.length + ' imágenes, unos ' + mb + ' MB. Mejor con wifi.', 'Descargar')
+        : Promise.resolve(true);
+
+      seguir.then(function (ok) {
+        if (!ok) return;
+        const botones = root.querySelectorAll('[data-dl]');
+        botones.forEach(function (b) { b.disabled = true; });
+        barra.hidden = false;
+        const relleno = barra.querySelector('i');
+
+        Offline.descargar(urls, function (hechas, total) {
+          relleno.style.width = Math.round(hechas / total * 100) + '%';
+          estadoEl.textContent = 'Descargando ' + hechas + ' de ' + total + '…';
+        }).then(function (r) {
+          UI.toast(r.fallos
+            ? 'Descarga terminada (' + r.fallos + ' no se pudieron guardar)'
+            : 'Listo: ya puedes entrenar sin internet');
+          barra.hidden = true;
+          relleno.style.width = '0%';
+          botones.forEach(function (b) { b.disabled = false; });
+          pintarEstado();
+        }).catch(function () {
+          UI.toast('No se pudo completar la descarga');
+          barra.hidden = true;
+          botones.forEach(function (b) { b.disabled = false; });
+        });
+      });
+    });
+
     root.querySelector('#s-name').onchange = function (e) {
       Store.setSetting('name', e.target.value.trim());
     };
@@ -1046,6 +1550,7 @@
 
   function init() {
     aplicarTema();
+    planState.gear = Store.settings().gear || 'gym';
 
     document.querySelectorAll('[data-nav]').forEach(function (el) {
       el.onclick = function () { go(el.dataset.nav); };
@@ -1063,6 +1568,9 @@
       if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         navigator.serviceWorker.register('sw.js').catch(function () { /* opcional */ });
       }
+
+      /* en segundo plano se guardan las imágenes de lo que ya tienes planificado */
+      setTimeout(function () { Offline.precargarRutinas(); }, 2500);
     }).catch(function (err) {
       console.error(err);
       fallo('No se pudo descargar el catálogo de ejercicios. Comprueba tu conexión.');

@@ -8,7 +8,7 @@
 
   const DEFAULTS = {
     version: 1,
-    settings: { unit: 'kg', theme: 'dark', rest: 90, sound: true, name: '' },
+    settings: { unit: 'kg', theme: 'dark', rest: 90, sound: true, name: '', gear: '' },
     routines: [],
     sessions: [],
     favorites: [],

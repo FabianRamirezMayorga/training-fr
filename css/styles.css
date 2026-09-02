@@ -165,3 +165,35 @@ a{color:var(--blue)}
 .instr{counter-reset:s;padding:0;margin:0;list-style:none}
 .instr li{counter-increment:s;position:relative;padding-left:30px;margin-bottom:10px;font-size:.9rem;color:var(--dim)}
 .instr li::before{content:counter(s);position:absolute;left:0;top:1px;width:21px;height:21px;border-radius:50%;background:var(--card2);color:var(--acc);font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+
+/* ---------- carrusel por músculo ---------- */
+.carousel{display:flex;gap:11px;overflow-x:auto;padding:2px 16px 10px;margin:0 -16px;
+  scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.carousel::-webkit-scrollbar{display:none}
+.carousel>.ex-card{flex:0 0 152px;scroll-snap-align:start}
+.ex-card.more{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;background:var(--card2);color:var(--acc);min-height:190px}
+.ex-card.more b{font-size:1.3rem;font-weight:800}
+.ex-card.more span{font-size:.7rem;color:var(--dim2)}
+
+/* ---------- animación del movimiento ----------
+   Con dos fotogramas se logra un recorrido continuo encadenando opacidad y un
+   ligero desplazamiento: el ojo lee el movimiento, no dos fotos alternas. */
+.demo img{transform:scale(1.05);transition:opacity var(--fade,.42s) ease-in-out,
+  transform var(--fade,.42s) ease-in-out}
+.demo img.on{opacity:1;transform:scale(1)}
+.demo.paused img{transition-duration:.15s}
+
+/* ---------- gráficas animadas ---------- */
+.bars .b i{height:0;transition:height .7s cubic-bezier(.2,.8,.3,1)}
+.bars .b em{font-size:.62rem;font-style:normal;color:var(--acc);font-weight:700;opacity:0;
+  transition:opacity .4s .5s}
+.bars .b.in em{opacity:1}
+.cal .d{transform:scale(.6);opacity:0;animation:pop .35s forwards}
+@keyframes pop{to{transform:scale(1);opacity:1}}
+.stat b{animation:rise .5s cubic-bezier(.2,.9,.3,1) both}
+@keyframes rise{from{transform:translateY(8px);opacity:0}}
+
+/* ---------- progreso de descarga sin conexión ---------- */
+.dl{height:8px;background:var(--card2);border-radius:999px;overflow:hidden;margin:10px 0 6px}
+.dl i{display:block;height:100%;width:0;background:var(--acc);transition:width .25s}

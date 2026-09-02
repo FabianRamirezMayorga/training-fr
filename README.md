@@ -71,18 +71,29 @@ que has abierto los ejercicios al menos una vez.
 
 ## Qué hace
 
-- **Ejercicios** — 876 movimientos filtrables por grupo muscular, material y nivel.
-  Buscador en español (*«peso muerto»*, *«sentadilla»*, *«pecho»*). Cada ficha muestra
-  la técnica **animada**, los músculos implicados, las instrucciones paso a paso
-  (traducibles con un toque) y un enlace directo a vídeos de YouTube.
-- **Rutinas** — crea las tuyas o parte de 8 plantillas probadas (Full Body, Push/Pull/Legs,
-  Torso/Pierna, 5x5, en casa sin material). Series, repeticiones y descanso por ejercicio.
-  Asigna días de la semana y la portada te recuerda qué toca hoy.
+- **Eliges dónde entrenas al abrirla** — gimnasio, casa con mancuernas, casa con bandas
+  o sin material. A partir de ahí el catálogo, el buscador y las rutinas generadas
+  solo ofrecen ejercicios que puedas hacer de verdad ahí. Se cambia en un toque.
+- **Plan semanal automático** — dices qué días entrenas y cuánto dura cada sesión, y la
+  app reparte los grupos musculares por día (*Lun · Pecho y tríceps*, *Mar · Espalda y
+  bíceps*…) y elige los ejercicios ajustando series, repeticiones y descansos a tu
+  objetivo. Sin repetir ejercicio en la misma semana. Verás la propuesta antes de guardarla.
+- **Ejercicios segmentados por músculo** — al entrar en *Pierna* aparecen secciones
+  separadas de cuádriceps, isquiotibiales, glúteos, gemelos, aductores y abductores,
+  cada una con su carrusel. Buscador en español (*«peso muerto»*, *«femoral»*, *«glúteo»*).
+  Cada ficha muestra la técnica **animada**, los músculos implicados, las instrucciones
+  paso a paso (traducibles con un toque) y un enlace a vídeos de YouTube.
+- **Rutinas** — crea las tuyas, genera el plan o parte de 8 plantillas probadas (Full Body,
+  Push/Pull/Legs, Torso/Pierna, 5x5, en casa sin material). Series, repeticiones y descanso
+  por ejercicio. Asigna días y la portada te recuerda qué toca hoy.
 - **Entrenar** — marca cada serie con su peso y repeticiones, con el temporizador de
   descanso automático y aviso sonoro. Te muestra tu récord y lo que hiciste la vez
   anterior en ese mismo ejercicio. Si cierras el navegador a mitad, se recupera.
-- **Progreso** — racha, volumen por semana, calendario de entrenamientos, récords
-  personales y el historial completo.
+- **Progreso** — racha, volumen por semana en gráfico animado, calendario de
+  entrenamientos, récords personales y el historial completo.
+- **Sin conexión** — desde Ajustes puedes descargar las imágenes de tus rutinas, de los
+  ejercicios principales o del catálogo completo. Una vez descargadas, la app funciona
+  entera sin internet: en el gimnasio sin cobertura, en el metro o sin datos.
 
 ---
 
@@ -104,9 +115,17 @@ js/store.js             persistencia en localStorage
 js/ui.js                utilidades, animación de los ejercicios
 js/data.js              descarga y búsqueda del catálogo
 js/templates.js         rutinas de ejemplo
+js/planner.js           generador del plan semanal (splits y selección de ejercicios)
+js/offline.js           descarga de imágenes para uso sin conexión
 js/workout.js           modo entrenamiento
 js/app.js               router y vistas
 sw.js                   service worker (uso sin conexión)
+```
+
+Al cambiar la lista de archivos hay que subir `VERSION` en `sw.js` para que los
+navegadores que ya tienen la app instalada se actualicen.
+
+```
 ```
 
 ## Créditos

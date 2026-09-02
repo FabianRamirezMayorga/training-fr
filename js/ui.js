@@ -203,6 +203,8 @@
 
       let i = 0, playing = true, timer = null;
       let speed = Number(box.dataset.speed) || 900;
+      const fade = function () { box.style.setProperty('--fade', Math.round(speed * 0.55) + 'ms'); };
+      fade();
 
       function tick() {
         i = (i + 1) % frames.length;
@@ -211,6 +213,7 @@
       }
       function run() {
         clearInterval(timer);
+        fade();
         timer = setInterval(tick, speed);
         demoTimers.push(timer);
       }
@@ -221,6 +224,7 @@
         playing = !playing;
         toggleBtn.innerHTML = icon(playing ? 'pause' : 'play');
         toggleBtn.setAttribute('aria-label', playing ? 'Pausar animación' : 'Reproducir animación');
+        box.classList.toggle('paused', !playing);
         if (playing) run(); else clearInterval(timer);
       };
 
