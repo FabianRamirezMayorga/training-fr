@@ -177,7 +177,9 @@
       <div class="stats" style="margin-top:14px">
         <div class="stat"><b>${st.streak}</b><span>Días seguidos</span></div>
         <div class="stat"><b>${st.total}</b><span>Entrenos</span></div>
-        <div class="stat"><b>${UI.num(st.weekVolume)}</b><span>Volumen semana</span></div>
+        <div class="stat"><b>${UI.num(Store.settings().registro === 'simple' || st.totalVolume === 0
+          ? st.weekSets : st.weekVolume)}</b><span>${Store.settings().registro === 'simple' ||
+          st.totalVolume === 0 ? 'Series semana' : 'Volumen semana'}</span></div>
       </div>
 
       ${raw(deHoy.length ? html`
@@ -220,7 +222,8 @@
             <div class="card row between">
               <div class="grow">
                 <div style="font-weight:600">${s.routineName}</div>
-                <div class="tiny">${UI.fecha(s.start)} · ${s.setsDone} series · ${UI.kg(s.volume)}</div>
+                <div class="tiny">${UI.fecha(s.start)} · ${s.setsDone} series${raw(
+                  s.volume ? ' · ' + esc(UI.kg(s.volume)) : '')}</div>
               </div>
               <div class="chip">${UI.mmss(((s.end || s.start) - s.start) / 1000)}</div>
             </div>`;
@@ -1220,7 +1223,10 @@
     const st = Store.stats();
     const sesiones = Store.sessions();
     const semanas = Store.weeklyVolume(8);
-    const max = Math.max.apply(null, semanas.map(function (w) { return w.volume; }).concat([1]));
+    /* sin peso anotado el volumen es cero: en ese caso la medida son las series */
+    const porSeries = Store.settings().registro === 'simple' || st.totalVolume === 0;
+    const valor = function (w) { return porSeries ? w.sets : w.volume; };
+    const max = Math.max.apply(null, semanas.map(valor).concat([1]));
 
     /* récords ordenados por peso */
     const prs = [];
@@ -1254,24 +1260,27 @@
       <div class="stats">
         <div class="stat"><b>${st.total}</b><span>Entrenos</span></div>
         <div class="stat"><b>${st.streak}</b><span>Racha</span></div>
-        <div class="stat"><b>${UI.num(st.totalVolume)}</b><span>Volumen total</span></div>
+        <div class="stat"><b>${UI.num(porSeries ? st.totalSets : st.totalVolume)}</b>
+          <span>${porSeries ? 'Series totales' : 'Volumen total'}</span></div>
         <div class="stat"><b>${st.totalMinutes < 60 ? st.totalMinutes + 'm'
           : Math.round(st.totalMinutes / 60) + 'h'}</b><span>Tiempo</span></div>
       </div>
 
-      <div class="sec-title"><h2>Volumen por semana</h2></div>
+      <div class="sec-title"><h2>${porSeries ? 'Series por semana' : 'Volumen por semana'}</h2></div>
       <div class="card">
         <div class="bars">
           ${raw(semanas.map(function (w) {
-            return html`<div class="b" title="${UI.kg(w.volume)}"
-                 data-h="${Math.max(3, Math.round(w.volume / max * 100))}">
-              <em>${w.volume ? UI.num(w.volume) : ''}</em>
+            const v = valor(w);
+            return html`<div class="b" title="${porSeries ? v + ' series' : UI.kg(w.volume)}"
+                 data-h="${Math.max(3, Math.round(v / max * 100))}">
+              <em>${v ? UI.num(v) : ''}</em>
               <i></i>
               <span>${UI.fechaCorta(w.from)}</span></div>`;
           }).join(''))}
         </div>
         <div class="tiny center" style="margin-top:8px">
-          Volumen = peso × repeticiones de las series completadas
+          ${porSeries ? 'Series completadas en cada semana'
+            : 'Volumen = peso × repeticiones de las series completadas'}
         </div>
       </div>
 
@@ -1305,8 +1314,9 @@
                 <div class="row between">
                   <div class="grow" style="cursor:pointer" data-ses="${s.id}">
                     <div style="font-weight:700">${s.routineName}</div>
-                    <div class="tiny">${UI.fecha(s.start)} · ${s.setsDone} series ·
-                      ${UI.kg(s.volume)} · ${UI.mmss(((s.end || s.start) - s.start) / 1000)}</div>
+                    <div class="tiny">${UI.fecha(s.start)} · ${s.setsDone} series${raw(
+                      s.volume ? ' · ' + esc(UI.kg(s.volume)) : '')} ·
+                      ${UI.mmss(((s.end || s.start) - s.start) / 1000)}</div>
                   </div>
                   <button class="btn icon sm danger" data-delses="${s.id}"
                           aria-label="Borrar">${raw(icon('trash'))}</button>
@@ -1380,6 +1390,31 @@
           <button class="btn sm" data-a="lugar2">Cambiar</button>
         </div>
       </div>
+
+      <div class="list-title">Cómo registras las series</div>
+      <div class="list">
+        <button class="list-row tap" data-reg="detallado">
+          <span class="row-icon">${raw(icon('grafica'))}</span>
+          <div class="grow">
+            <div class="list-row-title">Peso y repeticiones</div>
+            <div class="list-row-sub">Anotas cada serie. Necesario para los récords,
+              el volumen y las gráficas de progreso.</div>
+          </div>
+          ${raw(s.registro !== 'simple' ? '<span class="chip solid">' + icon('check') + '</span>' : '')}
+        </button>
+        <button class="list-row tap" data-reg="simple">
+          <span class="row-icon">${raw(icon('check'))}</span>
+          <div class="grow">
+            <div class="list-row-title">Solo marcar como hecho</div>
+            <div class="list-row-sub">Te propongo el objetivo (por ejemplo 3 × 12) y solo
+              marcas cada serie. El peso queda opcional.</div>
+          </div>
+          ${raw(s.registro === 'simple' ? '<span class="chip solid">' + icon('check') + '</span>' : '')}
+        </button>
+      </div>
+      ${raw(s.registro === 'simple'
+        ? '<p class="tiny" style="margin:8px 4px 0">Sin peso anotado no hay récords ni ' +
+          'volumen; el progreso se mide por series y entrenamientos completados.</p>' : '')}
 
       <div class="card">
         <div class="row between"><span>Unidad de peso</span>
@@ -1549,6 +1584,13 @@
     root.querySelector('#s-rest').onchange = function (e) {
       Store.setSetting('rest', Math.max(0, Number(e.target.value) || 90));
     };
+    bindAll(root, '[data-reg]', function (el) {
+      Store.setSetting('registro', el.dataset.reg);
+      render();
+      UI.toast(el.dataset.reg === 'simple'
+        ? 'Ahora solo marcarás las series como hechas'
+        : 'Ahora anotarás peso y repeticiones');
+    });
     bindAll(root, '[data-unit]', function (el) { Store.setSetting('unit', el.dataset.unit); render(); });
     bindAll(root, '[data-theme]', function (el) {
       Store.setSetting('theme', el.dataset.theme);

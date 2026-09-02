@@ -156,6 +156,7 @@
     const pct = totalSets ? Math.round(doneSets / totalSets * 100) : 0;
     const pr = Store.prOf(entry.exId);
     const last = Store.lastPerformance(entry.exId);
+    const simple = Store.settings().registro === 'simple';
 
     return html`
       <div class="wo-head">
@@ -196,12 +197,27 @@
       </div>
 
       <div class="card">
-        <div class="setgrid" style="margin-bottom:8px">
-          <div class="hd">#</div><div class="hd">${Store.settings().unit === 'lb' ? 'Lb' : 'Kg'}</div>
-          <div class="hd">Reps</div><div class="hd"></div>
-        </div>
+        ${raw(simple ? html`
+          <div class="objetivo">
+            <b>${entry.sets.length} × ${entry.targetReps}</b>
+            <span>series por repeticiones${raw(entry.rest ? ' · descanso ' + entry.rest + ' s' : '')}</span>
+          </div>` : html`
+          <div class="setgrid" style="margin-bottom:8px">
+            <div class="hd">#</div><div class="hd">${Store.settings().unit === 'lb' ? 'Lb' : 'Kg'}</div>
+            <div class="hd">Reps</div><div class="hd"></div>
+          </div>`)}
+
         <div class="stack" id="wo-sets">
           ${raw(entry.sets.map(function (s, i) {
+            if (simple) {
+              return html`
+                <button class="serie-simple ${s.done ? 'on' : ''}" data-set="${i}" data-f="done">
+                  <span class="rt-idx">${i + 1}</span>
+                  <span class="grow">Serie ${i + 1}</span>
+                  <span class="tiny">${entry.targetReps} reps</span>
+                  <span class="chk ${s.done ? 'on' : ''}">${raw(icon('check'))}</span>
+                </button>`;
+            }
             return html`
               <div class="setgrid" data-set="${i}">
                 <div class="rt-idx">${i + 1}</div>
@@ -212,6 +228,15 @@
               </div>`;
           }).join(''))}
         </div>
+
+        ${raw(simple ? html`
+          <div class="row" style="margin-top:12px;align-items:center">
+            <span class="tiny grow">Peso usado (opcional)</span>
+            <input type="number" inputmode="decimal" step="0.5" min="0" id="peso-opcional"
+                   value="${entry.sets[0] && entry.sets[0].weight ? entry.sets[0].weight : ''}"
+                   placeholder="—" style="max-width:96px;text-align:center">
+            <span class="tiny">${Store.settings().unit}</span>
+          </div>` : '')}
         <div class="row" style="margin-top:11px">
           <button class="btn sm grow" data-w="addset">${raw(icon('plus'))} Añadir serie</button>
           ${raw(entry.sets.length > 1
@@ -274,6 +299,18 @@
     /* el descanso sobrevive a los re-render */
     paintRest();
 
+    const simple = Store.settings().registro === 'simple';
+
+    /* en modo simple el peso es uno solo para todo el ejercicio, y es opcional */
+    const campoPeso = root.querySelector('#peso-opcional');
+    if (campoPeso) {
+      campoPeso.onchange = function () {
+        const kg = Number(campoPeso.value) || 0;
+        entry.sets.forEach(function (s) { s.weight = kg; });
+        Store.setActive(a);
+      };
+    }
+
     /* pesos y repeticiones */
     root.querySelectorAll('#wo-sets [data-set]').forEach(function (rowEl) {
       const i = Number(rowEl.dataset.set);
@@ -283,19 +320,29 @@
           Store.setActive(a);
         };
       });
-      rowEl.querySelector('[data-f=done]').onclick = function (e) {
+      const marcar = rowEl.matches('[data-f=done]') ? rowEl : rowEl.querySelector('[data-f=done]');
+      marcar.onclick = function (e) {
         const btn = e.currentTarget;
         const set = entry.sets[i];
         set.done = !set.done;
-        /* al marcar, se toma el valor que hay en los campos */
-        set.weight = Number(rowEl.querySelector('[data-f=weight]').value) || 0;
-        set.reps = Number(rowEl.querySelector('[data-f=reps]').value) || 0;
-        btn.classList.toggle('on', set.done);
+
+        if (simple) {
+          /* sin campos: se da por hecho el objetivo de la rutina */
+          set.reps = entry.targetReps;
+          set.weight = campoPeso ? (Number(campoPeso.value) || 0) : (set.weight || 0);
+          btn.classList.toggle('on', set.done);
+          const marca = btn.querySelector('.chk');
+          if (marca) marca.classList.toggle('on', set.done);
+        } else {
+          set.weight = Number(rowEl.querySelector('[data-f=weight]').value) || 0;
+          set.reps = Number(rowEl.querySelector('[data-f=reps]').value) || 0;
+          btn.classList.toggle('on', set.done);
+        }
         Store.setActive(a);
 
         if (set.done) {
           const prev = Store.prOf(entry.exId).best;
-          if (set.weight > 0 && (!prev || set.weight > prev.weight)) {
+          if (!simple && set.weight > 0 && (!prev || set.weight > prev.weight)) {
             UI.toast('¡Nuevo récord en ' + entry.name + '!');
           }
           startRest(entry.rest);

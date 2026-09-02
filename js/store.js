@@ -9,7 +9,11 @@
 
   const DEFAULTS = {
     version: 1,
-    settings: { unit: 'kg', theme: 'dark', rest: 90, sound: true, name: '', gear: '' },
+    settings: {
+      unit: 'kg', theme: 'dark', rest: 90, sound: true, name: '', gear: '',
+      /* 'detallado' anota peso y repeticiones; 'simple' solo marca la serie hecha */
+      registro: 'detallado'
+    },
     routines: [],
     sessions: [],
     favorites: [],
@@ -209,6 +213,8 @@
       total: state.sessions.length,
       week: week.length,
       weekVolume: week.reduce(function (a, s) { return a + (s.volume || 0); }, 0),
+      weekSets: week.reduce(function (a, s) { return a + (s.setsDone || 0); }, 0),
+      totalSets: state.sessions.reduce(function (a, s) { return a + (s.setsDone || 0); }, 0),
       totalVolume: totalVol,
       totalMinutes: totalMin,
       streak: streakDays()
@@ -230,6 +236,7 @@
       out.push({
         from: from,
         volume: ss.reduce(function (a, s) { return a + (s.volume || 0); }, 0),
+        sets: ss.reduce(function (a, s) { return a + (s.setsDone || 0); }, 0),
         count: ss.length
       });
     }

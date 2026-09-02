@@ -95,8 +95,11 @@ que has abierto los ejercicios al menos una vez.
 - **Rutinas** — crea las tuyas, genera el plan o parte de 8 plantillas probadas (Full Body,
   Push/Pull/Legs, Torso/Pierna, 5x5, en casa sin material). Series, repeticiones y descanso
   por ejercicio. Asigna días y la portada te recuerda qué toca hoy.
-- **Entrenar** — marca cada serie con su peso y repeticiones, con el temporizador de
-  descanso automático y aviso sonoro. Te muestra tu récord y lo que hiciste la vez
+- **Entrenar** — dos formas de registrar, a elegir en Ajustes: anotando **peso y
+  repeticiones** de cada serie, o **solo marcando la serie como hecha** sobre el objetivo
+  que te propone la app (3 × 12, por ejemplo), con el peso como campo opcional. En el
+  modo simple el progreso se mide por series completadas en lugar de por volumen.
+  Temporizador de descanso automático y aviso sonoro. Te muestra tu récord y lo que hiciste la vez
   anterior en ese mismo ejercicio. Si cierras el navegador a mitad, se recupera.
 - **Progreso** — racha, volumen por semana en gráfico animado, calendario de
   entrenamientos, récords personales y el historial completo.

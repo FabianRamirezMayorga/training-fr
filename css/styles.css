@@ -380,3 +380,16 @@ code{font-family:var(--mono);
 .aviso-seguridad{border-color:var(--warn)}
 .aviso-seguridad b{color:var(--warn);font-size:.82rem;text-transform:uppercase;letter-spacing:.05em}
 .aviso-seguridad p{font-size:.9rem;color:var(--dim)}
+
+/* ---------- registro simple de series ---------- */
+.objetivo{text-align:center;padding:6px 0 14px}
+.objetivo b{display:block;font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.objetivo span{font-size:.8rem;color:var(--dim2)}
+.serie-simple{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  padding:13px 14px;background:var(--card2);border:1px solid transparent;
+  border-radius:var(--r-s);transition:background .15s,border-color .15s,transform .12s}
+.serie-simple:active{transform:scale(.985)}
+.serie-simple.on{background:var(--acc-d);border-color:var(--acc)}
+.serie-simple .grow{font-weight:600;font-size:.95rem}
+.serie-simple .chk{width:30px;height:30px}
+.list-row.tap[data-reg]{width:100%;text-align:left}
