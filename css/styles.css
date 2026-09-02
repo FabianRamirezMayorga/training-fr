@@ -342,3 +342,41 @@ code{font-family:var(--mono);
   border-radius:var(--r-s);padding:8px 8px 8px 11px}
 .copiable code{background:none;padding:0;font-size:.74rem;overflow-x:auto;
   white-space:nowrap;flex:1;min-width:0}
+
+/* ---------- guía de técnica ---------- */
+.fase{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;
+  backdrop-filter:blur(8px);padding:.28em .7em;border-radius:999px;font-size:.72rem;
+  font-weight:600;letter-spacing:-.01em}
+.marcos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.marcos figure{margin:0;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);overflow:hidden}
+.marcos img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.marcos figcaption{padding:8px 10px;font-size:.78rem;color:var(--dim);
+  display:flex;align-items:center;gap:7px}
+.marcos figcaption b{width:19px;height:19px;border-radius:50%;background:var(--acc);
+  color:var(--on-acc);font-size:.68rem;display:flex;align-items:center;
+  justify-content:center;flex:none}
+
+.guia-bloque+.guia-bloque{margin-top:10px}
+.guia-h{display:flex;align-items:center;gap:8px;font-size:.8rem;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--dim2);margin:0 0 11px;font-weight:700}
+.guia-h svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;color:var(--acc)}
+.fase-txt{padding:10px 0;border-top:1px solid var(--line)}
+.fase-txt:first-of-type{border-top:0;padding-top:0}
+.fase-txt b{display:inline-block;font-size:.75rem;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--acc);margin-bottom:4px}
+.fase-txt p{margin:0;font-size:.95rem}
+.guia-dato{display:flex;gap:11px;align-items:flex-start;padding:9px 0}
+.guia-dato+.guia-dato{border-top:1px solid var(--line)}
+.guia-dato b{display:block;font-size:.82rem;margin-bottom:2px}
+.guia-dato p{margin:0;font-size:.9rem;color:var(--dim)}
+.error-item{padding:10px 0;border-top:1px solid var(--line)}
+.error-item:first-of-type{border-top:0;padding-top:0}
+.error-item b{display:block;font-size:.92rem;color:var(--bad);margin-bottom:3px}
+.error-item p{margin:0;font-size:.9rem;color:var(--dim)}
+.destacado-clave{border-color:var(--acc);background:var(--acc-d)}
+.destacado-clave p{font-size:.95rem}
+.aviso-seguridad{border-color:var(--warn)}
+.aviso-seguridad b{color:var(--warn);font-size:.82rem;text-transform:uppercase;letter-spacing:.05em}
+.aviso-seguridad p{font-size:.9rem;color:var(--dim)}

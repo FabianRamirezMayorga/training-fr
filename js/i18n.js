@@ -304,6 +304,25 @@
     return clean.length ? upperFirst(clean.join(' ')) : name;
   }
 
+  /* Devuelve la clave del movimiento reconocido en el nombre ("bench press",
+     "squat"...). Es lo que permite asignar a cada ejercicio su guía de técnica. */
+  function nucleo(name) {
+    const words = norm(name).split(' ').filter(Boolean);
+    for (let n = MAXN; n >= 1; n--) {
+      for (let k = 0; k + n <= words.length; k++) {
+        const frase = words.slice(k, k + n).join(' ');
+        if (I_CORE.has(frase)) {
+          /* se devuelve la clave canónica, no la variante en plural */
+          for (const clave in CORE) {
+            if (CORE[clave] === I_CORE.get(frase)) return clave;
+          }
+          return frase;
+        }
+      }
+    }
+    return '';
+  }
+
   function t(map, key) {
     if (key == null || key === '') return '—';
     return map[String(key).toLowerCase()] || key;
@@ -318,7 +337,7 @@
     level: function (k) { return t(LEVEL, k); },
     force: function (k) { return t(FORCE, k); },
     mechanic: function (k) { return t(MECHANIC, k); },
-    name: translateName,
+    name: translateName, nucleo: nucleo,
     norm: norm
   };
 })(window);

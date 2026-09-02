@@ -178,7 +178,8 @@
     const speed = opts.speed || 900;
     const controls = opts.controls !== false && frames.length > 1;
     return html`
-      <div class="demo" data-demo="${JSON.stringify(frames)}" data-speed="${speed}">
+      <div class="demo" data-demo="${JSON.stringify(frames)}" data-speed="${speed}"
+           ${raw(opts.fases ? 'data-fases="' + esc(JSON.stringify(opts.fases)) + '"' : '')}>
         ${raw(frames.map(function (src, i) {
           return '<img class="' + (i === 0 ? 'on' : '') + '" src="' + esc(src) +
                  '" alt="' + (i === 0 ? 'Técnica de ' + esc(ex.nameEs) : '') +
@@ -189,6 +190,8 @@
               return '<i class="' + (i === 0 ? 'on' : '') + '"></i>';
             }).join('') + '</div>'
           : '')}
+        ${raw(opts.fases ? '<div class="fase"><span data-fase>' + esc(opts.fases[0]) +
+          '</span></div>' : '')}
         ${raw(controls ? `
           <div class="demo-ctl">
             <button data-act="toggle" aria-label="Pausar animación">${icon('pause')}</button>
@@ -222,10 +225,15 @@
       const fade = function () { box.style.setProperty('--fade', Math.round(speed * 0.55) + 'ms'); };
       fade();
 
+      const fase = box.querySelector('[data-fase]');
+      let etiquetas = [];
+      try { etiquetas = JSON.parse(box.dataset.fases || '[]'); } catch (e) { etiquetas = []; }
+
       function tick() {
         i = (i + 1) % frames.length;
         layers.forEach(function (l, k) { l.classList.toggle('on', k === i); });
         dots.forEach(function (d, k) { d.classList.toggle('on', k === i); });
+        if (fase && etiquetas[i]) fase.textContent = etiquetas[i];
       }
       function run() {
         clearInterval(timer);

@@ -455,6 +455,8 @@
 
   /* ================= ficha de ejercicio ================= */
 
+  const FASES = ['Posición inicial', 'Posición final'];
+
   function viewEjercicio() {
     const ex = Data.get(route.arg);
     if (!ex) return '<div class="empty"><p>Ejercicio no encontrado.</p></div>';
@@ -462,12 +464,13 @@
     const pr = Store.prOf(ex.id);
     const hist = Store.historyOf(ex.id).slice(0, 6);
     const fav = Store.isFav(ex.id);
-    const cached = localStorage.getItem('trainingfr.tr.' + ex.id);
+    const guia = Tecnica.para(ex);
+    const marcos = Data.frames(ex);
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">${raw(icon('back'))} Volver</button>
 
-      ${raw(UI.demoHTML(ex, { speed: 900 }))}
+      ${raw(UI.demoHTML(ex, { speed: 900, fases: marcos.length > 1 ? FASES : null }))}
 
       <div class="row between" style="margin:14px 0 4px;align-items:flex-start">
         <div class="grow">
@@ -487,7 +490,6 @@
         }).join(''))}
         <span class="chip">${I18N.equip(ex.equipment)}</span>
         <span class="chip">${I18N.level(ex.level)}</span>
-        ${raw(ex.force ? '<span class="chip">' + esc(I18N.force(ex.force)) + '</span>' : '')}
         ${raw(ex.mechanic ? '<span class="chip">' + esc(I18N.mechanic(ex.mechanic)) + '</span>' : '')}
       </div>
 
@@ -497,22 +499,32 @@
            aria-label="Buscar vídeo en YouTube">${raw(icon('youtube'))}</a>
       </div>
 
-      <div class="sec-title">
-        <h2>Cómo se ejecuta</h2>
-        ${raw(cached ? '' : '<button class="btn sm ghost" data-a="traducir">Traducir</button>')}
-      </div>
-      <div class="card">
-        <ol class="instr" id="instr">
-          ${raw((cached ? JSON.parse(cached) : ex.instructions).map(function (s) {
-            return '<li>' + esc(s) + '</li>';
-          }).join(''))}
-        </ol>
-        ${raw(cached ? '' : '<div class="tiny">Texto original de la base de datos, en inglés. ' +
-          'Pulsa «Traducir» para verlo en español.</div>')}
-      </div>
+      ${raw(marcos.length > 1 ? html`
+        <div class="list-title">El recorrido</div>
+        <div class="marcos">
+          <figure>
+            <img src="${marcos[0]}" alt="Posición inicial" loading="lazy">
+            <figcaption><b>1</b> Posición inicial</figcaption>
+          </figure>
+          <figure>
+            <img src="${marcos[1]}" alt="Posición final" loading="lazy">
+            <figcaption><b>2</b> Posición final</figcaption>
+          </figure>
+        </div>
+        <p class="tiny" style="margin-top:8px">El movimiento va del punto 1 al 2 y vuelve
+        controlando la bajada. Arriba lo ves animado.</p>` : '')}
+
+      ${raw(guia ? guiaHTML(guia) : html`
+        <div class="list-title">Cómo se ejecuta</div>
+        <div class="card">
+          <p class="muted">Este ejercicio todavía no tiene guía propia en español.
+          Abajo tienes las instrucciones originales y el enlace a vídeos.</p>
+        </div>`)}
+
+      ${raw(instruccionesHTML(ex))}
 
       ${raw(pr.best ? html`
-        <div class="sec-title"><h2>Tus marcas</h2></div>
+        <div class="list-title">Tus marcas</div>
         <div class="stats">
           <div class="stat"><b>${UI.num(pr.best.weight)}</b><span>Máx. ${Store.settings().unit}</span></div>
           <div class="stat"><b>${pr.best.reps}</b><span>Reps de esa serie</span></div>
@@ -520,17 +532,87 @@
         </div>` : '')}
 
       ${raw(hist.length ? html`
-        <div class="sec-title"><h2>Historial</h2></div>
+        <div class="list-title">Historial</div>
         <div class="stack">
           ${raw(hist.map(function (h) {
             return html`<div class="card row between">
               <div class="tiny">${UI.fecha(h.date)}</div>
-              <div style="font-size:.85rem;font-weight:600">${h.sets.map(function (s) {
+              <div style="font-size:.9rem;font-weight:600">${h.sets.map(function (s) {
                 return UI.num(s.weight) + '×' + s.reps;
               }).join(' · ')}</div>
             </div>`;
           }).join(''))}
         </div>` : '')}`;
+  }
+
+  /* La guía de técnica, que es lo que de verdad explica el ejercicio */
+  function guiaHTML(gu) {
+    return html`
+      <div class="list-title">Cómo se hace · ${gu.titulo}</div>
+
+      <div class="card guia-bloque">
+        <h3 class="guia-h">${raw(icon('perfil'))} Posición inicial</h3>
+        <ol class="instr">
+          ${raw(gu.inicial.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join(''))}
+        </ol>
+      </div>
+
+      <div class="card guia-bloque">
+        <h3 class="guia-h">${raw(icon('grafica'))} El recorrido</h3>
+        ${raw(gu.recorrido.map(function (f) {
+          return '<div class="fase-txt"><b>' + esc(f.fase) + '</b><p>' + esc(f.texto) + '</p></div>';
+        }).join(''))}
+      </div>
+
+      <div class="card guia-bloque">
+        <div class="guia-dato">
+          <span class="row-icon">${raw(icon('gota'))}</span>
+          <div><b>Respiración</b><p>${gu.respiracion}</p></div>
+        </div>
+        <div class="guia-dato">
+          <span class="row-icon">${raw(icon('reloj'))}</span>
+          <div><b>Ritmo</b><p>${gu.tempo}</p></div>
+        </div>
+      </div>
+
+      <div class="card guia-bloque">
+        <h3 class="guia-h">${raw(icon('close'))} Errores frecuentes</h3>
+        ${raw(gu.errores.map(function (e) {
+          return '<div class="error-item"><b>' + esc(e.fallo) + '</b><p>' + esc(e.arreglo) + '</p></div>';
+        }).join(''))}
+      </div>
+
+      <div class="card destacado-clave">
+        <h3 class="guia-h">${raw(icon('chispa'))} La clave</h3>
+        <p style="margin:0">${gu.clave}</p>
+      </div>
+
+      ${raw(gu.seguridad ? html`
+        <div class="card aviso-seguridad">
+          <b>Seguridad</b>
+          <p style="margin:4px 0 0">${gu.seguridad}</p>
+        </div>` : '')}`;
+  }
+
+  /* Las instrucciones originales quedan como material de apoyo, plegadas */
+  function instruccionesHTML(ex) {
+    if (!ex.instructions || !ex.instructions.length) return '';
+    const traducidas = localStorage.getItem('trainingfr.tr.' + ex.id);
+    const pasos = traducidas ? JSON.parse(traducidas) : ex.instructions;
+
+    return html`
+      <button class="guia-tit" data-a="verOriginal" style="margin-top:18px">
+        ${raw(icon('chevron'))} Instrucciones originales del catálogo
+      </button>
+      <div class="guia" id="orig" hidden>
+        <div class="card">
+          <ol class="instr" id="instr">
+            ${raw(pasos.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join(''))}
+          </ol>
+          ${raw(traducidas ? '' : '<button class="btn sm block" data-a="traducir">' +
+            'Traducir al español</button>')}
+        </div>
+      </div>`;
   }
 
   viewEjercicio.mount = function (root) {
@@ -545,6 +627,10 @@
     });
     bind(root, '[data-a=addrutina]', function () { pickRoutineSheet(ex); });
     bind(root, '[data-a=traducir]', function (el) { traducirInstrucciones(ex, el); });
+    bind(root, '[data-a=verOriginal]', function (el) {
+      const c = root.querySelector('#orig');
+      if (c) { c.hidden = !c.hidden; el.classList.toggle('abierta', !c.hidden); }
+    });
   };
 
   /* Traducción bajo demanda de las instrucciones (servicio gratuito, sin clave).
@@ -1812,20 +1898,53 @@
       ${raw(icon(claro ? 'luna' : 'sol'))}</button>`;
   }
 
-  /* hoja de detalle rápida, usada desde el modo entrenamiento */
+  /* Hoja de técnica que se abre durante el entrenamiento: lo esencial para
+     corregir la ejecución sin salir de la serie. */
   function exerciseSheet(ex) {
+    const guia = Tecnica.para(ex);
+
     UI.modal(html`
-      <h2>${ex.nameEs}</h2>
-      <div class="tiny" style="margin-bottom:10px">${ex.name}</div>
-      ${raw(UI.demoHTML(ex, { speed: 800 }))}
-      <ol class="instr" style="margin-top:14px">
-        ${raw((JSON.parse(localStorage.getItem('trainingfr.tr.' + ex.id) || 'null') || ex.instructions)
-          .map(function (s) { return '<li>' + esc(s) + '</li>'; }).join(''))}
-      </ol>
-      <button class="btn block" data-x="cerrar">Cerrar</button>`,
+      <h2 style="margin-bottom:2px">${ex.nameEs}</h2>
+      <div class="tiny" style="margin-bottom:12px">${ex.primaryMuscles.map(I18N.muscle).join(', ')}</div>
+      ${raw(UI.demoHTML(ex, { speed: 800, fases: Data.frames(ex).length > 1 ? FASES : null }))}
+
+      ${raw(guia ? html`
+        <div class="guia-h" style="margin:16px 0 10px">${raw(icon('grafica'))} El recorrido</div>
+        ${raw(guia.recorrido.map(function (f) {
+          return '<div class="fase-txt"><b>' + esc(f.fase) + '</b><p>' + esc(f.texto) + '</p></div>';
+        }).join(''))}
+
+        <div class="card destacado-clave" style="margin-top:14px">
+          <div class="guia-h" style="margin-bottom:7px">${raw(icon('chispa'))} La clave</div>
+          <p style="margin:0">${guia.clave}</p>
+        </div>
+
+        <div class="guia-h" style="margin:16px 0 10px">${raw(icon('close'))} Vigila esto</div>
+        ${raw(guia.errores.slice(0, 3).map(function (e) {
+          return '<div class="error-item"><b>' + esc(e.fallo) + '</b><p>' + esc(e.arreglo) + '</p></div>';
+        }).join(''))}
+
+        <div class="guia-dato" style="margin-top:12px">
+          <span class="row-icon">${raw(icon('reloj'))}</span>
+          <div><b>Ritmo</b><p>${guia.tempo}</p></div>
+        </div>`
+      : html`
+        <ol class="instr" style="margin-top:14px">
+          ${raw((JSON.parse(localStorage.getItem('trainingfr.tr.' + ex.id) || 'null') || ex.instructions)
+            .map(function (s) { return '<li>' + esc(s) + '</li>'; }).join(''))}
+        </ol>`)}
+
+      <div class="row" style="margin-top:16px">
+        <button class="btn grow" data-x="ficha">Ver ficha completa</button>
+        <button class="btn primary grow" data-x="cerrar">Seguir</button>
+      </div>`,
       function (el) {
         UI.mountDemos(el);
         el.querySelector('[data-x=cerrar]').onclick = UI.closeModal;
+        el.querySelector('[data-x=ficha]').onclick = function () {
+          UI.closeModal();
+          go('ejercicio', ex.id);
+        };
       });
   }
 

@@ -82,6 +82,11 @@ que has abierto los ejercicios al menos una vez.
   app reparte los grupos musculares por día (*Lun · Pecho y tríceps*, *Mar · Espalda y
   bíceps*…) y elige los ejercicios ajustando series, repeticiones y descansos a tu
   objetivo. Sin repetir ejercicio en la misma semana. Verás la propuesta antes de guardarla.
+- **Guías de técnica en español** — cada ejercicio explica la posición inicial paso a
+  paso, el recorrido dividido en fases, la respiración, el ritmo y los errores más
+  frecuentes con su corrección. Están escritas por patrón de movimiento, así que cubren
+  721 de los 876 ejercicios sin depender de internet ni de la IA. Durante el
+  entrenamiento se abren en una hoja rápida sin salir de la serie.
 - **Ejercicios segmentados por músculo** — al entrar en *Pierna* aparecen secciones
   separadas de cuádriceps, isquiotibiales, glúteos, gemelos, aductores y abductores,
   cada una con su carrusel. Buscador en español (*«peso muerto»*, *«femoral»*, *«glúteo»*).
@@ -222,6 +227,7 @@ Estructura:
 index.html              maquetación y orden de carga
 css/styles.css          estilos (tema oscuro y claro, tipografía del sistema Apple)
 js/i18n.js              traducción del catálogo al español
+js/tecnica.js           guías de técnica por patrón de movimiento
 js/store.js             persistencia en localStorage
 js/ui.js                utilidades, animación de los ejercicios
 js/data.js              descarga y búsqueda del catálogo
