@@ -1,15 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 72" role="img" aria-label="Training FR">
-  <!-- Monograma de marca: F en cian y R en verde, superpuestas. -->
-  <g fill="var(--brand-1, #29abe2)">
-    <rect x="10" y="6" width="9" height="52"/>
-    <rect x="10" y="6" width="30" height="9"/>
-    <rect x="10" y="28" width="24" height="9"/>
-  </g>
-  <g fill="var(--brand-2, #8cc63f)">
-    <rect x="44" y="6" width="9" height="60"/>
-    <rect x="44" y="6" width="28" height="9"/>
-    <rect x="63" y="6" width="9" height="31"/>
-    <rect x="44" y="28" width="28" height="9"/>
-    <polygon points="60,37 69,37 88,66 79,66"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="24 17 52 66" role="img" aria-label="Training FR">
+  <!-- Logotipo de la marca: F en cian, R en verde. Sin fondo, recortado al trazo. -->
+  <path d="M28 22 L28 78" stroke="#26C6DA" stroke-width="7" stroke-linecap="square" fill="none"/>
+  <path d="M28 22 L62 22" stroke="#26C6DA" stroke-width="7" stroke-linecap="square" fill="none"/>
+  <path d="M45 34 L45 78" stroke="#8BC34A" stroke-width="7" stroke-linecap="square" fill="none"/>
+  <path d="M45 34 C68 34, 68 58, 45 58" stroke="#8BC34A" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M50 56 L72 78" stroke="#8BC34A" stroke-width="7" stroke-linecap="square" fill="none"/>
 </svg>

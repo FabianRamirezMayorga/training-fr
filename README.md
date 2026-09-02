@@ -169,10 +169,19 @@ navegadores que ya tienen la app instalada se actualicen.
 
 ## Marca
 
-El logotipo (`icons/logo.svg`) es el monograma **FR**: F en cian `#29abe2` y R en verde
-`#8cc63f`, los dos colores que usa toda la interfaz. Para cambiarlo basta con sustituir
-ese archivo; la app lo usa en la barra superior, en la pantalla de bienvenida y como icono.
-Los iconos PNG del instalador se regeneran con el script del repositorio.
+El logotipo es el monograma **FR** de la marca: F en cian `#26C6DA` y R en verde
+`#8BC34A`. Esos dos colores gobiernan toda la interfaz.
+
+- `icons/logo.svg` — recortado al trazo, para la barra superior y la bienvenida.
+- `icons/icon.svg` — centrado en lienzo cuadrado, para el favicon.
+- `icons/icon-192.png`, `icons/icon-512.png` — iconos del instalador, con fondo transparente.
+
+Todos comparten el mismo trazado y ninguno lleva fondo. Si cambia el logo, edita los dos
+SVG y regenera los PNG:
+
+```bash
+node tools-generar-iconos.js icons
+```
 
 ## Créditos
 

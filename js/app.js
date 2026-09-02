@@ -104,8 +104,8 @@
   function viewBienvenida() {
     return html`
       <div style="padding:26px 0 6px" class="center">
-        <img src="icons/logo.svg" alt="Training FR" width="130" height="94"
-             style="margin:0 auto 10px">
+        <img src="icons/logo.svg" alt="Training FR" width="94" height="119"
+             style="margin:0 auto 12px">
         <div class="splash-name">TRAINING <b>FR</b></div>
       </div>
       <h1 class="center">¿Dónde vas a entrenar?</h1>
