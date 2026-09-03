@@ -599,6 +599,17 @@
       }
 
       if (!remoto) return subir().then(function () { return 'subido'; });
+
+      /* Nunca se reemplazan datos por nada. Un dispositivo recién estrenado
+         guarda un ajuste y ya tiene la marca de tiempo más reciente; si además
+         sube su estado vacío, la nube queda en blanco y de ahí en adelante
+         cualquier sincronización arrasaría con lo que hubiera en los demás. */
+      const remotoVacio = !((remoto.data && remoto.data.routines || []).length ||
+        (remoto.data && remoto.data.sessions || []).length);
+      if (remotoVacio && hayDatosLocales()) {
+        return subir().then(function () { return 'subido'; });
+      }
+
       if (remoto.updatedAt > tLocal) { aplicar(remoto); return 'bajado'; }
       if (tLocal > remoto.updatedAt) return subir().then(function () { return 'subido'; });
       marcarSync();
