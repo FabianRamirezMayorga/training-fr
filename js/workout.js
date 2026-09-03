@@ -184,6 +184,8 @@
               <div class="tiny">${raw(ex ? UI.esc(ex.name) : '')}${raw(ex && ex.primaryMuscles.length
                 ? ' · ' + UI.esc(ex.primaryMuscles.map(I18N.muscle).join(', ')) : '')}</div>
             </div>
+            <button class="btn icon" data-w="cambiar"
+                    aria-label="Cambiar por otro ejercicio">${raw(icon('cambiar'))}</button>
             <button class="btn icon" data-w="info" aria-label="Ver instrucciones">${raw(icon('search'))}</button>
           </div>
           ${raw(entry.note ? html`<p class="muted" style="margin:8px 0 0">${entry.note}</p>` : '')}
@@ -400,6 +402,13 @@
       if (ex && g.App) g.App.exerciseSheet(ex);
     });
 
+    /* La máquina está ocupada: se cambia el ejercicio sin perder las series
+       ya marcadas ni el sitio en el entrenamiento. */
+    act('cambiar', function () {
+      const ex = Data.get(entry.exId);
+      if (ex) cambiarSheet(ex, rerender);
+    });
+
     act('finish', doFinish);
 
     act('cancel', function () {
@@ -420,6 +429,84 @@
   }
 
   /* Reproductor de Spotify durante la sesión, si está conectado */
+  /* ---- Cambiar el ejercicio en marcha ----
+     Pasa constantemente: la máquina está ocupada. Se ofrece el mismo trabajo
+     con otro material y se conserva lo que ya llevas hecho: las series ya
+     marcadas se quedan con el ejercicio original y el recambio arranca con
+     las que faltan. */
+  function cambiarSheet(ex, rerender) {
+    const gear = Store.settings().gear || '';
+    let lista = g.Alt ? Alt.para(ex, { limite: 10, soloDisponible: !!gear }) : [];
+    let fuera = false;
+    if (lista.length < 2 && g.Alt) {
+      lista = Alt.para(ex, { limite: 10, gear: '' });
+      fuera = true;
+    }
+
+    if (!lista.length) {
+      UI.toast('No encuentro un recambio para este ejercicio');
+      return;
+    }
+
+    UI.modal(UI.html`
+      <h2>Cambiar «${ex.nameEs}»</h2>
+      <p class="muted">${raw(fuera
+        ? 'Con tu material no hay recambio directo; estas son del catálogo completo.'
+        : 'Mismo trabajo, otro material. Las series que ya has marcado no se pierden.')}</p>
+      <div class="stack">
+        ${raw(lista.map(function (a) {
+          return UI.html`
+            <button class="rt-item" data-alt="${a.ex.id}" style="width:100%;text-align:left">
+              <img src="${Data.img(a.ex, 0)}" alt="" loading="lazy">
+              <div class="grow">
+                <div style="font-weight:600;font-size:.86rem">${a.ex.nameEs}</div>
+                <div class="tiny">${a.motivo} · ${I18N.equip(a.ex.equipment)}</div>
+              </div>
+            </button>`;
+        }).join(''))}
+      </div>`,
+      function (el) {
+        el.querySelectorAll('[data-alt]').forEach(function (btn) {
+          btn.onclick = function () {
+            reemplazarEjercicio(Data.get(btn.dataset.alt));
+            UI.closeModal();
+            rerender();
+            UI.toast('Ejercicio cambiado');
+          };
+        });
+      });
+  }
+
+  function reemplazarEjercicio(nuevo) {
+    const a = Store.active();
+    if (!a || !nuevo) return;
+    const e = a.entries[a.idx];
+    const hechas = e.sets.filter(function (s) { return s.done; }).length;
+    const last = Store.lastPerformance(nuevo.id);
+    const peso = last && last.sets.length ? Number(last.sets[0].weight) || 0 : 0;
+
+    const entrada = {
+      exId: nuevo.id,
+      name: nuevo.nameEs,
+      targetReps: e.targetReps,
+      rest: e.rest,
+      note: e.note,
+      sets: Array.from({ length: Math.max(1, e.sets.length - hechas) }, function () {
+        return { weight: peso, reps: e.targetReps, done: false };
+      })
+    };
+
+    if (hechas) {
+      /* lo ya hecho se queda con su ejercicio; el recambio continúa detrás */
+      e.sets = e.sets.filter(function (s) { return s.done; });
+      a.entries.splice(a.idx + 1, 0, entrada);
+      a.idx += 1;
+    } else {
+      a.entries[a.idx] = entrada;
+    }
+    Store.setActive(a);
+  }
+
   function pintarMusica(root) {
     const host = root.querySelector('#wo-musica');
     if (!host || !g.Spotify || !Spotify.activa()) return;

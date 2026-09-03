@@ -412,3 +412,6 @@ code{font-family:var(--mono);
 .secreto .btn{flex:none;padding:.55em .7em}
 .secreto .btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9}
 .secreto .btn.on{color:var(--acc);border-color:var(--acc)}
+
+/* Tarjeta de sesión completa de una zona (pierna, empuje, tren superior…) */
+.zona-card{border-color:var(--acc);background:var(--acc-d);margin-bottom:14px}

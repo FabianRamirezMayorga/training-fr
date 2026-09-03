@@ -1,7 +1,7 @@
 /* sw.js — service worker.
    Deja la app usable sin conexión: los archivos propios se precargan y las
    imágenes del catálogo se guardan la primera vez que se ven. */
-const VERSION = 'trainingfr-v20';
+const VERSION = 'trainingfr-v21';
 const SHELL = VERSION + '-shell';
 const MEDIA = VERSION + '-media';
 const MAX_MEDIA = 4000;         // imágenes guardadas como máximo (~200 MB)
@@ -10,7 +10,8 @@ const FILES = [
   './', './index.html',
   './css/styles.css',
   './js/i18n.js', './js/tecnica.js', './js/store.js', './js/ui.js', './js/data.js',
-  './js/templates.js', './js/planner.js', './js/offline.js', './js/sync.js',
+  './js/templates.js', './js/planner.js', './js/alternativas.js',
+  './js/offline.js', './js/sync.js',
   './js/perfil.js', './js/objetivos.js', './js/alertas.js', './js/ia.js',
   './js/spotify.js', './js/vistas.js', './js/vistas2.js', './js/vistas3.js',
   './js/workout.js', './js/app.js',

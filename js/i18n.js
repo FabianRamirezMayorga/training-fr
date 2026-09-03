@@ -41,6 +41,108 @@
     { id: 'core', label: 'Core', muscles: ['abdominals'] }
   ];
 
+  /* ---- Zonas: lo que se escribe en el buscador no es un músculo ----
+     "pierna" no existe como músculo en el catálogo, y buscarlo como texto
+     devuelve cuatro rarezas que llevan la palabra en el nombre. Al reconocer la
+     zona la app enseña TODOS sus músculos, cada uno en su sección, y ofrece
+     entrenarlos juntos en una sola sesión.
+     muscles: qué se muestra, en orden de importancia.
+     entreno: qué entra en la sesión rápida (a veces suma un sinergista). */
+  const REGIONES = [
+    { id: 'pierna', label: 'Pierna',
+      muscles: ['quadriceps', 'hamstrings', 'glutes', 'calves', 'adductors', 'abductors'],
+      entreno: ['quadriceps', 'hamstrings', 'glutes', 'calves'],
+      alias: ['pierna', 'piernas', 'tren inferior', 'pierna completa', 'leg', 'legs',
+        'lower body', 'muslo', 'muslos', 'dia de pierna'] },
+    { id: 'espalda', label: 'Espalda',
+      muscles: ['lats', 'middle back', 'traps', 'lower back'],
+      entreno: ['lats', 'middle back', 'traps'],
+      alias: ['espalda', 'espalda completa', 'back', 'dia de espalda'] },
+    { id: 'pecho', label: 'Pecho',
+      muscles: ['chest'], entreno: ['chest', 'triceps', 'shoulders'],
+      alias: ['pecho', 'pectoral', 'pectorales', 'chest', 'dia de pecho'] },
+    { id: 'hombro', label: 'Hombro',
+      muscles: ['shoulders'], entreno: ['shoulders', 'traps'],
+      alias: ['hombro', 'hombros', 'deltoides', 'delto', 'shoulder', 'dia de hombro'] },
+    { id: 'brazo', label: 'Brazo',
+      muscles: ['biceps', 'triceps', 'forearms'], entreno: ['biceps', 'triceps'],
+      alias: ['brazo', 'brazos', 'arm', 'arms', 'dia de brazo'] },
+    { id: 'core', label: 'Core',
+      muscles: ['abdominals', 'lower back'], entreno: ['abdominals', 'lower back'],
+      alias: ['core', 'abdomen', 'zona media', 'six pack'] },
+    { id: 'torso', label: 'Tren superior',
+      muscles: ['chest', 'lats', 'shoulders', 'middle back', 'biceps', 'triceps'],
+      entreno: ['chest', 'lats', 'shoulders', 'biceps', 'triceps'],
+      alias: ['tren superior', 'torso', 'upper body', 'cuerpo superior', 'parte de arriba'] },
+    { id: 'empuje', label: 'Empuje',
+      muscles: ['chest', 'shoulders', 'triceps'], entreno: ['chest', 'shoulders', 'triceps'],
+      alias: ['empuje', 'empujar', 'push', 'dia de empuje'] },
+    { id: 'traccion', label: 'Tracción',
+      muscles: ['lats', 'middle back', 'biceps', 'traps'],
+      entreno: ['lats', 'middle back', 'biceps'],
+      alias: ['traccion', 'tiron', 'jalar', 'pull', 'dia de traccion'] },
+    { id: 'completo', label: 'Cuerpo completo',
+      muscles: ['quadriceps', 'chest', 'lats', 'shoulders', 'hamstrings', 'glutes', 'abdominals'],
+      entreno: ['quadriceps', 'chest', 'lats', 'shoulders', 'hamstrings', 'abdominals'],
+      alias: ['cuerpo completo', 'full body', 'todo el cuerpo', 'cuerpo entero', 'general'] }
+  ];
+
+  /* Cómo llama la gente a cada músculo. Buscar "femoral" debe filtrar por
+     isquiotibiales, no buscar la palabra "femoral" en los nombres. */
+  const MUSCULO_ALIAS = {
+    quadriceps: ['cuadriceps', 'cuadricep', 'cuadris', 'quad', 'quads'],
+    hamstrings: ['femoral', 'femorales', 'isquio', 'isquios', 'isquiotibial', 'isquiotibiales',
+      'hamstring', 'hamstrings'],
+    glutes: ['gluteo', 'gluteos', 'nalga', 'nalgas', 'cola', 'glute', 'glutes'],
+    calves: ['gemelo', 'gemelos', 'pantorrilla', 'pantorrillas', 'soleo', 'calf', 'calves'],
+    chest: ['pecho', 'pectoral', 'pectorales'],
+    lats: ['dorsal', 'dorsales', 'lat', 'lats', 'espalda ancha'],
+    'middle back': ['espalda media', 'romboides', 'dorsal medio'],
+    'lower back': ['lumbar', 'lumbares', 'zona lumbar', 'espalda baja'],
+    traps: ['trapecio', 'trapecios', 'trapa', 'traps'],
+    shoulders: ['hombro', 'hombros', 'deltoides', 'deltoide'],
+    biceps: ['biceps', 'bicep', 'bi'],
+    triceps: ['triceps', 'tricep', 'tri'],
+    forearms: ['antebrazo', 'antebrazos', 'muneca', 'munecas', 'agarre'],
+    abdominals: ['abdominal', 'abdominales', 'abs', 'oblicuos', 'recto abdominal'],
+    adductors: ['aductor', 'aductores', 'interior del muslo'],
+    abductors: ['abductor', 'abductores', 'exterior del muslo'],
+    neck: ['cuello', 'cervical']
+  };
+
+  /* Índices normalizados, una sola vez */
+  const I_REGION = new Map();
+  REGIONES.forEach(function (r) {
+    r.alias.forEach(function (a) { I_REGION.set(norm(a), r); });
+    I_REGION.set(norm(r.label), r);
+  });
+
+  const I_MUSCULO = new Map();
+  Object.keys(MUSCULO_ALIAS).forEach(function (m) {
+    I_MUSCULO.set(norm(MUSCLE[m]), m);
+    MUSCULO_ALIAS[m].forEach(function (a) { I_MUSCULO.set(norm(a), m); });
+  });
+
+  /* Interpreta lo que ha escrito el usuario.
+     Devuelve {tipo:'region', region} | {tipo:'musculo', muscle} | null.
+     Se ignoran las palabras de relleno ("rutina de pierna" = "pierna"). */
+  const RELLENO = ['rutina', 'rutinas', 'ejercicio', 'ejercicios', 'entrenar', 'entrenamiento',
+    'para', 'de', 'del', 'la', 'el', 'los', 'las', 'dia', 'mi', 'y', 'con', 'en'];
+
+  function zona(texto) {
+    const limpio = norm(texto).split(' ')
+      .filter(function (w) { return w && RELLENO.indexOf(w) === -1; })
+      .join(' ');
+    if (!limpio) return null;
+    if (I_REGION.has(limpio)) return { tipo: 'region', region: I_REGION.get(limpio) };
+    if (I_MUSCULO.has(limpio)) return { tipo: 'musculo', muscle: I_MUSCULO.get(limpio) };
+    return null;
+  }
+
+  function region(id) {
+    return REGIONES.find(function (r) { return r.id === id; }) || null;
+  }
+
   /* ---- 1. NÚCLEO: el movimiento en sí. Greedy, la frase más larga gana. ---- */
   const CORE = {
     'clean and jerk': 'Cargada y envión', 'clean and press': 'Cargada y press',
@@ -330,7 +432,8 @@
 
   g.I18N = {
     MUSCLE: MUSCLE, EQUIP: EQUIP, CATEGORY: CATEGORY, LEVEL: LEVEL,
-    FORCE: FORCE, MECHANIC: MECHANIC, GROUPS: GROUPS,
+    FORCE: FORCE, MECHANIC: MECHANIC, GROUPS: GROUPS, REGIONES: REGIONES,
+    zona: zona, region: region,
     muscle: function (k) { return t(MUSCLE, k); },
     equip: function (k) { return t(EQUIP, k); },
     category: function (k) { return t(CATEGORY, k); },

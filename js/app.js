@@ -197,6 +197,15 @@
         <div class="list-title">Toca hoy (${hoy})</div>
         <div class="stack">${raw(deHoy.map(routineCard).join(''))}</div>` : '')}
 
+      <div class="list-title">¿Qué entrenas hoy?</div>
+      <p class="tiny" style="margin:-4px 4px 8px">Elige una zona y te la enseño músculo a
+      músculo, con la opción de montar la sesión entera de una vez.</p>
+      <div class="pill-scroll">
+        ${raw(I18N.REGIONES.map(function (r) {
+          return '<button class="chip" data-zona="' + r.id + '">' + esc(r.label) + '</button>';
+        }).join(''))}
+      </div>
+
       <div class="card" style="margin-top:14px;border-color:var(--acc)">
         <div class="row between">
           <div class="grow">
@@ -207,7 +216,8 @@
         </div>
       </div>
 
-      <div class="list-title">Mis rutinas</h2>
+      <div class="list-head">
+        <span class="list-title">Mis rutinas</span>
         <button class="btn sm" data-a="nueva">${raw(icon('plus'))} Nueva</button>
       </div>
 
@@ -270,7 +280,16 @@
     bind(root, '[data-a=verprogreso]', function () { go('progreso'); });
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
     bindAll(root, '[data-train]', function (el) { empezar(el.dataset.train); });
+    bindAll(root, '[data-zona]', function (el) { irAZona(el.dataset.zona); });
   };
+
+  /* Abre el catálogo centrado en una zona del cuerpo */
+  function irAZona(id) {
+    exFilters = { q: '', group: id, muscle: '', equipment: '', level: '', favs: false, todo: exFilters.todo };
+    exLimit = 40;
+    go('ejercicios');
+    window.scrollTo(0, 0);
+  }
 
   function empezar(routineId) {
     const r = Store.routine(routineId);
@@ -291,31 +310,68 @@
     return exFilters.todo ? '' : (Store.settings().gear || '');
   }
 
-  /* Músculos que se muestran como secciones, según el grupo elegido */
-  function musculosVisibles() {
-    if (exFilters.group) {
-      const gr = I18N.GROUPS.find(function (x) { return x.id === exFilters.group; });
-      return gr ? gr.muscles : [];
-    }
+  /* La zona del cuerpo que se está mirando, venga del chip o de lo buscado */
+  function regionActual() {
+    if (exFilters.muscle || exFilters.favs) return null;
+    const z = exFilters.q ? I18N.zona(exFilters.q) : null;
+    if (z) return z.tipo === 'region' ? z.region : null;
+    if (exFilters.q) return null;
+    return I18N.region(exFilters.group);
+  }
+
+  /* Todos los músculos del catálogo, en el orden en que se muestran */
+  function todosLosMusculos() {
     return I18N.GROUPS.reduce(function (acc, gr) { return acc.concat(gr.muscles); }, []);
   }
 
   function viewEjercicios() {
     const gear = gearActual();
+
+    /* Escribir "pierna" o "femoral" no es buscar esas palabras en los nombres:
+       es querer entrenar esa zona. Se convierte en filtro, no en texto suelto. */
+    const zonaQ = exFilters.q && !exFilters.favs ? I18N.zona(exFilters.q) : null;
+    const musculoQ = zonaQ && zonaQ.tipo === 'musculo' ? zonaQ.muscle : '';
+    const musculo = exFilters.muscle || musculoQ;
+
+    /* La zona activa: del texto buscado o del chip de grupo */
+    const region = zonaQ && zonaQ.tipo === 'region' ? zonaQ.region
+      : (!musculo && !exFilters.favs ? I18N.region(exFilters.group) : null);
+
     const base = {
-      q: exFilters.q, group: exFilters.group, muscle: exFilters.muscle,
+      q: zonaQ ? '' : exFilters.q,
+      group: region ? '' : exFilters.group,
+      muscles: region ? region.muscles : null,
+      muscle: musculo,
       equipment: exFilters.equipment, level: exFilters.level, favs: exFilters.favs, gear: gear
     };
     const res = Data.search(base);
 
-    /* Se segmenta por músculo salvo que haya una búsqueda concreta en marcha */
-    const segmentar = !exFilters.q && !exFilters.muscle && !exFilters.favs && !exFilters.equipment;
+    /* Se segmenta por músculo salvo que se esté mirando un músculo concreto */
+    const segmentar = !musculo && !base.q && !exFilters.favs && !exFilters.equipment;
     const gset = Data.GEAR[Store.settings().gear];
     const lugar = gset ? gset.label.toLowerCase() : '';
 
-    const secciones = segmentar ? musculosVisibles().map(function (m) {
-      return { muscle: m, lista: Data.search(Object.assign({}, base, { muscle: m })) };
+    const musculos = region ? region.muscles : todosLosMusculos();
+    const secciones = segmentar ? musculos.map(function (m) {
+      return { muscle: m, lista: Data.search(Object.assign({}, base, { muscles: null, muscle: m })) };
     }).filter(function (s) { return s.lista.length; }) : [];
+
+    /* Con una zona elegida se puede entrenar entera de una vez, que es lo
+       normal: nadie va al gimnasio a hacer solo gemelo. */
+    const musculosSesion = region ? (region.entreno || region.muscles) : [];
+    const tarjetaZona = region && secciones.length && musculosSesion.length > 1 ? html`
+      <div class="card zona-card">
+        <div class="row between" style="align-items:flex-start">
+          <div class="grow">
+            <div class="tiny" style="color:var(--acc)">SESIÓN COMPLETA</div>
+            <div style="font-weight:700;margin:2px 0">Entrenar ${region.label.toLowerCase()} hoy</div>
+            <div class="tiny">Reparto la sesión entre ${musculosSesion.map(function (m) {
+              return I18N.muscle(m).toLowerCase();
+            }).join(', ')}</div>
+          </div>
+          <button class="btn primary sm" data-a="sesionzona">${raw(icon('play'))} Crear</button>
+        </div>
+      </div>` : '';
 
     return html`
       <div class="row between">
@@ -332,23 +388,32 @@
 
       <div class="search-wrap" style="margin-bottom:10px">
         ${raw(icon('search'))}
-        <input id="ex-q" type="search" placeholder="Buscar: peso muerto, glúteo, femoral…"
+        <input id="ex-q" type="search" placeholder="Buscar: pierna, femoral, peso muerto…"
                value="${exFilters.q}" autocomplete="off">
       </div>
 
       <div class="pill-scroll">
-        <button class="chip ${!exFilters.group && !exFilters.favs ? 'on' : ''}" data-grp="">Todos</button>
+        <button class="chip ${!exFilters.group && !exFilters.favs && !zonaQ ? 'on' : ''}" data-grp="">Todos</button>
         <button class="chip ${exFilters.favs ? 'on' : ''}" data-favs="1">${raw(icon('star'))} Favoritos</button>
         ${raw(I18N.GROUPS.map(function (gr) {
-          return '<button class="chip ' + (exFilters.group === gr.id ? 'on' : '') +
+          return '<button class="chip ' + (exFilters.group === gr.id && !zonaQ ? 'on' : '') +
                  '" data-grp="' + gr.id + '">' + esc(gr.label) + '</button>';
         }).join(''))}
       </div>
+
+      ${raw(zonaQ ? html`
+        <p class="tiny" style="margin:-2px 4px 10px">Has buscado una zona del cuerpo:
+        te enseño ${raw(zonaQ.tipo === 'region'
+          ? 'todos sus músculos por separado'
+          : 'todos los ejercicios de ' + esc(I18N.muscle(musculo).toLowerCase()))}, no solo
+        los que llevan esa palabra en el nombre.</p>` : '')}
 
       ${raw(exFilters.muscle ? html`
         <div class="row wrap" style="gap:6px;margin-bottom:12px">
           <button class="chip on" data-a="quitarmusculo">${I18N.muscle(exFilters.muscle)} ×</button>
         </div>` : '')}
+
+      ${raw(tarjetaZona)}
 
       <div class="row" style="margin-bottom:14px">
         <select id="ex-eq" class="grow">
@@ -432,7 +497,10 @@
     };
 
     bindAll(root, '[data-grp]', function (el) {
+      /* el chip manda: se limpia la búsqueda para no cruzar dos criterios y
+         acabar sin resultados ("banca" + pierna no existe) */
       exFilters.group = el.dataset.grp; exFilters.favs = false; exFilters.muscle = '';
+      exFilters.q = '';
       exLimit = 40; render();
     });
     bind(root, '[data-favs]', function () {
@@ -443,6 +511,10 @@
       exFilters.muscle = el.dataset.vermusculo; exLimit = 40; render();
     });
     bind(root, '[data-a=quitarmusculo]', function () { exFilters.muscle = ''; render(); });
+    bind(root, '[data-a=sesionzona]', function () {
+      const r = regionActual();
+      if (r) sesionZonaSheet(r);
+    });
     bindAll(root, '[data-a=togglegear]', function () {
       exFilters.todo = !exFilters.todo; exLimit = 40; render();
       UI.toast(exFilters.todo
@@ -465,6 +537,153 @@
     });
     bindAll(root, '[data-ex]', function (el) { go('ejercicio', el.dataset.ex); });
   };
+
+  /* ---- Sesión completa de una zona ----
+     "Entrenar pierna" no es una lista de ejercicios de pierna: es una sesión
+     repartida entre cuádriceps, isquiotibiales, glúteos y gemelos, con el
+     compuesto delante. Se empieza en el momento o se guarda como rutina. */
+
+  const SESION_MIN = [30, 45, 60, 75];
+  const sesionOpts = { minutes: 45, goal: 'hipertrofia' };
+
+  /* Lo entrenado hoy, para no repetirlo en la siguiente propuesta */
+  function ejerciciosDeHoy() {
+    const desde = new Date();
+    desde.setHours(0, 0, 0, 0);
+    const ids = [];
+    Store.sessions().forEach(function (s) {
+      if (s.start < desde.getTime()) return;
+      (s.entries || []).forEach(function (e) { ids.push(e.exId); });
+    });
+    return ids;
+  }
+
+  function generarSesion(region, evitar) {
+    return Planner.sesion({
+      muscles: region.entreno || region.muscles,
+      minutes: sesionOpts.minutes,
+      gear: Store.settings().gear || 'gym',
+      goal: sesionOpts.goal,
+      level: planState.level,
+      evitar: (evitar || []).concat(ejerciciosDeHoy())
+    });
+  }
+
+  function sesionZonaSheet(region) {
+    UI.modal(html`
+      <h2>Entrenar ${region.label.toLowerCase()}</h2>
+      <p class="muted">Monto una sesión equilibrada entre
+      ${(region.entreno || region.muscles).map(function (m) {
+        return I18N.muscle(m).toLowerCase();
+      }).join(', ')}. Empiezo por lo pesado y termino con lo accesorio.</p>
+
+      <div class="card">
+        <b>¿Cuánto tiempo tienes?</b>
+        <div class="row wrap" style="gap:6px;margin-top:9px">
+          ${raw(SESION_MIN.map(function (m) {
+            return '<button class="chip ' + (sesionOpts.minutes === m ? 'on' : '') +
+              '" data-smin="' + m + '">' + m + ' min</button>';
+          }).join(''))}
+        </div>
+      </div>
+
+      <div class="card">
+        <b>¿Con qué objetivo?</b>
+        <div class="row wrap" style="gap:6px;margin-top:9px">
+          ${raw(Object.keys(Planner.GOALS).map(function (k) {
+            return '<button class="chip ' + (sesionOpts.goal === k ? 'on' : '') +
+              '" data-sgoal="' + k + '">' + esc(Planner.GOALS[k].label) + '</button>';
+          }).join(''))}
+        </div>
+      </div>
+
+      <button class="btn primary block" data-a="crear">Ver la sesión</button>`,
+      function (el) {
+        const elegir = function (attr, campo) {
+          el.querySelectorAll('[' + attr + ']').forEach(function (b) {
+            b.onclick = function () {
+              const v = b.getAttribute(attr);
+              sesionOpts[campo] = campo === 'minutes' ? Number(v) : v;
+              el.querySelectorAll('[' + attr + ']').forEach(function (x) {
+                x.classList.toggle('on', x === b);
+              });
+            };
+          });
+        };
+        elegir('data-smin', 'minutes');
+        elegir('data-sgoal', 'goal');
+
+        el.querySelector('[data-a=crear]').onclick = function () {
+          const ejercicios = generarSesion(region, []);
+          if (!ejercicios.length) {
+            UI.toast('No hay ejercicios de esa zona con tu material');
+            return;
+          }
+          previewSesionSheet(region, ejercicios);
+        };
+      });
+  }
+
+  function previewSesionSheet(region, ejercicios) {
+    const nombre = region.label + ' · ' + sesionOpts.minutes + ' min';
+    const minutos = Planner.estimate({ exercises: ejercicios });
+
+    UI.modal(html`
+      <h2>${nombre}</h2>
+      <p class="muted">${ejercicios.length} ejercicios · unos ${minutos} min ·
+      ${Planner.GOALS[sesionOpts.goal].label.toLowerCase()}</p>
+
+      <div class="stack">
+        ${raw(ejercicios.map(function (e) {
+          const ex = Data.get(e.exId);
+          return html`
+            <div class="rt-item">
+              <img src="${ex ? Data.img(ex, 0) : Data.PLACEHOLDER}" alt="" loading="lazy">
+              <div class="grow">
+                <div style="font-weight:600;font-size:.86rem">${ex ? ex.nameEs : e.exId}</div>
+                <div class="tiny">${I18N.muscle(e.muscle)} · ${e.sets}×${e.reps}${raw(
+                  ex ? ' · ' + esc(I18N.equip(ex.equipment)) : '')}</div>
+              </div>
+            </div>`;
+        }).join(''))}
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <button class="btn grow" data-a="otra">Otra propuesta</button>
+        <button class="btn primary grow" data-a="empezar">${raw(icon('play'))} Empezar</button>
+      </div>
+      <button class="btn ghost block" data-a="guardar" style="margin-top:8px">Guardar como rutina</button>`,
+      function (el) {
+        el.querySelector('[data-a=otra]').onclick = function () {
+          const otra = generarSesion(region, ejercicios.map(function (e) { return e.exId; }));
+          previewSesionSheet(region, otra.length ? otra : ejercicios);
+        };
+
+        el.querySelector('[data-a=empezar]').onclick = function () {
+          const rutina = { id: null, name: nombre, exercises: ejercicios };
+          const lanzar = function () { UI.closeModal(); Workout.start(rutina); go('entrenar'); };
+          if (Workout.isActive()) {
+            UI.confirm('Ya hay un entrenamiento en curso',
+              'Si empiezas otro, se descartará el que tienes a medias.', 'Empezar de nuevo', true)
+              .then(function (ok) { if (ok) { Workout.discard(); lanzar(); } });
+          } else lanzar();
+        };
+
+        el.querySelector('[data-a=guardar]').onclick = function () {
+          const r = Store.saveRoutine({
+            id: null, name: nombre,
+            note: 'Sesión de ' + region.label.toLowerCase() + ' generada automáticamente.',
+            days: [],
+            exercises: ejercicios.map(function (e) {
+              return { exId: e.exId, sets: e.sets, reps: e.reps, weight: 0, rest: e.rest, note: e.note };
+            })
+          });
+          UI.closeModal();
+          go('rutina', r.id);
+          UI.toast('Guardada como rutina');
+        };
+      });
+  }
 
   /* ================= ficha de ejercicio ================= */
 
@@ -512,6 +731,8 @@
            aria-label="Buscar vídeo en YouTube">${raw(icon('youtube'))}</a>
       </div>
 
+      ${raw(alternativasHTML(ex))}
+
       ${raw(marcos.length > 1 ? html`
         <div class="list-title">El recorrido</div>
         <div class="marcos">
@@ -556,6 +777,45 @@
             </div>`;
           }).join(''))}
         </div>` : '')}`;
+  }
+
+  /* ---- Alternativas ----
+     La máquina está ocupada, el banco pillado o no tienes ese material: aquí
+     está el mismo trabajo con otra cosa. Se prioriza lo que puedes hacer donde
+     entrenas; si con tu material no sale nada, se enseña el resto avisando. */
+  function alternativasHTML(ex) {
+    if (!window.Alt) return '';
+    const gear = Store.settings().gear || '';
+    let lista = Alt.para(ex, { limite: 8, soloDisponible: !!gear });
+    let fuera = false;
+    if (lista.length < 2) {
+      lista = Alt.para(ex, { limite: 8, gear: '' }).filter(function (a) {
+        return !gear || !Data.gearAllows(gear, a.ex.equipment);
+      });
+      fuera = lista.length > 0;
+    }
+    if (!lista.length) return '';
+
+    return html`
+      <div class="list-title">Si está ocupado o no lo tienes</div>
+      <p class="tiny" style="margin:-4px 4px 10px">${raw(fuera
+        ? 'Con tu material no hay recambio, así que estas son del catálogo completo.'
+        : 'Mismo trabajo con otro material. Toca cualquiera para ver su técnica.')}</p>
+      <div class="carousel">
+        ${raw(lista.map(function (a) {
+          return html`
+            <button class="ex-card" data-ex="${a.ex.id}">
+              <div class="ex-thumb">
+                <img src="${Data.img(a.ex, 0)}" alt="${a.ex.nameEs}" loading="lazy" decoding="async">
+                <span class="lvl">${I18N.equip(a.ex.equipment)}</span>
+              </div>
+              <div class="ex-body">
+                <div class="ex-name">${a.ex.nameEs}</div>
+                <div class="ex-sub">${a.motivo}</div>
+              </div>
+            </button>`;
+        }).join(''))}
+      </div>`;
   }
 
   /* La guía de técnica, que es lo que de verdad explica el ejercicio */
@@ -639,6 +899,7 @@
       UI.toast(on ? 'Añadido a favoritos' : 'Quitado de favoritos');
     });
     bind(root, '[data-a=addrutina]', function () { pickRoutineSheet(ex); });
+    bindAll(root, '[data-ex]', function (el) { go('ejercicio', el.dataset.ex); window.scrollTo(0, 0); });
     bind(root, '[data-a=traducir]', function (el) { traducirInstrucciones(ex, el); });
     bind(root, '[data-a=verOriginal]', function (el) {
       const c = root.querySelector('#orig');
@@ -994,7 +1255,8 @@
         </div>
       </div>
 
-      <div class="list-title">Ejercicios (${draft.exercises.length})</h2>
+      <div class="list-head">
+        <span class="list-title">Ejercicios (${draft.exercises.length})</span>
         <button class="btn sm primary" data-a="add">${raw(icon('plus'))} Añadir</button>
       </div>
 

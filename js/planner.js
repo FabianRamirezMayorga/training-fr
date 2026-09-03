@@ -204,6 +204,60 @@
     });
   }
 
+  /* ---- Sesión suelta para una zona del cuerpo ----
+     Elegir "pierna" no puede devolver cuatro ejercicios de gemelo: se reparte
+     el tiempo entre todos los músculos de la zona, el compuesto primero y los
+     accesorios después, sin repetir lo que ya se hizo hoy.
+     opts: {muscles, minutes, gear, goal, level, evitar:[exId]} */
+  function sesion(opts) {
+    const goal = GOALS[opts.goal] || GOALS.hipertrofia;
+    const gear = GEAR[opts.gear] ? opts.gear : 'gym';
+    const level = opts.level || 'intermediate';
+    const evitar = opts.evitar || [];
+
+    /* solo los músculos para los que de verdad hay ejercicios con este material */
+    const pools = {};
+    const muscles = (opts.muscles || []).filter(function (m) {
+      pools[m] = candidates(m, gear, level);
+      return pools[m].length;
+    }).slice(0, 6);
+    if (!muscles.length) return [];
+
+    const minutes = opts.minutes || 45;
+    const total = Math.max(muscles.length, exerciseCount(minutes, goal));
+    const cuota = share(muscles, total);
+
+    const usados = {};
+    const ejercicios = [];
+
+    muscles.forEach(function (muscle, mi) {
+      const pool = pools[muscle];
+      /* los ya vistos hoy van al final: se busca variedad, no repetición */
+      const orden = pool.filter(function (ex) { return evitar.indexOf(ex.id) === -1; })
+        .concat(pool.filter(function (ex) { return evitar.indexOf(ex.id) !== -1; }));
+      let añadidos = 0;
+      for (let i = 0; i < orden.length && añadidos < cuota[mi]; i++) {
+        const ex = orden[i];
+        if (usados[ex.id]) continue;
+        usados[ex.id] = true;
+        añadidos++;
+        const pesado = añadidos === 1 && ex.mechanic === 'compound';
+        const estatico = ex.force === 'static';
+        ejercicios.push({
+          exId: ex.id,
+          muscle: muscle,
+          sets: pesado ? goal.sets : goal.isoSets,
+          reps: estatico ? 40 : (pesado ? goal.reps : goal.isoReps),
+          weight: 0,
+          rest: pesado ? goal.rest : goal.isoRest,
+          note: estatico ? 'Aguanta la posición: las repeticiones son segundos.' : ''
+        });
+      }
+    });
+
+    return ejercicios;
+  }
+
   /* Duración estimada de una rutina ya construida, en minutos */
   function estimate(routine) {
     const seg = routine.exercises.reduce(function (t, e) {
@@ -213,7 +267,7 @@
   }
 
   g.Planner = {
-    generate: generate, estimate: estimate,
+    generate: generate, sesion: sesion, estimate: estimate,
     GOALS: GOALS, SPLITS: SPLITS, PICKS: PICKS, RECOMENDADOS: RECOMENDADOS
   };
 })(window);

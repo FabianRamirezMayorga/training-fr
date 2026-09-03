@@ -152,6 +152,10 @@
       if (f.gear && !gearAllows(f.gear, e.equipment)) return false;
       if (f.group && e.groups.indexOf(f.group) === -1) return false;
       if (f.muscle && (e.primaryMuscles || []).indexOf(f.muscle) === -1) return false;
+      /* varios músculos a la vez: una zona del cuerpo, no un músculo suelto */
+      if (f.muscles && f.muscles.length && !(e.primaryMuscles || []).some(function (m) {
+        return f.muscles.indexOf(m) !== -1;
+      })) return false;
       if (f.equipment && e.equipment !== f.equipment) return false;
       if (f.level && e.level !== f.level) return false;
       if (f.category && e.category !== f.category) return false;

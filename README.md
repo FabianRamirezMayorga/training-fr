@@ -89,9 +89,25 @@ que has abierto los ejercicios al menos una vez.
   entrenamiento se abren en una hoja rápida sin salir de la serie.
 - **Ejercicios segmentados por músculo** — al entrar en *Pierna* aparecen secciones
   separadas de cuádriceps, isquiotibiales, glúteos, gemelos, aductores y abductores,
-  cada una con su carrusel. Buscador en español (*«peso muerto»*, *«femoral»*, *«glúteo»*).
-  Cada ficha muestra la técnica **animada**, los músculos implicados, las instrucciones
-  paso a paso (traducibles con un toque) y un enlace a vídeos de YouTube.
+  cada una con su carrusel. Cada ficha muestra la técnica **animada**, los músculos
+  implicados, las instrucciones paso a paso (traducibles con un toque) y un enlace a
+  vídeos de YouTube.
+- **El buscador entiende zonas del cuerpo** — *«pierna»* no es una palabra que buscar en
+  los nombres: es una zona. Al escribirla (o *«tren superior»*, *«empuje»*, *«tracción»*,
+  *«cuerpo completo»*) la app abre todos sus músculos por separado. Y *«femoral»*,
+  *«gemelo»* o *«glúteo»* filtran por ese músculo entero, no solo por los ejercicios que
+  llevan la palabra en el nombre. Los términos concretos (*«peso muerto»*) siguen
+  buscándose como texto.
+- **Sesión completa de una zona** — elegida la zona, un botón monta el entrenamiento
+  entero repartido entre todos sus músculos: pedir *pierna* da cuádriceps, isquiotibiales,
+  glúteos y gemelos en la misma sesión, con el compuesto delante y los accesorios detrás,
+  ajustado a los minutos que tengas. Se empieza al momento o se guarda como rutina.
+- **Alternativas cuando la máquina está ocupada** — cada ejercicio propone recambios que
+  entrenan lo mismo con otro material: la prensa se cambia por sentadilla con barra, con
+  mancuernas, con bandas o con tu propio peso. No van por el nombre, sino por el **patrón
+  de movimiento** y los músculos implicados, y se priorizan los que puedes hacer donde
+  entrenas. En pleno entrenamiento el cambio es un botón: las series ya marcadas se
+  quedan con el ejercicio original y el recambio continúa con las que faltan.
 - **Rutinas** — crea las tuyas, genera el plan o parte de 8 plantillas probadas (Full Body,
   Push/Pull/Legs, Torso/Pierna, 5x5, en casa sin material). Series, repeticiones y descanso
   por ejercicio. Asigna días y la portada te recuerda qué toca hoy.
@@ -262,13 +278,14 @@ Estructura:
 ```
 index.html              maquetación y orden de carga
 css/styles.css          estilos (tema oscuro y claro, tipografía del sistema Apple)
-js/i18n.js              traducción del catálogo al español
+js/i18n.js              traducción del catálogo al español y zonas del cuerpo
 js/tecnica.js           guías de técnica por patrón de movimiento
 js/store.js             persistencia en localStorage
 js/ui.js                utilidades, animación de los ejercicios
 js/data.js              descarga y búsqueda del catálogo
 js/templates.js         rutinas de ejemplo
-js/planner.js           generador del plan semanal (splits y selección de ejercicios)
+js/planner.js           generador del plan semanal y de la sesión de una zona
+js/alternativas.js      recambios por patrón de movimiento (máquina ocupada)
 js/offline.js           descarga de imágenes para uso sin conexión
 js/sync.js              cuenta por correo y sincronización (API REST de Supabase)
 js/perfil.js            datos corporales y cálculos (IMC, metabolismo, calorías, macros)
