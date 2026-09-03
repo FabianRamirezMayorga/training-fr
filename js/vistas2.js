@@ -459,7 +459,14 @@
 
     bind(root, '[data-a=guardarPl]', function () {
       const val = root.querySelector('#sp-pl').value;
-      if (val && !Spotify.idDePlaylist(val)) { UI.toast('Ese enlace no parece de una lista'); return; }
+      if (val && !Spotify.idDePlaylist(val)) {
+        const que = Spotify.queEs(val);
+        UI.toast(que
+          ? 'Eso es el enlace de ' + que + ', no de una lista de reproducción.'
+          : 'No reconozco ese enlace. Abre la lista en Spotify, pulsa los tres puntos ' +
+            'y elige Compartir, Copiar enlace.');
+        return;
+      }
       Spotify.guardarPlaylist(val); render(); UI.toast('Lista guardada');
     });
 

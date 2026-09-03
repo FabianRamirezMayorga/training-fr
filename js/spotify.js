@@ -287,14 +287,26 @@
     });
   }
 
-  /* Acepta enlace web, URI o el identificador suelto */
+  /* Acepta el enlace que comparte la aplicación, la dirección con idioma
+     (open.spotify.com/intl-es/playlist/...), el URI interno y el identificador
+     suelto. Los parámetros de seguimiento del final se ignoran. */
   function idDePlaylist(v) {
     v = String(v || '').trim();
     if (!v) return '';
-    let m = v.match(/playlist[/:]([a-zA-Z0-9]+)/);
+    const m = v.match(/playlist[/:]([a-zA-Z0-9]{10,})/);
     if (m) return m[1];
     if (/^[a-zA-Z0-9]{22}$/.test(v)) return v;
     return '';
+  }
+
+  /* Qué pegó el usuario, cuando no es una lista: sirve para explicárselo */
+  function queEs(v) {
+    const m = String(v || '').match(/(album|track|artist|show|episode|user)[/:]/i);
+    const nombres = {
+      album: 'un álbum', track: 'una canción', artist: 'un artista',
+      show: 'un pódcast', episode: 'un episodio', user: 'un perfil'
+    };
+    return m ? (nombres[m[1].toLowerCase()] || '') : '';
   }
 
   /* Reproductor incrustado: es el camino cuando no hay Premium */
@@ -564,6 +576,7 @@
     urlRetorno: urlRetorno, sonando: sonando, play: play, pausa: pausa,
     siguiente: siguiente, anterior: anterior, alternar: alternar,
     ponerPlaylist: ponerPlaylist, misListas: misListas,
-    urlEmbed: urlEmbed, idDePlaylist: idDePlaylist, requierePremium: requierePremium
+    urlEmbed: urlEmbed, idDePlaylist: idDePlaylist, queEs: queEs,
+    requierePremium: requierePremium
   };
 })(window);

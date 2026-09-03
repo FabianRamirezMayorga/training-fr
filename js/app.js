@@ -194,7 +194,7 @@
       </div>
 
       ${raw(deHoy.length ? html`
-        <div class="sec-title"><h2>Toca hoy (${hoy})</h2></div>
+        <div class="list-title">Toca hoy (${hoy})</div>
         <div class="stack">${raw(deHoy.map(routineCard).join(''))}</div>` : '')}
 
       <div class="card" style="margin-top:14px;border-color:var(--acc)">
@@ -207,8 +207,7 @@
         </div>
       </div>
 
-      <div class="sec-title">
-        <h2>Mis rutinas</h2>
+      <div class="list-title">Mis rutinas</h2>
         <button class="btn sm" data-a="nueva">${raw(icon('plus'))} Nueva</button>
       </div>
 
@@ -224,8 +223,8 @@
         </div>`)}
 
       ${raw(ultimas.length ? html`
-        <div class="sec-title">
-          <h2>Últimos entrenamientos</h2>
+        <div class="list-head">
+          <span class="list-title">Últimos entrenamientos</span>
           <button class="btn sm ghost" data-a="verprogreso">Ver todo</button>
         </div>
         <div class="stack">${raw(ultimas.map(function (s) {
@@ -372,9 +371,9 @@
 
       ${raw(segmentar ? secciones.map(function (s) {
         return html`
-          <div class="sec-title" style="margin:18px 0 8px">
-            <h2 style="font-size:1.02rem">${I18N.muscle(s.muscle)}
-              <span class="tiny" style="font-weight:600">${s.lista.length}</span></h2>
+          <div class="list-head">
+            <span class="list-title">${I18N.muscle(s.muscle)}
+              <span style="opacity:.6">${s.lista.length}</span></span>
             <button class="btn sm ghost" data-vermusculo="${s.muscle}">Ver todos</button>
           </div>
           <div class="carousel">
@@ -733,7 +732,7 @@
         <div class="stack" style="margin-top:8px">${raw(rutinas.map(routineCard).join(''))}</div>`
       : '<p class="muted">Aún no tienes rutinas propias. Copia una plantilla de abajo para empezar.</p>')}
 
-      <div class="sec-title"><h2>Rutinas de ejemplo</h2></div>
+      <div class="list-title">Rutinas de ejemplo</div>
       <p class="muted">Al usar una plantilla se copia a tus rutinas; puedes cambiar ejercicios,
       series y descansos sin límite.</p>
       <div class="stack">
@@ -995,8 +994,7 @@
         </div>
       </div>
 
-      <div class="sec-title">
-        <h2>Ejercicios (${draft.exercises.length})</h2>
+      <div class="list-title">Ejercicios (${draft.exercises.length})</h2>
         <button class="btn sm primary" data-a="add">${raw(icon('plus'))} Añadir</button>
       </div>
 
@@ -1277,7 +1275,7 @@
           : Math.round(st.totalMinutes / 60) + 'h'}</b><span>Tiempo</span></div>
       </div>
 
-      <div class="sec-title"><h2>${porSeries ? 'Series por semana' : 'Volumen por semana'}</h2></div>
+      <div class="list-title">${porSeries ? 'Series por semana' : 'Volumen por semana'}</div>
       <div class="card">
         <div class="bars">
           ${raw(semanas.map(function (w) {
@@ -1295,7 +1293,7 @@
         </div>
       </div>
 
-      <div class="sec-title"><h2>Últimas 5 semanas</h2></div>
+      <div class="list-title">Últimas 5 semanas</div>
       <div class="card">
         <div class="cal">
           ${raw(celdas.map(function (c) {
@@ -1305,7 +1303,7 @@
       </div>
 
       ${raw(prs.length ? html`
-        <div class="sec-title"><h2>Récords personales</h2></div>
+        <div class="list-title">Récords personales</div>
         <div class="stack">
           ${raw(prs.slice(0, 12).map(function (p) {
             return html`<button class="card row between" data-ex="${p.exId}" style="width:100%;text-align:left">
@@ -1316,7 +1314,7 @@
           }).join(''))}
         </div>` : '')}
 
-      <div class="sec-title"><h2>Historial</h2></div>
+      <div class="list-title">Historial</div>
       ${raw(sesiones.length ? html`
         <div class="stack">
           ${raw(sesiones.slice(0, 30).map(function (s) {
@@ -1480,7 +1478,7 @@
         </div>
       </div>
 
-      <div class="sec-title"><h2>Copia de seguridad</h2></div>
+      <div class="list-title">Copia de seguridad</div>
       <div class="card">
         <p class="muted">Tus rutinas y tu historial se guardan solo en este navegador. Exporta un archivo
         para conservarlos o para llevarlos a otro dispositivo.</p>
@@ -1491,7 +1489,7 @@
         <input type="file" id="s-file" accept="application/json,.json" hidden>
       </div>
 
-      <div class="sec-title"><h2>Uso sin conexión</h2></div>
+      <div class="list-title">Uso sin conexión</div>
       <div class="card">
         <p class="muted">Descarga las imágenes de los ejercicios y la app funcionará entera
         sin internet: en el gimnasio sin cobertura, en el metro o sin datos.</p>
@@ -1505,7 +1503,7 @@
         </div>
       </div>
 
-      <div class="sec-title"><h2>Instalar en el móvil</h2></div>
+      <div class="list-title">Instalar en el móvil</div>
       <div class="card">
         <p class="muted">Training FR funciona como una app: ábrela en el navegador del móvil y usa
         <b>«Añadir a la pantalla de inicio»</b> (en Android, desde el menú del navegador; en iPhone, desde el botón Compartir).
@@ -1513,7 +1511,7 @@
         <button class="btn primary block" data-a="install" hidden id="btn-install">Instalar aplicación</button>
       </div>
 
-      <div class="sec-title"><h2>Zona peligrosa</h2></div>
+      <div class="list-title">Zona peligrosa</div>
       <div class="card">
         <button class="btn danger block" data-a="wipe">${raw(icon('trash'))} Borrar todos mis datos</button>
       </div>

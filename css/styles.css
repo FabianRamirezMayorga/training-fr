@@ -109,8 +109,10 @@ a{color:var(--blue)}
 .muted{color:var(--dim);font-size:.94rem;letter-spacing:-.01em}
 .tiny{font-size:.78rem;color:var(--dim2);letter-spacing:0}
 .stack{display:flex;flex-direction:column;gap:10px}
-.sec-title{display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px}
-.sec-title h2{margin:0}
+.list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+  margin:22px 4px 8px}
+.list-head .list-title{margin:0}
+.list-head .btn{margin-bottom:-3px;flex:none}
 .center{text-align:center}
 .hr{height:1px;background:var(--line);margin:12px 0;transform:scaleY(.5)}
 .nowrap{white-space:nowrap}

@@ -252,7 +252,7 @@
         </button>
       </div>
 
-      <div class="sec-title"><h2>Ejercicios de hoy</h2></div>
+      <div class="list-title">Ejercicios de hoy</div>
       <div class="stack">
         ${raw(a.entries.map(function (e, i) {
           const exx = Data.get(e.exId);

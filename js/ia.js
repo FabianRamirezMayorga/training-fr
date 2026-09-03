@@ -180,6 +180,22 @@
               return intentar(i);
             }
 
+            /* "el modelo está saturado" es temporal y muy frecuente en la capa
+               gratuita: se prueba con otro modelo y, agotados, se espera un poco
+               antes de rendirse. */
+            const saturado = r.status === 503 ||
+              /overloaded|high demand|try again later|unavailable/i.test(msg);
+            if (saturado) {
+              if (i < modelos.length - 1) return intentar(i + 1);
+              if (!opciones._esperado) {
+                return new Promise(function (res) { setTimeout(res, 2500); }).then(function () {
+                  return llamar(prompt, Object.assign({}, opciones, { _esperado: true }));
+                });
+              }
+              throw new Error('Los modelos de Gemini están saturados ahora mismo. ' +
+                'Vuelve a intentarlo en un minuto: es cosa de Google, no de tu clave.');
+            }
+
             const retirado = r.status === 404 ||
               /no longer available|not found|is not supported/i.test(msg);
             if (retirado && i < modelos.length - 1) return intentar(i + 1);
