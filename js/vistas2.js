@@ -11,14 +11,29 @@
   const go = function (n, a) { return App.go(n, a); };
   const render = function () { return App.render(); };
 
-  const PLAN_KEY = 'trainingfr.plan.nutricion';
+  const PLAN_KEY = 'trainingfr.plan.nutricion';   // dónde vivía antes, solo se migra
 
+  /* El menú vive en los ajustes, no en una clave suelta del navegador: así viaja
+     a los demás dispositivos con el resto de la cuenta. Lo que hubiera guardado
+     a la antigua se sube la primera vez que se abre esta pantalla. */
   function planGuardado() {
-    try { return JSON.parse(localStorage.getItem(PLAN_KEY) || 'null'); } catch (e) { return null; }
+    const enAjustes = Store.settings().menu;
+    if (enAjustes && enAjustes.plan) return enAjustes;
+
+    try {
+      const viejo = JSON.parse(localStorage.getItem(PLAN_KEY) || 'null');
+      if (viejo && viejo.plan) {
+        Store.setSetting('menu', viejo);
+        localStorage.removeItem(PLAN_KEY);
+        return viejo;
+      }
+    } catch (e) { /* nada que migrar */ }
+    return null;
   }
+
   function guardarPlan(p) {
-    if (p === null) localStorage.removeItem(PLAN_KEY);
-    else localStorage.setItem(PLAN_KEY, JSON.stringify({ t: Date.now(), plan: p }));
+    Store.setSetting('menu', p === null ? null : { t: Date.now(), plan: p });
+    try { localStorage.removeItem(PLAN_KEY); } catch (e) { /* nada */ }
   }
 
   /* ================= alimentación ================= */
@@ -89,6 +104,30 @@
       esc(titulo) + '</div></div><span class="list-row-val">' + esc(valor) + '</span></div>';
   }
 
+  /* La hidratación va aparte y arriba: es la parte del plan que más se olvida */
+  function hidratacionHTML(h) {
+    if (!h) return '';
+    return html`
+      <div class="card" style="margin-top:11px;border-color:var(--blue)">
+        <div class="row between">
+          <div class="row" style="gap:9px;align-items:center">
+            <span class="row-icon" style="color:var(--blue)">${raw(icon('gota'))}</span>
+            <b>Hidratación</b>
+          </div>
+          <span class="chip solid">${h.total || (Perfil.agua() + ' L')}</span>
+        </div>
+        ${raw((h.pauta || []).length ? '<div class="stack" style="margin-top:10px">' +
+          h.pauta.map(function (x) {
+            return '<div class="tiny" style="display:flex;gap:8px">' +
+              '<span style="color:var(--blue)">•</span><span>' + esc(x) + '</span></div>';
+          }).join('') + '</div>' : '')}
+        ${raw(h.nota ? '<p class="tiny" style="margin:10px 0 0">' + esc(h.nota) + '</p>' : '')}
+        <button class="btn sm block" data-a="alertasAgua" style="margin-top:11px">
+          ${raw(icon('campana'))} Ponerme los recordatorios de agua
+        </button>
+      </div>`;
+  }
+
   function planHTML(plan, cuando) {
     return html`
       <div class="card">
@@ -102,13 +141,16 @@
         ${raw(plan.resumen ? '<p class="muted" style="margin:10px 0 0">' + esc(plan.resumen) + '</p>' : '')}
       </div>
 
+      ${raw(hidratacionHTML(plan.hidratacion))}
+
       <div class="stack" style="margin-top:11px">
         ${raw((plan.dias || []).map(function (d, i) {
           return html`
             <div class="card">
               <div class="row between" data-dia="${i}" style="cursor:pointer">
                 <div class="grow">
-                  <div style="font-weight:600">${d.dia}</div>
+                  <div style="font-weight:600">${d.dia}${raw(d.entreno
+                    ? ' <span class="chip solid tiny-chip">ENTRENO</span>' : '')}</div>
                   <div class="tiny">${raw(d.total
                     ? esc(d.total.kcal + ' kcal · ' + d.total.prot + ' g proteína')
                     : (d.comidas || []).length + ' comidas')}</div>
@@ -120,10 +162,14 @@
                   return html`
                     <div class="meal">
                       <div class="row between">
-                        <b style="font-size:.9rem">${c.nombre}</b>
+                        <b style="font-size:.9rem">${c.nombre}${raw(c.hora
+                          ? ' <span class="tiny">· ' + esc(c.hora) + '</span>' : '')}</b>
                         <span class="tiny">${c.kcal} kcal</span>
                       </div>
                       <div class="muted" style="font-size:.9rem;margin-top:3px">${c.plato}</div>
+                      ${raw((c.alternativas || []).length ? '<div class="tiny" ' +
+                        'style="margin-top:5px;color:var(--acc)">O bien: ' +
+                        esc(c.alternativas.join(' · ')) + '</div>' : '')}
                       <div class="tiny" style="margin-top:4px">P ${c.prot} · H ${c.carbo} · G ${c.grasa}</div>
                     </div>`;
                 }).join(''))}
@@ -140,6 +186,12 @@
               return '<span class="chip">' + esc(x) + '</span>';
             }).join(''))}
           </div>
+        </div>` : '')}
+
+      ${raw(plan.flexibilidad ? html`
+        <div class="card destacado-clave" style="margin-top:14px">
+          <h3 class="guia-h">${raw(icon('chispa'))} Hasta dónde puedes salirte</h3>
+          <p style="margin:0">${plan.flexibilidad}</p>
         </div>` : '')}
 
       ${raw((plan.consejos || []).length ? html`
@@ -186,6 +238,16 @@
     bind(root, '[data-a=borrarPlan]', function () {
       UI.confirm('Borrar el plan', 'Podrás generar otro cuando quieras.', 'Borrar', true)
         .then(function (ok) { if (ok) { guardarPlan(null); render(); } });
+    });
+
+    /* Puente con las alertas: el plan dice cuánta agua y las alertas la recuerdan */
+    bind(root, '[data-a=alertasAgua]', function () {
+      const sug = Alertas.sugerencias().find(function (x) { return x.clave === 'agua'; });
+      if (!sug) { UI.toast('Completa tu perfil para calcular el agua'); return; }
+      if (Alertas.yaExiste(sug)) { go('alertas'); UI.toast('Ya los tienes puestos'); return; }
+      Alertas.crearDesdeSugerencia(sug);
+      go('alertas');
+      UI.toast(sug.horas.length + ' recordatorios de agua creados');
     });
   };
 

@@ -199,7 +199,13 @@
         <div style="height:10px"></div>
         <label class="tiny">LESIONES O LIMITACIONES</label>
         <input value="${p.lesiones}" data-txt="lesiones" placeholder="Hombro derecho, rodilla…"
-               style="margin-top:5px">`))}
+               style="margin-top:5px">
+        <div style="height:10px"></div>
+        <label class="tiny">CONDICIONES DE SALUD</label>
+        <div class="tiny" style="margin:2px 0 0">Para que el menú las tenga en cuenta.
+        No sustituye a tu médico ni a un dietista.</div>
+        <input value="${p.condiciones || ''}" data-txt="condiciones"
+               placeholder="Tensión alta, colesterol, diabetes…" style="margin-top:5px">`))}
 
       ${raw(Perfil.completo(p) ? html`
         <div class="list-title">Tus números</div>

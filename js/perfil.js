@@ -16,6 +16,8 @@
        sería inventarse a qué hora te levantas. */
     despertar: '07:00', acostar: '23:00', horaEntreno: '',
     alergias: '', lesiones: '', notas: '',
+    /* Lo que condiciona qué se puede comer: diabetes, tensión, colesterol… */
+    condiciones: '',
     pesajes: []          // [{fecha, peso}]
   };
 
@@ -219,6 +221,7 @@
       'dieta: ' + (DIETA[p.dieta] || p.dieta),
       p.alergias ? 'alergias o intolerancias: ' + p.alergias : null,
       p.lesiones ? 'lesiones o limitaciones: ' + p.lesiones : null,
+      p.condiciones ? 'condiciones de salud: ' + p.condiciones : null,
       p.notas ? 'notas: ' + p.notas : null
     ];
     return partes.filter(Boolean).join('; ') + '.';

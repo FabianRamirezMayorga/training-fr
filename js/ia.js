@@ -319,24 +319,59 @@
     const m = Perfil.macros();
     if (!m) return Promise.reject(new Error('Completa tu perfil para calcular el plan.'));
 
-    const clave = 'nutricion:' + JSON.stringify(m) + ':' + Perfil.datos().dieta +
-      ':' + Perfil.datos().comidas + ':' + (opciones.variante || 0);
+    const p = Perfil.datos();
+    const clave = 'nutricion:' + JSON.stringify(m) + ':' + p.dieta + ':' + p.comidas +
+      ':' + p.alergias + ':' + p.condiciones + ':' + (opciones.variante || 0);
     const guardado = leerCache(clave, 72);
     if (guardado && !opciones.forzar) return Promise.resolve(guardado);
 
-    const p = Perfil.datos();
+    /* Los días de entrenamiento cambian la comida: hay que comer antes y después */
+    const dias = {};
+    Store.routines().forEach(function (r) {
+      (r.days || []).forEach(function (d) { dias[d] = true; });
+    });
+    const diasEntreno = Object.keys(dias);
+    const horaEntreno = g.Alertas ? Alertas.horaHabitualDeEntreno() : '';
+
+    const litros = Perfil.agua(p);
+
     const prompt = contexto({ progreso: true }) + '\n\n' +
-      'Crea un plan de alimentación de 7 días que sume cada día ' + m.kcal + ' kcal ' +
-      'con aproximadamente ' + m.prot + ' g de proteína, ' + m.carbo + ' g de hidratos y ' +
-      m.grasa + ' g de grasa, repartidos en ' + p.comidas + ' comidas. ' +
-      'Usa comida corriente de supermercado en España, sencilla de preparar, ' +
-      'con platos que se repitan para no complicar la compra. ' +
-      'Indica cantidades en gramos o medidas caseras.\n\n' +
+      'OBJETIVO DIARIO: ' + m.kcal + ' kcal, ' + m.prot + ' g de proteína, ' +
+      m.carbo + ' g de hidratos y ' + m.grasa + ' g de grasa, en ' + p.comidas + ' comidas.\n' +
+      'HORARIO: se levanta a las ' + (p.despertar || '07:00') + ' y se acuesta a las ' +
+      (p.acostar || '23:00') + '.\n' +
+      (diasEntreno.length ? 'ENTRENA: ' + diasEntreno.join(', ') +
+        (horaEntreno ? ' sobre las ' + horaEntreno : '') + '.\n' : '') +
+      (litros ? 'AGUA: le corresponden ' + String(litros).replace('.', ',') + ' L al día.\n' : '') +
+      (p.dieta !== 'omnivora' ? 'DIETA: ' + Perfil.DIETA[p.dieta] + '. Todo el menú la respeta.\n' : '') +
+      (p.alergias ? 'NO PUEDE COMER (innegociable: no aparece en ningún plato, en ninguna ' +
+        'alternativa ni en la lista de la compra): ' + p.alergias + '.\n' : '') +
+      (p.condiciones ? 'CONDICIONES DE SALUD: ' + p.condiciones + '. Adapta el menú a ' +
+        'ellas (sal, azúcares, grasas saturadas, lo que corresponda) y dilo en el resumen, ' +
+        'recordando que lo confirme con su médico o un dietista.\n' : '') +
+      '\nPrepara su menú semanal de 7 días.\n\n' +
+      'CÓMO TIENE QUE SER:\n' +
+      '- Comida corriente de supermercado en España, fácil y rápida de preparar.\n' +
+      '- Enfocado de verdad a su objetivo y sus datos, no un menú genérico.\n' +
+      '- Flexible, no un régimen: cada comida lleva una o dos alternativas equivalentes ' +
+      'para cuando no apetezca o no haya de eso, y las cantidades son orientativas.\n' +
+      '- Platos que se repitan de un día a otro, para no complicar la compra.\n' +
+      '- En los días de entrenamiento, la comida de antes con hidratos y la de después ' +
+      'con proteína, cuadradas con su hora de entrenar.\n' +
+      '- Cantidades en gramos o medidas caseras (un vaso, una cucharada).\n' +
+      '- La hidratación también se planifica: cuánta agua y en qué momentos del día, ' +
+      'con lo que suma el café o la infusión y qué cambia los días que entrena.\n\n' +
       'Devuelve JSON con esta forma exacta:\n' +
-      '{"resumen":"2 frases","dias":[{"dia":"Lunes","comidas":[{"nombre":"Desayuno",' +
-      '"plato":"descripcion con cantidades","kcal":000,"prot":00,"carbo":00,"grasa":00}],' +
+      '{"resumen":"2 o 3 frases explicando el enfoque para SU caso concreto",' +
+      '"hidratacion":{"total":"1,9 L","pauta":["momento del día: cuánto"],' +
+      '"nota":"1 frase sobre entrenamiento o café"},' +
+      '"dias":[{"dia":"Lunes","entreno":true,"comidas":[{"nombre":"Desayuno","hora":"08:00",' +
+      '"plato":"descripcion con cantidades","alternativas":["opcion equivalente"],' +
+      '"kcal":000,"prot":00,"carbo":00,"grasa":00}],' +
       '"total":{"kcal":000,"prot":00,"carbo":00,"grasa":00}}],' +
-      '"compra":["item con cantidad semanal"],"consejos":["consejo breve"]}';
+      '"compra":["item con cantidad semanal"],' +
+      '"flexibilidad":"1 o 2 frases sobre hasta dónde se puede salir del plan sin romperlo",' +
+      '"consejos":["consejo breve"]}';
 
     return llamarJSON(prompt, { maxTokens: 8192 }).then(function (r) {
       escribirCache(clave, r);
