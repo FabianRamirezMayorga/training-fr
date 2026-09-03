@@ -19,6 +19,7 @@
     gym: {
       label: 'En el gimnasio',
       note: 'Barras, mancuernas, poleas y máquinas',
+      frase: 'en el gimnasio',
       icon: 'dumbbell',
       allow: ['barbell', 'dumbbell', 'cable', 'machine', 'body only', 'kettlebells',
         'bands', 'e-z curl bar', 'exercise ball', 'medicine ball', 'other', 'foam roll']
@@ -26,26 +27,45 @@
     dumbbell: {
       label: 'En casa con mancuernas',
       note: 'Mancuernas, kettlebells y peso corporal',
+      frase: 'en casa con mancuernas',
       icon: 'dumbbell',
       allow: ['dumbbell', 'body only', 'kettlebells', 'exercise ball', 'medicine ball', 'foam roll']
     },
     bands: {
       label: 'En casa con bandas',
       note: 'Bandas elásticas y peso corporal',
+      frase: 'en casa con bandas',
       icon: 'dumbbell',
       allow: ['bands', 'body only', 'exercise ball', 'medicine ball', 'foam roll']
     },
     home: {
       label: 'Sin material',
       note: 'Solo tu peso corporal, en cualquier sitio',
+      frase: 'sin material',
       icon: 'dumbbell',
       allow: ['body only', 'foam roll']
+    },
+    /* Sin filtro. Para curiosear el catálogo entero o para quien todavía no
+       sabe con qué va a entrenar. allow en null significa "todo vale", así que
+       entran también los ejercicios que no declaran material. */
+    todo: {
+      label: 'Ver todo',
+      note: 'El catálogo completo, sin filtrar por material',
+      frase: 'con todo el material',
+      icon: 'dumbbell',
+      allow: null
     }
   };
 
+  /* Cómo se nombra el sitio dentro de una frase: "...que puedes hacer EN EL GIMNASIO" */
+  function gearFrase(gear) {
+    const gset = GEAR[gear];
+    return gset ? (gset.frase || gset.label.toLowerCase()) : '';
+  }
+
   function gearAllows(gear, equipment) {
     const gset = GEAR[gear];
-    if (!gset) return true;
+    if (!gset || !gset.allow) return true;
     return gset.allow.indexOf(equipment) !== -1;
   }
 
@@ -176,6 +196,6 @@
   g.Data = {
     load: load, all: all, get: get, search: search,
     img: img, frames: frames, youtube: youtube, PLACEHOLDER: PLACEHOLDER,
-    GEAR: GEAR, gearAllows: gearAllows
+    GEAR: GEAR, gearAllows: gearAllows, gearFrase: gearFrase
   };
 })(window);

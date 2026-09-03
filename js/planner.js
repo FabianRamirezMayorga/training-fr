@@ -121,13 +121,12 @@
   /* Candidatos para un músculo: primero los recomendados, después el resto
      del catálogo puntuado, siempre respetando el material y el nivel. */
   function candidates(muscle, gear, level) {
-    const allow = GEAR[gear].allow;
     const maxLevel = LEVELS[level] || 2;
 
     const ok = function (ex) {
       return ex &&
         ex.primaryMuscles.indexOf(muscle) !== -1 &&
-        allow.indexOf(ex.equipment) !== -1 &&
+        Data.gearAllows(gear, ex.equipment) &&
         (LEVELS[ex.level] || 2) <= maxLevel + (maxLevel === 1 ? 1 : 0) &&
         ex.images.length >= 2;
     };
@@ -196,7 +195,7 @@
         id: null,
         name: day + ' · ' + plan.name,
         note: 'Generado para ' + opts.minutes + ' min · ' + goal.label.toLowerCase() +
-          ' · ' + GEAR[opts.gear].label.toLowerCase() + '. Ajusta lo que quieras.',
+          ' · ' + Data.gearFrase(opts.gear) + '. Ajusta lo que quieras.',
         days: [day],
         muscles: plan.muscles,
         exercises: ejercicios

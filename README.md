@@ -75,9 +75,11 @@ que has abierto los ejercicios al menos una vez.
 
 ## Qué hace
 
-- **Eliges dónde entrenas al abrirla** — gimnasio, casa con mancuernas, casa con bandas
-  o sin material. A partir de ahí el catálogo, el buscador y las rutinas generadas
-  solo ofrecen ejercicios que puedas hacer de verdad ahí. Se cambia en un toque.
+- **Eliges dónde entrenas al abrirla** — gimnasio, casa con mancuernas, casa con bandas,
+  sin material o **Ver todo** (el catálogo completo, sin filtrar, para curiosear o para
+  quien todavía no sabe con qué va a entrenar). A partir de ahí el catálogo, el buscador y
+  las rutinas generadas solo ofrecen ejercicios que puedas hacer de verdad ahí. Se cambia
+  en un toque desde el botón de la barra superior.
 - **Plan semanal automático** — dices qué días entrenas y cuánto dura cada sesión, y la
   app reparte los grupos musculares por día (*Lun · Pecho y tríceps*, *Mar · Espalda y
   bíceps*…) y elige los ejercicios ajustando series, repeticiones y descansos a tu

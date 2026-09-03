@@ -305,7 +305,8 @@
     }
 
     const gset = Data.GEAR[Store.settings().gear];
-    if (gset) trozos.push('ENTRENA: ' + gset.label.toLowerCase() + ' (' + gset.note.toLowerCase() + ').');
+    if (gset) trozos.push('ENTRENA: ' + Data.gearFrase(Store.settings().gear) +
+      ' (' + gset.note.toLowerCase() + ').');
 
     return trozos.join('\n');
   }

@@ -125,7 +125,8 @@
       </div>
       <h1 class="center">¿Dónde vas a entrenar?</h1>
       <p class="muted center">Con esto te muestro solo los ejercicios que puedes hacer de verdad,
-      y las rutinas que te genere usarán únicamente ese material.</p>
+      y las rutinas que te genere usarán únicamente ese material. Si vienes a mirar,
+      elige <b>Ver todo</b> y tendrás el catálogo entero.</p>
       <div class="stack" style="margin-top:18px">${raw(tarjetasLugar(''))}</div>
       <p class="tiny center" style="margin-top:16px">Podrás cambiarlo cuando quieras
       desde el botón de arriba o en Ajustes.</p>`;
@@ -137,7 +138,9 @@
       planState.gear = el.dataset.lugar;
       exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', favs: false, todo: false };
       go('inicio');
-      UI.toast('Listo. Verás solo ejercicios de ' + Data.GEAR[el.dataset.lugar].label.toLowerCase());
+      UI.toast(el.dataset.lugar === 'todo'
+        ? 'Listo. Verás el catálogo completo, sin filtrar por material.'
+        : 'Listo. Verás solo lo que puedes hacer ' + Data.gearFrase(el.dataset.lugar));
     });
   };
 
@@ -153,7 +156,9 @@
             planState.gear = b.dataset.lugar;
             UI.closeModal();
             render();
-            UI.toast('Ahora entrenas ' + Data.GEAR[b.dataset.lugar].label.toLowerCase());
+            UI.toast(b.dataset.lugar === 'todo'
+              ? 'Mostrando el catálogo completo'
+              : 'Ahora entrenas ' + Data.gearFrase(b.dataset.lugar));
           };
         });
       });
@@ -372,8 +377,7 @@
 
     /* Se segmenta por músculo salvo que se esté mirando un músculo concreto */
     const segmentar = !musculo && !base.q && !exFilters.favs && !exFilters.equipment;
-    const gset = Data.GEAR[Store.settings().gear];
-    const lugar = gset ? gset.label.toLowerCase() : '';
+    const lugar = Data.gearFrase(Store.settings().gear);
 
     const musculos = region ? region.muscles : todosLosMusculos();
     const secciones = segmentar ? musculos.map(function (m) {
@@ -397,15 +401,19 @@
         </div>
       </div>` : '';
 
+    /* Con el sitio en «Ver todo» el catálogo ya está entero: el interruptor sobra */
+    const sinFiltro = exFilters.todo || Store.settings().gear === 'todo';
+
     return html`
       <div class="row between">
         <h1 style="margin:0">Ejercicios</h1>
-        <button class="chip ${exFilters.todo ? '' : 'on'}" data-a="togglegear">
-          ${exFilters.todo ? 'Solo mi material' : 'Ver todo'}
-        </button>
+        ${raw(Store.settings().gear === 'todo' ? '' : html`
+          <button class="chip ${exFilters.todo ? '' : 'on'}" data-a="togglegear">
+            ${exFilters.todo ? 'Solo mi material' : 'Ver todo'}
+          </button>`)}
       </div>
       <p class="muted" style="margin-top:6px">
-        ${UI.num(res.length)} ejercicios${raw(exFilters.todo
+        ${UI.num(res.length)} ejercicios${raw(sinFiltro
           ? ' del catálogo completo'
           : ' que puedes hacer ' + esc(lugar))}, con la técnica animada.
       </p>
@@ -480,10 +488,10 @@
           ? '<button class="btn block" data-a="mas" style="margin-top:14px">Ver más (' +
             (res.length - exLimit) + ' restantes)</button>' : '')}`
       : html`<div class="empty">${raw(icon('search'))}
-          <p>Ningún ejercicio coincide${raw(gear ? ' entre los que puedes hacer ' + esc(lugar) : '')}.</p>
+          <p>Ningún ejercicio coincide${raw(gear && !sinFiltro ? ' entre los que puedes hacer ' + esc(lugar) : '')}.</p>
           <div class="row" style="justify-content:center;gap:8px">
             <button class="btn sm" data-a="limpiar">Limpiar filtros</button>
-            ${raw(gear ? '<button class="btn sm primary" data-a="togglegear">Buscar en todo el catálogo</button>' : '')}
+            ${raw(gear && !sinFiltro ? '<button class="btn sm primary" data-a="togglegear">Buscar en todo el catálogo</button>' : '')}
           </div>
         </div>`) : '')}
 
@@ -1113,7 +1121,7 @@
       <div class="card">
         <div class="row between">
           <div class="grow">
-            <b>Entrenas ${raw(esc((Data.GEAR[p.gear] || Data.GEAR.gym).label.toLowerCase()))}</b>
+            <b>Entrenas ${Data.gearFrase(Data.GEAR[p.gear] ? p.gear : 'gym')}</b>
             <div class="tiny">Solo usaré ejercicios que puedas hacer ahí</div>
           </div>
           <button class="btn sm" data-a="cambiarlugar">Cambiar</button>
@@ -1460,7 +1468,7 @@
       if (info) {
         info.textContent = todo || !gset
           ? 'Mostrando el catálogo completo'
-          : 'Solo lo que puedes hacer ' + gset.label.toLowerCase();
+          : 'Solo lo que puedes hacer ' + Data.gearFrase(Store.settings().gear);
       }
       const btnAll = el.querySelector('[data-pickall]');
       if (btnAll) {
