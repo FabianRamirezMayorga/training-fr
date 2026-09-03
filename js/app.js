@@ -60,6 +60,8 @@
     if (fn.mount) fn.mount(viewEl);
     UI.mountDemos(viewEl);
     pintarAvisos();
+    /* el cronómetro acompaña al usuario por toda la app mientras entrena */
+    Workout.pintarBanner();
 
     const chip = actionsEl.querySelector('[data-a=lugar]');
     if (chip) chip.onclick = lugarSheet;
@@ -183,7 +185,13 @@
             </div>
             <button class="btn primary" data-a="resume">Continuar</button>
           </div>
-        </div>` : '')}
+        </div>`
+      : html`
+        <button class="btn primary block grande" data-a="empezarlibre" style="margin-top:14px">
+          ${raw(icon('play'))} Iniciar entrenamiento
+        </button>
+        <p class="tiny center" style="margin:7px 4px 0">Arranca el cronómetro ahora y añade los
+        ejercicios sobre la marcha. El tiempo se ve desde cualquier pantalla.</p>`)}
 
       <div class="stats" style="margin-top:14px">
         <div class="stat"><b>${st.streak}</b><span>Días seguidos</span></div>
@@ -274,6 +282,11 @@
 
   viewInicio.mount = function (root) {
     bind(root, '[data-a=resume]', function () { go('entrenar'); });
+    bind(root, '[data-a=empezarlibre]', function () {
+      Workout.startLibre();
+      go('entrenar');
+      UI.toast('Cronómetro en marcha');
+    });
     bind(root, '[data-a=nueva]', function () { go('rutina', 'nueva'); });
     bind(root, '[data-a=plan]', function () { go('plan'); });
     bind(root, '[data-a=plantillas]', function () { go('rutinas'); });
@@ -297,6 +310,17 @@
     if (!r.exercises.length) { UI.toast('Añade ejercicios a la rutina antes de entrenar'); return; }
 
     const run = function () { Workout.start(r); go('entrenar'); };
+
+    /* Si venía de un entrenamiento libre, la rutina se suma a lo que ya lleva:
+       el cronómetro no se reinicia y no se pierde nada. */
+    const activa = Store.active();
+    if (activa && activa.libre) {
+      Workout.cargar(r);
+      go('entrenar');
+      UI.toast('«' + (r.name || 'Rutina') + '» añadida al entrenamiento en curso');
+      return;
+    }
+
     if (Workout.isActive()) {
       UI.confirm('Ya hay un entrenamiento en curso',
         'Si empiezas otro, se descartará el que tienes a medias.', 'Empezar de nuevo', true)
@@ -662,6 +686,17 @@
         el.querySelector('[data-a=empezar]').onclick = function () {
           const rutina = { id: null, name: nombre, exercises: ejercicios };
           const lanzar = function () { UI.closeModal(); Workout.start(rutina); go('entrenar'); };
+
+          /* si ya corre un entrenamiento libre, la sesión se le suma */
+          const activa = Store.active();
+          if (activa && activa.libre) {
+            UI.closeModal();
+            Workout.cargar(rutina);
+            go('entrenar');
+            UI.toast('Sesión añadida al entrenamiento en curso');
+            return;
+          }
+
           if (Workout.isActive()) {
             UI.confirm('Ya hay un entrenamiento en curso',
               'Si empiezas otro, se descartará el que tienes a medias.', 'Empezar de nuevo', true)
@@ -2764,7 +2799,7 @@
   }
 
   g.App = {
-    go: go, render: render, exerciseSheet: exerciseSheet,
+    go: go, render: render, exerciseSheet: exerciseSheet, pickExercise: pickExerciseSheet,
     bind: bind, bindAll: bindAll, aplicarTema: aplicarTema,
     lugarSheet: lugarSheet, cuantosEn: cuantosEn, temaEfectivo: temaEfectivo
   };

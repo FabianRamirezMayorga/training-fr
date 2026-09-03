@@ -13,8 +13,8 @@
 
   /* ---------- ciclo de vida ---------- */
 
-  function start(routine) {
-    const entries = routine.exercises.map(function (re) {
+  function construir(routine) {
+    return routine.exercises.map(function (re) {
       const ex = Data.get(re.exId);
       const last = Store.lastPerformance(re.exId);
       const prevWeight = last && last.sets.length ? Number(last.sets[0].weight) || 0 : Number(re.weight) || 0;
@@ -29,17 +29,118 @@
         })
       };
     });
+  }
 
+  function start(routine) {
     Store.setActive({
       routineId: routine.id,
       routineName: routine.name,
       start: Date.now(),
       idx: 0,
-      entries: entries
+      entries: construir(routine)
     });
+    pintarBanner();
+  }
+
+  /* Mete una rutina en el entrenamiento que ya está corriendo, sin tocar el
+     cronómetro: quien empezó libre no pierde el tiempo acumulado. */
+  function cargar(routine) {
+    const a = Store.active();
+    if (!a) { start(routine); return; }
+    const nuevas = construir(routine);
+    if (!nuevas.length) return;
+    a.idx = a.entries.length;
+    a.entries = a.entries.concat(nuevas);
+    if (a.libre && a.idx === 0) { a.routineName = routine.name; a.routineId = routine.id; }
+    Store.setActive(a);
+  }
+
+  /* Entrenamiento libre: solo el cronómetro. Los ejercicios se van añadiendo
+     sobre la marcha, o ninguno, y lo que se guarda es el tiempo entrenado. */
+  function startLibre() {
+    Store.setActive({
+      routineId: null,
+      routineName: 'Entrenamiento libre',
+      libre: true,
+      start: Date.now(),
+      idx: 0,
+      entries: []
+    });
+    pintarBanner();
+  }
+
+  /* Añade un ejercicio a la sesión en curso y salta a él */
+  function añadirEjercicio(ex) {
+    const a = Store.active();
+    if (!a || !ex) return;
+    const ajustes = Store.settings();
+    const last = Store.lastPerformance(ex.id);
+    const peso = last && last.sets.length ? Number(last.sets[0].weight) || 0 : 0;
+    const reps = 12;
+
+    a.entries.push({
+      exId: ex.id,
+      name: ex.nameEs,
+      targetReps: reps,
+      rest: ajustes.rest || 90,
+      note: '',
+      sets: Array.from({ length: 3 }, function () {
+        return { weight: peso, reps: reps, done: false };
+      })
+    });
+    a.idx = a.entries.length - 1;
+    Store.setActive(a);
   }
 
   function isActive() { return !!Store.active(); }
+
+  /* ---------- cronómetro visible en toda la app ----------
+     Mientras hay entrenamiento en curso, un banner acompaña al usuario por
+     cualquier pantalla con el tiempo corriendo y el botón de terminar. En la
+     propia pantalla de entrenamiento sobra: allí ya está el cronómetro. */
+
+  let bannerTimer = null;
+
+  function pintarBanner() {
+    const host = document.getElementById('crono-host');
+    if (!host) return;
+
+    const a = Store.active();
+    const enEntrenar = location.hash.indexOf('entrenar') !== -1;
+
+    if (!a || enEntrenar) {
+      if (host.innerHTML) host.innerHTML = '';
+      document.body.classList.remove('con-crono');
+      clearInterval(bannerTimer); bannerTimer = null;
+      return;
+    }
+    /* el banner tapa el final de la página: se le hace hueco */
+    document.body.classList.add('con-crono');
+
+    /* se dibuja una vez; después solo cambia el número, para no reiniciar
+       la animación de entrada en cada segundo */
+    let salida = host.querySelector('[data-crono-out]');
+    if (!salida) {
+      host.innerHTML = html`
+        <div class="crono">
+          <button class="crono-ir" data-c="ir">
+            <span class="crono-pulso"></span>
+            <span class="crono-txt">
+              <span>ENTRENANDO</span>
+              <b>${a.routineName}</b>
+            </span>
+          </button>
+          <b class="crono-t" data-crono-out>0:00</b>
+          <button class="crono-fin" data-c="fin">Finalizar</button>
+        </div>`;
+      host.querySelector('[data-c=ir]').onclick = function () { g.App.go('entrenar'); };
+      host.querySelector('[data-c=fin]').onclick = doFinish;
+      salida = host.querySelector('[data-crono-out]');
+    }
+
+    salida.textContent = UI.mmss((Date.now() - a.start) / 1000);
+    if (!bannerTimer) bannerTimer = setInterval(pintarBanner, 1000);
+  }
 
   function stopTimers() {
     clearInterval(restTimer); restTimer = null;
@@ -52,6 +153,7 @@
   function discard() {
     stopTimers();
     Store.clearActive();
+    pintarBanner();
   }
 
   function finish() {
@@ -80,6 +182,7 @@
 
     stopTimers();
     Store.clearActive();
+    pintarBanner();
     return Store.addSession(session);
   }
 
@@ -143,9 +246,44 @@
 
   /* ---------- vista ---------- */
 
+  /* Entrenamiento en marcha al que todavía no se le ha puesto ningún ejercicio */
+  function vistaVacia(a) {
+    return html`
+      <div class="wo-head">
+        <div class="row between" style="margin-bottom:8px">
+          <div class="grow" style="min-width:0">
+            <div class="tiny">ENTRENANDO</div>
+            <h2 style="margin:0;font-size:1.05rem">${a.routineName}</h2>
+          </div>
+          <div class="center nowrap">
+            <b id="wo-clock" style="font-variant-numeric:tabular-nums">0:00</b>
+            <div class="tiny">en marcha</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="wo-musica"></div>
+
+      <div class="card center">
+        <p class="muted" style="margin-bottom:12px">El cronómetro ya está corriendo. Puedes
+        entrenar así, solo con el tiempo, o ir añadiendo los ejercicios que hagas para
+        registrar series y pesos.</p>
+        <button class="btn primary block" data-w="anadir">${raw(icon('plus'))} Añadir ejercicio</button>
+        <button class="btn block" data-w="rutina" style="margin-top:8px">Cargar una rutina</button>
+      </div>
+
+      <button class="btn danger block" data-w="finish" style="margin-top:16px">
+        ${raw(icon('flag'))} Terminar y guardar el tiempo
+      </button>
+      <button class="btn ghost block" data-w="cancel" style="margin-top:8px">Descartar entrenamiento</button>`;
+  }
+
   function view() {
     const a = Store.active();
     if (!a) return '<div class="empty">No hay ningún entrenamiento en curso.</div>';
+
+    /* Un entrenamiento libre empieza sin ejercicios: solo corre el reloj */
+    if (!a.entries.length) return vistaVacia(a);
 
     const entry = a.entries[a.idx];
     const ex = Data.get(entry.exId);
@@ -253,6 +391,10 @@
           ${a.idx === a.entries.length - 1 ? 'Terminar' : 'Siguiente'}
         </button>
       </div>
+
+      <button class="btn ghost block" data-w="anadir" style="margin-top:10px">
+        ${raw(icon('plus'))} Añadir otro ejercicio a esta sesión
+      </button>
 
       <div class="list-title">Ejercicios de hoy</div>
       <div class="stack">
@@ -409,6 +551,20 @@
       if (ex) cambiarSheet(ex, rerender);
     });
 
+    /* se puede añadir cualquier ejercicio sobre la marcha, venga de rutina
+       o de un entrenamiento libre */
+    act('anadir', function () {
+      if (!g.App || !g.App.pickExercise) return;
+      g.App.pickExercise(function (ex) {
+        UI.closeModal();
+        añadirEjercicio(ex);
+        rerender();
+        UI.toast('«' + ex.nameEs + '» añadido a la sesión');
+      });
+    });
+
+    act('rutina', function () { g.App.go('rutinas'); });
+
     act('finish', doFinish);
 
     act('cancel', function () {
@@ -543,27 +699,47 @@
       return n + e.sets.filter(function (s) { return s.done; }).length;
     }, 0);
 
-    if (!done) {
-      UI.confirm('Sin series marcadas',
-        'No has marcado ninguna serie como completada. ¿Quieres descartar el entrenamiento?',
+    const segundos = (Date.now() - a.start) / 1000;
+
+    /* Ni series ni tiempo: no hay nada que guardar */
+    if (!done && segundos < 60) {
+      UI.confirm('Terminar entrenamiento',
+        'No has marcado ninguna serie y llevas menos de un minuto. ¿Lo descarto?',
         'Descartar', true).then(function (ok) {
-        if (ok) { discard(); g.App.go('inicio'); }
+        if (ok) { discard(); g.App.go('inicio'); UI.toast('Entrenamiento descartado'); }
+      });
+      return;
+    }
+
+    /* Sin series pero con tiempo: el entrenamiento cuenta igual */
+    if (!done) {
+      UI.confirm('Terminar entrenamiento',
+        'Llevas ' + UI.mmss(segundos) + ' entrenando sin anotar series. Guardo el tiempo igualmente.',
+        'Guardar el tiempo').then(function (ok) {
+        if (!ok) return;
+        finish();
+        g.App.go('inicio');
+        UI.toast('Entrenamiento guardado: ' + UI.mmss(segundos));
       });
       return;
     }
 
     UI.confirm('Terminar entrenamiento',
-      'Se guardarán ' + done + (done === 1 ? ' serie completada.' : ' series completadas.'),
+      'Se guardarán ' + done + (done === 1 ? ' serie completada' : ' series completadas') +
+      ' y ' + UI.mmss(segundos) + ' de entrenamiento.',
       'Guardar').then(function (ok) {
       if (!ok) return;
       const s = finish();
       g.App.go('inicio');
-      UI.toast('¡Entrenamiento guardado! Volumen: ' + UI.kg(s.volume));
+      UI.toast(s.volume
+        ? '¡Entrenamiento guardado! Volumen: ' + UI.kg(s.volume)
+        : '¡Entrenamiento guardado! ' + done + ' series en ' + UI.mmss(segundos));
     });
   }
 
   g.Workout = {
-    start: start, view: view, mount: mount, isActive: isActive,
-    finish: finish, discard: discard, stopTimers: stopTimers
+    start: start, startLibre: startLibre, cargar: cargar, view: view, mount: mount,
+    isActive: isActive, finish: finish, discard: discard, stopTimers: stopTimers,
+    pintarBanner: pintarBanner
   };
 })(window);

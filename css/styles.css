@@ -26,6 +26,7 @@ body{
   background:var(--bg); color:var(--txt);
   font:400 17px/1.47 var(--sans);
   letter-spacing:-.01em;
+  /* deja hueco a la barra de pestañas y, si entrena, al cronómetro */
   padding-bottom:calc(78px + var(--safe-b));
   overflow-wrap:anywhere;
   -webkit-font-smoothing:antialiased;
@@ -129,6 +130,8 @@ a{color:var(--blue)}
 .btn.block{width:100%}
 .btn.sm{padding:.42em .75em;font-size:.85rem}
 .btn.icon{padding:.5em;width:36px;height:36px;flex:none}
+.btn.grande{padding:.95em 1.2em;font-size:1.02rem;font-weight:700}
+.btn.grande svg{width:20px;height:20px}
 .btn[disabled]{opacity:.4;pointer-events:none}
 
 .chip{display:inline-flex;align-items:center;gap:5px;padding:.34em .78em;border-radius:999px;
@@ -198,7 +201,13 @@ a{color:var(--blue)}
 .wo-head{position:sticky;top:53px;z-index:40;background:var(--bg);padding:10px 0;margin-bottom:4px}
 .prog{height:5px;background:var(--card2);border-radius:999px;overflow:hidden}
 .prog i{display:block;height:100%;background:var(--acc);transition:width .35s}
-.rest{position:fixed;left:0;right:0;bottom:calc(80px + var(--safe-b));z-index:55;padding:0 16px}
+/* Pila fija sobre la barra de pestañas: cronómetro arriba, descanso debajo.
+   Sin puntero salvo en sus hijos, para no tapar la página que hay detrás. */
+.hud{position:fixed;left:0;right:0;bottom:calc(80px + var(--safe-b));z-index:55;
+  padding:0 16px;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.hud>*{pointer-events:auto}
+.hud:empty{display:none}
+.rest{padding:0}
 .rest-in{max-width:900px;margin:0 auto;background:var(--acc);color:var(--on-acc);border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 28px rgba(0,0,0,.4);animation:up .3s}
 @keyframes up{from{transform:translateY(20px);opacity:0}}
 .rest-in svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
@@ -415,3 +424,23 @@ code{font-family:var(--mono);
 
 /* Tarjeta de sesión completa de una zona (pierna, empuje, tren superior…) */
 .zona-card{border-color:var(--acc);background:var(--acc-d);margin-bottom:14px}
+
+/* ---------- cronómetro del entrenamiento ---------- */
+/* Banner que acompaña al usuario por toda la app mientras entrena. */
+.crono{max-width:900px;margin:0 auto;width:100%;display:flex;align-items:center;gap:11px;
+  background:var(--acc);color:var(--on-acc);border-radius:var(--r);padding:9px 10px 9px 14px;
+  box-shadow:0 8px 28px rgba(0,0,0,.35);animation:up .3s}
+.crono-ir{display:flex;align-items:center;gap:11px;flex:1;min-width:0;color:inherit;padding:0;
+  text-align:left;background:none}
+.crono-pulso{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none;
+  animation:latido 1.6s ease-in-out infinite}
+@keyframes latido{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+.crono-txt{min-width:0}
+.crono-txt span{display:block;font-size:.64rem;font-weight:800;letter-spacing:.06em;opacity:.75}
+.crono-txt b{display:block;font-size:.86rem;font-weight:700;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.crono-t{font-size:1.35rem;font-weight:800;font-variant-numeric:tabular-nums;flex:none}
+.crono-fin{flex:none;font-weight:700;font-size:.8rem;background:rgba(0,0,0,.16);color:inherit;
+  padding:.5em .85em;border-radius:9px}
+.crono-fin:active{transform:scale(.95)}
+body.con-crono{padding-bottom:calc(142px + var(--safe-b))}

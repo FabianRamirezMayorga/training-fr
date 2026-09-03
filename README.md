@@ -111,6 +111,11 @@ que has abierto los ejercicios al menos una vez.
 - **Rutinas** — crea las tuyas, genera el plan o parte de 8 plantillas probadas (Full Body,
   Push/Pull/Legs, Torso/Pierna, 5x5, en casa sin material). Series, repeticiones y descanso
   por ejercicio. Asigna días y la portada te recuerda qué toca hoy.
+- **Cronómetro siempre a la vista** — un botón en la portada arranca el entrenamiento y,
+  a partir de ahí, un banner verde te acompaña por **cualquier pantalla** de la app con el
+  tiempo corriendo y el botón de terminar. Puedes entrenar solo con el tiempo, ir añadiendo
+  ejercicios sobre la marcha o cargar una rutina encima sin reiniciar el reloj. Al terminar
+  se guarda aunque no hayas anotado ninguna serie: el tiempo entrenado cuenta.
 - **Entrenar** — dos formas de registrar, a elegir en Ajustes: anotando **peso y
   repeticiones** de cada serie, o **solo marcando la serie como hecha** sobre el objetivo
   que te propone la app (3 × 12, por ejemplo), con el peso como campo opcional. En el
