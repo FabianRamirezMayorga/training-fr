@@ -32,7 +32,7 @@
       inicio: viewInicio, ejercicios: viewEjercicios, ejercicio: viewEjercicio,
       rutinas: viewRutinas, rutina: viewRutina, entrenar: viewEntrenar,
       progreso: viewProgreso, ajustes: viewAjustes, plan: viewPlan,
-      bienvenida: viewBienvenida
+      bienvenida: viewBienvenida, cuenta: viewCuenta
     };
     Object.assign(views, g.VISTAS || {});
 
@@ -1467,8 +1467,18 @@
         </div>
       </div>
 
-      <div class="sec-title"><h2>Mi cuenta</h2></div>
-      ${raw(vistaCuenta())}
+      <div class="list-title">Mi cuenta</div>
+      <div class="list">
+        <div class="list-row tap" data-a="ircuenta">
+          <span class="row-icon">${raw(icon('nube'))}</span>
+          <div class="grow">
+            <div class="list-row-title">Sincronización</div>
+            <div class="list-row-sub">${raw(Sync.activa() ? esc(Sync.email())
+              : 'Entra con tu correo para tenerlo todo en cada dispositivo')}</div>
+          </div>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </div>
+      </div>
 
       <div class="sec-title"><h2>Copia de seguridad</h2></div>
       <div class="card">
@@ -1519,7 +1529,7 @@
   viewAjustes.mount = function (root) {
     bind(root, '[data-a=lugar2]', lugarSheet);
     bind(root, '[data-a=claves]', function () { go('claves'); });
-    mountCuenta(root);
+    bind(root, '[data-a=ircuenta]', function () { go('cuenta'); });
 
     /* --- descarga para uso sin conexión --- */
     const estadoEl = root.querySelector('#dl-estado');
@@ -1728,6 +1738,55 @@
       </div>`;
   }
 
+  function viewCuenta() {
+    return html`
+      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+        ${raw(icon('back'))} Perfil</button>
+      <h1>Mi cuenta</h1>
+      <p class="muted">Entra con tu correo y la app queda igual en todos tus dispositivos:
+      rutinas, historial, perfil, objetivos, alertas y ajustes.</p>
+
+      ${raw(vistaCuenta())}
+
+      ${raw(Sync.activa() ? html`
+        <div class="list-title">Qué se sincroniza</div>
+        <div class="list">
+          ${raw(filaSync('dumbbell', 'Rutinas', Store.routines().length))}
+          ${raw(filaSync('grafica', 'Entrenamientos', Store.sessions().length))}
+          ${raw(filaSync('trofeo', 'Objetivos', Objetivos.lista().length))}
+          ${raw(filaSync('campana', 'Alertas', Alertas.lista().length))}
+          ${raw(filaSync('perfil', 'Perfil y hábitos', Perfil.completo() ? 'Completo' : 'Sin completar'))}
+          ${raw(filaSync('llave', 'Claves de Gemini y Spotify',
+            Sync.sincronizaClaves() ? 'Incluidas' : 'Solo en este dispositivo'))}
+        </div>
+        <p class="tiny" style="margin-top:10px">Los cambios suben solos unos segundos
+        después de hacerlos, y al abrir la app se descarga lo que hayas hecho en otro sitio.</p>` : '')}
+
+      ${raw(Sync.configurado() && !Sync.activa() ? html`
+        <div class="card" style="margin-top:12px">
+          <div style="font-weight:600;margin-bottom:4px">Cómo funciona</div>
+          <ol class="instr" style="margin-top:8px">
+            <li>Escribes tu correo y pulsas el botón.</li>
+            <li>Te llega un correo con un enlace de acceso.</li>
+            <li><b>Ábrelo en este mismo dispositivo</b>: al pulsarlo vuelves aquí ya dentro
+              y todo se sincroniza solo.</li>
+          </ol>
+          <p class="tiny" style="margin:0">Sin contraseñas. Si el enlace se abre en otro
+          navegador, la sesión se queda allí: por eso conviene abrirlo donde tengas la app.</p>
+        </div>` : '')}`;
+  }
+
+  function filaSync(ico, titulo, valor) {
+    return '<div class="list-row"><span class="row-icon">' + icon(ico) + '</span>' +
+      '<div class="grow"><div class="list-row-title">' + esc(titulo) + '</div></div>' +
+      '<span class="list-row-val">' + esc(String(valor)) + '</span></div>';
+  }
+
+  viewCuenta.mount = function (root) {
+    bind(root, '[data-a=atras]', function () { go('perfil'); });
+    mountCuenta(root);
+  };
+
   /* Asistente de configuración: URL y clave del proyecto, más el SQL de la tabla */
   function configSyncSheet() {
     const c = Sync.config() || {};
@@ -1871,8 +1930,16 @@
       return Sync.sincronizar();
     }).then(function () {
       aplicarTema();
-      render();
-      UI.toast('Has entrado como ' + Sync.email());
+      go('cuenta');
+      const piezas = [];
+      if (Store.routines().length) piezas.push(Store.routines().length + ' rutinas');
+      if (Store.sessions().length) piezas.push(Store.sessions().length + ' entrenamientos');
+      if (Sync.sincronizaClaves() && (IA.activa() || Spotify.configurado())) {
+        piezas.push('tus claves');
+      }
+      UI.toast(piezas.length
+        ? 'Listo: ' + piezas.join(', ') + ' en este dispositivo'
+        : 'Has entrado como ' + Sync.email());
     }).catch(function (e) {
       render();
       UI.toast(e.message || 'Entraste, pero no se pudo sincronizar todavía');
@@ -2070,6 +2137,22 @@
           Alertas.avisar('Objetivo cumplido', Objetivos.etiqueta(logradas[0]));
         }, 1200);
       }
+
+      /* Al volver a la app se traen los cambios hechos en otro dispositivo.
+         Con un intervalo mínimo para no llamar en cada cambio de pestaña. */
+      let ultimaVuelta = Date.now();
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden || !Sync.activa()) return;
+        if (Date.now() - ultimaVuelta < 60000) return;
+        ultimaVuelta = Date.now();
+        Sync.sincronizar().then(function (r) {
+          if (r === 'bajado') {
+            aplicarTema();
+            render();
+            UI.toast('Actualizado desde otro dispositivo');
+          }
+        }).catch(function () { /* sin conexión: ya se reintentará */ });
+      });
 
       /* en segundo plano se guardan las imágenes de lo que ya tienes planificado */
       setTimeout(function () { Offline.precargarRutinas(); }, 2500);

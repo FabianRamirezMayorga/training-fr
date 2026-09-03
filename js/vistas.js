@@ -96,7 +96,7 @@
   V.perfil.mount = function (root) {
     const ir = { datos: 'datos', objetivos: 'objetivos', nutricion: 'nutricion',
       alertas: 'alertas', entrenador: 'entrenador', musica: 'musica',
-      cuenta: 'ajustes', ajustes: 'ajustes' };
+      cuenta: 'cuenta', ajustes: 'ajustes' };
     bindAll(root, '[data-fila]', function (el) {
       const d = el.dataset.fila;
       if (d === 'lugar') return App.lugarSheet();
