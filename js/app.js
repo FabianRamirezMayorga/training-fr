@@ -1800,6 +1800,34 @@
         </div>
         <p class="tiny" style="margin-top:9px">Los cambios se suben solos. En otro dispositivo,
         entra con este mismo correo y lo tendrás todo.</p>
+      </div>
+
+      <div class="list-title">Contraseña</div>
+      <div class="card">
+        <p class="muted" style="margin:0 0 4px">Ponle una contraseña a tu cuenta y podrás
+        entrar en cualquier dispositivo al momento, sin esperar ningún correo.</p>
+        <p class="tiny" style="margin:0 0 12px">Si entraste con un enlace, tu cuenta aún no
+        tiene contraseña. La eliges tú aquí: no se envía a ningún sitio salvo a tu propio
+        proyecto de Supabase, que la guarda cifrada.</p>
+
+        <label class="tiny">NUEVA CONTRASEÑA</label>
+        <div class="secreto">
+          <input id="pass-nueva" type="password" autocomplete="new-password"
+                 placeholder="Al menos 8 caracteres">
+          <button class="btn sm" data-ver="pass-nueva" aria-label="Mostrar u ocultar">
+            ${raw(icon('ojo'))}</button>
+        </div>
+
+        <label class="tiny" style="display:block;margin-top:10px">REPÍTELA</label>
+        <div class="secreto">
+          <input id="pass-repe" type="password" autocomplete="new-password"
+                 placeholder="La misma otra vez">
+          <button class="btn sm" data-ver="pass-repe" aria-label="Mostrar u ocultar">
+            ${raw(icon('ojo'))}</button>
+        </div>
+
+        <button class="btn primary block" data-a="guardarClave" style="margin-top:14px">
+          Guardar contraseña</button>
       </div>`;
   }
 
@@ -2081,6 +2109,23 @@
       }).catch(function (e) {
         btn.disabled = false;
         btn.textContent = 'Entrar con ese enlace';
+        UI.toast(e.message);
+      });
+    });
+
+    bind(root, '[data-a=guardarClave]', function (btn) {
+      const nueva = (root.querySelector('#pass-nueva') || {}).value || '';
+      const repe = (root.querySelector('#pass-repe') || {}).value || '';
+      if (nueva !== repe) { UI.toast('Las dos contraseñas no coinciden'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Guardando…';
+      Sync.establecerClave(nueva).then(function () {
+        render();
+        UI.toast('Contraseña guardada. Ya puedes entrar con ella en otros dispositivos.');
+      }).catch(function (e) {
+        btn.disabled = false;
+        btn.textContent = 'Guardar contraseña';
         UI.toast(e.message);
       });
     });

@@ -167,6 +167,32 @@
     });
   }
 
+  /* Establece o cambia la contraseña de la sesión abierta. Sirve para las
+     cuentas creadas con enlace por correo, que nacen sin contraseña y por eso
+     no pueden entrar en otro dispositivo sin gastar otro correo. */
+  function establecerClave(clave) {
+    if (String(clave || '').length < 8) {
+      return Promise.reject(new Error('La contraseña necesita al menos 8 caracteres.'));
+    }
+    return conSesion(function () {
+      return pedir('/auth/v1/user', {
+        method: 'PUT',
+        headers: cabeceras(true),
+        body: JSON.stringify({ password: clave })
+      });
+    }).then(function () { return true; })
+      .catch(function (e) {
+        const t = String(e.message || '');
+        if (/same.*password|should be different/i.test(t)) {
+          throw new Error('Esa ya es tu contraseña actual.');
+        }
+        if (/weak|password/i.test(t) && /short|length/i.test(t)) {
+          throw new Error('La contraseña es demasiado corta para tu proyecto.');
+        }
+        throw new Error(t || 'No se pudo guardar la contraseña.');
+      });
+  }
+
   function entrarConClave(correo, clave) {
     let dir;
     try { dir = validarCredenciales(correo, clave); }
@@ -605,6 +631,7 @@
     limpiarDatosDeCuenta: limpiarDatosDeCuenta,
     enviarEnlace: enviarEnlace, capturarRedireccion: capturarRedireccion, salir: salir,
     entrarConEnlace: entrarConEnlace, registrar: registrar, entrarConClave: entrarConClave,
+    establecerClave: establecerClave,
     bajar: bajar, subir: subir, sincronizar: sincronizar,
     hayDatosLocales: hayDatosLocales, programarSubida: programarSubida,
     ultimoSync: ultimoSync, urlRetorno: urlRetorno
