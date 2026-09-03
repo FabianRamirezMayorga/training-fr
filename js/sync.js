@@ -184,6 +184,13 @@
         throw new Error('Supabase ha limitado los correos por ahora. Desactiva la ' +
           'confirmación por correo en tu proyecto y vuelve a intentarlo.');
       }
+      /* El proyecto tiene cerrado el alta de cuentas nuevas, que es lo
+         recomendable una vez creadas las tuyas */
+      if (/signup.{0,12}disabled|signups not allowed/i.test(t)) {
+        throw new Error('Tu proyecto tiene cerrado el registro de cuentas nuevas. ' +
+          'Entra con tu correo y tu contraseña de siempre. Si de verdad quieres otra ' +
+          'cuenta, ábrelo en Supabase: Authentication, Sign In, Allow new users to sign up.');
+      }
       throw new Error(t || 'No se pudo crear la cuenta.');
     });
   }
