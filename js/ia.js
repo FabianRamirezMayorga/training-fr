@@ -355,6 +355,46 @@
     return llamarJSON(prompt, { maxTokens: 2048 });
   }
 
+  /* ---------- afinar el programa ----------
+     El programa lo construye programa.js, que es determinista y siempre da algo
+     coherente. La IA solo entra a revisarlo: comenta cada día, avisa de lo que
+     no encaja con el perfil y puede proponer cambios de ejercicio. Los cambios
+     se validan después contra el catálogo, el material y las lesiones: si la IA
+     se inventa un ejercicio o propone algo prohibido, se descarta. */
+  function afinarPrograma(prog) {
+    const dias = prog.sesiones.map(function (s, i) {
+      return (i + 1) + ') ' + s.nombre + ' [' + s.minutos + ' min]: ' +
+        s.ejercicios.map(function (e) {
+          const ex = Data.get(e.exId);
+          return (ex ? ex.nameEs : e.exId) + ' ' + e.sets + 'x' + e.reps +
+            ' (' + e.patron + ', ' + I18N.muscle(e.musculo) + ')';
+        }).join('; ');
+    }).join('\n');
+
+    const volumen = Object.keys(prog.volumen).map(function (m) {
+      return I18N.muscle(m) + ' ' + prog.volumen[m];
+    }).join(', ');
+
+    const prompt = contexto({ progreso: true }) + '\n\n' +
+      'PROGRAMA PROPUESTO (objetivo ' + prog.objetivoLabel + ', RPE tope ' + prog.rpe +
+      ', unas ' + prog.objetivoSeries + ' series semanales por músculo):\n' + dias + '\n' +
+      'SERIES POR SEMANA Y MÚSCULO: ' + volumen + '\n' +
+      (prog.lesiones.length ? 'LIMITACIONES YA APLICADAS: ' + prog.lesiones.join(', ') + '\n' : '') +
+      '\nEres un entrenador de fuerza. Revisa este programa para ESTE perfil concreto. ' +
+      'No lo reescribas entero ni repitas lo que ya está bien. Busca: desequilibrios de ' +
+      'volumen entre músculos, patrones que falten, riesgo para las limitaciones que tengo, ' +
+      'y si el orden de los ejercicios de cada día tiene sentido.\n\n' +
+      'Si algún ejercicio te parece mal elegido, propón el cambio con el nombre EXACTO en ' +
+      'español tal y como aparece arriba, y el nombre del recambio en español común. ' +
+      'Como mucho tres cambios, y solo si de verdad mejoran el plan.\n\n' +
+      'Devuelve JSON: {"veredicto":"1-2 frases sobre el plan en conjunto",' +
+      '"puntos":[{"titulo":"3-5 palabras","detalle":"1-2 frases"}],' +
+      '"cambios":[{"quitar":"nombre exacto","poner":"nombre del recambio","porque":"1 frase"}],' +
+      '"consejo":"la única cosa que más te cambiaría el resultado, 1 frase"}';
+
+    return llamarJSON(prompt, { maxTokens: 2048, temperatura: 0.5 });
+  }
+
   /* Lectura del progreso reciente */
   function analizarProgreso() {
     const sesiones = Store.sessions().slice(0, 20).map(function (s) {
@@ -507,7 +547,7 @@
     config: config, guardarConfig: guardarConfig, borrarConfig: borrarConfig, activa: activa,
     llamar: llamar, llamarJSON: llamarJSON, contexto: contexto, limpiarCache: limpiarCache,
     listarModelos: listarModelos,
-    planNutricion: planNutricion, revisarRutinas: revisarRutinas,
+    planNutricion: planNutricion, revisarRutinas: revisarRutinas, afinarPrograma: afinarPrograma,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,
     analizarProgreso: analizarProgreso, preguntar: preguntar, explicarEjercicio: explicarEjercicio,

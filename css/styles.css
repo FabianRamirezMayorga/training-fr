@@ -444,3 +444,28 @@ code{font-family:var(--mono);
   padding:.5em .85em;border-radius:9px}
 .crono-fin:active{transform:scale(.95)}
 body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
+
+/* ---------- programa personal ---------- */
+/* Cabecera plegable de cada día del programa */
+.dia-cab{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:13px;background:none;color:var(--txt)}
+.dia-cab .chevron svg{transition:transform .18s}
+.dia-cab .chevron.abierta svg{transform:rotate(90deg)}
+
+/* Series por semana y músculo, con la marca del objetivo */
+.vol-fila{display:flex;align-items:center;gap:10px;padding:5px 0}
+.vol-nom{flex:none;width:104px;font-size:.78rem;color:var(--dim)}
+.vol-barra{position:relative;flex:1;height:9px;border-radius:5px;background:var(--line)}
+.vol-barra i{display:block;height:100%;border-radius:5px;background:var(--acc);
+  transition:width .45s cubic-bezier(.2,.9,.3,1)}
+/* marca del objetivo semanal, sobresaliendo por arriba y por abajo de la barra */
+.vol-barra u{position:absolute;top:-4px;width:2px;height:17px;background:var(--txt);opacity:.5}
+.vol-num{flex:none;width:34px;text-align:right;font-size:.8rem;font-weight:700;
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* Cada motivo del plan, numerado */
+.razon{display:flex;gap:10px;align-items:flex-start;padding:7px 0}
+.razon p{margin:0;font-size:.87rem;line-height:1.45}
+.razon .rt-idx{margin-top:1px}
+
+.tiny-chip{font-size:.6rem;padding:.15em .5em;margin-left:5px;vertical-align:middle}

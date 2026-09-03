@@ -222,10 +222,11 @@
       <div class="card" style="margin-top:14px;border-color:var(--acc)">
         <div class="row between">
           <div class="grow">
-            <div style="font-weight:700">Organiza tu semana</div>
-            <div class="tiny">Reparto los grupos musculares por día según tu tiempo</div>
+            <div style="font-weight:700">Tu programa personal</div>
+            <div class="tiny">Volumen, repeticiones y ejercicios según tu edad, tu nivel,
+              tu objetivo y tus limitaciones</div>
           </div>
-          <button class="btn primary sm" data-a="plan">Crear plan</button>
+          <button class="btn primary sm" data-a="programa">Crear</button>
         </div>
       </div>
 
@@ -293,7 +294,7 @@
       UI.toast('Cronómetro en marcha');
     });
     bind(root, '[data-a=nueva]', function () { go('rutina', 'nueva'); });
-    bind(root, '[data-a=plan]', function () { go('plan'); });
+    bind(root, '[data-a=programa]', function () { go('programa'); });
     bind(root, '[data-a=plantillas]', function () { go('rutinas'); });
     bind(root, '[data-a=verprogreso]', function () { go('progreso'); });
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
@@ -1027,10 +1028,11 @@
         <button class="btn sm" data-a="nueva">${raw(icon('plus'))} Nueva</button>
       </div>
 
-      <button class="btn primary block" data-a="plan" style="margin:6px 0 4px">
-        ${raw(icon('flag'))} Organizar mi semana automáticamente
+      <button class="btn primary block" data-a="programa" style="margin:6px 0 4px">
+        ${raw(icon('chispa'))} Crear mi programa personal
       </button>
-      <p class="tiny">Eliges días, tiempo y objetivo; yo reparto los músculos y los ejercicios.</p>
+      <p class="tiny">Ajustado a tu edad, tu nivel, tu objetivo y tus limitaciones, con la
+      progresión de las cinco semanas siguientes.</p>
 
       ${raw(rutinas.length ? html`
         <div class="stack" style="margin-top:8px">${raw(rutinas.map(routineCard).join(''))}</div>`
@@ -1058,7 +1060,7 @@
 
   viewRutinas.mount = function (root) {
     bind(root, '[data-a=nueva]', function () { go('rutina', 'nueva'); });
-    bind(root, '[data-a=plan]', function () { go('plan'); });
+    bind(root, '[data-a=programa]', function () { go('programa'); });
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
     bindAll(root, '[data-train]', function (el) { empezar(el.dataset.train); });
     bindAll(root, '[data-tpl]', function (el) {

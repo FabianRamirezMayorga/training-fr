@@ -80,10 +80,28 @@ que has abierto los ejercicios al menos una vez.
   quien todavía no sabe con qué va a entrenar). A partir de ahí el catálogo, el buscador y
   las rutinas generadas solo ofrecen ejercicios que puedas hacer de verdad ahí. Se cambia
   en un toque desde el botón de la barra superior.
-- **Plan semanal automático** — dices qué días entrenas y cuánto dura cada sesión, y la
-  app reparte los grupos musculares por día (*Lun · Pecho y tríceps*, *Mar · Espalda y
-  bíceps*…) y elige los ejercicios ajustando series, repeticiones y descansos a tu
-  objetivo. Sin repetir ejercicio en la misma semana. Verás la propuesta antes de guardarla.
+- **Tu programa personal** — no es una plantilla con tu nombre encima. A partir de tu
+  perfil (sexo, edad, nivel, objetivo, descanso y limitaciones) calcula las **series
+  semanales por músculo** que te tocan, elige los rangos de repeticiones y descansos del
+  objetivo, y construye la semana **por patrones de movimiento** (empuje horizontal,
+  tracción vertical, bisagra de cadera, sentadilla…), que es lo que evita el plan de seis
+  variantes de press y ni una dominada. Con el reparto que más rinde para tus días: cuerpo
+  completo a 2-3 días, torso/pierna a 4, empuje-tracción-pierna a 5 o 6.
+
+  Te enseña **por qué** cada decisión, cuántas series efectivas recibe cada músculo (el
+  trabajo indirecto cuenta la mitad), qué músculos se quedan cortos con el tiempo que
+  tienes, y el **bloque de cinco semanas** para progresar de verdad en vez de repetir el
+  mismo peso. Si tienes clave de Gemini, la IA revisa el programa, señala desequilibrios y
+  propone cambios de ejercicio: cada cambio se valida contra el catálogo, tu material y tus
+  limitaciones antes de aplicarse, así que no puede colar algo que no existe o que te hace
+  daño.
+- **Las limitaciones se respetan solas** — escribe *«me duele la rodilla»* o *«manguito
+  rotador»* en el perfil y el programa retira patrones completos: sin impacto, la sentadilla
+  en versión guiada, el press por encima de la cabeza con mancuernas en vez de barra, fuera
+  el remo al mentón y los fondos. Cubre rodilla, hombro, espalda baja, codo, muñeca, cadera,
+  tobillo, cuello y tensión alta, y te dice exactamente qué ha quitado y por qué.
+- **Plan semanal rápido** — si no quieres rellenar el perfil, sigue estando el asistente de
+  siempre: días, tiempo y objetivo, y reparte los grupos musculares por día.
 - **Guías de técnica en español** — cada ejercicio explica la posición inicial paso a
   paso, el recorrido dividido en fases, la respiración, el ritmo y los errores más
   frecuentes con su corrección. Están escritas por patrón de movimiento, así que cubren
@@ -292,6 +310,7 @@ js/ui.js                utilidades, animación de los ejercicios
 js/data.js              descarga y búsqueda del catálogo
 js/templates.js         rutinas de ejemplo
 js/planner.js           generador del plan semanal y de la sesión de una zona
+js/programa.js          programa personal: volumen, patrones, lesiones y progresión
 js/alternativas.js      recambios por patrón de movimiento (máquina ocupada)
 js/offline.js           descarga de imágenes para uso sin conexión
 js/sync.js              cuenta por correo y sincronización (API REST de Supabase)
@@ -302,6 +321,7 @@ js/ia.js                entrenador con IA sobre Gemini
 js/spotify.js           control de música con autorización PKCE
 js/vistas.js            perfil, objetivos y alertas
 js/vistas2.js           alimentación, entrenador y música
+js/vistas4.js           el programa personal
 js/workout.js           modo entrenamiento
 js/app.js               router y vistas
 sw.js                   service worker (uso sin conexión)

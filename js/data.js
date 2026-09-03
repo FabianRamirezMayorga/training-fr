@@ -120,6 +120,10 @@
   function prepare(raw) {
     list = raw.map(function (ex) {
       const e = Object.assign({}, ex);
+      /* 77 ejercicios del catálogo no declaran material y todos son de peso
+         corporal (flexiones, remo invertido, escalador, saltos). Sin esto
+         ningún filtro los dejaba ver, ni siquiera el de "sin material". */
+      if (!e.equipment) e.equipment = 'body only';
       e.nameEs = I18N.name(ex.name);
       e._rank = rank(ex);
       e.groups = I18N.GROUPS
