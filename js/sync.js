@@ -108,24 +108,32 @@
     }).then(function () { return dir; });
   }
 
-  /* Al volver del correo, Supabase deja los tokens en el hash de la URL */
-  function capturarRedireccion() {
-    const h = location.hash || '';
-    if (h.indexOf('access_token=') === -1) return Promise.resolve(false);
+  /* Al volver del correo, Supabase puede devolver la sesión de tres formas según
+     la versión del proyecto y la plantilla de correo:
 
-    const p = new URLSearchParams(h.replace(/^#/, ''));
-    const access = p.get('access_token');
-    const refresh = p.get('refresh_token');
-    const expira = Number(p.get('expires_in') || 3600);
-    if (!access) return Promise.resolve(false);
+       1. #access_token=...        el token ya listo, en el fragmento
+       2. ?token_hash=...&type=... hay que canjearlo en /auth/v1/verify
+       3. ?code=...                hay que canjearlo en /auth/v1/token
 
+     Antes solo se miraba la primera, así que con las otras dos no pasaba
+     absolutamente nada: ni sesión ni aviso. Ahora se contemplan las tres, y
+     también los errores que Supabase devuelve por el mismo camino. */
+
+  function parametros(url) {
+    const u = url ? new URL(url, location.href) : location;
+    const query = new URLSearchParams(u.search || '');
+    const hash = new URLSearchParams((u.hash || '').replace(/^#/, ''));
+    return function (nombre) { return hash.get(nombre) || query.get(nombre); };
+  }
+
+  /* Guarda la sesión y completa los datos del usuario */
+  function abrirSesion(access, refresh, expira) {
     guardar(SES_KEY, {
-      access_token: access, refresh_token: refresh,
-      expires_at: Date.now() + expira * 1000, email: '', user_id: ''
+      access_token: access,
+      refresh_token: refresh || '',
+      expires_at: Date.now() + (Number(expira) || 3600) * 1000,
+      email: '', user_id: ''
     });
-
-    /* se limpia la URL para que no quede el token a la vista */
-    history.replaceState(null, '', location.pathname + '#/inicio');
 
     return usuario().then(function (u) {
       const ses = sesion();
@@ -133,8 +141,7 @@
       guardar(SES_KEY, ses);
 
       /* si en este dispositivo había otra cuenta, sus datos se van ahora */
-      const cambio = esOtraCuenta(u.id);
-      if (cambio) {
+      if (esOtraCuenta(u.id)) {
         const anterior = ultimoUsuario();
         limpiarDatosDeCuenta();
         guardar(SES_KEY, ses);   // la sesión recién abierta se conserva
@@ -143,9 +150,128 @@
       }
       recordarUsuario(u.id, u.email);
       return { ok: true, cambioDeCuenta: false };
-    }).catch(function () {
+    }).catch(function (e) {
       guardar(SES_KEY, null);
-      return false;
+      return { ok: false, error: e.message || 'No se pudo abrir la sesión.' };
+    });
+  }
+
+  /* Canjea el token de un enlace de correo (formato token_hash o token) */
+  function canjearToken(token, tipo) {
+    return pedir('/auth/v1/verify', {
+      method: 'POST',
+      headers: cabeceras(false),
+      body: JSON.stringify({ type: tipo || 'magiclink', token_hash: token })
+    }).then(function (r) {
+      if (!r || !r.access_token) throw new Error('El enlace no devolvió una sesión.');
+      return abrirSesion(r.access_token, r.refresh_token, r.expires_in);
+    });
+  }
+
+  /* Canjea el código del flujo con verificador */
+  function canjearCodigo(code) {
+    const guardadoVerif = leer('trainingfr.sync.verificador');
+    const cuerpo = { auth_code: code };
+    if (guardadoVerif) cuerpo.code_verifier = guardadoVerif;
+    localStorage.removeItem('trainingfr.sync.verificador');
+
+    return pedir('/auth/v1/token?grant_type=pkce', {
+      method: 'POST',
+      headers: cabeceras(false),
+      body: JSON.stringify(cuerpo)
+    }).then(function (r) {
+      if (!r || !r.access_token) throw new Error('El código no devolvió una sesión.');
+      return abrirSesion(r.access_token, r.refresh_token, r.expires_in);
+    });
+  }
+
+  function limpiarURLRetorno() {
+    history.replaceState(null, '', location.pathname + '#/cuenta');
+  }
+
+  /* Procesa una vuelta del correo. Sin argumento mira la URL actual; con una
+     URL pegada a mano, la analiza igual (útil si el correo abre en otro
+     navegador y hay que traerse el enlace hasta aquí). */
+  function procesarRetorno(url) {
+    const p = parametros(url);
+
+    const error = p('error_description') || p('error');
+    if (error) {
+      if (!url) limpiarURLRetorno();
+      return Promise.resolve({ ok: false, error: descifrarError(error) });
+    }
+
+    const access = p('access_token');
+    if (access) {
+      if (!url) limpiarURLRetorno();
+      return abrirSesion(access, p('refresh_token'), p('expires_in'));
+    }
+
+    const tokenHash = p('token_hash') || p('token');
+    if (tokenHash) {
+      if (!url) limpiarURLRetorno();
+      return canjearToken(tokenHash, p('type'))
+        .catch(function (e) { return { ok: false, error: descifrarError(e.message) }; });
+    }
+
+    const code = p('code');
+    if (code) {
+      if (!url) limpiarURLRetorno();
+      return canjearCodigo(code)
+        .catch(function (e) { return { ok: false, error: descifrarError(e.message) }; });
+    }
+
+    return Promise.resolve({ ok: false });
+  }
+
+  /* Traduce los fallos más habituales a algo accionable */
+  function descifrarError(msg) {
+    const t = String(msg || '');
+    if (/expired|caduc/i.test(t)) {
+      return 'El enlace ha caducado. Pide uno nuevo: solo valen unos minutos y un único uso.';
+    }
+    if (/already been used|used/i.test(t)) {
+      return 'Ese enlace ya se usó. Pide uno nuevo desde la app.';
+    }
+    if (/redirect|not allowed/i.test(t)) {
+      return 'La dirección de retorno no está autorizada en Supabase. Añádela en Authentication, URL Configuration.';
+    }
+    if (/invalid|not found/i.test(t)) {
+      return 'El enlace no es válido. Pide uno nuevo desde este mismo dispositivo.';
+    }
+    return t || 'No se pudo completar el acceso.';
+  }
+
+  function capturarRedireccion() {
+    return procesarRetorno(null);
+  }
+
+  /* Entrar pegando el enlace del correo: la salida cuando el correo se abre en
+     un navegador distinto del que tiene la app instalada. */
+  function entrarConEnlace(url) {
+    url = String(url || '').trim();
+    if (!url) return Promise.reject(new Error('Pega el enlace que te llegó al correo.'));
+
+    let limpio = url;
+    /* si es el enlace directo de Supabase, se le quita el redirect para que
+       devuelva la sesión aquí en lugar de reenviar a otra parte */
+    try {
+      const u = new URL(url);
+      const token = u.searchParams.get('token') || u.searchParams.get('token_hash');
+      if (token && /\/auth\/v1\/verify/.test(u.pathname)) {
+        return canjearToken(token, u.searchParams.get('type') || 'magiclink');
+      }
+      limpio = u.href;
+    } catch (e) {
+      return Promise.reject(new Error('Eso no parece un enlace. Cópialo entero desde el correo.'));
+    }
+
+    return procesarRetorno(limpio).then(function (r) {
+      if (!r.ok && !r.error) {
+        throw new Error('Ese enlace no lleva ningún acceso. Copia el del botón del correo.');
+      }
+      if (!r.ok) throw new Error(r.error);
+      return r;
     });
   }
 
@@ -394,6 +520,7 @@
     aplicarEnlace: aplicarEnlace, ultimoUsuario: ultimoUsuario,
     limpiarDatosDeCuenta: limpiarDatosDeCuenta,
     enviarEnlace: enviarEnlace, capturarRedireccion: capturarRedireccion, salir: salir,
+    entrarConEnlace: entrarConEnlace,
     bajar: bajar, subir: subir, sincronizar: sincronizar,
     hayDatosLocales: hayDatosLocales, programarSubida: programarSubida,
     ultimoSync: ultimoSync, urlRetorno: urlRetorno

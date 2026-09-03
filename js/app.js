@@ -1734,7 +1734,20 @@
             ${raw(icon('correo'))} Enviarme el enlace de acceso</button>
           <p class="tiny" style="margin-top:9px">Te llega un correo con un enlace. Al pulsarlo
           vuelves aquí ya dentro. Revisa la carpeta de spam la primera vez.</p>
-          <button class="btn ghost sm block" data-a="configsync" style="margin-top:6px">
+
+          <div class="hr"></div>
+          <button class="guia-tit" data-a="verPegar">${raw(icon('chevron'))}
+            El enlace se abre en otro navegador</button>
+          <div class="guia" id="pegar-enlace" hidden>
+            <p class="tiny">Pasa a menudo en el móvil: pulsas el enlace desde el correo y se
+            abre en el navegador en vez de en la app. Copia el enlace (mantén pulsado el botón
+            del correo y elige <b>Copiar enlace</b>) y pégalo aquí.</p>
+            <input id="link-acceso" placeholder="Pega el enlace del correo" autocomplete="off"
+                   spellcheck="false" style="margin:8px 0 10px">
+            <button class="btn block" data-a="usarLinkAcceso">Entrar con ese enlace</button>
+          </div>
+
+          <button class="btn ghost sm block" data-a="configsync" style="margin-top:10px">
             Cambiar la configuración</button>
         </div>`;
     }
@@ -1977,6 +1990,24 @@
         UI.toast(e.message || 'No se pudo enviar el enlace');
       }).then(function () {
         render();
+      });
+    });
+
+    bind(root, '[data-a=verPegar]', function (el) {
+      const c = root.querySelector('#pegar-enlace');
+      if (c) { c.hidden = !c.hidden; el.classList.toggle('abierta', !c.hidden); }
+    });
+
+    bind(root, '[data-a=usarLinkAcceso]', function (btn) {
+      const campo = root.querySelector('#link-acceso');
+      btn.disabled = true;
+      btn.textContent = 'Entrando…';
+      Sync.entrarConEnlace(campo.value).then(function (r) {
+        trasEntrar(r);
+      }).catch(function (e) {
+        btn.disabled = false;
+        btn.textContent = 'Entrar con ese enlace';
+        UI.toast(e.message);
       });
     });
 
@@ -2263,7 +2294,11 @@
         navigator.serviceWorker.register('sw.js').catch(function () { /* opcional */ });
       }
 
-      if (reciénEntrado) trasEntrar(reciénEntrado);
+      if (reciénEntrado && reciénEntrado.ok) trasEntrar(reciénEntrado);
+      else if (reciénEntrado && reciénEntrado.error) {
+        go('cuenta');
+        setTimeout(function () { UI.toast(reciénEntrado.error); }, 500);
+      }
       else if (Sync.activa()) {
         /* al abrir la app se traen los cambios hechos en otro dispositivo */
         Sync.sincronizar().then(function (r) {
