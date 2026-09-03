@@ -184,6 +184,20 @@ avisa y sigue funcionando.
 Al preguntar se envían a Google tu perfil, tus rutinas y tu progreso. Si no quieres que
 salgan de tu dispositivo, no configures esta parte.
 
+### Varias claves, varios dispositivos
+
+Con la sincronización activada, **la clave de Gemini y el Client ID de Spotify viajan con
+tus datos**, así que solo hay que ponerlas una vez. Se controla desde el interruptor
+*Sincronizar mis claves*, en la bóveda.
+
+Las **sesiones abiertas nunca se sincronizan**: los tokens caducan en una hora y cada
+dispositivo abre la suya. En uno nuevo solo hay que pulsar *Conectar* en Spotify.
+
+La configuración de Supabase no puede venir de la nube, porque es la que abre la puerta.
+Para eso está **Enlazar un dispositivo nuevo**: genera un enlace que, abierto en el otro
+aparato, lo deja listo para entrar con el correo. Ese enlace lleva la URL del proyecto y la
+clave anon, ambas públicas por diseño: sin iniciar sesión no dan acceso a ningún dato.
+
 ### Música — Spotify
 
 Con **Spotify Premium** la música suena dentro de la propia app: el Web Playback SDK

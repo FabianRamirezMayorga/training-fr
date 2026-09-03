@@ -173,6 +173,70 @@
       .catch(function () { /* la sesión local ya está cerrada */ });
   }
 
+  /* ---------- claves de los demás servicios ----------
+     Con la sincronización de claves activada, la configuración de Gemini y de
+     Spotify viaja con el resto de datos, para no tener que copiarla a mano en
+     cada dispositivo.
+
+     Las sesiones abiertas nunca se sincronizan: los tokens caducan en una hora,
+     cada dispositivo necesita el suyo y repartirlos no aporta nada. Tampoco viaja
+     la configuración de Supabase, porque es justo la que hace falta para llegar
+     hasta aquí; para eso está el enlace de configuración. */
+
+  const CLAVES_SINCRONIZABLES = [
+    { origen: 'trainingfr.ia', campo: 'ia' },
+    { origen: 'trainingfr.spotify', campo: 'spotify' }
+  ];
+
+  function sincronizaClaves() {
+    return Store.settings().sincronizarClaves !== false;
+  }
+
+  function recogerClaves() {
+    if (!sincronizaClaves()) return null;
+    const out = {};
+    CLAVES_SINCRONIZABLES.forEach(function (c) {
+      const v = leer(c.origen);
+      if (v) out[c.campo] = v;
+    });
+    return Object.keys(out).length ? out : null;
+  }
+
+  function aplicarClaves(claves) {
+    if (!claves || !sincronizaClaves()) return 0;
+    let n = 0;
+    CLAVES_SINCRONIZABLES.forEach(function (c) {
+      if (claves[c.campo]) { guardar(c.origen, claves[c.campo]); n++; }
+    });
+    return n;
+  }
+
+  /* ---------- enlace para configurar otro dispositivo ----------
+     Lleva la URL del proyecto y la clave anon, que son públicas por diseño en
+     cualquier aplicación de Supabase: sin entrar con el correo no dan acceso a
+     ningún dato, porque las políticas de seguridad filtran por usuario. */
+
+  function enlaceConfiguracion() {
+    const c = config();
+    if (!c || !c.url || !c.key) throw new Error('Configura antes la sincronización.');
+    const dato = btoa(JSON.stringify({ u: c.url, k: c.key }))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return location.origin + location.pathname + '#/enlazar/' + dato;
+  }
+
+  /* Lee el enlace y deja el dispositivo listo para entrar con el correo */
+  function aplicarEnlace(dato) {
+    try {
+      const json = atob(String(dato).replace(/-/g, '+').replace(/_/g, '/'));
+      const d = JSON.parse(json);
+      if (!d.u || !d.k) throw new Error('faltan datos');
+      guardarConfig(d.u, d.k);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /* ---------- datos ---------- */
 
   function bajar() {
@@ -189,6 +253,8 @@
     return conSesion(function () {
       const s = sesion();
       const estado = Store.exportar();
+      const claves = recogerClaves();
+      if (claves) estado.claves = claves;
       const cuerpo = [{
         user_id: s.user_id,
         data: estado,
@@ -206,8 +272,14 @@
   }
 
   function aplicar(remoto) {
-    Store.importar(remoto.data);
+    const datos = remoto.data || {};
+    /* las claves se guardan aparte, no dentro del estado principal */
+    const n = aplicarClaves(datos.claves);
+    const limpio = Object.assign({}, datos);
+    delete limpio.claves;
+    Store.importar(limpio);
     marcarSync();
+    return n;
   }
 
   function marcarSync() { guardar('trainingfr.ultimoSync', Date.now()); }
@@ -255,6 +327,8 @@
     SQL: SQL,
     config: config, configurado: configurado, guardarConfig: guardarConfig, borrarConfig: borrarConfig,
     sesion: sesion, email: email, activa: activa,
+    sincronizaClaves: sincronizaClaves, enlaceConfiguracion: enlaceConfiguracion,
+    aplicarEnlace: aplicarEnlace,
     enviarEnlace: enviarEnlace, capturarRedireccion: capturarRedireccion, salir: salir,
     bajar: bajar, subir: subir, sincronizar: sincronizar,
     hayDatosLocales: hayDatosLocales, programarSubida: programarSubida,

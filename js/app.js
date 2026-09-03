@@ -36,6 +36,17 @@
     };
     Object.assign(views, g.VISTAS || {});
 
+    /* Enlace de configuración traído desde otro dispositivo */
+    if (route.name === 'enlazar' && route.arg) {
+      const ok = Sync.aplicarEnlace(route.arg);
+      history.replaceState(null, '', location.pathname + '#/ajustes');
+      route = { name: ok ? 'ajustes' : 'inicio', arg: null };
+      setTimeout(function () {
+        UI.toast(ok ? 'Dispositivo enlazado. Entra con tu correo.'
+          : 'Ese enlace de configuración no es válido.');
+      }, 400);
+    }
+
     /* Lo primero de todo es saber dónde entrena: sin eso no se puede filtrar nada */
     if (!Store.settings().gear && route.name !== 'bienvenida') {
       route = { name: 'bienvenida', arg: null };

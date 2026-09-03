@@ -210,12 +210,48 @@
           'style="margin-top:10px">Borrar la configuración de Supabase</button>' : '')}
       </div>
 
+      <!-- ============ varios dispositivos ============ -->
+      <div class="list-title">Varios dispositivos</div>
+      <div class="card">
+        <div class="row between">
+          <div class="grow">
+            <div style="font-weight:600">Sincronizar mis claves</div>
+            <div class="tiny">La clave de Gemini y el Client ID de Spotify viajan con tus
+              datos, para no repetirlos en cada dispositivo</div>
+          </div>
+          <button class="sw ${Store.settings().sincronizarClaves !== false ? 'on' : ''}"
+                  data-a="togglesync" role="switch"
+                  aria-checked="${Store.settings().sincronizarClaves !== false}"
+                  aria-label="Sincronizar claves"></button>
+        </div>
+        <p class="tiny" style="margin:10px 0 0">Las sesiones abiertas nunca se sincronizan:
+        cada dispositivo abre la suya, que es lo correcto. En uno nuevo solo tendrás que
+        pulsar Conectar en Spotify.</p>
+      </div>
+
+      ${raw(Sync.configurado() ? html`
+        <div class="card">
+          <div style="font-weight:600;margin-bottom:4px">Enlazar un dispositivo nuevo</div>
+          <p class="muted" style="margin:0 0 10px">La configuración de Supabase no puede
+          venir de la nube, porque es justo la que abre la puerta. Abre este enlace en el
+          otro dispositivo y quedará listo para entrar con tu correo.</p>
+          <div class="row">
+            <button class="btn primary grow" data-a="compartirEnlace">
+              ${raw(icon('share'))} Compartir enlace</button>
+            <button class="btn" data-a="copiarEnlace" aria-label="Copiar enlace">
+              ${raw(icon('copy'))}</button>
+          </div>
+          <p class="tiny" style="margin:10px 0 0">El enlace lleva la URL del proyecto y la
+          clave anon, que son públicas por diseño: sin entrar con tu correo no dan acceso a
+          ningún dato.</p>
+        </div>` : '')}
+
       <!-- ============ seguridad ============ -->
       <div class="list-title">Seguridad</div>
       <div class="card">
         <p class="muted" style="margin:0 0 10px">Las claves viven en el almacenamiento de
-        este navegador. Si usas la app en otro dispositivo, tendrás que volver a ponerlas
-        allí: no se sincronizan a propósito.</p>
+        este navegador y, si la sincronización de claves está activada, también en tu base
+        de datos de Supabase, donde solo tú puedes leerlas.</p>
         <p class="tiny" style="margin:0 0 12px">La clave <i>anon public</i> de Supabase y el
         <i>Client ID</i> de Spotify están pensados para ir en el navegador y no son
         secretos. La de Gemini sí lo es: no la compartas ni la pegues en el código.</p>
@@ -323,6 +359,40 @@
         if (ok) { Sync.borrarConfig(); render(); UI.toast('Configuración borrada'); }
       });
     });
+
+    /* ---- varios dispositivos ---- */
+    bind(root, '[data-a=togglesync]', function (el) {
+      const nuevo = Store.settings().sincronizarClaves === false;
+      Store.setSetting('sincronizarClaves', nuevo);
+      el.classList.toggle('on', nuevo);
+      el.setAttribute('aria-checked', String(nuevo));
+      UI.toast(nuevo
+        ? 'Tus claves se sincronizarán con los demás dispositivos'
+        : 'Las claves se quedarán solo en este dispositivo');
+      if (nuevo && Sync.activa()) Sync.subir().catch(function () { /* ya se reintentará */ });
+    });
+
+    const conEnlace = function (fn) {
+      return function () {
+        try { fn(Sync.enlaceConfiguracion()); }
+        catch (e) { UI.toast(e.message); }
+      };
+    };
+
+    bind(root, '[data-a=copiarEnlace]', conEnlace(function (url) {
+      if (navigator.clipboard) navigator.clipboard.writeText(url);
+      UI.toast('Enlace copiado. Ábrelo en el otro dispositivo.');
+    }));
+
+    bind(root, '[data-a=compartirEnlace]', conEnlace(function (url) {
+      if (navigator.share) {
+        navigator.share({ title: 'Configurar Training FR', url: url })
+          .catch(function () { /* el usuario canceló */ });
+      } else {
+        if (navigator.clipboard) navigator.clipboard.writeText(url);
+        UI.toast('Enlace copiado: pégalo en el otro dispositivo.');
+      }
+    }));
 
     /* ---- todo ---- */
     bind(root, '[data-a=borrarTodo]', function () {

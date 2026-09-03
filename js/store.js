@@ -12,7 +12,9 @@
     settings: {
       unit: 'kg', theme: 'dark', rest: 90, sound: true, name: '', gear: '',
       /* 'detallado' anota peso y repeticiones; 'simple' solo marca la serie hecha */
-      registro: 'detallado'
+      registro: 'detallado',
+      /* lleva también las claves de Gemini y Spotify a los demás dispositivos */
+      sincronizarClaves: true
     },
     routines: [],
     sessions: [],
