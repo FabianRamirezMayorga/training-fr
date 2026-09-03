@@ -1686,17 +1686,39 @@
 
   /* ================= cuenta y sincronización ================= */
 
+  /* '' = elegir camino, 'tengo' = conectar a una cuenta existente, 'nueva' = crearla */
+  let altaModo = '';
+
   function vistaCuenta() {
-    /* 1. sin configurar: hace falta el proyecto gratuito de Supabase */
+    /* 1. sin configurar: dos caminos, según si ya usas la app en otro sitio */
     if (!Sync.configurado()) {
+      if (altaModo === 'tengo') return altaConCuentaHTML();
+      if (altaModo === 'nueva') return altaNuevaHTML();
+
       return html`
         <div class="card">
           <p class="muted">Entra con tu correo y tus rutinas, tu historial y tus marcas
           estarán en todos tus dispositivos. Sin contraseñas: recibes un enlace y ya está.</p>
-          <p class="tiny">Para activarlo hay que crear una base de datos gratuita (una sola vez,
-          cinco minutos). Te guío paso a paso.</p>
-          <button class="btn primary block" data-a="configsync" style="margin-top:8px">
-            ${raw(icon('nube'))} Activar la sincronización</button>
+        </div>
+
+        <div class="list-title">¿Por dónde empezamos?</div>
+        <div class="list">
+          <button class="list-row tap" data-alta="tengo">
+            <span class="row-icon">${raw(icon('correo'))}</span>
+            <div class="grow">
+              <div class="list-row-title">Ya tengo cuenta</div>
+              <div class="list-row-sub">Uso la app en otro dispositivo. Conecto este y listo.</div>
+            </div>
+            <span class="chevron">${raw(icon('chevron'))}</span>
+          </button>
+          <button class="list-row tap" data-alta="nueva">
+            <span class="row-icon">${raw(icon('nube'))}</span>
+            <div class="grow">
+              <div class="list-row-title">Es mi primera vez</div>
+              <div class="list-row-sub">Creo la base de datos gratuita. Una vez, cinco minutos.</div>
+            </div>
+            <span class="chevron">${raw(icon('chevron'))}</span>
+          </button>
         </div>`;
     }
 
@@ -1847,7 +1869,96 @@
       });
   }
 
+  /* Camino corto: ya hay una cuenta en otro dispositivo */
+  function altaConCuentaHTML() {
+    return html`
+      <button class="btn sm ghost" data-alta="" style="margin-bottom:10px">
+        ${raw(icon('back'))} Volver</button>
+
+      <div class="card">
+        <div style="font-weight:600;margin-bottom:4px">Conectar este dispositivo</div>
+        <p class="muted" style="margin-bottom:0">En el dispositivo donde ya usas la app,
+        entra en <b>Ajustes → Bóveda de claves → Enlazar un dispositivo nuevo</b> y comparte
+        el enlace. Pégalo aquí.</p>
+        <input id="alta-enlace" placeholder="Pega aquí el enlace" autocomplete="off"
+               spellcheck="false" style="margin:12px 0 10px">
+        <button class="btn primary block" data-a="usarEnlace">Conectar</button>
+      </div>
+
+      <div class="list-title">O a mano</div>
+      <div class="card">
+        <p class="muted">Si prefieres, copia los dos datos del panel de Supabase.</p>
+        <label class="tiny">PROJECT URL</label>
+        <input id="alta-url" placeholder="https://xxxxxxxx.supabase.co" autocomplete="off"
+               spellcheck="false" style="margin:5px 0 10px">
+        <label class="tiny">CLAVE PUBLISHABLE</label>
+        <input id="alta-key" type="password" placeholder="sb_publishable_..." autocomplete="off"
+               spellcheck="false" style="margin:5px 0 12px">
+        <button class="btn block" data-a="usarManual">Guardar y continuar</button>
+      </div>
+
+      <p class="tiny" style="margin-top:12px">Después escribirás tu correo y, al pulsar el
+      enlace que te llegue, este dispositivo tendrá todo lo tuyo.</p>`;
+  }
+
+  /* Camino largo: no hay cuenta todavía */
+  function altaNuevaHTML() {
+    return html`
+      <button class="btn sm ghost" data-alta="" style="margin-bottom:10px">
+        ${raw(icon('back'))} Volver</button>
+
+      <div class="card">
+        <div style="font-weight:600;margin-bottom:4px">Crear tu base de datos</div>
+        <p class="muted" style="margin:0">Es gratis y se hace una sola vez. Tus datos quedan
+        en tu propia cuenta de Supabase, no en un servidor mío ni de nadie.</p>
+      </div>
+
+      <div class="card">
+        <ol class="instr">
+          <li>Entra en <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">supabase.com</a>,
+            crea una cuenta y pulsa <b>New project</b>. Nombre y contraseña, los que quieras;
+            elige la región más cercana.</li>
+          <li>Cuando termine, ve a <b>SQL Editor</b>, pega el bloque que te da la bóveda y
+            pulsa <b>Run</b>. Crea la tabla de tus datos.</li>
+          <li>En <b>Authentication → URL Configuration</b>, pon esta dirección en
+            <b>Site URL</b> y en <b>Redirect URLs</b>.</li>
+          <li>En <b>Project Settings → API Keys</b> copia la <b>Publishable key</b>, y la
+            <b>Project URL</b> de <b>Data API</b>.</li>
+          <li>Pega los dos valores en la bóveda y vuelve aquí a entrar con tu correo.</li>
+        </ol>
+        <button class="btn primary block" data-a="configsync">
+          ${raw(icon('llave'))} Abrir la bóveda con el paso a paso</button>
+      </div>`;
+  }
+
   function mountCuenta(root) {
+    bindAll(root, '[data-alta]', function (el) {
+      altaModo = el.dataset.alta || '';
+      render();
+    });
+
+    bind(root, '[data-a=usarEnlace]', function () {
+      const v = (root.querySelector('#alta-enlace').value || '').trim();
+      const trozo = v.split('#/enlazar/')[1];
+      if (!trozo || !Sync.aplicarEnlace(trozo)) {
+        UI.toast('Ese enlace no es válido. Cópialo entero.');
+        return;
+      }
+      altaModo = '';
+      render();
+      UI.toast('Dispositivo conectado. Ahora entra con tu correo.');
+    });
+
+    bind(root, '[data-a=usarManual]', function () {
+      try {
+        Sync.guardarConfig(root.querySelector('#alta-url').value,
+          root.querySelector('#alta-key').value);
+        altaModo = '';
+        render();
+        UI.toast('Guardado. Ahora entra con tu correo.');
+      } catch (e) { UI.toast(e.message); }
+    });
+
     bind(root, '[data-a=configsync]', configSyncSheet);
 
     bind(root, '[data-a=enviarenlace]', function (btn) {
@@ -1887,16 +1998,54 @@
     });
 
     bind(root, '[data-a=salir]', function () {
-      UI.confirm('Cerrar sesión',
-        'Tus datos seguirán en este dispositivo y en la nube. Podrás volver a entrar cuando quieras.',
-        'Cerrar sesión').then(function (ok) {
-        if (ok) Sync.salir().then(function () { render(); UI.toast('Sesión cerrada'); });
-      });
+      UI.modal(html`
+        <h2>Cerrar sesión</h2>
+        <p class="muted">Tus datos siguen guardados en la nube y volverán al entrar de nuevo.
+        Elige qué hacer con la copia de este dispositivo.</p>
+        <div class="stack" style="margin-top:14px">
+          <button class="btn block" data-x="conservar">Cerrar y conservarlos aquí</button>
+          <button class="btn danger block" data-x="borrar">Cerrar y borrarlos de este dispositivo</button>
+        </div>
+        <p class="tiny" style="margin-top:10px">Borrarlos es lo apropiado si el dispositivo
+        no es tuyo o lo va a usar otra persona con su cuenta.</p>
+        <button class="btn ghost block sm" data-x="cancelar" style="margin-top:8px">Cancelar</button>`,
+        function (el) {
+          const cerrar = function (borrar) {
+            UI.closeModal();
+            Sync.salir(borrar).then(function () {
+              aplicarTema();
+              render();
+              UI.toast(borrar ? 'Sesión cerrada y datos borrados' : 'Sesión cerrada');
+            });
+          };
+          el.querySelector('[data-x=conservar]').onclick = function () { cerrar(false); };
+          el.querySelector('[data-x=borrar]').onclick = function () { cerrar(true); };
+          el.querySelector('[data-x=cancelar]').onclick = UI.closeModal;
+        });
     });
   }
 
   /* Al volver del enlace del correo: decidir qué hacer con lo que ya hay aquí */
-  function trasEntrar() {
+  function trasEntrar(info) {
+    info = info || {};
+
+    /* Si acaba de entrar otra cuenta, lo local ya se ha borrado: no hay nada
+       que fusionar y preguntar por ello solo confundiría. */
+    if (info.cambioDeCuenta) {
+      return Sync.sincronizar('bajar').catch(function () {
+        /* cuenta nueva sin datos en la nube: se sube lo que haya */
+        return Sync.sincronizar('subir');
+      }).then(function () {
+        aplicarTema();
+        go('cuenta');
+        UI.toast('Ahora estás como ' + Sync.email());
+      }).catch(function () {
+        aplicarTema();
+        render();
+        UI.toast('Has entrado como ' + Sync.email());
+      });
+    }
+
     const hayLocal = Sync.hayDatosLocales();
 
     return Sync.bajar().then(function (remoto) {
@@ -2114,7 +2263,7 @@
         navigator.serviceWorker.register('sw.js').catch(function () { /* opcional */ });
       }
 
-      if (reciénEntrado) trasEntrar();
+      if (reciénEntrado) trasEntrar(reciénEntrado);
       else if (Sync.activa()) {
         /* al abrir la app se traen los cambios hechos en otro dispositivo */
         Sync.sincronizar().then(function (r) {

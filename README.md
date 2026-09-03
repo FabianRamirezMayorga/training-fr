@@ -193,6 +193,11 @@ tus datos**, así que solo hay que ponerlas una vez. Se controla desde el interr
 Las **sesiones abiertas nunca se sincronizan**: los tokens caducan en una hora y cada
 dispositivo abre la suya. En uno nuevo solo hay que pulsar *Conectar* en Spotify.
 
+Cada correo tiene lo suyo. Si en un dispositivo entra otra cuenta, lo del anterior se
+borra antes de bajar lo nuevo: rutinas, historial, preferencias y claves. La conexión con
+Supabase se conserva, porque es del dispositivo y hace falta para que el siguiente entre.
+Al cerrar sesión se puede elegir si dejar la copia local o borrarla.
+
 La configuración de Supabase no puede venir de la nube, porque es la que abre la puerta.
 Para eso está **Enlazar un dispositivo nuevo**: genera un enlace que, abierto en el otro
 aparato, lo deja listo para entrar con el correo. Ese enlace lleva la URL del proyecto y la

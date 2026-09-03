@@ -128,10 +128,21 @@
     history.replaceState(null, '', location.pathname + '#/inicio');
 
     return usuario().then(function (u) {
-      const s = sesion();
-      s.email = u.email; s.user_id = u.id;
-      guardar(SES_KEY, s);
-      return true;
+      const ses = sesion();
+      ses.email = u.email; ses.user_id = u.id;
+      guardar(SES_KEY, ses);
+
+      /* si en este dispositivo había otra cuenta, sus datos se van ahora */
+      const cambio = esOtraCuenta(u.id);
+      if (cambio) {
+        const anterior = ultimoUsuario();
+        limpiarDatosDeCuenta();
+        guardar(SES_KEY, ses);   // la sesión recién abierta se conserva
+        recordarUsuario(u.id, u.email);
+        return { ok: true, cambioDeCuenta: true, anterior: anterior && anterior.correo };
+      }
+      recordarUsuario(u.id, u.email);
+      return { ok: true, cambioDeCuenta: false };
     }).catch(function () {
       guardar(SES_KEY, null);
       return false;
@@ -170,9 +181,13 @@
     return Promise.resolve().then(fn);
   }
 
-  function salir() {
+  function salir(borrarDatos) {
     const s = sesion();
     guardar(SES_KEY, null);
+    if (borrarDatos) {
+      limpiarDatosDeCuenta();
+      guardar(USUARIO_KEY, null);
+    }
     if (!s) return Promise.resolve();
     return pedir('/auth/v1/logout', { method: 'POST', headers: cabeceras(true) })
       .catch(function () { /* la sesión local ya está cerrada */ });
@@ -205,6 +220,44 @@
       if (v) out[c.campo] = v;
     });
     return Object.keys(out).length ? out : null;
+  }
+
+  /* ---------- una cuenta, sus datos ----------
+     Cada correo tiene sus rutinas, sus preferencias y sus claves. Si en este
+     dispositivo entra otra cuenta, primero se borra lo del anterior: de lo
+     contrario, quien entrase después se encontraría con las claves ajenas. */
+
+  const USUARIO_KEY = 'trainingfr.ultimoUsuario';
+
+  /* Todo lo que pertenece a una cuenta concreta y no debe sobrevivir al cambio */
+  const DATOS_DE_CUENTA = [
+    'trainingfr.v1',                 // rutinas, historial, perfil, objetivos, alertas
+    'trainingfr.ia', 'trainingfr.ia.cache', 'trainingfr.ia.modelos',
+    'trainingfr.spotify', 'trainingfr.spotify.sesion',
+    'trainingfr.plan.nutricion', 'trainingfr.playlist', 'trainingfr.musica.memoria',
+    'trainingfr.ultimoSync'
+  ];
+
+  function ultimoUsuario() { return leer(USUARIO_KEY); }
+
+  function recordarUsuario(id, correo) {
+    guardar(USUARIO_KEY, { id: id, correo: correo });
+  }
+
+  /* Borra lo de la cuenta anterior. No toca la configuración de Supabase:
+     esa es del dispositivo y hace falta para que el siguiente pueda entrar. */
+  function limpiarDatosDeCuenta() {
+    DATOS_DE_CUENTA.forEach(function (k) { localStorage.removeItem(k); });
+    /* las traducciones de ejercicios se guardan una por clave */
+    Object.keys(localStorage)
+      .filter(function (k) { return k.indexOf('trainingfr.tr.') === 0; })
+      .forEach(function (k) { localStorage.removeItem(k); });
+  }
+
+  /* ¿El que entra es distinto del que había? */
+  function esOtraCuenta(id) {
+    const prev = ultimoUsuario();
+    return !!(prev && prev.id && id && prev.id !== id);
   }
 
   function aplicarClaves(claves) {
@@ -333,7 +386,8 @@
     config: config, configurado: configurado, guardarConfig: guardarConfig, borrarConfig: borrarConfig,
     sesion: sesion, email: email, activa: activa,
     sincronizaClaves: sincronizaClaves, enlaceConfiguracion: enlaceConfiguracion,
-    aplicarEnlace: aplicarEnlace,
+    aplicarEnlace: aplicarEnlace, ultimoUsuario: ultimoUsuario,
+    limpiarDatosDeCuenta: limpiarDatosDeCuenta,
     enviarEnlace: enviarEnlace, capturarRedireccion: capturarRedireccion, salir: salir,
     bajar: bajar, subir: subir, sincronizar: sincronizar,
     hayDatosLocales: hayDatosLocales, programarSubida: programarSubida,
