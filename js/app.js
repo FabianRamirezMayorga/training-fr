@@ -1783,6 +1783,7 @@
     }
 
     /* 3. sesión abierta */
+    const tieneClave = Store.settings().tieneClave === true;
     const ultimo = Sync.ultimoSync();
     return html`
       <div class="card">
@@ -1802,15 +1803,22 @@
         entra con este mismo correo y lo tendrás todo.</p>
       </div>
 
-      <div class="list-title">Contraseña</div>
-      <div class="card">
-        <p class="muted" style="margin:0 0 4px">Ponle una contraseña a tu cuenta y podrás
-        entrar en cualquier dispositivo al momento, sin esperar ningún correo.</p>
-        <p class="tiny" style="margin:0 0 12px">Si entraste con un enlace, tu cuenta aún no
-        tiene contraseña. La eliges tú aquí: no se envía a ningún sitio salvo a tu propio
-        proyecto de Supabase, que la guarda cifrada.</p>
+      <div class="list-title">Cuenta</div>
+      <div class="list">
+        <button class="list-row tap" data-a="verClave">
+          <span class="row-icon">${raw(icon('llave'))}</span>
+          <div class="grow">
+            <div class="list-row-title">${tieneClave ? 'Cambiar contraseña' : 'Poner contraseña'}</div>
+            <div class="list-row-sub">${raw(tieneClave
+              ? 'Ya tienes una: con ella entras en cualquier dispositivo'
+              : 'Sin contraseña solo puedes entrar con enlaces por correo')}</div>
+          </div>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+      </div>
 
-        <label class="tiny">NUEVA CONTRASEÑA</label>
+      <div class="card" id="caja-clave" hidden style="margin-top:11px">
+        <label class="tiny">${tieneClave ? 'NUEVA CONTRASEÑA' : 'CONTRASEÑA'}</label>
         <div class="secreto">
           <input id="pass-nueva" type="password" autocomplete="new-password"
                  placeholder="Al menos 8 caracteres">
@@ -1828,7 +1836,29 @@
 
         <button class="btn primary block" data-a="guardarClave" style="margin-top:14px">
           Guardar contraseña</button>
-      </div>`;
+        <p class="tiny" style="margin:10px 0 0">Solo viaja a tu proyecto de Supabase, que la
+        guarda cifrada.</p>
+      </div>
+
+      <div class="list-title">Si algo no cuadra</div>
+      <div class="list">
+        <button class="list-row tap" data-a="forzarBajar">
+          <span class="row-icon">${raw(icon('down'))}</span>
+          <div class="grow">
+            <div class="list-row-title">Traer lo de la nube</div>
+            <div class="list-row-sub">Reemplaza lo de este dispositivo por lo guardado</div>
+          </div>
+        </button>
+        <button class="list-row tap" data-a="forzarSubir">
+          <span class="row-icon">${raw(icon('up'))}</span>
+          <div class="grow">
+            <div class="list-row-title">Subir lo de este dispositivo</div>
+            <div class="list-row-sub">Reemplaza lo de la nube por lo de aquí</div>
+          </div>
+        </button>
+      </div>
+      <p class="tiny" style="margin-top:8px">Úsalos solo si la sincronización automática se
+      ha quedado con la versión equivocada.</p>`;
   }
 
   function viewCuenta() {
@@ -2088,11 +2118,21 @@
     };
 
     bind(root, '[data-a=entrarClave]', function (btn) {
-      conCredenciales(btn, Sync.entrarConClave, 'Entrando…');
+      conCredenciales(btn, function (c, p) {
+        return Sync.entrarConClave(c, p).then(function (r) {
+          Store.setSetting('tieneClave', true);
+          return r;
+        });
+      }, 'Entrando…');
     });
 
     bind(root, '[data-a=crearCuenta]', function (btn) {
-      conCredenciales(btn, Sync.registrar, 'Creando…');
+      conCredenciales(btn, function (c, p) {
+        return Sync.registrar(c, p).then(function (r) {
+          if (r && r.ok) Store.setSetting('tieneClave', true);
+          return r;
+        });
+      }, 'Creando…');
     });
 
     bind(root, '[data-a=verPegar]', function (el) {
@@ -2113,6 +2153,32 @@
       });
     });
 
+    bind(root, '[data-a=verClave]', function (el) {
+      const c = root.querySelector('#caja-clave');
+      if (c) {
+        c.hidden = !c.hidden;
+        if (!c.hidden) c.querySelector('#pass-nueva').focus();
+      }
+    });
+
+    const forzar = function (sentido, titulo, aviso) {
+      return function () {
+        UI.confirm(titulo, aviso, 'Continuar', true).then(function (ok) {
+          if (!ok) return;
+          Sync.sincronizar(sentido).then(function () {
+            aplicarTema();
+            render();
+            UI.toast(sentido === 'bajar' ? 'Datos traídos de la nube' : 'Datos subidos a la nube');
+          }).catch(function (e) { UI.toast(e.message); });
+        });
+      };
+    };
+
+    bind(root, '[data-a=forzarBajar]', forzar('bajar', 'Traer lo de la nube',
+      'Lo que tengas en este dispositivo se reemplaza por lo guardado en la nube.'));
+    bind(root, '[data-a=forzarSubir]', forzar('subir', 'Subir lo de este dispositivo',
+      'Lo guardado en la nube se reemplaza por lo que tengas en este dispositivo.'));
+
     bind(root, '[data-a=guardarClave]', function (btn) {
       const nueva = (root.querySelector('#pass-nueva') || {}).value || '';
       const repe = (root.querySelector('#pass-repe') || {}).value || '';
@@ -2121,6 +2187,7 @@
       btn.disabled = true;
       btn.textContent = 'Guardando…';
       Sync.establecerClave(nueva).then(function () {
+        Store.setSetting('tieneClave', true);
         render();
         UI.toast('Contraseña guardada. Ya puedes entrar con ella en otros dispositivos.');
       }).catch(function (e) {
@@ -2226,7 +2293,12 @@
             });
         });
       }
-      return Sync.sincronizar();
+      /* Al entrar en un dispositivo manda el contenido, no la fecha. Un móvil
+         recién estrenado tiene una marca de tiempo más reciente por el simple
+         hecho de haber tocado un ajuste, y comparando fechas acababa subiendo
+         su estado vacío encima de lo que había en la nube. */
+      if (!hayLocal && tieneRemoto) return Sync.sincronizar('bajar');
+      return Sync.sincronizar('subir');
     }).then(function () {
       aplicarTema();
       go('cuenta');
