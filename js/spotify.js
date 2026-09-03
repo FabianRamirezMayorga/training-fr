@@ -45,12 +45,15 @@
     if (!/^[a-f0-9]{32}$/i.test(clientId)) {
       throw new Error('El Client ID son 32 caracteres. Cópialo del panel de Spotify.');
     }
-    escribir(CFG, { clientId: clientId, playlist: String(playlist || '').trim() });
+    escribir(CFG, {
+      clientId: clientId, playlist: String(playlist || '').trim(), _ts: Date.now()
+    });
   }
 
   function guardarPlaylist(url) {
     const c = config();
     c.playlist = String(url || '').trim();
+    c._ts = Date.now();
     escribir(CFG, c);
   }
 

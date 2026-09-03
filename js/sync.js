@@ -496,11 +496,19 @@
     return !!(prev && prev.id && id && prev.id !== id);
   }
 
+  /* De cada servicio se queda la configuración guardada más tarde, para que
+     cambiar una clave en un dispositivo no la pise la versión vieja del otro. */
   function aplicarClaves(claves) {
     if (!claves || !sincronizaClaves()) return 0;
     let n = 0;
     CLAVES_SINCRONIZABLES.forEach(function (c) {
-      if (claves[c.campo]) { guardar(c.origen, claves[c.campo]); n++; }
+      const remota = claves[c.campo];
+      if (!remota) return;
+      const local = leer(c.origen);
+      const tLocal = (local && local._ts) || 0;
+      const tRemota = remota._ts || 0;
+      /* sin marca de tiempo se asume antigua: solo entra si aquí no hay nada */
+      if (!local || tRemota > tLocal) { guardar(c.origen, remota); n++; }
     });
     return n;
   }
@@ -687,10 +695,16 @@
 
       const fusionado = fusionar(local, remoto.data || {});
       const cambiaAqui = huella(fusionado) !== huella(local);
-      const cambiaAlla = huella(fusionado) !== huella(remoto.data || {});
+      let cambiaAlla = huella(fusionado) !== huella(remoto.data || {});
 
-      /* las claves llegan aparte del estado */
-      aplicarClaves((remoto.data || {}).claves);
+      /* Las claves viajan aparte del estado, así que hay que compararlas por
+         separado: si solo faltan ellas en la nube, el resto coincide y sin esta
+         comprobación la app daría por hecho que no hay nada que subir. */
+      const clavesRemotas = (remoto.data || {}).claves || null;
+      aplicarClaves(clavesRemotas);
+
+      const clavesLocales = recogerClaves();
+      if (JSON.stringify(clavesLocales) !== JSON.stringify(clavesRemotas)) cambiaAlla = true;
 
       if (cambiaAqui) Store.importar(fusionado);
       if (cambiaAlla) return subir().then(function () { return cambiaAqui ? 'fusionado' : 'subido'; });

@@ -36,7 +36,9 @@
   function guardarConfig(clave, modelo) {
     clave = String(clave || '').trim();
     if (clave && clave.length < 20) throw new Error('Esa clave no parece válida.');
-    localStorage.setItem(CFG, JSON.stringify({ clave: clave, modelo: modelo || MODELOS[0] }));
+    localStorage.setItem(CFG, JSON.stringify({
+      clave: clave, modelo: modelo || MODELOS[0], _ts: Date.now()
+    }));
   }
 
   function borrarConfig() { localStorage.removeItem(CFG); localStorage.removeItem(CACHE); }
