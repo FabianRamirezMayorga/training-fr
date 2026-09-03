@@ -2218,6 +2218,8 @@
         guarda cifrada.</p>
       </div>
 
+      <div class="card" id="sync-estado"></div>
+
       <div class="list-title">Si algo no cuadra</div>
       <div class="list">
         <button class="list-row tap" data-a="forzarBajar">
@@ -2256,12 +2258,16 @@
           ${raw(filaSync('grafica', 'Entrenamientos', Store.sessions().length))}
           ${raw(filaSync('trofeo', 'Objetivos', Objetivos.lista().length))}
           ${raw(filaSync('campana', 'Alertas', Alertas.lista().length))}
+          ${raw(filaSync('nutricion', 'Menú de comidas',
+            (Store.settings().menu ? 'Guardado' : 'Sin generar')))}
           ${raw(filaSync('perfil', 'Perfil y hábitos', Perfil.completo() ? 'Completo' : 'Sin completar'))}
           ${raw(filaSync('llave', 'Claves de Gemini y Spotify',
             Sync.sincronizaClaves() ? 'Incluidas' : 'Solo en este dispositivo'))}
         </div>
-        <p class="tiny" style="margin-top:10px">Los cambios suben solos unos segundos
-        después de hacerlos, y al abrir la app se descarga lo que hayas hecho en otro sitio.</p>` : '')}
+        <p class="tiny" style="margin-top:10px">No hay que pulsar nada: lo que cambies sube
+        solo unos segundos después, y lo que cambies en otro dispositivo baja al abrir la app,
+        al volver a ella y cada minuto y medio mientras la tengas delante. Si falla, se
+        reintenta solo.</p>` : '')}
 
       ${raw(Sync.configurado() && !Sync.activa() ? html`
         <div class="card" style="margin-top:12px">
@@ -2277,6 +2283,44 @@
         </div>` : '')}`;
   }
 
+  /* Estado de la sincronización, en vivo: sin esto no hay forma de saber si de
+     verdad ha subido algo o lleva media hora fallando en silencio. */
+  function estadoSyncHTML() {
+    const e = Sync.estado();
+    const hace = function (t) {
+      if (!t) return 'nunca';
+      const s = Math.round((Date.now() - t) / 1000);
+      if (s < 60) return 'hace un momento';
+      if (s < 3600) return 'hace ' + Math.round(s / 60) + ' min';
+      if (s < 86400) return 'hace ' + Math.round(s / 3600) + ' h';
+      return UI.fecha(t);
+    };
+
+    const mapa = {
+      subiendo: { txt: 'Subiendo tus cambios…', tono: 'var(--acc)' },
+      bajando: { txt: 'Buscando cambios de otros dispositivos…', tono: 'var(--acc)' },
+      pendiente: { txt: 'Cambios pendientes de subir', tono: 'var(--warn)' },
+      error: { txt: 'No se pudo sincronizar', tono: 'var(--bad)' },
+      ok: { txt: 'Todo al día', tono: 'var(--acc)' },
+      inactivo: { txt: 'Esperando el primer cambio', tono: 'var(--dim2)' }
+    };
+    const m = mapa[e.fase] || mapa.inactivo;
+
+    return html`
+      <div class="row between">
+        <div class="row" style="gap:9px;align-items:center">
+          <span class="punto-sync" style="background:${raw(m.tono)}"></span>
+          <b>${m.txt}</b>
+        </div>
+        <button class="btn sm" data-a="sincronizarYa">Comprobar</button>
+      </div>
+      <div class="tiny" style="margin-top:6px">Última sincronización completa ${hace(e.ultimo)}.</div>
+      ${raw(e.error ? '<div class="tiny" style="margin-top:4px;color:var(--bad)">' +
+        esc(e.error) + '</div>' : '')}
+      ${raw(e.pendiente ? '<div class="tiny" style="margin-top:4px">Hay cambios de este ' +
+        'dispositivo esperando a subir. Se reintenta solo.</div>' : '')}`;
+  }
+
   function filaSync(ico, titulo, valor) {
     return '<div class="list-row"><span class="row-icon">' + icon(ico) + '</span>' +
       '<div class="grow"><div class="list-row-title">' + esc(titulo) + '</div></div>' +
@@ -2286,7 +2330,29 @@
   viewCuenta.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     mountCuenta(root);
+
+    pintarEstadoSync();
   };
+
+  /* Un único oyente para toda la vida de la app: si se registrara al montar la
+     vista, cada visita a Mi cuenta dejaría uno más detrás. */
+  function pintarEstadoSync() {
+    const caja = document.getElementById('sync-estado');
+    if (!caja) return;
+    caja.innerHTML = estadoSyncHTML();
+    const b = caja.querySelector('[data-a=sincronizarYa]');
+    if (b) b.onclick = function () {
+      b.disabled = true;
+      Sync.ciclo(true).then(function (r) {
+        pintarEstadoSync();
+        UI.toast(r === 'igual' ? 'Ya estaba todo al día'
+          : r === 'subido' ? 'Tus cambios están en la nube'
+          : r === 'muy pronto' ? 'Comprobado hace un momento'
+          : 'Datos actualizados');
+        if (r === 'bajado' || r === 'fusionado') { aplicarTema(); render(); }
+      }).catch(function (e) { pintarEstadoSync(); UI.toast(e.message); });
+    };
+  }
 
   /* Asistente de configuración: URL y clave del proyecto, más el SQL de la tabla */
   function configSyncSheet() {
@@ -2833,12 +2899,7 @@
         go('cuenta');
         setTimeout(function () { UI.toast(reciénEntrado.error); }, 500);
       }
-      else if (Sync.activa()) {
-        /* al abrir la app se traen los cambios hechos en otro dispositivo */
-        Sync.sincronizar().then(function (r) {
-          if (r === 'bajado') { aplicarTema(); render(); UI.toast('Datos actualizados desde la nube'); }
-        }).catch(function () { /* sin conexión: se sincroniza más tarde */ });
-      }
+
 
       if (sp.ok) UI.toast('Spotify conectado');
       else if (sp.error) UI.toast(sp.error);
@@ -2856,20 +2917,14 @@
         }, 1200);
       }
 
-      /* Al volver a la app se traen los cambios hechos en otro dispositivo.
-         Con un intervalo mínimo para no llamar en cada cambio de pestaña. */
-      let ultimaVuelta = Date.now();
-      document.addEventListener('visibilitychange', function () {
-        if (document.hidden || !Sync.activa()) return;
-        if (Date.now() - ultimaVuelta < 60000) return;
-        ultimaVuelta = Date.now();
-        Sync.sincronizar().then(function (r) {
-          if (r === 'bajado') {
-            aplicarTema();
-            render();
-            UI.toast('Actualizado desde otro dispositivo');
-          }
-        }).catch(function () { /* sin conexión: ya se reintentará */ });
+      /* Sincronización automática: al abrir, al volver al primer plano, cada
+         minuto y medio mientras esté abierta, y al recuperar la conexión. Lo
+         que se cambie aquí se sube solo, y si falla se reintenta sin pedir nada. */
+      Sync.alCambiarEstado(pintarEstadoSync);
+      Sync.arrancarAuto(function () {
+        aplicarTema();
+        render();
+        UI.toast('Actualizado desde otro dispositivo');
       });
 
       /* en segundo plano se guardan las imágenes de lo que ya tienes planificado */

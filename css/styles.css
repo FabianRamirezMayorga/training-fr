@@ -483,3 +483,7 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 .saludo h1{font-size:1.5rem;letter-spacing:-.02em}
 .saludo p{color:var(--txt);opacity:.9;line-height:1.45}
 .saludo .btn.icon{margin:-4px -4px 0 6px;border-color:transparent;opacity:.5}
+
+/* Punto de estado de la sincronización */
+.punto-sync{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 0 3px rgba(255,255,255,.06)}
+#sync-estado .btn{flex:none;white-space:nowrap}

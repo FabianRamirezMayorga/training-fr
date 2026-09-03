@@ -761,15 +761,140 @@
     return (e.routines && e.routines.length) || (e.sessions && e.sessions.length);
   }
 
-  /* Subida automática tras cambiar algo, agrupando ráfagas de cambios */
-  let pendiente = null;
+  /* ================= sincronización automática =================
+     El usuario no tiene que pulsar nada. Cuatro cosas la disparan:
+       1. cambiar algo (se agrupa la ráfaga y se sube a los 4 s),
+       2. volver a la app o al primer plano,
+       3. un latido mientras está abierta, por si el otro dispositivo cambió algo,
+       4. recuperar la conexión.
+     Y si una subida falla, se reintenta sola con esperas crecientes en vez de
+     quedarse esperando a que el usuario haga otro cambio. */
+
+  let pendiente = null;          // temporizador de la subida agrupada
+  let haySubidaPendiente = false;
+  let reintentos = 0;
+  let latido = null;
+  let ultimoIntento = 0;
+  let estado = { fase: 'inactivo', cuando: 0, error: '' };
+  const oyentes = [];
+
+  /* El error de Supabase en crudo no le dice nada a nadie ("Expected 3 parts in
+     JWT"). Aquí se traduce a lo que hay que hacer. */
+  function mensajeClaro(texto) {
+    const t = String(texto || '');
+    if (/JWT|jwt expired|invalid token|401|no autorizado|unauthorized/i.test(t)) {
+      return 'Tu sesión ha caducado. Entra otra vez con tu correo y contraseña.';
+    }
+    if (/No se pudo conectar|Failed to fetch|NetworkError/i.test(t)) {
+      return 'Sin conexión ahora mismo. Lo intento solo cuando vuelva.';
+    }
+    if (/row-level security|permission denied|42501/i.test(t)) {
+      return 'La base de datos rechazó el guardado. Revisa la política de seguridad de la tabla.';
+    }
+    return t || 'No se pudo sincronizar';
+  }
+
+  function fijarEstado(fase, error) {
+    estado = { fase: fase, cuando: Date.now(), error: error ? mensajeClaro(error) : '' };
+    oyentes.forEach(function (f) { try { f(estado); } catch (e) { /* nada */ } });
+  }
+
+  function alCambiarEstado(fn) { if (typeof fn === 'function') oyentes.push(fn); }
+  function estadoActual() {
+    return { fase: estado.fase, cuando: estado.cuando, error: estado.error,
+      pendiente: haySubidaPendiente, ultimo: ultimoSync() };
+  }
+
   function programarSubida() {
     if (!activa()) return;
+    haySubidaPendiente = true;
+    fijarEstado('pendiente');
     clearTimeout(pendiente);
-    pendiente = setTimeout(function () {
-      subir().catch(function () { /* se reintentará en la próxima sincronización */ });
-    }, 4000);
+    pendiente = setTimeout(subirAhora, 4000);
   }
+
+  /* Sincroniza ya, sin esperar.
+
+     Ojo con la tentación de subir a secas cuando solo hay cambios locales: la
+     tabla guarda el estado entero en una fila, así que una subida a pelo pisa
+     lo que el otro dispositivo hubiera escrito mientras tanto. Por eso siempre
+     se pasa por la fusión, que baja, mezcla y solo entonces escribe. Cuesta una
+     petición más y evita perder datos. */
+  function subirAhora() {
+    clearTimeout(pendiente);
+    pendiente = null;
+    if (!activa()) return Promise.resolve('inactivo');
+
+    fijarEstado(haySubidaPendiente ? 'subiendo' : 'bajando');
+    return sincronizar().then(function (r) {
+      haySubidaPendiente = false;
+      reintentos = 0;
+      fijarEstado('ok');
+      return r;
+    }).catch(function (e) {
+      fijarEstado('error', e.message || 'No se pudo sincronizar');
+      /* solo se insiste si hay algo propio esperando; una bajada fallida ya se
+         reintenta en el siguiente latido */
+      if (haySubidaPendiente) {
+        reintentos++;
+        const espera = Math.min(5000 * Math.pow(3, reintentos - 1), 300000);
+        clearTimeout(pendiente);
+        pendiente = setTimeout(subirAhora, espera);
+      }
+      throw e;
+    });
+  }
+
+  /* Un ciclo completo. Los cambios propios no esperan al intervalo mínimo. */
+  function ciclo(forzar) {
+    if (!activa()) return Promise.resolve('inactivo');
+    if (!forzar && !haySubidaPendiente && Date.now() - ultimoIntento < 20000) {
+      return Promise.resolve('muy pronto');
+    }
+    ultimoIntento = Date.now();
+    return subirAhora();
+  }
+
+  /* Arranca la vigilancia. onActualizar se llama cuando llega algo de fuera.
+     Idempotente: llamarla dos veces no duplica los oyentes. */
+  let enganchado = false;
+  let avisar = null;
+
+  function arrancarAuto(onActualizar) {
+    avisar = onActualizar || avisar;
+
+    const traer = function (forzar) {
+      ciclo(forzar).then(function (r) {
+        if ((r === 'bajado' || r === 'fusionado') && avisar) avisar(r);
+      }).catch(function () { /* ya quedó en el estado; se reintenta al siguiente */ });
+    };
+
+    clearInterval(latido);
+    latido = setInterval(function () {
+      if (!document.hidden) traer(false);
+    }, 90000);
+
+    if (enganchado) { traer(true); return; }
+    enganchado = true;
+
+    document.addEventListener('visibilitychange', function () {
+      /* al irse a segundo plano, lo pendiente se sube ya: en el móvil la app
+         puede no volver a ejecutar nada durante horas */
+      if (document.hidden) { if (haySubidaPendiente) subirAhora(); return; }
+      traer(true);
+    });
+
+    /* la pestaña se cierra o el móvil la descarta */
+    window.addEventListener('pagehide', function () {
+      if (haySubidaPendiente) subirAhora();
+    });
+
+    window.addEventListener('online', function () { traer(true); });
+
+    traer(true);
+  }
+
+  function pararAuto() { clearInterval(latido); latido = null; clearTimeout(pendiente); }
 
   g.Sync = {
     SQL: SQL,
@@ -784,6 +909,8 @@
     establecerClave: establecerClave,
     bajar: bajar, subir: subir, sincronizar: sincronizar,
     hayDatosLocales: hayDatosLocales, programarSubida: programarSubida,
+    arrancarAuto: arrancarAuto, pararAuto: pararAuto, subirAhora: subirAhora,
+    estado: estadoActual, alCambiarEstado: alCambiarEstado, ciclo: ciclo,
     ultimoSync: ultimoSync, urlRetorno: urlRetorno
   };
 })(window);

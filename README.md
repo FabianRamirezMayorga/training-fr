@@ -151,8 +151,17 @@ que has abierto los ejercicios al menos una vez.
   entera sin internet: en el gimnasio sin cobertura, en el metro o sin datos.
 - **Modo claro, oscuro o el del sistema** — con un botón en la barra superior para
   alternar al vuelo.
-- **Tu cuenta por correo** *(opcional)* — entras con un enlace que te llega al email,
-  sin contraseñas, y tus rutinas e historial se sincronizan entre todos tus dispositivos.
+- **Tu cuenta y la sincronización automática** *(opcional)* — entras con tu correo y
+  contraseña (o con un enlace al email) y todo viaja entre tus dispositivos **sin pulsar
+  nada**: lo que cambias sube solo unos segundos después, lo que cambia en otro dispositivo
+  baja al abrir la app, al volver a ella, cada minuto y medio mientras la tienes delante y
+  al recuperar la conexión. Si algo falla se reintenta solo con esperas crecientes, y al
+  mandar la app a segundo plano lo pendiente sube antes de que el móvil la congele.
+
+  La subida nunca es a ciegas: primero baja lo que haya, lo fusiona y solo entonces
+  escribe, así que dos dispositivos cambiando cosas a la vez no se pisan. En *Mi cuenta*
+  hay un indicador en vivo —al día, subiendo, pendiente o error, con el motivo en
+  castellano— para no tener que fiarse de la fe.
 - **Te saluda por tu nombre al volver** — la app pregunta cómo te llamas en el perfil, y
   cuando la abres después de unas horas te recibe con un mensaje corto que sale de tus
   datos reales, no de una frase hecha: *«6 días seguidos. Lo raro ya no es entrenar hoy:
