@@ -105,7 +105,91 @@
       method: 'POST',
       headers: cabeceras(false),
       body: JSON.stringify({ email: dir, create_user: true })
-    }).then(function () { return dir; });
+    }).then(function () { return dir; })
+      .catch(function (e) {
+        if (/rate limit/i.test(String(e.message || ''))) {
+          throw new Error('Supabase solo deja enviar un par de correos por hora en el plan ' +
+            'gratuito y ya se han agotado. Entra con contraseña, que no tiene ese límite.');
+        }
+        throw e;
+      });
+  }
+
+  /* ---------- entrar con contraseña ----------
+     El servidor de correo que trae Supabase de serie solo deja mandar un par de
+     mensajes por hora, así que el enlace por correo se agota enseguida cuando se
+     prueban varios dispositivos. Con contraseña no hay ese límite ni depende de
+     que el enlace se abra en el navegador correcto. */
+
+  function validarCredenciales(correo, clave) {
+    correo = String(correo || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)) {
+      throw new Error('Escribe un correo válido.');
+    }
+    if (String(clave || '').length < 8) {
+      throw new Error('La contraseña necesita al menos 8 caracteres.');
+    }
+    return correo;
+  }
+
+  /* Crea la cuenta. Si el proyecto exige confirmar el correo, Supabase no
+     devuelve sesión y hay que confirmar antes: se avisa en ese caso. */
+  function registrar(correo, clave) {
+    let dir;
+    try { dir = validarCredenciales(correo, clave); }
+    catch (e) { return Promise.reject(e); }
+
+    return pedir('/auth/v1/signup', {
+      method: 'POST',
+      headers: cabeceras(false),
+      body: JSON.stringify({ email: dir, password: clave })
+    }).then(function (r) {
+      if (r && r.access_token) {
+        return abrirSesion(r.access_token, r.refresh_token, r.expires_in);
+      }
+      return {
+        ok: false,
+        pendiente: true,
+        error: 'Cuenta creada. Tu proyecto pide confirmar el correo: ábrelo y pulsa el ' +
+          'enlace, o desactiva esa confirmación en Supabase (Authentication, Sign In, ' +
+          'Confirm email) para entrar directamente.'
+      };
+    }).catch(function (e) {
+      const t = String(e.message || '');
+      if (/already registered|already been registered/i.test(t)) {
+        throw new Error('Ese correo ya tiene cuenta. Usa "Ya tengo contraseña" para entrar.');
+      }
+      if (/rate limit/i.test(t)) {
+        throw new Error('Supabase ha limitado los correos por ahora. Desactiva la ' +
+          'confirmación por correo en tu proyecto y vuelve a intentarlo.');
+      }
+      throw new Error(t || 'No se pudo crear la cuenta.');
+    });
+  }
+
+  function entrarConClave(correo, clave) {
+    let dir;
+    try { dir = validarCredenciales(correo, clave); }
+    catch (e) { return Promise.reject(e); }
+
+    return pedir('/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: cabeceras(false),
+      body: JSON.stringify({ email: dir, password: clave })
+    }).then(function (r) {
+      if (!r || !r.access_token) throw new Error('No se pudo iniciar sesión.');
+      return abrirSesion(r.access_token, r.refresh_token, r.expires_in);
+    }).catch(function (e) {
+      const t = String(e.message || '');
+      if (/invalid login credentials/i.test(t)) {
+        throw new Error('Correo o contraseña incorrectos. Si es tu primera vez, crea la cuenta.');
+      }
+      if (/email not confirmed/i.test(t)) {
+        throw new Error('Falta confirmar el correo. Ábrelo y pulsa el enlace, o desactiva ' +
+          'esa confirmación en Supabase.');
+      }
+      throw new Error(t || 'No se pudo iniciar sesión.');
+    });
   }
 
   /* Al volver del correo, Supabase puede devolver la sesión de tres formas según
@@ -520,7 +604,7 @@
     aplicarEnlace: aplicarEnlace, ultimoUsuario: ultimoUsuario,
     limpiarDatosDeCuenta: limpiarDatosDeCuenta,
     enviarEnlace: enviarEnlace, capturarRedireccion: capturarRedireccion, salir: salir,
-    entrarConEnlace: entrarConEnlace,
+    entrarConEnlace: entrarConEnlace, registrar: registrar, entrarConClave: entrarConClave,
     bajar: bajar, subir: subir, sincronizar: sincronizar,
     hayDatosLocales: hayDatosLocales, programarSubida: programarSubida,
     ultimoSync: ultimoSync, urlRetorno: urlRetorno

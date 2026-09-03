@@ -1689,6 +1689,9 @@
   /* '' = elegir camino, 'tengo' = conectar a una cuenta existente, 'nueva' = crearla */
   let altaModo = '';
 
+  /* 'entrar' o 'crear': con contraseña, que no depende del límite de correos */
+  let accesoModo = 'entrar';
+
   function vistaCuenta() {
     /* 1. sin configurar: dos caminos, según si ya usas la app en otro sitio */
     if (!Sync.configurado()) {
@@ -1722,34 +1725,61 @@
         </div>`;
     }
 
-    /* 2. configurado pero sin sesión: pedir el correo */
+    /* 2. configurado pero sin sesión: entrar o crear la cuenta */
     if (!Sync.activa()) {
       return html`
         <div class="card">
-          <label class="tiny">TU CORREO</label>
-          <input id="sync-mail" type="email" inputmode="email" autocomplete="email"
-                 placeholder="tucorreo@ejemplo.com" value="${Store.settings().name ? '' : ''}"
-                 style="margin:5px 0 10px">
-          <button class="btn primary block" data-a="enviarenlace">
-            ${raw(icon('correo'))} Enviarme el enlace de acceso</button>
-          <p class="tiny" style="margin-top:9px">Te llega un correo con un enlace. Al pulsarlo
-          vuelves aquí ya dentro. Revisa la carpeta de spam la primera vez.</p>
-
-          <div class="hr"></div>
-          <button class="guia-tit" data-a="verPegar">${raw(icon('chevron'))}
-            El enlace se abre en otro navegador</button>
-          <div class="guia" id="pegar-enlace" hidden>
-            <p class="tiny">Pasa a menudo en el móvil: pulsas el enlace desde el correo y se
-            abre en el navegador en vez de en la app. Copia el enlace (mantén pulsado el botón
-            del correo y elige <b>Copiar enlace</b>) y pégalo aquí.</p>
-            <input id="link-acceso" placeholder="Pega el enlace del correo" autocomplete="off"
-                   spellcheck="false" style="margin:8px 0 10px">
-            <button class="btn block" data-a="usarLinkAcceso">Entrar con ese enlace</button>
+          <div class="row" style="gap:6px;margin-bottom:14px">
+            <button class="chip ${accesoModo === 'entrar' ? 'on' : ''}" data-acceso="entrar">Entrar</button>
+            <button class="chip ${accesoModo === 'crear' ? 'on' : ''}" data-acceso="crear">Crear cuenta</button>
           </div>
 
-          <button class="btn ghost sm block" data-a="configsync" style="margin-top:10px">
-            Cambiar la configuración</button>
-        </div>`;
+          <label class="tiny">CORREO</label>
+          <input id="sync-mail" type="email" inputmode="email" autocomplete="email"
+                 placeholder="tucorreo@ejemplo.com" style="margin:5px 0 10px">
+
+          <label class="tiny">CONTRASEÑA</label>
+          <div class="secreto">
+            <input id="sync-pass" type="password"
+                   autocomplete="${accesoModo === 'crear' ? 'new-password' : 'current-password'}"
+                   placeholder="${accesoModo === 'crear' ? 'Al menos 8 caracteres' : 'Tu contraseña'}">
+            <button class="btn sm" data-ver="sync-pass" aria-label="Mostrar u ocultar">
+              ${raw(icon('ojo'))}</button>
+          </div>
+
+          <button class="btn primary block" data-a="${accesoModo === 'crear' ? 'crearCuenta' : 'entrarClave'}"
+                  style="margin-top:14px">
+            ${accesoModo === 'crear' ? 'Crear cuenta y sincronizar' : 'Entrar'}
+          </button>
+
+          <p class="tiny" style="margin-top:10px">${raw(accesoModo === 'crear'
+            ? 'Usa el mismo correo y contraseña en tus demás dispositivos y tendrás lo mismo en todos.'
+            : 'Si es tu primera vez, pulsa Crear cuenta.')}</p>
+        </div>
+
+        <button class="guia-tit" data-a="verCorreo">${raw(icon('chevron'))}
+          Prefiero entrar con un enlace al correo</button>
+        <div class="guia" id="via-correo" hidden>
+          <div class="card">
+            <p class="tiny">Sin contraseña: te llega un enlace y entras al pulsarlo.
+            El correo que trae Supabase de serie solo permite <b>dos mensajes por hora</b>,
+            así que si lo agotas tendrás que esperar.</p>
+            <input id="mail-enlace" type="email" inputmode="email" placeholder="tucorreo@ejemplo.com"
+                   autocomplete="email" style="margin:10px 0">
+            <button class="btn block" data-a="enviarenlace">
+              ${raw(icon('correo'))} Enviarme el enlace</button>
+
+            <div class="hr"></div>
+            <p class="tiny">Si el enlace se abre en otro navegador en vez de en la app,
+            cópialo del correo y pégalo aquí.</p>
+            <input id="link-acceso" placeholder="Pega el enlace del correo" autocomplete="off"
+                   spellcheck="false" style="margin:8px 0 10px">
+            <button class="btn block sm" data-a="usarLinkAcceso">Entrar con ese enlace</button>
+          </div>
+        </div>
+
+        <button class="btn ghost sm block" data-a="configsync" style="margin-top:12px">
+          Cambiar la configuración de Supabase</button>`;
     }
 
     /* 3. sesión abierta */
@@ -1975,7 +2005,7 @@
     bind(root, '[data-a=configsync]', configSyncSheet);
 
     bind(root, '[data-a=enviarenlace]', function (btn) {
-      const campo = root.querySelector('#sync-mail');
+      const campo = root.querySelector('#mail-enlace') || root.querySelector('#sync-mail');
       btn.disabled = true;
       btn.textContent = 'Enviando…';
       Sync.enviarEnlace(campo.value).then(function (dir) {
@@ -1991,6 +2021,50 @@
       }).then(function () {
         render();
       });
+    });
+
+    bindAll(root, '[data-acceso]', function (el) {
+      accesoModo = el.dataset.acceso;
+      render();
+    });
+
+    bindAll(root, '[data-ver]', function (el) {
+      const campo = root.querySelector('#' + el.dataset.ver);
+      if (!campo) return;
+      const oculto = campo.type === 'password';
+      campo.type = oculto ? 'text' : 'password';
+      el.classList.toggle('on', oculto);
+    });
+
+    bind(root, '[data-a=verCorreo]', function (el) {
+      const c = root.querySelector('#via-correo');
+      if (c) { c.hidden = !c.hidden; el.classList.toggle('abierta', !c.hidden); }
+    });
+
+    const conCredenciales = function (btn, fn, textoOcupado) {
+      const correo = (root.querySelector('#sync-mail') || {}).value;
+      const clave = (root.querySelector('#sync-pass') || {}).value;
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = textoOcupado;
+      fn(correo, clave).then(function (r) {
+        if (r && r.ok) return trasEntrar(r);
+        btn.disabled = false;
+        btn.textContent = original;
+        if (r && r.error) UI.toast(r.error);
+      }).catch(function (e) {
+        btn.disabled = false;
+        btn.textContent = original;
+        UI.toast(e.message);
+      });
+    };
+
+    bind(root, '[data-a=entrarClave]', function (btn) {
+      conCredenciales(btn, Sync.entrarConClave, 'Entrando…');
+    });
+
+    bind(root, '[data-a=crearCuenta]', function (btn) {
+      conCredenciales(btn, Sync.registrar, 'Creando…');
     });
 
     bind(root, '[data-a=verPegar]', function (el) {
