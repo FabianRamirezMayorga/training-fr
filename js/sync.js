@@ -297,9 +297,14 @@
 
   /* ---------- datos ---------- */
 
+  /* La base de datos ya filtra por usuario con su política de seguridad, pero la
+     petición pide además su propia fila por identificador: si alguna vez esa
+     política se desactivara, el cliente seguiría sin pedir datos de nadie más. */
   function bajar() {
     return conSesion(function () {
-      return pedir('/rest/v1/' + TABLA + '?select=data,updated_at&limit=1',
+      const s = sesion();
+      const filtro = s && s.user_id ? '&user_id=eq.' + encodeURIComponent(s.user_id) : '';
+      return pedir('/rest/v1/' + TABLA + '?select=data,updated_at' + filtro + '&limit=1',
         { headers: cabeceras(true) });
     }).then(function (filas) {
       if (!filas || !filas.length) return null;
