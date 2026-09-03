@@ -175,11 +175,26 @@
     const ultimas = Store.sessions().slice(0, 3);
     const nombre = Store.settings().name;
 
+    /* Al volver tras un rato, la portada saluda antes que nada */
+    const bienvenida = Saludo.pendiente();
+
     return html`
-      <h1>Hola${nombre ? ', ' + nombre : ''}</h1>
-      <p class="muted">${st.week === 0 ? 'Aún no has entrenado esta semana. Buen momento para empezar.'
-        : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
-        : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.'}</p>
+      ${raw(bienvenida ? html`
+        <div class="card saludo">
+          <div class="row between" style="align-items:flex-start">
+            <div class="grow">
+              <h1 style="margin:0 0 4px">${bienvenida.titulo}</h1>
+              <p style="margin:0;font-size:.95rem">${bienvenida.texto}</p>
+            </div>
+            <button class="btn icon ghost" data-a="cerrarSaludo"
+                    aria-label="Cerrar">${raw(icon('close'))}</button>
+          </div>
+        </div>`
+      : html`
+        <h1>Hola${nombre ? ', ' + nombre : ''}</h1>
+        <p class="muted">${st.week === 0 ? 'Aún no has entrenado esta semana. Buen momento para empezar.'
+          : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
+          : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.'}</p>`)}
 
       ${raw(activa ? html`
         <div class="card" style="border-color:var(--acc);background:var(--acc-d)">
@@ -300,6 +315,7 @@
   }
 
   viewInicio.mount = function (root) {
+    bind(root, '[data-a=cerrarSaludo]', function () { Saludo.descartar(); render(); });
     bind(root, '[data-a=resume]', function () { go('entrenar'); });
     bind(root, '[data-a=empezarlibre]', function () {
       Workout.startLibre();

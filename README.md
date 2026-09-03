@@ -153,8 +153,14 @@ que has abierto los ejercicios al menos una vez.
   alternar al vuelo.
 - **Tu cuenta por correo** *(opcional)* — entras con un enlace que te llega al email,
   sin contraseñas, y tus rutinas e historial se sincronizan entre todos tus dispositivos.
-- **Perfil y hábitos** — peso, altura, edad, actividad, sueño, tipo de dieta, alergias y
-  lesiones. Con eso calcula tu metabolismo basal, tu gasto diario, las calorías objetivo,
+- **Te saluda por tu nombre al volver** — la app pregunta cómo te llamas en el perfil, y
+  cuando la abres después de unas horas te recibe con un mensaje corto que sale de tus
+  datos reales, no de una frase hecha: *«6 días seguidos. Lo raro ya no es entrenar hoy:
+  sería no hacerlo»*, *«Una semana parada no borra 14 entrenamientos. Baja algo el peso hoy
+  y en dos sesiones estás donde estabas»*. Aparece una vez, se cierra de un toque, y el
+  entrenador con IA también te habla por tu nombre.
+- **Perfil y hábitos** — nombre, peso, altura, edad, actividad, sueño, tipo de dieta,
+  alergias, lesiones y condiciones de salud. Con eso calcula tu metabolismo basal, tu gasto diario, las calorías objetivo,
   el reparto de macronutrientes y el agua del día. Registro de peso con evolución.
 - **Objetivos** — metas de peso, entrenamientos por semana, racha, volumen o récord en un
   ejercicio. Se actualizan solas con lo que entrenas y te avisan al cumplirse.
@@ -338,6 +344,7 @@ js/sync.js              cuenta por correo y sincronización (API REST de Supabas
 js/perfil.js            datos corporales y cálculos (IMC, metabolismo, calorías, macros)
 js/objetivos.js         metas con seguimiento automático
 js/alertas.js           recordatorios, avisos del sistema y exportación al calendario
+js/saludo.js            la bienvenida al volver, a partir de tu historial
 js/ia.js                entrenador con IA sobre Gemini
 js/spotify.js           control de música con autorización PKCE
 js/vistas.js            perfil, objetivos y alertas

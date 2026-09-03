@@ -59,7 +59,9 @@
       <div class="list-title">Tú</div>
       <div class="list">
         ${raw(fila({ icono: 'perfil', titulo: 'Datos y hábitos', accion: 'datos',
-          sub: listo ? p.edad + ' años · ' + p.altura + ' cm · ' + Perfil.ACTIVIDAD[p.actividad].label
+          sub: !Store.settings().name ? 'Dime tu nombre para empezar'
+            : listo ? Store.settings().name + ' · ' + p.edad + ' años · ' +
+              Perfil.ACTIVIDAD[p.actividad].label
             : 'Sin completar' }))}
         ${raw(fila({ icono: 'trofeo', titulo: 'Objetivos', accion: 'objetivos',
           sub: metas.length ? metas.length + ' en marcha · ' + cumplidas + ' cumplidos'
@@ -127,6 +129,13 @@
       <h1>Datos y hábitos</h1>
       <p class="muted">Sirven para calcular tus calorías y ajustar lo que te propongo.
       No salen de tu dispositivo salvo que actives la sincronización o el entrenador con IA.</p>
+
+      ${raw(grupo('Quién eres', html`
+        <label class="tiny">TU NOMBRE</label>
+        <div class="tiny" style="margin:2px 0 0">Para saludarte al abrir la app y para que
+        el entrenador con IA te hable a ti, no a un usuario.</div>
+        <input id="p-nombre" value="${Store.settings().name || ''}" placeholder="Tu nombre"
+               autocomplete="given-name" style="margin-top:6px">`))}
 
       ${raw(grupo('Cuerpo', html`
         <label class="tiny">SEXO BIOLÓGICO</label>
@@ -281,6 +290,12 @@
         Perfil.guardar(cambio);
       };
     });
+
+    const campoNombre = root.querySelector('#p-nombre');
+    if (campoNombre) campoNombre.onchange = function () {
+      Store.setSetting('name', campoNombre.value.trim());
+      UI.toast(campoNombre.value.trim() ? 'Encantado, ' + campoNombre.value.trim() : 'Nombre borrado');
+    };
 
     bind(root, '[data-a=pesar]', function () {
       const campo = root.querySelector('#peso-hoy');

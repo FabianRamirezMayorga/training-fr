@@ -271,6 +271,13 @@
     incluir = incluir || {};
     const trozos = [];
 
+    /* Hablarle por su nombre cambia por completo cómo se lee una respuesta */
+    const nombre = String(Store.settings().name || '').trim();
+    if (nombre) {
+      trozos.push('SE LLAMA ' + nombre + '. Dirígete a ' + nombre + ' por su nombre al ' +
+        'empezar y alguna vez más si encaja, sin repetirlo en cada frase.');
+    }
+
     const p = Perfil.resumen();
     if (p) trozos.push('PERFIL: ' + p);
 

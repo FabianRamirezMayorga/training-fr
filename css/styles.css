@@ -477,3 +477,9 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 .mover{display:flex;flex-direction:column;gap:5px;flex:none;margin-right:11px}
 .mover .btn{width:34px;height:30px;padding:0}
 .mover .btn svg{width:15px;height:15px}
+
+/* ---------- saludo al abrir la app ---------- */
+.saludo{border-color:var(--acc);background:var(--acc-d);animation:up .35s cubic-bezier(.2,.9,.3,1)}
+.saludo h1{font-size:1.5rem;letter-spacing:-.02em}
+.saludo p{color:var(--txt);opacity:.9;line-height:1.45}
+.saludo .btn.icon{margin:-4px -4px 0 6px;border-color:transparent;opacity:.5}
