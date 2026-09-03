@@ -32,6 +32,26 @@
       : '<span class="chip">' + esc(textoNo) + '</span>';
   }
 
+  /* Campo de clave: siempre oculto de entrada, con un botón para revelarlo.
+     Antes se veían enteras en pantalla, que es justo lo que no debe pasar
+     cuando alguien mira por encima del hombro. */
+  function campoSecreto(id, valor, marcador) {
+    return html`
+      <div class="secreto">
+        <input id="${id}" type="password" autocomplete="off" spellcheck="false"
+               value="${valor || ''}" placeholder="${marcador}">
+        <button class="btn sm" data-ver="${id}" aria-label="Mostrar u ocultar">
+          ${raw(icon('ojo'))}</button>
+      </div>`;
+  }
+
+  /* Muestra solo el principio y el final: suficiente para reconocerla */
+  function resumida(clave) {
+    const s = String(clave || '');
+    if (s.length < 14) return '••••••••';
+    return s.slice(0, 6) + '••••••' + s.slice(-4);
+  }
+
   /* Campo para copiar al portapapeles: la URL de retorno hay que pegarla
      literalmente en el panel de cada servicio */
   function copiable(valor, etiqueta) {
@@ -68,16 +88,25 @@
         </div>
 
         <label class="tiny">CLAVE DE API</label>
-        <input id="k-ia" type="password" autocomplete="off" spellcheck="false"
-               placeholder="${cfgIA.clave ? '••••••••••••••••' : 'AIzaSy...'}"
-               style="margin:5px 0 10px">
+        ${raw(campoSecreto('k-ia', cfgIA.clave, 'AIzaSy...'))}
+        ${raw(cfgIA.clave ? '<div class="tiny" style="margin:6px 0 10px">Guardada: <code>' +
+          esc(resumida(cfgIA.clave)) + '</code></div>' : '<div style="height:10px"></div>')}
 
-        <label class="tiny">MODELO</label>
-        <select id="k-ia-modelo" style="margin:5px 0 12px">
-          ${raw(IA.MODELOS.map(function (m) {
-            return '<option value="' + esc(m) + '"' +
-              ((cfgIA.modelo || IA.MODELOS[0]) === m ? ' selected' : '') + '>' + esc(m) + '</option>';
-          }).join(''))}
+        <div class="row between" style="margin-bottom:5px">
+          <span class="tiny">MODELO</span>
+          ${raw(IA.activa()
+            ? '<button class="btn sm ghost" data-a="refrescarModelos">Actualizar lista</button>' : '')}
+        </div>
+        <select id="k-ia-modelo" style="margin:0 0 12px">
+          ${raw((function () {
+            const actual = cfgIA.modelo || IA.MODELOS[0];
+            const lista = IA.MODELOS.indexOf(actual) === -1
+              ? [actual].concat(IA.MODELOS) : IA.MODELOS;
+            return lista.map(function (m) {
+              return '<option value="' + esc(m) + '"' + (actual === m ? ' selected' : '') +
+                '>' + esc(m) + '</option>';
+            }).join('');
+          })())}
         </select>
 
         <div class="row">
@@ -122,9 +151,9 @@
           : '')}
 
         <label class="tiny">CLIENT ID</label>
-        <input id="k-sp" autocomplete="off" spellcheck="false"
-               value="${cfgSp.clientId || ''}" placeholder="32 caracteres"
-               style="margin:5px 0 12px">
+        ${raw(campoSecreto('k-sp', cfgSp.clientId, '32 caracteres'))}
+        ${raw(cfgSp.clientId ? '<div class="tiny" style="margin:6px 0 12px">Guardado: <code>' +
+          esc(resumida(cfgSp.clientId)) + '</code></div>' : '<div style="height:12px"></div>')}
 
         <div class="row">
           <button class="btn primary grow" data-a="guardarSp">Guardar</button>
@@ -177,9 +206,9 @@
                value="${cfgSync.url || ''}" placeholder="https://xxxxxxxx.supabase.co"
                style="margin:5px 0 10px">
         <label class="tiny">CLAVE PUBLISHABLE (O ANON)</label>
-        <input id="k-sb-key" autocomplete="off" spellcheck="false"
-               value="${cfgSync.key || ''}" placeholder="sb_publishable_... o eyJhbGciOi..."
-               style="margin:5px 0 12px">
+        ${raw(campoSecreto('k-sb-key', cfgSync.key, 'sb_publishable_... o eyJhbGciOi...'))}
+        ${raw(cfgSync.key ? '<div class="tiny" style="margin:6px 0 12px">Guardada: <code>' +
+          esc(resumida(cfgSync.key)) + '</code></div>' : '<div style="height:12px"></div>')}
         <button class="btn primary block" data-a="guardarSb">Guardar</button>
 
         <div style="margin-top:12px">
@@ -272,6 +301,14 @@
       el.classList.toggle('abierta', !c.hidden);
     });
 
+    bindAll(root, '[data-ver]', function (el) {
+      const campo = root.querySelector('#' + el.dataset.ver);
+      if (!campo) return;
+      const oculto = campo.type === 'password';
+      campo.type = oculto ? 'text' : 'password';
+      el.classList.toggle('on', oculto);
+    });
+
     bindAll(root, '[data-copiar]', function (el) {
       const v = el.dataset.copiar;
       if (navigator.clipboard) navigator.clipboard.writeText(v);
@@ -286,6 +323,43 @@
     };
 
     /* ---- Gemini ---- */
+
+    /* Al abrir la bóveda se consulta qué modelos admite la clave: Google retira
+       los antiguos y una lista escrita a mano deja de valer al poco tiempo. */
+    const selectorModelo = root.querySelector('#k-ia-modelo');
+    const rellenarModelos = function (forzar) {
+      if (!selectorModelo || !IA.activa()) return;
+      IA.listarModelos(forzar).then(function (lista) {
+        if (!lista || !lista.length) return;
+        const actual = selectorModelo.value;
+        selectorModelo.innerHTML = lista.map(function (m) {
+          return '<option value="' + esc(m) + '"' + (m === actual ? ' selected' : '') +
+            '>' + esc(m) + '</option>';
+        }).join('');
+        /* si el guardado ya no existe, se pasa al primero disponible */
+        if (lista.indexOf(actual) === -1) {
+          selectorModelo.value = lista[0];
+          IA.guardarConfig(IA.config().clave, lista[0]);
+        }
+      }).catch(function () { /* se queda la lista por defecto */ });
+    };
+    rellenarModelos(false);
+
+    bind(root, '[data-a=refrescarModelos]', function (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Consultando…';
+      IA.listarModelos(true).then(function (lista) {
+        rellenarModelos(false);
+        btn.disabled = false;
+        btn.textContent = 'Actualizar lista';
+        UI.toast(lista.length + ' modelos disponibles con tu clave');
+      }).catch(function () {
+        btn.disabled = false;
+        btn.textContent = 'Actualizar lista';
+        UI.toast('No se pudo consultar la lista');
+      });
+    });
+
     bind(root, '[data-a=guardarIA]', function () {
       const campo = root.querySelector('#k-ia');
       const modelo = root.querySelector('#k-ia-modelo').value;
@@ -293,6 +367,13 @@
       if (!clave) { UI.toast('Pega la clave de Gemini'); return; }
       try {
         IA.guardarConfig(clave, modelo);
+        IA.listarModelos(true).then(function (lista) {
+          if (lista && lista.length && lista.indexOf(IA.config().modelo) === -1) {
+            IA.guardarConfig(clave, lista[0]);
+            UI.toast('Clave guardada. Modelo ajustado a ' + lista[0]);
+            render();
+          }
+        }).catch(function () { /* nada */ });
         render();
         UI.toast('Clave guardada');
       } catch (e) { UI.toast(e.message); }

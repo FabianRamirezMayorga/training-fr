@@ -12,7 +12,11 @@
   const CFG = 'trainingfr.ia';
   const CACHE = 'trainingfr.ia.cache';
   const BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
-  const MODELOS = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+  /* Google retira modelos cada pocos meses y los nuevos usuarios dejan de poder
+     usar los viejos. Esta lista es solo el punto de partida: la app pregunta a
+     Google qué modelos tiene disponibles tu clave y se queda con los que existan. */
+  const MODELOS = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+  const CACHE_MODELOS = 'trainingfr.ia.modelos';
 
   const INSTRUCCIONES =
     'Eres el entrenador personal de la aplicación Training FR. Respondes en español ' +
@@ -65,6 +69,59 @@
 
   function limpiarCache() { localStorage.removeItem(CACHE); }
 
+  /* ---------- qué modelos hay disponibles ----------
+     Se los pregunta a Google con la clave del usuario, así que la app no depende
+     de una lista escrita a mano que envejece. */
+
+  function modelosGuardados() {
+    try {
+      const c = JSON.parse(localStorage.getItem(CACHE_MODELOS) || 'null');
+      if (c && Date.now() - c.t < 7 * 864e5 && c.lista && c.lista.length) return c.lista;
+    } catch (e) { /* nada */ }
+    return null;
+  }
+
+  function listarModelos(forzar) {
+    const guardados = forzar ? null : modelosGuardados();
+    if (guardados) return Promise.resolve(guardados);
+
+    const c = config();
+    if (!c.clave) return Promise.resolve(MODELOS.slice());
+
+    return fetch(BASE.replace(/models\/$/, 'models') + '?key=' + encodeURIComponent(c.clave))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.models) return MODELOS.slice();
+
+        const lista = j.models
+          .filter(function (m) {
+            const metodos = m.supportedGenerationMethods || m.supportedActions || [];
+            return metodos.indexOf('generateContent') !== -1;
+          })
+          .map(function (m) { return String(m.name || '').replace(/^models\//, ''); })
+          .filter(function (n) { return n && n.indexOf('gemini') === 0; });
+
+        if (!lista.length) return MODELOS.slice();
+
+        /* los "flash" primero: son los rápidos y los que más cabida tienen en la
+           capa gratuita; después el resto, y los más nuevos por delante */
+        lista.sort(function (a, b) {
+          const flash = function (x) { return /flash/.test(x) ? 0 : 1; };
+          const version = function (x) {
+            const m = x.match(/gemini-(\d+)[.-]?(\d*)/);
+            return m ? Number(m[1]) * 100 + Number(m[2] || 0) : 0;
+          };
+          return flash(a) - flash(b) || version(b) - version(a) || a.localeCompare(b);
+        });
+
+        try {
+          localStorage.setItem(CACHE_MODELOS, JSON.stringify({ t: Date.now(), lista: lista }));
+        } catch (e) { /* nada */ }
+        return lista;
+      })
+      .catch(function () { return MODELOS.slice(); });
+  }
+
   /* ---------- llamada ---------- */
 
   function llamar(prompt, opciones) {
@@ -101,9 +158,24 @@
 
           if (!r.ok) {
             const msg = (j && j.error && j.error.message) || ('Error ' + r.status);
-            if (r.status === 404 && i < modelos.length - 1) return intentar(i + 1);
+
+            /* Google avisa del sustituto en el propio mensaje cuando retira un
+               modelo: se aprovecha para saltar directamente al nuevo. */
+            const sugerido = msg.match(/use\s+models\/([a-z0-9.\-]+)/i);
+            if (sugerido && modelos.indexOf(sugerido[1]) === -1) {
+              modelos.splice(i + 1, 0, sugerido[1]);
+            }
+
+            const retirado = r.status === 404 ||
+              /no longer available|not found|is not supported/i.test(msg);
+            if (retirado && i < modelos.length - 1) return intentar(i + 1);
+
             if (r.status === 400 && /API key/i.test(msg)) throw new Error('La clave de la IA no es válida.');
             if (r.status === 429) throw new Error('Has agotado la cuota gratuita por ahora. Inténtalo más tarde.');
+            if (retirado) {
+              throw new Error('El modelo elegido ya no está disponible. Abre la bóveda y ' +
+                'vuelve a elegir modelo: la lista se actualiza sola.');
+            }
             throw new Error(msg);
           }
 
@@ -115,6 +187,10 @@
               throw new Error('La IA no pudo responder a esa petición.');
             }
             throw new Error('La IA devolvió una respuesta vacía.');
+          }
+          /* el modelo que ha respondido pasa a ser el preferido */
+          if (modelos[i] !== c.modelo) {
+            try { guardarConfig(c.clave, modelos[i]); } catch (e) { /* nada */ }
           }
           return texto.trim();
         });
@@ -376,6 +452,7 @@
   g.IA = {
     config: config, guardarConfig: guardarConfig, borrarConfig: borrarConfig, activa: activa,
     llamar: llamar, llamarJSON: llamarJSON, contexto: contexto, limpiarCache: limpiarCache,
+    listarModelos: listarModelos,
     planNutricion: planNutricion, revisarRutinas: revisarRutinas,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,
