@@ -176,9 +176,9 @@
         <input id="k-sb-url" autocomplete="off" spellcheck="false"
                value="${cfgSync.url || ''}" placeholder="https://xxxxxxxx.supabase.co"
                style="margin:5px 0 10px">
-        <label class="tiny">CLAVE ANON PUBLIC</label>
+        <label class="tiny">CLAVE PUBLISHABLE (O ANON)</label>
         <input id="k-sb-key" autocomplete="off" spellcheck="false"
-               value="${cfgSync.key || ''}" placeholder="eyJhbGciOi..."
+               value="${cfgSync.key || ''}" placeholder="sb_publishable_... o eyJhbGciOi..."
                style="margin:5px 0 12px">
         <button class="btn primary block" data-a="guardarSb">Guardar</button>
 
@@ -191,8 +191,10 @@
           '<li>Entra en <a href="https://supabase.com" target="_blank" ' +
           'rel="noopener noreferrer">supabase.com</a>, crea una cuenta y pulsa ' +
           '<b>New project</b>. Elige nombre, contraseña y la región más cercana.</li>',
-          '<li>Cuando termine de crearse, ve a <b>Project Settings &rarr; API</b> y copia la ' +
-          '<b>Project URL</b> y la clave <b>anon public</b>.</li>',
+          '<li>Copia la <b>Project URL</b> en <b>Project Settings &rarr; Data API</b>.</li>',
+          '<li>En <b>Project Settings &rarr; API Keys</b> copia la <b>Publishable key</b> ' +
+          '(empieza por <code>sb_publishable_</code>). Si tu proyecto es antiguo, sirve ' +
+          'igual la <b>anon public</b> de la pestaña <i>Legacy</i>.</li>',
           '<li>Ve a <b>SQL Editor</b>, pega el bloque de abajo y pulsa <b>Run</b>. Crea la ' +
           'tabla de tus datos con la seguridad que impide que nadie más los vea.</li>',
           '<li>Ve a <b>Authentication &rarr; URL Configuration</b> y pon la dirección de ' +
@@ -252,7 +254,7 @@
         <p class="muted" style="margin:0 0 10px">Las claves viven en el almacenamiento de
         este navegador y, si la sincronización de claves está activada, también en tu base
         de datos de Supabase, donde solo tú puedes leerlas.</p>
-        <p class="tiny" style="margin:0 0 12px">La clave <i>anon public</i> de Supabase y el
+        <p class="tiny" style="margin:0 0 12px">La clave <i>publishable</i> de Supabase y el
         <i>Client ID</i> de Spotify están pensados para ir en el navegador y no son
         secretos. La de Gemini sí lo es: no la compartas ni la pegues en el código.</p>
         <button class="btn danger block" data-a="borrarTodo">Borrar todas las claves</button>

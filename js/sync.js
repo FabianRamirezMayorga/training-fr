@@ -43,7 +43,12 @@
     if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)) {
       throw new Error('La URL debe tener la forma https://xxxxx.supabase.co');
     }
-    if (key.length < 30) throw new Error('La clave anon no parece válida.');
+    /* vale tanto la clave publishable actual como la anon de los proyectos antiguos */
+    const formatoOk = /^sb_publishable_[A-Za-z0-9_-]{10,}$/.test(key) ||
+      /^eyJ[A-Za-z0-9._-]{30,}$/.test(key);
+    if (!formatoOk) {
+      throw new Error('Esa clave no parece la publishable ni la anon. Cópiala de Project Settings, API Keys.');
+    }
     guardar(CFG_KEY, { url: url, key: key });
   }
 
