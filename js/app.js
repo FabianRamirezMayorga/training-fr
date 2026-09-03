@@ -116,13 +116,65 @@
     }).join('');
   }
 
+  /* La bienvenida son dos preguntas: dónde entrenas y cómo quieres usar la app */
+  let pasoBienvenida = 1;
+
   function viewBienvenida() {
-    return html`
+    const cabecera = html`
       <div style="padding:26px 0 6px" class="center">
         <img src="icons/logo.svg" alt="Training FR" width="94" height="119"
              style="margin:0 auto 12px">
         <div class="splash-name wordmark">TRAINING<sup>FR</sup></div>
-      </div>
+      </div>`;
+
+    if (pasoBienvenida === 2) {
+      return html`
+        ${raw(cabecera)}
+        <h1 class="center">¿Cómo quieres empezar?</h1>
+        <p class="muted center">Puedes usar la app tal cual, sin dar ningún dato, o crear
+        tu cuenta para tenerlo todo en cualquier dispositivo.</p>
+
+        <div class="stack" style="margin-top:18px">
+          <button class="rt-item modo-op" data-modo="cuenta" style="width:100%;text-align:left">
+            <span class="row-icon">${raw(icon('nube'))}</span>
+            <div class="grow">
+              <div style="font-weight:700">Con mi cuenta</div>
+              <div class="tiny">Correo y contraseña. Tus rutinas, tu historial y tus
+                ajustes viajan contigo al móvil, al portátil y al que venga después.</div>
+            </div>
+            <span class="chevron">${raw(icon('chevron'))}</span>
+          </button>
+
+          <button class="rt-item modo-op" data-modo="invitado" style="width:100%;text-align:left">
+            <span class="row-icon">${raw(icon('perfil'))}</span>
+            <div class="grow">
+              <div style="font-weight:700">Como invitado</div>
+              <div class="tiny">Empiezas ya, sin dar ningún dato. Todo se guarda solo en
+                este dispositivo y se pierde si borras los datos del navegador.</div>
+            </div>
+            <span class="chevron">${raw(icon('chevron'))}</span>
+          </button>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="row" style="gap:10px;align-items:flex-start">
+            <span class="row-icon">${raw(icon('chispa'))}</span>
+            <div class="grow">
+              <b style="font-size:.9rem">Lo que funciona sin nada de esto</b>
+              <p class="tiny" style="margin:5px 0 0">El catálogo de 876 ejercicios con su
+              técnica, tus rutinas, el programa personal y el registro de entrenamientos
+              van solos, sin cuenta y sin internet. La cuenta es para no perderlo; la clave
+              de IA, para el entrenador, el menú de comidas y las listas de música.</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn ghost block sm" data-a="atrasPaso" style="margin-top:14px">
+          Volver a elegir dónde entreno</button>`;
+    }
+
+    return html`
+      ${raw(cabecera)}
       <h1 class="center">¿Dónde vas a entrenar?</h1>
       <p class="muted center">Con esto te muestro solo los ejercicios que puedes hacer de verdad,
       y las rutinas que te genere usarán únicamente ese material. Si vienes a mirar,
@@ -137,10 +189,27 @@
       Store.setSetting('gear', el.dataset.lugar);
       planState.gear = el.dataset.lugar;
       exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', favs: false, todo: false };
-      go('inicio');
-      UI.toast(el.dataset.lugar === 'todo'
-        ? 'Listo. Verás el catálogo completo, sin filtrar por material.'
-        : 'Listo. Verás solo lo que puedes hacer ' + Data.gearFrase(el.dataset.lugar));
+      pasoBienvenida = 2;
+      /* el ajuste ya está guardado, así que la ruta de bienvenida deja de valer */
+      route = { name: 'bienvenida', arg: null };
+      viewEl.innerHTML = viewBienvenida();
+      viewBienvenida.mount(viewEl);
+      window.scrollTo(0, 0);
+    });
+
+    bind(root, '[data-a=atrasPaso]', function () {
+      pasoBienvenida = 1;
+      Store.setSetting('gear', '');
+      render();
+    });
+
+    bindAll(root, '[data-modo]', function (el) {
+      pasoBienvenida = 1;
+      if (el.dataset.modo === 'cuenta') { go('cuenta'); return; }
+      Modo.avisarInvitado(function () {
+        go('inicio');
+        UI.toast('Listo. Puedes crear la cuenta cuando quieras desde Perfil.');
+      });
     });
   };
 
@@ -183,16 +252,18 @@
         <div class="card saludo">
           <div class="row between" style="align-items:flex-start">
             <div class="grow">
-              <h1 style="margin:0 0 4px">${bienvenida.titulo}</h1>
-              <p style="margin:0;font-size:.95rem">${bienvenida.texto}</p>
+              <div class="saludo-tit entra">${raw(conNombreHTML(bienvenida.titulo))}</div>
+              <p class="entra entra-2" style="margin:0;font-size:.92rem">${bienvenida.texto}</p>
             </div>
             <button class="btn icon ghost" data-a="cerrarSaludo"
                     aria-label="Cerrar">${raw(icon('close'))}</button>
           </div>
         </div>`
       : html`
-        <h1>Hola${nombre ? ', ' + nombre : ''}</h1>
-        <p class="muted">${st.week === 0 ? 'Aún no has entrenado esta semana. Buen momento para empezar.'
+        <div class="hola entra">Hola${raw(nombre
+          ? ', <span class="nombre">' + esc(nombre) + '</span>' : '')}</div>
+        <p class="muted entra entra-2" style="font-size:.92rem">${st.week === 0
+          ? 'Aún no has entrenado esta semana. Buen momento para empezar.'
           : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
           : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.'}</p>`)}
 
@@ -220,6 +291,8 @@
           ? st.weekSets : st.weekVolume)}</b><span>${Store.settings().registro === 'simple' ||
           st.totalVolume === 0 ? 'Series semana' : 'Volumen semana'}</span></div>
       </div>
+
+      ${raw(Modo.franjaInvitado())}
 
       ${raw(deHoy.length ? html`
         <div class="list-title">Toca hoy (${hoy})</div>
@@ -279,6 +352,17 @@
         }).join(''))}` : '')}`;
   }
 
+  /* Resalta el nombre dentro del saludo, que es lo único que cambia de persona
+     a persona: "Buenas tardes, Fabián" con el nombre en color. */
+  function conNombreHTML(titulo) {
+    const n = Saludo.nombre();
+    if (!n) return esc(titulo);
+    const i = titulo.lastIndexOf(n);
+    if (i === -1) return esc(titulo);
+    return esc(titulo.slice(0, i)) + '<span class="nombre">' + esc(n) + '</span>' +
+      esc(titulo.slice(i + n.length));
+  }
+
   function routineCard(r, i, total) {
     const n = r.exercises.length;
     const hoy = UI.DAY_NAMES[new Date().getDay()];
@@ -316,6 +400,7 @@
 
   viewInicio.mount = function (root) {
     bind(root, '[data-a=cerrarSaludo]', function () { Saludo.descartar(); render(); });
+    bind(root, '[data-a=irCuenta]', function () { go('cuenta'); });
     bind(root, '[data-a=resume]', function () { go('entrenar'); });
     bind(root, '[data-a=empezarlibre]', function () {
       Workout.startLibre();
@@ -2472,8 +2557,8 @@
             <b>Project URL</b> de <b>Data API</b>.</li>
           <li>Pega los dos valores en la bóveda y vuelve aquí a entrar con tu correo.</li>
         </ol>
-        <button class="btn primary block" data-a="configsync">
-          ${raw(icon('llave'))} Abrir la bóveda con el paso a paso</button>
+        <button class="btn primary block" data-a="pasoapaso">
+          ${raw(icon('chevron'))} Abrir el paso a paso completo</button>
       </div>`;
   }
 
@@ -2482,6 +2567,8 @@
       altaModo = el.dataset.alta || '';
       render();
     });
+
+    bind(root, '[data-a=pasoapaso]', function () { go('basedatos'); });
 
     bind(root, '[data-a=usarEnlace]', function () {
       const v = (root.querySelector('#alta-enlace').value || '').trim();

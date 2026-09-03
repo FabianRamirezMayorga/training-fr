@@ -810,7 +810,7 @@
     haySubidaPendiente = true;
     fijarEstado('pendiente');
     clearTimeout(pendiente);
-    pendiente = setTimeout(subirAhora, 4000);
+    pendiente = setTimeout(intentarSubir, 4000);
   }
 
   /* Sincroniza ya, sin esperar.
@@ -839,10 +839,16 @@
         reintentos++;
         const espera = Math.min(5000 * Math.pow(3, reintentos - 1), 300000);
         clearTimeout(pendiente);
-        pendiente = setTimeout(subirAhora, espera);
+        pendiente = setTimeout(intentarSubir, espera);
       }
       throw e;
     });
+  }
+
+  /* Igual que subirAhora pero recogiendo el rechazo: lo usan el temporizador y
+     los eventos, donde nadie está esperando la promesa. */
+  function intentarSubir() {
+    return subirAhora().catch(function () { /* el estado ya lo cuenta */ });
   }
 
   /* Un ciclo completo. Los cambios propios no esperan al intervalo mínimo. */
@@ -880,13 +886,13 @@
     document.addEventListener('visibilitychange', function () {
       /* al irse a segundo plano, lo pendiente se sube ya: en el móvil la app
          puede no volver a ejecutar nada durante horas */
-      if (document.hidden) { if (haySubidaPendiente) subirAhora(); return; }
+      if (document.hidden) { if (haySubidaPendiente) intentarSubir(); return; }
       traer(true);
     });
 
     /* la pestaña se cierra o el móvil la descarta */
     window.addEventListener('pagehide', function () {
-      if (haySubidaPendiente) subirAhora();
+      if (haySubidaPendiente) intentarSubir();
     });
 
     window.addEventListener('online', function () { traer(true); });

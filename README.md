@@ -73,6 +73,28 @@ que has abierto los ejercicios al menos una vez.
 
 ---
 
+## Dos formas de usarla
+
+Al abrirla por primera vez pregunta dos cosas: dónde entrenas y cómo quieres empezar.
+
+- **Como invitado.** Sin dar ningún dato. Todo se guarda en ese dispositivo y solo ahí, y
+  la app lo dice claramente antes de seguir: se pierde si borras los datos del navegador,
+  no hay copia en ningún servidor y no lo verás en tu otro móvil. Cuando vas a personalizar
+  algo que merece la pena conservar —tu peso, tus hábitos, tus limitaciones— te ofrece crear
+  la cuenta, y si prefieres seguir sin ella, adelante. Lo hecho hasta entonces no se pierde:
+  al crear la cuenta después, se sube.
+- **Con cuenta.** Correo y contraseña, y lo mismo en todos tus dispositivos.
+
+El catálogo, las rutinas, el programa personal y el registro de entrenamientos **funcionan
+sin cuenta y sin internet**. La cuenta es para no perderlos. La clave de IA (gratuita) es
+para el entrenador, el menú de comidas, las listas de música y la revisión del programa.
+
+Quien no tenga base de datos encuentra en *Mi cuenta* un **paso a paso de siete pasos** con
+los nombres exactos de cada menú de Supabase, el SQL listo para copiar, la dirección que hay
+que autorizar y dónde están los dos datos de conexión.
+
+---
+
 ## Qué hace
 
 - **Eliges dónde entrenas al abrirla** — gimnasio, casa con mancuernas, casa con bandas,
@@ -359,6 +381,7 @@ js/spotify.js           control de música con autorización PKCE
 js/vistas.js            perfil, objetivos y alertas
 js/vistas2.js           alimentación, entrenador y música
 js/vistas4.js           el programa personal
+js/vistas5.js           modo invitado y guía para crear la base de datos
 js/workout.js           modo entrenamiento
 js/app.js               router y vistas
 sw.js                   service worker (uso sin conexión)

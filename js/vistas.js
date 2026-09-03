@@ -56,6 +56,8 @@
           <button class="btn primary block" data-a="datos">Empezar</button>
         </div>`)}
 
+      ${raw(Modo.franjaInvitado())}
+
       <div class="list-title">Tú</div>
       <div class="list">
         ${raw(fila({ icono: 'perfil', titulo: 'Datos y hábitos', accion: 'datos',
@@ -105,6 +107,7 @@
       go(ir[d] || 'ajustes');
     });
     bind(root, '[data-a=datos]', function () { go('datos'); });
+    bind(root, '[data-a=irCuenta]', function () { go('cuenta'); });
   };
 
   /* ================= datos y hábitos ================= */
@@ -266,6 +269,10 @@
 
   V.datos.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
+
+    /* Personalizar es justo el momento de decidir dónde va a vivir todo esto */
+    Modo.pedirCuenta('Vas a guardar tu peso, tus hábitos y tus limitaciones. Es lo que ' +
+      'hace que las rutinas y el menú sean tuyos y no de cualquiera.');
 
     bindAll(root, '[data-set]', function (el) {
       const cambio = {};

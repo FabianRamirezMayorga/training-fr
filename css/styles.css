@@ -480,10 +480,44 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 
 /* ---------- saludo al abrir la app ---------- */
 .saludo{border-color:var(--acc);background:var(--acc-d);animation:up .35s cubic-bezier(.2,.9,.3,1)}
-.saludo h1{font-size:1.5rem;letter-spacing:-.02em}
 .saludo p{color:var(--txt);opacity:.9;line-height:1.45}
 .saludo .btn.icon{margin:-4px -4px 0 6px;border-color:transparent;opacity:.5}
+
+/* El saludo entra en dos tiempos: primero el nombre, después el mensaje.
+   Con prefers-reduced-motion se queda quieto, que para algunas personas el
+   movimiento marea. */
+.saludo-tit{font-size:1.18rem;font-weight:700;letter-spacing:-.02em;margin:0 0 3px;
+  line-height:1.25}
+.saludo-tit .nombre{color:var(--acc)}
+.entra{opacity:0;animation:entra .5s cubic-bezier(.2,.9,.3,1) forwards}
+.entra-2{animation-delay:.13s}
+@keyframes entra{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .entra{animation:none;opacity:1}
+  .saludo{animation:none}
+}
+
+/* El "Hola, Fabián" de la portada, más contenido que un titular */
+.hola{font-size:1.35rem;font-weight:700;letter-spacing:-.022em;margin:0 0 2px}
+.hola .nombre{color:var(--acc)}
 
 /* Punto de estado de la sincronización */
 .punto-sync{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 0 3px rgba(255,255,255,.06)}
 #sync-estado .btn{flex:none;white-space:nowrap}
+
+/* ---------- modo invitado y paso a paso ---------- */
+/* Franja que recuerda dónde viven los datos, sin dar la lata */
+.franja-invitado{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  margin-top:14px;border-style:dashed;color:var(--txt)}
+.franja-invitado .row-icon{color:var(--warn)}
+
+/* Las dos formas de empezar */
+.modo-op{padding:15px;align-items:flex-start}
+.modo-op .row-icon{margin-top:2px}
+
+/* Cada paso de la guía, numerado */
+.paso-n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--acc);
+  color:var(--on-acc);font-weight:800;font-size:.82rem;display:flex;
+  align-items:center;justify-content:center}
+.paso .instr li{margin-bottom:6px}
+.paso pre{margin:0}
