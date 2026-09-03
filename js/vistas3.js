@@ -111,9 +111,15 @@
             <div style="font-weight:600">Client ID de Spotify</div>
             <div class="tiny">Controlar la música desde la pantalla de entrenamiento</div>
           </div>
-          ${raw(estado(Spotify.activa(), 'Conectado',
-            Spotify.configurado() ? 'Sin conectar' : 'Sin configurar'))}
+          ${raw(Spotify.permisosCaducados()
+            ? '<span class="chip" style="border-color:var(--warn);color:var(--warn)">Reconectar</span>'
+            : estado(Spotify.activa(), 'Conectado',
+                Spotify.configurado() ? 'Sin conectar' : 'Sin configurar'))}
         </div>
+        ${raw(Spotify.permisosCaducados()
+          ? '<p class="tiny" style="margin:0 0 11px;color:var(--warn)">La app ya puede ' +
+            'reproducir por sí misma y crear listas. Pulsa Conectar para dar los permisos nuevos.</p>'
+          : '')}
 
         <label class="tiny">CLIENT ID</label>
         <input id="k-sp" autocomplete="off" spellcheck="false"

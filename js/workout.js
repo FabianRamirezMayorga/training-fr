@@ -424,11 +424,29 @@
     const host = root.querySelector('#wo-musica');
     if (!host || !g.Spotify || !Spotify.activa()) return;
 
-    Spotify.sonando().then(function (s) {
-      if (!s) return;
-      host.innerHTML = g.Reproductor.html(s);
-      g.Reproductor.montar(host);
-    }).catch(function () { /* sin música sonando o sin permiso: no molesta */ });
+    const pintar = function (s) {
+      if (s) {
+        host.innerHTML = g.Reproductor.html(s);
+        g.Reproductor.montar(host);
+        return;
+      }
+      /* nada sonando: acceso directo a la música sin salir del entrenamiento */
+      host.innerHTML = html`
+        <button class="card row" data-w="musica" style="width:100%;text-align:left;gap:11px">
+          <span class="row-icon">${raw(icon('musica'))}</span>
+          <span class="grow" style="font-weight:600;font-size:.92rem">Poner música</span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>`;
+      const b = host.querySelector('[data-w=musica]');
+      if (b) b.onclick = function () { g.App.go('musica'); };
+    };
+
+    Spotify.sonando()
+      .then(pintar)
+      .catch(function () { pintar(null); });
+
+    /* el reproductor propio avisa de cada cambio de canción */
+    if (Spotify.alCambiar) Spotify.alCambiar(function (s) { if (s) pintar(s); });
   }
 
   function doFinish() {

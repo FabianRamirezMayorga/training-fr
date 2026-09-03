@@ -248,6 +248,112 @@
     return llamar(prompt, { maxTokens: 1024 });
   }
 
+  /* ---------- listas de reproducción para entrenar ----------
+     La IA propone canciones y la app las busca luego en Spotify, así que las que
+     no existan simplemente se descartan. Se guarda memoria de lo ya propuesto
+     para que cada lista traiga cosas nuevas en lugar de repetir siempre igual. */
+
+  const MEM_MUSICA = 'trainingfr.musica.memoria';
+
+  function memoriaMusical() {
+    try { return JSON.parse(localStorage.getItem(MEM_MUSICA) || 'null') || { artistas: [], listas: 0 }; }
+    catch (e) { return { artistas: [], listas: 0 }; }
+  }
+
+  function recordarMusica(artistas) {
+    const m = memoriaMusical();
+    artistas.forEach(function (a) {
+      if (a && m.artistas.indexOf(a) === -1) m.artistas.push(a);
+    });
+    /* se conservan los 120 últimos: suficiente para no repetir, sin inflar el prompt */
+    m.artistas = m.artistas.slice(-120);
+    m.listas = (m.listas || 0) + 1;
+    try { localStorage.setItem(MEM_MUSICA, JSON.stringify(m)); } catch (e) { /* nada */ }
+    return m;
+  }
+
+  function olvidarMusica() { localStorage.removeItem(MEM_MUSICA); }
+
+  const AMBIENTES = {
+    fuerza: {
+      label: 'Fuerza bruta',
+      guia: 'pesado, agresivo y contundente, para series máximas: hip hop duro, metal, ' +
+        'rap rock, trap oscuro. Entre 80 y 110 pulsaciones por minuto con mucho golpe.'
+    },
+    ritmo: {
+      label: 'Ritmo constante',
+      guia: 'cadencia estable para mantener el ritmo entre series: house, techno melódico, ' +
+        'drum and bass, electrónica. Entre 120 y 135 pulsaciones por minuto.'
+    },
+    cardio: {
+      label: 'Cardio y quema',
+      guia: 'rápido y eufórico para cardio o circuitos: dance, EDM, pop enérgico, ' +
+        'reguetón rápido. Entre 140 y 160 pulsaciones por minuto.'
+    },
+    clasicos: {
+      label: 'Clásicos de gimnasio',
+      guia: 'himnos de gimnasio de todas las épocas: rock potente, hard rock ochentero, ' +
+        'temas que todo el mundo reconoce al primer acorde.'
+    },
+    concentracion: {
+      label: 'Concentración',
+      guia: 'sin letra o con letra mínima, para no distraer: instrumental, lo-fi con ' +
+        'garra, post rock, bandas sonoras épicas.'
+    },
+    latino: {
+      label: 'Latino',
+      guia: 'reguetón, dembow, salsa dura, latin trap y afrobeat con mucho ritmo.'
+    }
+  };
+
+  /* Genera una lista distinta cada vez, adaptada al entrenamiento del día */
+  function playlistEntreno(opts) {
+    opts = opts || {};
+    const amb = AMBIENTES[opts.ambiente] || AMBIENTES.ritmo;
+    const n = Math.max(8, Math.min(40, opts.canciones || 20));
+    const mem = memoriaMusical();
+
+    const partes = [
+      'Prepara una lista de ' + n + ' canciones para entrenar en el gimnasio.',
+      'Ambiente buscado: ' + amb.guia
+    ];
+
+    if (opts.rutina) partes.push('El entrenamiento de hoy es: ' + opts.rutina + '.');
+    if (opts.minutos) partes.push('La sesión dura unos ' + opts.minutos + ' minutos.');
+    if (opts.gustos && opts.gustos.length) {
+      partes.push('Artistas que escucha habitualmente: ' + opts.gustos.slice(0, 12).join(', ') +
+        '. Puedes incluir alguno, pero que sean minoría.');
+    }
+    if (opts.libre) partes.push('Indicación del usuario: ' + opts.libre);
+
+    if (mem.artistas.length) {
+      partes.push('NO repitas estos artistas, ya salieron en listas anteriores: ' +
+        mem.artistas.slice(-60).join(', ') + '.');
+    }
+
+    partes.push(
+      'Reglas: canciones reales y localizables en Spotify, con el título exacto. ' +
+      'Máximo una canción por artista. Mezcla épocas y países. ' +
+      'Al menos un tercio deben ser temas poco evidentes, para descubrir cosas nuevas; ' +
+      'el resto pueden ser más conocidos. Nada de villancicos, infantil ni parodias.',
+      'Semilla de variación para que esta lista no se parezca a las anteriores: ' +
+      (opts.semilla || Math.random().toString(36).slice(2)) + '.',
+      '',
+      'Devuelve JSON: {"nombre":"nombre corto y con gracia para la lista",' +
+      '"descripcion":"una frase","canciones":[{"artista":"","titulo":"",' +
+      '"porque":"3-6 palabras sobre por qué encaja"}]}'
+    );
+
+    /* temperatura alta: aquí interesa que se repita poco y explore */
+    return llamarJSON(partes.join('\n'), { maxTokens: 4096, temperatura: 1.0 })
+      .then(function (r) {
+        if (!r || !Array.isArray(r.canciones) || !r.canciones.length) {
+          throw new Error('La IA no devolvió canciones.');
+        }
+        return r;
+      });
+  }
+
   /* Explicación de un ejercicio concreto, en español */
   function explicarEjercicio(ex) {
     const clave = 'ejercicio:' + ex.id;
@@ -271,6 +377,8 @@
     config: config, guardarConfig: guardarConfig, borrarConfig: borrarConfig, activa: activa,
     llamar: llamar, llamarJSON: llamarJSON, contexto: contexto, limpiarCache: limpiarCache,
     planNutricion: planNutricion, revisarRutinas: revisarRutinas,
+    playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
+    memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,
     analizarProgreso: analizarProgreso, preguntar: preguntar, explicarEjercicio: explicarEjercicio,
     MODELOS: MODELOS
   };

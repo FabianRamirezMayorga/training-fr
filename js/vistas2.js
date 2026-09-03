@@ -315,111 +315,343 @@
 
   /* ================= música ================= */
 
-  V.musica = function () {
-    const c = Spotify.config();
+  const LISTA_KEY = 'trainingfr.playlist';
 
+  function listaGuardada() {
+    try { return JSON.parse(localStorage.getItem(LISTA_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function guardarLista(l) {
+    if (l === null) localStorage.removeItem(LISTA_KEY);
+    else localStorage.setItem(LISTA_KEY, JSON.stringify(l));
+  }
+
+  V.musica = function () {
     if (!Spotify.configurado()) {
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
           ${raw(icon('back'))} Perfil</button>
         <h1>Música</h1>
-        <p class="muted">Controla Spotify desde la pantalla de entrenamiento, sin salir de la app.</p>
-
+        <p class="muted">Reproduce dentro de la app y deja que la IA te prepare listas
+        distintas para cada entrenamiento.</p>
         <div class="card">
-          <p class="muted">Necesita el Client ID de una app de Spotify, que se crea en un
+          <p class="muted">Necesita el Client ID de una app de Spotify: se crea en un
           minuto y es gratis. Tienes el paso a paso en la bóveda.</p>
           <button class="btn primary block" data-a="boveda">
             ${raw(icon('llave'))} Ir a la bóveda de claves</button>
         </div>
-
-        <p class="tiny" style="margin-top:12px">Con Spotify Premium tendrás los controles
-        completos (play, pausa y cambio de tema). Sin Premium, Spotify solo permite ver qué
-        suena y usar el reproductor incrustado.</p>`;
+        <p class="tiny" style="margin-top:12px">Reproducir dentro de la app requiere
+        Spotify Premium; es condición de su plataforma.</p>`;
     }
+
+    if (!Spotify.activa()) {
+      return html`
+        <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+          ${raw(icon('back'))} Perfil</button>
+        <h1>Música</h1>
+        <div class="card">
+          <p class="muted">Conecta tu cuenta para reproducir aquí y generar listas.</p>
+          <button class="btn primary block" data-a="conectar">
+            ${raw(icon('musica'))} Conectar Spotify</button>
+        </div>`;
+    }
+
+    const lista = listaGuardada();
+    const mem = IA.activa() ? IA.memoriaMusical() : { listas: 0, artistas: [] };
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Perfil</button>
-      <h1>Música</h1>
-
-      ${raw(Spotify.activa() ? html`
-        <div class="card">
-          <div class="row between">
-            <div class="grow">
-              <div style="font-weight:600">Spotify conectado</div>
-              <div class="tiny">Verás los controles durante el entrenamiento</div>
-            </div>
-            <button class="btn sm" data-a="desconectar">Desconectar</button>
-          </div>
-        </div>
-        <div id="sp-ahora"></div>`
-      : html`
-        <div class="card">
-          <p class="muted">Conecta tu cuenta para ver y controlar lo que suena.</p>
-          <button class="btn primary block" data-a="conectar">${raw(icon('musica'))} Conectar Spotify</button>
-        </div>`)}
-
-      <div class="list-title">Lista para entrenar</div>
-      <div class="card">
-        <p class="muted">Pega el enlace de la lista que quieras lanzar al empezar.</p>
-        <input id="sp-pl" value="${c.playlist || ''}" placeholder="https://open.spotify.com/playlist/..."
-               autocomplete="off" spellcheck="false">
-        <button class="btn block" data-a="guardarPl" style="margin-top:10px">Guardar lista</button>
-        ${raw(c.playlist && Spotify.urlEmbed() ? html`
-          <div style="margin-top:12px">
-            <iframe src="${Spotify.urlEmbed()}" width="100%" height="152" frameborder="0"
-              style="border-radius:12px" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
-              loading="lazy" title="Lista de Spotify"></iframe>
-            <p class="tiny" style="margin-top:8px">Este reproductor funciona también sin
-            Premium, aunque en ese caso Spotify solo deja escuchar fragmentos.</p>
-          </div>` : '')}
+      <div class="row between">
+        <h1 style="margin:0">Música</h1>
+        <button class="btn sm" data-a="desconectar">Desconectar</button>
       </div>
 
-      <button class="btn ghost block sm" data-a="borrarSp" style="margin-top:14px">
-        Borrar la configuración de Spotify</button>`;
+      ${raw(Spotify.permisosCaducados() ? html`
+        <div class="card" style="border-color:var(--warn);margin-top:12px">
+          <b>Vuelve a conectar</b>
+          <p class="muted" style="margin:5px 0 10px">La app ahora puede reproducir por sí
+          misma y crear listas, y eso necesita permisos nuevos.</p>
+          <button class="btn primary block" data-a="conectar">Reconectar Spotify</button>
+        </div>` : '')}
+
+      <div id="sp-player" style="margin-top:12px"></div>
+
+      <div class="list-title">Lista para entrenar</div>
+      ${raw(lista ? listaHTML(lista) : html`
+        <div class="card">
+          <p class="muted">Deja que la IA te prepare una lista a medida del entrenamiento
+          de hoy. Cada vez propone artistas distintos, así que siempre descubres algo.</p>
+          ${raw(IA.activa()
+            ? '<button class="btn primary block" data-a="generar">' + icon('chispa') +
+              ' Crear una lista</button>'
+            : '<button class="btn block" data-a="boveda">Necesita la clave de la IA</button>')}
+        </div>`)}
+
+      ${raw(mem.listas ? '<p class="tiny" style="margin-top:10px">' + mem.listas +
+        (mem.listas === 1 ? ' lista creada' : ' listas creadas') + ' · ' + mem.artistas.length +
+        ' artistas ya propuestos que no se repetirán. ' +
+        '<button class="btn sm ghost" data-a="olvidar">Empezar de cero</button></p>' : '')}
+
+      <div class="list-title">Lista propia</div>
+      <div class="card">
+        <p class="muted">Si prefieres una lista tuya, pega su enlace y la app la lanzará.</p>
+        <input id="sp-pl" value="${Spotify.config().playlist || ''}"
+               placeholder="https://open.spotify.com/playlist/..." autocomplete="off" spellcheck="false">
+        <div class="row" style="margin-top:10px">
+          <button class="btn grow" data-a="guardarPl">Guardar</button>
+          ${raw(Spotify.config().playlist
+            ? '<button class="btn primary grow" data-a="ponerPl">' + icon('play') + ' Reproducir</button>'
+            : '')}
+        </div>
+      </div>`;
   };
+
+  function listaHTML(l) {
+    return html`
+      <div class="card">
+        <div class="row between" style="align-items:flex-start">
+          <div class="grow">
+            <div style="font-weight:700">${l.nombre}</div>
+            <div class="tiny">${l.pistas.length} canciones${raw(l.ambiente
+              ? ' · ' + esc(l.ambiente) : '')} · ${UI.fecha(l.creada)}</div>
+          </div>
+          <button class="btn icon sm danger" data-a="borrarLista"
+                  aria-label="Borrar lista">${raw(icon('trash'))}</button>
+        </div>
+        ${raw(l.descripcion ? '<p class="muted" style="margin:9px 0 0">' +
+          esc(l.descripcion) + '</p>' : '')}
+        <div class="row" style="margin-top:12px">
+          <button class="btn primary grow" data-a="reproducirLista">
+            ${raw(icon('play'))} Reproducir aquí</button>
+          <button class="btn" data-a="guardarEnSpotify" aria-label="Guardar en Spotify">
+            ${raw(icon('down'))}</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn ghost grow sm" data-a="generar">${raw(icon('chispa'))} Crear otra distinta</button>
+        </div>
+      </div>
+
+      <div class="stack" style="margin-top:11px">
+        ${raw(l.pistas.map(function (p, i) {
+          return html`
+            <button class="pista" data-pista="${i}">
+              <span class="rt-idx">${i + 1}</span>
+              <div class="grow">
+                <div class="player-t">${p.titulo}</div>
+                <div class="tiny">${p.artista}${raw(p.porque ? ' · ' + esc(p.porque) : '')}</div>
+              </div>
+              ${raw(icon('play'))}
+            </button>`;
+        }).join(''))}
+      </div>`;
+  }
 
   V.musica.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
-
     bind(root, '[data-a=boveda]', function () { go('claves'); });
-
     bind(root, '[data-a=conectar]', function () {
       Spotify.entrar().catch(function (e) { UI.toast(e.message); });
     });
-
     bind(root, '[data-a=desconectar]', function () {
+      Spotify.apagarReproductor();
       Spotify.salir(); render(); UI.toast('Spotify desconectado');
     });
 
     bind(root, '[data-a=guardarPl]', function () {
-      const v = root.querySelector('#sp-pl').value;
-      if (v && !Spotify.idDePlaylist(v)) { UI.toast('Ese enlace no parece de una lista'); return; }
-      Spotify.guardarPlaylist(v);
-      render();
-      UI.toast('Lista guardada');
+      const val = root.querySelector('#sp-pl').value;
+      if (val && !Spotify.idDePlaylist(val)) { UI.toast('Ese enlace no parece de una lista'); return; }
+      Spotify.guardarPlaylist(val); render(); UI.toast('Lista guardada');
     });
 
-    bind(root, '[data-a=borrarSp]', function () {
-      UI.confirm('Borrar configuración', 'Se olvidará el Client ID y la sesión de Spotify.',
-        'Borrar', true).then(function (ok) {
-        if (ok) { Spotify.borrarConfig(); render(); UI.toast('Configuración borrada'); }
-      });
+    bind(root, '[data-a=ponerPl]', function () {
+      Spotify.ponerPlaylist().then(function () { UI.toast('Reproduciendo'); })
+        .catch(function (e) { UI.toast(e.message); });
     });
 
-    const ahora = root.querySelector('#sp-ahora');
-    if (ahora) {
-      Spotify.sonando().then(function (s) {
-        ahora.innerHTML = s
-          ? reproductorHTML(s)
-          : '<div class="card"><div class="muted">Nada sonando ahora mismo. ' +
-            'Abre Spotify en cualquier dispositivo y aparecerá aquí.</div></div>';
-        if (s) montarReproductor(ahora);
-      }).catch(function (e) {
-        ahora.innerHTML = '<div class="card"><div class="muted">' + esc(e.message) + '</div></div>';
-      });
-    }
+    bind(root, '[data-a=olvidar]', function () {
+      IA.olvidarMusica(); render();
+      UI.toast('Memoria musical borrada: podrán repetirse artistas');
+    });
+
+    bind(root, '[data-a=borrarLista]', function () {
+      UI.confirm('Borrar la lista', 'Podrás generar otra cuando quieras.', 'Borrar', true)
+        .then(function (ok) { if (ok) { guardarLista(null); render(); } });
+    });
+
+    /* reproductor propio */
+    const host = root.querySelector('#sp-player');
+    if (host) montarPlayer(host);
+
+    bindAll(root, '[data-a=generar]', function (btn) { generarLista(btn); });
+
+    bind(root, '[data-a=reproducirLista]', function (btn) {
+      const l = listaGuardada();
+      if (!l) return;
+      btn.disabled = true;
+      Spotify.iniciarReproductor()
+        .then(function () { return Spotify.reproducirUris(l.pistas.map(function (p) { return p.uri; })); })
+        .then(function () { UI.toast('Sonando en la app'); btn.disabled = false; })
+        .catch(function (e) { btn.disabled = false; UI.toast(e.message); });
+    });
+
+    bindAll(root, '[data-pista]', function (el) {
+      const l = listaGuardada();
+      if (!l) return;
+      const desde = Number(el.dataset.pista);
+      const uris = l.pistas.slice(desde).map(function (p) { return p.uri; });
+      Spotify.iniciarReproductor()
+        .then(function () { return Spotify.reproducirUris(uris); })
+        .catch(function (e) { UI.toast(e.message); });
+    });
+
+    bind(root, '[data-a=guardarEnSpotify]', function (btn) {
+      const l = listaGuardada();
+      if (!l) return;
+      btn.disabled = true;
+      Spotify.crearPlaylist(l.nombre, l.descripcion, l.pistas.map(function (p) { return p.uri; }))
+        .then(function () { UI.toast('Guardada en tu Spotify'); btn.disabled = false; })
+        .catch(function (e) { btn.disabled = false; UI.toast(e.message); });
+    });
   };
+
+  /* Asistente de generación: ambiente, duración y una indicación libre */
+  function generarLista(btnOrigen) {
+    const hoy = UI.DAY_NAMES[new Date().getDay()];
+    const rutinaHoy = Store.routines().find(function (r) {
+      return (r.days || []).indexOf(hoy) !== -1;
+    });
+
+    let ambiente = 'ritmo';
+
+    UI.modal(html`
+      <h2>Nueva lista</h2>
+      <p class="muted">La IA propone las canciones y la app las busca en Spotify.
+      Las que no existan se descartan solas.</p>
+
+      <label class="tiny">AMBIENTE</label>
+      <div class="row wrap" style="gap:6px;margin:7px 0 14px">
+        ${raw(Object.keys(IA.AMBIENTES).map(function (k) {
+          return '<button class="chip ' + (k === ambiente ? 'on' : '') + '" data-amb="' + k + '">' +
+            esc(IA.AMBIENTES[k].label) + '</button>';
+        }).join(''))}
+      </div>
+
+      <label class="tiny">CUÁNTAS CANCIONES</label>
+      <div class="row wrap" style="gap:6px;margin:7px 0 14px">
+        ${raw([12, 20, 30].map(function (n) {
+          return '<button class="chip ' + (n === 20 ? 'on' : '') + '" data-num="' + n + '">' +
+            n + '</button>';
+        }).join(''))}
+      </div>
+
+      <label class="tiny">ALGO MÁS (OPCIONAL)</label>
+      <input id="pl-libre" placeholder="Nada de reguetón, más rock de los noventa…"
+             style="margin:6px 0 14px">
+
+      ${raw(rutinaHoy ? '<p class="tiny">Se adaptará a tu entrenamiento de hoy: ' +
+        esc(rutinaHoy.name) + '.</p>' : '')}
+
+      <button class="btn primary block" data-x="crear">${raw(icon('chispa'))} Crear lista</button>
+      <div class="tiny center" id="pl-estado" style="margin-top:12px"></div>`,
+      function (el) {
+        let num = 20;
+
+        el.querySelectorAll('[data-amb]').forEach(function (b) {
+          b.onclick = function () {
+            ambiente = b.dataset.amb;
+            el.querySelectorAll('[data-amb]').forEach(function (x) { x.classList.remove('on'); });
+            b.classList.add('on');
+          };
+        });
+        el.querySelectorAll('[data-num]').forEach(function (b) {
+          b.onclick = function () {
+            num = Number(b.dataset.num);
+            el.querySelectorAll('[data-num]').forEach(function (x) { x.classList.remove('on'); });
+            b.classList.add('on');
+          };
+        });
+
+        el.querySelector('[data-x=crear]').onclick = function (ev) {
+          const boton = ev.currentTarget;
+          const estado = el.querySelector('#pl-estado');
+          boton.disabled = true;
+          estado.textContent = 'Pensando la lista…';
+
+          Spotify.misArtistas().then(function (gustos) {
+            return IA.playlistEntreno({
+              ambiente: ambiente,
+              canciones: num,
+              rutina: rutinaHoy ? rutinaHoy.name : '',
+              gustos: gustos,
+              libre: el.querySelector('#pl-libre').value.trim(),
+              semilla: Date.now().toString(36)
+            });
+          }).then(function (r) {
+            estado.textContent = 'Buscando las canciones en Spotify…';
+            return Spotify.buscarPistas(r.canciones, function (hechas, total, halladas) {
+              estado.textContent = 'Buscando ' + hechas + ' de ' + total +
+                ' · ' + halladas + ' encontradas';
+            }).then(function (pistas) {
+              if (!pistas.length) throw new Error('Ninguna de las canciones apareció en Spotify.');
+              IA.recordarMusica(pistas.map(function (p) { return p.artista.split(',')[0].trim(); }));
+              guardarLista({
+                nombre: r.nombre || 'Lista de entrenamiento',
+                descripcion: r.descripcion || '',
+                ambiente: IA.AMBIENTES[ambiente].label,
+                creada: Date.now(),
+                pistas: pistas
+              });
+              UI.closeModal();
+              render();
+              UI.toast(pistas.length + ' canciones listas');
+            });
+          }).catch(function (e) {
+            boton.disabled = false;
+            estado.innerHTML = '<span style="color:var(--bad)">' + esc(e.message) + '</span>';
+          });
+        };
+      });
+  }
+
+  /* Reproductor propio: se conecta al pulsar, porque el navegador exige un gesto */
+  function montarPlayer(host) {
+    const pintar = function (s) {
+      host.innerHTML = s ? Reproductor.html(s) : html`
+        <div class="card">
+          <div class="row between">
+            <div class="grow">
+              <div style="font-weight:600">Reproductor de la app</div>
+              <div class="tiny">Suena aquí mismo, sin abrir Spotify</div>
+            </div>
+            <button class="btn primary sm" data-a="activar">${raw(icon('play'))} Activar</button>
+          </div>
+        </div>`;
+      if (s) Reproductor.montar(host);
+      const activar = host.querySelector('[data-a=activar]');
+      if (activar) activar.onclick = function () {
+        activar.disabled = true;
+        activar.textContent = 'Conectando…';
+        Spotify.iniciarReproductor()
+          .then(function () { return Spotify.traerAqui(); })
+          .then(function () {
+            UI.toast('Listo: la música sonará en la app');
+            pintar(Spotify.estado());
+          })
+          .catch(function (e) {
+            activar.disabled = false;
+            activar.innerHTML = icon('play') + ' Activar';
+            UI.toast(e.message);
+          });
+      };
+    };
+
+    pintar(Spotify.reproductorActivo() ? Spotify.estado() : null);
+    Spotify.alCambiar(function (s) { if (s) pintar(s); });
+
+    if (!Spotify.reproductorActivo()) {
+      Spotify.sonando().then(function (s) { if (s) pintar(s); }).catch(function () { /* nada */ });
+    }
+  }
 
   /* Reproductor compacto, reutilizado en la pantalla de entrenamiento */
   function reproductorHTML(s) {

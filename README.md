@@ -121,7 +121,10 @@ que has abierto los ejercicios al menos una vez.
   generado por la IA respetando tu dieta y tus alergias.
 - **Entrenador con IA** *(opcional)* — analiza tu progreso, revisa tus rutinas y responde
   a lo que le preguntes, conociendo tu perfil y tu historial.
-- **Música** *(opcional)* — controla Spotify desde la pantalla de entrenamiento.
+- **Música** *(opcional)* — reproduce Spotify **dentro de la propia app** (la pestaña se
+  convierte en un dispositivo más de tu cuenta) y deja que la IA te prepare listas de
+  entrenamiento. Cada lista recuerda los artistas ya propuestos y no los repite, así que
+  siempre descubres cosas nuevas. Se pueden guardar en tu Spotify con un toque.
 
 ---
 
@@ -183,9 +186,14 @@ salgan de tu dispositivo, no configures esta parte.
 
 ### Música — Spotify
 
-Con **Spotify Premium** funcionan los controles completos: play, pausa y cambio de tema
-desde la pantalla de entrenamiento. Sin Premium, Spotify solo deja ver qué suena y usar el
+Con **Spotify Premium** la música suena dentro de la propia app: el Web Playback SDK
+convierte la pestaña en un dispositivo de tu cuenta, con play, pausa y cambio de tema desde
+la pantalla de entrenamiento. Sin Premium, Spotify solo deja ver qué suena y usar el
 reproductor incrustado; es una limitación de su plataforma, no de la app.
+
+La IA genera listas a medida del entrenamiento del día: eliges el ambiente (fuerza, ritmo,
+cardio, clásicos, concentración o latino), propone las canciones, la app las busca una a una
+en Spotify y descarta las que no existen. Recuerda los artistas ya usados para no repetirlos.
 
 1. En [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) pulsa
    **Create app**. Nombre y descripción, los que quieras.
