@@ -96,13 +96,41 @@
   function favorites() { return state.favorites.slice(); }
 
   /* ---------- rutinas ---------- */
-  function routines() { return state.routines; }
+  /* El orden lo pone el usuario y viaja con cada rutina (campo "orden"), no en
+     la posición del array: al fusionar con otro dispositivo el array se rehace
+     y se perdería. Las que no lo tengan van detrás, en el orden de siempre. */
+  function routines() {
+    return state.routines.slice().sort(function (a, b) {
+      const oa = a.orden == null ? 1e9 + state.routines.indexOf(a) : a.orden;
+      const ob = b.orden == null ? 1e9 + state.routines.indexOf(b) : b.orden;
+      return oa - ob;
+    });
+  }
+
   function routine(id) { return state.routines.find(function (r) { return r.id === id; }) || null; }
+
+  /* Coloca la rutina delta posiciones más arriba o más abajo */
+  function moverRutina(id, delta) {
+    const lista = routines();
+    const i = lista.findIndex(function (r) { return r.id === id; });
+    const j = i + delta;
+    if (i === -1 || j < 0 || j >= lista.length) return false;
+    lista.splice(j, 0, lista.splice(i, 1)[0]);
+    const ahora = Date.now();
+    lista.forEach(function (r, n) {
+      if (r.orden === n) return;
+      r.orden = n;
+      r.updatedAt = ahora;          // para que el nuevo orden gane al fusionar
+    });
+    save();
+    return true;
+  }
 
   function saveRoutine(r) {
     if (!r.id) {
       r.id = uid();
       r.createdAt = Date.now();
+      if (r.orden == null) r.orden = state.routines.length;
       state.routines.push(r);
     } else {
       const i = state.routines.findIndex(function (x) { return x.id === r.id; });
@@ -309,7 +337,7 @@
   g.Store = {
     settings: settings, setSetting: setSetting,
     isFav: isFav, toggleFav: toggleFav, favorites: favorites,
-    routines: routines, routine: routine, saveRoutine: saveRoutine,
+    routines: routines, routine: routine, saveRoutine: saveRoutine, moverRutina: moverRutina,
     deleteRoutine: deleteRoutine, duplicateRoutine: duplicateRoutine,
     newRoutine: newRoutine, newRoutineExercise: newRoutineExercise,
     active: active, setActive: setActive, clearActive: clearActive,

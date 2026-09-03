@@ -128,9 +128,11 @@ que has abierto los ejercicios al menos una vez.
   de movimiento** y los músculos implicados, y se priorizan los que puedes hacer donde
   entrenas. En pleno entrenamiento el cambio es un botón: las series ya marcadas se
   quedan con el ejercicio original y el recambio continúa con las que faltan.
-- **Rutinas** — crea las tuyas, genera el plan o parte de 8 plantillas probadas (Full Body,
-  Push/Pull/Legs, Torso/Pierna, 5x5, en casa sin material). Series, repeticiones y descanso
-  por ejercicio. Asigna días y la portada te recuerda qué toca hoy.
+- **Rutinas, en el orden que tú quieras** — crea las tuyas, genera el programa o parte de 8
+  plantillas probadas (Full Body, Push/Pull/Legs, Torso/Pierna, 5x5, en casa sin material).
+  Series, repeticiones y descanso por ejercicio. Con el botón *Ordenar* las colocas a mano y
+  ese orden viaja a tus demás dispositivos. Y **la del día va siempre la primera**: si hoy es
+  jueves y tienes una rutina asignada al jueves, aparece arriba, marcada, sin que la busques.
 - **Cronómetro siempre a la vista** — un botón en la portada arranca el entrenamiento y,
   a partir de ahí, un banner verde te acompaña por **cualquier pantalla** de la app con el
   tiempo corriendo y el botón de terminar. Puedes entrenar solo con el tiempo, ir añadiendo

@@ -208,7 +208,7 @@
 
       ${raw(deHoy.length ? html`
         <div class="list-title">Toca hoy (${hoy})</div>
-        <div class="stack">${raw(deHoy.map(routineCard).join(''))}</div>` : '')}
+        <div class="stack">${raw(deHoy.map(function (r) { return routineCard(r); }).join(''))}</div>` : '')}
 
       <div class="list-title">¿Qué entrenas hoy?</div>
       <p class="tiny" style="margin:-4px 4px 8px">Elige una zona y te la enseño músculo a
@@ -238,7 +238,7 @@
       ${raw(rutinas.length ? html`
         <div class="stack">${raw(rutinas.filter(function (r) {
           return (r.days || []).indexOf(hoy) === -1;
-        }).map(routineCard).join(''))}</div>`
+        }).map(function (r) { return routineCard(r); }).join(''))}</div>`
       : html`
         <div class="card center">
           <p class="muted" style="margin-bottom:12px">Todavía no tienes rutinas. Empieza con una plantilla
@@ -264,17 +264,30 @@
         }).join(''))}` : '')}`;
   }
 
-  function routineCard(r) {
+  function routineCard(r, i, total) {
     const n = r.exercises.length;
+    const hoy = UI.DAY_NAMES[new Date().getDay()];
+    const esDeHoy = (r.days || []).indexOf(hoy) !== -1;
+    const conFlechas = ordenando && total > 1;
+
     return html`
-      <div class="card">
+      <div class="card ${esDeHoy && !ordenando ? 'card-hoy' : ''}">
         <div class="row between" style="align-items:flex-start">
+          ${raw(conFlechas ? html`
+            <div class="mover">
+              <button class="btn sm" data-sube="${r.id}" ${i === 0 ? 'disabled' : ''}
+                      aria-label="Subir">${raw(icon('up'))}</button>
+              <button class="btn sm" data-baja="${r.id}" ${i === total - 1 ? 'disabled' : ''}
+                      aria-label="Bajar">${raw(icon('down'))}</button>
+            </div>` : '')}
           <div class="grow" style="cursor:pointer" data-open="${r.id}">
-            <div style="font-weight:700">${r.name || 'Rutina sin nombre'}</div>
+            <div style="font-weight:700">${r.name || 'Rutina sin nombre'}
+              ${raw(esDeHoy && !ordenando ? '<span class="chip solid tiny-chip">HOY</span>' : '')}</div>
             <div class="tiny">${n} ${n === 1 ? 'ejercicio' : 'ejercicios'}${raw(
               (r.days || []).length ? ' · ' + esc(r.days.join(', ')) : '')}</div>
           </div>
-          <button class="btn primary sm" data-train="${r.id}">${raw(icon('play'))} Entrenar</button>
+          ${raw(conFlechas ? '' : html`
+            <button class="btn primary sm" data-train="${r.id}">${raw(icon('play'))} Entrenar</button>`)}
         </div>
         ${raw(n ? html`<div class="row wrap" style="margin-top:9px;gap:5px">
           ${raw(r.exercises.slice(0, 4).map(function (re) {
@@ -1020,8 +1033,25 @@
 
   /* ================= rutinas ================= */
 
-  function viewRutinas() {
+  /* Modo de ordenación: mientras está activo cada tarjeta enseña las flechas */
+  let ordenando = false;
+
+  /* Las de hoy primero, y detrás el orden que haya puesto el usuario.
+     En modo ordenación no se reordena por día: se vería saltar la tarjeta. */
+  function rutinasOrdenadas() {
     const rutinas = Store.routines();
+    if (ordenando) return rutinas;
+    const hoy = UI.DAY_NAMES[new Date().getDay()];
+    const deHoy = rutinas.filter(function (r) { return (r.days || []).indexOf(hoy) !== -1; });
+    const resto = rutinas.filter(function (r) { return (r.days || []).indexOf(hoy) === -1; });
+    return deHoy.concat(resto);
+  }
+
+  function viewRutinas() {
+    const rutinas = rutinasOrdenadas();
+    const hoy = UI.DAY_NAMES[new Date().getDay()];
+    const hayHoy = rutinas.some(function (r) { return (r.days || []).indexOf(hoy) !== -1; });
+
     return html`
       <div class="row between">
         <h1>Rutinas</h1>
@@ -1034,9 +1064,23 @@
       <p class="tiny">Ajustado a tu edad, tu nivel, tu objetivo y tus limitaciones, con la
       progresión de las cinco semanas siguientes.</p>
 
+      ${raw(rutinas.length > 1 ? html`
+        <div class="list-head">
+          <span class="list-title">${ordenando ? 'Colócalas a tu gusto'
+            : hayHoy ? 'Hoy es ' + hoy + ', y esto es lo que toca' : 'Mis rutinas'}</span>
+          <button class="btn sm ${ordenando ? 'primary' : 'ghost'}" data-a="ordenar">
+            ${ordenando ? 'Hecho' : 'Ordenar'}</button>
+        </div>` : '')}
+
       ${raw(rutinas.length ? html`
-        <div class="stack" style="margin-top:8px">${raw(rutinas.map(routineCard).join(''))}</div>`
+        <div class="stack" style="margin-top:8px">${raw(rutinas.map(function (r, i) {
+          return routineCard(r, i, rutinas.length);
+        }).join(''))}</div>`
       : '<p class="muted">Aún no tienes rutinas propias. Copia una plantilla de abajo para empezar.</p>')}
+
+      ${raw(ordenando ? '<p class="tiny center" style="margin-top:10px">El orden se guarda ' +
+        'y viaja a tus demás dispositivos. Al salir de aquí, la rutina de hoy vuelve a ' +
+        'ponerse la primera.</p>' : '')}
 
       <div class="list-title">Rutinas de ejemplo</div>
       <p class="muted">Al usar una plantilla se copia a tus rutinas; puedes cambiar ejercicios,
@@ -1061,6 +1105,19 @@
   viewRutinas.mount = function (root) {
     bind(root, '[data-a=nueva]', function () { go('rutina', 'nueva'); });
     bind(root, '[data-a=programa]', function () { go('programa'); });
+
+    bind(root, '[data-a=ordenar]', function () {
+      ordenando = !ordenando;
+      render();
+      if (ordenando) UI.toast('Coloca las rutinas con las flechas');
+    });
+
+    const mover = function (id, delta) {
+      const pos = window.scrollY;
+      if (Store.moverRutina(id, delta)) { render(); window.scrollTo(0, pos); }
+    };
+    bindAll(root, '[data-sube]', function (el) { mover(el.dataset.sube, -1); });
+    bindAll(root, '[data-baja]', function (el) { mover(el.dataset.baja, 1); });
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
     bindAll(root, '[data-train]', function (el) { empezar(el.dataset.train); });
     bindAll(root, '[data-tpl]', function (el) {

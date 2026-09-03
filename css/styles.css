@@ -469,3 +469,11 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 .razon .rt-idx{margin-top:1px}
 
 .tiny-chip{font-size:.6rem;padding:.15em .5em;margin-left:5px;vertical-align:middle}
+
+/* ---------- rutinas: orden manual y la de hoy ---------- */
+/* La rutina que toca hoy se distingue sin gritar */
+.card-hoy{border-color:var(--acc)}
+/* Flechas para colocar las rutinas a mano */
+.mover{display:flex;flex-direction:column;gap:5px;flex:none;margin-right:11px}
+.mover .btn{width:34px;height:30px;padding:0}
+.mover .btn svg{width:15px;height:15px}
