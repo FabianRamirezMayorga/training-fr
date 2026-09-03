@@ -34,8 +34,29 @@
     if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v));
   }
 
-  function config() { return leer(CFG_KEY); }
+  /* ---- Conexión de fábrica ----
+     Si estos dos datos vienen rellenos, cualquier dispositivo que abra la app ya
+     está conectado y solo tiene que escribir correo y contraseña: nada de pegar
+     enlaces. La clave publishable está pensada precisamente para viajar en el
+     navegador; lo que protege los datos son las políticas RLS de la tabla, que
+     solo dejan ver y escribir las filas del usuario autenticado.
+     Vacío = la app pide la configuración como antes. */
+  const DE_FABRICA = {
+    url: 'https://jeigxeunjofhfxbcfazp.supabase.co',
+    key: 'sb_publishable_YqkEVOKGpx7DF8_eOgqnFg_Ew5lVRQY'
+  };
+
+  function hayFabrica() { return !!(DE_FABRICA.url && DE_FABRICA.key); }
+
+  /* Manda lo guardado en el dispositivo; si no hay nada, la conexión de fábrica */
+  function config() {
+    const c = leer(CFG_KEY);
+    if (c && c.url && c.key) return c;
+    return hayFabrica() ? DE_FABRICA : c;
+  }
   function configurado() { const c = config(); return !!(c && c.url && c.key); }
+  /* ¿La configuración es propia de este dispositivo o la que trae la app? */
+  function configPropia() { const c = leer(CFG_KEY); return !!(c && c.url && c.key); }
 
   function guardarConfig(url, key) {
     url = String(url || '').trim().replace(/\/+$/, '');
@@ -748,6 +769,7 @@
     config: config, configurado: configurado, guardarConfig: guardarConfig, borrarConfig: borrarConfig,
     sesion: sesion, email: email, activa: activa,
     sincronizaClaves: sincronizaClaves, enlaceConfiguracion: enlaceConfiguracion,
+    configPropia: configPropia, hayFabrica: hayFabrica,
     aplicarEnlace: aplicarEnlace, ultimoUsuario: ultimoUsuario,
     limpiarDatosDeCuenta: limpiarDatosDeCuenta, fusionar: fusionar,
     enviarEnlace: enviarEnlace, capturarRedireccion: capturarRedireccion, salir: salir,

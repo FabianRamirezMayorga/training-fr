@@ -2192,13 +2192,13 @@
         <div class="card" style="margin-top:12px">
           <div style="font-weight:600;margin-bottom:4px">Cómo funciona</div>
           <ol class="instr" style="margin-top:8px">
-            <li>Escribes tu correo y pulsas el botón.</li>
-            <li>Te llega un correo con un enlace de acceso.</li>
-            <li><b>Ábrelo en este mismo dispositivo</b>: al pulsarlo vuelves aquí ya dentro
-              y todo se sincroniza solo.</li>
+            <li>Escribes tu correo y tu contraseña, los mismos en todos tus dispositivos.</li>
+            <li>Al entrar se descarga lo que tengas en la nube y se une con lo de aquí.</li>
+            <li>A partir de ahí, cada cambio sube solo unos segundos después.</li>
           </ol>
-          <p class="tiny" style="margin:0">Sin contraseñas. Si el enlace se abre en otro
-          navegador, la sesión se queda allí: por eso conviene abrirlo donde tengas la app.</p>
+          <p class="tiny" style="margin:0">No hace falta configurar nada más: la app ya sabe
+          a qué cuenta conectarse. Si prefieres entrar sin contraseña, tienes la opción del
+          enlace por correo debajo.</p>
         </div>` : '')}`;
   }
 
@@ -2245,8 +2245,8 @@
              autocomplete="off" spellcheck="false" style="margin:5px 0 12px">
 
       <button class="btn primary block" data-a="guardarcfg">Guardar y continuar</button>
-      ${raw(c.url ? '<button class="btn danger block sm" data-a="borrarcfg" style="margin-top:8px">' +
-        'Desconectar y borrar la configuración</button>' : '')}`,
+      ${raw(Sync.configPropia() ? '<button class="btn danger block sm" data-a="borrarcfg" style="margin-top:8px">' +
+        'Volver a la conexión que trae la app</button>' : '')}`,
       function (el) {
         el.querySelector('[data-a=copiarsql]').onclick = function () {
           const t = el.querySelector('#sql-box').textContent;
@@ -2265,8 +2265,9 @@
         };
         const borrar = el.querySelector('[data-a=borrarcfg]');
         if (borrar) borrar.onclick = function () {
-          UI.confirm('Desconectar', 'Se borrará la configuración y la sesión de este dispositivo. ' +
-            'Tus datos locales y los de la nube no se tocan.', 'Desconectar', true).then(function (ok) {
+          UI.confirm('Volver a la conexión de la app',
+            'Se borrará la configuración propia de este dispositivo y su sesión. ' +
+            'Tus datos locales y los de la nube no se tocan.', 'Continuar', true).then(function (ok) {
             if (ok) { Sync.borrarConfig(); UI.closeModal(); render(); UI.toast('Desconectado'); }
           });
         };
