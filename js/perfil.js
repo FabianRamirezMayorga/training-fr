@@ -12,6 +12,9 @@
     actividad: 'moderado', objetivo: 'mantener', ritmo: 'moderado',
     experiencia: 'intermediate',
     sueño: 7, comidas: 4, dieta: 'omnivora',
+    /* Marcan el día real: sin ellas, repartir el agua y las comidas por el día
+       sería inventarse a qué hora te levantas. */
+    despertar: '07:00', acostar: '23:00', horaEntreno: '',
     alergias: '', lesiones: '', notas: '',
     pesajes: []          // [{fecha, peso}]
   };
@@ -211,6 +214,7 @@
       m ? 'objetivo diario ' + m.kcal + ' kcal (' + m.prot + ' g proteína, ' +
         m.carbo + ' g hidratos, ' + m.grasa + ' g grasa)' : null,
       'duerme ' + p.sueño + ' h',
+      'se levanta a las ' + p.despertar + ' y se acuesta a las ' + p.acostar,
       p.comidas + ' comidas al día',
       'dieta: ' + (DIETA[p.dieta] || p.dieta),
       p.alergias ? 'alergias o intolerancias: ' + p.alergias : null,

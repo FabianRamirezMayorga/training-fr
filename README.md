@@ -156,8 +156,16 @@ que has abierto los ejercicios al menos una vez.
   el reparto de macronutrientes y el agua del día. Registro de peso con evolución.
 - **Objetivos** — metas de peso, entrenamientos por semana, racha, volumen o récord en un
   ejercicio. Se actualizan solas con lo que entrenas y te avisan al cumplirse.
-- **Alertas** — recordatorios por día y hora para entrenar, beber agua, comer o pesarte,
-  con exportación al calendario del móvil.
+- **Alertas con varias horas al día y calculadas con tus datos** — el agua no se bebe de
+  una sentada: la app mira tu peso y tu actividad, saca los litros que te tocan, los divide
+  en vasos de 250 ml y los reparte entre la hora a la que te levantas y dos horas antes de
+  acostarte. Lo mismo con las comidas (según cuántas hagas, con las calorías y la proteína
+  de cada una), el entrenamiento (en los días de tus rutinas y a la hora a la que **sueles
+  entrenar de verdad**, deducida de tus sesiones), la comida de antes de entrenar, el pesaje
+  del lunes en ayunas y el aviso para irte a dormir si duermes poco. Cada propuesta explica
+  su porqué y se crea de un toque. También puedes montarlas a mano: añades y quitas horas
+  una a una, o dices *«seis veces entre las 9:00 y las 19:00»* y las reparte. Todo se
+  exporta al calendario del móvil, un evento por cada hora.
 - **Alimentación** — calorías y macros calculados, y menú semanal con lista de la compra
   generado por la IA respetando tu dieta y tus alergias.
 - **Entrenador con IA** *(opcional)* — analiza tu progreso, revisa tus rutinas y responde

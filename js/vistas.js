@@ -172,6 +172,24 @@
                    data-num="comidas" style="text-align:center;margin-top:4px"></div>
         </div>
         <div class="hr"></div>
+        <label class="tiny">TU DÍA</label>
+        <div class="tiny" style="margin:2px 0 0">Con esto reparto los recordatorios de agua
+        y comidas por tus horas reales, no por unas por defecto.</div>
+        <div class="row" style="gap:10px;margin-top:8px">
+          <div class="grow"><div class="tiny">ME LEVANTO</div>
+            <input type="time" value="${p.despertar || '07:00'}" data-txt="despertar"
+                   style="margin-top:4px"></div>
+          <div class="grow"><div class="tiny">ME ACUESTO</div>
+            <input type="time" value="${p.acostar || '23:00'}" data-txt="acostar"
+                   style="margin-top:4px"></div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="tiny">HORA A LA QUE ENTRENAS (OPCIONAL)</div>
+        <input type="time" value="${p.horaEntreno || ''}" data-txt="horaEntreno"
+               style="margin-top:4px">
+        <div class="tiny" style="margin-top:4px">Si la dejas vacía, la deduzco de las horas a
+        las que sueles entrenar.</div>
+        <div class="hr"></div>
         <label class="tiny">ALIMENTACIÓN</label>
         ${raw(opciones('dieta', Perfil.DIETA, p.dieta))}
         <div class="hr"></div>
@@ -415,8 +433,11 @@
       ${raw(lista.length ? '<div class="stack" style="margin-top:12px">' +
         lista.map(tarjetaAlerta).join('') + '</div>'
         : html`<div class="empty" style="padding-top:28px">${raw(icon('campana'))}
-            <p>Sin recordatorios. Puedo crearlos a partir de los días de tus rutinas.</p>
+            <p>Sin recordatorios todavía. Abajo tienes los que te propongo con tus datos,
+            con las horas ya calculadas.</p>
           </div>`)}
+
+      ${raw(sugerenciasHTML())}
 
       <div class="row" style="margin-top:14px">
         <button class="btn grow" data-a="desdeRutinas">${raw(icon('dumbbell'))} Crear desde mis rutinas</button>
@@ -434,6 +455,61 @@
       </div>`;
   };
 
+  /* ---------- sugerencias calculadas con tus datos ---------- */
+  function sugerenciasHTML() {
+    if (!Perfil.completo()) {
+      return html`
+        <div class="card" style="margin-top:14px">
+          <div style="font-weight:600;margin-bottom:4px">Puedo proponerte las horas</div>
+          <p class="muted" style="margin-bottom:10px">Con tu peso, tu actividad y a qué hora
+          te levantas calculo cuántos vasos de agua te tocan y a qué horas, cuándo comer y
+          cuándo entrenar. Necesito el perfil completo.</p>
+          <button class="btn primary block" data-a="irperfil">Completar mi perfil</button>
+        </div>`;
+    }
+
+    const sug = Alertas.sugerencias().filter(function (x) { return !Alertas.yaExiste(x); });
+    if (!sug.length) {
+      return html`
+        <div class="card" style="margin-top:14px">
+          <p class="muted" style="margin:0">Ya tienes creados todos los recordatorios que te
+          propondría con tus datos. Si cambias de peso, de horarios o de rutinas, vuelve por
+          aquí y recalculo.</p>
+        </div>`;
+    }
+
+    return html`
+      <div class="list-head" style="margin-top:20px">
+        <span class="list-title">Lo que te propongo</span>
+        <button class="btn sm ghost" data-a="crearTodas">Crear todas</button>
+      </div>
+      <p class="tiny" style="margin:-4px 4px 10px">Calculado con tus datos, no son horas por
+      defecto. Puedes cambiarlas después.</p>
+      <div class="stack">
+        ${raw(sug.map(function (x, i) {
+          const t = Alertas.TIPOS[x.tipo] || Alertas.TIPOS.libre;
+          return html`
+            <div class="card">
+              <div class="row" style="align-items:flex-start">
+                <span class="row-icon">${raw(icon(t.icono))}</span>
+                <div class="grow">
+                  <div style="font-weight:600">${x.titulo}</div>
+                  <div class="tiny">${Alertas.resumenHoras({ horas: x.horas })}</div>
+                  <div class="tiny">${Alertas.resumenDias({ dias: x.dias })}</div>
+                </div>
+                <button class="btn sm primary" data-sug="${i}">Crear</button>
+              </div>
+              <div class="row wrap" style="gap:5px;margin-top:9px">
+                ${raw(x.horas.map(function (h) {
+                  return '<span class="chip">' + esc(h) + '</span>';
+                }).join(''))}
+              </div>
+              <p class="tiny" style="margin:9px 0 0">${x.porque}</p>
+            </div>`;
+        }).join(''))}
+      </div>`;
+  }
+
   function tarjetaAlerta(a) {
     const t = Alertas.TIPOS[a.tipo] || Alertas.TIPOS.libre;
     return html`
@@ -442,7 +518,8 @@
           <span class="row-icon">${raw(icon(t.icono))}</span>
           <div class="grow" data-edit="${a.id}" style="cursor:pointer">
             <div style="font-weight:600">${a.titulo}</div>
-            <div class="tiny">${a.hora} · ${Alertas.resumenDias(a)}</div>
+            <div class="tiny">${Alertas.resumenHoras(a)}</div>
+            <div class="tiny">${Alertas.resumenDias(a)}</div>
           </div>
           <button class="sw ${a.activa ? 'on' : ''}" data-tog="${a.id}"
                   role="switch" aria-checked="${a.activa}" aria-label="Activar"></button>
@@ -478,8 +555,27 @@
       alertaSheet(Alertas.lista().find(function (x) { return x.id === el.dataset.edit; }));
     });
 
+    bind(root, '[data-a=irperfil]', function () { go('datos'); });
+
+    bindAll(root, '[data-sug]', function (el) {
+      const sug = Alertas.sugerencias().filter(function (x) { return !Alertas.yaExiste(x); });
+      const s = sug[Number(el.dataset.sug)];
+      if (!s) return;
+      Alertas.crearDesdeSugerencia(s);
+      render();
+      UI.toast('«' + s.titulo + '» creado con ' + s.horas.length +
+        (s.horas.length === 1 ? ' aviso' : ' avisos'));
+    });
+
+    bind(root, '[data-a=crearTodas]', function () {
+      const sug = Alertas.sugerencias().filter(function (x) { return !Alertas.yaExiste(x); });
+      sug.forEach(Alertas.crearDesdeSugerencia);
+      render();
+      UI.toast(sug.length + ' recordatorios creados');
+    });
+
     bind(root, '[data-a=desdeRutinas]', function () {
-      const a = Alertas.desdeRutinas('18:00');
+      const a = Alertas.desdeRutinas();
       if (!a) { UI.toast('Antes asigna días a alguna rutina'); return; }
       render();
       UI.toast('Recordatorio creado para tus días de entrenamiento');
@@ -514,8 +610,30 @@
       <input id="al-tit" value="${a.titulo}" placeholder="Título" style="margin:5px 0 8px">
       <input id="al-msg" value="${a.mensaje}" placeholder="Mensaje (opcional)" style="margin:0 0 12px">
 
-      <label class="tiny">HORA</label>
-      <input id="al-hora" type="time" value="${a.hora}" style="margin:5px 0 12px">
+      <label class="tiny">HORAS</label>
+      <div class="row wrap" style="gap:6px;margin:6px 0 8px" id="al-horas"></div>
+      <div class="row" style="gap:8px;margin-bottom:8px">
+        <input id="al-hora" type="time" value="${a.horas[0]}" class="grow">
+        <button class="btn sm" data-x="addhora">${raw(icon('plus'))} Añadir</button>
+      </div>
+      <button class="guia-tit" data-x="verRepartir">${raw(icon('chevron'))}
+        Repartir varias veces al día</button>
+      <div class="guia" id="al-repartir" hidden>
+        <div class="card">
+          <p class="tiny" style="margin:0 0 9px">Para el agua o las comidas: dime cuántas
+          veces y entre qué horas, y las coloco repartidas.</p>
+          <div class="row" style="gap:8px">
+            <div class="grow"><div class="tiny">VECES</div>
+              <input id="rep-n" type="number" inputmode="numeric" min="2" max="12" value="8"
+                     style="text-align:center;margin-top:4px"></div>
+            <div class="grow"><div class="tiny">DESDE</div>
+              <input id="rep-a" type="time" value="08:00" style="margin-top:4px"></div>
+            <div class="grow"><div class="tiny">HASTA</div>
+              <input id="rep-b" type="time" value="21:00" style="margin-top:4px"></div>
+          </div>
+          <button class="btn block sm" data-x="repartir" style="margin-top:10px">Repartir</button>
+        </div>
+      </div>
 
       <label class="tiny">DÍAS</label>
       <div class="row wrap" style="gap:6px;margin:6px 0 16px">
@@ -540,6 +658,48 @@
           };
         });
 
+        /* las horas se pintan como fichas que se quitan al tocarlas */
+        const pintarHoras = function () {
+          const caja = el.querySelector('#al-horas');
+          a.horas = a.horas.slice().sort();
+          caja.innerHTML = a.horas.map(function (h) {
+            return '<button class="chip on" data-quitar="' + esc(h) + '">' + esc(h) + ' ×</button>';
+          }).join('') || '<span class="tiny">Sin horas: añade al menos una.</span>';
+          caja.querySelectorAll('[data-quitar]').forEach(function (b) {
+            b.onclick = function () {
+              a.horas = a.horas.filter(function (h) { return h !== b.dataset.quitar; });
+              pintarHoras();
+            };
+          });
+        };
+        pintarHoras();
+
+        el.querySelector('[data-x=addhora]').onclick = function () {
+          const v = el.querySelector('#al-hora').value;
+          if (!v) return;
+          if (a.horas.indexOf(v) === -1) a.horas.push(v);
+          pintarHoras();
+        };
+
+        el.querySelector('[data-x=verRepartir]').onclick = function () {
+          const c = el.querySelector('#al-repartir');
+          c.hidden = !c.hidden;
+          this.classList.toggle('abierta', !c.hidden);
+        };
+
+        el.querySelector('[data-x=repartir]').onclick = function () {
+          const n = Number(el.querySelector('#rep-n').value) || 2;
+          const desde = el.querySelector('#rep-a').value || '08:00';
+          const hasta = el.querySelector('#rep-b').value || '21:00';
+          if (Alertas.enMinutos(hasta) <= Alertas.enMinutos(desde)) {
+            UI.toast('La hora de fin tiene que ser posterior');
+            return;
+          }
+          a.horas = Alertas.repartir(desde, hasta, Math.max(2, Math.min(12, n)));
+          pintarHoras();
+          UI.toast(a.horas.length + ' avisos repartidos');
+        };
+
         el.querySelectorAll('[data-dia]').forEach(function (b) {
           b.onclick = function () {
             const d = Number(b.dataset.dia);
@@ -552,7 +712,7 @@
         el.querySelector('[data-x=guardar]').onclick = function () {
           a.titulo = el.querySelector('#al-tit').value.trim() || 'Recordatorio';
           a.mensaje = el.querySelector('#al-msg').value.trim();
-          a.hora = el.querySelector('#al-hora').value || '18:00';
+          if (!a.horas.length) { UI.toast('Añade al menos una hora'); return; }
           if (!a.dias.length) { UI.toast('Elige al menos un día'); return; }
           Alertas.guardar(a);
           UI.closeModal();

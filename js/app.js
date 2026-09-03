@@ -2597,22 +2597,20 @@
     if (!p.length) { host.innerHTML = ''; return; }
 
     host.innerHTML = p.slice(0, 2).map(function (x) {
-      const t = Alertas.TIPOS[x.tipo] || Alertas.TIPOS.libre;
+      const t = Alertas.TIPOS[x.alerta.tipo] || Alertas.TIPOS.libre;
       return html`<div class="aviso">
         <span class="row-icon">${raw(icon(t.icono))}</span>
         <div class="grow">
           <div style="font-weight:600;font-size:.95rem">${x.titulo}</div>
-          <div class="tiny">${x.mensaje || x.hora}</div>
+          <div class="tiny">${x.hora}${raw(x.mensaje ? ' · ' + esc(x.mensaje) : '')}</div>
         </div>
-        <button class="btn sm" data-visto="${x.id}">Vale</button>
+        <button class="btn sm" data-visto="${x.alerta.id}" data-hora="${x.hora}">Vale</button>
       </div>`;
     }).join('');
 
     host.querySelectorAll('[data-visto]').forEach(function (b) {
       b.onclick = function () {
-        const arr = Alertas.lista().slice();
-        const al = arr.find(function (x) { return x.id === b.dataset.visto; });
-        if (al) { al.ultima = Date.now(); Store.setSetting('alertas', arr); }
+        Alertas.marcarLanzada(b.dataset.visto, b.dataset.hora);
         pintarAvisos();
       };
     });
