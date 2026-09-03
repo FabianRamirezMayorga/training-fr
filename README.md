@@ -193,6 +193,12 @@ tus datos**, así que solo hay que ponerlas una vez. Se controla desde el interr
 Las **sesiones abiertas nunca se sincronizan**: los tokens caducan en una hora y cada
 dispositivo abre la suya. En uno nuevo solo hay que pulsar *Conectar* en Spotify.
 
+La sincronización **fusiona**, no reemplaza: añadir un dispositivo nunca le cuesta datos
+a ninguno. Las rutinas y los entrenamientos se unen por identificador; si el mismo
+elemento cambió en dos sitios, gana la última edición; y los ajustes se combinan campo a
+campo. Algo desaparece solo si se borró a propósito, y de ese borrado queda constancia
+para que no reaparezca desde otro dispositivo.
+
 Cada correo tiene lo suyo. Si en un dispositivo entra otra cuenta, lo del anterior se
 borra antes de bajar lo nuevo: rutinas, historial, preferencias y claves. La conexión con
 Supabase se conserva, porque es del dispositivo y hace falta para que el siguiente entre.

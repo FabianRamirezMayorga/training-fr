@@ -19,7 +19,15 @@
     routines: [],
     sessions: [],
     favorites: [],
-    active: null   // entrenamiento en curso (sobrevive a un cierre del navegador)
+    active: null,  // entrenamiento en curso (sobrevive a un cierre del navegador)
+
+    /* Cuándo cambió cada ajuste, para poder fusionar con otros dispositivos
+       campo a campo en lugar de quedarse con el estado entero más reciente. */
+    sellos: {},
+
+    /* Lo que el usuario ha borrado a propósito. Sin esta memoria, al fusionar
+       con otro dispositivo volvería a aparecer lo que ya había eliminado. */
+    borrados: { routines: {}, sessions: {}, favorites: {} }
   };
 
   let state = load();
@@ -62,13 +70,26 @@
 
   /* ---------- ajustes ---------- */
   function settings() { return state.settings; }
-  function setSetting(k, v) { state.settings[k] = v; save(); }
+
+  function setSetting(k, v) {
+    state.settings[k] = v;
+    state.sellos = state.sellos || {};
+    state.sellos[k] = Date.now();
+    save();
+  }
 
   /* ---------- favoritos ---------- */
   function isFav(id) { return state.favorites.indexOf(id) !== -1; }
   function toggleFav(id) {
     const i = state.favorites.indexOf(id);
-    if (i === -1) state.favorites.push(id); else state.favorites.splice(i, 1);
+    state.borrados = state.borrados || { routines: {}, sessions: {}, favorites: {} };
+    if (i === -1) {
+      state.favorites.push(id);
+      delete state.borrados.favorites[id];
+    } else {
+      state.favorites.splice(i, 1);
+      state.borrados.favorites[id] = Date.now();
+    }
     save();
     return i === -1;
   }
@@ -94,6 +115,7 @@
 
   function deleteRoutine(id) {
     state.routines = state.routines.filter(function (r) { return r.id !== id; });
+    marcarBorrado('routines', id);
     save();
   }
 
@@ -131,6 +153,7 @@
 
   function addSession(s) {
     s.id = s.id || uid();
+    s.updatedAt = s.updatedAt || Date.now();
     state.sessions.unshift(s);
     save();
     return s;
@@ -138,7 +161,15 @@
 
   function deleteSession(id) {
     state.sessions = state.sessions.filter(function (s) { return s.id !== id; });
+    marcarBorrado('sessions', id);
     save();
+  }
+
+  /* Deja constancia de un borrado deliberado para que no resucite al fusionar */
+  function marcarBorrado(coleccion, id) {
+    state.borrados = state.borrados || { routines: {}, sessions: {}, favorites: {} };
+    state.borrados[coleccion] = state.borrados[coleccion] || {};
+    state.borrados[coleccion][id] = Date.now();
   }
 
   /* Todas las series registradas de un ejercicio, de la más reciente a la más antigua */
@@ -286,6 +317,6 @@
     historyOf: historyOf, prOf: prOf, lastPerformance: lastPerformance,
     volumeOf: volumeOf, stats: stats, weeklyVolume: weeklyVolume, dayKey: dayKey,
     exportJSON: exportJSON, importJSON: importJSON, wipe: wipe, uid: uid,
-    exportar: exportar, importar: importar
+    exportar: exportar, importar: importar, marcarBorrado: marcarBorrado
   };
 })(window);

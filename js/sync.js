@@ -570,9 +570,92 @@
     });
   }
 
+  /* ---------- fusión ----------
+     Añadir un dispositivo no puede costarle datos a nadie. Por eso no se
+     reemplaza un estado por otro: se fusionan los dos, elemento a elemento.
+
+     La regla es simple: algo desaparece solo si alguien lo borró a propósito,
+     y de eso queda constancia. Si el mismo elemento cambió en los dos sitios,
+     gana la versión editada más tarde. */
+
+  function indexar(lista) {
+    const m = {};
+    (lista || []).forEach(function (x) { if (x && x.id) m[x.id] = x; });
+    return m;
+  }
+
+  /* Une dos colecciones respetando los borrados deliberados de ambos lados */
+  function fusionarColeccion(locales, remotos, borrados) {
+    const a = indexar(locales), b = indexar(remotos);
+    const ids = Object.keys(a).concat(Object.keys(b).filter(function (id) { return !a[id]; }));
+
+    return ids.map(function (id) {
+      const x = a[id], y = b[id];
+      if (!y) return x;
+      if (!x) return y;
+      /* el mismo elemento en ambos lados: se queda el editado más tarde */
+      return (y.updatedAt || 0) > (x.updatedAt || 0) ? y : x;
+    }).filter(function (x) {
+      /* fuera lo que se borró después de su última edición */
+      const cuandoSeBorro = borrados[x.id];
+      return !cuandoSeBorro || cuandoSeBorro < (x.updatedAt || 0);
+    });
+  }
+
+  /* Los ajustes se fusionan campo a campo con su propia marca de cambio */
+  function fusionarAjustes(local, remoto, sellosLocal, sellosRemoto) {
+    const out = Object.assign({}, local);
+    Object.keys(remoto || {}).forEach(function (k) {
+      const tLocal = (sellosLocal || {})[k] || 0;
+      const tRemoto = (sellosRemoto || {})[k] || 0;
+      /* solo pisa el valor local si allí se cambió más tarde */
+      if (!(k in out) || tRemoto > tLocal) out[k] = remoto[k];
+    });
+    return out;
+  }
+
+  function fusionarMarcas(a, b) {
+    const out = Object.assign({}, a || {});
+    Object.keys(b || {}).forEach(function (k) {
+      if (!out[k] || b[k] > out[k]) out[k] = b[k];
+    });
+    return out;
+  }
+
+  /* Combina el estado de este dispositivo con el de la nube */
+  function fusionar(local, remoto) {
+    local = local || {};
+    remoto = remoto || {};
+
+    const borrados = {
+      routines: fusionarMarcas((local.borrados || {}).routines, (remoto.borrados || {}).routines),
+      sessions: fusionarMarcas((local.borrados || {}).sessions, (remoto.borrados || {}).sessions),
+      favorites: fusionarMarcas((local.borrados || {}).favorites, (remoto.borrados || {}).favorites)
+    };
+
+    const sellos = fusionarMarcas(local.sellos, remoto.sellos);
+
+    const favoritos = [].concat(local.favorites || [], remoto.favorites || [])
+      .filter(function (id, i, arr) { return arr.indexOf(id) === i; })
+      .filter(function (id) { return !borrados.favorites[id]; });
+
+    return {
+      version: local.version || remoto.version || 1,
+      settings: fusionarAjustes(local.settings, remoto.settings, local.sellos, remoto.sellos),
+      routines: fusionarColeccion(local.routines, remoto.routines, borrados.routines),
+      sessions: fusionarColeccion(local.sessions, remoto.sessions, borrados.sessions),
+      favorites: favoritos,
+      /* el entrenamiento a medias es de este dispositivo y no viaja */
+      active: local.active || null,
+      sellos: sellos,
+      borrados: borrados,
+      updatedAt: Math.max(local.updatedAt || 0, remoto.updatedAt || 0, Date.now())
+    };
+  }
+
+  /* Reemplazo completo por lo que hay en la nube. Solo desde "traer lo de la nube". */
   function aplicar(remoto) {
     const datos = remoto.data || {};
-    /* las claves se guardan aparte, no dentro del estado principal */
     const n = aplicarClaves(datos.claves);
     const limpio = Object.assign({}, datos);
     delete limpio.claves;
@@ -584,37 +667,50 @@
   function marcarSync() { guardar('trainingfr.ultimoSync', Date.now()); }
   function ultimoSync() { return leer('trainingfr.ultimoSync') || 0; }
 
-  /* Sincroniza: gana la versión más reciente.
-     Devuelve 'subido', 'bajado', 'igual' o 'conflicto' (para que decida el usuario). */
-  function sincronizar(forzar) {
-    return bajar().then(function (remoto) {
-      const local = Store.exportar();
-      const tLocal = local.updatedAt || 0;
+  /* Sincroniza fusionando los dos lados. Nada desaparece salvo lo que se haya
+     borrado a propósito; si un mismo elemento cambió en ambos, gana el último.
 
-      if (forzar === 'subir') return subir().then(function () { return 'subido'; });
+     'subir' y 'bajar' fuerzan un reemplazo completo y solo se usan cuando el
+     usuario lo pide expresamente desde la pantalla de cuenta. */
+  function sincronizar(forzar) {
+    if (forzar === 'subir') return subir().then(function () { return 'subido'; });
+
+    return bajar().then(function (remoto) {
       if (forzar === 'bajar') {
         if (!remoto) throw new Error('No hay nada guardado en la nube todavía.');
         aplicar(remoto);
         return 'bajado';
       }
 
+      const local = Store.exportar();
       if (!remoto) return subir().then(function () { return 'subido'; });
 
-      /* Nunca se reemplazan datos por nada. Un dispositivo recién estrenado
-         guarda un ajuste y ya tiene la marca de tiempo más reciente; si además
-         sube su estado vacío, la nube queda en blanco y de ahí en adelante
-         cualquier sincronización arrasaría con lo que hubiera en los demás. */
-      const remotoVacio = !((remoto.data && remoto.data.routines || []).length ||
-        (remoto.data && remoto.data.sessions || []).length);
-      if (remotoVacio && hayDatosLocales()) {
-        return subir().then(function () { return 'subido'; });
-      }
+      const fusionado = fusionar(local, remoto.data || {});
+      const cambiaAqui = huella(fusionado) !== huella(local);
+      const cambiaAlla = huella(fusionado) !== huella(remoto.data || {});
 
-      if (remoto.updatedAt > tLocal) { aplicar(remoto); return 'bajado'; }
-      if (tLocal > remoto.updatedAt) return subir().then(function () { return 'subido'; });
+      /* las claves llegan aparte del estado */
+      aplicarClaves((remoto.data || {}).claves);
+
+      if (cambiaAqui) Store.importar(fusionado);
+      if (cambiaAlla) return subir().then(function () { return cambiaAqui ? 'fusionado' : 'subido'; });
+
       marcarSync();
-      return 'igual';
+      return cambiaAqui ? 'bajado' : 'igual';
     });
+  }
+
+  /* Resumen barato del contenido, para saber si la fusión cambió algo */
+  function huella(e) {
+    e = e || {};
+    const ids = function (lista) {
+      return (lista || []).map(function (x) {
+        return x.id + ':' + (x.updatedAt || 0);
+      }).sort().join(',');
+    };
+    return ids(e.routines) + '|' + ids(e.sessions) + '|' +
+      (e.favorites || []).slice().sort().join(',') + '|' +
+      JSON.stringify(e.settings || {});
   }
 
   /* ¿Hay datos propios en este dispositivo que podrían pisarse al entrar? */
@@ -639,7 +735,7 @@
     sesion: sesion, email: email, activa: activa,
     sincronizaClaves: sincronizaClaves, enlaceConfiguracion: enlaceConfiguracion,
     aplicarEnlace: aplicarEnlace, ultimoUsuario: ultimoUsuario,
-    limpiarDatosDeCuenta: limpiarDatosDeCuenta,
+    limpiarDatosDeCuenta: limpiarDatosDeCuenta, fusionar: fusionar,
     enviarEnlace: enviarEnlace, capturarRedireccion: capturarRedireccion, salir: salir,
     entrarConEnlace: entrarConEnlace, registrar: registrar, entrarConClave: entrarConClave,
     establecerClave: establecerClave,

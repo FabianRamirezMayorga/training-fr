@@ -2263,43 +2263,9 @@
       });
     }
 
-    const hayLocal = Sync.hayDatosLocales();
-
-    return Sync.bajar().then(function (remoto) {
-      const tieneRemoto = remoto && remoto.data &&
-        ((remoto.data.routines || []).length || (remoto.data.sessions || []).length);
-
-      if (hayLocal && tieneRemoto) {
-        return new Promise(function (resolve) {
-          UI.modal(html`
-            <h2>Ya tenías datos guardados</h2>
-            <p class="muted">En la nube hay rutinas de este correo y en este dispositivo también.
-            ¿Con cuáles te quedas?</p>
-            <div class="stack" style="margin-top:14px">
-              <button class="btn primary block" data-x="bajar">
-                Usar los de la nube (${(remoto.data.routines || []).length} rutinas)</button>
-              <button class="btn block" data-x="subir">
-                Usar los de este dispositivo (${Store.routines().length} rutinas)</button>
-            </div>
-            <p class="tiny" style="margin-top:10px">La opción que no elijas se reemplaza.
-            Si quieres conservar ambas, cancela y exporta antes una copia desde Ajustes.</p>`,
-            function (el) {
-              el.querySelector('[data-x=bajar]').onclick = function () {
-                UI.closeModal(); resolve(Sync.sincronizar('bajar'));
-              };
-              el.querySelector('[data-x=subir]').onclick = function () {
-                UI.closeModal(); resolve(Sync.sincronizar('subir'));
-              };
-            });
-        });
-      }
-      /* Al entrar en un dispositivo manda el contenido, no la fecha. Un móvil
-         recién estrenado tiene una marca de tiempo más reciente por el simple
-         hecho de haber tocado un ajuste, y comparando fechas acababa subiendo
-         su estado vacío encima de lo que había en la nube. */
-      if (!hayLocal && tieneRemoto) return Sync.sincronizar('bajar');
-      return Sync.sincronizar('subir');
-    }).then(function () {
+    /* Ya no hay que preguntar nada: la sincronización fusiona los dos lados,
+       así que entrar en un dispositivo nunca le cuesta datos a ninguno. */
+    return Sync.sincronizar().then(function () {
       aplicarTema();
       go('cuenta');
       const piezas = [];
