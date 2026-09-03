@@ -129,12 +129,17 @@
     const c = config();
     if (!c.clave) return Promise.reject(new Error('Falta la clave de la IA. Configúrala en Ajustes.'));
 
+    /* Los modelos recientes razonan antes de responder y ese razonamiento gasta
+       del mismo presupuesto de tokens. Con un límite corto se lo consumen entero
+       pensando y devuelven una respuesta vacía, así que aquí se apaga: para lo
+       que pide esta app no aporta y sí encarece cada llamada. */
     const cuerpo = {
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       systemInstruction: { parts: [{ text: INSTRUCCIONES }] },
       generationConfig: {
         temperature: opciones.temperatura == null ? 0.7 : opciones.temperatura,
-        maxOutputTokens: opciones.maxTokens || 2048
+        maxOutputTokens: Math.max(opciones.maxTokens || 2048, 256),
+        thinkingConfig: { thinkingBudget: 0 }
       }
     };
     if (opciones.json) cuerpo.generationConfig.responseMimeType = 'application/json';
@@ -166,6 +171,13 @@
               modelos.splice(i + 1, 0, sugerido[1]);
             }
 
+            /* modelos antiguos que no conocen thinkingConfig: se quita y se repite */
+            if (r.status === 400 && /thinking/i.test(msg) &&
+                cuerpo.generationConfig.thinkingConfig) {
+              delete cuerpo.generationConfig.thinkingConfig;
+              return intentar(i);
+            }
+
             const retirado = r.status === 404 ||
               /no longer available|not found|is not supported/i.test(msg);
             if (retirado && i < modelos.length - 1) return intentar(i + 1);
@@ -180,13 +192,36 @@
           }
 
           const cand = j && j.candidates && j.candidates[0];
-          const texto = cand && cand.content && cand.content.parts &&
-            cand.content.parts.map(function (p) { return p.text || ''; }).join('');
+          const partes = (cand && cand.content && cand.content.parts) || [];
+          /* se descartan las partes de razonamiento: no son la respuesta */
+          const texto = partes
+            .filter(function (p) { return !p.thought; })
+            .map(function (p) { return p.text || ''; })
+            .join('');
+
           if (!texto) {
-            if (cand && cand.finishReason === 'SAFETY') {
+            const razon = cand && cand.finishReason;
+
+            /* se quedó sin tokens antes de escribir nada: se reintenta con más
+               margen, que es la causa habitual de una respuesta vacía */
+            if (razon === 'MAX_TOKENS' && !opciones._ampliado) {
+              return llamar(prompt, Object.assign({}, opciones, {
+                _ampliado: true,
+                maxTokens: Math.min((cuerpo.generationConfig.maxOutputTokens || 2048) * 4, 16384)
+              }));
+            }
+
+            if (razon === 'SAFETY' || razon === 'PROHIBITED_CONTENT') {
               throw new Error('La IA no pudo responder a esa petición.');
             }
-            throw new Error('La IA devolvió una respuesta vacía.');
+            if (razon === 'MAX_TOKENS') {
+              throw new Error('La respuesta se cortó por longitud. Prueba a pedir menos de una vez.');
+            }
+            if (razon === 'RECITATION') {
+              throw new Error('La IA se negó a responder por posible copia de otra fuente.');
+            }
+            throw new Error('La IA no devolvió texto' + (razon ? ' (motivo: ' + razon + ')' : '') +
+              '. Prueba con otro modelo desde la bóveda.');
           }
           /* el modelo que ha respondido pasa a ser el preferido */
           if (modelos[i] !== c.modelo) {

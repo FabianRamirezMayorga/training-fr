@@ -383,7 +383,7 @@
       const salida = root.querySelector('#ia-estado');
       btn.disabled = true;
       salida.textContent = 'Probando la conexión…';
-      IA.llamar('Responde solo con la palabra: listo', { maxTokens: 20, temperatura: 0 })
+      IA.llamar('Responde solo con la palabra: listo', { maxTokens: 512, temperatura: 0 })
         .then(function (r) {
           salida.innerHTML = '<span style="color:var(--acc)">Funciona. La IA respondió: ' +
             esc(r.slice(0, 40)) + '</span>';
