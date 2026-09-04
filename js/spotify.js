@@ -581,18 +581,19 @@
        Spotify: /playlists/{id}/tracks devuelve un 403 seco en cuentas donde
        /playlists/{id} responde de sobra. Se pide primero el que funciona y el
        otro queda de reserva, que en listas de más de cien hace falta. */
+    /* La lista entera trae dentro sus canciones, y ese camino sí lo deja
+       Spotify: /playlists/{id}/tracks devuelve un 403 seco en cuentas donde
+       /playlists/{id} responde de sobra. Si la lista contesta, lo que traiga
+       es la respuesta buena aunque venga vacía; sólo cuando ni eso pasa se
+       intenta la puerta cerrada, que para algunas cuentas sí está abierta. */
     return pedir('/playlists/' + pl + '?fields=' + encodeURIComponent(campos))
-      .then(function (r) { return ordenar(r && r.tracks && r.tracks.items); })
-      .catch(function () {
-        return pedir('/playlists/' + pl)
-          .then(function (r) { return ordenar(r && r.tracks && r.tracks.items); });
-      })
-      .then(function (temas) {
-        if (temas.length) return temas;
-        return pedir(sueltas).then(function (r) { return ordenar(r && r.items); });
+      .catch(function () { return pedir('/playlists/' + pl); })
+      .then(function (r) {
+        if (r && r.tracks) return ordenar(r.tracks.items);
+        return pedir(sueltas).then(function (x) { return ordenar(x && x.items); });
       })
       .catch(function (e) {
-        return pedir(sueltas).then(function (r) { return ordenar(r && r.items); })
+        return pedir(sueltas).then(function (x) { return ordenar(x && x.items); })
           .catch(function () { throw e; });
       });
   }
@@ -972,11 +973,22 @@
       });
     }).then(function (pl) {
       if (!pl || !pl.id) throw new Error('No se pudo crear la lista.');
+      /* Meter las canciones va por /playlists/{id}/tracks, que es justo la
+         puerta que algunas cuentas tienen cerrada. Si falla ahí, la lista ya
+         está creada y vacía: se deshace antes de avisar, que si no le queda
+         una lista en blanco en Spotify por cada intento. */
       return pedir('/playlists/' + pl.id + '/tracks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ uris: uris })
-      }).then(function () { return pl; });
+      }).then(function () { return pl; }).catch(function (e) {
+        return pedir('/playlists/' + pl.id + '/followers', { method: 'DELETE' })
+          .catch(function () { /* si no se puede deshacer, tampoco se insiste */ })
+          .then(function () {
+            throw new Error('Spotify ha creado la lista pero no deja meterle las '
+              + 'canciones, así que se ha deshecho. (' + e.message + ')');
+          });
+      });
     });
   }
 

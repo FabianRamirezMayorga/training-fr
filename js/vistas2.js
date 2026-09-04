@@ -1065,7 +1065,7 @@
             ${raw(icon(s.sonando ? 'pausaLleno' : 'playLleno'))}</button>
           <button class="player-b" data-sp="siguiente" aria-label="Siguiente">
             ${raw(icon('siguiente'))}</button>
-          ${raw(favVa === false ? '' : html`
+          ${raw(favVa === false ? '<span class="player-b chico hueco"></span>' : html`
           <button class="player-b chico ${favoritaActual ? 'fav' : ''}" data-sp="corazon"
             aria-label="Guardar en favoritas" aria-pressed="${!!favoritaActual}">
             ${raw(icon('corazon'))}</button>`)}
