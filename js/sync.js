@@ -103,6 +103,20 @@
         if (!r.ok) {
           const msg = (cuerpo && (cuerpo.error_description || cuerpo.msg ||
             cuerpo.message || cuerpo.error)) || ('Error ' + r.status);
+
+          /* Quien monta su propio proyecto se salta el paso del SQL m\u00e1s veces
+             que ninguno, y el error de la base de datos no lo dice de forma
+             que se entienda: habla de una relaci\u00f3n que no existe. */
+          if (/does not exist|schema cache|PGRST205|42P01/i.test(msg) &&
+              /estado/i.test(msg + ' ' + String(ruta))) {
+            throw new Error('En ese proyecto de Supabase falta la tabla donde van los datos. '
+              + 'Ve a Ajustes \u2192 B\u00f3veda de claves, copia el SQL que hay bajo la conexi\u00f3n de '
+              + 'Supabase y ejec\u00fatalo una vez en el SQL Editor de tu proyecto.');
+          }
+          if (/invalid api key|no api key/i.test(msg)) {
+            throw new Error('Esa clave no vale para este proyecto. Copia otra vez la '
+              + 'Publishable key en Project Settings \u2192 API Keys.');
+          }
           throw new Error(msg);
         }
         return cuerpo;
