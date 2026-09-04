@@ -423,6 +423,7 @@
 
     const lista = listaGuardada();
     const mem = IA.activa() ? IA.memoriaMusical() : { listas: 0, artistas: [] };
+    const faltantes = Spotify.permisosQueFaltan ? Spotify.permisosQueFaltan() : [];
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
@@ -437,9 +438,16 @@
       ${raw(Spotify.permisosCaducados() ? html`
         <div class="card" style="border-color:var(--warn);margin-top:12px">
           <b>Vuelve a conectar</b>
-          <p class="muted" style="margin:5px 0 10px">Hay funciones nuevas —guardar canciones
-          en tus favoritas y ver tus listas de Spotify— y Spotify pide permiso otra vez para
-          eso. Es un toque y no pierdes nada.</p>
+          <p class="muted" style="margin:5px 0 10px">${raw(faltantes.length
+            ? 'A la conexión con Spotify le faltan permisos, y por eso el corazón y las '
+              + 'canciones de tus listas dan error. Reconecta y acepta la pantalla de '
+              + 'Spotify tal cual sale.'
+            : 'Hay funciones nuevas —guardar canciones en tus favoritas y ver tus listas '
+              + 'de Spotify— y Spotify pide permiso otra vez para eso. Es un toque y no '
+              + 'pierdes nada.')}</p>
+          ${raw(faltantes.length
+            ? '<p class="tiny" style="margin:0 0 10px">Falta: ' + esc(faltantes.join(', ')) + '</p>'
+            : '')}
           <button class="btn primary block" data-a="conectar">Reconectar Spotify</button>
         </div>` : '')}
 
@@ -534,7 +542,7 @@
     return '<div class="stack">' + listas.map(function (l) {
       const abierta = listaAbierta === l.id;
       return html`
-        <div class="card" style="padding:0;overflow:hidden">
+        <div class="card lista-card" style="padding:0;overflow:hidden">
           <button class="rt-item" data-abrir-lista="${l.id}" data-uri="${l.uri}"
                   style="width:100%;text-align:left;background:none;border:0">
             ${raw(l.portada
@@ -547,6 +555,8 @@
             </div>
             <span class="chevron ${abierta ? 'abierta' : ''}">${raw(icon('chevron'))}</span>
           </button>
+          <button class="lista-play" data-poner-ya="${l.uri}"
+                  aria-label="Reproducir ${l.nombre}">${raw(icon('play'))}</button>
           <div class="lista-temas" data-temas="${l.id}" ${raw(abierta ? '' : 'hidden')}></div>
         </div>`;
     }).join('') + '</div>';
@@ -615,6 +625,18 @@
 
     pedir.then(function (listas) {
       caja.innerHTML = tarjetasListas(listas, !q);
+      caja.querySelectorAll('[data-poner-ya]').forEach(function (b) {
+        b.onclick = function (ev) {
+          ev.stopPropagation();
+          Spotify.desbloquearAudio();
+          Spotify.iniciarReproductor()
+            .catch(function () { /* sin reproductor propio, donde se pueda */ })
+            .then(function () { return Spotify.ponerPlaylist(b.dataset.ponerYa); })
+            .then(function () { UI.toast('Reproduciendo'); })
+            .catch(function (e) { UI.toast(e.message); });
+        };
+      });
+
       caja.querySelectorAll('[data-abrir-lista]').forEach(function (b) {
         b.onclick = function () {
           const id = b.dataset.abrirLista;

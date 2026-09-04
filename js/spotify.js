@@ -31,7 +31,10 @@
   ].join(' ');
 
   /* La versión de permisos: si cambia, hay que volver a autorizar la cuenta */
-  const SCOPES_V = 3;
+  /* Sube cuando cambian los permisos. Sube también a 4 porque las sesiones
+     anteriores no guardaban qué concedió Spotify: sin eso no hay forma de
+     saber si al token le falta algo, y los 403 se quedaban sin explicación. */
+  const SCOPES_V = 4;
 
   function leer(k) {
     try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; }
@@ -65,10 +68,22 @@
   function sesion() { return leer(SES); }
   function activa() { return !!(configurado() && sesion()); }
 
-  /* Los permisos han cambiado desde la última vez: hay que reconectar */
+  /* Los permisos que faltan en la sesión de ahora mismo */
+  function permisosQueFaltan() {
+    const s = sesion();
+    if (!s) return [];
+    /* Sesiones viejas no guardaban lo concedido; ahí manda la versión */
+    if (typeof s.scope !== 'string') return [];
+    const tiene = s.scope.split(' ').filter(Boolean);
+    return SCOPES.split(' ').filter(function (p) { return tiene.indexOf(p) === -1; });
+  }
+
+  /* Los permisos han cambiado o Spotify no concedió todos: hay que reconectar */
   function permisosCaducados() {
     const s = sesion();
-    return !!(s && (s.scopes_v || 1) < SCOPES_V);
+    if (!s) return false;
+    if ((s.scopes_v || 1) < SCOPES_V) return true;
+    return permisosQueFaltan().length > 0;
   }
   function salir() { escribir(SES, null); }
 
@@ -293,7 +308,11 @@
           access_token: j.access_token,
           refresh_token: j.refresh_token || previo.refresh_token,
           expires_at: Date.now() + (j.expires_in || 3600) * 1000,
-          scopes_v: SCOPES_V
+          scopes_v: SCOPES_V,
+          /* Lo que Spotify ha concedido de verdad, que no siempre es lo que se
+             pidió: si falta alguno, las llamadas fallan con un 403 seco y sin
+             esto no había manera de saber por qué. */
+          scope: j.scope || previo.scope || ''
         });
         return true;
       });
@@ -351,8 +370,10 @@
             throw new Error('Esa orden no la admite el aparato donde suena la música.');
           }
           if (ruta.indexOf('/me/player') !== 0) {
-            throw new Error('Spotify no ha autorizado esta acción. Pulsa «Reconectar» '
-              + 'para volver a dar permisos a la cuenta.');
+            const faltan = permisosQueFaltan();
+            throw new Error('Spotify no ha autorizado esta acción'
+              + (faltan.length ? ' (falta el permiso ' + faltan[0] + ')' : '')
+              + '. Pulsa «Reconectar» para volver a dar permisos a la cuenta.');
           }
           throw new Error(e.message || 'Spotify ha rechazado la orden.');
         });
@@ -854,6 +875,7 @@
 
   const PUBLICO = {
     SCOPES_V: SCOPES_V, permisosCaducados: permisosCaducados, volumen: volumen,
+    permisosQueFaltan: permisosQueFaltan,
     admiteVolumen: admiteVolumen,
     iniciarReproductor: iniciarReproductor, reproductorActivo: reproductorActivo,
     estado: estado, alCambiar: alCambiar, traerAqui: traerAqui,

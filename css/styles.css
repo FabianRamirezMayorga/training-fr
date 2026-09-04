@@ -180,6 +180,14 @@ a{color:var(--blue)}
 .rt-item .bm-sin{width:56px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;
   border-radius:7px;background:var(--card2)}
 .rt-item .bm-sin svg{width:18px;height:18px;fill:currentColor;color:var(--dim2)}
+/* la fila abre la lista y el botón verde la pone a sonar sin desplegarla */
+.lista-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.lista-card .rt-item{grid-column:1;min-width:0}
+.lista-play{grid-column:2;width:38px;height:38px;margin-right:9px;border:0;flex:none;
+  border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center}
+.lista-play svg{width:15px;height:15px;fill:var(--on-acc);color:var(--on-acc)}
+.lista-play:active{transform:scale(.94)}
+.lista-card .lista-temas{grid-column:1 / -1;min-width:0}
 /* las canciones que cuelgan de una lista al desplegarla */
 .lista-temas{border-top:1px solid var(--line);background:var(--bg)}
 .lista-temas .pista{border-radius:0;background:none;border-bottom:1px solid var(--line);padding:9px 13px}
