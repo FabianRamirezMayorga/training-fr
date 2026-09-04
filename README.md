@@ -186,9 +186,10 @@ que autorizar y dónde están los dos datos de conexión.
   (semana, mes, dos meses, tres o un año) y cuánto has subido o bajado respecto al periodo
   anterior; un **mapa de calor de tres meses** donde la
   constancia se ve de un vistazo, con los días más oscuros cuanto más has entrenado; y el
-  **reparto por zona** de los últimos 30 días, que es lo que destapa los desequilibrios y te
-  dice en una frase lo que llevas sin entrenar. Más los récords personales y el historial
-  completo, cada sesión desplegable.
+  **reparto por zona**, que es lo que destapa los desequilibrios y te dice en una frase lo
+  que llevas sin entrenar. El rango manda sobre los tres. Debajo, **tus metas con su anillo
+  de progreso** —cuánto llevas, cuánto falta y cuáles has cumplido—, los récords personales
+  y el historial completo, cada sesión desplegable.
 - **Sin conexión** — desde Ajustes puedes descargar las imágenes de tus rutinas, de los
   ejercicios principales o del catálogo completo. Una vez descargadas, la app funciona
   entera sin internet: en el gimnasio sin cobertura, en el metro o sin datos.

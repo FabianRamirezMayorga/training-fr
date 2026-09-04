@@ -3185,8 +3185,12 @@
       }
 
 
-      if (sp.ok) UI.toast('Spotify conectado');
-      else if (sp.error) UI.toast(sp.error);
+      if (sp.ok) {
+        /* vuelve a donde estaba, que es Música: aterrizar en la portada parece
+           que no ha pasado nada */
+        if (sp.volver && location.hash !== sp.volver) location.hash = sp.volver;
+        UI.toast('Spotify conectado. Ya puedes activar el reproductor.');
+      } else if (sp.error) UI.toast(sp.error);
 
       /* recordatorios: revisan cada minuto mientras la app esté abierta */
       Alertas.arrancar(function () { pintarAvisos(); });

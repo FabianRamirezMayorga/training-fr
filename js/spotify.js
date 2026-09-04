@@ -102,7 +102,11 @@
 
     const verificador = aleatorio(64);
     const estado = aleatorio(16);
-    localStorage.setItem(VERIF, JSON.stringify({ v: verificador, s: estado }));
+    /* de dónde salió: al volver, Spotify manda a la raíz y sin esto uno acaba
+       en la portada preguntándose si ha pasado algo */
+    localStorage.setItem(VERIF, JSON.stringify({
+      v: verificador, s: estado, volver: location.hash || '#/musica'
+    }));
 
     return reto(verificador).then(function (challenge) {
       const q = new URLSearchParams({
@@ -159,19 +163,19 @@
     if (guardado.s !== estado) return Promise.resolve({ ok: false });
 
     localStorage.removeItem(VERIF);
-    limpiarURL();
+    limpiarURL(guardado.volver);
 
     return token({
       grant_type: 'authorization_code',
       code: code,
       redirect_uri: urlRetorno(),
       code_verifier: guardado.v
-    }).then(function () { return { ok: true }; })
+    }).then(function () { return { ok: true, volver: guardado.volver || '#/musica' }; })
       .catch(function (e) { return { ok: false, error: e.message }; });
   }
 
-  function limpiarURL() {
-    history.replaceState(null, '', location.pathname + (location.hash || '#/inicio'));
+  function limpiarURL(destino) {
+    history.replaceState(null, '', location.pathname + (destino || location.hash || '#/inicio'));
   }
 
   function token(params) {

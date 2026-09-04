@@ -161,34 +161,53 @@
       </div>`;
   }
 
-  /* Mapa de calor de 12 semanas: cada columna una semana, cada fila un día */
+  /* Mapa de calor del rango elegido. Con pocos días va en una fila, día a día;
+     con muchos, en columnas de siete, que es como se lee la constancia. */
   function mapaCalor(dias) {
     const max = Math.max.apply(null, dias.map(function (d) { return d.series; }).concat([1]));
     const hoyKey = Store.dayKey(Date.now());
     const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const DIAS_SEM = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
-    /* etiquetas de mes: solo cuando cambia, alineadas con su columna */
-    let mesAnterior = -1;
-    const cabecera = [];
-    for (let i = 0; i < dias.length; i += 7) {
-      const m = new Date(dias[i].t).getMonth();
-      cabecera.push(m !== mesAnterior ? MESES[m] : '');
-      mesAnterior = m;
+    /* una sola fila solo en la semana: con un mes salían treinta letras de día
+       seguidas y no se leía nada */
+    const enFila = dias.length <= 14;
+    const filas = enFila ? 1 : 7;
+    const columnas = Math.ceil(dias.length / filas);
+
+    /* cabecera: días de la semana si van en fila, meses si van en columnas */
+    let cabecera;
+    if (enFila) {
+      cabecera = dias.map(function (d) {
+        return DIAS_SEM[(new Date(d.t).getDay() + 6) % 7];
+      });
+    } else {
+      let mesAnterior = -1;
+      cabecera = [];
+      for (let i = 0; i < dias.length; i += 7) {
+        const m = new Date(dias[i].t).getMonth();
+        cabecera.push(m !== mesAnterior ? MESES[m] : '');
+        mesAnterior = m;
+      }
     }
 
+    const celdas = dias.map(function (d) {
+      const nivel = !d.series ? 0 : Math.min(4, Math.ceil(d.series / max * 4));
+      const titulo = UI.fechaCorta(d.t) + (d.series
+        ? ': ' + d.series + ' series' + (d.volumen ? ', ' + UI.kg(d.volumen) : '')
+        : ': descanso');
+      return '<i class="n' + nivel + (d.k === hoyKey ? ' hoy' : '') +
+        '" title="' + esc(titulo) + '"></i>';
+    }).join('');
+
     return html`
-      <div class="calor-meses">
-        ${raw(cabecera.map(function (m) { return '<span>' + esc(m) + '</span>'; }).join(''))}
-      </div>
-      <div class="calor">
-        ${raw(dias.map(function (d) {
-          const nivel = !d.series ? 0 : Math.min(4, Math.ceil(d.series / max * 4));
-          const titulo = UI.fechaCorta(d.t) + (d.series
-            ? ': ' + d.series + ' series' + (d.volumen ? ', ' + UI.kg(d.volumen) : '')
-            : ': descanso');
-          return '<i class="n' + nivel + (d.k === hoyKey ? ' hoy' : '') +
-            '" title="' + esc(titulo) + '"></i>';
-        }).join(''))}
+      <div class="calor-scroll ${columnas > 26 ? 'ancho' : ''}">
+        <div class="calor-caja" style="--cols:${columnas}">
+          <div class="calor-meses">
+            ${raw(cabecera.map(function (m) { return '<span>' + esc(m) + '</span>'; }).join(''))}
+          </div>
+          <div class="calor" style="grid-template-rows:repeat(${filas},1fr)">${raw(celdas)}</div>
+        </div>
       </div>
       <div class="calor-pie">
         <span>Menos</span>
@@ -281,10 +300,10 @@
 
       <div class="list-title">Constancia</div>
       <div class="card">
-        ${raw(mapaCalor(porDia(84)))}
-        <p class="tiny" style="margin:12px 0 0">Cada cuadro es un día de los últimos tres
-        meses; cuanto más oscuro, más series. Los huecos también cuentan: el descanso
-        forma parte del plan.</p>
+        ${raw(mapaCalor(porDia(r.dias)))}
+        <p class="tiny" style="margin:12px 0 0">Cada cuadro es un día de ${r.frase};
+        cuanto más oscuro, más series. Los huecos también cuentan: el descanso forma
+        parte del plan.</p>
       </div>
 
       ${raw(reparto.total ? html`
@@ -302,6 +321,8 @@
           }).join(''))}
           <p class="tiny" style="margin:11px 0 0">${raw(pistaReparto(reparto))}</p>
         </div>` : '')}
+
+      ${raw(metasHTML())}
 
       ${raw(prs.length ? html`
         <div class="list-title">Récords personales</div>
@@ -346,6 +367,77 @@
       </div>`;
   };
 
+  /* ---------- metas ----------
+     El progreso vive en objetivos.js, que ya sabe leerlo solo de los datos.
+     Aquí se enseña donde se mira la evolución, que es donde uno quiere verlo:
+     un anillo por meta con el porcentaje y lo que falta. */
+  function metasHTML() {
+    const metas = Objetivos.lista();
+    if (!metas.length) {
+      return html`
+        <div class="list-title">Tus metas</div>
+        <div class="card center">
+          <p class="muted" style="margin-bottom:12px">Ponte una meta y la verás avanzar
+          aquí sola: llegar a un peso, entrenar x veces por semana, una racha o un récord
+          en un ejercicio.</p>
+          <button class="btn primary block" data-a="metas">Crear mi primera meta</button>
+        </div>`;
+    }
+
+    const hechas = metas.filter(function (m) { return m.logrado; }).length;
+
+    return html`
+      <div class="list-head">
+        <span class="list-title">Tus metas${raw(hechas
+          ? ' <span class="chip solid tiny-chip">' + hechas + ' cumplida' +
+            (hechas === 1 ? '' : 's') + '</span>' : '')}</span>
+        <button class="btn sm ghost" data-a="metas">Gestionar</button>
+      </div>
+      <div class="stack">
+        ${raw(metas.map(function (m) {
+          const p = Objetivos.progreso(m);
+          const pct = Math.round(p.pct * 100);
+          const t = Objetivos.TIPOS[m.tipo] || {};
+          const falta = Math.abs((Number(m.meta) || 0) - p.actual);
+
+          return html`
+            <div class="card meta ${p.cumplido ? 'lograda' : ''}">
+              ${raw(anillo(pct, p.cumplido))}
+              <div class="grow" style="min-width:0">
+                <div class="meta-t">${Objetivos.etiqueta(m)}</div>
+                <div class="tiny">${Objetivos.formato(m, p.actual)} de
+                  ${Objetivos.formato(m, m.meta)}</div>
+                <div class="tiny" style="margin-top:3px;color:${raw(p.cumplido
+                  ? 'var(--acc)' : 'var(--dim2)')}">${raw(p.cumplido
+                  ? 'Cumplida el ' + esc(UI.fechaCorta(m.logrado))
+                  : esc(loQueFalta(m, falta)))}</div>
+              </div>
+            </div>`;
+        }).join(''))}
+      </div>`;
+  }
+
+  /* "Te falta 1 sesión", no "Te faltan 1 sesiones" */
+  function loQueFalta(m, falta) {
+    const txt = Objetivos.formato(m, falta);
+    const uno = Math.round(falta) === 1;
+    if (!uno) return 'Te faltan ' + txt;
+    return 'Te falta ' + txt.replace(/sesiones$/, 'sesión').replace(/días$/, 'día');
+  }
+
+  /* Anillo de progreso: un círculo con el trazo recortado al porcentaje */
+  function anillo(pct, cumplida) {
+    const R = 20, C = 2 * Math.PI * R;
+    const corte = C * (1 - Math.max(0, Math.min(100, pct)) / 100);
+    return html`
+      <svg class="anillo ${cumplida ? 'ok' : ''}" viewBox="0 0 48 48" aria-hidden="true">
+        <circle class="anillo-fondo" cx="24" cy="24" r="${R}"/>
+        <circle class="anillo-arco" cx="24" cy="24" r="${R}"
+                stroke-dasharray="${C}" stroke-dashoffset="${corte}"/>
+        <text x="24" y="24" class="anillo-txt">${pct}<tspan class="anillo-pc">%</tspan></text>
+      </svg>`;
+  }
+
   /* Una frase que diga algo del reparto, no solo los porcentajes */
   function pistaReparto(r) {
     const nombres = r.filas.map(function (f) { return f.id; });
@@ -364,6 +456,8 @@
 
   V.progreso.mount = function (root) {
     bind(root, '[data-a=ir]', function () { go('rutinas'); });
+
+    bind(root, '[data-a=metas]', function () { go('objetivos'); });
 
     bindAll(root, '[data-rango]', function (el) {
       rango = el.dataset.rango;
@@ -387,6 +481,15 @@
       root.querySelectorAll('.calor i').forEach(function (c, i) {
         c.style.animationDelay = (i * 4) + 'ms';
       });
+      root.querySelectorAll('.anillo-arco').forEach(function (c, i) {
+        const fin = c.getAttribute('stroke-dashoffset');
+        c.style.strokeDashoffset = c.getAttribute('stroke-dasharray');
+        setTimeout(function () {
+          c.style.transition = 'stroke-dashoffset .9s cubic-bezier(.2,.9,.3,1)';
+          c.style.strokeDashoffset = fin;
+        }, 120 + i * 90);
+      });
+
       root.querySelectorAll('.zona-barra i').forEach(function (b, i) {
         const w = b.style.width;
         b.style.width = '0';
