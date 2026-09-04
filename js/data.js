@@ -62,6 +62,22 @@
      mismo saco los estiramientos y el rodillo de espuma, que no se usan para
      lo mismo—, así que aquí se recomponen: el rodillo sale aparte por su
      material y la fuerza junta lo que en la práctica es fuerza. */
+  /* Pilates de suelo. No hay ninguna fuente libre de pilates —lo busqué— así
+     que la lista está escogida a mano del catálogo: control del centro,
+     movimiento de columna vértebra a vértebra y trabajo de suelo, que es lo
+     que un mat de pilates tiene en común con lo que hay aquí. No es el
+     repertorio auténtico ni lo pretende. */
+  const PILATES = [
+    'Dead_Bug', 'Plank', 'Side_Bridge', 'Butt_Lift_Bridge', 'Single_Leg_Glute_Bridge',
+    'Pelvic_Tilt_Into_Bridge', 'Standing_Pelvic_Tilt', 'Scissor_Kick', 'Stomach_Vacuum',
+    'Superman', 'Lower_Back_Curl', 'Bent-Knee_Hip_Raise', 'Reverse_Crunch', 'Leg_Pull-In',
+    'Flat_Bench_Lying_Leg_Raise', 'Cocoons', 'Jackknife_Sit-Up', 'Bottoms_Up',
+    'Russian_Twist', 'Cross-Body_Crunch', 'Oblique_Crunches', 'Air_Bike', 'Butt-Ups',
+    'Spider_Crawl', 'Flutter_Kicks', 'Cat_Stretch', 'Childs_Pose', 'Hip_Circles_prone',
+    'Toe_Touchers', 'Seated_Leg_Tucks', 'Glute_Kickback', 'Leg_Lift', 'Side_Jackknife',
+    'Hyperextensions_With_No_Hyperextension_Bench'
+  ];
+
   const TIPOS = [
     { id: 'fuerza', label: 'Fuerza', test: function (e) {
       return e.category === 'strength' || e.category === 'powerlifting' ||
@@ -69,6 +85,12 @@
     } },
     { id: 'estiramiento', label: 'Estiramientos', test: function (e) {
       return e.category === 'stretching' && e.equipment !== 'foam roll';
+    } },
+    { id: 'yoga', label: 'Yoga', test: function (e) {
+      return e.category === 'yoga';
+    } },
+    { id: 'pilates', label: 'Pilates', test: function (e) {
+      return PILATES.indexOf(e.id) !== -1;
     } },
     { id: 'rodillo', label: 'Rodillo y terapia', test: function (e) {
       return e.equipment === 'foam roll';
@@ -112,14 +134,19 @@
       'stroke="#3ddc84" stroke-width=".12" stroke-linecap="round" fill="none"/></svg>');
 
   /* URL del fotograma i de un ejercicio (0 = inicio, 1 = final del movimiento) */
+  /* Las del yoga vienen de otra fuente y ya traen la direccion entera */
+  function rutaImagen(p) {
+    return /^https?:/i.test(p) ? p : CDN + 'exercises/' + p;
+  }
+
   function img(ex, i) {
     if (!ex || !ex.images || !ex.images.length) return PLACEHOLDER;
-    return CDN + 'exercises/' + ex.images[Math.min(i || 0, ex.images.length - 1)];
+    return rutaImagen(ex.images[Math.min(i || 0, ex.images.length - 1)]);
   }
 
   function frames(ex) {
     if (!ex || !ex.images || !ex.images.length) return [PLACEHOLDER];
-    return ex.images.map(function (p) { return CDN + 'exercises/' + p; });
+    return ex.images.map(rutaImagen);
   }
 
   /* Texto normalizado sobre el que busca el usuario: inglés + español */
@@ -139,7 +166,7 @@
      lista es alfabética y "Estiramiento de cuádriceps" precede a "Sentadilla". */
   const CAT_RANK = {
     strength: 0, powerlifting: 0, 'olympic weightlifting': 1,
-    plyometrics: 2, strongman: 2, cardio: 3, stretching: 4
+    plyometrics: 2, strongman: 2, cardio: 3, stretching: 4, yoga: 4
   };
 
   function rank(ex) {
@@ -159,7 +186,7 @@
          corporal (flexiones, remo invertido, escalador, saltos). Sin esto
          ningún filtro los dejaba ver, ni siquiera el de "sin material". */
       if (!e.equipment) e.equipment = 'body only';
-      e.nameEs = I18N.name(ex.name);
+      e.nameEs = ex.nameEs || I18N.name(ex.name);
       e._rank = rank(ex);
       e.groups = I18N.GROUPS
         .filter(function (gr) {
@@ -177,6 +204,14 @@
     return list;
   }
 
+  /* El yoga vive en su propio fichero y se suma al catálogo descargado. Va
+     fuera de la copia guardada a propósito: así una versión nueva de la app
+     trae posturas nuevas sin esperar a que caduque lo guardado. */
+  function conYoga(raw) {
+    if (!g.Yoga) return raw;
+    return raw.concat(Yoga.crudos());
+  }
+
   function fetchJSON(url) {
     return fetch(url, { cache: 'default' }).then(function (r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -190,11 +225,11 @@
       .catch(function () { return fetchJSON(MIRROR + JSON_PATH); })
       .then(function (raw) {
         try { localStorage.setItem(CACHE_KEY, JSON.stringify(raw)); } catch (e) { /* cuota llena: no es crítico */ }
-        return prepare(raw);
+        return prepare(conYoga(raw));
       })
       .catch(function (err) {
         const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) return prepare(JSON.parse(cached));
+        if (cached) return prepare(conYoga(JSON.parse(cached)));
         throw err;
       });
   }

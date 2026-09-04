@@ -658,6 +658,19 @@
         }).join(''))}
       </div>
 
+      ${raw(exFilters.tipo === 'yoga' ? html`
+        <p class="tiny" style="margin:-2px 4px 12px">48 posturas de
+        <a href="https://github.com/alexcumplido/yoga-api" target="_blank" rel="noopener">Yoga API</a>.
+        Ilustraciones CC0 y de Flaticon:
+        <a href="https://www.flaticon.com/free-icons/easy" target="_blank" rel="noopener">Easy icons de monkik</a> y
+        <a href="https://www.flaticon.com/free-icons/yoga" target="_blank" rel="noopener">Yoga icons de dDara</a>.</p>` : '')}
+
+      ${raw(exFilters.tipo === 'pilates' ? html`
+        <p class="tiny" style="margin:-2px 4px 12px">No existe ningún catálogo libre de
+        pilates, así que estos están escogidos a mano del catálogo por lo que comparten
+        con un mat de pilates: control del centro y trabajo de suelo.</p>` : '')}
+
+
       ${raw(zonaQ ? html`
         <p class="tiny" style="margin:-2px 4px 10px">Has buscado una zona del cuerpo:
         te enseño ${raw(zonaQ.tipo === 'region'

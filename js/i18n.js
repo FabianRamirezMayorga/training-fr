@@ -25,7 +25,7 @@
   const CATEGORY = {
     strength: 'Fuerza', stretching: 'Estiramiento', plyometrics: 'Pliometría',
     strongman: 'Strongman', powerlifting: 'Powerlifting', cardio: 'Cardio',
-    'olympic weightlifting': 'Halterofilia'
+    'olympic weightlifting': 'Halterofilia', yoga: 'Yoga'
   };
 
   const LEVEL = { beginner: 'Principiante', intermediate: 'Intermedio', expert: 'Avanzado' };
