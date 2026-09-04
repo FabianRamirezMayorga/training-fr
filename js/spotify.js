@@ -136,10 +136,19 @@
     const error = q.get('error');
     const guardado = leer(VERIF);
 
-    /* Sin autorización pendiente por nuestra parte esto no es de Spotify: se
-       devuelve tal cual y, sobre todo, no se limpia la URL, que puede llevar
-       el código del enlace de la cuenta. */
-    if (!guardado) return Promise.resolve({ ok: false });
+    /* Sin "state" esto no viene de aquí: será el enlace de la cuenta. Se deja
+       intacto, sin limpiar la URL. */
+    if (!estado) return Promise.resolve({ ok: false });
+
+    /* Con state pero sin verificador guardado, la vuelta es de Spotify pero no
+       se puede completar: se perdió el almacenamiento por el camino (otra
+       pestaña, modo privado, limpieza). Se limpia la URL y se dice qué pasó,
+       en vez de dejar el código ahí para que lo malinterprete otro módulo. */
+    if (!guardado) {
+      limpiarURL();
+      return Promise.resolve({ ok: false, error: 'La conexión con Spotify se interrumpió ' +
+        'por el camino. Vuelve a pulsar Conectar desde este mismo navegador.' });
+    }
 
     if (error) {
       localStorage.removeItem(VERIF);

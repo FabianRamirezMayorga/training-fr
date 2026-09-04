@@ -182,8 +182,9 @@ que autorizar y dónde están los dos datos de conexión.
   series completadas en lugar de por volumen.
   Temporizador de descanso automático y aviso sonoro. Te muestra tu récord y lo que hiciste la vez
   anterior en ese mismo ejercicio. Si cierras el navegador a mitad, se recupera.
-- **Progreso, contado con gráficos** — una curva con la evolución semanal y cuánto has
-  subido o bajado respecto a la semana pasada; un **mapa de calor de tres meses** donde la
+- **Progreso, contado con gráficos** — una curva con la evolución en el rango que elijas
+  (semana, mes, dos meses, tres o un año) y cuánto has subido o bajado respecto al periodo
+  anterior; un **mapa de calor de tres meses** donde la
   constancia se ve de un vistazo, con los días más oscuros cuanto más has entrenado; y el
   **reparto por zona** de los últimos 30 días, que es lo que destapa los desequilibrios y te
   dice en una frase lo que llevas sin entrenar. Más los récords personales y el historial

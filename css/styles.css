@@ -184,10 +184,18 @@ a{color:var(--blue)}
 .chk.on svg{opacity:1}
 
 /* ---------- stats ---------- */
+/* Tarjetas de cifras. Se centran de verdad: la etiqueta larga ("Series
+   totales") partía en dos líneas y descolocaba la fila entera, así que todas
+   tienen la misma altura y el contenido va centrado en los dos ejes. */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:9px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 10px;text-align:center}
-.stat b{display:block;font-size:1.35rem;line-height:1.1;font-weight:800}
-.stat span{font-size:.68rem;color:var(--dim2);text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:13px 8px;text-align:center;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;min-height:76px}
+.stat b{display:block;font-size:1.3rem;line-height:1.05;font-weight:800;
+  font-variant-numeric:tabular-nums}
+.stat span{display:block;font-size:.63rem;color:var(--dim2);text-transform:uppercase;
+  letter-spacing:.3px;font-weight:700;line-height:1.25;max-width:100%;
+  text-wrap:balance;hyphens:auto}
 .bars{display:flex;align-items:flex-end;gap:6px;height:130px;padding-top:8px}
 .bars .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;height:100%}
 .bars .b i{width:100%;background:linear-gradient(180deg,var(--acc),color-mix(in srgb,var(--acc) 45%,transparent));border-radius:5px 5px 2px 2px;min-height:3px;transition:height .4s}
@@ -602,7 +610,8 @@ body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
 .graf-p{fill:var(--bg2);stroke:var(--acc);stroke-width:1.6;vector-effect:non-scaling-stroke}
 .graf-ultimo{fill:var(--acc);stroke:var(--bg2);stroke-width:2;vector-effect:non-scaling-stroke}
 .graf-ejes{display:flex;justify-content:space-between;margin-top:6px}
-.graf-ejes span{flex:1;text-align:center;font-size:.6rem;color:var(--dim2);font-weight:600}
+.graf-ejes span{flex:1;text-align:center;font-size:.6rem;color:var(--dim2);font-weight:600;
+  white-space:nowrap;overflow:visible}
 
 /* Mapa de calor: 12 columnas de 7 días */
 .calor{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:3px}

@@ -354,12 +354,11 @@
 
     const code = p('code');
     if (code) {
-      /* Spotify vuelve con ?code= igual que Supabase. Si el "state" es el que
-         guardó Spotify antes de salir, esto no es nuestro: se deja pasar para
-         que lo recoja su módulo, y sobre todo no se limpia la URL. */
-      if (!url && g.Spotify && Spotify.esperandoRedireccion(p('state'))) {
-        return Promise.resolve({ ok: false });
-      }
+      /* Spotify vuelve con ?code= igual que Supabase, y quien lea primero la URL
+         se queda el código del otro. La diferencia fiable es el "state": lo pone
+         esta app al salir hacia Spotify y el enlace de Supabase nunca lo trae.
+         Con state, esto no es nuestro: ni se toca ni se limpia la URL. */
+      if (!url && p('state')) return Promise.resolve({ ok: false });
       if (!url) limpiarURLRetorno();
       return canjearCodigo(code)
         .catch(function (e) { return { ok: false, error: descifrarError(e.message) }; });

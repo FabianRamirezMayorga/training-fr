@@ -20,6 +20,22 @@
 
   const DIA = 864e5;
 
+  /* Rangos que se pueden mirar. dias: cuánto abarca; paso: si se agrupa por día
+     o por semana, que 365 puntos diarios no se leen en un móvil. */
+  const RANGOS = [
+    { id: 'semana', label: 'Semana', dias: 7, paso: 'dia', frase: 'la última semana' },
+    { id: 'mes', label: 'Mes', dias: 30, paso: 'dia', frase: 'el último mes' },
+    { id: '2meses', label: '2 meses', dias: 60, paso: 'semana', frase: 'los últimos dos meses' },
+    { id: '3meses', label: '3 meses', dias: 91, paso: 'semana', frase: 'los últimos tres meses' },
+    { id: 'año', label: 'Año', dias: 364, paso: 'semana', frase: 'el último año' }
+  ];
+
+  /* El elegido dura lo que dure la sesión de la app */
+  let rango = '3meses';
+  function rangoActual() {
+    return RANGOS.find(function (r) { return r.id === rango; }) || RANGOS[3];
+  }
+
   /* ---------- datos ---------- */
 
   /* Total por día de los últimos n días: series y volumen */
@@ -40,6 +56,29 @@
       const t = hoy.getTime() - i * DIA;
       const k = Store.dayKey(t);
       out.push(Object.assign({ t: t, k: k }, mapa[k] || { series: 0, volumen: 0, minutos: 0, n: 0 }));
+    }
+    return out;
+  }
+
+  /* La serie que se pinta: por día en los rangos cortos, por semana en los largos */
+  function serie(r, porSeries) {
+    const dias = porDia(r.dias);
+    const dato = function (d) { return porSeries ? d.series : d.volumen; };
+
+    if (r.paso === 'dia') {
+      return dias.map(function (d) {
+        return { y: dato(d), etiqueta: UI.fechaCorta(d.t) };
+      });
+    }
+
+    /* se agrupa de siete en siete, terminando en hoy */
+    const out = [];
+    for (let i = 0; i < dias.length; i += 7) {
+      const trozo = dias.slice(i, i + 7);
+      out.push({
+        y: trozo.reduce(function (a2, d) { return a2 + dato(d); }, 0),
+        etiqueta: UI.fechaCorta(trozo[0].t)
+      });
     }
     return out;
   }
@@ -113,7 +152,10 @@
       </svg>
       <div class="graf-ejes">
         ${raw(puntos.map(function (p, i) {
-          const mostrar = puntos.length <= 8 || i % 2 === 0;
+          /* como mucho seis etiquetas: con 52 semanas se solapaban en vertical
+             y no se leía ninguna */
+          const cada = Math.max(1, Math.ceil(puntos.length / 6));
+          const mostrar = i % cada === 0 || i === puntos.length - 1;
           return '<span>' + (mostrar ? esc(p.etiqueta) : '') + '</span>';
         }).join(''))}
       </div>`;
@@ -172,18 +214,19 @@
         </div>`;
     }
 
-    const semanas = Store.weeklyVolume(8);
-    const valor = function (w) { return porSeries ? w.sets : w.volume; };
-    const puntos = semanas.map(function (w) {
-      return { y: valor(w), etiqueta: UI.fechaCorta(w.from) };
-    });
+    const r = rangoActual();
+    const puntos = serie(r, porSeries);
 
-    /* esta semana contra la anterior: el dato que dice si vas a más o a menos */
-    const estaSemana = valor(semanas[semanas.length - 1]);
-    const anterior = semanas.length > 1 ? valor(semanas[semanas.length - 2]) : 0;
-    const delta = anterior ? Math.round((estaSemana - anterior) / anterior * 100) : null;
+    /* Total del rango y comparación con el periodo anterior de la misma
+       duración: es lo que dice si vas a más o a menos. */
+    const total = puntos.reduce(function (a, p) { return a + p.y; }, 0);
+    const previos = porDia(r.dias * 2).slice(0, r.dias);
+    const totalPrevio = previos.reduce(function (a, d) {
+      return a + (porSeries ? d.series : d.volumen);
+    }, 0);
+    const delta = totalPrevio ? Math.round((total - totalPrevio) / totalPrevio * 100) : null;
 
-    const reparto = repartoMuscular(30);
+    const reparto = repartoMuscular(Math.min(r.dias, 90));
     const maxMusculo = reparto.filas.length ? reparto.filas[0].series : 1;
 
     /* récords ordenados por peso */
@@ -211,19 +254,29 @@
           : Math.round(st.totalMinutes / 60) + 'h'}</b><span>Tiempo</span></div>
       </div>
 
-      <div class="list-title">${porSeries ? 'Series por semana' : 'Volumen por semana'}</div>
+      <div class="list-title">${porSeries ? 'Series completadas' : 'Volumen levantado'}</div>
+      <div class="pill-scroll">
+        ${raw(RANGOS.map(function (x) {
+          return '<button class="chip ' + (x.id === rango ? 'on' : '') +
+            '" data-rango="' + x.id + '">' + esc(x.label) + '</button>';
+        }).join(''))}
+      </div>
+
       <div class="card graf-caja">
         <div class="row between" style="align-items:flex-end;margin-bottom:6px">
           <div>
-            <div class="graf-dato">${UI.num(estaSemana)}</div>
-            <div class="tiny">${porSeries ? 'series esta semana' : (Store.settings().unit || 'kg') + ' esta semana'}</div>
+            <div class="graf-dato">${UI.num(total)}</div>
+            <div class="tiny">${porSeries ? 'series' : (Store.settings().unit || 'kg')}
+              en ${r.frase}</div>
           </div>
           ${raw(delta === null ? '' : html`
             <span class="chip ${delta >= 0 ? 'solid' : ''}" style="${raw(delta < 0
               ? 'color:var(--warn);border-color:var(--warn)' : '')}">
-              ${delta >= 0 ? '+' : ''}${delta}% vs. semana pasada</span>`)}
+              ${delta >= 0 ? '+' : ''}${delta}% vs. periodo anterior</span>`)}
         </div>
         ${raw(grafica(puntos, porSeries ? 'series' : 'kg'))}
+        <div class="tiny center" style="margin-top:8px">${r.paso === 'dia'
+          ? 'Cada punto es un día' : 'Cada punto es una semana'}</div>
       </div>
 
       <div class="list-title">Constancia</div>
@@ -235,7 +288,7 @@
       </div>
 
       ${raw(reparto.total ? html`
-        <div class="list-title">Reparto por zona (30 días)</div>
+        <div class="list-title">Reparto por zona (${Math.min(r.dias, 90)} días)</div>
         <div class="card">
           ${raw(reparto.filas.map(function (f) {
             const pct = Math.round(f.series / maxMusculo * 100);
@@ -298,7 +351,7 @@
     const nombres = r.filas.map(function (f) { return f.id; });
     const falta = I18N.GROUPS.filter(function (gr) { return nombres.indexOf(gr.id) === -1; });
     if (falta.length) {
-      return 'En 30 días no has entrenado ' +
+      return 'En este periodo no has entrenado ' +
         esc(falta.map(function (f) { return f.label.toLowerCase(); }).join(', ')) + '.';
     }
     const arriba = r.filas[0], abajo = r.filas[r.filas.length - 1];
@@ -311,6 +364,13 @@
 
   V.progreso.mount = function (root) {
     bind(root, '[data-a=ir]', function () { go('rutinas'); });
+
+    bindAll(root, '[data-rango]', function (el) {
+      rango = el.dataset.rango;
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+    });
 
     /* la curva se dibuja sola al entrar */
     requestAnimationFrame(function () {
