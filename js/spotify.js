@@ -562,12 +562,12 @@
 
   /* Las canciones de una lista, para poder verlas antes de darle al play */
   function cancionesDeLista(id, limite) {
-    const pl = idDePlaylist(id) || id;
-    const base = '/playlists/' + encodeURIComponent(pl) + '/tracks?limit=' + (limite || 50);
-    const campos = '&fields=items(track(id,uri,name,duration_ms,artists(name)))';
+    const pl = encodeURIComponent(idDePlaylist(id) || id);
+    const campos = 'tracks.items(track(id,uri,name,duration_ms,artists(name)))';
+    const sueltas = '/playlists/' + pl + '/tracks?limit=' + (limite || 50);
 
-    function ordenar(r) {
-      return ((r && r.items) || []).map(function (it) {
+    function ordenar(items) {
+      return (items || []).map(function (it) {
         const t = it && it.track;
         if (!t) return null;
         return {
@@ -577,11 +577,24 @@
       }).filter(Boolean);
     }
 
-    /* Si el filtro de campos es lo que molesta, se vuelve a pedir sin él antes
-       de darlo por perdido: trae de más, pero trae. */
-    return pedir(base + campos).then(ordenar).catch(function (e) {
-      return pedir(base).then(ordenar).catch(function () { throw e; });
-    });
+    /* La lista entera trae dentro sus canciones, y ese camino sí lo deja
+       Spotify: /playlists/{id}/tracks devuelve un 403 seco en cuentas donde
+       /playlists/{id} responde de sobra. Se pide primero el que funciona y el
+       otro queda de reserva, que en listas de más de cien hace falta. */
+    return pedir('/playlists/' + pl + '?fields=' + encodeURIComponent(campos))
+      .then(function (r) { return ordenar(r && r.tracks && r.tracks.items); })
+      .catch(function () {
+        return pedir('/playlists/' + pl)
+          .then(function (r) { return ordenar(r && r.tracks && r.tracks.items); });
+      })
+      .then(function (temas) {
+        if (temas.length) return temas;
+        return pedir(sueltas).then(function (r) { return ordenar(r && r.items); });
+      })
+      .catch(function (e) {
+        return pedir(sueltas).then(function (r) { return ordenar(r && r.items); })
+          .catch(function () { throw e; });
+      });
   }
 
   /* Prueba de las llamadas que fallan, para ver el motivo en crudo en vez de
@@ -623,15 +636,25 @@
     }).catch(function (e) {
       partes.push('fallo antes de empezar: ' + e.message);
     }).then(function () {
-      return probar('catálogo público', '/albums/4aawyAB9vmqN3uQ7FjRGTy');
-    }).then(function () {
-      return probar('datos de la lista', '/playlists/' + (pl || 'x'));
-    }).then(function () {
       return probar('canciones de la lista', '/playlists/' + (pl || 'x') + '/tracks?limit=1');
     }).then(function () {
-      return probar('mis guardadas', '/me/tracks?limit=1');
-    }).then(function () {
       return probar('favorita (contains)', '/me/tracks/contains?ids=4uLU6hMCjMI75M1A2tKUQC');
+    }).then(function () {
+      return probar('contains de álbumes', '/me/albums/contains?ids=4aawyAB9vmqN3uQ7FjRGTy');
+    }).then(function () {
+      return probar('público hondo', '/artists/0TnOYISbd1XYRBk9myaseg/albums?limit=1');
+    }).then(function () {
+      /* Con la lista de ids vacía no toca nada de su biblioteca: si Spotify deja
+         escribir contesta 400 por la petición mal formada, y si no, 403. Es la
+         única forma de probar el corazón sin guardarle una canción que no ha pedido. */
+      return probar('escribir favorita', '/me/tracks', {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Bearer ' + ses.access_token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ids: [] })
+      });
     }).then(function () {
       return partes.join(SALTO);
     });
