@@ -382,7 +382,7 @@ js/perfil.js            datos corporales y cálculos (IMC, metabolismo, caloría
 js/objetivos.js         metas con seguimiento automático
 js/alertas.js           recordatorios, avisos del sistema y exportación al calendario
 js/saludo.js            la bienvenida al volver, a partir de tu historial
-js/ia.js                entrenador con IA sobre Gemini
+js/ia.js                entrenador con IA sobre Gemini (se adapta a lo que admite cada modelo)
 js/spotify.js           control de música con autorización PKCE
 js/vistas.js            perfil, objetivos y alertas
 js/vistas2.js           alimentación, entrenador y música

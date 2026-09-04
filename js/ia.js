@@ -41,7 +41,11 @@
     }));
   }
 
-  function borrarConfig() { localStorage.removeItem(CFG); localStorage.removeItem(CACHE); }
+  function borrarConfig() {
+    localStorage.removeItem(CFG);
+    localStorage.removeItem(CACHE);
+    localStorage.removeItem(LIMITES);
+  }
   function activa() { return !!config().clave; }
 
   /* ---------- caché, para no gastar cuota repitiendo la misma consulta ---------- */
@@ -70,6 +74,26 @@
   }
 
   function limpiarCache() { localStorage.removeItem(CACHE); }
+
+  /* ---------- qué admite cada modelo ----------
+     Cada modelo de Gemini acepta unas opciones distintas y Google no lo dice de
+     antemano: se descubre a base de 400. Lo aprendido se guarda para no repetir
+     la petición fallida en cada consulta. */
+  const LIMITES = 'trainingfr.ia.limites';
+
+  function limitesDe(modelo) {
+    try { return (JSON.parse(localStorage.getItem(LIMITES) || '{}'))[modelo] || {}; }
+    catch (e) { return {}; }
+  }
+
+  function apuntarLimite(modelo, campo) {
+    try {
+      const todo = JSON.parse(localStorage.getItem(LIMITES) || '{}');
+      todo[modelo] = todo[modelo] || {};
+      todo[modelo][campo] = false;
+      localStorage.setItem(LIMITES, JSON.stringify(todo));
+    } catch (e) { /* nada */ }
+  }
 
   /* ---------- qué modelos hay disponibles ----------
      Se los pregunta a Google con la clave del usuario, así que la app no depende
@@ -158,6 +182,11 @@
       const corte = new AbortController();
       const reloj = setTimeout(function () { corte.abort(); }, 90000);
 
+      /* lo que ya se sabe que este modelo no admite, ni se manda */
+      const lim = limitesDe(modelos[i]);
+      if (lim.thinking === false) delete cuerpo.generationConfig.thinkingConfig;
+      if (lim.json === false) delete cuerpo.generationConfig.responseMimeType;
+
       return fetch(BASE + modelos[i] + ':generateContent?key=' + encodeURIComponent(c.clave), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -185,12 +214,26 @@
               modelos.splice(i + 1, 0, sugerido[1]);
             }
 
-            /* modelos antiguos que no conocen thinkingConfig: se quita y se repite */
-            if (r.status === 400 && /thinking/i.test(msg) &&
-                cuerpo.generationConfig.thinkingConfig) {
+            /* 400 por la configuración, no por el contenido.
+               Google suele responder un escueto "Request contains an invalid
+               argument" sin decir cuál, y cada modelo admite unas opciones
+               distintas: unos no conocen thinkingConfig, otros no aceptan que
+               se les pida JSON. Así que se van quitando de una en una y se
+               reintenta, en vez de rendirse con un mensaje que no ayuda. */
+            const configSospechosa = r.status === 400 &&
+              !/API key|API_KEY|quota|safety|blocked/i.test(msg);
+
+            if (configSospechosa && cuerpo.generationConfig.thinkingConfig) {
               delete cuerpo.generationConfig.thinkingConfig;
+              apuntarLimite(modelos[i], 'thinking');
               return intentar(i);
             }
+            if (configSospechosa && cuerpo.generationConfig.responseMimeType) {
+              delete cuerpo.generationConfig.responseMimeType;
+              apuntarLimite(modelos[i], 'json');
+              return intentar(i);
+            }
+            if (configSospechosa && i < modelos.length - 1) return intentar(i + 1);
 
             /* "el modelo está saturado" es temporal y muy frecuente en la capa
                gratuita: se prueba con otro modelo y, agotados, se espera un poco
@@ -213,6 +256,10 @@
             if (retirado && i < modelos.length - 1) return intentar(i + 1);
 
             if (r.status === 400 && /API key/i.test(msg)) throw new Error('La clave de la IA no es válida.');
+            if (r.status === 400) {
+              throw new Error('Gemini rechazó la petición (' + msg + '). Prueba a elegir ' +
+                'otro modelo en la bóveda de claves.');
+            }
             if (r.status === 429) throw new Error('Has agotado la cuota gratuita por ahora. Inténtalo más tarde.');
             if (retirado) {
               throw new Error('El modelo elegido ya no está disponible. Abre la bóveda y ' +
