@@ -109,11 +109,15 @@
 
     const verificador = aleatorio(64);
     const estado = aleatorio(16);
-    /* de dónde salió: al volver, Spotify manda a la raíz y sin esto uno acaba
-       en la portada preguntándose si ha pasado algo */
-    localStorage.setItem(VERIF, JSON.stringify({
-      v: verificador, s: estado, volver: location.hash || '#/musica'
-    }));
+
+    /* Se guardan los últimos intentos, no solo el último.
+       Un doble toque en el botón, o volver atrás y reintentar, dejaba guardado
+       el verificador del segundo intento mientras Spotify respondía al primero:
+       el "state" no cuadraba y la conexión se caía con un mensaje que no ayuda
+       a nadie. Guardando varios, el código que vuelve encuentra el suyo. */
+    guardarIntento({
+      v: verificador, s: estado, t: Date.now(), volver: location.hash || '#/musica'
+    });
 
     return reto(verificador).then(function (challenge) {
       const q = new URLSearchParams({
@@ -127,10 +131,29 @@
       });
       location.href = 'https://accounts.spotify.com/authorize?' + q.toString();
     }).catch(function (e) {
-      localStorage.removeItem(VERIF);
       throw new Error(e.message || 'No se pudo iniciar la conexión con Spotify.');
     });
   }
+
+  /* ---------- intentos de autorización en curso ----------
+     Como mucho tres, y solo los de los últimos quince minutos. */
+  function intentos() {
+    const g2 = leer(VERIF);
+    if (!g2) return [];
+    const lista = Array.isArray(g2) ? g2 : [g2];         // formato anterior
+    const desde = Date.now() - 15 * 60000;
+    return lista.filter(function (x) { return x && x.s && (x.t || Date.now()) > desde; });
+  }
+
+  function guardarIntento(x) {
+    escribir(VERIF, intentos().concat([x]).slice(-3));
+  }
+
+  function buscarIntento(estado) {
+    return intentos().find(function (x) { return x.s === estado; }) || null;
+  }
+
+  function olvidarIntentos() { escribir(VERIF, null); }
 
   /* ¿Esta vuelta a la app es de Spotify?
      Supabase también responde con ?code=, así que sin esto el módulo de la
@@ -138,8 +161,7 @@
      nada: la conexión no se completaba nunca y sin ruido. El "state" lo pone
      esta app y solo ella lo conoce. */
   function esperandoRedireccion(estado) {
-    const guardado = leer(VERIF);
-    return !!(guardado && estado && guardado.s === estado);
+    return !!(estado && buscarIntento(estado));
   }
 
   /* Al volver de Spotify, el código llega en la query de la URL */
@@ -149,39 +171,42 @@
     const estado = q.get('state');
     const error = q.get('error');
     const detalle = q.get('error_description');
-    const guardado = leer(VERIF);
+    const guardado = estado ? buscarIntento(estado) : null;
+    const hayIntentos = intentos().length;
 
     /* Sin "state" esto no viene de aquí: será el enlace de la cuenta. Se deja
        intacto, sin limpiar la URL. */
     if (!estado) return Promise.resolve({ ok: false });
 
-    /* Con state pero sin verificador guardado, la vuelta es de Spotify pero no
-       se puede completar: se perdió el almacenamiento por el camino (otra
-       pestaña, modo privado, limpieza). Se limpia la URL y se dice qué pasó,
+    /* Con state pero sin su verificador, la vuelta es de Spotify pero no se
+       puede completar: se perdió el almacenamiento por el camino (otro
+       navegador, modo privado, limpieza). Se limpia la URL y se dice qué pasó,
        en vez de dejar el código ahí para que lo malinterprete otro módulo. */
     if (!guardado) {
-      limpiarURL();
-      return Promise.resolve({ ok: false, error: 'La conexión con Spotify se interrumpió ' +
-        'por el camino. Vuelve a pulsar Conectar desde este mismo navegador.' });
+      limpiarURL('#/musica');
+      const texto = hayIntentos
+        ? 'La respuesta llegó de un intento anterior. Vuelve a pulsar Conectar y ' +
+          'espera sin tocar nada hasta que vuelva.'
+        : 'La conexión con Spotify se interrumpió por el camino. Vuelve a pulsar ' +
+          'Conectar desde este mismo navegador.';
+      apuntarFallo(texto);
+      olvidarIntentos();
+      return Promise.resolve({ ok: false, error: texto, volver: '#/musica' });
     }
 
     /* Lo que responda Spotify se guarda tal cual: un aviso de dos segundos se
        pierde, y sin el texto exacto no hay forma de saber qué ha rechazado. */
     if (error) {
-      const volver = guardado.volver;
-      localStorage.removeItem(VERIF);
+      const volver = (guardado && guardado.volver) || '#/musica';
+      olvidarIntentos();
       limpiarURL(volver);
       const texto = traducirError(error, detalle);
       apuntarFallo(error + (detalle ? ': ' + detalle : ''));
       return Promise.resolve({ ok: false, error: texto, volver: volver });
     }
     if (!code) return Promise.resolve({ ok: false });
-    if (guardado.s !== estado) {
-      apuntarFallo('La respuesta no coincide con la petición (state distinto).');
-      return Promise.resolve({ ok: false });
-    }
 
-    localStorage.removeItem(VERIF);
+    olvidarIntentos();
     limpiarURL(guardado.volver);
 
     return token({

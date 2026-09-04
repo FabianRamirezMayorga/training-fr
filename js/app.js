@@ -3133,6 +3133,8 @@
     document.querySelector('.spinner').style.display = 'none';
   }
 
+  const arranque = Date.now();
+
   function init() {
     aplicarTema();
     planState.gear = Store.settings().gear || 'gym';
@@ -3179,9 +3181,12 @@
              aviso deja a medio mundo usando la versión de antes y viendo
              fallos ya arreglados. Con un entrenamiento en curso o una hoja
              abierta no se toca nada y se ofrece el botón. */
+          /* nada de recargar en los primeros segundos: puede haber una vuelta
+             de Spotify o del correo resolviéndose todavía */
           const ocupado = Workout.isActive() ||
             !document.getElementById('modal').hidden ||
-            location.hash.indexOf('entrenar') !== -1;
+            location.hash.indexOf('entrenar') !== -1 ||
+            Date.now() - arranque < 15000;
 
           if (ocupado) { avisarVersionNueva(); return; }
           UI.toast('Actualizando a la versión nueva…');
