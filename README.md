@@ -390,7 +390,7 @@ js/vistas4.js           el programa personal
 js/vistas5.js           modo invitado y guía para crear la base de datos
 js/workout.js           modo entrenamiento
 js/app.js               router y vistas
-sw.js                   service worker (uso sin conexión)
+sw.js                   service worker (uso sin conexión, una versión coherente por despliegue)
 ```
 
 Al cambiar la lista de archivos hay que subir `VERSION` en `sw.js` para que los

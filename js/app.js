@@ -2020,6 +2020,16 @@
         </div>
       </div>
 
+      <div class="list-title">Versión de la app</div>
+      <div class="card">
+        <p class="muted">Si algo se comporta raro después de una actualización, casi siempre
+        es que el móvil se ha quedado con archivos de dos versiones distintas. Esto lo borra
+        todo y vuelve a bajar la última. Tus datos no se tocan.</p>
+        <div class="tiny" id="sw-version">Comprobando la versión…</div>
+        <button class="btn block" data-a="actualizarApp" style="margin-top:10px">
+          ${raw(icon('down'))} Forzar actualización</button>
+      </div>
+
       <div class="list-title">Instalar en el móvil</div>
       <div class="card">
         <p class="muted">Training FR funciona como una app: ábrela en el navegador del móvil y usa
@@ -2112,6 +2122,41 @@
           botones.forEach(function (b) { b.disabled = false; });
         });
       });
+    });
+
+    /* qué versión sirve el service worker ahora mismo */
+    const cajaVer = root.querySelector('#sw-version');
+    if (cajaVer) {
+      fetch('sw.js?v=' + Date.now()).then(function (r) { return r.text(); }).then(function (t) {
+        const m = t.match(/VERSION = '([^']+)'/);
+        const enServidor = m ? m[1] : '?';
+        caches.keys().then(function (ks) {
+          const local = ks.filter(function (k) { return k.indexOf('-shell') !== -1; })
+            .map(function (k) { return k.replace('-shell', ''); })[0] || 'sin caché';
+          cajaVer.textContent = local === enServidor
+            ? 'Estás en la última versión (' + local + ').'
+            : 'Tienes ' + local + ' y la última es ' + enServidor + '. Pulsa el botón.';
+        });
+      }).catch(function () { cajaVer.textContent = 'Sin conexión para comprobarlo.'; });
+    }
+
+    bind(root, '[data-a=actualizarApp]', function (el) {
+      el.disabled = true;
+      el.textContent = 'Actualizando…';
+      const fin = function () { location.reload(true); };
+      const tareas = [];
+      if ('serviceWorker' in navigator) {
+        tareas.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+          return Promise.all(rs.map(function (r) { return r.unregister(); }));
+        }));
+      }
+      if (window.caches) {
+        tareas.push(caches.keys().then(function (ks) {
+          return Promise.all(ks.filter(function (k) { return k.indexOf('-media') === -1; })
+            .map(function (k) { return caches.delete(k); }));
+        }));
+      }
+      Promise.all(tareas).then(fin).catch(fin);
     });
 
     root.querySelector('#s-name').onchange = function (e) {

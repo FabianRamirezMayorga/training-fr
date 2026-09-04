@@ -152,13 +152,25 @@
     /* si el modelo elegido ya no existe, se prueba el siguiente */
     function intentar(i) {
       if (i >= modelos.length) return Promise.reject(new Error('Ningún modelo disponible respondió.'));
+      /* Sin límite de tiempo, una red que se queda a medias deja la pantalla
+         "pensando" para siempre. Minuto y medio es de sobra para lo más largo
+         que se pide aquí, que es el menú semanal. */
+      const corte = new AbortController();
+      const reloj = setTimeout(function () { corte.abort(); }, 90000);
+
       return fetch(BASE + modelos[i] + ':generateContent?key=' + encodeURIComponent(c.clave), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cuerpo)
-      }).catch(function () {
+        body: JSON.stringify(cuerpo),
+        signal: corte.signal
+      }).catch(function (e) {
+        clearTimeout(reloj);
+        if (e && e.name === 'AbortError') {
+          throw new Error('La IA ha tardado demasiado en responder. Vuelve a intentarlo: ' +
+            'suele ser cosa de la conexión o de que Google va cargado.');
+        }
         throw new Error('No se pudo conectar con el servicio de IA.');
-      }).then(function (r) {
+      }).then(function (r) { clearTimeout(reloj); return r; }).then(function (r) {
         return r.text().then(function (t) {
           let j = null;
           try { j = JSON.parse(t); } catch (e) { j = null; }

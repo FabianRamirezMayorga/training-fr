@@ -208,9 +208,16 @@
     opciones.headers = Object.assign({ 'Authorization': 'Bearer ' + s.access_token },
       opciones.headers || {});
 
-    return fetch(API + ruta, opciones).catch(function () {
+    /* con límite de tiempo: una petición colgada dejaba la pantalla esperando */
+    const corte = new AbortController();
+    const reloj = setTimeout(function () { corte.abort(); }, 20000);
+    opciones.signal = corte.signal;
+
+    return fetch(API + ruta, opciones).catch(function (e) {
+      clearTimeout(reloj);
+      if (e && e.name === 'AbortError') throw new Error('Spotify ha tardado demasiado en responder.');
       throw new Error('Sin conexión con Spotify.');
-    }).then(function (r) {
+    }).then(function (r) { clearTimeout(reloj); return r; }).then(function (r) {
       if (r.status === 401 && !reintento) {
         return refrescar().then(function () { return pedir(ruta, opciones, true); });
       }
