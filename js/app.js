@@ -363,6 +363,77 @@
       esc(titulo.slice(i + n.length));
   }
 
+  /* ---------- de qué va una rutina ----------
+     La zona sale de los ejercicios que tiene, no de su nombre: así una rutina
+     llamada "Lunes" sigue sabiendo que es de pierna. */
+  function zonaDeRutina(r) {
+    const cuenta = {};
+    (r.exercises || []).forEach(function (re) {
+      const ex = Data.get(re.exId);
+      if (!ex) return;
+      (ex.groups || []).forEach(function (g2) { cuenta[g2] = (cuenta[g2] || 0) + 1; });
+    });
+    const ids = Object.keys(cuenta).sort(function (a2, b2) { return cuenta[b2] - cuenta[a2]; });
+    if (!ids.length) return null;
+    const gr = I18N.GROUPS.find(function (x) { return x.id === ids[0]; });
+    return gr ? { id: gr.id, label: gr.label, cuantos: cuenta[ids[0]] } : null;
+  }
+
+  /* Los músculos que toca de verdad, de más a menos presentes */
+  function musculosDeRutina(r) {
+    const cuenta = {};
+    (r.exercises || []).forEach(function (re) {
+      const ex = Data.get(re.exId);
+      if (!ex) return;
+      (ex.primaryMuscles || []).forEach(function (m) { cuenta[m] = (cuenta[m] || 0) + 1; });
+    });
+    return Object.keys(cuenta)
+      .sort(function (a2, b2) { return cuenta[b2] - cuenta[a2]; })
+      .map(function (m) { return I18N.muscle(m); });
+  }
+
+  /* Título de la tarjeta: el día y lo que se trabaja, que es lo que uno busca */
+  function tituloRutina(r) {
+    const zona = zonaDeRutina(r);
+    const dias = (r.days || []).map(UI.diaLargo);
+    const que = r.mixta ? 'Mixta' : (zona ? zona.label : 'Sin ejercicios');
+    if (!dias.length) return que;
+    return dias.join(' y ') + ' · ' + que;
+  }
+
+  /* qué rutina está desplegada en la lista */
+  let rutinaAbierta = null;
+
+  /* La lista agrupada por día, con el de hoy primero. Una rutina asignada a
+     varios días sale en cada uno: es donde uno la va a buscar. */
+  function porDias(rutinas) {
+    const orden = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const hoy = UI.DAY_NAMES[new Date().getDay()];
+    const desde = orden.indexOf(hoy);
+    const dias = orden.slice(desde).concat(orden.slice(0, desde));
+
+    const bloques = dias.map(function (d) {
+      const suyas = rutinas.filter(function (r) { return (r.days || []).indexOf(d) !== -1; });
+      if (!suyas.length) return '';
+      return html`
+        <div class="list-head" style="margin-top:18px">
+          <span class="list-title">${UI.diaLargo(d)}${raw(d === hoy
+            ? ' <span class="chip solid tiny-chip">HOY</span>' : '')}</span>
+        </div>
+        <div class="stack">${raw(suyas.map(function (r) { return routineCard(r); }).join(''))}</div>`;
+    }).join('');
+
+    const sueltas = rutinas.filter(function (r) { return !(r.days || []).length; });
+    const sinDia = sueltas.length ? html`
+      <div class="list-head" style="margin-top:18px">
+        <span class="list-title">Sin día asignado</span>
+      </div>
+      <div class="stack">${raw(sueltas.map(function (r) { return routineCard(r); }).join(''))}</div>`
+      : '';
+
+    return bloques + sinDia;
+  }
+
   /* i y total solo llegan desde la lista de Rutinas, que es donde se puede
      reordenar y borrar. En la portada se usa la tarjeta sin más. */
   function routineCard(r, i, total) {
@@ -371,9 +442,12 @@
     const esDeHoy = (r.days || []).indexOf(hoy) !== -1;
     const editando = ordenando && total;
 
+    const musculos = musculosDeRutina(r);
+    const abierta = rutinaAbierta === r.id;
+
     return html`
-      <div class="card ${esDeHoy && !ordenando ? 'card-hoy' : ''}">
-        <div class="row between" style="align-items:flex-start">
+      <div class="card ${esDeHoy && !ordenando ? 'card-hoy' : ''}" style="padding:0;overflow:hidden">
+        <div class="row between" style="align-items:flex-start;padding:13px">
           ${raw(editando && total > 1 ? html`
             <div class="mover">
               <button class="btn sm" data-sube="${r.id}" ${i === 0 ? 'disabled' : ''}
@@ -381,11 +455,14 @@
               <button class="btn sm" data-baja="${r.id}" ${i === total - 1 ? 'disabled' : ''}
                       aria-label="Bajar">${raw(icon('down'))}</button>
             </div>` : '')}
-          <div class="grow" style="cursor:pointer" data-open="${r.id}">
-            <div style="font-weight:700">${r.name || 'Rutina sin nombre'}
-              ${raw(esDeHoy && !ordenando ? '<span class="chip solid tiny-chip">HOY</span>' : '')}</div>
-            <div class="tiny">${n} ${n === 1 ? 'ejercicio' : 'ejercicios'}${raw(
-              (r.days || []).length ? ' · ' + esc(UI.diasLargos(r.days)) : '')}</div>
+          <div class="grow" style="cursor:pointer;min-width:0" data-desplegar="${r.id}">
+            <div class="rt-titulo">${tituloRutina(r)}
+              ${raw(esDeHoy && !ordenando ? '<span class="chip solid tiny-chip">HOY</span>' : '')}
+              ${raw(r.mixta ? '<span class="chip tiny-chip">MIXTA</span>' : '')}</div>
+            <div class="rt-nombre">${r.name || 'Rutina sin nombre'}</div>
+            <div class="tiny" style="margin-top:3px">${n} ${n === 1 ? 'ejercicio' : 'ejercicios'}${raw(
+              musculos.length ? ' · ' + esc(musculos.slice(0, 3).join(', ').toLowerCase()) +
+                (musculos.length > 3 ? ' y ' + (musculos.length - 3) + ' más' : '') : '')}</div>
           </div>
           ${raw(editando
             ? html`<button class="btn sm danger" data-borrar="${r.id}"
@@ -393,13 +470,27 @@
             : html`<button class="btn primary sm" data-train="${r.id}">
                      ${raw(icon('play'))} Entrenar</button>`)}
         </div>
-        ${raw(n ? html`<div class="row wrap" style="margin-top:9px;gap:5px">
-          ${raw(r.exercises.slice(0, 4).map(function (re) {
-            const ex = Data.get(re.exId);
-            return '<span class="chip">' + esc(ex ? ex.nameEs : re.exId) + '</span>';
-          }).join(''))}
-          ${raw(n > 4 ? '<span class="chip">+' + (n - 4) + '</span>' : '')}
-        </div>` : '')}
+
+        ${raw(abierta && n ? html`
+          <div class="rt-detalle">
+            ${raw(r.exercises.map(function (re, k) {
+              const ex = Data.get(re.exId);
+              return html`
+                <button class="rt-item" data-ver="${re.exId}" style="width:100%;text-align:left">
+                  <img src="${ex ? Data.img(ex, 0) : Data.PLACEHOLDER}" alt="" loading="lazy">
+                  <div class="grow">
+                    <div style="font-weight:600;font-size:.85rem">${k + 1}. ${ex ? ex.nameEs : re.exId}</div>
+                    <div class="tiny">${re.sets} × ${re.reps}${raw(ex && ex.primaryMuscles.length
+                      ? ' · ' + esc(ex.primaryMuscles.map(I18N.muscle).join(', ')) : '')}</div>
+                  </div>
+                </button>`;
+            }).join(''))}
+            <div class="row" style="padding:11px 13px 13px">
+              <button class="btn sm grow" data-open="${r.id}">${raw(icon('edit'))} Editar</button>
+              <button class="btn sm primary grow" data-train="${r.id}">
+                ${raw(icon('play'))} Entrenar</button>
+            </div>
+          </div>` : '')}
       </div>`;
   }
 
@@ -1180,10 +1271,11 @@
             ${ordenando ? 'Hecho' : 'Editar lista'}</button>
         </div>` : '')}
 
-      ${raw(rutinas.length ? html`
-        <div class="stack" style="margin-top:8px">${raw(rutinas.map(function (r, i) {
-          return routineCard(r, i, rutinas.length);
-        }).join(''))}</div>`
+      ${raw(rutinas.length ? (ordenando
+        ? '<div class="stack" style="margin-top:8px">' + rutinas.map(function (r, i) {
+            return routineCard(r, i, rutinas.length);
+          }).join('') + '</div>'
+        : porDias(rutinas))
       : '<p class="muted">Aún no tienes rutinas propias. Copia una plantilla de abajo para empezar.</p>')}
 
       ${raw(ordenando ? '<p class="tiny center" style="margin-top:10px">Con las flechas las ' +
@@ -1202,7 +1294,10 @@
               <div class="row between" style="align-items:flex-start">
                 <div class="grow">
                   <div style="font-weight:700">${t.name}</div>
-                  <div class="tiny">${t.goal} · ${t.level} · ${t.exercises.length} ejercicios · ${t.days.join(', ')}</div>
+                  <div class="tiny">${t.goal} · ${t.level} · ${t.exercises.length} ejercicios</div>
+                  <div class="tiny">${UI.diasLargos(t.days)}</div>
+                  <span class="chip tiny-chip" style="margin:6px 0 0;display:inline-block">
+                    ${raw(icon('dumbbell'))} ${Data.GEAR[Templates.lugarNecesario(t)].label}</span>
                 </div>
                 <button class="btn sm" data-tpl="${t.id}">${raw(icon('copy'))} Usar</button>
               </div>
@@ -1244,6 +1339,20 @@
     bindAll(root, '[data-baja]', function (el) { mover(el.dataset.baja, 1); });
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
     bindAll(root, '[data-train]', function (el) { empezar(el.dataset.train); });
+
+    bindAll(root, '[data-desplegar]', function (el) {
+      const id = el.dataset.desplegar;
+      rutinaAbierta = rutinaAbierta === id ? null : id;
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+    });
+
+    bindAll(root, '[data-ver]', function (el) {
+      const ex = Data.get(el.dataset.ver);
+      if (ex) exerciseSheet(ex);
+    });
+
     bindAll(root, '[data-tpl]', function (el) {
       const tpl = Templates.list.find(function (t) { return t.id === el.dataset.tpl; });
       const r = Store.saveRoutine(Templates.toRoutine(tpl));
@@ -1482,12 +1591,29 @@
                    '" data-day="' + d + '">' + UI.diaLargo(d) + '</button>';
           }).join(''))}
         </div>
+
+        <div class="hr"></div>
+        <div class="row between" style="align-items:flex-start;gap:12px">
+          <div class="grow">
+            <b style="font-size:.92rem">Rutina mixta</b>
+            <div class="tiny">Apagado, la rutina se queda en su zona${raw(zonaBorrador()
+              ? ' (' + esc(zonaBorrador().label.toLowerCase()) + ')' : '')} y avisa si metes
+              un ejercicio de otra. Enciéndelo para mezclar tren superior e inferior.</div>
+          </div>
+          <button class="sw ${draft.mixta ? 'on' : ''}" data-a="mixta"
+                  role="switch" aria-checked="${!!draft.mixta}" aria-label="Rutina mixta"></button>
+        </div>
       </div>
 
       <div class="list-head">
         <span class="list-title">Ejercicios (${draft.exercises.length})</span>
         <button class="btn sm primary" data-a="add">${raw(icon('plus'))} Añadir</button>
       </div>
+      <p class="tiny" style="margin:-4px 4px 10px">${raw(draft.exercises.length < Store.MINIMO_EJERCICIOS
+        ? 'Te faltan ' + (Store.MINIMO_EJERCICIOS - draft.exercises.length) +
+          ' para llegar al mínimo de ' + Store.MINIMO_EJERCICIOS + '.'
+        : 'Puedes añadir los que quieras y cambiar cualquiera por otro. Quitar, hasta ' +
+          'dejarla en ' + Store.MINIMO_EJERCICIOS + '.')}</p>
 
       ${raw(draft.exercises.length ? html`
         <div class="stack">
@@ -1508,6 +1634,8 @@
                     <button class="btn icon sm" data-down="${i}"
                             ${i === draft.exercises.length - 1 ? 'disabled' : ''}
                             aria-label="Bajar">${raw(icon('down'))}</button>
+                    <button class="btn icon sm" data-cambiar="${i}"
+                            aria-label="Cambiar por otro">${raw(icon('cambiar'))}</button>
                     <button class="btn icon sm danger" data-del="${i}"
                             aria-label="Quitar">${raw(icon('trash'))}</button>
                   </div>
@@ -1540,6 +1668,18 @@
       ${raw(draft.id && draft.exercises.length ? html`
         <button class="btn block" data-a="entrenar" style="margin-top:8px">
           ${raw(icon('play'))} Guardar y entrenar ahora</button>` : '')}`;
+  }
+
+  /* La zona del borrador que se está editando */
+  function zonaBorrador() { return draft ? zonaDeRutina(draft) : null; }
+
+  /* ¿Encaja este ejercicio en la rutina que se está editando?
+     Si no es mixta, se avisa antes de meter pierna en una rutina de brazo. */
+  function encajaEnRutina(ex) {
+    if (!draft || draft.mixta) return true;
+    const zona = zonaDeRutina(draft);
+    if (!zona) return true;                       // la primera marca la zona
+    return (ex.groups || []).indexOf(zona.id) !== -1;
   }
 
   viewRutina.mount = function (root) {
@@ -1621,18 +1761,66 @@
       leerCampos(); Store.saveRoutine(draft); render();
     });
     bindAll(root, '[data-del]', function (el) {
+      if (draft.exercises.length <= Store.MINIMO_EJERCICIOS) {
+        UI.toast('Una rutina no baja de ' + Store.MINIMO_EJERCICIOS +
+          ' ejercicios. Cámbialo por otro en vez de quitarlo.');
+        return;
+      }
       draft.exercises.splice(Number(el.dataset.del), 1);
       leerCampos(); Store.saveRoutine(draft); render();
     });
 
-    bindAll(root, '[data-a=add]', function () {
+    /* Cambiar un ejercicio por otro: conserva series, repeticiones y descanso */
+    bindAll(root, '[data-cambiar]', function (el) {
+      const i = Number(el.dataset.cambiar);
       leerCampos();
       pickExerciseSheet(function (ex) {
+        if (!encajaEnRutina(ex)) { UI.closeModal(); preguntarMixta(ex, function () { cambiar(i, ex); }); return; }
+        UI.closeModal();
+        cambiar(i, ex);
+      });
+    });
+
+    function cambiar(i, ex) {
+      draft.exercises[i].exId = ex.id;
+      const saved = Store.saveRoutine(draft);
+      go('rutina', saved.id);
+      UI.toast('Cambiado por ' + ex.nameEs);
+    }
+
+    /* Una rutina de brazo con un ejercicio de pierna: o es mixta, o no entra */
+    function preguntarMixta(ex, alSeguir) {
+      const zona = zonaDeRutina(draft);
+      UI.confirm('Eso es de otra zona',
+        '«' + ex.nameEs + '» no es de ' + (zona ? zona.label.toLowerCase() : 'esta zona') +
+        '. Puedo marcar la rutina como mixta y meterlo igual.',
+        'Marcar mixta y añadir').then(function (ok) {
+        if (!ok) return;
+        draft.mixta = true;
+        alSeguir();
+      });
+    }
+
+    bind(root, '[data-a=mixta]', function (el) {
+      draft.mixta = !draft.mixta;
+      el.classList.toggle('on', draft.mixta);
+      el.setAttribute('aria-checked', String(!!draft.mixta));
+      autoguardar();
+      render();
+    });
+
+    bindAll(root, '[data-a=add]', function () {
+      leerCampos();
+      const meter = function (ex) {
         draft.exercises.push(Store.newRoutineExercise(ex.id));
         const saved = Store.saveRoutine(draft);
-        UI.closeModal();
         /* una rutina nueva ya tiene id: se navega a él para no perder el borrador */
         go('rutina', saved.id);
+      };
+      pickExerciseSheet(function (ex) {
+        UI.closeModal();
+        if (encajaEnRutina(ex)) meter(ex);
+        else preguntarMixta(ex, function () { meter(ex); });
       });
     });
 

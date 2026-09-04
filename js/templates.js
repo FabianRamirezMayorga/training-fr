@@ -150,5 +150,22 @@
     };
   }
 
-  g.Templates = { list: TEMPLATES, toRoutine: toRoutine };
+  /* Dónde hace falta entrenar para poder hacerla entera: se deduce del material
+     de sus ejercicios, así no hay que mantenerlo a mano en cada plantilla. */
+  const ORDEN_LUGARES = ['home', 'bands', 'dumbbell', 'gym'];
+
+  function lugarNecesario(t) {
+    for (let i = 0; i < ORDEN_LUGARES.length; i++) {
+      const g2 = ORDEN_LUGARES[i];
+      const cabe = t.exercises.every(function (e) {
+        const ex = Data.get(e[0]);
+        return ex && Data.gearAllows(g2, ex.equipment);
+      });
+      if (cabe) return g2;
+    }
+    return 'gym';
+  }
+
+  g.Templates = {
+    lugarNecesario: lugarNecesario, list: TEMPLATES, toRoutine: toRoutine };
 })(window);

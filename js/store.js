@@ -163,8 +163,12 @@
     return saveRoutine(copy);
   }
 
+  /* MINIMO: una rutina no baja de aquí. Se pueden cambiar ejercicios o añadir,
+     pero no dejarla coja. mixta: permite mezclar zonas del cuerpo. */
+  const MINIMO_EJERCICIOS = 6;
+
   function newRoutine() {
-    return { id: null, name: '', note: '', days: [], exercises: [] };
+    return { id: null, name: '', note: '', days: [], exercises: [], mixta: false };
   }
 
   function newRoutineExercise(exId) {
@@ -345,6 +349,7 @@
     settings: settings, setSetting: setSetting,
     isFav: isFav, toggleFav: toggleFav, favorites: favorites,
     routines: routines, routine: routine, saveRoutine: saveRoutine, moverRutina: moverRutina,
+    MINIMO_EJERCICIOS: MINIMO_EJERCICIOS,
     deleteRoutine: deleteRoutine, duplicateRoutine: duplicateRoutine,
     newRoutine: newRoutine, newRoutineExercise: newRoutineExercise,
     active: active, setActive: setActive, clearActive: clearActive,

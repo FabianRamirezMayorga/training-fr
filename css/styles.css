@@ -521,3 +521,12 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
   align-items:center;justify-content:center}
 .paso .instr li{margin-bottom:6px}
 .paso pre{margin:0}
+
+/* ---------- tarjeta de rutina ---------- */
+/* Lo que uno busca es el día y qué se trabaja; el nombre va debajo y pequeño */
+.rt-titulo{font-weight:700;font-size:1.02rem;letter-spacing:-.015em}
+.rt-nombre{font-size:.82rem;color:var(--dim);margin-top:1px}
+.rt-detalle{border-top:1px solid var(--line);animation:fade .2s ease}
+.rt-detalle .rt-item{border:0;border-bottom:1px solid var(--line);border-radius:0}
+.rt-detalle .rt-item:last-of-type{border-bottom:0}
+.tiny-chip svg{width:11px;height:11px;vertical-align:-1px}

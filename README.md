@@ -150,7 +150,17 @@ que autorizar y dónde están los dos datos de conexión.
   de movimiento** y los músculos implicados, y se priorizan los que puedes hacer donde
   entrenas. En pleno entrenamiento el cambio es un botón: las series ya marcadas se
   quedan con el ejercicio original y el recambio continúa con las que faltan.
-- **Rutinas, en el orden que tú quieras** — dos caminos igual de visibles: *Crear la mía*,
+- **Mis rutinas, agrupadas por día** — cada bloque es un día de la semana, empezando por
+  hoy. La tarjeta dice lo que importa en grande, *Jueves · Pierna*, con el nombre que le
+  hayas puesto debajo y los músculos que toca; al tocarla se despliegan sus ejercicios sin
+  salir de la lista, con la técnica de cada uno a un toque. Las plantillas de ejemplo
+  indican dónde hace falta entrenar para poder hacerlas (deducido de su material, no
+  escrito a mano).
+- **Rutinas coherentes y completas** — una rutina no baja de 6 ejercicios: se cambian o se
+  añaden, pero no se deja coja. Y no admite ejercicios de otra zona (pierna en una de
+  brazo) salvo que la marques como **mixta** con el interruptor de su ficha, apagado por
+  defecto. Cambiar un ejercicio por otro conserva sus series, repeticiones y descanso.
+- **Dos caminos igual de visibles**: *Crear la mía*,
   donde le pones el nombre que te sirva a ti y eliges los ejercicios, o *Generar programa*,
   que te lo monta con tu perfil y luego lo editas igual (y puedes decidir cómo se llaman:
   *Lunes · Mi plan de otoño*). Se guardan solas mientras las editas, así que
