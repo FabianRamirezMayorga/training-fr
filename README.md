@@ -240,8 +240,10 @@ que autorizar y dónde están los dos datos de conexión.
   convierte en un dispositivo más de tu cuenta), con un reproductor de verdad: portada
   grande, barra de progreso y controles como los de cualquier app de música. Y mientras
   suene algo, una **barra de control en todas las pantallas**, igual que el cronómetro:
-  canción, pausa y siguiente sin ir a buscarla. Deja además que la IA te prepare listas de
-  entrenamiento. Cada lista recuerda los artistas ya propuestos y no los repite, así que
+  canción, pausa y siguiente sin ir a buscarla. Lleva corazón para guardar la canción en tus
+  favoritas de Spotify, aleatorio, volumen, y un buscador de **tus listas** que, si no
+  encuentra nada entre las tuyas, busca en todo Spotify. Deja además que la IA te prepare
+  listas de entrenamiento y las guarde en tu cuenta. Cada lista recuerda los artistas ya propuestos y no los repite, así que
   siempre descubres cosas nuevas. Se pueden guardar en tu Spotify con un toque.
 
 ---

@@ -64,7 +64,10 @@
     siguiente: '<svg viewBox="0 0 24 24" class="lleno"><path d="M17 6a1 1 0 00-2 0v4.6L6.5 5.7A1 1 0 005 6.6v10.8a1 1 0 001.5.9l8.5-4.9V18a1 1 0 002 0z"/></svg>',
     playLleno: '<svg viewBox="0 0 24 24" class="lleno"><path d="M8 5.1a1 1 0 011.5-.9l9.2 5.9a1 1 0 010 1.7l-9.2 5.9a1 1 0 01-1.5-.9z"/></svg>',
     pausaLleno: '<svg viewBox="0 0 24 24" class="lleno"><path d="M8 4.5h3v15H8zM13 4.5h3v15h-3z"/></svg>',
-    altavoz: '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 010 7"/></svg>'
+    altavoz: '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 010 7"/></svg>',
+    corazon: '<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.4A4.1 4.1 0 0112 8.2a4.1 4.1 0 017 2.4c0 4.8-7 9.4-7 9.4z"/></svg>',
+    aleatorio: '<svg viewBox="0 0 24 24"><path d="M4 6h3.5l9 12H20M17 3l3 3-3 3M4 18h3.5l2.2-3M14.2 9l2.3-3H20M17 21l3-3-3-3"/></svg>',
+    lista: '<svg viewBox="0 0 24 24"><path d="M4 7h11M4 12h11M4 17h7M18 8v9M18 8l3-1"/></svg>'
   };
   function icon(n) { return ICON[n] || ''; }
 

@@ -431,8 +431,9 @@
       ${raw(Spotify.permisosCaducados() ? html`
         <div class="card" style="border-color:var(--warn);margin-top:12px">
           <b>Vuelve a conectar</b>
-          <p class="muted" style="margin:5px 0 10px">La app ahora puede reproducir por sí
-          misma y crear listas, y eso necesita permisos nuevos.</p>
+          <p class="muted" style="margin:5px 0 10px">Hay funciones nuevas —guardar canciones
+          en tus favoritas y ver tus listas de Spotify— y Spotify pide permiso otra vez para
+          eso. Es un toque y no pierdes nada.</p>
           <button class="btn primary block" data-a="conectar">Reconectar Spotify</button>
         </div>` : '')}
 
@@ -454,9 +455,21 @@
         ' artistas ya propuestos que no se repetirán. ' +
         '<button class="btn sm ghost" data-a="olvidar">Empezar de cero</button></p>' : '')}
 
-      <div class="list-title">Lista propia</div>
+      <div class="list-head">
+        <span class="list-title">Tus listas de Spotify</span>
+        <button class="btn sm ghost" data-a="recargarListas">Actualizar</button>
+      </div>
+      <div class="search-wrap" style="margin-bottom:10px">
+        ${raw(icon('search'))}
+        <input id="sp-buscar" type="search" placeholder="Buscar entre las tuyas o en Spotify"
+               autocomplete="off">
+      </div>
+      <div id="sp-listas"><p class="tiny">Cargando tus listas…</p></div>
+
+      <div class="list-title">Lista fija</div>
       <div class="card">
-        <p class="muted">Si prefieres una lista tuya, pega su enlace y la app la lanzará.</p>
+        <p class="muted">La que quieras tener siempre a mano: pega su enlace y queda
+        guardada para lanzarla de un toque.</p>
         <input id="sp-pl" value="${Spotify.config().playlist || ''}"
                placeholder="https://open.spotify.com/playlist/..." autocomplete="off" spellcheck="false">
         <div class="row" style="margin-top:10px">
@@ -467,6 +480,62 @@
         </div>
       </div>`;
   };
+
+  /* ---------- tus listas de Spotify ---------- */
+
+  function tarjetasListas(listas, propias) {
+    if (!listas.length) {
+      return '<p class="tiny">' + (propias
+        ? 'No tienes listas guardadas en Spotify todavía.'
+        : 'Ninguna lista con ese nombre.') + '</p>';
+    }
+    return '<div class="stack">' + listas.map(function (l) {
+      return html`
+        <button class="rt-item" data-lista="${l.uri}" style="width:100%;text-align:left">
+          ${raw(l.portada
+            ? '<img src="' + esc(l.portada) + '" alt="" loading="lazy">'
+            : '<span class="bm-sin">' + icon('lista') + '</span>')}
+          <div class="grow">
+            <div style="font-weight:600;font-size:.86rem">${l.nombre}</div>
+            <div class="tiny">${raw(l.temas != null ? l.temas + ' canciones' : '')}${raw(
+              l.de ? ' · ' + esc(l.de) : '')}</div>
+          </div>
+          ${raw(icon('play'))}
+        </button>`;
+    }).join('') + '</div>';
+  }
+
+  function pintarListas(root, texto) {
+    const caja = root.querySelector('#sp-listas');
+    if (!caja) return;
+    caja.innerHTML = '<p class="tiny">Buscando…</p>';
+
+    const q = String(texto || '').trim();
+    const pedir = q
+      ? Spotify.misListas().then(function (mias) {
+          const filtro = I18N.norm(q);
+          const suyas = mias.filter(function (l) { return I18N.norm(l.nombre).indexOf(filtro) !== -1; });
+          /* si entre las tuyas no hay nada, se busca en todo Spotify */
+          return suyas.length ? suyas : Spotify.buscarListas(q);
+        })
+      : Spotify.misListas();
+
+    pedir.then(function (listas) {
+      caja.innerHTML = tarjetasListas(listas, !q);
+      caja.querySelectorAll('[data-lista]').forEach(function (b) {
+        b.onclick = function () {
+          Spotify.desbloquearAudio();
+          Spotify.iniciarReproductor()
+            .catch(function () { /* sin reproductor propio, suena donde puedas */ })
+            .then(function () { return Spotify.ponerPlaylist(b.dataset.lista); })
+            .then(function () { UI.toast('Reproduciendo'); })
+            .catch(function (e) { UI.toast(e.message); });
+        };
+      });
+    }).catch(function (e) {
+      caja.innerHTML = '<p class="tiny" style="color:var(--bad)">' + esc(e.message) + '</p>';
+    });
+  }
 
   function listaHTML(l) {
     return html`
@@ -531,6 +600,18 @@
       }
       Spotify.guardarPlaylist(val); render(); UI.toast('Lista guardada');
     });
+
+    /* tus listas, con buscador */
+    if (root.querySelector('#sp-listas')) {
+      pintarListas(root, '');
+      const busca = root.querySelector('#sp-buscar');
+      let deb = null;
+      busca.oninput = function () {
+        clearTimeout(deb);
+        deb = setTimeout(function () { pintarListas(root, busca.value); }, 350);
+      };
+      bind(root, '[data-a=recargarListas]', function () { pintarListas(root, busca.value); });
+    }
 
     bind(root, '[data-a=ponerPl]', function () {
       Spotify.ponerPlaylist().then(function () { UI.toast('Reproduciendo'); })
@@ -749,6 +830,20 @@
 
   /* Reproductor completo. La portada manda: es lo que hace que parezca un
      reproductor y no una fila de botones. */
+  /* Si la canción de ahora está en tus favoritas de Spotify. Se consulta al
+     pintar y se recuerda mientras no cambie de tema. */
+  let favoritaActual = false;
+  let favoritaDe = '';
+  let volActual = 0.6;            // el que trae el reproductor al arrancar
+
+  function comprobarFavorita(s, alSaber) {
+    if (!s || !s.id || s.id === favoritaDe) return;
+    favoritaDe = s.id;
+    Spotify.esFavorita(s.id).then(function (si) {
+      if (si !== favoritaActual) { favoritaActual = si; if (alSaber) alSaber(); }
+    });
+  }
+
   function reproductorHTML(s) {
     const pct = s.duracion ? Math.min(100, Math.round(s.progreso / s.duracion * 100)) : 0;
 
@@ -770,6 +865,9 @@
         </div>
 
         <div class="player-mandos">
+          <button class="player-b chico ${s.aleatorio ? 'on' : ''}" data-sp="aleatorio"
+            aria-label="Aleatorio" aria-pressed="${!!s.aleatorio}">
+            ${raw(icon('aleatorio'))}</button>
           <button class="player-b" data-sp="anterior" aria-label="Anterior">
             ${raw(icon('anterior'))}</button>
           <button class="player-b grande" data-sp="alternar"
@@ -777,7 +875,17 @@
             ${raw(icon(s.sonando ? 'pausaLleno' : 'playLleno'))}</button>
           <button class="player-b" data-sp="siguiente" aria-label="Siguiente">
             ${raw(icon('siguiente'))}</button>
+          <button class="player-b chico ${favoritaActual ? 'fav' : ''}" data-sp="corazon"
+            aria-label="Guardar en favoritas" aria-pressed="${!!favoritaActual}">
+            ${raw(icon('corazon'))}</button>
         </div>
+
+        ${raw(s.local ? html`
+          <div class="player-vol">
+            ${raw(icon('altavoz'))}
+            <input type="range" min="0" max="100" value="${Math.round(volActual * 100)}"
+                   id="player-vol" aria-label="Volumen">
+          </div>` : '')}
 
         ${raw(s.dispositivo ? html`
           <div class="player-donde">
@@ -788,6 +896,20 @@
   }
 
   function montarReproductor(root) {
+    const vol = root.querySelector('#player-vol');
+    if (vol) {
+      vol.oninput = function () {
+        volActual = Number(vol.value) / 100;
+        Spotify.volumen(volActual).catch(function () { /* sin reproductor propio */ });
+      };
+    }
+
+    const s0 = Spotify.estado();
+    comprobarFavorita(s0, function () {
+      const c = root.querySelector('[data-sp=corazon]');
+      if (c) { c.classList.toggle('fav', favoritaActual); c.setAttribute('aria-pressed', String(favoritaActual)); }
+    });
+
     root.querySelectorAll('[data-sp]').forEach(function (b) {
       b.onclick = function () {
         /* Safari solo desbloquea el audio dentro del gesto: si se hace después
@@ -795,7 +917,21 @@
         Spotify.desbloquearAudio();
         const acciones = {
           alternar: Spotify.alternar, siguiente: Spotify.siguiente,
-          anterior: Spotify.anterior, traer: Spotify.traerAqui
+          anterior: Spotify.anterior, traer: Spotify.traerAqui,
+          aleatorio: function () {
+            const s = Spotify.estado() || {};
+            return Spotify.aleatorio(!s.aleatorio).then(function () {
+              UI.toast(!s.aleatorio ? 'Aleatorio activado' : 'Aleatorio desactivado');
+            });
+          },
+          corazon: function () {
+            const s = Spotify.estado() || {};
+            return Spotify.marcarFavorita(s.id, !favoritaActual).then(function () {
+              favoritaActual = !favoritaActual;
+              UI.toast(favoritaActual ? 'Guardada en tus favoritas de Spotify'
+                : 'Quitada de favoritas');
+            });
+          }
         };
         const fn = acciones[b.dataset.sp];
         if (!fn) return;

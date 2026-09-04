@@ -22,13 +22,16 @@
     'user-modify-playback-state',
     'user-read-currently-playing',
     'playlist-read-private',
+    'playlist-read-collaborative',
     'playlist-modify-private',    // guardar las listas que genera la IA
     'playlist-modify-public',
+    'user-library-read',          // saber si una canción ya es favorita
+    'user-library-modify',        // el corazón
     'user-top-read'               // conocer tus gustos para afinar las listas
   ].join(' ');
 
   /* La versión de permisos: si cambia, hay que volver a autorizar la cuenta */
-  const SCOPES_V = 2;
+  const SCOPES_V = 3;
 
   function leer(k) {
     try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; }
@@ -245,6 +248,7 @@
     return pedir('/me/player').then(function (r) {
       if (!r || !r.item) return null;
       return {
+        id: r.item.id,
         titulo: r.item.name,
         artista: (r.item.artists || []).map(function (a) { return a.name; }).join(', '),
         album: r.item.album && r.item.album.name,
@@ -253,6 +257,7 @@
         sonando: !!r.is_playing,
         progreso: r.progress_ms || 0,
         duracion: r.item.duration_ms || 0,
+        aleatorio: !!r.shuffle_state,
         dispositivo: r.device && r.device.name
       };
     });
@@ -300,11 +305,26 @@
   function ponerPlaylist(uri) {
     const id = idDePlaylist(uri || config().playlist);
     if (!id) return Promise.reject(new Error('Guarda antes una lista de reproducción.'));
-    return pedir('/me/player/play', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ context_uri: 'spotify:playlist:' + id })
-    });
+
+    const lanzar = function (dev) {
+      return pedir('/me/player/play' + (dev ? '?device_id=' + encodeURIComponent(dev) : ''), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ context_uri: 'spotify:playlist:' + id })
+      });
+    };
+
+    /* igual que con las canciones sueltas: primero se trae el mando aquí */
+    if (reproductorActivo()) {
+      desbloquearAudio();
+      return pedir('/me/player', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_ids: [deviceId], play: false })
+      }).catch(function () { /* si ya era el activo, da igual */ })
+        .then(function () { return lanzar(deviceId); });
+    }
+    return lanzar('');
   }
 
   /* Acepta el enlace que comparte la aplicación, la dirección con idioma
@@ -337,14 +357,55 @@
   }
 
   function misListas() {
-    return pedir('/me/playlists?limit=30').then(function (r) {
+    return pedir('/me/playlists?limit=50').then(function (r) {
       return ((r && r.items) || []).map(function (p) {
         return {
           id: p.id, nombre: p.name, temas: p.tracks && p.tracks.total,
+          uri: p.uri, de: p.owner && p.owner.display_name,
           portada: p.images && p.images.length ? p.images[p.images.length - 1].url : ''
         };
       });
     });
+  }
+
+  /* Busca listas por todo Spotify, no solo entre las tuyas */
+  function buscarListas(texto) {
+    const q = String(texto || '').trim();
+    if (!q) return Promise.resolve([]);
+    return pedir('/search?type=playlist&limit=20&q=' + encodeURIComponent(q)).then(function (r) {
+      return ((r && r.playlists && r.playlists.items) || []).filter(Boolean).map(function (p) {
+        return {
+          id: p.id, nombre: p.name, temas: p.tracks && p.tracks.total,
+          uri: p.uri, de: p.owner && p.owner.display_name,
+          portada: p.images && p.images.length ? p.images[p.images.length - 1].url : ''
+        };
+      });
+    });
+  }
+
+  /* ---------- favoritos, aleatorio y repetición ---------- */
+
+  function esFavorita(id) {
+    if (!id) return Promise.resolve(false);
+    return pedir('/me/tracks/contains?ids=' + encodeURIComponent(id))
+      .then(function (r) { return !!(r && r[0]); })
+      .catch(function () { return false; });
+  }
+
+  function marcarFavorita(id, si) {
+    if (!id) return Promise.reject(new Error('No hay ninguna canción sonando.'));
+    return pedir('/me/tracks?ids=' + encodeURIComponent(id), { method: si ? 'PUT' : 'DELETE' })
+      .then(function () { return si; });
+  }
+
+  function aleatorio(si) {
+    return pedir('/me/player/shuffle?state=' + (si ? 'true' : 'false') +
+      (deviceId ? '&device_id=' + encodeURIComponent(deviceId) : ''), { method: 'PUT' });
+  }
+
+  function repetir(modo) {
+    return pedir('/me/player/repeat?state=' + encodeURIComponent(modo) +
+      (deviceId ? '&device_id=' + encodeURIComponent(deviceId) : ''), { method: 'PUT' });
   }
 
   /* ---------- reproductor dentro de la app ----------
@@ -470,6 +531,7 @@
     if (!estadoActual || !estadoActual.track_window || !estadoActual.track_window.current_track) return null;
     const t = estadoActual.track_window.current_track;
     return {
+      id: t.id,
       titulo: t.name,
       artista: (t.artists || []).map(function (a) { return a.name; }).join(', '),
       album: t.album && t.album.name,
@@ -478,6 +540,7 @@
       sonando: !estadoActual.paused,
       progreso: estadoActual.position,
       duracion: estadoActual.duration,
+      aleatorio: !!estadoActual.shuffle,
       dispositivo: 'Training FR',
       local: true
     };
@@ -623,6 +686,8 @@
     config: config, configurado: configurado, guardarConfig: guardarConfig,
     esperandoRedireccion: esperandoRedireccion,
     guardarPlaylist: guardarPlaylist, borrarConfig: borrarConfig,
+    buscarListas: buscarListas, esFavorita: esFavorita, marcarFavorita: marcarFavorita,
+    aleatorio: aleatorio, repetir: repetir,
     activa: activa, entrar: entrar, salir: salir, capturarRedireccion: capturarRedireccion,
     urlRetorno: urlRetorno, sonando: sonando, play: play, pausa: pausa,
     siguiente: siguiente, anterior: anterior, alternar: alternar,
