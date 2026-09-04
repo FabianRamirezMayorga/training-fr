@@ -2933,6 +2933,29 @@
     });
   }
 
+  /* Aviso de versión nueva, con su botón para recargar en el momento */
+  let avisadoVersion = false;
+  function avisarVersionNueva() {
+    if (avisadoVersion) return;
+    avisadoVersion = true;
+    /* contenedor propio: el de recordatorios se reescribe en cada pintado */
+    const host = document.getElementById('avisos');
+    if (!host || !host.parentNode) return;
+    const caja = document.createElement('div');
+    caja.className = 'avisos';
+    caja.id = 'aviso-version';
+    caja.innerHTML = html`
+      <span class="row-icon">${raw(icon('down'))}</span>
+      <div class="grow">
+        <div style="font-weight:600;font-size:.95rem">Hay una versión nueva</div>
+        <div class="tiny">Recarga para usarla. Tus datos no se tocan.</div>
+      </div>
+      <button class="btn sm primary" data-recargar>Actualizar</button>`;
+    caja.innerHTML = '<div class="aviso">' + caja.innerHTML + '</div>';
+    host.parentNode.insertBefore(caja, host);
+    caja.querySelector('[data-recargar]').onclick = function () { location.reload(); };
+  }
+
   /* Recordatorios que tocaban y aún no has visto */
   function pintarAvisos() {
     const host = document.getElementById('avisos');
@@ -3101,6 +3124,14 @@
       render();
 
       if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+        /* Al desplegar, el service worker nuevo se instala y toma el control,
+           pero la página ya está corriendo con los archivos viejos: hasta que
+           no se recarga, la app sigue en la versión anterior. Sin avisar, uno
+           cierra y abre y sigue viendo el mismo fallo sin entender por qué. */
+        const yaControlaba = !!navigator.serviceWorker.controller;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (yaControlaba) avisarVersionNueva();
+        });
         navigator.serviceWorker.register('sw.js').catch(function () { /* opcional */ });
       }
 
