@@ -363,16 +363,18 @@
       esc(titulo.slice(i + n.length));
   }
 
+  /* i y total solo llegan desde la lista de Rutinas, que es donde se puede
+     reordenar y borrar. En la portada se usa la tarjeta sin más. */
   function routineCard(r, i, total) {
     const n = r.exercises.length;
     const hoy = UI.DAY_NAMES[new Date().getDay()];
     const esDeHoy = (r.days || []).indexOf(hoy) !== -1;
-    const conFlechas = ordenando && total > 1;
+    const editando = ordenando && total;
 
     return html`
       <div class="card ${esDeHoy && !ordenando ? 'card-hoy' : ''}">
         <div class="row between" style="align-items:flex-start">
-          ${raw(conFlechas ? html`
+          ${raw(editando && total > 1 ? html`
             <div class="mover">
               <button class="btn sm" data-sube="${r.id}" ${i === 0 ? 'disabled' : ''}
                       aria-label="Subir">${raw(icon('up'))}</button>
@@ -385,8 +387,11 @@
             <div class="tiny">${n} ${n === 1 ? 'ejercicio' : 'ejercicios'}${raw(
               (r.days || []).length ? ' · ' + esc(UI.diasLargos(r.days)) : '')}</div>
           </div>
-          ${raw(conFlechas ? '' : html`
-            <button class="btn primary sm" data-train="${r.id}">${raw(icon('play'))} Entrenar</button>`)}
+          ${raw(editando
+            ? html`<button class="btn sm danger" data-borrar="${r.id}"
+                     aria-label="Borrar rutina">${raw(icon('trash'))}</button>`
+            : html`<button class="btn primary sm" data-train="${r.id}">
+                     ${raw(icon('play'))} Entrenar</button>`)}
         </div>
         ${raw(n ? html`<div class="row wrap" style="margin-top:9px;gap:5px">
           ${raw(r.exercises.slice(0, 4).map(function (re) {
@@ -1166,13 +1171,13 @@
       series y los días. <b>Generar programa</b>: te lo monto yo con tu edad, tu nivel, tu
       objetivo y tus limitaciones, y luego lo editas igual.</p>
 
-      ${raw(rutinas.length > 1 ? html`
+      ${raw(rutinas.length ? html`
         <div class="list-head">
-          <span class="list-title">${ordenando ? 'Colócalas a tu gusto'
+          <span class="list-title">${ordenando ? 'Ordena y borra lo que sobre'
             : hayHoy ? 'Hoy es ' + UI.diaLargo(hoy).toLowerCase() + ', y esto es lo que toca'
             : 'Mis rutinas'}</span>
           <button class="btn sm ${ordenando ? 'primary' : 'ghost'}" data-a="ordenar">
-            ${ordenando ? 'Hecho' : 'Ordenar'}</button>
+            ${ordenando ? 'Hecho' : 'Editar lista'}</button>
         </div>` : '')}
 
       ${raw(rutinas.length ? html`
@@ -1181,9 +1186,11 @@
         }).join(''))}</div>`
       : '<p class="muted">Aún no tienes rutinas propias. Copia una plantilla de abajo para empezar.</p>')}
 
-      ${raw(ordenando ? '<p class="tiny center" style="margin-top:10px">El orden se guarda ' +
-        'y viaja a tus demás dispositivos. Al salir de aquí, la rutina de hoy vuelve a ' +
-        'ponerse la primera.</p>' : '')}
+      ${raw(ordenando ? '<p class="tiny center" style="margin-top:10px">Con las flechas las ' +
+        'colocas a tu gusto y con la papelera las borras. El orden viaja a tus demás ' +
+        'dispositivos, y al salir de aquí la rutina de hoy vuelve a ponerse la primera.</p>'
+        : '<p class="tiny center" style="margin-top:10px">Toca una rutina para verla o ' +
+        'editarla, o pulsa Entrenar para hacerla ahora.</p>')}
 
       <div class="list-title">Rutinas de ejemplo</div>
       <p class="muted">Al usar una plantilla se copia a tus rutinas; puedes cambiar ejercicios,
@@ -1212,7 +1219,21 @@
     bind(root, '[data-a=ordenar]', function () {
       ordenando = !ordenando;
       render();
-      if (ordenando) UI.toast('Coloca las rutinas con las flechas');
+      if (ordenando) UI.toast('Colócalas con las flechas o bórralas con la papelera');
+    });
+
+    bindAll(root, '[data-borrar]', function (el) {
+      const r = Store.routine(el.dataset.borrar);
+      if (!r) return;
+      UI.confirm('Borrar «' + (r.name || 'esta rutina') + '»',
+        'Se quita de tu lista. Los entrenamientos que ya hiciste con ella se conservan ' +
+        'en tu historial.', 'Borrar', true).then(function (ok) {
+        if (!ok) return;
+        Store.deleteRoutine(r.id);
+        if (!Store.routines().length) ordenando = false;
+        render();
+        UI.toast('Rutina borrada');
+      });
     });
 
     const mover = function (id, delta) {

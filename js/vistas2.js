@@ -646,7 +646,15 @@
           boton.disabled = true;
           estado.textContent = 'Pensando la lista…';
 
-          Spotify.misArtistas().then(function (gustos) {
+          const mostrarFallo = function (e) {
+            boton.disabled = false;
+            estado.innerHTML = '<span style="color:var(--bad)">' + esc(e.message) + '</span>';
+          };
+
+          /* Promise.resolve() antes de nada: si algo falla de forma síncrona,
+             el error entra en el catch en vez de dejar el botón bloqueado y el
+             "Pensando la lista…" para siempre. */
+          Promise.resolve().then(function () { return Spotify.misArtistas(); }).then(function (gustos) {
             return IA.playlistEntreno({
               ambiente: ambiente,
               canciones: num,
@@ -674,10 +682,7 @@
               render();
               UI.toast(pistas.length + ' canciones listas');
             });
-          }).catch(function (e) {
-            boton.disabled = false;
-            estado.innerHTML = '<span style="color:var(--bad)">' + esc(e.message) + '</span>';
-          });
+          }).catch(mostrarFallo);
         };
       });
   }

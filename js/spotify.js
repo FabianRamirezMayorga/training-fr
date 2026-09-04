@@ -359,16 +359,37 @@
   let estadoActual = null;
   const oyentes = [];
 
+  /* ---- El SDK de Spotify se apodera de window.Spotify ----
+     Su script hace literalmente window.Spotify = { Player }, que es el mismo
+     nombre global que usa este módulo. A partir de ese momento Spotify.play,
+     Spotify.traerAqui y todo lo demás desaparecen, y salta el
+     "Spotify.traerAqui is not a function" justo al activar el reproductor.
+     Aquí se guarda su Player, se devuelve el global a su sitio y se deja
+     también el Player colgado del nuestro por si algo lo busca ahí. */
+  let PlayerSDK = null;
+
+  function recuperarGlobal() {
+    const suyo = window.Spotify;
+    if (suyo && suyo.Player && suyo !== g.Spotify) {
+      PlayerSDK = suyo.Player;
+      if (g.Spotify) g.Spotify.Player = suyo.Player;
+    }
+    if (g.Spotify) window.Spotify = g.Spotify;
+  }
+
   function cargarSDK() {
     if (sdkListo) return sdkListo;
     sdkListo = new Promise(function (resolve, reject) {
-      if (window.Spotify && window.Spotify.Player) return resolve();
+      recuperarGlobal();
+      if (PlayerSDK) return resolve();
 
       /* el SDK llama a esta función global cuando termina de cargarse */
       const previo = window.onSpotifyWebPlaybackSDKReady;
       window.onSpotifyWebPlaybackSDKReady = function () {
+        recuperarGlobal();
         if (previo) { try { previo(); } catch (e) { /* nada */ } }
-        resolve();
+        if (PlayerSDK) resolve();
+        else reject(new Error('El reproductor de Spotify no se cargó bien.'));
       };
 
       const s = document.createElement('script');
@@ -389,7 +410,8 @@
 
     return cargarSDK().then(function () {
       return new Promise(function (resolve, reject) {
-        player = new window.Spotify.Player({
+        recuperarGlobal();
+        player = new PlayerSDK({
           name: 'Training FR',
           volume: 0.6,
           getOAuthToken: function (cb) {
@@ -583,7 +605,7 @@
       .catch(function () { return []; });
   }
 
-  g.Spotify = {
+  const PUBLICO = {
     SCOPES_V: SCOPES_V, permisosCaducados: permisosCaducados, volumen: volumen,
     iniciarReproductor: iniciarReproductor, reproductorActivo: reproductorActivo,
     estado: estado, alCambiar: alCambiar, traerAqui: traerAqui,
@@ -600,4 +622,21 @@
     urlEmbed: urlEmbed, idDePlaylist: idDePlaylist, queEs: queEs,
     requierePremium: requierePremium
   };
+
+  g.Spotify = PUBLICO;
+
+  /* Blindaje: el script del SDK hace window.Spotify = { Player }. Con este
+     descriptor, esa asignación no borra nada: se queda con su Player y el
+     global sigue siendo este módulo. Es la red por si el SDK lo reasigna en un
+     momento que no controlamos. */
+  try {
+    Object.defineProperty(window, 'Spotify', {
+      configurable: true,
+      get: function () { return PUBLICO; },
+      set: function (v) {
+        if (v && v.Player) { PlayerSDK = v.Player; PUBLICO.Player = v.Player; }
+      }
+    });
+  } catch (e) { /* si el navegador no deja, queda recuperarGlobal() */ }
+
 })(window);
