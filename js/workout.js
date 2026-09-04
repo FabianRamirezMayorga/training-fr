@@ -287,16 +287,22 @@
     const guia = g.Tecnica ? Tecnica.para(ex) : null;
     if (!hayAlt && !guia) return '';
 
-    function plegable(clave, titulo, icono, abierto) {
+    function boton(clave, titulo, icono) {
+      const abierto = ayudaAbierta === clave;
       return html`
-        <button class="btn block sm plegar ${abierto ? 'abierta' : ''}"
-                data-ayuda="${clave}" aria-expanded="${!!abierto}" style="margin-top:10px">
-          ${raw(icon('chevron'))} ${raw(icono)} ${titulo}</button>
-        <div data-ayuda-caja="${clave}" ${raw(abierto ? '' : 'hidden')}></div>`;
+        <button class="btn sm grow plegar ${abierto ? 'abierta' : ''}"
+                data-ayuda="${clave}" aria-expanded="${abierto}">
+          ${raw(icono)} ${titulo}</button>`;
     }
 
-    return (hayAlt ? plegable('alt', 'Si está ocupado o no lo tienes', icon('cambiar'), ayudaAbierta === 'alt') : '')
-      + (guia ? plegable('guia', 'Cómo se hace, paso a paso', icon('search'), ayudaAbierta === 'guia') : '');
+    /* Los dos en la misma línea: uno debajo del otro se comían el sitio de lo
+       que de verdad se mira aquí, el peso y las repeticiones. */
+    return '<div class="row" style="margin-top:11px">'
+      + (hayAlt ? boton('alt', 'Recambios', icon('cambiar')) : '')
+      + (guia ? boton('guia', 'Cómo se hace', icon('search')) : '')
+      + '</div>'
+      + (hayAlt ? '<div data-ayuda-caja="alt"' + (ayudaAbierta === 'alt' ? '' : ' hidden') + '></div>' : '')
+      + (guia ? '<div data-ayuda-caja="guia"' + (ayudaAbierta === 'guia' ? '' : ' hidden') + '></div>' : '');
   }
 
   /* Cuál de las dos está abierta, para que sobreviva a los re-render que hace
@@ -349,13 +355,11 @@
               <h2 style="margin:0 0 2px">${entry.name}</h2>
               <div class="tiny">${raw(ex ? UI.esc(ex.name) : '')}</div>
               ${raw(ex && ex.primaryMuscles.length ? html`
-                <div class="row wrap" style="gap:5px;margin-top:5px">
-                  ${raw(ex.primaryMuscles.map(function (m) {
-                    return '<span class="chip musculo">' + UI.esc(I18N.muscle(m)) + '</span>';
-                  }).join(''))}
-                  ${raw((ex.secondaryMuscles || []).map(function (m) {
-                    return '<span class="chip musculo-2">' + UI.esc(I18N.muscle(m)) + '</span>';
-                  }).join(''))}
+                <div class="musculos">
+                  <b>${raw(ex.primaryMuscles.map(function (m) {
+                    return UI.esc(I18N.muscle(m));
+                  }).join(', '))}</b>${raw((ex.secondaryMuscles || []).length
+                    ? ' · ' + UI.esc(ex.secondaryMuscles.map(I18N.muscle).join(', ')) : '')}
                 </div>` : '')}
             </div>
             <button class="btn icon" data-w="cambiar"
@@ -775,15 +779,40 @@
     if (!host || !g.Spotify || !Spotify.activa()) return;
 
     const pintar = function (s) {
-      /* Con la barra flotante puesta abajo, el reproductor grande aquí es lo
-         mismo dos veces y empuja el ejercicio fuera de la pantalla. Sólo se
-         pinta cuando no hay barra —la música suena en otro aparato—, que
-         entonces es el único mando que queda a mano. */
-      const hayBarra = !!(Spotify.reproductorActivo && Spotify.reproductorActivo());
-      if (s && hayBarra) { host.innerHTML = ''; return; }
+      /* Aquí no va nunca el reproductor grande: con la barra flotante abajo es
+         lo mismo dos veces y empuja el ejercicio fuera de la pantalla. Si la
+         música suena en otro aparato no hay barra que valga, así que se pone
+         una línea igual de estrecha con lo mínimo para no quedarse sin mando. */
+      if (s && Spotify.reproductorActivo && Spotify.reproductorActivo()) {
+        host.innerHTML = '';
+        return;
+      }
       if (s) {
-        host.innerHTML = g.Reproductor.html(s);
-        g.Reproductor.montar(host);
+        host.innerHTML = html`
+          <div class="card" style="padding:9px 11px">
+            <div class="barra-musica">
+              <button class="bm-ir" data-w2="ir">
+                ${raw(s.portada ? '<img src="' + UI.esc(s.portada) + '" alt="">'
+                  : '<span class="bm-sin">' + icon('musica') + '</span>')}
+                <span class="bm-txt"><b>${s.titulo}</b><span>${s.artista}</span></span>
+              </button>
+              <button class="bm-b" data-w2="alternar"
+                      aria-label="${s.sonando ? 'Pausar' : 'Reproducir'}">
+                ${raw(icon(s.sonando ? 'pausaLleno' : 'playLleno'))}</button>
+              <button class="bm-b" data-w2="siguiente" aria-label="Siguiente">
+                ${raw(icon('siguiente'))}</button>
+            </div>
+          </div>`;
+        host.querySelector('[data-w2=ir]').onclick = function () { g.App.go('musica'); };
+        host.querySelectorAll('[data-w2=alternar],[data-w2=siguiente]').forEach(function (b) {
+          b.onclick = function () {
+            Spotify.desbloquearAudio();
+            const fn = b.dataset.w2 === 'siguiente' ? Spotify.siguiente : Spotify.alternar;
+            b.disabled = true;
+            fn().catch(function (e) { UI.toast(e.message); })
+              .then(function () { setTimeout(function () { b.disabled = false; }, 300); });
+          };
+        });
         return;
       }
       /* nada sonando: acceso directo a la música sin salir del entrenamiento */

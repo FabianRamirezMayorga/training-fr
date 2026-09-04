@@ -148,9 +148,10 @@ a{color:var(--blue)}
 .chip.on{background:var(--acc-d);border-color:var(--acc);color:var(--acc)}
 .chip.solid{background:var(--acc-d);color:var(--acc);border-color:transparent}
 /* El músculo que se trabaja, en color: entre el nombre en inglés y la lista de
-   músculos todo era del mismo gris y no se distinguía de un vistazo. */
-.chip.musculo{background:var(--acc-d);color:var(--acc);border-color:var(--acc);font-weight:600}
-.chip.musculo-2{background:var(--card2);color:var(--dim);border-color:var(--line)}
+   músculos todo era del mismo gris y no se distinguía de un vistazo. Es texto y
+   no una pastilla: parecían botones y no lo son, no se pulsan. */
+.musculos{font-size:.8rem;color:var(--dim2);margin-top:4px;letter-spacing:0}
+.musculos b{color:var(--acc);font-weight:600}
 
 .pill-scroll{display:flex;gap:7px;overflow-x:auto;padding:2px 16px 8px;margin:0 -16px;scrollbar-width:none}
 .pill-scroll::-webkit-scrollbar{display:none}
