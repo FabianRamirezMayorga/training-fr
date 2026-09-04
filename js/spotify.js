@@ -635,54 +635,73 @@
     if (!pide.length) return Promise.resolve([]);
     /* Con un solo tipo cabe traer más de cada uno sin llenar la pantalla */
     const cuantos = pide.length === 1 ? 20 : 8;
-    return pedir('/search?type=' + pide.join(',') + '&limit=' + cuantos +
-      '&q=' + encodeURIComponent(q))
-      .then(function (r) {
-        r = r || {};
-        const fuera = [];
 
-        function portada(x) {
-          const im = (x && x.images) || (x && x.album && x.album.images) || [];
-          return im.length ? im[im.length - 1].url : '';
-        }
-        function meter(lista, hacer) {
-          ((lista && lista.items) || []).filter(Boolean).forEach(function (x) {
-            fuera.push(hacer(x));
-          });
-        }
+    function portada(x) {
+      const im = (x && x.images) || (x && x.album && x.album.images) || [];
+      return im.length ? im[im.length - 1].url : '';
+    }
 
-        meter(r.tracks, function (t) {
-          return {
-            id: t.id, uri: t.uri, nombre: t.name, tipo: 'Canción',
-            de: (t.artists || []).map(function (a) { return a.name; }).join(', '),
-            portada: portada(t)
-          };
-        });
-        meter(r.playlists, function (p) {
-          return {
-            id: p.id, uri: p.uri, nombre: p.name, tipo: 'Lista',
-            temas: p.tracks && p.tracks.total,
-            de: p.owner && p.owner.display_name, portada: portada(p)
-          };
-        });
-        meter(r.albums, function (a) {
-          return {
-            id: a.id, uri: a.uri, nombre: a.name, tipo: 'Álbum',
-            de: (a.artists || []).map(function (x) { return x.name; }).join(', '),
-            portada: portada(a)
-          };
-        });
-        meter(r.artists, function (a) {
-          return { id: a.id, uri: a.uri, nombre: a.name, tipo: 'Artista',
-            de: '', portada: portada(a) };
-        });
-        meter(r.shows, function (x) {
-          return { id: x.id, uri: x.uri, nombre: x.name, tipo: 'Pódcast',
-            de: x.publisher || '', portada: portada(x) };
-        });
+    const comoSale = {
+      track: function (t) {
+        return {
+          id: t.id, uri: t.uri, nombre: t.name, tipo: 'Canción',
+          de: (t.artists || []).map(function (a) { return a.name; }).join(', '),
+          portada: portada(t)
+        };
+      },
+      playlist: function (p) {
+        return {
+          id: p.id, uri: p.uri, nombre: p.name, tipo: 'Lista',
+          temas: p.tracks && p.tracks.total,
+          de: p.owner && p.owner.display_name, portada: portada(p)
+        };
+      },
+      album: function (a) {
+        return {
+          id: a.id, uri: a.uri, nombre: a.name, tipo: 'Álbum',
+          de: (a.artists || []).map(function (x) { return x.name; }).join(', '),
+          portada: portada(a)
+        };
+      },
+      artist: function (a) {
+        return { id: a.id, uri: a.uri, nombre: a.name, tipo: 'Artista',
+          de: '', portada: portada(a) };
+      },
+      show: function (x) {
+        return { id: x.id, uri: x.uri, nombre: x.name, tipo: 'Pódcast',
+          de: x.publisher || '', portada: portada(x) };
+      }
+    };
+    const clave = { track: 'tracks', playlist: 'playlists', album: 'albums',
+      artist: 'artists', show: 'shows' };
+    const enCastellano = { track: 'canciones', playlist: 'listas', album: 'álbumes',
+      artist: 'artistas', show: 'pódcast' };
 
-        return fuera;
-      });
+    /* Cada tipo va en su propia petición. Pedirlos juntos era más barato, pero
+       si Spotify rechaza uno se cae la búsqueda entera y el resultado parece
+       «no hay nada»: así lo que funciona se ve y lo que no se dice cuál es. */
+    const fallos = [];
+    let motivo = null;
+
+    return Promise.all(pide.map(function (t) {
+      return pedir('/search?type=' + t + '&limit=' + cuantos + '&q=' + encodeURIComponent(q))
+        .then(function (r) {
+          const caja = r && r[clave[t]];
+          return ((caja && caja.items) || []).filter(Boolean).map(comoSale[t]);
+        })
+        .catch(function (e) {
+          fallos.push(enCastellano[t]);
+          if (!motivo) motivo = e;
+          return [];
+        });
+    })).then(function (partes) {
+      if (fallos.length === pide.length) throw (motivo || new Error('No se pudo buscar.'));
+      const fuera = [];
+      partes.forEach(function (p) { p.forEach(function (x) { fuera.push(x); }); });
+      /* lo que no se pudo buscar viaja con el resultado, para poder decirlo */
+      fuera.noSePudo = fallos;
+      return fuera;
+    });
   }
 
   /* Las canciones de una lista, para poder verlas antes de darle al play */

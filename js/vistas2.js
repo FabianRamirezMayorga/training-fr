@@ -641,20 +641,32 @@
           }).map(function (l) {
             return Object.assign({}, l, { tipo: 'Lista tuya' });
           });
-          return Spotify.buscarListas(q, filtrosBusca).catch(function () { return []; })
-            .then(function (fuera) {
-              const vistas = {};
-              return suyas.concat(fuera).filter(function (x) {
-                if (!x || !x.uri || vistas[x.uri]) return false;
-                vistas[x.uri] = 1;
-                return true;
-              });
+          return Spotify.buscarListas(q, filtrosBusca).then(function (fuera) {
+            const vistas = {};
+            const todo = suyas.concat(fuera).filter(function (x) {
+              if (!x || !x.uri || vistas[x.uri]) return false;
+              vistas[x.uri] = 1;
+              return true;
             });
+            /* concat pierde lo que colgaba del array; se pasa aparte */
+            todo.noSePudo = fuera.noSePudo || [];
+            return todo;
+          }).catch(function (e) {
+            /* si falla del todo y él tiene listas suyas, al menos eso se ve */
+            if (!suyas.length) throw e;
+            suyas.noSePudo = [];
+            suyas.fallo = e.message;
+            return suyas;
+          });
         })
       : Spotify.misListas();
 
     pedir.then(function (listas) {
-      caja.innerHTML = tarjetasListas(listas, !q);
+      caja.innerHTML = tarjetasListas(listas, !q)
+        + ((listas.noSePudo && listas.noSePudo.length)
+          ? '<p class="tiny" style="margin:10px 0 0;color:var(--warn)">Spotify no ha '
+            + 'dejado buscar ' + esc(listas.noSePudo.join(' ni ')) + ' desde esta app.</p>'
+          : '');
       caja.querySelectorAll('[data-poner-ya]').forEach(function (b) {
         b.onclick = function (ev) {
           ev.stopPropagation();
