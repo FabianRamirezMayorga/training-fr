@@ -294,6 +294,7 @@
   function token(params) {
     const c = config();
     params.client_id = c.clientId;
+    const esRenovacion = params.grant_type === 'refresh_token';
     return fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -308,7 +309,7 @@
           access_token: j.access_token,
           refresh_token: j.refresh_token || previo.refresh_token,
           expires_at: Date.now() + (j.expires_in || 3600) * 1000,
-          scopes_v: SCOPES_V,
+          scopes_v: esRenovacion ? (previo.scopes_v || 1) : SCOPES_V,
           /* Lo que Spotify ha concedido de verdad, que no siempre es lo que se
              pidió: si falta alguno, las llamadas fallan con un 403 seco y sin
              esto no había manera de saber por qué. */
@@ -450,13 +451,18 @@
   function admiteVolumen() {
     /* Si suena en otro aparato la orden va por la API y sí llega */
     if (!local()) return Promise.resolve(true);
-    let va = false;
-    try {
-      const a = new Audio();
-      a.volume = 0.42;
-      va = Math.abs(a.volume - 0.42) < 0.01;
-    } catch (e) { va = false; }
-    return Promise.resolve(va);
+    return Promise.resolve(!esIOS());
+  }
+
+  /* iOS y iPadOS: ninguna web puede tocar el volumen, lo lleva el aparato. Se
+     mira el sistema y no el comportamiento, porque las dos comprobaciones que
+     probé —preguntar al SDK y probar un elemento de audio— decían que sí y la
+     barra seguía sin hacer nada. El iPad se hace pasar por Mac, de ahí lo del
+     táctil. */
+  function esIOS() {
+    const ua = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod/i.test(ua)) return true;
+    return /Macintosh/i.test(ua) && (navigator.maxTouchPoints || 0) > 1;
   }
 
   function alternar() {
@@ -575,6 +581,39 @@
        de darlo por perdido: trae de más, pero trae. */
     return pedir(base + campos).then(ordenar).catch(function (e) {
       return pedir(base).then(ordenar).catch(function () { throw e; });
+    });
+  }
+
+  /* Prueba de las llamadas que fallan, para ver el motivo en crudo en vez de
+     seguir deduciéndolo desde fuera. */
+  function diagnostico() {
+    const ses = sesion() || {};
+    const partes = [];
+
+    function probar(nombre, ruta, opciones) {
+      return fetch(API + ruta, Object.assign({
+        headers: { 'Authorization': 'Bearer ' + ses.access_token }
+      }, opciones || {})).then(function (r) {
+        return r.text().then(function (t) {
+          partes.push(nombre + ': ' + r.status + ' ' + t.slice(0, 160));
+        });
+      }).catch(function (e) { partes.push(nombre + ': sin red (' + e.message + ')'); });
+    }
+
+    return pedir('/me').then(function (yo) {
+      partes.push('cuenta: ' + (yo && yo.id) + ' · ' + (yo && yo.product));
+      return pedir('/me/playlists?limit=1');
+    }).then(function (r) {
+      const uno = r && r.items && r.items[0];
+      partes.push('permisos: ' + (ses.scope || '(la sesión no lo apuntó)'));
+      return probar('leer canciones de una lista',
+        '/playlists/' + (uno ? uno.id : 'x') + '/tracks?limit=1');
+    }).catch(function (e) {
+      partes.push('fallo antes de empezar: ' + e.message);
+    }).then(function () {
+      return probar('favorita (contains)', '/me/tracks/contains?ids=4uLU6hMCjMI75M1A2tKUQC');
+    }).then(function () {
+      return partes.join(SALTO);
     });
   }
 
@@ -885,7 +924,7 @@
 
   const PUBLICO = {
     SCOPES_V: SCOPES_V, permisosCaducados: permisosCaducados, volumen: volumen,
-    permisosQueFaltan: permisosQueFaltan,
+    permisosQueFaltan: permisosQueFaltan, diagnostico: diagnostico,
     permisosConcedidos: function () { const x = sesion(); return (x && x.scope) || ''; },
     admiteVolumen: admiteVolumen,
     iniciarReproductor: iniciarReproductor, reproductorActivo: reproductorActivo,

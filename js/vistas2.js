@@ -417,16 +417,6 @@
         </div>
         ${raw(falloSpotifyHTML())}
 
-      ${raw(Spotify.permisosConcedidos ? html`
-        <details class="card" style="margin-top:12px">
-          <summary class="tiny">Permisos que Spotify ha dado a esta app</summary>
-          <p class="tiny" style="margin:8px 0 0;word-break:break-word">${
-            Spotify.permisosConcedidos() || 'la sesión es anterior y no lo apuntó'}</p>
-          ${raw(faltantes.length
-            ? '<p class="tiny" style="margin:6px 0 0;color:var(--bad)">Falta: '
-              + esc(faltantes.join(', ')) + '</p>'
-            : '<p class="tiny" style="margin:6px 0 0">No falta ninguno.</p>')}
-        </details>` : '')}
         <p class="tiny" style="margin-top:12px">Al pulsar te lleva a Spotify para dar
         permiso y vuelve aquí solo. Si vuelves sin conectar, aquí abajo aparecerá el
         motivo exacto.</p>`;
@@ -463,6 +453,21 @@
         </div>` : '')}
 
       <div id="sp-player" style="margin-top:12px"></div>
+
+      <details class="card" style="margin-top:12px">
+        <summary class="tiny">Qué permisos ha dado Spotify</summary>
+        <p class="tiny" style="margin:8px 0 0;word-break:break-word">${
+          Spotify.permisosConcedidos ? (Spotify.permisosConcedidos()
+            || 'la sesión es anterior y no lo apuntó') : ''}</p>
+        ${raw(faltantes.length
+          ? '<p class="tiny" style="margin:6px 0 0;color:var(--bad)">Falta: '
+            + esc(faltantes.join(', ')) + '</p>'
+          : '<p class="tiny" style="margin:6px 0 0">No falta ninguno de los que pide la app.</p>')}
+        <button class="btn sm block" data-a="diagnostico" style="margin-top:10px">
+          Probar las llamadas que fallan</button>
+        <pre class="tiny" id="sp-diag" style="white-space:pre-wrap;word-break:break-word;
+          margin:10px 0 0"></pre>
+      </details>
 
       <div class="list-title">Lista para entrenar</div>
       ${raw(lista ? listaHTML(lista) : html`
@@ -573,6 +578,28 @@
     }).join('') + '</div>';
   }
 
+  /* La lista que elige él manda: sustituye arriba a la que hizo la IA, que era
+     lo que seguía viendo por mucho que eligiera otra. */
+  function subirArriba(l) {
+    UI.toast('Poniendo «' + l.nombre + '» arriba…');
+    return Spotify.cancionesDeLista(l.id, 100).then(function (temas) {
+      if (!temas.length) { UI.toast('Reproduciendo ' + l.nombre); return; }
+      guardarLista({
+        nombre: l.nombre,
+        descripcion: 'Tu lista de Spotify' + (l.de ? ' · ' + l.de : ''),
+        deSpotify: true,
+        uri: l.uri,
+        pistas: temas.map(function (t) {
+          return { uri: t.uri, titulo: t.titulo, artista: t.artista };
+        })
+      });
+      render();
+    }).catch(function () {
+      /* si no deja leer sus canciones, al menos suena y se dice por qué */
+      UI.toast('Reproduciendo ' + l.nombre + ', pero Spotify no deja leer sus canciones.');
+    });
+  }
+
   /* Las canciones de una lista, con su botón para sonar desde cualquiera */
   function pintarTemas(caja, lista) {
     caja.innerHTML = '<p class="tiny" style="padding:11px 13px">Cargando canciones…</p>';
@@ -641,12 +668,11 @@
         b.onclick = function (ev) {
           ev.stopPropagation();
           Spotify.desbloquearAudio();
-          const fila = b.parentNode.querySelector('[data-abrir-lista]');
-          if (fila && b.parentNode.querySelector('.lista-temas').hidden) fila.click();
+          const l = listas.find(function (x) { return x.uri === b.dataset.ponerYa; });
           Spotify.iniciarReproductor()
             .catch(function () { /* sin reproductor propio, donde se pueda */ })
             .then(function () { return Spotify.ponerPlaylist(b.dataset.ponerYa); })
-            .then(function () { UI.toast('Reproduciendo'); })
+            .then(function () { if (l) subirArriba(l); else UI.toast('Reproduciendo'); })
             .catch(function (e) { UI.toast(e.message); });
         };
       });
@@ -797,6 +823,15 @@
       if (!l) return;
       const desde = Number(el.dataset.pista);
       lanzar(l.pistas.slice(desde).map(function (p) { return p.uri; }));
+    });
+
+    bind(root, '[data-a=diagnostico]', function (btn) {
+      const caja = root.querySelector('#sp-diag');
+      btn.disabled = true;
+      caja.textContent = 'Probando…';
+      Spotify.diagnostico()
+        .then(function (t) { caja.textContent = t; btn.disabled = false; })
+        .catch(function (e) { caja.textContent = 'No se pudo probar: ' + e.message; btn.disabled = false; });
     });
 
     bind(root, '[data-a=guardarEnSpotify]', function (btn) {
@@ -1032,15 +1067,11 @@
         </div>
 
         ${raw(s.local && volumenVa !== false ? html`
-          <div class="player-vol">
+          <div class="player-vol" style="--pct:${Math.round(volActual * 100)}%">
             ${raw(icon('altavoz'))}
             <input type="range" min="0" max="100" value="${Math.round(volActual * 100)}"
                    id="player-vol" aria-label="Volumen">
           </div>` : '')}
-        ${raw(s.local && volumenVa === false
-          ? '<p class="tiny" style="text-align:center;margin:2px 0 0">'
-            + icon('altavoz') + ' El volumen se ajusta con los botones del teléfono.</p>'
-          : '')}
 
         ${raw(s.dispositivo ? html`
           <div class="player-donde">
@@ -1055,6 +1086,7 @@
     if (vol) {
       vol.oninput = function () {
         volActual = Number(vol.value) / 100;
+        vol.parentNode.style.setProperty('--pct', vol.value + '%');
         Spotify.volumen(volActual).catch(function () { /* sin reproductor propio */ });
       };
       if (volumenVa === null && Spotify.admiteVolumen) {

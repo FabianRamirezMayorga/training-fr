@@ -620,7 +620,18 @@ body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
 .player-vol{display:flex;align-items:center;gap:10px;margin-top:14px}
 .player-vol svg{width:17px;height:17px;flex:none;fill:none;stroke:var(--dim2);stroke-width:1.8;
   stroke-linecap:round;stroke-linejoin:round}
-.player-vol input[type=range]{flex:1;accent-color:var(--acc);height:4px}
+.player-vol input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:22px;
+  background:none;margin:0}
+/* la pista se pinta a mano: la de serie sale gris y con bordes que desentonan */
+.player-vol input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:99px;
+  background:linear-gradient(to right,var(--acc) var(--pct,60%),var(--line) var(--pct,60%))}
+.player-vol input[type=range]::-moz-range-track{height:5px;border-radius:99px;background:var(--line)}
+.player-vol input[type=range]::-moz-range-progress{height:5px;border-radius:99px;background:var(--acc)}
+.player-vol input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:15px;height:15px;border-radius:50%;background:var(--txt);margin-top:-5px;
+  box-shadow:0 1px 4px rgba(0,0,0,.45)}
+.player-vol input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;
+  background:var(--txt);box-shadow:0 1px 4px rgba(0,0,0,.45)}
 
 /* ---------- progreso: gráficos ---------- */
 .graf-caja{overflow:hidden}
