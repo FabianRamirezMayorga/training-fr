@@ -110,6 +110,34 @@
     });
   }
 
+  /* ---------- qué permite el proyecto ----------
+     Supabase publica su configuración de acceso sin necesidad de sesión. Sin
+     mirarla, un "correo o contraseña incorrectos" tapaba dos cosas muy
+     distintas: que el alta esté cerrada —y entonces la cuenta no existe por
+     mucho que se haya intentado crear— o que la cuenta naciera de un enlace por
+     correo y no tenga contraseña todavía. */
+  let ajustesCache = null;
+
+  function ajustesProyecto() {
+    if (ajustesCache) return Promise.resolve(ajustesCache);
+    return pedir('/auth/v1/settings', { headers: cabeceras(false) })
+      .then(function (r) { ajustesCache = r || {}; return ajustesCache; })
+      .catch(function () { return {}; });
+  }
+
+  /* Le añade al error lo que explica de verdad lo que ha pasado */
+  function conMotivo(mensaje) {
+    return ajustesProyecto().then(function (a) {
+      if (a && a.disable_signup) {
+        throw new Error(mensaje + ' Ojo: este proyecto tiene cerrado el alta de cuentas ' +
+          'nuevas, as\u00ed que si intentaste registrarte, la cuenta no lleg\u00f3 a crearse. ' +
+          '\u00c1brelo en Supabase (Authentication \u2192 Sign In / Providers \u2192 Allow new users ' +
+          'to sign up), reg\u00edstrate y vuelve a cerrarlo.');
+      }
+      throw new Error(mensaje);
+    });
+  }
+
   /* ---------- entrar con el correo ---------- */
 
   /* A dónde vuelve el enlace del correo: la propia app, sin hash de ruta */
@@ -191,7 +219,7 @@
           'Entra con tu correo y tu contraseña de siempre. Si de verdad quieres otra ' +
           'cuenta, ábrelo en Supabase: Authentication, Sign In, Allow new users to sign up.');
       }
-      throw new Error(t || 'No se pudo crear la cuenta.');
+      return conMotivo(t || 'No se pudo crear la cuenta.');
     });
   }
 
@@ -236,7 +264,9 @@
     }).catch(function (e) {
       const t = String(e.message || '');
       if (/invalid login credentials/i.test(t)) {
-        throw new Error('Correo o contraseña incorrectos. Si es tu primera vez, crea la cuenta.');
+        return conMotivo('Correo o contrase\u00f1a incorrectos. Si creaste la cuenta con el ' +
+          'enlace del correo, todav\u00eda no tiene contrase\u00f1a: entra con el enlace en el ' +
+          'dispositivo de siempre y p\u00f3nsela desde la pantalla de cuenta.');
       }
       if (/email not confirmed/i.test(t)) {
         throw new Error('Falta confirmar el correo. Ábrelo y pulsa el enlace, o desactiva ' +
