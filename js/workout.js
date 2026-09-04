@@ -700,6 +700,12 @@
     if (!host || !g.Spotify || !Spotify.activa()) return;
 
     const pintar = function (s) {
+      /* Con la barra flotante puesta abajo, el reproductor grande aquí es lo
+         mismo dos veces y empuja el ejercicio fuera de la pantalla. Sólo se
+         pinta cuando no hay barra —la música suena en otro aparato—, que
+         entonces es el único mando que queda a mano. */
+      const hayBarra = !!(Spotify.reproductorActivo && Spotify.reproductorActivo());
+      if (s && hayBarra) { host.innerHTML = ''; return; }
       if (s) {
         host.innerHTML = g.Reproductor.html(s);
         g.Reproductor.montar(host);

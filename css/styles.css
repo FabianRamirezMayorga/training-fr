@@ -93,6 +93,9 @@ a{color:var(--blue)}
 /* ---------- primitives ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px}
 .card+.card{margin-top:11px}
+/* El hueco de la música en el entrenamiento se queda vacío cuando ya está la
+   barra flotante, y sin esto la tarjeta siguiente perdía su separación. */
+#wo-musica:empty+.card{margin-top:11px}
 
 /* lista agrupada: filas separadas por una línea de un píxel, como en Ajustes de iOS */
 .list{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
