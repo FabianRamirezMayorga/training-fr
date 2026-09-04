@@ -416,6 +416,17 @@
             ${raw(icon('musica'))} Conectar Spotify</button>
         </div>
         ${raw(falloSpotifyHTML())}
+
+      ${raw(Spotify.permisosConcedidos ? html`
+        <details class="card" style="margin-top:12px">
+          <summary class="tiny">Permisos que Spotify ha dado a esta app</summary>
+          <p class="tiny" style="margin:8px 0 0;word-break:break-word">${
+            Spotify.permisosConcedidos() || 'la sesión es anterior y no lo apuntó'}</p>
+          ${raw(faltantes.length
+            ? '<p class="tiny" style="margin:6px 0 0;color:var(--bad)">Falta: '
+              + esc(faltantes.join(', ')) + '</p>'
+            : '<p class="tiny" style="margin:6px 0 0">No falta ninguno.</p>')}
+        </details>` : '')}
         <p class="tiny" style="margin-top:12px">Al pulsar te lleva a Spotify para dar
         permiso y vuelve aquí solo. Si vuelves sin conectar, aquí abajo aparecerá el
         motivo exacto.</p>`;
@@ -566,6 +577,7 @@
   function pintarTemas(caja, lista) {
     caja.innerHTML = '<p class="tiny" style="padding:11px 13px">Cargando canciones…</p>';
     Spotify.cancionesDeLista(lista.id).then(function (temas) {
+      caja.dataset.cargada = '1';
       if (!temas.length) {
         caja.innerHTML = '<p class="tiny" style="padding:11px 13px">Esta lista está vacía.</p>';
         return;
@@ -629,6 +641,8 @@
         b.onclick = function (ev) {
           ev.stopPropagation();
           Spotify.desbloquearAudio();
+          const fila = b.parentNode.querySelector('[data-abrir-lista]');
+          if (fila && b.parentNode.querySelector('.lista-temas').hidden) fila.click();
           Spotify.iniciarReproductor()
             .catch(function () { /* sin reproductor propio, donde se pueda */ })
             .then(function () { return Spotify.ponerPlaylist(b.dataset.ponerYa); })
@@ -652,7 +666,6 @@
           temas.hidden = !abrir;
           if (chev) chev.classList.toggle('abierta', abrir);
           if (abrir && !temas.dataset.cargada) {
-            temas.dataset.cargada = '1';
             pintarTemas(temas, listas.find(function (x) { return x.id === id; }));
           }
         };

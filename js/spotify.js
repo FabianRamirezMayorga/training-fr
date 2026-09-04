@@ -369,13 +369,15 @@
           if (/Restriction|NO_PREV|NO_NEXT|UNKNOWN/i.test(dice)) {
             throw new Error('Esa orden no la admite el aparato donde suena la música.');
           }
+          const suyo = e.message ? ' Spotify dice: "' + e.message + '".' : '';
           if (ruta.indexOf('/me/player') !== 0) {
             const faltan = permisosQueFaltan();
             throw new Error('Spotify no ha autorizado esta acción'
               + (faltan.length ? ' (falta el permiso ' + faltan[0] + ')' : '')
-              + '. Pulsa «Reconectar» para volver a dar permisos a la cuenta.');
+              + '.' + suyo + ' [403 ' + ruta.split('?')[0] + ']');
           }
-          throw new Error(e.message || 'Spotify ha rechazado la orden.');
+          throw new Error((e.message || 'Spotify ha rechazado la orden.')
+            + ' [403 ' + ruta.split('?')[0] + ']');
         });
       }
       if (r.status === 404) throw new Error('No hay ningún dispositivo de Spotify activo.');
@@ -440,24 +442,21 @@
       (deviceId ? '&device_id=' + encodeURIComponent(deviceId) : ''), { method: 'PUT' });
   }
 
-  /* En iPhone y en casi todo el móvil el volumen es del aparato: la web puede
-     pedir el cambio pero no pasa nada. En vez de adivinar por el navegador se
-     comprueba de verdad (poner un valor y volver a leerlo) para poder esconder
-     la barra en lugar de dejarla ahí sin hacer nada. */
+  /* En iPhone el volumen es del aparato: iOS no deja que una web lo cambie.
+     Preguntarle al SDK no sirve, porque se apunta el valor y lo devuelve tal
+     cual aunque el sonido siga igual —por eso la barra parecía funcionar y
+     estaba de adorno—. Lo que de verdad lo dice es si este navegador permite
+     cambiar el volumen de un elemento de audio: en iOS se queda en 1. */
   function admiteVolumen() {
+    /* Si suena en otro aparato la orden va por la API y sí llega */
     if (!local()) return Promise.resolve(true);
-    return player.getVolume().then(function (antes) {
-      /* un salto mínimo, que no se oiga mientras se comprueba */
-      const prueba = antes > 0.5 ? antes - 0.02 : antes + 0.02;
-      return player.setVolume(prueba)
-        .then(function () { return player.getVolume(); })
-        .then(function (despues) {
-          const va = Math.abs(despues - prueba) < 0.01;
-          return player.setVolume(antes)
-            .catch(function () { /* da igual, era solo por dejarlo como estaba */ })
-            .then(function () { return va; });
-        });
-    }).catch(function () { return false; });
+    let va = false;
+    try {
+      const a = new Audio();
+      a.volume = 0.42;
+      va = Math.abs(a.volume - 0.42) < 0.01;
+    } catch (e) { va = false; }
+    return Promise.resolve(va);
   }
 
   function alternar() {
@@ -558,9 +557,10 @@
   /* Las canciones de una lista, para poder verlas antes de darle al play */
   function cancionesDeLista(id, limite) {
     const pl = idDePlaylist(id) || id;
-    return pedir('/playlists/' + encodeURIComponent(pl) +
-      '/tracks?limit=' + (limite || 50) +
-      '&fields=items(track(id,uri,name,duration_ms,artists(name)))').then(function (r) {
+    const base = '/playlists/' + encodeURIComponent(pl) + '/tracks?limit=' + (limite || 50);
+    const campos = '&fields=items(track(id,uri,name,duration_ms,artists(name)))';
+
+    function ordenar(r) {
       return ((r && r.items) || []).map(function (it) {
         const t = it && it.track;
         if (!t) return null;
@@ -569,6 +569,12 @@
           artista: (t.artists || []).map(function (a) { return a.name; }).join(', ')
         };
       }).filter(Boolean);
+    }
+
+    /* Si el filtro de campos es lo que molesta, se vuelve a pedir sin él antes
+       de darlo por perdido: trae de más, pero trae. */
+    return pedir(base + campos).then(ordenar).catch(function (e) {
+      return pedir(base).then(ordenar).catch(function () { throw e; });
     });
   }
 
@@ -583,12 +589,16 @@
 
   function marcarFavorita(id, si) {
     if (!id) return Promise.reject(new Error('No hay ninguna canción sonando.'));
-    /* El id va en el cuerpo, no en la ruta: mandarlo por los dos sitios a la
-       vez es lo que hacía que Spotify devolviera un 403. */
+    /* Spotify acepta el id en el cuerpo o en la ruta, y no siempre trata
+       igual a los dos. Se prueba primero por el cuerpo y, si lo rechaza, por
+       la ruta, antes de dar el corazón por roto. */
     return pedir('/me/tracks', {
       method: si ? 'PUT' : 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids: [id] })
+    }).catch(function (e) {
+      return pedir('/me/tracks?ids=' + encodeURIComponent(id),
+        { method: si ? 'PUT' : 'DELETE' }).catch(function () { throw e; });
     }).then(function () { return si; });
   }
 
@@ -876,6 +886,7 @@
   const PUBLICO = {
     SCOPES_V: SCOPES_V, permisosCaducados: permisosCaducados, volumen: volumen,
     permisosQueFaltan: permisosQueFaltan,
+    permisosConcedidos: function () { const x = sesion(); return (x && x.scope) || ''; },
     admiteVolumen: admiteVolumen,
     iniciarReproductor: iniciarReproductor, reproductorActivo: reproductorActivo,
     estado: estado, alCambiar: alCambiar, traerAqui: traerAqui,
