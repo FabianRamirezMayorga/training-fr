@@ -635,12 +635,8 @@
       ', unas ' + prog.objetivoSeries + ' series semanales por músculo):\n' + dias + '\n' +
       'SERIES POR SEMANA Y MÚSCULO QUE PIDE EL PLAN: ' + volumen + '\n' + historial + comida +
       (prog.lesiones.length ? 'LIMITACIONES YA APLICADAS: ' + prog.lesiones.join(', ') + '\n' : '') +
-      '\nEres a la vez preparador físico, especialista en acondicionamiento y ' +
-      'nutricionista deportivo, y llevas veinte años corrigiendo planes. Te han ' +
-      'contratado para auditar este programa, no para animar a nadie.\n\n' +
+      '\nTe han contratado para auditar este programa, no para animar a nadie.\n\n' +
       'REGLAS INNEGOCIABLES:\n' +
-      '- Prohíbido adular. Nada de "buen plan", "vas por buen camino" ni ' +
-      'felicitaciones. Si algo está bien, se dice en cinco palabras y se pasa.\n' +
       '- De los puntos que devuelvas, al menos tres tienen que ser críticas ' +
       'concretas con su consecuencia: qué falla, por qué importa y qué pasa si se ' +
       'deja así. Nada de generalidades que valgan para cualquiera.\n' +
@@ -682,7 +678,7 @@
     const suyo = m ? 'Al d\u00eda le tocan unas ' + m.kcal + ' kcal y ' + m.prot +
       ' g de prote\u00edna, por si ayuda a juzgar el tama\u00f1o de la raci\u00f3n.\n' : '';
 
-    const prompt = 'Eres un nutricionista mirando la foto de un plato.\n' + suyo +
+    const prompt = PERSONA + '\n\nAhora estás mirando la foto de un plato.\n' + suyo +
       (pista ? 'Quien la ha hecho a\u00f1ade: "' + pista + '".\n' : '') +
       '\nDi qu\u00e9 alimentos ves y estima la raci\u00f3n de cada uno en gramos o en medidas ' +
       'caseras. Suma las calor\u00edas y la prote\u00edna del plato entero. Si la foto no deja ' +
@@ -692,7 +688,10 @@
       '"alimentos":[{"que":"nombre","cuanto":"raci\u00f3n estimada","kcal":n\u00famero,' +
       '"prot":n\u00famero}],"kcal":n\u00famero,"prot":n\u00famero,' +
       '"confianza":"alta|media|baja","nota":"una frase con lo que no has podido ' +
-      'ver bien o lo que has dado por supuesto"}';
+      'ver bien o lo que has dado por supuesto"}\n\n' +
+      'Estima sin miedo pero sin adornar: si el plato lleva más aceite o más ' +
+      'azúcar de lo que parece, cuéntalo; y si la ración se le va de lo que le ' +
+      'toca al día, dilo en la nota.';
 
     return llamarJSON(prompt, {
       imagen: imagen, maxTokens: 1024, temperatura: 0.3
@@ -709,16 +708,23 @@
     if (!sesiones) return Promise.reject(new Error('Aún no hay entrenamientos que analizar.'));
 
     const prompt = contexto({ progreso: true }) + '\n\nÚLTIMAS SESIONES: ' + sesiones + '\n\n' +
-      'Analiza cómo voy. Señala lo que estoy haciendo bien, el punto más flojo y ' +
-      'la única cosa que cambiarías esta semana.\n\n' +
-      'Devuelve JSON: {"bien":"1-2 frases","flojo":"1-2 frases","accion":"1 frase"}';
+      'Analiza cómo voy de verdad, mirando fechas, huecos, series y cargas.\n' +
+      '- "bien": una frase, y solo lo que se sostenga con estos datos. Si no hay ' +
+      'nada destacable, escribe exactamente eso y no lo maquilles.\n' +
+      '- "flojo": lo peor que ves, con números y con lo que va a pasar si sigue ' +
+      'igual. Aquí no te cortes.\n' +
+      '- "accion": una sola cosa, concreta y hacedera esta semana.\n\n' +
+      'Devuelve JSON: {"bien":"1 frase","flojo":"2 frases","accion":"1 frase"}';
     return llamarJSON(prompt, { maxTokens: 1024 });
   }
 
   /* Pregunta libre al entrenador */
   function preguntar(texto) {
     const prompt = contexto({ rutinas: true, progreso: true }) + '\n\nPREGUNTA: ' + texto +
-      '\n\nResponde en menos de 150 palabras, sin listas salvo que ayuden de verdad.';
+      '\n\nResponde en menos de 150 palabras, sin listas salvo que ayuden de verdad. ' +
+      'No des la razón por costumbre: si la pregunta parte de algo falso o de un ' +
+      'mito de gimnasio, corrígelo antes de contestar. Si la respuesta honesta es ' +
+      '"depende", di de qué depende y con qué números, en vez de escurrir el bulto.';
     return llamar(prompt, { maxTokens: 1024 });
   }
 
@@ -834,11 +840,13 @@
     const guardado = leerCache(clave, 24 * 30);
     if (guardado) return Promise.resolve(guardado);
 
-    const prompt = 'Ejercicio: ' + ex.nameEs + ' (' + ex.name + '). ' +
+    const prompt = PERSONA + '\n\nEjercicio: ' + ex.nameEs + ' (' + ex.name + '). ' +
       'Músculos: ' + ex.primaryMuscles.map(I18N.muscle).join(', ') + '. ' +
       'Material: ' + I18N.equip(ex.equipment) + '.\n\n' +
       'Explica cómo se hace bien: la ejecución en 3 o 4 pasos, los dos fallos más ' +
-      'habituales y un truco para notarlo en el músculo correcto.\n\n' +
+      'habituales y un truco para notarlo en el músculo correcto. Los pasos son ' +
+      'instrucciones, no ánimos: postura, recorrido y respiración. Si el ejercicio ' +
+      'tiene un riesgo real cuando se hace mal, dilo en el fallo que corresponda.\n\n' +
       'Devuelve JSON: {"pasos":["paso"],"fallos":["fallo y su corrección"],"truco":"1 frase"}';
 
     return llamarJSON(prompt, { maxTokens: 1024 }).then(function (r) {

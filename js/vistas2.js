@@ -447,7 +447,8 @@
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Perfil</button>
       <h1>Entrenador</h1>
-      <p class="muted">Conoce tu perfil, tus rutinas y tu progreso. Pregúntale lo que quieras.</p>
+      <p class="muted">Conoce tu perfil, tus rutinas y tu progreso. No está aquí para
+      darte la razón: si algo lo estás haciendo mal, te lo dice.</p>
 
       <div class="card">
         <textarea id="ia-q" rows="3"
@@ -460,8 +461,8 @@
 
       <div class="list-title">Análisis rápidos</div>
       <div class="list">
-        ${raw(filaAccion('grafica', 'Cómo voy', 'Lee tus últimos entrenamientos', 'analizar'))}
-        ${raw(filaAccion('dumbbell', 'Revisa mis rutinas', 'Qué cambiar para tu objetivo', 'revisar'))}
+        ${raw(filaAccion('grafica', 'Cómo voy', 'Lee tus últimos entrenamientos sin adornos', 'analizar'))}
+        ${raw(filaAccion('dumbbell', 'Audita mis rutinas', 'Les pone nota y dice qué falla', 'revisar'))}
         ${raw(filaAccion('nutricion', 'Plan de comidas', 'Menú semanal con tus calorías', 'nutricion'))}
       </div>
 
@@ -532,18 +533,26 @@
       if (a === 'nutricion') return go('nutricion');
       if (a === 'config') return go('claves');
 
-      cargando(a === 'analizar' ? 'Revisando tus entrenamientos…' : 'Revisando tus rutinas…');
+      cargando(a === 'analizar' ? 'Revisando tus entrenamientos…' : 'Auditando tus rutinas…');
       window.scrollTo({ top: caja.offsetTop - 80, behavior: 'smooth' });
 
       const peticion = a === 'analizar' ? IA.analizarProgreso() : IA.revisarRutinas();
       peticion.then(function (r) {
         caja.innerHTML = a === 'analizar'
           ? html`<div class="card ia-resp">
-              <div class="ia-bloque"><b>Lo que va bien</b><p>${r.bien}</p></div>
-              <div class="ia-bloque"><b>Lo más flojo</b><p>${r.flojo}</p></div>
+              <div class="ia-bloque"><b>Lo que se sostiene</b><p>${r.bien}</p></div>
+              <div class="ia-bloque"><b>Lo que hay que arreglar</b><p>${r.flojo}</p></div>
               <div class="ia-bloque destacado"><b>Esta semana</b><p>${r.accion}</p></div>
             </div>`
           : html`<div class="card ia-resp">
+              ${raw(Number(r.nota) > 0 ? html`
+                <div class="row" style="gap:12px;align-items:center;margin-bottom:10px">
+                  <div style="flex:none;font-size:1.9rem;font-weight:700;line-height:1;color:${raw(
+                    Number(r.nota) >= 8 ? 'var(--acc)'
+                      : Number(r.nota) >= 6 ? 'var(--warn)' : 'var(--bad)')}">${Number(r.nota)}<span
+                       style="font-size:.9rem;color:var(--dim2)">/10</span></div>
+                  <div class="tiny grow">Nota que les pone a tus rutinas tal y como están.</div>
+                </div>` : '')}
               <p class="muted">${r.veredicto}</p>
               ${raw((r.puntos || []).map(function (x) {
                 return '<div class="ia-bloque"><b>' + esc(x.titulo) + '</b><p>' +

@@ -323,8 +323,8 @@
 
       ${raw(r.nutricion ? html`
         <div class="card">
-          <b>${raw(icon('nutricion'))} De comida</b>
-          <p class="muted" style="margin:6px 0 0">${r.nutricion}</p>
+          <h3 class="guia-h">${raw(icon('nutricion'))} De comida</h3>
+          <p style="margin:0">${r.nutricion}</p>
         </div>` : '')}
 
       ${raw(pendientes ? html`
@@ -534,7 +534,7 @@
     bindAll(root, '[data-nocambio]', function (el) {
       est.ia.cambios.splice(Number(el.dataset.nocambio), 1);
       guardarEstado();
-      render();
+      repintarQuieto();
     });
 
     bind(root, '[data-a=olvidaIA]', function () {
@@ -625,11 +625,19 @@
     return Math.round(ejercicio.sets * ((ejercicio.rest || 75) + 35) / 60);
   }
 
+  /* Repintar devuelve la pantalla arriba del todo, y la lista de cambios está
+     al final: aplicar uno significaba volver a bajar a mano cada vez. */
+  function repintarQuieto() {
+    const pos = window.scrollY;
+    render();
+    window.scrollTo(0, pos);
+  }
+
   function apuntarAplicado(texto) {
     est.aplicados.push(texto);
     Programa.revolumen(est.prog);
     guardarEstado();
-    render();
+    repintarQuieto();
     UI.toast(texto);
   }
 
@@ -649,7 +657,7 @@
         minutosDe(sitio.ses.ejercicios[sitio.i]));
       sitio.ses.ejercicios.splice(sitio.i, 1);
       est.ia.cambios.splice(i, 1);
-      apuntarAplicado('Fuera ' + sitio.ex.nameEs + ' de ' + sitio.ses.nombre);
+      apuntarAplicado(sitio.ex.nameEs + ': fuera de ' + sitio.ses.nombre);
       return;
     }
 
@@ -658,14 +666,14 @@
       UI.toast('No encuentro «' + (c.poner || '') + '» en el catálogo. Cambio descartado.');
       est.ia.cambios.splice(i, 1);
       guardarEstado();
-      render();
+      repintarQuieto();
       return;
     }
     if (chocaConLesiones(nuevo)) {
       UI.toast('«' + nuevo.nameEs + '» no encaja con tus limitaciones. Cambio descartado.');
       est.ia.cambios.splice(i, 1);
       guardarEstado();
-      render();
+      repintarQuieto();
       return;
     }
 
@@ -681,7 +689,7 @@
         UI.toast('«' + nuevo.nameEs + '» ya está en ese día.');
         est.ia.cambios.splice(i, 1);
         guardarEstado();
-        render();
+        repintarQuieto();
         return;
       }
 
@@ -700,7 +708,7 @@
       destino.ejercicios.push(entra);
       destino.minutos += minutosDe(entra);
       est.ia.cambios.splice(i, 1);
-      apuntarAplicado('Entra ' + nuevo.nameEs + ' en ' + destino.nombre);
+      apuntarAplicado(nuevo.nameEs + ': entra en ' + destino.nombre);
       return;
     }
 
