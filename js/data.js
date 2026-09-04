@@ -57,6 +57,41 @@
     }
   };
 
+  /* Qué clase de trabajo es, dicho como lo busca uno. El catálogo trae la
+     categoría en inglés y con nombres que no ayudan —«stretching» mete en el
+     mismo saco los estiramientos y el rodillo de espuma, que no se usan para
+     lo mismo—, así que aquí se recomponen: el rodillo sale aparte por su
+     material y la fuerza junta lo que en la práctica es fuerza. */
+  const TIPOS = [
+    { id: 'fuerza', label: 'Fuerza', test: function (e) {
+      return e.category === 'strength' || e.category === 'powerlifting' ||
+        e.category === 'strongman';
+    } },
+    { id: 'estiramiento', label: 'Estiramientos', test: function (e) {
+      return e.category === 'stretching' && e.equipment !== 'foam roll';
+    } },
+    { id: 'rodillo', label: 'Rodillo y terapia', test: function (e) {
+      return e.equipment === 'foam roll';
+    } },
+    { id: 'salto', label: 'Saltos y potencia', test: function (e) {
+      return e.category === 'plyometrics';
+    } },
+    { id: 'cardio', label: 'Cardio', test: function (e) {
+      return e.category === 'cardio';
+    } },
+    { id: 'halterofilia', label: 'Halterofilia', test: function (e) {
+      return e.category === 'olympic weightlifting';
+    } }
+  ];
+
+  const TIPO_POR_ID = {};
+  TIPOS.forEach(function (t) { TIPO_POR_ID[t.id] = t; });
+
+  function tipoDe(ex) {
+    for (let i = 0; i < TIPOS.length; i++) if (TIPOS[i].test(ex)) return TIPOS[i].id;
+    return '';
+  }
+
   /* Cómo se nombra el sitio dentro de una frase: "...que puedes hacer EN EL GIMNASIO" */
   function gearFrase(gear) {
     const gset = GEAR[gear];
@@ -183,6 +218,7 @@
       if (f.equipment && e.equipment !== f.equipment) return false;
       if (f.level && e.level !== f.level) return false;
       if (f.category && e.category !== f.category) return false;
+      if (f.tipo && TIPO_POR_ID[f.tipo] && !TIPO_POR_ID[f.tipo].test(e)) return false;
       if (f.favs && !Store.isFav(e.id)) return false;
       for (let i = 0; i < terms.length; i++) {
         if (e._q.indexOf(terms[i]) === -1) return false;
@@ -200,6 +236,7 @@
   g.Data = {
     load: load, all: all, get: get, search: search,
     img: img, frames: frames, youtube: youtube, PLACEHOLDER: PLACEHOLDER,
-    GEAR: GEAR, gearAllows: gearAllows, gearFrase: gearFrase
+    GEAR: GEAR, gearAllows: gearAllows, gearFrase: gearFrase,
+    TIPOS: TIPOS, tipoDe: tipoDe
   };
 })(window);

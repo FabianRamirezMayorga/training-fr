@@ -7,7 +7,7 @@
   const actionsEl = document.getElementById('topbar-actions');
 
   let route = { name: 'inicio', arg: null };
-  let exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', favs: false, todo: false };
+  let exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', tipo: '', favs: false, todo: false };
   let exLimit = 40;
 
   /* ================= router ================= */
@@ -189,7 +189,7 @@
     bindAll(root, '[data-lugar]', function (el) {
       Store.setSetting('gear', el.dataset.lugar);
       planState.gear = el.dataset.lugar;
-      exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', favs: false, todo: false };
+      exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', tipo: '', favs: false, todo: false };
       pasoBienvenida = 2;
       /* el ajuste ya está guardado, así que la ruta de bienvenida deja de valer */
       route = { name: 'bienvenida', arg: null };
@@ -515,7 +515,7 @@
 
   /* Abre el catálogo centrado en una zona del cuerpo */
   function irAZona(id) {
-    exFilters = { q: '', group: id, muscle: '', equipment: '', level: '', favs: false, todo: exFilters.todo };
+    exFilters = { q: '', group: id, muscle: '', equipment: '', level: '', tipo: '', favs: false, todo: exFilters.todo };
     exLimit = 40;
     go('ejercicios');
     window.scrollTo(0, 0);
@@ -583,12 +583,17 @@
       group: region ? '' : exFilters.group,
       muscles: region ? region.muscles : null,
       muscle: musculo,
-      equipment: exFilters.equipment, level: exFilters.level, favs: exFilters.favs, gear: gear
+      equipment: exFilters.equipment, level: exFilters.level, tipo: exFilters.tipo,
+      favs: exFilters.favs, gear: gear
     };
     const res = Data.search(base);
 
     /* Se segmenta por músculo salvo que se esté mirando un músculo concreto */
-    const segmentar = !musculo && !base.q && !exFilters.favs && !exFilters.equipment;
+    /* Repartir por músculo ayuda con el catálogo entero, pero con un tipo
+       elegido —el rodillo son once ejercicios— salían ocho carruseles de uno.
+       Ahí se enseña la rejilla de golpe. */
+    const segmentar = !musculo && !base.q && !exFilters.favs && !exFilters.equipment
+      && (!exFilters.tipo || res.length > 40);
     const lugar = Data.gearFrase(Store.settings().gear);
 
     const musculos = region ? region.muscles : todosLosMusculos();
@@ -642,6 +647,14 @@
         ${raw(I18N.GROUPS.map(function (gr) {
           return '<button class="chip ' + (exFilters.group === gr.id && !zonaQ ? 'on' : '') +
                  '" data-grp="' + gr.id + '">' + esc(gr.label) + '</button>';
+        }).join(''))}
+      </div>
+
+      <div class="pill-scroll">
+        <button class="chip ${exFilters.tipo ? '' : 'on'}" data-tipoex="">Todo el trabajo</button>
+        ${raw(Data.TIPOS.map(function (t) {
+          return '<button class="chip ' + (exFilters.tipo === t.id ? 'on' : '') +
+                 '" data-tipoex="' + t.id + '">' + esc(t.label) + '</button>';
         }).join(''))}
       </div>
 
@@ -747,6 +760,9 @@
       exFilters.q = '';
       exLimit = 40; render();
     });
+    bindAll(root, '[data-tipoex]', function (el) {
+      exFilters.tipo = el.dataset.tipoex; exLimit = 40; render();
+    });
     bind(root, '[data-favs]', function () {
       exFilters.favs = !exFilters.favs; exFilters.group = ''; exFilters.muscle = '';
       exLimit = 40; render();
@@ -776,7 +792,7 @@
       const pos = window.scrollY; render(); window.scrollTo(0, pos);
     });
     bind(root, '[data-a=limpiar]', function () {
-      exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', favs: false, todo: exFilters.todo };
+      exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', tipo: '', favs: false, todo: exFilters.todo };
       exLimit = 40; render();
     });
     bindAll(root, '[data-ex]', function (el) { go('ejercicio', el.dataset.ex); });
