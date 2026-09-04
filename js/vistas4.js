@@ -381,7 +381,12 @@
         <div class="card destacado-clave">
           <h3 class="guia-h">${raw(icon('chispa'))} Si solo haces una cosa</h3>
           <p style="margin:0">${r.consejo}</p>
-        </div>` : '')}`;
+        </div>` : '')}
+
+      <button class="btn block" data-a="afinar" style="margin-top:12px">
+        ${raw(icon('chispa'))} Auditar otra vez</button>
+      <p class="tiny center" style="margin:7px 4px 0">Con los cambios que acabas de aplicar
+      delante, el dictamen cambia. Cada pulsación es una llamada a la IA.</p>`;
   }
 
   function resultado(prog) {
@@ -571,7 +576,7 @@
       Offline.precargarRutinas();
     });
 
-    bind(root, '[data-a=afinar]', afinar);
+    bindAll(root, '[data-a=afinar]', afinar);
     bindAll(root, '[data-cambio]', function (el) { aplicarCambio(Number(el.dataset.cambio)); });
 
     bindAll(root, '[data-nocambio]', function (el) {
@@ -615,7 +620,7 @@
     est.cargandoIA = true;
     render();
     IA.afinarPrograma(est.prog)
-      .then(function (r) { est.ia = r; est.aplicados = []; })
+      .then(function (r) { est.ia = r; })
       .catch(function (e) { UI.toast(e.message); })
       .then(function () { est.cargandoIA = false; guardarEstado(); render(); });
   }

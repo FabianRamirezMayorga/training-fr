@@ -2083,7 +2083,12 @@
         <div class="card destacado-clave">
           <h3 class="guia-h">${raw(icon('chispa'))} Si solo haces una cosa</h3>
           <p style="margin:0">${r.consejo}</p>
-        </div>` : '')}`;
+        </div>` : '')}
+
+      <button class="btn block" data-a="auditar" style="margin-top:12px">
+        ${raw(icon('chispa'))} Analizar otra vez</button>
+      <p class="tiny center" style="margin:7px 4px 0">Con los cambios que acabas de aplicar
+      delante, el dictamen cambia. Cada pulsación es una llamada a la IA.</p>`;
   }
 
   function accionRutina(c) {
@@ -2348,7 +2353,7 @@
     bind(root, '[data-a=atras]', function () { autoguardar(); go('rutinas'); });
 
     /* ---- la lectura de la IA sobre esta rutina ---- */
-    bind(root, '[data-a=auditar]', function () {
+    bindAll(root, '[data-a=auditar]', function () {
       if (!IA.activa()) { go('claves'); UI.toast('Configura la clave de Gemini para esto'); return; }
       const r = autoguardar();
       if (!r) { UI.toast('Guárdala antes de pasarla por la IA'); return; }
