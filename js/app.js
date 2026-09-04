@@ -295,7 +295,7 @@
       ${raw(Modo.franjaInvitado())}
 
       ${raw(deHoy.length ? html`
-        <div class="list-title">Toca hoy (${hoy})</div>
+        <div class="list-title">Toca hoy, ${UI.diaLargo(hoy)}</div>
         <div class="stack">${raw(deHoy.map(function (r) { return routineCard(r); }).join(''))}</div>` : '')}
 
       <div class="list-title">¿Qué entrenas hoy?</div>
@@ -383,7 +383,7 @@
             <div style="font-weight:700">${r.name || 'Rutina sin nombre'}
               ${raw(esDeHoy && !ordenando ? '<span class="chip solid tiny-chip">HOY</span>' : '')}</div>
             <div class="tiny">${n} ${n === 1 ? 'ejercicio' : 'ejercicios'}${raw(
-              (r.days || []).length ? ' · ' + esc(r.days.join(', ')) : '')}</div>
+              (r.days || []).length ? ' · ' + esc(UI.diasLargos(r.days)) : '')}</div>
           </div>
           ${raw(conFlechas ? '' : html`
             <button class="btn primary sm" data-train="${r.id}">${raw(icon('play'))} Entrenar</button>`)}
@@ -1154,21 +1154,23 @@
     const hayHoy = rutinas.some(function (r) { return (r.days || []).indexOf(hoy) !== -1; });
 
     return html`
-      <div class="row between">
-        <h1>Rutinas</h1>
-        <button class="btn sm" data-a="nueva">${raw(icon('plus'))} Nueva</button>
-      </div>
+      <h1>Rutinas</h1>
 
-      <button class="btn primary block" data-a="programa" style="margin:6px 0 4px">
-        ${raw(icon('chispa'))} Crear mi programa personal
-      </button>
-      <p class="tiny">Ajustado a tu edad, tu nivel, tu objetivo y tus limitaciones, con la
-      progresión de las cinco semanas siguientes.</p>
+      <div class="row" style="margin:6px 0 4px">
+        <button class="btn primary grow" data-a="nueva">
+          ${raw(icon('plus'))} Crear la mía</button>
+        <button class="btn grow" data-a="programa">
+          ${raw(icon('chispa'))} Generar programa</button>
+      </div>
+      <p class="tiny"><b>Crear la mía</b>: le pones nombre y eliges tú los ejercicios, las
+      series y los días. <b>Generar programa</b>: te lo monto yo con tu edad, tu nivel, tu
+      objetivo y tus limitaciones, y luego lo editas igual.</p>
 
       ${raw(rutinas.length > 1 ? html`
         <div class="list-head">
           <span class="list-title">${ordenando ? 'Colócalas a tu gusto'
-            : hayHoy ? 'Hoy es ' + hoy + ', y esto es lo que toca' : 'Mis rutinas'}</span>
+            : hayHoy ? 'Hoy es ' + UI.diaLargo(hoy).toLowerCase() + ', y esto es lo que toca'
+            : 'Mis rutinas'}</span>
           <button class="btn sm ${ordenando ? 'primary' : 'ghost'}" data-a="ordenar">
             ${ordenando ? 'Hecho' : 'Ordenar'}</button>
         </div>` : '')}
@@ -1262,7 +1264,7 @@
         <div class="row wrap" style="gap:6px">
           ${raw(DIAS.map(function (d) {
             return '<button class="chip ' + (p.days.indexOf(d) !== -1 ? 'on' : '') +
-                   '" data-pday="' + d + '">' + d + '</button>';
+                   '" data-pday="' + d + '">' + UI.diaLargo(d) + '</button>';
           }).join(''))}
         </div>
         <div class="tiny" style="margin-top:9px" id="p-split"></div>
@@ -1444,8 +1446,11 @@
       <h1>${draft.id ? 'Editar rutina' : 'Nueva rutina'}</h1>
 
       <div class="card">
-        <label class="tiny">NOMBRE</label>
-        <input id="r-name" value="${draft.name}" placeholder="Ej. Pierna pesada" style="margin:5px 0 12px">
+        <label class="tiny">NOMBRE DE LA RUTINA</label>
+        <div class="tiny" style="margin:2px 0 0">El que te sirva a ti para reconocerla de un
+        vistazo: «Pierna dura», «Lunes de espalda», «La corta de casa»…</div>
+        <input id="r-name" value="${draft.name}" placeholder="Ponle nombre"
+               style="margin:6px 0 12px">
         <label class="tiny">NOTAS (opcional)</label>
         <textarea id="r-note" rows="2" placeholder="Objetivo, progresión, recordatorios…"
                   style="margin:5px 0 12px">${draft.note || ''}</textarea>
@@ -1453,7 +1458,7 @@
         <div class="row wrap" style="gap:6px;margin-top:6px">
           ${raw(dias.map(function (d) {
             return '<button class="chip ' + ((draft.days || []).indexOf(d) !== -1 ? 'on' : '') +
-                   '" data-day="' + d + '">' + d + '</button>';
+                   '" data-day="' + d + '">' + UI.diaLargo(d) + '</button>';
           }).join(''))}
         </div>
       </div>
@@ -3004,16 +3009,21 @@
       el.onclick = function () { go(el.dataset.nav); };
     });
 
-    window.addEventListener('hashchange', render);
+    /* Al volver atrás la página cambiaba debajo y la hoja abierta se quedaba
+       flotando encima. Cualquier navegación la cierra. */
+    window.addEventListener('hashchange', function () { UI.closeModal(); render(); });
+    window.addEventListener('popstate', function () { UI.closeModal(); });
 
-    /* si venimos del enlace del correo o de autorizar Spotify, se resuelve antes de pintar */
-    const entrando = Sync.configurado()
-      ? Sync.capturarRedireccion().catch(function () { return false; })
-      : Promise.resolve(false);
-
+    /* Si venimos del enlace del correo o de autorizar Spotify, se resuelve antes
+       de pintar. Spotify va primero: los dos vuelven con ?code= en la URL y el
+       primero que la lea se la lleva. */
     const spotify = Spotify.configurado()
       ? Spotify.capturarRedireccion().catch(function () { return { ok: false }; })
       : Promise.resolve({ ok: false });
+
+    const entrando = Sync.configurado()
+      ? Sync.capturarRedireccion().catch(function () { return false; })
+      : Promise.resolve(false);
 
     Promise.all([Data.load(), entrando, spotify]).then(function (res) {
       const reciénEntrado = res[1];

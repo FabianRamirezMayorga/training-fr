@@ -446,7 +446,7 @@
 
       return {
         dia: dia,
-        nombre: dia + ' · ' + plantilla.nombre,
+        nombre: UI.diaLargo(dia) + ' · ' + plantilla.nombre,
         plantilla: plantilla.nombre,
         ejercicios: ejercicios,
         minutos: duracion(ejercicios, edad.calentamiento)
@@ -624,11 +624,13 @@
   }
 
   /* ---------- 10. Pasar el programa a rutinas de la app ---------- */
-  function aRutinas(prog) {
+  /* etiqueta: cómo quiere el usuario que se llamen. Vacío = el nombre del día. */
+  function aRutinas(prog, etiqueta) {
+    etiqueta = String(etiqueta || '').trim();
     return prog.sesiones.map(function (s) {
       return {
         id: null,
-        name: s.nombre,
+        name: etiqueta ? UI.diaLargo(s.dia) + ' · ' + etiqueta : s.nombre,
         note: prog.objetivoLabel + ' · ' + prog.minutos + ' min · RPE ' + prog.rpe +
           ' · calienta ' + prog.calentamiento + ' min antes.',
         days: [s.dia],

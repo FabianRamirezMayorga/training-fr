@@ -115,26 +115,39 @@
     });
   }
 
+  /* ¿Esta vuelta a la app es de Spotify?
+     Supabase también responde con ?code=, así que sin esto el módulo de la
+     cuenta se quedaba el código de Spotify, limpiaba la URL y aquí no llegaba
+     nada: la conexión no se completaba nunca y sin ruido. El "state" lo pone
+     esta app y solo ella lo conoce. */
+  function esperandoRedireccion(estado) {
+    const guardado = leer(VERIF);
+    return !!(guardado && estado && guardado.s === estado);
+  }
+
   /* Al volver de Spotify, el código llega en la query de la URL */
   function capturarRedireccion() {
     const q = new URLSearchParams(location.search);
     const code = q.get('code');
     const estado = q.get('state');
     const error = q.get('error');
+    const guardado = leer(VERIF);
+
+    /* Sin autorización pendiente por nuestra parte esto no es de Spotify: se
+       devuelve tal cual y, sobre todo, no se limpia la URL, que puede llevar
+       el código del enlace de la cuenta. */
+    if (!guardado) return Promise.resolve({ ok: false });
 
     if (error) {
+      localStorage.removeItem(VERIF);
       limpiarURL();
       return Promise.resolve({ ok: false, error: 'Spotify denegó el permiso.' });
     }
     if (!code) return Promise.resolve({ ok: false });
+    if (guardado.s !== estado) return Promise.resolve({ ok: false });
 
-    const guardado = leer(VERIF);
     localStorage.removeItem(VERIF);
     limpiarURL();
-
-    if (!guardado || guardado.s !== estado) {
-      return Promise.resolve({ ok: false, error: 'La respuesta de Spotify no coincide con la petición.' });
-    }
 
     return token({
       grant_type: 'authorization_code',
@@ -571,6 +584,7 @@
     buscarPista: buscarPista, buscarPistas: buscarPistas, reproducirUris: reproducirUris,
     crearPlaylist: crearPlaylist, misArtistas: misArtistas,
     config: config, configurado: configurado, guardarConfig: guardarConfig,
+    esperandoRedireccion: esperandoRedireccion,
     guardarPlaylist: guardarPlaylist, borrarConfig: borrarConfig,
     activa: activa, entrar: entrar, salir: salir, capturarRedireccion: capturarRedireccion,
     urlRetorno: urlRetorno, sonando: sonando, play: play, pausa: pausa,

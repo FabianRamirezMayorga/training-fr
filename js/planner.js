@@ -193,7 +193,7 @@
 
       return {
         id: null,
-        name: day + ' · ' + plan.name,
+        name: UI.diaLargo(day) + ' · ' + plan.name,
         note: 'Generado para ' + opts.minutes + ' min · ' + goal.label.toLowerCase() +
           ' · ' + Data.gearFrase(opts.gear) + '. Ajusta lo que quieras.',
         days: [day],

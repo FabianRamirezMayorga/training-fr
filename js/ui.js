@@ -122,6 +122,15 @@
   }
 
   const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+  /* Los días se guardan abreviados desde la primera versión, pero al leerlos
+     "Jue" suena a nota de la compra. Se muestran enteros. */
+  const DIA_LARGO = {
+    Dom: 'Domingo', Lun: 'Lunes', Mar: 'Martes', 'Mié': 'Miércoles',
+    Jue: 'Jueves', Vie: 'Viernes', 'Sáb': 'Sábado'
+  };
+  function diaLargo(d) { return DIA_LARGO[d] || d; }
+  function diasLargos(lista) { return (lista || []).map(diaLargo).join(', '); }
   const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
   function fecha(ts) {
@@ -268,6 +277,6 @@
     demoHTML: demoHTML, mountDemos: mountDemos, clearDemos: clearDemos,
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,
     num: num, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
-    beep: beep, DAY_NAMES: DAY_NAMES
+    beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos
   };
 })(window);

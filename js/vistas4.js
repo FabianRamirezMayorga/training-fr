@@ -33,6 +33,7 @@
     minutos: 60,
     objetivo: '',
     foco: 'equilibrado',
+    nombre: '',
     prog: null,
     ia: null,
     cargandoIA: false,
@@ -89,7 +90,7 @@
         <div class="row wrap" style="gap:6px">
           ${raw(DIAS.map(function (d) {
             return '<button class="chip ' + (est.dias.indexOf(d) !== -1 ? 'on' : '') +
-              '" data-dia="' + d + '">' + d + '</button>';
+              '" data-dia="' + d + '">' + UI.diaLargo(d) + '</button>';
           }).join(''))}
         </div>
       </div>
@@ -304,7 +305,15 @@
 
       ${raw(bloqueIA())}
 
-      <div class="row" style="margin-top:16px">
+      <div class="card" style="margin-top:16px">
+        <label class="tiny">CÓMO QUIERES LLAMARLAS</label>
+        <div class="tiny" style="margin:2px 0 0">Cada rutina se llamará «día · lo que pongas
+        aquí». Déjalo vacío y uso el nombre de cada sesión.</div>
+        <input id="prog-nombre" value="${est.nombre}" placeholder="Ej. Mi plan de otoño"
+               style="margin:6px 0 0">
+      </div>
+
+      <div class="row" style="margin-top:12px">
         <button class="btn grow" data-a="otra">Otra propuesta</button>
         <button class="btn primary grow" data-a="guardar">Guardar mis rutinas</button>
       </div>
@@ -377,7 +386,9 @@
     });
 
     bind(root, '[data-a=guardar]', function () {
-      const rutinas = Programa.aRutinas(est.prog);
+      const campo = root.querySelector('#prog-nombre');
+      est.nombre = campo ? campo.value.trim() : '';
+      const rutinas = Programa.aRutinas(est.prog, est.nombre);
       rutinas.forEach(function (r) { Store.saveRoutine(r); });
       UI.toast(rutinas.length + ' rutinas creadas con sus días');
       go('rutinas');

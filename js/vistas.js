@@ -667,7 +667,7 @@
       <div class="row wrap" style="gap:6px;margin:6px 0 16px">
         ${raw([1, 2, 3, 4, 5, 6, 0].map(function (d) {
           return '<button class="chip ' + (a.dias.indexOf(d) !== -1 ? 'on' : '') +
-            '" data-dia="' + d + '">' + Alertas.DIAS[d] + '</button>';
+            '" data-dia="' + d + '">' + UI.diaLargo(Alertas.DIAS[d]) + '</button>';
         }).join(''))}
       </div>
 

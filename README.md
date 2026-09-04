@@ -150,9 +150,12 @@ que autorizar y dónde están los dos datos de conexión.
   de movimiento** y los músculos implicados, y se priorizan los que puedes hacer donde
   entrenas. En pleno entrenamiento el cambio es un botón: las series ya marcadas se
   quedan con el ejercicio original y el recambio continúa con las que faltan.
-- **Rutinas, en el orden que tú quieras** — se guardan solas mientras las editas, así que
+- **Rutinas, en el orden que tú quieras** — dos caminos igual de visibles: *Crear la mía*,
+  donde le pones el nombre que te sirva a ti y eliges los ejercicios, o *Generar programa*,
+  que te lo monta con tu perfil y luego lo editas igual (y puedes decidir cómo se llaman:
+  *Lunes · Mi plan de otoño*). Se guardan solas mientras las editas, así que
   no se pierde ninguna por salir sin pulsar Guardar (una vacía del todo no se guarda, para
-  no dejar restos). Crea las tuyas, genera el programa o parte de 8
+  no dejar restos). Parte también de 8
   plantillas probadas (Full Body, Push/Pull/Legs, Torso/Pierna, 5x5, en casa sin material).
   Series, repeticiones y descanso por ejercicio. Con el botón *Ordenar* las colocas a mano y
   ese orden viaja a tus demás dispositivos. Y **la del día va siempre la primera**: si hoy es

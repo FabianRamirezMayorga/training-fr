@@ -175,7 +175,7 @@
         clave: 'entreno', tipo: 'entreno', dias: nums, horas: [horaE],
         titulo: 'Toca entrenar', mensaje: 'Tu rutina de hoy te está esperando.',
         porque: 'Tus rutinas tienen días asignados (' +
-          nums.map(function (d) { return DIAS[d]; }).join(', ') + ') y ' +
+          nums.map(function (d) { return UI.diaLargo(DIAS[d]); }).join(', ') + ') y ' +
           (Perfil.datos().horaEntreno
             ? 'la hora es la que has puesto en tu perfil.'
             : Store.sessions().length >= 3
@@ -385,7 +385,7 @@
     if (a.dias.length === 5 && a.dias.every(function (d) { return d >= 1 && d <= 5; })) {
       return 'De lunes a viernes';
     }
-    return a.dias.slice().sort().map(function (d) { return DIAS[d]; }).join(', ');
+    return a.dias.slice().sort().map(function (d) { return UI.diaLargo(DIAS[d]); }).join(', ');
   }
 
   /* "8 avisos, de 07:30 a 21:00 cada 1 h 55" o la lista corta si son pocos */
