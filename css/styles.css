@@ -584,6 +584,12 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 .player-b.grande{width:62px;height:62px;background:var(--acc);color:var(--on-acc);
   box-shadow:0 6px 18px color-mix(in srgb,var(--acc) 40%,transparent)}
 .player-b.grande svg{width:30px;height:30px}
+/* De qué lista sale lo que suena: sonaba y no había forma de saber qué era. */
+.player-de{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:7px;
+  font-size:.78rem;color:var(--acc);min-width:0}
+.player-de svg{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+.player-de span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .player-donde{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;
   font-size:.75rem;color:var(--dim2)}
 .player-donde svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;

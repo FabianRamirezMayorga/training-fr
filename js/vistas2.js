@@ -440,12 +440,11 @@
         <div class="card" style="border-color:var(--warn);margin-top:12px">
           <b>Vuelve a conectar</b>
           <p class="muted" style="margin:5px 0 10px">${raw(faltantes.length
-            ? 'A la conexión con Spotify le faltan permisos, y por eso el corazón y las '
-              + 'canciones de tus listas dan error. Reconecta y acepta la pantalla de '
-              + 'Spotify tal cual sale.'
-            : 'Hay funciones nuevas —guardar canciones en tus favoritas y ver tus listas '
-              + 'de Spotify— y Spotify pide permiso otra vez para eso. Es un toque y no '
-              + 'pierdes nada.')}</p>
+            ? 'A la conexión con Spotify le faltan permisos, y por eso tus listas y el '
+              + 'buscador dan error. Reconecta y acepta la pantalla de Spotify tal cual '
+              + 'sale.'
+            : 'Hay funciones nuevas —tus listas de Spotify y el buscador— y Spotify pide '
+              + 'permiso otra vez para eso. Es un toque y no pierdes nada.')}</p>
           ${raw(faltantes.length
             ? '<p class="tiny" style="margin:0 0 10px">Falta: ' + esc(faltantes.join(', ')) + '</p>'
             : '')}
@@ -491,7 +490,7 @@
       </div>
       <div class="search-wrap" style="margin-bottom:10px">
         ${raw(icon('search'))}
-        <input id="sp-buscar" type="search" placeholder="Buscar entre las tuyas o en Spotify"
+        <input id="sp-buscar" type="search" placeholder="Canciones, listas, álbumes o pódcast"
                autocomplete="off">
       </div>
       <div id="sp-listas"><p class="tiny">Cargando tus listas…</p></div>
@@ -557,7 +556,7 @@
         ? 'No tienes listas guardadas en Spotify todavía.'
         : 'Ninguna lista con ese nombre.') + '</p>';
     }
-    return '<p class="tiny" style="margin:0 0 10px">' + SORPRESA + '</p>'
+    return (propias ? '<p class="tiny" style="margin:0 0 10px">' + SORPRESA + '</p>' : '')
       + '<div class="stack">' + listas.map(function (l) {
       return html`
         <div class="card lista-card" style="padding:0;overflow:hidden">
@@ -568,8 +567,11 @@
               : '<span class="bm-sin">' + icon('lista') + '</span>')}
             <div class="grow">
               <div style="font-weight:600;font-size:.86rem">${l.nombre}</div>
-              <div class="tiny">${raw(l.temas != null ? l.temas + ' canciones' : '')}${raw(
-                l.de ? ' · ' + esc(l.de) : '')}</div>
+              <div class="tiny">${raw([
+                l.tipo ? esc(l.tipo) : '',
+                l.temas != null ? l.temas + ' canciones' : '',
+                l.de ? esc(l.de) : ''
+              ].filter(Boolean).join(' · '))}</div>
             </div>
           </button>
           <button class="lista-play" data-poner-ya="${l.uri}" data-nombre="${l.nombre}"
@@ -606,12 +608,26 @@
     caja.innerHTML = '<p class="tiny">Buscando…</p>';
 
     const q = String(texto || '').trim();
+    /* Primero lo suyo, que es lo que más se busca, y detrás lo que haya en
+       Spotify: canciones, álbumes, artistas y pódcast. Antes, si una lista
+       suya coincidía, lo de Spotify no llegaba a verse. */
     const pedir = q
-      ? Spotify.misListas().then(function (mias) {
+      ? Spotify.misListas().catch(function () { return []; }).then(function (mias) {
           const filtro = I18N.norm(q);
-          const suyas = mias.filter(function (l) { return I18N.norm(l.nombre).indexOf(filtro) !== -1; });
-          /* si entre las tuyas no hay nada, se busca en todo Spotify */
-          return suyas.length ? suyas : Spotify.buscarListas(q);
+          const suyas = mias.filter(function (l) {
+            return I18N.norm(l.nombre).indexOf(filtro) !== -1;
+          }).map(function (l) {
+            return Object.assign({}, l, { tipo: 'Lista tuya' });
+          });
+          return Spotify.buscarListas(q).catch(function () { return []; })
+            .then(function (fuera) {
+              const vistas = {};
+              return suyas.concat(fuera).filter(function (x) {
+                if (!x || !x.uri || vistas[x.uri]) return false;
+                vistas[x.uri] = 1;
+                return true;
+              });
+            });
         })
       : Spotify.misListas();
 
@@ -622,10 +638,20 @@
           ev.stopPropagation();
           Spotify.desbloquearAudio();
           const l = listas.find(function (x) { return x.uri === b.dataset.ponerYa; });
+          /* ya sabemos de qué lista es: se apunta para que salga su nombre en
+             el reproductor sin esperar a preguntárselo a Spotify */
+          if (l) Spotify.apuntarContexto(l.uri, l.nombre);
+          const uri = b.dataset.ponerYa;
+          const esLista = uri.indexOf(':playlist:') !== -1;
           Spotify.iniciarReproductor()
             .catch(function () { /* sin reproductor propio, donde se pueda */ })
-            .then(function () { return Spotify.ponerPlaylist(b.dataset.ponerYa); })
-            .then(function () { if (l) subirArriba(l); else UI.toast('Reproduciendo'); })
+            .then(function () { return Spotify.ponerUri(uri); })
+            .then(function () {
+              /* sólo una lista puede subir arriba; una canción suelta o un
+                 pódcast no tienen nada que poner ahí */
+              if (l && esLista) subirArriba(l);
+              else UI.toast('Sonando' + (l ? ' ' + l.nombre : ''));
+            })
             .catch(function (e) { UI.toast(e.message); });
         };
       });
@@ -966,6 +992,11 @@
      pintar y se recuerda mientras no cambie de tema. */
   let favoritaActual = false;
   let favoritaDe = '';
+  /* De qué lista sale lo que suena. Se guarda la uri para no volver a
+     preguntar el nombre mientras no cambie. */
+  let ctxUri = '';
+  let ctxNombre = '';
+
   /* null = todavía no se sabe si Spotify deja guardar favoritas */
   let favVa = null;
   let favPreguntado = false;
@@ -982,7 +1013,33 @@
     });
   }
 
+  /* El nombre de donde sale la canción. El reproductor propio a veces lo trae
+     puesto; si no, se pregunta una vez y se pinta cuando llegue. */
+  function comprobarContexto(s, alSaber) {
+    const uri = (s && s.contexto) || '';
+    if (uri === ctxUri) return;
+    ctxUri = uri;
+    if (!uri) { ctxNombre = ''; return; }
+
+    if (s.contextoNombre) {
+      ctxNombre = s.contextoNombre;
+      if (alSaber) alSaber();
+      return;
+    }
+    ctxNombre = '';
+    Spotify.nombreDeContexto(uri).then(function (n) {
+      if (uri !== ctxUri || !n) return;
+      ctxNombre = n;
+      if (alSaber) alSaber();
+    });
+  }
+
+  /* Lo último que se pintó. montar() no recibe el estado y, cuando la música
+     suena en otro aparato, Spotify.estado() no devuelve nada. */
+  let pintado = null;
+
   function reproductorHTML(s) {
+    pintado = s;
     const pct = s.duracion ? Math.min(100, Math.round(s.progreso / s.duracion * 100)) : 0;
 
     return html`
@@ -994,6 +1051,8 @@
         <div class="player-info">
           <div class="player-t">${s.titulo}</div>
           <div class="player-a">${s.artista}</div>
+          ${raw(ctxNombre ? html`
+            <div class="player-de">${raw(icon('lista'))} <span>${ctxNombre}</span></div>` : '')}
         </div>
 
         <div class="player-barra"><i style="width:${pct}%"></i></div>
@@ -1065,7 +1124,12 @@
       });
     }
 
-    const s0 = Spotify.estado();
+    comprobarContexto(pintado, function () {
+      const s = pintado;
+      if (s && root.isConnected) { root.innerHTML = reproductorHTML(s); montarReproductor(root); }
+    });
+
+    const s0 = pintado;
     comprobarFavorita(s0, function () {
       const c = root.querySelector('[data-sp=corazon]');
       if (c) { c.classList.toggle('fav', favoritaActual); c.setAttribute('aria-pressed', String(favoritaActual)); }

@@ -3192,7 +3192,28 @@
           UI.toast('Actualizando a la versión nueva…');
           setTimeout(function () { location.reload(); }, 900);
         });
-        navigator.serviceWorker.register('sw.js').catch(function () { /* opcional */ });
+        /* Sin esto el aviso de versión nueva no llegaba a salir: el navegador
+           servía el propio sw.js desde su caché y, en una app instalada que
+           puede pasar días abierta, no volvía a mirar si había algo nuevo.
+           Ahora se pregunta al arrancar, cada vez que se vuelve a la app y de
+           tanto en tanto mientras está delante. */
+        navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+          .then(function (reg) {
+            if (!reg) return;
+            let ultimaMirada = 0;
+            const mirar = function () {
+              if (Date.now() - ultimaMirada < 60000) return;
+              ultimaMirada = Date.now();
+              reg.update().catch(function () { /* sin conexión, ya se verá */ });
+            };
+            mirar();
+            document.addEventListener('visibilitychange', function () {
+              if (!document.hidden) mirar();
+            });
+            window.addEventListener('focus', mirar);
+            setInterval(mirar, 900000);
+          })
+          .catch(function () { /* opcional */ });
       }
 
       if (reciénEntrado && reciénEntrado.ok) trasEntrar(reciénEntrado);

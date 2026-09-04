@@ -411,9 +411,53 @@
         progreso: r.progress_ms || 0,
         duracion: r.item.duration_ms || 0,
         aleatorio: !!r.shuffle_state,
+        contexto: (r.context && r.context.uri) || '',
+        contextoNombre: '',
         dispositivo: r.device && r.device.name
       };
     });
+  }
+
+  /* El nombre de la lista, el álbum o el artista de donde sale lo que suena.
+     Spotify sólo da la uri, y sin esto no había manera de saber qué se estaba
+     escuchando. Se recuerda lo preguntado, incluso lo que no se pudo saber,
+     para no repetir la llamada en cada latido del reproductor. */
+  const nombresCtx = {};
+
+  function nombreDeContexto(uri) {
+    if (!uri) return Promise.resolve('');
+    if (nombresCtx[uri] !== undefined) return Promise.resolve(nombresCtx[uri]);
+
+    const t = String(uri).split(':');
+    const tipo = t[1];
+    const id = t[t.length - 1];
+
+    if (tipo === 'collection' || id === 'collection') {
+      nombresCtx[uri] = 'Tus me gusta';
+      return Promise.resolve(nombresCtx[uri]);
+    }
+
+    const rutas = {
+      playlist: '/playlists/' + encodeURIComponent(id) + '?fields=name',
+      album: '/albums/' + encodeURIComponent(id),
+      artist: '/artists/' + encodeURIComponent(id),
+      show: '/shows/' + encodeURIComponent(id)
+    };
+    if (!rutas[tipo]) { nombresCtx[uri] = ''; return Promise.resolve(''); }
+
+    return pedir(rutas[tipo]).then(function (r) {
+      nombresCtx[uri] = (r && r.name) || '';
+      return nombresCtx[uri];
+    }).catch(function () {
+      nombresCtx[uri] = '';
+      return '';
+    });
+  }
+
+  /* Cuando la lista se pone desde aquí ya se sabe el nombre: se apunta y así
+     sale al momento, sin esperar a que Spotify conteste. */
+  function apuntarContexto(uri, nombre) {
+    if (uri && nombre) nombresCtx[uri] = nombre;
   }
 
   /* Si la música suena dentro de la app, se controla el reproductor propio;
@@ -479,6 +523,37 @@
   }
 
   /* Lanza la lista guardada como favorita para entrenar */
+  /* Poner a sonar cualquier cosa de Spotify. Las canciones y los episodios
+     van como pista suelta y el resto —listas, álbumes, artistas, pódcast— como
+     contexto, que es lo que Spotify espera de cada uno. */
+  function ponerUri(uri) {
+    const u = String(uri || '');
+    const tipo = u.split(':')[1] || '';
+    if (!tipo) return Promise.reject(new Error('No sé qué es eso.'));
+
+    const suelta = tipo === 'track' || tipo === 'episode';
+    const cuerpo = suelta ? { uris: [u] } : { context_uri: u };
+
+    const lanzar = function (dev) {
+      return pedir('/me/player/play' + (dev ? '?device_id=' + encodeURIComponent(dev) : ''), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cuerpo)
+      });
+    };
+
+    if (reproductorActivo()) {
+      desbloquearAudio();
+      return pedir('/me/player', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_ids: [deviceId], play: false })
+      }).catch(function () { /* si ya era el activo, da igual */ })
+        .then(function () { return lanzar(deviceId); });
+    }
+    return lanzar('');
+  }
+
   function ponerPlaylist(uri) {
     const id = idDePlaylist(uri || config().playlist);
     if (!id) return Promise.reject(new Error('Guarda antes una lista de reproducción.'));
@@ -546,18 +621,61 @@
   }
 
   /* Busca listas por todo Spotify, no solo entre las tuyas */
+  /* Busca en todo Spotify, no sólo entre listas: canciones, álbumes, artistas
+     y pódcast salen mezclados por orden de tipo, que es como se busca de
+     verdad —«pon algo de Fred again», «pon tal canción»—. Cada resultado sabe
+     cómo se pone a sonar. */
   function buscarListas(texto) {
     const q = String(texto || '').trim();
     if (!q) return Promise.resolve([]);
-    return pedir('/search?type=playlist&limit=20&q=' + encodeURIComponent(q)).then(function (r) {
-      return ((r && r.playlists && r.playlists.items) || []).filter(Boolean).map(function (p) {
-        return {
-          id: p.id, nombre: p.name, temas: p.tracks && p.tracks.total,
-          uri: p.uri, de: p.owner && p.owner.display_name,
-          portada: p.images && p.images.length ? p.images[p.images.length - 1].url : ''
-        };
+    const tipos = 'track,playlist,album,artist,show';
+    return pedir('/search?type=' + tipos + '&limit=8&q=' + encodeURIComponent(q))
+      .then(function (r) {
+        r = r || {};
+        const fuera = [];
+
+        function portada(x) {
+          const im = (x && x.images) || (x && x.album && x.album.images) || [];
+          return im.length ? im[im.length - 1].url : '';
+        }
+        function meter(lista, hacer) {
+          ((lista && lista.items) || []).filter(Boolean).forEach(function (x) {
+            fuera.push(hacer(x));
+          });
+        }
+
+        meter(r.tracks, function (t) {
+          return {
+            id: t.id, uri: t.uri, nombre: t.name, tipo: 'Canción',
+            de: (t.artists || []).map(function (a) { return a.name; }).join(', '),
+            portada: portada(t)
+          };
+        });
+        meter(r.playlists, function (p) {
+          return {
+            id: p.id, uri: p.uri, nombre: p.name, tipo: 'Lista',
+            temas: p.tracks && p.tracks.total,
+            de: p.owner && p.owner.display_name, portada: portada(p)
+          };
+        });
+        meter(r.albums, function (a) {
+          return {
+            id: a.id, uri: a.uri, nombre: a.name, tipo: 'Álbum',
+            de: (a.artists || []).map(function (x) { return x.name; }).join(', '),
+            portada: portada(a)
+          };
+        });
+        meter(r.artists, function (a) {
+          return { id: a.id, uri: a.uri, nombre: a.name, tipo: 'Artista',
+            de: '', portada: portada(a) };
+        });
+        meter(r.shows, function (x) {
+          return { id: x.id, uri: x.uri, nombre: x.name, tipo: 'Pódcast',
+            de: x.publisher || '', portada: portada(x) };
+        });
+
+        return fuera;
       });
-    });
   }
 
   /* Las canciones de una lista, para poder verlas antes de darle al play */
@@ -856,6 +974,11 @@
       duracion: estadoActual.duration,
       aleatorio: !!estadoActual.shuffle,
       dispositivo: 'Training FR',
+      /* De dónde sale la canción. El reproductor propio suele traer ya el
+         nombre puesto; si no, se pregunta luego con la uri. */
+      contexto: (estadoActual.context && estadoActual.context.uri) || '',
+      contextoNombre: (estadoActual.context && estadoActual.context.metadata
+        && estadoActual.context.metadata.context_description) || '',
       local: true
     };
   }
@@ -1005,6 +1128,8 @@
     SCOPES_V: SCOPES_V, permisosCaducados: permisosCaducados, volumen: volumen,
     permisosQueFaltan: permisosQueFaltan, diagnostico: diagnostico,
     puedeGuardar: puedeGuardar,
+    nombreDeContexto: nombreDeContexto, apuntarContexto: apuntarContexto,
+    ponerUri: ponerUri,
     permisosConcedidos: function () { const x = sesion(); return (x && x.scope) || ''; },
     admiteVolumen: admiteVolumen,
     iniciarReproductor: iniciarReproductor, reproductorActivo: reproductorActivo,
