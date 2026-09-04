@@ -522,6 +522,9 @@
 
   /* ---------- tus listas de Spotify ---------- */
 
+  /* qué lista está desplegada, para no pedir sus canciones sin que se pidan */
+  let listaAbierta = '';
+
   function tarjetasListas(listas, propias) {
     if (!listas.length) {
       return '<p class="tiny">' + (propias
@@ -529,19 +532,70 @@
         : 'Ninguna lista con ese nombre.') + '</p>';
     }
     return '<div class="stack">' + listas.map(function (l) {
+      const abierta = listaAbierta === l.id;
       return html`
-        <button class="rt-item" data-lista="${l.uri}" style="width:100%;text-align:left">
-          ${raw(l.portada
-            ? '<img src="' + esc(l.portada) + '" alt="" loading="lazy">'
-            : '<span class="bm-sin">' + icon('lista') + '</span>')}
-          <div class="grow">
-            <div style="font-weight:600;font-size:.86rem">${l.nombre}</div>
-            <div class="tiny">${raw(l.temas != null ? l.temas + ' canciones' : '')}${raw(
-              l.de ? ' · ' + esc(l.de) : '')}</div>
-          </div>
-          ${raw(icon('play'))}
-        </button>`;
+        <div class="card" style="padding:0;overflow:hidden">
+          <button class="rt-item" data-abrir-lista="${l.id}" data-uri="${l.uri}"
+                  style="width:100%;text-align:left;background:none;border:0">
+            ${raw(l.portada
+              ? '<img src="' + esc(l.portada) + '" alt="" loading="lazy">'
+              : '<span class="bm-sin">' + icon('lista') + '</span>')}
+            <div class="grow">
+              <div style="font-weight:600;font-size:.86rem">${l.nombre}</div>
+              <div class="tiny">${raw(l.temas != null ? l.temas + ' canciones' : '')}${raw(
+                l.de ? ' · ' + esc(l.de) : '')}</div>
+            </div>
+            <span class="chevron ${abierta ? 'abierta' : ''}">${raw(icon('chevron'))}</span>
+          </button>
+          <div class="lista-temas" data-temas="${l.id}" ${raw(abierta ? '' : 'hidden')}></div>
+        </div>`;
     }).join('') + '</div>';
+  }
+
+  /* Las canciones de una lista, con su botón para sonar desde cualquiera */
+  function pintarTemas(caja, lista) {
+    caja.innerHTML = '<p class="tiny" style="padding:11px 13px">Cargando canciones…</p>';
+    Spotify.cancionesDeLista(lista.id).then(function (temas) {
+      if (!temas.length) {
+        caja.innerHTML = '<p class="tiny" style="padding:11px 13px">Esta lista está vacía.</p>';
+        return;
+      }
+      caja.innerHTML = temas.map(function (t, i) {
+        return html`
+          <button class="pista" data-uri-tema="${t.uri}" data-desde="${i}">
+            <span class="rt-idx">${i + 1}</span>
+            <div class="grow">
+              <div class="player-t">${t.titulo}</div>
+              <div class="tiny">${t.artista}</div>
+            </div>
+            ${raw(icon('play'))}
+          </button>`;
+      }).join('') +
+        '<div style="padding:9px 13px 13px">' +
+        '<button class="btn primary block sm" data-poner-lista="' + esc(lista.uri) + '">' +
+        icon('play') + ' Reproducir la lista entera</button></div>';
+
+      const uris = temas.map(function (t) { return t.uri; });
+
+      caja.querySelectorAll('[data-uri-tema]').forEach(function (b) {
+        b.onclick = function () {
+          Spotify.desbloquearAudio();
+          lanzar(uris.slice(Number(b.dataset.desde)));
+        };
+      });
+      const todo = caja.querySelector('[data-poner-lista]');
+      if (todo) todo.onclick = function () {
+        Spotify.desbloquearAudio();
+        Spotify.iniciarReproductor()
+          .catch(function () { /* sin reproductor propio, donde se pueda */ })
+          .then(function () { return Spotify.ponerPlaylist(todo.dataset.ponerLista); })
+          .then(function () { UI.toast('Reproduciendo ' + lista.nombre); })
+          .catch(function (e) { UI.toast(e.message); });
+      };
+    }).catch(function (e) {
+      caja.innerHTML = '<p class="tiny" style="padding:11px 13px;color:var(--bad)">' +
+        esc(e.message) + '</p>';
+    });
   }
 
   function pintarListas(root, texto) {
@@ -561,14 +615,24 @@
 
     pedir.then(function (listas) {
       caja.innerHTML = tarjetasListas(listas, !q);
-      caja.querySelectorAll('[data-lista]').forEach(function (b) {
+      caja.querySelectorAll('[data-abrir-lista]').forEach(function (b) {
         b.onclick = function () {
-          Spotify.desbloquearAudio();
-          Spotify.iniciarReproductor()
-            .catch(function () { /* sin reproductor propio, suena donde puedas */ })
-            .then(function () { return Spotify.ponerPlaylist(b.dataset.lista); })
-            .then(function () { UI.toast('Reproduciendo'); })
-            .catch(function (e) { UI.toast(e.message); });
+          const id = b.dataset.abrirLista;
+          const temas = caja.querySelector('[data-temas="' + id + '"]');
+          const chev = b.querySelector('.chevron');
+          const abrir = temas.hidden;
+
+          /* solo una abierta a la vez, que si no la pantalla es un rollo */
+          caja.querySelectorAll('.lista-temas').forEach(function (x) { x.hidden = true; });
+          caja.querySelectorAll('.chevron').forEach(function (x) { x.classList.remove('abierta'); });
+
+          listaAbierta = abrir ? id : '';
+          temas.hidden = !abrir;
+          if (chev) chev.classList.toggle('abierta', abrir);
+          if (abrir && !temas.dataset.cargada) {
+            temas.dataset.cargada = '1';
+            pintarTemas(temas, listas.find(function (x) { return x.id === id; }));
+          }
         };
       });
     }).catch(function (e) {
@@ -884,6 +948,8 @@
      pintar y se recuerda mientras no cambie de tema. */
   let favoritaActual = false;
   let favoritaDe = '';
+  /* null = todavía no se sabe; false = este aparato no deja tocar el volumen */
+  let volumenVa = null;
   let volActual = 0.6;            // el que trae el reproductor al arrancar
 
   function comprobarFavorita(s, alSaber) {
@@ -930,12 +996,16 @@
             ${raw(icon('corazon'))}</button>
         </div>
 
-        ${raw(s.local ? html`
+        ${raw(s.local && volumenVa !== false ? html`
           <div class="player-vol">
             ${raw(icon('altavoz'))}
             <input type="range" min="0" max="100" value="${Math.round(volActual * 100)}"
                    id="player-vol" aria-label="Volumen">
           </div>` : '')}
+        ${raw(s.local && volumenVa === false
+          ? '<p class="tiny" style="text-align:center;margin:2px 0 0">'
+            + icon('altavoz') + ' El volumen se ajusta con los botones del teléfono.</p>'
+          : '')}
 
         ${raw(s.dispositivo ? html`
           <div class="player-donde">
@@ -952,6 +1022,15 @@
         volActual = Number(vol.value) / 100;
         Spotify.volumen(volActual).catch(function () { /* sin reproductor propio */ });
       };
+      if (volumenVa === null && Spotify.admiteVolumen) {
+        Spotify.admiteVolumen().then(function (va) {
+          volumenVa = va;
+          if (!va && root.isConnected) {
+            const s = Spotify.estado();
+            if (s) { root.innerHTML = reproductorHTML(s); montarReproductor(root); }
+          }
+        });
+      }
     }
 
     const s0 = Spotify.estado();
@@ -975,8 +1054,13 @@
             });
           },
           corazon: function () {
-            const s = Spotify.estado() || {};
-            return Spotify.marcarFavorita(s.id, !favoritaActual).then(function () {
+            const propio = Spotify.estado();
+            const dame = propio && propio.id
+              ? Promise.resolve(propio)
+              : Spotify.sonando();
+            return dame.then(function (s) {
+              return Spotify.marcarFavorita(s && s.id, !favoritaActual);
+            }).then(function () {
               favoritaActual = !favoritaActual;
               UI.toast(favoritaActual ? 'Guardada en tus favoritas de Spotify'
                 : 'Quitada de favoritas');

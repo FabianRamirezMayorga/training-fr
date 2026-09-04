@@ -336,8 +336,26 @@
         return refrescar().then(function () { return pedir(ruta, opciones, true); });
       }
       if (r.status === 403) {
-        sinPremium = true;
-        throw new Error('Spotify solo permite controlar la reproducción con Premium.');
+        /* Un 403 no siempre es falta de Premium: también sale cuando al token
+           le falta un permiso, o cuando el aparato no admite esa orden (el
+           reproductor de la web, por ejemplo, no siempre deja el aleatorio).
+           Antes lo dábamos todo por «hace falta Premium» y era mentira. */
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          const e = j.error || {};
+          const dice = String(e.reason || '') + ' ' + String(e.message || '');
+          if (/PREMIUM/i.test(dice)) {
+            sinPremium = true;
+            throw new Error('Spotify solo permite controlar la reproducción con Premium.');
+          }
+          if (/Restriction|NO_PREV|NO_NEXT|UNKNOWN/i.test(dice)) {
+            throw new Error('Esa orden no la admite el aparato donde suena la música.');
+          }
+          if (ruta.indexOf('/me/player') !== 0) {
+            throw new Error('Spotify no ha autorizado esta acción. Pulsa «Reconectar» '
+              + 'para volver a dar permisos a la cuenta.');
+          }
+          throw new Error(e.message || 'Spotify ha rechazado la orden.');
+        });
       }
       if (r.status === 404) throw new Error('No hay ningún dispositivo de Spotify activo.');
       if (r.status === 204) return null;
@@ -395,8 +413,30 @@
     return pedir('/me/player/previous', { method: 'POST' });
   }
   function volumen(v) {
-    if (local()) return player.setVolume(Math.max(0, Math.min(1, v)));
-    return pedir('/me/player/volume?volume_percent=' + Math.round(v * 100), { method: 'PUT' });
+    const vol = Math.max(0, Math.min(1, v));
+    if (local()) return player.setVolume(vol);
+    return pedir('/me/player/volume?volume_percent=' + Math.round(vol * 100) +
+      (deviceId ? '&device_id=' + encodeURIComponent(deviceId) : ''), { method: 'PUT' });
+  }
+
+  /* En iPhone y en casi todo el móvil el volumen es del aparato: la web puede
+     pedir el cambio pero no pasa nada. En vez de adivinar por el navegador se
+     comprueba de verdad (poner un valor y volver a leerlo) para poder esconder
+     la barra en lugar de dejarla ahí sin hacer nada. */
+  function admiteVolumen() {
+    if (!local()) return Promise.resolve(true);
+    return player.getVolume().then(function (antes) {
+      /* un salto mínimo, que no se oiga mientras se comprueba */
+      const prueba = antes > 0.5 ? antes - 0.02 : antes + 0.02;
+      return player.setVolume(prueba)
+        .then(function () { return player.getVolume(); })
+        .then(function (despues) {
+          const va = Math.abs(despues - prueba) < 0.01;
+          return player.setVolume(antes)
+            .catch(function () { /* da igual, era solo por dejarlo como estaba */ })
+            .then(function () { return va; });
+        });
+    }).catch(function () { return false; });
   }
 
   function alternar() {
@@ -494,6 +534,23 @@
     });
   }
 
+  /* Las canciones de una lista, para poder verlas antes de darle al play */
+  function cancionesDeLista(id, limite) {
+    const pl = idDePlaylist(id) || id;
+    return pedir('/playlists/' + encodeURIComponent(pl) +
+      '/tracks?limit=' + (limite || 50) +
+      '&fields=items(track(id,uri,name,duration_ms,artists(name)))').then(function (r) {
+      return ((r && r.items) || []).map(function (it) {
+        const t = it && it.track;
+        if (!t) return null;
+        return {
+          id: t.id, uri: t.uri, titulo: t.name, duracion: t.duration_ms,
+          artista: (t.artists || []).map(function (a) { return a.name; }).join(', ')
+        };
+      }).filter(Boolean);
+    });
+  }
+
   /* ---------- favoritos, aleatorio y repetición ---------- */
 
   function esFavorita(id) {
@@ -505,8 +562,13 @@
 
   function marcarFavorita(id, si) {
     if (!id) return Promise.reject(new Error('No hay ninguna canción sonando.'));
-    return pedir('/me/tracks?ids=' + encodeURIComponent(id), { method: si ? 'PUT' : 'DELETE' })
-      .then(function () { return si; });
+    /* El id va en el cuerpo, no en la ruta: mandarlo por los dos sitios a la
+       vez es lo que hacía que Spotify devolviera un 403. */
+    return pedir('/me/tracks', {
+      method: si ? 'PUT' : 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: [id] })
+    }).then(function () { return si; });
   }
 
   /* Ojo con el nombre: arriba ya hay un aleatorio() que genera las cadenas de
@@ -792,6 +854,7 @@
 
   const PUBLICO = {
     SCOPES_V: SCOPES_V, permisosCaducados: permisosCaducados, volumen: volumen,
+    admiteVolumen: admiteVolumen,
     iniciarReproductor: iniciarReproductor, reproductorActivo: reproductorActivo,
     estado: estado, alCambiar: alCambiar, traerAqui: traerAqui,
     apagarReproductor: apagarReproductor, desbloquearAudio: desbloquearAudio,
@@ -801,7 +864,8 @@
     esperandoRedireccion: esperandoRedireccion, ultimoFallo: ultimoFallo,
     apuntarFallo: apuntarFallo,
     guardarPlaylist: guardarPlaylist, borrarConfig: borrarConfig,
-    buscarListas: buscarListas, esFavorita: esFavorita, marcarFavorita: marcarFavorita,
+    buscarListas: buscarListas, cancionesDeLista: cancionesDeLista,
+    esFavorita: esFavorita, marcarFavorita: marcarFavorita,
     aleatorio: ponerAleatorio, repetir: repetir,
     activa: activa, entrar: entrar, salir: salir, capturarRedireccion: capturarRedireccion,
     urlRetorno: urlRetorno, sonando: sonando, play: play, pausa: pausa,
