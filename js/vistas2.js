@@ -1018,11 +1018,15 @@
      pintar y se recuerda mientras no cambie de tema. */
   let favoritaActual = false;
   let favoritaDe = '';
+  /* null = todavía no se sabe si Spotify deja guardar favoritas */
+  let favVa = null;
+  let favPreguntado = false;
   /* null = todavía no se sabe; false = este aparato no deja tocar el volumen */
   let volumenVa = null;
   let volActual = 0.6;            // el que trae el reproductor al arrancar
 
   function comprobarFavorita(s, alSaber) {
+    if (favVa === false) return;   /* aquí Spotify ni lee ni escribe favoritas */
     if (!s || !s.id || s.id === favoritaDe) return;
     favoritaDe = s.id;
     Spotify.esFavorita(s.id).then(function (si) {
@@ -1061,9 +1065,10 @@
             ${raw(icon(s.sonando ? 'pausaLleno' : 'playLleno'))}</button>
           <button class="player-b" data-sp="siguiente" aria-label="Siguiente">
             ${raw(icon('siguiente'))}</button>
+          ${raw(favVa === false ? '' : html`
           <button class="player-b chico ${favoritaActual ? 'fav' : ''}" data-sp="corazon"
             aria-label="Guardar en favoritas" aria-pressed="${!!favoritaActual}">
-            ${raw(icon('corazon'))}</button>
+            ${raw(icon('corazon'))}</button>`)}
         </div>
 
         ${raw(s.local && volumenVa !== false ? html`
@@ -1098,6 +1103,18 @@
           }
         });
       }
+    }
+
+    if (!favPreguntado && Spotify.puedeGuardar) {
+      favPreguntado = true;
+      Spotify.puedeGuardar().then(function (va) {
+        if (va === favVa) return;
+        favVa = va;
+        if (!va && root.isConnected) {
+          const s = Spotify.estado();
+          if (s) { root.innerHTML = reproductorHTML(s); montarReproductor(root); }
+        }
+      });
     }
 
     const s0 = Spotify.estado();

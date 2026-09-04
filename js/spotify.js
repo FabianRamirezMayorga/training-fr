@@ -669,6 +669,30 @@
       .catch(function () { return false; });
   }
 
+  /* Spotify no deja guardar favoritas en todas las cuentas: responde un 403
+     seco aunque el permiso esté concedido y la lectura de la biblioteca pase
+     sin problema. Se pregunta una vez, con la lista de ids vacía para no tocar
+     nada suyo: si autoriza contesta 400 por la petición mal formada. Así el
+     corazón aparece sólo donde de verdad hace algo, en vez de dar error. */
+  let guardarVa = null;
+
+  function puedeGuardar() {
+    if (guardarVa !== null) return Promise.resolve(guardarVa);
+    if (!sesion()) return Promise.resolve(false);
+    return pedir('/me/tracks', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: [] })
+    }).then(function () { guardarVa = true; return true; }).catch(function (e) {
+      const m = String((e && e.message) || '');
+      if (m.indexOf('[403 ') !== -1) { guardarVa = false; return false; }
+      /* Sin red no se decide nada: mejor dejarlo como estaba que esconderlo */
+      if (/Sin conexi|tardado demasiado/i.test(m)) return true;
+      guardarVa = true;
+      return true;
+    });
+  }
+
   function marcarFavorita(id, si) {
     if (!id) return Promise.reject(new Error('No hay ninguna canción sonando.'));
     /* Spotify acepta el id en el cuerpo o en la ruta, y no siempre trata
@@ -968,6 +992,7 @@
   const PUBLICO = {
     SCOPES_V: SCOPES_V, permisosCaducados: permisosCaducados, volumen: volumen,
     permisosQueFaltan: permisosQueFaltan, diagnostico: diagnostico,
+    puedeGuardar: puedeGuardar,
     permisosConcedidos: function () { const x = sesion(); return (x && x.scope) || ''; },
     admiteVolumen: admiteVolumen,
     iniciarReproductor: iniciarReproductor, reproductorActivo: reproductorActivo,
