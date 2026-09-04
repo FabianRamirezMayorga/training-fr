@@ -194,6 +194,10 @@
     s.id = s.id || uid();
     s.updatedAt = s.updatedAt || Date.now();
     state.sessions.unshift(s);
+    /* Desde que se puede apuntar algo de hace tres días, meter siempre por
+       delante dejaba el historial desordenado. Se ordena por fecha, que es
+       como se lee. */
+    state.sessions.sort(function (a, b) { return (b.start || 0) - (a.start || 0); });
     save();
     return s;
   }

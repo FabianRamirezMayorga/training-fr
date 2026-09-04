@@ -489,6 +489,27 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 
 /* ---------- programa personal ---------- */
 /* Cabecera plegable de cada día del programa */
+/* La semana de un vistazo en la portada. Cada día es una letra y un punto:
+   lleno = entrenado, hueco = había plan y no se hizo, apagado = día libre. */
+.semana{display:flex;gap:6px}
+.sem-dia{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.sem-dia span{font-size:.68rem;color:var(--dim2);letter-spacing:.03em}
+.sem-dia i{display:block;width:100%;height:26px;border-radius:8px;
+  background:var(--card2);border:1px solid transparent}
+.sem-dia.plan i{border-color:var(--line)}
+.sem-dia.toca i{border-color:var(--acc);border-style:dashed}
+.sem-dia.fallado i{border:1px dashed var(--dim2);opacity:.65}
+.sem-dia.hecho i{background:var(--acc);border-color:var(--acc)}
+.sem-dia.es-hoy span{color:var(--txt);font-weight:700}
+
+/* Cabecera de cada día en la lista de rutinas: pliega su grupo. La semana
+   entera desplegada obligaba a bajar mucho para llegar al jueves. */
+.dia-grupo{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:8px 4px;margin-top:14px;background:none;color:var(--txt);border:0}
+.dia-grupo .tiny{color:var(--dim2)}
+.dia-grupo .chevron svg{transition:transform .18s}
+.dia-grupo .chevron.abierta svg{transform:rotate(90deg)}
+
 .dia-cab{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
   padding:13px;background:none;color:var(--txt)}
 .dia-cab .chevron svg{transition:transform .18s}

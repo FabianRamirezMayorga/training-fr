@@ -714,8 +714,27 @@
     });
   }
 
+  /* Vuelve a contar las series por músculo a partir de las sesiones tal y como
+     estén ahora. Hace falta desde que se pueden añadir y quitar ejercicios a
+     mano: si no, la barra de volumen seguía enseñando el plan recién nacido y
+     no el que se va a entrenar. */
+  function revolumen(prog) {
+    const volumen = {};
+    prog.sesiones.forEach(function (ses) {
+      ses.ejercicios.forEach(function (e) {
+        const ex = Data.get(e.exId);
+        if (ex) sumarVolumen(volumen, ex, e.musculo, e.sets);
+      });
+    });
+    Object.keys(volumen).forEach(function (m) {
+      volumen[m] = Math.round(volumen[m] * 2) / 2;
+    });
+    prog.volumen = volumen;
+    return volumen;
+  }
+
   g.Programa = {
-    volumenReal: volumenReal, olvidados: olvidados,
+    volumenReal: volumenReal, olvidados: olvidados, revolumen: revolumen,
     crear: crear, aRutinas: aRutinas, lesionesDe: lesionesDe,
     OBJETIVOS: OBJETIVOS, LESIONES: LESIONES
   };

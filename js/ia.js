@@ -581,10 +581,11 @@
 
   /* ---------- afinar el programa ----------
      El programa lo construye programa.js, que es determinista y siempre da algo
-     coherente. La IA solo entra a revisarlo: comenta cada día, avisa de lo que
-     no encaja con el perfil y puede proponer cambios de ejercicio. Los cambios
-     se validan después contra el catálogo, el material y las lesiones: si la IA
-     se inventa un ejercicio o propone algo prohibido, se descarta. */
+     coherente. La IA entra después, y entra a criticar: si lo único que devuelve
+     es que está todo bien, no sirve para nada y encima cuesta dinero. Se le pide
+     nota, se le prohíbe adular y se le exige que proponga cambios concretos
+     —quitar, meter o sustituir un ejercicio— que la app valida después contra el
+     catálogo, el material y las lesiones. */
   function afinarPrograma(prog) {
     const dias = prog.sesiones.map(function (s, i) {
       return (i + 1) + ') ' + s.nombre + ' [' + s.minutos + ' min]: ' +
@@ -599,24 +600,77 @@
       return I18N.muscle(m) + ' ' + prog.volumen[m];
     }).join(', ');
 
+    /* Lo que de verdad entrena, no lo que dice que va a entrenar. Sin esto la
+       crítica sale de manual y vale para cualquiera. */
+    let historial = '';
+    if (prog.real && Object.keys(prog.real).length) {
+      historial = 'SERIES REALES POR SEMANA (últimas 6 semanas, de sus entrenamientos ' +
+        'registrados): ' + Object.keys(prog.real).map(function (m) {
+          return I18N.muscle(m) + ' ' + prog.real[m];
+        }).join(', ') + '\n';
+    }
+
+    /* La parte de nutrición: sin los números, cualquier consejo de comida es
+       relleno. Con ellos se puede decir si el objetivo es alcanzable o no. */
+    let comida = '';
+    const mac = Perfil.macros ? Perfil.macros() : null;
+    if (mac) {
+      comida = 'ALIMENTACIÓN OBJETIVO: ' + mac.kcal + ' kcal al día, ' + mac.prot +
+        ' g de proteína, ' + mac.carbo + ' g de hidratos, ' + mac.grasa + ' g de grasa.\n';
+    }
+    if (g.Comidas) {
+      const dd = Comidas.ultimos(7).filter(function (d) { return d.kcal > 0; });
+      if (dd.length) {
+        const mk = Math.round(dd.reduce(function (a, d) { return a + d.kcal; }, 0) / dd.length);
+        const mp = Math.round(dd.reduce(function (a, d) { return a + d.prot; }, 0) / dd.length);
+        comida += 'LO QUE REALMENTE COME: media de ' + mk + ' kcal y ' + mp +
+          ' g de proteína en los ' + dd.length + ' días que ha apuntado esta semana.\n';
+      } else {
+        comida += 'NO APUNTA LO QUE COME, así que de la comida solo sabes el objetivo.\n';
+      }
+    }
+
     const prompt = contexto({ progreso: true }) + '\n\n' +
       'PROGRAMA PROPUESTO (objetivo ' + prog.objetivoLabel + ', RPE tope ' + prog.rpe +
       ', unas ' + prog.objetivoSeries + ' series semanales por músculo):\n' + dias + '\n' +
-      'SERIES POR SEMANA Y MÚSCULO: ' + volumen + '\n' +
+      'SERIES POR SEMANA Y MÚSCULO QUE PIDE EL PLAN: ' + volumen + '\n' + historial + comida +
       (prog.lesiones.length ? 'LIMITACIONES YA APLICADAS: ' + prog.lesiones.join(', ') + '\n' : '') +
-      '\nEres un entrenador de fuerza. Revisa este programa para ESTE perfil concreto. ' +
-      'No lo reescribas entero ni repitas lo que ya está bien. Busca: desequilibrios de ' +
-      'volumen entre músculos, patrones que falten, riesgo para las limitaciones que tengo, ' +
-      'y si el orden de los ejercicios de cada día tiene sentido.\n\n' +
-      'Si algún ejercicio te parece mal elegido, propón el cambio con el nombre EXACTO en ' +
-      'español tal y como aparece arriba, y el nombre del recambio en español común. ' +
-      'Como mucho tres cambios, y solo si de verdad mejoran el plan.\n\n' +
-      'Devuelve JSON: {"veredicto":"1-2 frases sobre el plan en conjunto",' +
-      '"puntos":[{"titulo":"3-5 palabras","detalle":"1-2 frases"}],' +
-      '"cambios":[{"quitar":"nombre exacto","poner":"nombre del recambio","porque":"1 frase"}],' +
-      '"consejo":"la única cosa que más te cambiaría el resultado, 1 frase"}';
+      '\nEres a la vez preparador físico, especialista en acondicionamiento y ' +
+      'nutricionista deportivo, y llevas veinte años corrigiendo planes. Te han ' +
+      'contratado para auditar este programa, no para animar a nadie.\n\n' +
+      'REGLAS INNEGOCIABLES:\n' +
+      '- Prohíbido adular. Nada de "buen plan", "vas por buen camino" ni ' +
+      'felicitaciones. Si algo está bien, se dice en cinco palabras y se pasa.\n' +
+      '- De los puntos que devuelvas, al menos tres tienen que ser críticas ' +
+      'concretas con su consecuencia: qué falla, por qué importa y qué pasa si se ' +
+      'deja así. Nada de generalidades que valgan para cualquiera.\n' +
+      '- Habla de ESTE plan y de ESTA persona: cita ejercicios por su nombre, ' +
+      'músculos por sus series y días por su número. Si un consejo se lo podrías ' +
+      'dar a otro cualquiera, bórralo y busca otro.\n' +
+      '- Ponle nota del 0 al 10. Un plan correcto pero mejorable es un 6 o un 7. ' +
+      'Reserva el 9 y el 10 para lo que no tocarías.\n' +
+      '- Si hay riesgo para sus limitaciones o para su edad, eso va primero.\n\n' +
+      'CAMBIOS: propon de dos a cuatro, y que sean ejecutables. Cada uno lleva ' +
+      'una accion:\n' +
+      '- "cambiar": sustituir un ejercicio por otro. Rellena "quitar" con el ' +
+      'nombre EXACTO en español tal y como aparece arriba y "poner" con el ' +
+      'recambio en español común.\n' +
+      '- "quitar": sobra un ejercicio (repite estímulo, alarga la sesión sin ' +
+      'aportar, o es un riesgo). Rellena "quitar" con el nombre exacto.\n' +
+      '- "anadir": falta un ejercicio. Rellena "poner" con el nombre en español ' +
+      'común, "dia" con el número de la sesión donde va, y "series" y "reps".\n' +
+      'Si un cambio no mejora el plan de verdad, no lo propongas.\n\n' +
+      'Devuelve JSON: {"nota":número del 0 al 10,' +
+      '"veredicto":"2-3 frases sin rodeos sobre qué le pasa a este plan",' +
+      '"puntos":[{"titulo":"3-5 palabras","detalle":"1-2 frases con la consecuencia"}],' +
+      '"cambios":[{"accion":"cambiar|quitar|anadir","quitar":"nombre exacto o vacío",' +
+      '"poner":"nombre o vacío","dia":número o 0,"series":número o 0,' +
+      '"reps":número o 0,"porque":"1 frase"}],' +
+      '"nutricion":"1-2 frases sobre qué hay que corregir en su alimentación para ' +
+      'que este entrenamiento sirva de algo, con números",' +
+      '"consejo":"la única cosa que más le cambiaría el resultado, 1 frase"}';
 
-    return llamarJSON(prompt, { maxTokens: 2048, temperatura: 0.5 });
+    return llamarJSON(prompt, { maxTokens: 2600, temperatura: 0.55 });
   }
 
   /* Mira una foto de comida y estima lo que hay. Es una aproximación y se dice

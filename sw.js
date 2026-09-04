@@ -1,7 +1,7 @@
 /* sw.js — service worker.
    Deja la app usable sin conexión: los archivos propios se precargan y las
    imágenes del catálogo se guardan la primera vez que se ven. */
-const VERSION = 'trainingfr-v76';
+const VERSION = 'trainingfr-v77';
 const SHELL = VERSION + '-shell';
 const MEDIA = VERSION + '-media';
 const MAX_MEDIA = 4000;         // imágenes guardadas como máximo (~200 MB)
@@ -45,6 +45,20 @@ self.addEventListener('activate', function (e) {
         .map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
+});
+
+/* La página pregunta en qué versión está de verdad, y puede mandar pasar al que
+   se ha quedado esperando. Sin esto, con otra pestaña abierta el service worker
+   nuevo se quedaba en cola y la app seguía con los archivos viejos sin decir
+   nada. */
+self.addEventListener('message', function (e) {
+  const d = e.data || {};
+  if (d.tipo === 'saltar') { self.skipWaiting(); return; }
+  if (d.tipo === 'version') {
+    const puerto = e.ports && e.ports[0];
+    if (puerto) puerto.postMessage({ version: VERSION });
+    else if (e.source) e.source.postMessage({ tipo: 'version', version: VERSION });
+  }
 });
 
 /* Recorta la caché de imágenes cuando crece demasiado */

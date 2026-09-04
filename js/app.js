@@ -236,14 +236,146 @@
 
   /* ================= inicio ================= */
 
+  /* La portada era un menú: cuatro atajos a pantallas que ya están en la barra de
+     abajo y la lista de rutinas repetida. Ahora responde a lo que uno se
+     pregunta al abrir la app por la mañana —qué toca hoy, cómo voy de semana,
+     cómo voy de comida, qué llevo abandonado— y para navegar ya está la barra. */
+
+  const MUSCULOS_CLAVE = ['chest', 'lats', 'middle back', 'shoulders', 'biceps', 'triceps',
+    'quadriceps', 'hamstrings', 'glutes', 'abdominals', 'calves'];
+
+  /* Cuándo se tocó por última vez cada músculo. Es la pregunta que nadie se
+     acuerda de responder y la que explica los estancamientos: se entrena tres
+     veces por semana y hay medio cuerpo sin tocar desde hace un mes. */
+  function abandonados() {
+    const ses = Store.sessions();
+    if (ses.length < 4) return [];
+
+    const ultima = {};
+    ses.forEach(function (s) {
+      (s.entries || []).forEach(function (e) {
+        const ex = Data.get(e.exId);
+        if (!ex) return;
+        (ex.primaryMuscles || []).forEach(function (m) {
+          if (!ultima[m] || s.start > ultima[m]) ultima[m] = s.start;
+        });
+      });
+    });
+
+    const filas = MUSCULOS_CLAVE.map(function (m) {
+      return {
+        m: m,
+        dias: ultima[m] ? Math.floor((Date.now() - ultima[m]) / 864e5) : null
+      };
+    }).filter(function (f) { return f.dias === null || f.dias >= 8; });
+
+    filas.sort(function (a, b) {
+      if (a.dias === null) return -1;
+      if (b.dias === null) return 1;
+      return b.dias - a.dias;
+    });
+    return filas.slice(0, 3);
+  }
+
+  /* La semana de un vistazo: qué días había plan y cuáles se han cumplido. */
+  function semanaHTML() {
+    const orden = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const ahora = new Date();
+    const desdeLunes = (ahora.getDay() + 6) % 7;
+    const lunes = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - desdeLunes);
+
+    const hechos = {};
+    Store.sessions().forEach(function (x) { hechos[Store.dayKey(x.start)] = true; });
+    const rutinas = Store.routines();
+
+    let previstos = 0;
+    let cumplidos = 0;
+    let sueltos = 0;
+
+    const celdas = orden.map(function (d, i) {
+      const fecha = new Date(lunes.getFullYear(), lunes.getMonth(), lunes.getDate() + i);
+      const hecho = !!hechos[Store.dayKey(fecha.getTime())];
+      const plan = rutinas.some(function (r) { return (r.days || []).indexOf(d) !== -1; });
+      const esHoy = i === desdeLunes;
+      const pasado = i < desdeLunes;
+
+      if (plan) previstos++;
+      if (plan && hecho) cumplidos++;
+      if (!plan && hecho) sueltos++;
+
+      const clases = ['sem-dia'];
+      if (hecho) clases.push('hecho');
+      else if (plan && (pasado || esHoy)) clases.push(pasado ? 'fallado' : 'toca');
+      else if (plan) clases.push('plan');
+      if (esHoy) clases.push('es-hoy');
+
+      return '<div class="' + clases.join(' ') + '"><span>' + d.charAt(0) + '</span><i></i></div>';
+    }).join('');
+
+    const frase = previstos
+      ? cumplidos + ' de ' + previstos + ' días del plan' +
+        (sueltos ? ' y ' + sueltos + ' suelto' + (sueltos > 1 ? 's' : '') : '')
+      : (cumplidos + sueltos) + ' días entrenados';
+
+    return html`
+      <div class="list-title">Tu semana</div>
+      <div class="card">
+        <div class="semana">${raw(celdas)}</div>
+        <div class="row between" style="margin-top:11px">
+          <div class="tiny">${frase}</div>
+          <button class="btn sm ghost" data-a="verprogreso">Ver progreso</button>
+        </div>
+      </div>`;
+  }
+
+  /* Lo que llevas comido hoy contra lo que te toca. En la portada porque es un
+     dato de hoy y de ahora, no de una pantalla a la que se entra a propósito. */
+  function comidaHoyHTML() {
+    if (!g.Comidas) return '';
+    const p = Perfil.datos();
+    if (!Perfil.completo(p)) return '';
+    const m = Perfil.macros(p);
+    if (!m) return '';
+
+    const h = Comidas.hoy();
+    const pk = Math.min(100, Math.round(h.kcal / m.kcal * 100));
+    const pp = Math.min(100, Math.round(h.prot / m.prot * 100));
+    const faltaProt = Math.max(0, m.prot - h.prot);
+
+    return html`
+      <div class="list-title">Lo que llevas comido</div>
+      <div class="card" data-a="irnutricion" style="cursor:pointer">
+        <div class="row" style="gap:16px;align-items:flex-start">
+          <div class="grow">
+            <div class="tiny">CALORÍAS</div>
+            <div><b style="font-size:1.15rem">${UI.num(h.kcal)}</b>
+              <span class="tiny"> / ${UI.num(m.kcal)}</span></div>
+            <div class="prog" style="margin-top:5px"><i style="width:${pk}%"></i></div>
+          </div>
+          <div class="grow">
+            <div class="tiny">PROTEÍNA</div>
+            <div><b style="font-size:1.15rem;color:var(--brand-1)">${h.prot}</b>
+              <span class="tiny"> / ${m.prot} g</span></div>
+            <div class="prog" style="margin-top:5px">
+              <i style="width:${pp}%;background:var(--brand-1)"></i></div>
+          </div>
+        </div>
+        <p class="tiny" style="margin:11px 0 0">${h.kcal === 0
+          ? 'Hoy no has apuntado nada. Una foto del plato basta.'
+          : faltaProt > 0 ? 'Te faltan ' + faltaProt + ' g de proteína para el objetivo del día.'
+          : 'Proteína del día cubierta.'}</p>
+      </div>`;
+  }
+
   function viewInicio() {
     const st = Store.stats();
     const rutinas = Store.routines();
     const activa = Store.active();
     const hoy = UI.DAY_NAMES[new Date().getDay()];
     const deHoy = rutinas.filter(function (r) { return (r.days || []).indexOf(hoy) !== -1; });
-    const ultimas = Store.sessions().slice(0, 3);
     const nombre = Store.settings().name;
+    const olvido = abandonados();
+    const peso = Perfil.tendencia(30);
 
     /* Al volver tras un rato, la portada saluda antes que nada */
     const bienvenida = Saludo.pendiente();
@@ -295,62 +427,51 @@
 
       ${raw(Modo.franjaInvitado())}
 
-      ${raw(deHoy.length ? html`
-        <div class="list-title">Toca hoy, ${UI.diaLargo(hoy)}</div>
-        <div class="stack">${raw(deHoy.map(function (r) { return routineCard(r); }).join(''))}</div>` : '')}
+      <div class="list-title">Hoy, ${UI.diaLargo(hoy).toLowerCase()}</div>
+      ${raw(deHoy.length
+        ? '<div class="stack">' + deHoy.map(function (r) { return routineCard(r); }).join('') + '</div>'
+        : html`
+          <div class="card">
+            <p class="muted" style="margin:0 0 12px">${rutinas.length
+              ? 'Hoy no toca nada en tu plan. Si has hecho algo por tu cuenta, apúntalo; y si te apetece entrenar, elige una rutina.'
+              : 'Todavía no tienes rutinas. Copia una plantilla probada y edítala a tu gusto, o móntate el programa con tus datos.'}</p>
+            <div class="row">
+              ${raw(rutinas.length
+                ? '<button class="btn grow" data-a="apuntar">Apuntar lo que hice</button>' +
+                  '<button class="btn primary grow" data-a="plantillas">Elegir rutina</button>'
+                : '<button class="btn grow" data-a="plantillas">Ver plantillas</button>' +
+                  '<button class="btn primary grow" data-a="programa">Crear mi programa</button>')}
+            </div>
+          </div>`)}
 
-      <div class="list-title">¿Qué entrenas hoy?</div>
-      <p class="tiny" style="margin:-4px 4px 8px">Elige una zona y te la enseño músculo a
-      músculo, con la opción de montar la sesión entera de una vez.</p>
-      <div class="pill-scroll">
-        ${raw(I18N.REGIONES.map(function (r) {
-          return '<button class="chip" data-zona="' + r.id + '">' + esc(r.label) + '</button>';
-        }).join(''))}
-      </div>
+      ${raw(semanaHTML())}
+      ${raw(comidaHoyHTML())}
 
-      <div class="card" style="margin-top:14px;border-color:var(--acc)">
-        <div class="row between">
-          <div class="grow">
-            <div style="font-weight:700">Tu programa personal</div>
-            <div class="tiny">Volumen, repeticiones y ejercicios según tu edad, tu nivel,
-              tu objetivo y tus limitaciones</div>
+      ${raw(olvido.length ? html`
+        <div class="list-title">Lo que llevas abandonado</div>
+        <div class="card">
+          <div class="stack" style="gap:7px">
+            ${raw(olvido.map(function (f) {
+              return '<div class="row between"><span style="font-size:.9rem">' +
+                esc(I18N.muscle(f.m)) + '</span><span class="tiny">' +
+                (f.dias === null ? 'nunca' : 'hace ' + f.dias + ' días') + '</span></div>';
+            }).join(''))}
           </div>
-          <button class="btn primary sm" data-a="programa">Crear</button>
-        </div>
-      </div>
+          <p class="tiny" style="margin:11px 0 0">Un músculo que no se toca en más de una semana
+          se estanca. Toca la zona en Ejercicios y te monto la sesión.</p>
+          <button class="btn sm block" data-a="programa" style="margin-top:9px">
+            Rehacer mi programa con esto en cuenta</button>
+        </div>` : '')}
 
-      <div class="list-head">
-        <span class="list-title">Mis rutinas</span>
-        <button class="btn sm" data-a="nueva">${raw(icon('plus'))} Nueva</button>
-      </div>
-
-      ${raw(rutinas.length ? html`
-        <div class="stack">${raw(rutinas.filter(function (r) {
-          return (r.days || []).indexOf(hoy) === -1;
-        }).map(function (r) { return routineCard(r); }).join(''))}</div>`
-      : html`
-        <div class="card center">
-          <p class="muted" style="margin-bottom:12px">Todavía no tienes rutinas. Empieza con una plantilla
-          probada y edítala a tu gusto, o créala desde cero.</p>
-          <button class="btn primary block" data-a="plantillas">Ver rutinas de ejemplo</button>
-        </div>`)}
-
-      ${raw(ultimas.length ? html`
-        <div class="list-head">
-          <span class="list-title">Últimos entrenamientos</span>
-          <button class="btn sm ghost" data-a="verprogreso">Ver todo</button>
-        </div>
-        <div class="stack">${raw(ultimas.map(function (s) {
-          return html`
-            <div class="card row between">
-              <div class="grow">
-                <div style="font-weight:600">${s.routineName}</div>
-                <div class="tiny">${UI.fecha(s.start)} · ${s.setsDone} series${raw(
-                  s.volume ? ' · ' + esc(UI.kg(s.volume)) : '')}</div>
-              </div>
-              <div class="chip">${UI.mmss(((s.end || s.start) - s.start) / 1000)}</div>
-            </div>`;
-        }).join(''))}` : '')}`;
+      ${raw(peso ? html`
+        <div class="list-title">Tu peso</div>
+        <div class="card row between">
+          <div class="grow">
+            <div style="font-weight:700;font-size:1.05rem">${peso.dif >= 0 ? '+' : ''}${peso.dif.toFixed(1)} kg</div>
+            <div class="tiny">en los últimos 30 días, con ${peso.n} pesajes</div>
+          </div>
+          <button class="btn sm" data-a="irperfil">Apuntar peso</button>
+        </div>` : '')}`;
   }
 
   /* Resalta el nombre dentro del saludo, que es lo único que cambia de persona
@@ -399,11 +520,43 @@
     const dias = (r.days || []).map(UI.diaLargo);
     const que = r.mixta ? 'Mixta' : (zona ? zona.label : 'Sin ejercicios');
     if (!dias.length) return que;
-    return dias.join(' y ') + ' · ' + que;
+    /* Tres días unidos con «y» daban «Lunes y Miércoles y Viernes» */
+    const lista = dias.length < 2 ? dias[0]
+      : dias.slice(0, -1).join(', ') + ' y ' + dias[dias.length - 1];
+    return lista + ' · ' + que;
+  }
+
+  /* Los nombres que salen del generador llevan el día delante —«Viernes · Rutina
+     Fabián»— porque así se guardaron. En la lista el día ya sale en la cabecera
+     del grupo y otra vez en el título de la tarjeta: escribirlo una tercera vez
+     no añade nada. Se quita al pintar, no al guardar: el nombre completo sigue
+     siendo el que viaja al historial y a los otros dispositivos. */
+  function nombreRutina(r) {
+    const n = String(r.name || '').trim();
+    if (!n) return 'Rutina sin nombre';
+    const corte = n.indexOf(' · ');
+    if (corte === -1) return n;
+
+    const cabeza = n.slice(0, corte);
+    const resto = n.slice(corte + 3).trim();
+    if (!resto) return n;
+
+    const soloDias = cabeza.split(/\s+y\s+/).every(function (t) {
+      const x = I18N.norm(t);
+      return UI.DAY_NAMES.some(function (d) {
+        return I18N.norm(d) === x || I18N.norm(UI.diaLargo(d)) === x;
+      });
+    });
+    return soloDias ? resto : n;
   }
 
   /* qué rutina está desplegada en la lista */
   let rutinaAbierta = null;
+
+  /* Qué grupos de día están abiertos. Sin esto la pantalla de Rutinas era la
+     semana entera desplegada de una vez y había que bajar mucho para ver el
+     jueves. Hoy viene abierto y el resto cerrado, que es lo que se mira. */
+  let diasAbiertos = {};
 
   /* La lista agrupada por día, con el de hoy primero. Una rutina asignada a
      varios días sale en cada uno: es donde uno la va a buscar. */
@@ -413,24 +566,29 @@
     const desde = orden.indexOf(hoy);
     const dias = orden.slice(desde).concat(orden.slice(0, desde));
 
+    const grupo = function (clave, titulo, suyas, abiertoPorDefecto) {
+      if (!suyas.length) return '';
+      const abierto = diasAbiertos[clave] === undefined ? abiertoPorDefecto : diasAbiertos[clave];
+      const resumen = suyas.map(function (r) { return nombreRutina(r); }).join(' · ');
+      return html`
+        <button class="dia-grupo" data-grupo="${clave}">
+          <div class="grow">
+            <div class="list-title" style="margin:0">${titulo}</div>
+            <div class="tiny" style="margin-top:2px">${resumen}</div>
+          </div>
+          <span class="chevron ${abierto ? 'abierta' : ''}">${raw(icon('chevron'))}</span>
+        </button>
+        ${raw(abierto ? '<div class="stack">' +
+          suyas.map(function (r) { return routineCard(r); }).join('') + '</div>' : '')}`;
+    };
+
     const bloques = dias.map(function (d) {
       const suyas = rutinas.filter(function (r) { return (r.days || []).indexOf(d) !== -1; });
-      if (!suyas.length) return '';
-      return html`
-        <div class="list-head" style="margin-top:18px">
-          <span class="list-title">${UI.diaLargo(d)}${raw(d === hoy
-            ? ' <span class="chip solid tiny-chip">HOY</span>' : '')}</span>
-        </div>
-        <div class="stack">${raw(suyas.map(function (r) { return routineCard(r); }).join(''))}</div>`;
+      return grupo(d, UI.diaLargo(d) + (d === hoy ? ' — hoy' : ''), suyas, d === hoy);
     }).join('');
 
     const sueltas = rutinas.filter(function (r) { return !(r.days || []).length; });
-    const sinDia = sueltas.length ? html`
-      <div class="list-head" style="margin-top:18px">
-        <span class="list-title">Sin día asignado</span>
-      </div>
-      <div class="stack">${raw(sueltas.map(function (r) { return routineCard(r); }).join(''))}</div>`
-      : '';
+    const sinDia = grupo('_sueltas', 'Sin día asignado', sueltas, false);
 
     return bloques + sinDia;
   }
@@ -460,7 +618,7 @@
             <div class="rt-titulo">${tituloRutina(r)}
               ${raw(esDeHoy && !ordenando ? '<span class="chip solid tiny-chip">HOY</span>' : '')}
               ${raw(r.mixta ? '<span class="chip tiny-chip">MIXTA</span>' : '')}</div>
-            <div class="rt-nombre">${r.name || 'Rutina sin nombre'}</div>
+            <div class="rt-nombre">${nombreRutina(r)}</div>
             <div class="tiny" style="margin-top:3px">${n} ${n === 1 ? 'ejercicio' : 'ejercicios'}${raw(
               musculos.length ? ' · ' + esc(musculos.slice(0, 3).join(', ').toLowerCase()) +
                 (musculos.length > 3 ? ' y ' + (musculos.length - 3) + ' más' : '') : '')}</div>
@@ -486,6 +644,19 @@
                   </div>
                 </button>`;
             }).join(''))}
+            <div style="padding:11px 13px 0">
+              <div class="tiny">QUÉ DÍAS LA HAGO</div>
+              <div class="row wrap" style="gap:6px;margin-top:6px">
+                ${raw(DIAS.map(function (d) {
+                  const on = (r.days || []).indexOf(d) !== -1;
+                  return '<button class="chip ' + (on ? 'on' : '') + '" data-rdia="' + d +
+                    '" data-rid="' + r.id + '">' + d + '</button>';
+                }).join(''))}
+              </div>
+              <p class="tiny" style="margin:6px 0 0">Tócalos para mover la rutina de día. Si
+              el viernes quieres pecho en vez de pierna, quita el viernes de una y
+              pónselo a la otra.</p>
+            </div>
             <div class="row" style="padding:11px 13px 13px">
               <button class="btn sm grow" data-open="${r.id}">${raw(icon('edit'))} Editar</button>
               <button class="btn sm primary grow" data-train="${r.id}">
@@ -508,6 +679,9 @@
     bind(root, '[data-a=programa]', function () { go('programa'); });
     bind(root, '[data-a=plantillas]', function () { go('rutinas'); });
     bind(root, '[data-a=verprogreso]', function () { go('progreso'); });
+    bind(root, '[data-a=irnutricion]', function () { go('nutricion'); });
+    bind(root, '[data-a=irperfil]', function () { go('perfil'); });
+    bind(root, '[data-a=apuntar]', apuntarActividad);
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
     bindAll(root, '[data-train]', function (el) { empezar(el.dataset.train); });
     bindAll(root, '[data-zona]', function (el) { irAZona(el.dataset.zona); });
@@ -1300,6 +1474,11 @@
       series y los días. <b>Generar programa</b>: te lo monto yo con tu edad, tu nivel, tu
       objetivo y tus limitaciones, y luego lo editas igual.</p>
 
+      <button class="btn ghost block sm" data-a="actividad" style="margin-top:8px">
+        ${raw(icon('plus'))} Apuntar algo que ya hice</button>
+      <p class="tiny center" style="margin-top:6px">Caminar una hora el domingo, la pachanga
+      del sábado o la clase de pilates cuentan igual, aunque no salgan de una rutina.</p>
+
       ${raw(rutinas.length ? html`
         <div class="list-head">
           <span class="list-title">${ordenando ? 'Ordena y borra lo que sobre'
@@ -1398,6 +1577,38 @@
       window.scrollTo(0, pos);
     });
 
+    bindAll(root, '[data-grupo]', function (el) {
+      const d = el.dataset.grupo;
+      const hoy = UI.DAY_NAMES[new Date().getDay()];
+      const abierto = diasAbiertos[d] === undefined ? (d === hoy) : diasAbiertos[d];
+      diasAbiertos[d] = !abierto;
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+    });
+
+    /* Mover una rutina de día sin entrar a editarla: es el cambio que más se
+       hace y estaba tres pantallas adentro. */
+    bindAll(root, '[data-rdia]', function (el) {
+      const r = Store.routine(el.dataset.rid);
+      if (!r) return;
+      const d = el.dataset.rdia;
+      const dias = (r.days || []).slice();
+      const i = dias.indexOf(d);
+      if (i === -1) dias.push(d); else dias.splice(i, 1);
+      dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
+      r.days = dias;
+      Store.saveRoutine(r);
+      diasAbiertos[d] = true;
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+      UI.toast(dias.length ? nombreRutina(r) + ': ' + UI.diasLargos(dias)
+        : nombreRutina(r) + ' se queda sin día');
+    });
+
+    bind(root, '[data-a=actividad]', apuntarActividad);
+
     bindAll(root, '[data-ver]', function (el) {
       const ex = Data.get(el.dataset.ver);
       if (ex) exerciseSheet(ex);
@@ -1410,6 +1621,134 @@
       go('rutina', r.id);
     });
   };
+
+  /* ---------- apuntar algo hecho fuera de la app ----------
+     Media vida de entrenamiento no pasa por una rutina: una hora andando el
+     domingo, la pachanga del sábado, la clase de pilates del barrio. Si eso no
+     se puede apuntar, la racha miente y el progreso enseña menos de lo que hay.
+     Las calorías salen del MET de cada actividad por el peso y el tiempo, que es
+     la misma cuenta que hace cualquier reloj y no pretende ser exacta. */
+  const ACTIVIDADES = [
+    { id: 'caminar', label: 'Caminar', met: 3.5 },
+    { id: 'correr', label: 'Correr', met: 9 },
+    { id: 'bici', label: 'Bici', met: 7 },
+    { id: 'nadar', label: 'Nadar', met: 7 },
+    { id: 'senderismo', label: 'Senderismo', met: 6 },
+    { id: 'equipo', label: 'Deporte de equipo', met: 7 },
+    { id: 'raqueta', label: 'Raqueta o pádel', met: 6.5 },
+    { id: 'baile', label: 'Baile', met: 5 },
+    { id: 'pilates', label: 'Pilates o yoga', met: 3 },
+    { id: 'estirar', label: 'Estirar y movilidad', met: 2.5 },
+    { id: 'pesas', label: 'Pesas por mi cuenta', met: 5 },
+    { id: 'otro', label: 'Otra cosa', met: 4 }
+  ];
+
+  function apuntarActividad() {
+    const p = Perfil.datos();
+    const peso = Number(p && p.peso) || 75;
+    const elegido = { act: 'caminar', min: 60, atras: 0 };
+
+    const kcalDe = function () {
+      const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
+      return Math.round(a.met * peso * elegido.min / 60);
+    };
+
+    const diasHTML = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(Date.now() - i * 86400000);
+      const et = i === 0 ? 'Hoy' : i === 1 ? 'Ayer' : UI.diaLargo(UI.DAY_NAMES[d.getDay()]);
+      diasHTML.push('<button class="chip ' + (i === 0 ? 'on' : '') + '" data-cuando="' +
+        i + '">' + esc(et) + '</button>');
+    }
+
+    UI.modal(html`
+      <h2>Apuntar algo que ya hice</h2>
+      <p class="muted" style="margin:0 0 12px">Entra en tu historial y en tu racha como un
+      entrenamiento más. Las calorías son una estimación por tu peso y el tiempo.</p>
+
+      <label class="tiny">QUÉ HICE</label>
+      <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-tipos">
+        ${raw(ACTIVIDADES.map(function (a) {
+          return '<button class="chip ' + (a.id === 'caminar' ? 'on' : '') +
+            '" data-act="' + a.id + '">' + esc(a.label) + '</button>';
+        }).join(''))}
+      </div>
+
+      <label class="tiny" style="display:block;margin-top:14px">CUÁNDO</label>
+      <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-dias">${raw(diasHTML.join(''))}</div>
+
+      <label class="tiny" style="display:block;margin-top:14px">CUÁNTO TIEMPO</label>
+      <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-mins">
+        ${raw([15, 30, 45, 60, 90, 120].map(function (m) {
+          return '<button class="chip ' + (m === 60 ? 'on' : '') + '" data-min="' + m +
+            '">' + m + ' min</button>';
+        }).join(''))}
+      </div>
+      <input id="ac-otro" type="number" inputmode="numeric" min="1" max="600"
+             placeholder="u otro número de minutos" style="margin-top:8px">
+
+      <div class="card" style="margin-top:14px">
+        <div class="tiny">ESTIMACIÓN</div>
+        <div id="ac-kcal" style="font-weight:700;font-size:1.15rem;margin-top:3px"></div>
+      </div>
+
+      <button class="btn primary block" id="ac-ok" style="margin-top:14px">Apuntar</button>`,
+      function (el) {
+        const pintarKcal = function () {
+          el.querySelector('#ac-kcal').textContent = '~' + UI.num(kcalDe()) + ' kcal en ' +
+            elegido.min + ' min';
+        };
+        const marcar = function (caja, sel) {
+          el.querySelectorAll(caja + ' .chip').forEach(function (c) {
+            c.classList.toggle('on', c === sel);
+          });
+        };
+
+        el.querySelectorAll('#ac-tipos .chip').forEach(function (c) {
+          c.onclick = function () { elegido.act = c.dataset.act; marcar('#ac-tipos', c); pintarKcal(); };
+        });
+        el.querySelectorAll('#ac-dias .chip').forEach(function (c) {
+          c.onclick = function () { elegido.atras = Number(c.dataset.cuando); marcar('#ac-dias', c); };
+        });
+        el.querySelectorAll('#ac-mins .chip').forEach(function (c) {
+          c.onclick = function () {
+            elegido.min = Number(c.dataset.min);
+            el.querySelector('#ac-otro').value = '';
+            marcar('#ac-mins', c);
+            pintarKcal();
+          };
+        });
+        el.querySelector('#ac-otro').oninput = function (ev) {
+          const v = Number(ev.target.value);
+          if (v > 0) {
+            elegido.min = Math.min(600, v);
+            marcar('#ac-mins', null);
+            pintarKcal();
+          }
+        };
+        pintarKcal();
+
+        el.querySelector('#ac-ok').onclick = function () {
+          const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
+          const fin = Date.now() - elegido.atras * 86400000;
+          Store.addSession({
+            routineName: a.label,
+            start: fin - elegido.min * 60000,
+            end: fin,
+            entries: [],
+            setsDone: 0,
+            volume: 0,
+            manual: true,
+            actividad: a.id,
+            minutos: elegido.min,
+            kcal: kcalDe()
+          });
+          UI.closeModal();
+          render();
+          UI.toast(a.label + ' apuntado: ' + elegido.min + ' min');
+        };
+      });
+  }
 
   /* ================= asistente: plan semanal ================= */
 
@@ -3027,7 +3366,7 @@
 
   /* Aviso de versión nueva, con su botón para recargar en el momento */
   let avisadoVersion = false;
-  function avisarVersionNueva() {
+  function avisarVersionNueva(seRecargaSola) {
     if (avisadoVersion) return;
     avisadoVersion = true;
     /* contenedor propio: el de recordatorios se reescribe en cada pintado */
@@ -3040,12 +3379,31 @@
       <span class="row-icon">${raw(icon('down'))}</span>
       <div class="grow">
         <div style="font-weight:600;font-size:.95rem">Hay una versión nueva</div>
-        <div class="tiny">Recarga para usarla. Tus datos no se tocan.</div>
+        <div class="tiny">${seRecargaSola
+          ? 'Se instala sola en un momento. Tus datos no se tocan.'
+          : 'Recarga cuando termines. Tus datos no se tocan.'}</div>
       </div>
-      <button class="btn sm primary" data-recargar>Actualizar</button>`;
+      <button class="btn sm primary" data-recargar>Actualizar ya</button>`;
     caja.innerHTML = '<div class="aviso">' + caja.innerHTML + '</div>';
     host.parentNode.insertBefore(caja, host);
     caja.querySelector('[data-recargar]').onclick = function () { location.reload(); };
+  }
+
+  /* En qué versión está de verdad lo que se está ejecutando. Lo contesta el
+     service worker, que es el único que lo sabe con certeza. */
+  function versionDelSW() {
+    return new Promise(function (ok) {
+      const sw = 'serviceWorker' in navigator ? navigator.serviceWorker.controller : null;
+      if (!sw || !window.MessageChannel) { ok(''); return; }
+      const canal = new MessageChannel();
+      const t = setTimeout(function () { ok(''); }, 1500);
+      canal.port1.onmessage = function (e) {
+        clearTimeout(t);
+        ok((e.data || {}).version || '');
+      };
+      try { sw.postMessage({ tipo: 'version' }, [canal.port2]); }
+      catch (e) { clearTimeout(t); ok(''); }
+    });
   }
 
   /* Recordatorios que tocaban y aún no has visto */
@@ -3223,39 +3581,80 @@
            no se recarga, la app sigue en la versión anterior. Sin avisar, uno
            cierra y abre y sigue viendo el mismo fallo sin entender por qué. */
         const yaControlaba = !!navigator.serviceWorker.controller;
-        navigator.serviceWorker.addEventListener('controllerchange', function () {
-          if (!yaControlaba) return;
-          /* La versión nueva ya manda, pero la página sigue con los archivos
-             viejos. Si no hay nada en marcha se recarga sola: pedirlo por un
-             aviso deja a medio mundo usando la versión de antes y viendo
-             fallos ya arreglados. Con un entrenamiento en curso o una hoja
-             abierta no se toca nada y se ofrece el botón. */
-          /* La comprobación de versión ocurre nada más arrancar, así que la
-             espera fija de quince segundos significaba no recargarse nunca
-             sola: cerrabas y abrías la app y seguías en la versión de antes,
-             que es justo lo que se quería evitar. Ahora sólo se aplaza si de
-             verdad hay algo a medias —una vuelta de Spotify o del correo se
-             reconoce por lo que traen en la dirección—. */
+        let yaAvisado = false;
+
+        /* Se recarga sola, pero primero se ve. Un aviso que aparece y se va con
+           la recarga es un aviso que nadie ha leído: por eso el cartel se pinta
+           antes y la recarga espera a que dé tiempo a leerlo, y al volver la app
+           dice en qué versión se ha quedado. Con un entrenamiento en marcha o
+           una hoja abierta no se toca nada y queda el botón. */
+        const hayVersionNueva = function () {
+          /* En la primera visita también se instala un service worker, y eso no
+             es una versión nueva de nada: sin esta línea la app se recargaba
+             sola nada más abrirla por primera vez. */
+          if (!yaControlaba || yaAvisado) return;
+          yaAvisado = true;
+
           const volviendoDeFuera = /(?:code|state|access_token|error)=/
             .test(location.search + location.hash);
           const ocupado = Workout.isActive() ||
             !document.getElementById('modal').hidden ||
             location.hash.indexOf('entrenar') !== -1 ||
-            volviendoDeFuera ||
-            Date.now() - arranque < 2000;
+            volviendoDeFuera;
 
-          if (ocupado) { avisarVersionNueva(); return; }
-          UI.toast('Actualizando a la versión nueva…');
-          setTimeout(function () { location.reload(); }, 900);
+          avisarVersionNueva(!ocupado);
+          if (ocupado) return;
+          try { sessionStorage.setItem('trainingfr.actualizada', '1'); } catch (e) { /* da igual */ }
+          setTimeout(function () { location.reload(); }, 3500);
+        };
+
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (!yaControlaba) return;
+          hayVersionNueva();
         });
-        /* Sin esto el aviso de versión nueva no llegaba a salir: el navegador
-           servía el propio sw.js desde su caché y, en una app instalada que
-           puede pasar días abierta, no volvía a mirar si había algo nuevo.
-           Ahora se pregunta al arrancar, cada vez que se vuelve a la app y de
-           tanto en tanto mientras está delante. */
+
+        /* Si la vez anterior nos recargamos por una versión nueva, se dice cuál
+           es. Es la única prueba visible de que la actualización ha entrado. */
+        let veniaDeActualizar = false;
+        try {
+          veniaDeActualizar = !!sessionStorage.getItem('trainingfr.actualizada');
+          if (veniaDeActualizar) sessionStorage.removeItem('trainingfr.actualizada');
+        } catch (e) { /* modo privado */ }
+        if (veniaDeActualizar) {
+          versionDelSW().then(function (v) {
+            UI.toast('Ya estás en la versión nueva' +
+              (v ? ' (' + v.replace('trainingfr-', '') + ')' : '') + '.');
+          });
+        }
+
         navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
           .then(function (reg) {
             if (!reg) return;
+
+            /* controllerchange no siempre llega. Si el service worker nuevo se
+               queda en cola —pasa con otra pestaña abierta— nadie se enteraba de
+               que había versión nueva: la app seguía con los archivos viejos y el
+               aviso no salía nunca. Escuchando la instalación sale igual, y al
+               que espera se le manda pasar. */
+            const vigilar = function (sw) {
+              if (!sw) return;
+              sw.addEventListener('statechange', function () {
+                if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+                  hayVersionNueva();
+                }
+              });
+            };
+            if (reg.waiting && navigator.serviceWorker.controller) {
+              try { reg.waiting.postMessage({ tipo: 'saltar' }); } catch (e) { /* sigue igual */ }
+              hayVersionNueva();
+            }
+            vigilar(reg.installing);
+            reg.addEventListener('updatefound', function () { vigilar(reg.installing); });
+
+            /* Sin esto el aviso no llegaba a salir: el navegador servía el propio
+               sw.js desde su caché y, en una app instalada que puede pasar días
+               abierta, no volvía a mirar si había algo nuevo. Se pregunta al
+               arrancar, al volver a la app y de tanto en tanto. */
             let ultimaMirada = 0;
             const mirar = function () {
               if (Date.now() - ultimaMirada < 60000) return;

@@ -344,8 +344,9 @@
               <div class="row between">
                 <div class="grow" style="cursor:pointer" data-ses="${s.id}">
                   <div style="font-weight:700">${s.routineName}</div>
-                  <div class="tiny">${UI.fecha(s.start)} · ${s.setsDone} series${raw(
-                    s.volume ? ' · ' + esc(UI.kg(s.volume)) : '')} ·
+                  <div class="tiny">${UI.fecha(s.start)} · ${raw(s.manual
+                    ? esc('apuntado a mano' + (s.kcal ? ' · ~' + UI.num(s.kcal) + ' kcal' : ''))
+                    : s.setsDone + ' series' + (s.volume ? ' · ' + esc(UI.kg(s.volume)) : ''))} ·
                     ${UI.mmss(((s.end || s.start) - s.start) / 1000)}</div>
                 </div>
                 <button class="btn icon sm danger" data-delses="${s.id}"
