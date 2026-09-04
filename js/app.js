@@ -344,7 +344,7 @@
 
     return html`
       <div class="list-title">Lo que llevas comido</div>
-      <div class="card" data-a="irnutricion" style="cursor:pointer">
+      <div class="card">
         <div class="row" style="gap:16px;align-items:flex-start">
           <div class="grow">
             <div class="tiny">CALORÍAS</div>
@@ -364,7 +364,16 @@
           ? 'Hoy no has apuntado nada. Una foto del plato basta.'
           : faltaProt > 0 ? 'Te faltan ' + faltaProt + ' g de proteína para el objetivo del día.'
           : 'Proteína del día cubierta.'}</p>
-      </div>`;
+
+        <div class="row" style="margin-top:12px">
+          <label class="btn primary grow" for="foto-inicio" style="cursor:pointer">
+            ${raw(icon('nutricion'))} Foto de lo que como</label>
+          <button class="btn" data-a="irnutricion">Ver el día</button>
+        </div>
+        <input type="file" id="foto-inicio" accept="image/*" capture="environment" hidden>
+      </div>
+
+      <div id="comida-pensando"></div>`;
   }
 
   function viewInicio() {
@@ -462,6 +471,8 @@
           <button class="btn sm block" data-a="programa" style="margin-top:9px">
             Rehacer mi programa con esto en cuenta</button>
         </div>` : '')}
+
+      <div class="pie-version" id="pie-version"></div>
 
       ${raw(peso ? html`
         <div class="list-title">Tu peso</div>
@@ -712,8 +723,41 @@
     bind(root, '[data-a=plantillas]', function () { go('rutinas'); });
     bind(root, '[data-a=verprogreso]', function () { go('progreso'); });
     bind(root, '[data-a=irnutricion]', function () { go('nutricion'); });
+
+    /* La cámara, a un toque desde la portada: es lo que más veces al día se
+       hace y estaba dos pantallas adentro. */
+    const campoFoto = root.querySelector('#foto-inicio');
+    if (campoFoto) campoFoto.onchange = function () {
+      const file = campoFoto.files && campoFoto.files[0];
+      campoFoto.value = '';        // si no, elegir dos veces la misma foto no dispara nada
+      if (file && VISTAS.mirarFotoComida) VISTAS.mirarFotoComida(file);
+    };
     bind(root, '[data-a=irperfil]', function () { go('perfil'); });
     bind(root, '[data-a=apuntar]', apuntarActividad);
+
+    /* La versión, abajo del todo y sin ruido cuando no hay nada que hacer. Si
+       hay una nueva publicada, esta línea es el botón para cogerla: el aviso
+       automático depende de que el navegador se digne a mirar, y con la app
+       instalada eso puede tardar días. */
+    const pie = root.querySelector('#pie-version');
+    if (pie) {
+      estadoVersion().then(function (v) {
+        if (!v || !v.local) { pie.textContent = ''; return; }
+        const corto = function (x) { return String(x).replace('trainingfr-', ''); };
+        if (v.alDia) {
+          pie.innerHTML = 'Training FR ' + esc(corto(v.local)) + ' · al día';
+          return;
+        }
+        pie.className = 'pie-version hay-nueva';
+        pie.innerHTML = '<b>Hay una versión nueva: ' + esc(corto(v.servidor)) + '</b>' +
+          '<span>Tú tienes la ' + esc(corto(v.local)) + '. Toca para actualizar; ' +
+          'tus datos no se tocan.</span>';
+        pie.onclick = function () {
+          pie.innerHTML = '<b>Actualizando…</b>';
+          forzarActualizacion();
+        };
+      });
+    }
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
     bindAll(root, '[data-train]', function (el) { empezar(el.dataset.train); });
     bindAll(root, '[data-zona]', function (el) { irAZona(el.dataset.zona); });
@@ -2847,36 +2891,19 @@
     /* qué versión sirve el service worker ahora mismo */
     const cajaVer = root.querySelector('#sw-version');
     if (cajaVer) {
-      fetch('sw.js?v=' + Date.now()).then(function (r) { return r.text(); }).then(function (t) {
-        const m = t.match(/VERSION = '([^']+)'/);
-        const enServidor = m ? m[1] : '?';
-        caches.keys().then(function (ks) {
-          const local = ks.filter(function (k) { return k.indexOf('-shell') !== -1; })
-            .map(function (k) { return k.replace('-shell', ''); })[0] || 'sin caché';
-          cajaVer.textContent = local === enServidor
-            ? 'Estás en la última versión (' + local + ').'
-            : 'Tienes ' + local + ' y la última es ' + enServidor + '. Pulsa el botón.';
-        });
-      }).catch(function () { cajaVer.textContent = 'Sin conexión para comprobarlo.'; });
+      estadoVersion().then(function (v) {
+        if (!v) { cajaVer.textContent = 'Sin conexión para comprobarlo.'; return; }
+        cajaVer.textContent = v.alDia
+          ? 'Estás en la última versión (' + v.local + ').'
+          : 'Tienes ' + (v.local || 'sin caché') + ' y la última es ' +
+            (v.servidor || '?') + '. Pulsa el botón.';
+      });
     }
 
     bind(root, '[data-a=actualizarApp]', function (el) {
       el.disabled = true;
       el.textContent = 'Actualizando…';
-      const fin = function () { location.reload(true); };
-      const tareas = [];
-      if ('serviceWorker' in navigator) {
-        tareas.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
-          return Promise.all(rs.map(function (r) { return r.unregister(); }));
-        }));
-      }
-      if (window.caches) {
-        tareas.push(caches.keys().then(function (ks) {
-          return Promise.all(ks.filter(function (k) { return k.indexOf('-media') === -1; })
-            .map(function (k) { return caches.delete(k); }));
-        }));
-      }
-      Promise.all(tareas).then(fin).catch(fin);
+      forzarActualizacion();
     });
 
     root.querySelector('#s-name').onchange = function (e) {
@@ -3655,6 +3682,45 @@
     caja.innerHTML = '<div class="aviso">' + caja.innerHTML + '</div>';
     host.parentNode.insertBefore(caja, host);
     caja.querySelector('[data-recargar]').onclick = function () { location.reload(); };
+  }
+
+  /* Qué versión hay instalada y cuál se está publicando. La instalada se lee
+     del nombre de la caché, que es lo único que no miente aunque el service
+     worker se haya quedado a medias; la publicada, del propio sw.js pedido sin
+     pasar por ninguna caché. */
+  function estadoVersion() {
+    if (!window.caches) return Promise.resolve(null);
+    return fetch('sw.js?v=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.text(); })
+      .then(function (t) {
+        const m = t.match(/VERSION = '([^']+)'/);
+        const servidor = m ? m[1] : '';
+        return caches.keys().then(function (ks) {
+          const local = ks.filter(function (k) { return k.indexOf('-shell') !== -1; })
+            .map(function (k) { return k.replace('-shell', ''); })[0] || '';
+          return { local: local, servidor: servidor, alDia: !!local && local === servidor };
+        });
+      })
+      .catch(function () { return null; });
+  }
+
+  /* Borrar el service worker y las cachés de código y volver a empezar. Es lo
+     que arregla un móvil que se ha quedado con archivos de dos versiones. */
+  function forzarActualizacion() {
+    const fin = function () { location.reload(true); };
+    const tareas = [];
+    if ('serviceWorker' in navigator) {
+      tareas.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+        return Promise.all(rs.map(function (r) { return r.unregister(); }));
+      }));
+    }
+    if (window.caches) {
+      tareas.push(caches.keys().then(function (ks) {
+        return Promise.all(ks.filter(function (k) { return k.indexOf('-media') === -1; })
+          .map(function (k) { return caches.delete(k); }));
+      }));
+    }
+    return Promise.all(tareas).then(fin).catch(fin);
   }
 
   /* En qué versión está de verdad lo que se está ejecutando. Lo contesta el

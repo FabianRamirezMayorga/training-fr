@@ -277,14 +277,17 @@
   /* Manda la foto, apunta lo que la IA vea y suelta la imagen. Mientras piensa
      se enseña la foto en pequeño, que es la única copia que existe y vive en
      memoria hasta que se acaba. */
-  function mirarFoto(file, root) {
+  function mirarFoto(file) {
     if (!IA.activa()) {
       UI.toast('Esto necesita la clave de Gemini, que se pone en la b\u00f3veda de Ajustes.');
       go('entrenador');
       return;
     }
 
-    const caja = root.querySelector('#comida-pensando');
+    /* La caja donde se enseña la foto mientras se piensa. Se busca en el
+       documento y no dentro de una pantalla concreta: la misma función la usan
+       Alimentación y el acceso rápido de la portada. */
+    const caja = document.getElementById('comida-pensando');
     let foto = null;
 
     const soltar = function () {
@@ -374,6 +377,9 @@
       });
   }
 
+  /* La usa también la portada, que tiene su propio botón de cámara */
+  V.mirarFotoComida = mirarFoto;
+
   V.nutricion.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=datos]', function () { go('datos'); });
@@ -393,7 +399,7 @@
       const file = campoFoto.files && campoFoto.files[0];
       /* se vac\u00eda ya: si no, elegir dos veces la misma foto no dispara nada */
       campoFoto.value = '';
-      if (file) mirarFoto(file, root);
+      if (file) mirarFoto(file);
     };
 
     bindAll(root, '[data-dia]', function (el) {

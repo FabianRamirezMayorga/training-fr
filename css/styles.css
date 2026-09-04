@@ -489,6 +489,16 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 
 /* ---------- programa personal ---------- */
 /* Cabecera plegable de cada día del programa */
+/* La versión, al pie de la portada. Callada cuando no hay nada que hacer y
+   con cara de botón cuando hay una nueva esperando. */
+.pie-version{margin:22px 4px 4px;font-size:.72rem;color:var(--dim2);text-align:center}
+.pie-version:empty{display:none}
+.pie-version.hay-nueva{display:block;width:100%;text-align:left;padding:12px 14px;
+  border:1px solid var(--acc);border-radius:14px;background:var(--acc-d);
+  color:var(--txt);cursor:pointer}
+.pie-version.hay-nueva b{display:block;font-size:.92rem;color:var(--acc)}
+.pie-version.hay-nueva span{display:block;margin-top:3px;font-size:.76rem;color:var(--dim)}
+
 /* La semana de un vistazo en la portada. Cada día es una letra y un punto:
    lleno = entrenado, hueco = había plan y no se hizo, apagado = día libre. */
 .semana{display:flex;gap:6px}
