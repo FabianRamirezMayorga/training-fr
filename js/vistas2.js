@@ -80,6 +80,8 @@
         <span><i class="dot" style="background:var(--warn)"></i> Grasa</span>
       </div>
 
+      ${raw(comidasHoyHTML(m))}
+
       <div class="list" style="margin-top:16px">
         ${raw(filaSimple('Gasto diario estimado', UI.num(Math.round(Perfil.tdee(p))) + ' kcal'))}
         ${raw(filaSimple('Objetivo', (Perfil.OBJETIVO[p.objetivo] || {}).label))}
@@ -98,6 +100,74 @@
             : '<button class="btn block" data-a="configIA">Necesita el entrenador con IA</button>')}
         </div>`)}`;
   };
+
+  /* Lo que llevas hoy contra lo que te toca. Es la pregunta de verdad —¿voy
+     corto de proteína?— y hasta ahora la app decía el objetivo y se
+     desentendía de si se cumplía. */
+  function comidasHoyHTML(m) {
+    if (!g.Comidas) return '';
+    const h = Comidas.hoy();
+    const pk = Math.min(100, Math.round(h.kcal / m.kcal * 100));
+    const pp = Math.min(100, Math.round(h.prot / m.prot * 100));
+    const faltaProt = Math.max(0, m.prot - h.prot);
+
+    return html`
+      <div class="list-title">Hoy</div>
+      <div class="card">
+        <div class="row between" style="align-items:flex-end">
+          <div><b style="font-size:1.3rem">${UI.num(h.kcal)}</b>
+            <span class="tiny"> de ${UI.num(m.kcal)} kcal</span></div>
+          <div class="tiny">${pk}%</div>
+        </div>
+        <div class="prog" style="margin:6px 0 12px"><i style="width:${pk}%"></i></div>
+
+        <div class="row between" style="align-items:flex-end">
+          <div><b style="font-size:1.3rem;color:var(--brand-1)">${h.prot}</b>
+            <span class="tiny"> de ${m.prot} g de prote\u00edna</span></div>
+          <div class="tiny">${pp}%</div>
+        </div>
+        <div class="prog" style="margin:6px 0 0">
+          <i style="width:${pp}%;background:var(--brand-1)"></i></div>
+
+        <p class="tiny" style="margin:11px 0 0">${raw(faltaProt > 0
+          ? 'Te faltan <b>' + faltaProt + ' g de prote\u00edna</b> para llegar al objetivo del d\u00eda.'
+          : 'Prote\u00edna del d\u00eda cubierta.')}</p>
+
+        <div class="row" style="margin-top:12px">
+          <label class="btn primary grow" for="foto-comida" style="cursor:pointer">
+            ${raw(icon('nutricion'))} Foto de lo que comes</label>
+          <button class="btn" data-a="comidaMano">${raw(icon('plus'))}</button>
+        </div>
+        <input type="file" id="foto-comida" accept="image/*" capture="environment" hidden>
+        <p class="tiny" style="margin:8px 0 0">La foto se encoge en el m\u00f3vil, se manda para
+        que la IA la lea y se suelta: no se guarda ni aqu\u00ed ni en ning\u00fan sitio. Solo quedan
+        el nombre del plato y los n\u00fameros.</p>
+      </div>
+
+      <div id="comida-pensando"></div>
+
+      ${raw(h.lista.length ? '<div class="stack" style="margin-top:11px">' +
+        h.lista.map(comidaFilaHTML).join('') + '</div>' : '')}`;
+  }
+
+  function comidaFilaHTML(c) {
+    const dudosa = c.confianza === 'baja';
+    return html`
+      <div class="card" style="padding:11px 13px">
+        <div class="row between" style="align-items:flex-start;gap:10px">
+          <div class="grow">
+            <div style="font-weight:600;font-size:.92rem">${c.plato}</div>
+            <div class="tiny">${UI.num(c.kcal)} kcal \u00b7 ${c.prot} g de prote\u00edna
+              \u00b7 ${raw(UI.hora ? UI.hora(c.t) : new Date(c.t).toTimeString().slice(0, 5))}
+              ${raw(dudosa ? ' \u00b7 <span style="color:var(--warn)">estimaci\u00f3n floja</span>' : '')}</div>
+            ${raw(c.detalle ? '<div class="tiny" style="margin-top:3px">' +
+              esc(c.detalle) + '</div>' : '')}
+          </div>
+          <button class="btn icon sm danger" data-borrar-comida="${c.id}"
+                  aria-label="Borrar">${raw(icon('trash'))}</button>
+        </div>
+      </div>`;
+  }
 
   function filaSimple(titulo, valor) {
     return '<div class="list-row"><div class="grow"><div class="list-row-title">' +
@@ -204,10 +274,127 @@
       Revísalo con criterio y consulta a un dietista si tienes alguna condición de salud.</p>`;
   }
 
+  /* Manda la foto, apunta lo que la IA vea y suelta la imagen. Mientras piensa
+     se enseña la foto en pequeño, que es la única copia que existe y vive en
+     memoria hasta que se acaba. */
+  function mirarFoto(file, root) {
+    if (!IA.activa()) {
+      UI.toast('Esto necesita la clave de Gemini, que se pone en la b\u00f3veda de Ajustes.');
+      go('entrenador');
+      return;
+    }
+
+    const caja = root.querySelector('#comida-pensando');
+    let foto = null;
+
+    const soltar = function () {
+      foto = null;                      // la imagen deja de existir aqu\u00ed
+      if (caja) caja.innerHTML = '';
+    };
+
+    Comidas.prepararFoto(file).then(function (f) {
+      foto = f;
+      if (caja) {
+        caja.innerHTML = html`
+          <div class="card row" style="margin-top:11px;gap:12px;align-items:center">
+            <img src="${f.vista}" alt="" style="width:64px;height:64px;object-fit:cover;
+                 border-radius:10px;flex:none">
+            <div class="grow">
+              <div style="font-weight:600;font-size:.9rem">Mirando el plato\u2026</div>
+              <div class="tiny">La foto se borra en cuanto termine.</div>
+            </div>
+            <div class="spinner" style="flex:none"></div>
+          </div>`;
+      }
+      return IA.analizarComida({ mime: f.mime, datos: f.datos });
+    }).then(function (r) {
+      soltar();
+      if (!r || !(Number(r.kcal) > 0)) {
+        UI.toast('No he visto comida en esa foto. Prueba con m\u00e1s luz o m\u00e1s cerca.');
+        return;
+      }
+      const detalle = (r.alimentos || []).map(function (a) {
+        return a.que + (a.cuanto ? ' (' + a.cuanto + ')' : '');
+      }).join(', ');
+
+      Comidas.anotar({
+        plato: r.plato || 'Comida',
+        kcal: r.kcal, prot: r.prot,
+        detalle: detalle || r.nota || '',
+        confianza: r.confianza || '',
+        fuente: 'foto'
+      });
+      render();
+      UI.toast('Anotado: ' + Math.round(r.kcal) + ' kcal y ' + Math.round(r.prot) +
+        ' g de prote\u00edna' + (r.confianza === 'baja' ? ' (a ojo, ret\u00f3calo si quieres)' : ''));
+    }).catch(function (e) {
+      soltar();
+      UI.toast(e.message || 'No he podido leer esa foto.');
+    });
+  }
+
+  /* A mano, para lo que no tiene foto o para corregir lo que la IA no acertó */
+  /* A mano, para lo que no tiene foto o para corregir lo que la IA no acertó */
+  function comidaAMano() {
+    UI.modal(html`
+      <h2>Apuntar a mano</h2>
+      <p class="muted">Para lo que ya sabes de memoria, o para arreglar una estimaci\u00f3n
+      que se qued\u00f3 corta.</p>
+      <label class="tiny">QU\u00c9 HAS COMIDO</label>
+      <input id="cm-plato" placeholder="Ej. Arroz con pollo" autocomplete="off">
+      <div class="row" style="margin-top:10px">
+        <div class="grow">
+          <label class="tiny">CALOR\u00cdAS</label>
+          <input id="cm-kcal" type="number" inputmode="numeric" min="0" placeholder="0">
+        </div>
+        <div class="grow">
+          <label class="tiny">PROTE\u00cdNA (g)</label>
+          <input id="cm-prot" type="number" inputmode="numeric" min="0" placeholder="0">
+        </div>
+      </div>
+      <button class="btn primary block" id="cm-ok" style="margin-top:14px">Anotar</button>`,
+      function (el) {
+        const guardar = function () {
+          const plato = el.querySelector('#cm-plato').value.trim();
+          const kcal = Number(el.querySelector('#cm-kcal').value) || 0;
+          const prot = Number(el.querySelector('#cm-prot').value) || 0;
+          if (!kcal && !prot) {
+            UI.toast('Pon al menos las calor\u00edas o la prote\u00edna');
+            return;
+          }
+          Comidas.anotar({ plato: plato || 'Comida', kcal: kcal, prot: prot, fuente: 'mano' });
+          UI.closeModal();
+          render();
+          UI.toast('Anotado');
+        };
+        el.querySelector('#cm-ok').onclick = guardar;
+        el.querySelector('#cm-prot').onkeydown = function (ev) {
+          if (ev.key === 'Enter') guardar();
+        };
+      });
+  }
+
   V.nutricion.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=datos]', function () { go('datos'); });
     bind(root, '[data-a=configIA]', function () { go('entrenador'); });
+
+    /* ---- lo que has comido hoy ---- */
+    bindAll(root, '[data-borrar-comida]', function (el) {
+      Comidas.borrar(el.dataset.borrarComida);
+      render();
+      UI.toast('Borrado');
+    });
+
+    bind(root, '[data-a=comidaMano]', function () { comidaAMano(); });
+
+    const campoFoto = root.querySelector('#foto-comida');
+    if (campoFoto) campoFoto.onchange = function () {
+      const file = campoFoto.files && campoFoto.files[0];
+      /* se vac\u00eda ya: si no, elegir dos veces la misma foto no dispara nada */
+      campoFoto.value = '';
+      if (file) mirarFoto(file, root);
+    };
 
     bindAll(root, '[data-dia]', function (el) {
       const c = root.querySelector('[data-cuerpo="' + el.dataset.dia + '"]');

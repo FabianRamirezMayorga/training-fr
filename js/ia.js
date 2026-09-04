@@ -159,8 +159,18 @@
        del mismo presupuesto de tokens. Con un límite corto se lo consumen entero
        pensando y devuelven una respuesta vacía, así que aquí se apaga: para lo
        que pide esta app no aporta y sí encarece cada llamada. */
+    /* La foto viaja en la misma petición que el texto y no se guarda en
+       ninguna parte: ni aquí, ni en el móvil, ni después. */
+    const partes = [{ text: prompt }];
+    if (opciones.imagen && opciones.imagen.datos) {
+      partes.push({ inlineData: {
+        mimeType: opciones.imagen.mime || 'image/jpeg',
+        data: opciones.imagen.datos
+      } });
+    }
+
     const cuerpo = {
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      contents: [{ role: 'user', parts: partes }],
       systemInstruction: { parts: [{ text: INSTRUCCIONES }] },
       generationConfig: {
         temperature: opciones.temperatura == null ? 0.7 : opciones.temperatura,
@@ -609,6 +619,32 @@
     return llamarJSON(prompt, { maxTokens: 2048, temperatura: 0.5 });
   }
 
+  /* Mira una foto de comida y estima lo que hay. Es una aproximación y se dice
+     que lo es: nadie acierta los gramos de un plato por una foto, ni una
+     persona ni un modelo. Sirve para saber si el día va corto de proteína, que
+     es la pregunta de verdad, no para contar calorías al gramo. */
+  function analizarComida(imagen, pista) {
+    const m = Perfil.macros ? Perfil.macros() : null;
+    const suyo = m ? 'Al d\u00eda le tocan unas ' + m.kcal + ' kcal y ' + m.prot +
+      ' g de prote\u00edna, por si ayuda a juzgar el tama\u00f1o de la raci\u00f3n.\n' : '';
+
+    const prompt = 'Eres un nutricionista mirando la foto de un plato.\n' + suyo +
+      (pista ? 'Quien la ha hecho a\u00f1ade: "' + pista + '".\n' : '') +
+      '\nDi qu\u00e9 alimentos ves y estima la raci\u00f3n de cada uno en gramos o en medidas ' +
+      'caseras. Suma las calor\u00edas y la prote\u00edna del plato entero. Si la foto no deja ' +
+      'ver bien algo, tira por lo m\u00e1s probable en una comida normal y b\u00e1jale la ' +
+      'confianza. Si en la foto no hay comida, dilo con kcal 0.\n\n' +
+      'Devuelve JSON: {"plato":"c\u00f3mo llamar\u00edas a esto en 2-5 palabras",' +
+      '"alimentos":[{"que":"nombre","cuanto":"raci\u00f3n estimada","kcal":n\u00famero,' +
+      '"prot":n\u00famero}],"kcal":n\u00famero,"prot":n\u00famero,' +
+      '"confianza":"alta|media|baja","nota":"una frase con lo que no has podido ' +
+      'ver bien o lo que has dado por supuesto"}';
+
+    return llamarJSON(prompt, {
+      imagen: imagen, maxTokens: 1024, temperatura: 0.3
+    });
+  }
+
   /* Lectura del progreso reciente */
   function analizarProgreso() {
     const sesiones = Store.sessions().slice(0, 20).map(function (s) {
@@ -762,6 +798,7 @@
     llamar: llamar, llamarJSON: llamarJSON, contexto: contexto, limpiarCache: limpiarCache,
     listarModelos: listarModelos,
     planNutricion: planNutricion, revisarRutinas: revisarRutinas, afinarPrograma: afinarPrograma,
+    analizarComida: analizarComida,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,
     analizarProgreso: analizarProgreso, preguntar: preguntar, explicarEjercicio: explicarEjercicio,
