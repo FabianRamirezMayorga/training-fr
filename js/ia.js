@@ -311,17 +311,130 @@
     return intentar(0);
   }
 
+  /* Los modelos devuelven JSON casi válido: envuelto en un bloque de código,
+     con una coma de más al final de una lista, con saltos de línea sin escapar
+     dentro de una cadena, o cortado a la mitad porque se acabó el cupo de
+     palabras. Nada de eso hay que adivinarlo, se arregla mirando el texto. */
+  function sinAdornos(t) {
+    let x = String(t || '').trim();
+    x = x.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const i = x.search(/[{[]/);
+    if (i > 0) x = x.slice(i);
+    return x;
+  }
+
+  /* Recorre el texto sabiendo cuándo va por dentro de una cadena, que es lo
+     único que permite tocar comas y llaves sin romper el contenido. */
+  function reparar(t) {
+    const abiertos = [];
+    let dentro = false, escape = false;
+    let salida = '';
+    let finBueno = -1;          // última coma o cierre con la estructura sana
+
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+
+      if (dentro) {
+        if (escape) { escape = false; salida += c; continue; }
+        if (c === '\\') { escape = true; salida += c; continue; }
+        if (c === '"') { dentro = false; salida += c; continue; }
+        /* un salto de línea crudo dentro de una cadena invalida el JSON */
+        if (c === '\n') { salida += '\\n'; continue; }
+        if (c === '\r') { continue; }
+        if (c === '\t') { salida += '\\t'; continue; }
+        salida += c;
+        continue;
+      }
+
+      if (c === '"') { dentro = true; salida += c; continue; }
+      if (c === '{' || c === '[') { abiertos.push(c === '{' ? '}' : ']'); salida += c; continue; }
+      if (c === '}' || c === ']') { abiertos.pop(); salida += c; finBueno = salida.length; continue; }
+      if (c === ',') { salida += c; finBueno = salida.length; continue; }
+      salida += c;
+    }
+
+    const intentos = [];
+    intentos.push(salida);
+    /* comas de más justo antes de un cierre */
+    intentos.push(salida.replace(/,\s*([}\]])/g, '$1'));
+
+    /* cortado a la mitad: se poda hasta lo último que estaba entero y se
+       cierra lo que quedó abierto, en el orden contrario al que se abrió */
+    if (abiertos.length && finBueno > 0) {
+      let podado = salida.slice(0, finBueno).replace(/,\s*$/, '');
+      for (let k = abiertos.length - 1; k >= 0; k--) podado += abiertos[k];
+      intentos.push(podado);
+    }
+    return intentos;
+  }
+
+  /* La avería más común de todas: se deja la coma entre dos elementos de una
+     lista. Se pone mirando qué cierra un valor y qué abre el siguiente, sin
+     entrar en las cadenas para no tocar el texto de dentro. */
+  function comasQueFaltan(t) {
+    let salida = '';
+    let dentro = false, escape = false;
+    let ultimo = '';            // último carácter con significado, fuera de cadenas
+    let hondo = 0;
+
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+
+      if (dentro) {
+        salida += c;
+        if (escape) { escape = false; continue; }
+        if (c === '\\') { escape = true; continue; }
+        if (c === '"') { dentro = false; ultimo = '"'; }
+        continue;
+      }
+
+      if (c === ' ' || c === '\n' || c === '\r' || c === '\t') { salida += c; continue; }
+
+      const cierraValor = ultimo === '}' || ultimo === ']' || ultimo === '"' ||
+        (ultimo >= '0' && ultimo <= '9') || ultimo === 'e' || ultimo === 'l';
+      const abreValor = c === '{' || c === '[' || c === '"';
+      if (hondo > 0 && cierraValor && abreValor) salida += ',';
+
+      if (c === '{' || c === '[') hondo++;
+      if (c === '}' || c === ']') hondo--;
+      if (c === '"') dentro = true;
+
+      salida += c;
+      ultimo = c;
+    }
+    return salida;
+  }
+
+  function analizarJSON(t) {
+    const base = sinAdornos(t);
+    const conComas = comasQueFaltan(base);
+    const pruebas = [base].concat(reparar(base), [conComas], reparar(conComas));
+    for (let i = 0; i < pruebas.length; i++) {
+      if (!pruebas[i]) continue;
+      try { return JSON.parse(pruebas[i]); } catch (e) { /* la siguiente */ }
+    }
+    return null;
+  }
+
   function llamarJSON(prompt, opciones) {
-    return llamar(prompt, Object.assign({ json: true, temperatura: 0.4 }, opciones))
-      .then(function (t) {
-        try { return JSON.parse(t); }
-        catch (e) {
-          /* a veces envuelve el JSON en un bloque de código */
-          const m = t.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-          if (m) return JSON.parse(m[0]);
-          throw new Error('La IA no devolvió datos con el formato esperado.');
-        }
+    const opts = Object.assign({ json: true, temperatura: 0.4 }, opciones);
+    return llamar(prompt, opts).then(function (t) {
+      const r = analizarJSON(t);
+      if (r) return r;
+
+      /* Una segunda oportunidad con el listón más bajo: menos que escribir y
+         una orden seca de que sea JSON y nada más. Si tampoco, se dice que
+         fue la IA y no su plan, que si no parece que la app esté rota. */
+      return llamar(prompt + '\n\nDevuelve SOLO el JSON, sin explicaciones, sin bloque '
+        + 'de código y sin texto antes ni después. Sé breve en cada campo.',
+        Object.assign({}, opts, { temperatura: 0.2 })
+      ).then(function (t2) {
+        const r2 = analizarJSON(t2);
+        if (r2) return r2;
+        throw new Error('La IA ha contestado en un formato que no entiendo. '
+          + 'Vuelve a intentarlo: suele salir a la segunda.');
       });
+    });
   }
 
   /* ---------- contexto que se envía ---------- */
