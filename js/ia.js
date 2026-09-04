@@ -447,11 +447,39 @@
     });
   }
 
+  /* ---------- cómo se comporta en toda la app ----------
+     A un modelo, si se le deja, le sale contestar con buenas palabras: que vas
+     bien, que sigas así, que buen trabajo. En una app de entrenamiento eso no es
+     amabilidad, es dejar que alguien se estanque durante meses o se haga daño.
+     Este bloque va delante de todo lo que se le pide —el programa, las rutinas,
+     el progreso, la comida, la técnica de un ejercicio— para que en cualquier
+     pantalla hable como habla un profesional que responde de lo que dice. */
+  const PERSONA =
+    'Eres un profesional del entrenamiento y la nutrición: preparador físico, ' +
+    'especialista en acondicionamiento y nutricionista deportivo, con veinte años ' +
+    'de consulta a tus espaldas. Hablas con alguien que te paga por que le digas ' +
+    'la verdad, no con un cliente al que hay que tener contento.\n' +
+    'CÓMO RESPONDES, SIEMPRE Y EN CUALQUIER APARTADO:\n' +
+    '- Prohibido el halago y el ánimo de relleno: ni "buen trabajo", ni "vas por ' +
+    'buen camino", ni "sigue así", ni felicitaciones. Si algo está bien, se ' +
+    'despacha en cinco palabras y se pasa a lo que no lo está.\n' +
+    '- Concreto y con números: series, gramos, kilos, días, semanas. Un consejo ' +
+    'que le valdría a cualquiera es un consejo que sobra; bórralo y busca otro.\n' +
+    '- Lo que está mal se dice claro y con su consecuencia: qué va a pasar si ' +
+    'sigue así.\n' +
+    '- No te inventas nada. Si un dato no está, lo dices en vez de rellenarlo, y ' +
+    'no des por bueno lo que no puedas ver.\n' +
+    '- Sin jerga vacía ni promesas: nada de "quemar grasa localizada", "tonificar", ' +
+    '"limpiar el organismo" ni plazos milagro.\n' +
+    '- Lo que sea un riesgo para la salud va primero, y donde haga falta un ' +
+    'médico o un fisio lo dices sin rodeos y sin asustar.\n' +
+    '- Español de España, de tú, frases cortas, sin relleno de cortesía.';
+
   /* ---------- contexto que se envía ---------- */
 
   function contexto(incluir) {
     incluir = incluir || {};
-    const trozos = [];
+    const trozos = [PERSONA];
 
     /* Hablarle por su nombre cambia por completo cómo se lee una respuesta */
     const nombre = String(Store.settings().name || '').trim();
@@ -538,9 +566,12 @@
       (p.condiciones ? 'CONDICIONES DE SALUD: ' + p.condiciones + '. Adapta el menú a ' +
         'ellas (sal, azúcares, grasas saturadas, lo que corresponda) y dilo en el resumen, ' +
         'recordando que lo confirme con su médico o un dietista.\n' : '') +
-      '\nPrepara su menú semanal de 7 días.\n\n' +
+      '\nPrepara su menú semanal de 7 días. Es un plan de nutricionista, no una ' +
+      'lista de deseos: si con sus horarios o su objetivo hay algo que no cuadra, ' +
+      'dilo en el resumen en lugar de maquillarlo.\n\n' +
       'CÓMO TIENE QUE SER:\n' +
-      '- Comida corriente de supermercado en España, fácil y rápida de preparar.\n' +
+      '- Comida corriente de supermercado en España, fácil y rápida de preparar. ' +
+      'Nada de superalimentos, suplementos ni ingredientes de tienda especializada.\n' +
       '- Enfocado de verdad a su objetivo y sus datos, no un menú genérico.\n' +
       '- Flexible, no un régimen: cada comida lleva una o dos alternativas equivalentes ' +
       'para cuando no apetezca o no haya de eso, y las cantidades son orientativas.\n' +
@@ -571,11 +602,18 @@
   /* Revisión de las rutinas actuales frente al perfil y el progreso */
   function revisarRutinas() {
     const prompt = contexto({ rutinas: true, progreso: true }) + '\n\n' +
-      'Revisa mis rutinas. Dime en qué fallan para mi objetivo y qué cambiarías, ' +
-      'sin reescribirlas enteras. Máximo 5 puntos, cada uno de una o dos frases, ' +
-      'concretos y accionables.\n\n' +
-      'Devuelve JSON: {"veredicto":"una frase","puntos":[{"titulo":"3-5 palabras",' +
-      '"detalle":"1-2 frases"}]}';
+      'Audita mis rutinas tal y como están. No las reescribas enteras ni me ' +
+      'cuentes lo que ya está bien.\n\n' +
+      '- Ponles nota del 0 al 10. Un conjunto correcto pero mejorable es un 6 o ' +
+      'un 7; el 9 y el 10 son para lo que no tocarías.\n' +
+      '- De tres a cinco puntos, y al menos tres tienen que ser fallos concretos ' +
+      'con su consecuencia. Cita las rutinas y los ejercicios por su nombre.\n' +
+      '- Mira el reparto de volumen entre músculos, los patrones que falten, la ' +
+      'frecuencia semanal y si lo que entreno de verdad se parece a lo que tengo ' +
+      'apuntado.\n\n' +
+      'Devuelve JSON: {"nota":número del 0 al 10,' +
+      '"veredicto":"2 frases sin rodeos","puntos":[{"titulo":"3-5 palabras",' +
+      '"detalle":"1-2 frases con la consecuencia"}]}';
     return llamarJSON(prompt, { maxTokens: 2048 });
   }
 

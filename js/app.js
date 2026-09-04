@@ -553,49 +553,79 @@
   /* qué rutina está desplegada en la lista */
   let rutinaAbierta = null;
 
-  /* Qué grupos de día están abiertos. Sin esto la pantalla de Rutinas era la
-     semana entera desplegada de una vez y había que bajar mucho para ver el
-     jueves. Hoy viene abierto y el resto cerrado, que es lo que se mira. */
-  let diasAbiertos = {};
+  /* Qué planes están desplegados. Sin esto la pantalla de Rutinas era todo lo
+     que uno tiene, abierto de golpe. */
+  let gruposAbiertos = {};
 
-  /* La lista agrupada por día, con el de hoy primero. Una rutina asignada a
-     varios días sale en cada uno: es donde uno la va a buscar. */
-  function porDias(rutinas) {
-    const orden = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  /* La lista de Rutinas, agrupada por el plan al que pertenece cada una.
+     Agrupar por día partía el plan en siete trozos y obligaba a abrir uno por
+     uno para ver qué había montado; lo que uno tiene en la cabeza es «mi plan
+     Fabián» con sus días dentro. El nombre del plan es el de la rutina sin el
+     día delante, que es justo como se guardan al generarlas.
+     Arriba, y aparte, lo que toca hoy: eso se mira sin abrir nada. */
+  function porPlanes(rutinas) {
     const hoy = UI.DAY_NAMES[new Date().getDay()];
-    const desde = orden.indexOf(hoy);
-    const dias = orden.slice(desde).concat(orden.slice(0, desde));
+    const deHoy = rutinas.filter(function (r) { return (r.days || []).indexOf(hoy) !== -1; });
 
-    const grupo = function (clave, titulo, suyas, abiertoPorDefecto) {
-      if (!suyas.length) return '';
-      const abierto = diasAbiertos[clave] === undefined ? abiertoPorDefecto : diasAbiertos[clave];
-      const resumen = suyas.map(function (r) { return nombreRutina(r); }).join(' · ');
+    const orden = [];
+    const planes = {};
+    rutinas.forEach(function (r) {
+      const k = nombreRutina(r);
+      if (!planes[k]) { planes[k] = []; orden.push(k); }
+      planes[k].push(r);
+    });
+
+    /* dentro del plan, por el día de la semana; las sueltas al final */
+    const pos = function (r) {
+      const i = DIAS.indexOf((r.days || [])[0]);
+      return i === -1 ? 99 : i;
+    };
+    orden.forEach(function (k) {
+      planes[k].sort(function (a, b) { return pos(a) - pos(b); });
+    });
+
+    const soloUno = orden.length === 1;
+
+    const arriba = deHoy.length ? html`
+      <div class="list-title">Hoy es ${UI.diaLargo(hoy).toLowerCase()}, y esto es lo que toca</div>
+      <div class="stack">${raw(deHoy.map(function (r) { return routineCard(r); }).join(''))}</div>`
+      : html`
+      <div class="list-title">Hoy es ${UI.diaLargo(hoy).toLowerCase()}</div>
+      <p class="tiny" style="margin:-4px 4px 4px">No tienes nada asignado a hoy. Abre un plan
+      y toca los días de una rutina para moverla aquí.</p>`;
+
+    const bloques = orden.map(function (k) {
+      const suyas = planes[k];
+      const abierto = gruposAbiertos[k] === undefined ? soloUno : gruposAbiertos[k];
+      const dias = [];
+      suyas.forEach(function (r) {
+        (r.days || []).forEach(function (d) { if (dias.indexOf(d) === -1) dias.push(d); });
+      });
+      dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
+
+      const ejercicios = suyas.reduce(function (n, r) { return n + r.exercises.length; }, 0);
+
       return html`
-        <button class="dia-grupo" data-grupo="${clave}">
+        <button class="dia-grupo" data-grupo="${k}">
           <div class="grow">
-            <div class="list-title" style="margin:0">${titulo}</div>
-            <div class="tiny" style="margin-top:2px">${resumen}</div>
+            <div class="rt-titulo">${k}
+              ${raw(dias.indexOf(hoy) !== -1 ? '<span class="chip solid tiny-chip">HOY</span>' : '')}</div>
+            <div class="tiny" style="margin-top:2px">${suyas.length}
+              ${suyas.length === 1 ? 'rutina' : 'rutinas'} · ${ejercicios} ejercicios
+              · ${dias.length ? dias.join(', ') : 'sin día'}</div>
           </div>
           <span class="chevron ${abierto ? 'abierta' : ''}">${raw(icon('chevron'))}</span>
         </button>
         ${raw(abierto ? '<div class="stack">' +
-          suyas.map(function (r) { return routineCard(r); }).join('') + '</div>' : '')}`;
-    };
-
-    const bloques = dias.map(function (d) {
-      const suyas = rutinas.filter(function (r) { return (r.days || []).indexOf(d) !== -1; });
-      return grupo(d, UI.diaLargo(d) + (d === hoy ? ' — hoy' : ''), suyas, d === hoy);
+          suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' : '')}`;
     }).join('');
 
-    const sueltas = rutinas.filter(function (r) { return !(r.days || []).length; });
-    const sinDia = grupo('_sueltas', 'Sin día asignado', sueltas, false);
-
-    return bloques + sinDia;
+    return arriba + html`<div class="list-title">Tus planes</div>` + bloques;
   }
 
   /* i y total solo llegan desde la lista de Rutinas, que es donde se puede
      reordenar y borrar. En la portada se usa la tarjeta sin más. */
-  function routineCard(r, i, total) {
+  function routineCard(r, i, total, sinPlan) {
     const n = r.exercises.length;
     const hoy = UI.DAY_NAMES[new Date().getDay()];
     const esDeHoy = (r.days || []).indexOf(hoy) !== -1;
@@ -618,7 +648,7 @@
             <div class="rt-titulo">${tituloRutina(r)}
               ${raw(esDeHoy && !ordenando ? '<span class="chip solid tiny-chip">HOY</span>' : '')}
               ${raw(r.mixta ? '<span class="chip tiny-chip">MIXTA</span>' : '')}</div>
-            <div class="rt-nombre">${nombreRutina(r)}</div>
+            ${raw(sinPlan ? '' : '<div class="rt-nombre">' + esc(nombreRutina(r)) + '</div>')}
             <div class="tiny" style="margin-top:3px">${n} ${n === 1 ? 'ejercicio' : 'ejercicios'}${raw(
               musculos.length ? ' · ' + esc(musculos.slice(0, 3).join(', ').toLowerCase()) +
                 (musculos.length > 3 ? ' y ' + (musculos.length - 3) + ' más' : '') : '')}</div>
@@ -1481,9 +1511,7 @@
 
       ${raw(rutinas.length ? html`
         <div class="list-head">
-          <span class="list-title">${ordenando ? 'Ordena y borra lo que sobre'
-            : hayHoy ? 'Hoy es ' + UI.diaLargo(hoy).toLowerCase() + ', y esto es lo que toca'
-            : 'Mis rutinas'}</span>
+          <span class="list-title">${ordenando ? 'Ordena y borra lo que sobre' : 'Mis rutinas'}</span>
           <button class="btn sm ${ordenando ? 'primary' : 'ghost'}" data-a="ordenar">
             ${ordenando ? 'Hecho' : 'Editar lista'}</button>
         </div>` : '')}
@@ -1492,14 +1520,15 @@
         ? '<div class="stack" style="margin-top:8px">' + rutinas.map(function (r, i) {
             return routineCard(r, i, rutinas.length);
           }).join('') + '</div>'
-        : porDias(rutinas))
+        : porPlanes(rutinas))
       : '<p class="muted">Aún no tienes rutinas propias. Copia una plantilla de abajo para empezar.</p>')}
 
       ${raw(ordenando ? '<p class="tiny center" style="margin-top:10px">Con las flechas las ' +
         'colocas a tu gusto y con la papelera las borras. El orden viaja a tus demás ' +
         'dispositivos, y al salir de aquí la rutina de hoy vuelve a ponerse la primera.</p>'
-        : '<p class="tiny center" style="margin-top:10px">Toca una rutina para verla o ' +
-        'editarla, o pulsa Entrenar para hacerla ahora.</p>')}
+        : '<p class="tiny center" style="margin-top:10px">Abre un plan para ver sus d\u00edas. ' +
+        'Toca una rutina para desplegar sus ejercicios y cambiarle el d\u00eda, o pulsa ' +
+        'Entrenar para hacerla ahora.</p>')}
 
       <div class="list-title">Rutinas de ejemplo</div>
       <p class="muted">Al usar una plantilla se copia a tus rutinas; puedes cambiar ejercicios,
@@ -1578,10 +1607,10 @@
     });
 
     bindAll(root, '[data-grupo]', function (el) {
-      const d = el.dataset.grupo;
-      const hoy = UI.DAY_NAMES[new Date().getDay()];
-      const abierto = diasAbiertos[d] === undefined ? (d === hoy) : diasAbiertos[d];
-      diasAbiertos[d] = !abierto;
+      /* el estado se lee de lo pintado, que es lo único que sabe si estaba
+         abierto por defecto o porque alguien lo abrió */
+      const abierto = !!el.querySelector('.chevron.abierta');
+      gruposAbiertos[el.dataset.grupo] = !abierto;
       const pos = window.scrollY;
       render();
       window.scrollTo(0, pos);
@@ -1599,7 +1628,6 @@
       dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
       r.days = dias;
       Store.saveRoutine(r);
-      diasAbiertos[d] = true;
       const pos = window.scrollY;
       render();
       window.scrollTo(0, pos);
@@ -1646,7 +1674,7 @@
   function apuntarActividad() {
     const p = Perfil.datos();
     const peso = Number(p && p.peso) || 75;
-    const elegido = { act: 'caminar', min: 60, atras: 0 };
+    const elegido = { act: 'caminar', min: 60, atras: 0, nombre: '' };
 
     const kcalDe = function () {
       const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
@@ -1667,12 +1695,16 @@
       entrenamiento más. Las calorías son una estimación por tu peso y el tiempo.</p>
 
       <label class="tiny">QUÉ HICE</label>
-      <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-tipos">
+      <input id="ac-nombre" placeholder="Escríbelo tú: pickleball, mudanza, subir al pueblo…"
+             autocomplete="off" style="margin-top:6px">
+      <div class="row wrap" style="gap:6px;margin-top:8px" id="ac-tipos">
         ${raw(ACTIVIDADES.map(function (a) {
           return '<button class="chip ' + (a.id === 'caminar' ? 'on' : '') +
             '" data-act="' + a.id + '">' + esc(a.label) + '</button>';
         }).join(''))}
       </div>
+      <p class="tiny" style="margin:6px 0 0">Si lo escribes tú, elige abajo lo que más se le
+      parezca en esfuerzo: de ahí salen las calorías.</p>
 
       <label class="tiny" style="display:block;margin-top:14px">CUÁNDO</label>
       <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-dias">${raw(diasHTML.join(''))}</div>
@@ -1705,8 +1737,24 @@
         };
 
         el.querySelectorAll('#ac-tipos .chip').forEach(function (c) {
-          c.onclick = function () { elegido.act = c.dataset.act; marcar('#ac-tipos', c); pintarKcal(); };
+          c.onclick = function () {
+            elegido.act = c.dataset.act;
+            elegido.aMano = true;
+            marcar('#ac-tipos', c);
+            pintarKcal();
+          };
         });
+
+        /* Escribir el nombre no puede obligar a elegir esfuerzo: si no se ha
+           tocado ningún chip, se asume una actividad del montón. */
+        el.querySelector('#ac-nombre').oninput = function (ev) {
+          elegido.nombre = ev.target.value.trim();
+          if (elegido.nombre && !elegido.aMano) {
+            elegido.act = 'otro';
+            marcar('#ac-tipos', el.querySelector('[data-act=otro]'));
+            pintarKcal();
+          }
+        };
         el.querySelectorAll('#ac-dias .chip').forEach(function (c) {
           c.onclick = function () { elegido.atras = Number(c.dataset.cuando); marcar('#ac-dias', c); };
         });
@@ -1731,8 +1779,9 @@
         el.querySelector('#ac-ok').onclick = function () {
           const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
           const fin = Date.now() - elegido.atras * 86400000;
+          const comoSeLlama = elegido.nombre || a.label;
           Store.addSession({
-            routineName: a.label,
+            routineName: comoSeLlama,
             start: fin - elegido.min * 60000,
             end: fin,
             entries: [],
@@ -1745,7 +1794,7 @@
           });
           UI.closeModal();
           render();
-          UI.toast(a.label + ' apuntado: ' + elegido.min + ' min');
+          UI.toast(comoSeLlama + ' apuntado: ' + elegido.min + ' min');
         };
       });
   }
