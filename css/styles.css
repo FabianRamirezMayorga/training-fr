@@ -507,8 +507,17 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 .dia-grupo{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
   padding:8px 4px;margin-top:14px;background:none;color:var(--txt);border:0}
 .dia-grupo .tiny{color:var(--dim2)}
-.dia-grupo .chevron svg{transition:transform .18s}
-.dia-grupo .chevron.abierta svg{transform:rotate(90deg)}
+/* La señal de plegar. Un galoncito de 9 px en la esquina no se veía: no
+   quedaba claro que el plan se abriera tocando. Ahora dice lo que hace y la
+   flecha apunta abajo cuando hay algo por ver y arriba cuando ya está abierto. */
+.dia-grupo .plegador{flex:none;display:flex;align-items:center;gap:6px;
+  padding:5px 9px;border-radius:999px;background:var(--card2);color:var(--acc)}
+.dia-grupo .plegador-txt{font-size:.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em}
+.dia-grupo .plegador svg{width:9px;height:15px;fill:none;stroke:currentColor;
+  stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;
+  transform:rotate(90deg);transition:transform .2s}
+.dia-grupo .plegador.abierto svg{transform:rotate(-90deg)}
 
 .dia-cab{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
   padding:13px;background:none;color:var(--txt)}

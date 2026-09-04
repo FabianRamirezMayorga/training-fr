@@ -614,7 +614,9 @@
               ${suyas.length === 1 ? 'rutina' : 'rutinas'} · ${ejercicios} ejercicios
               · ${dias.length ? dias.join(', ') : 'sin día'}</div>
           </div>
-          <span class="chevron ${abierto ? 'abierta' : ''}">${raw(icon('chevron'))}</span>
+          <span class="plegador ${abierto ? 'abierto' : ''}">
+            <span class="plegador-txt">${abierto ? 'Ocultar' : 'Ver'}</span>
+            ${raw(icon('chevron'))}</span>
         </button>
         ${raw(abierto ? '<div class="stack">' +
           suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' : '')}`;
@@ -1609,7 +1611,7 @@
     bindAll(root, '[data-grupo]', function (el) {
       /* el estado se lee de lo pintado, que es lo único que sabe si estaba
          abierto por defecto o porque alguien lo abrió */
-      const abierto = !!el.querySelector('.chevron.abierta');
+      const abierto = !!el.querySelector('.plegador.abierto');
       gruposAbiertos[el.dataset.grupo] = !abierto;
       const pos = window.scrollY;
       render();
