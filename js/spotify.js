@@ -184,12 +184,27 @@
        en vez de dejar el código ahí para que lo malinterprete otro módulo. */
     if (!guardado) {
       limpiarURL('#/musica');
+      /* Aquí no ha fallado Spotify: falta en ESTE almacenamiento el verificador
+         de la petición que responde. Pasa cuando se empieza en un sitio y se
+         vuelve en otro (la app instalada y el navegador guardan aparte). Se
+         apuntan los datos para poder verlo, no para adivinarlo. */
+      const guardados = intentos();
       const texto = hayIntentos
-        ? 'La respuesta llegó de un intento anterior. Vuelve a pulsar Conectar y ' +
-          'espera sin tocar nada hasta que vuelva.'
-        : 'La conexión con Spotify se interrumpió por el camino. Vuelve a pulsar ' +
-          'Conectar desde este mismo navegador.';
-      apuntarFallo(texto);
+        ? 'La vuelta de Spotify no encaja con ningún intento guardado aquí. Suele pasar ' +
+          'cuando se empieza en la app instalada y se vuelve en el navegador, o al revés: ' +
+          'cada uno guarda sus datos por separado.'
+        : 'La conexión con Spotify se interrumpió por el camino: en este navegador no ' +
+          'queda constancia de la petición.';
+      apuntarFallo(texto, {
+        detalle: 'state recibido: ' + estado + SALTO +
+          'intentos guardados aquí: ' + (guardados.length
+            ? guardados.map(function (x) {
+                return x.s + ' (hace ' + Math.round((Date.now() - (x.t || 0)) / 60000) + ' min)';
+              }).join(', ')
+            : 'ninguno') + SALTO +
+          'contexto: ' + (window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone ? 'app instalada' : 'navegador')
+      });
       olvidarIntentos();
       return Promise.resolve({ ok: false, error: texto, volver: '#/musica' });
     }
@@ -201,7 +216,7 @@
       olvidarIntentos();
       limpiarURL(volver);
       const texto = traducirError(error, detalle);
-      apuntarFallo(error + (detalle ? ': ' + detalle : ''));
+      apuntarFallo(error + (detalle ? ': ' + detalle : ''), { deSpotify: true });
       return Promise.resolve({ ok: false, error: texto, volver: volver });
     }
     if (!code) return Promise.resolve({ ok: false });
@@ -225,9 +240,11 @@
 
   /* Último fallo de autorización, para poder enseñarlo con calma en la pantalla */
   const FALLO = 'trainingfr.spotify.fallo';
-  function apuntarFallo(texto) {
+  const SALTO = String.fromCharCode(10);
+  function apuntarFallo(texto, datos) {
     if (!texto) { localStorage.removeItem(FALLO); return; }
-    escribir(FALLO, { t: Date.now(), texto: String(texto) });
+    escribir(FALLO, { t: Date.now(), texto: String(texto), deSpotify: !!(datos && datos.deSpotify),
+      detalle: (datos && datos.detalle) || '' });
   }
   function ultimoFallo() { return leer(FALLO); }
 

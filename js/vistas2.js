@@ -503,9 +503,20 @@
             ${raw(icon('close'))}</button>
         </div>
         <pre style="margin:10px 0 0;font-size:.72rem;white-space:pre-wrap">${f.texto}</pre>
-        <p class="tiny" style="margin:9px 0 0">Comprueba en el panel de Spotify que en
-        <b>Redirect URIs</b> está exactamente <code>${Spotify.urlRetorno()}</code> y que tu
-        cuenta figura en <b>User Management</b> si la app está en modo desarrollo.</p>
+        ${raw(f.detalle ? '<pre class="tiny" style="margin:8px 0 0;opacity:.75;' +
+          'white-space:pre-wrap">' + esc(f.detalle) + '</pre>' : '')}
+        ${raw(f.deSpotify ? html`
+          <p class="tiny" style="margin:9px 0 0">Esto lo ha rechazado Spotify. Comprueba en
+          su panel que en <b>Redirect URIs</b> está exactamente
+          <code>${Spotify.urlRetorno()}</code> y que tu cuenta figura en
+          <b>User Management</b> si la app está en modo desarrollo.</p>`
+        : html`
+          <p class="tiny" style="margin:9px 0 0">Esto no es cosa del panel de Spotify: no
+          hace falta tocar nada allí. Pulsa Conectar <b>desde esta misma pantalla</b> y deja
+          que vuelva sin abrir otras pestañas ni cambiar entre la app instalada y el
+          navegador.</p>`)}
+        <button class="btn primary block sm" data-a="conectar" style="margin-top:10px">
+          ${raw(icon('musica'))} Reintentar aquí</button>
       </div>`;
   }
 
@@ -612,12 +623,13 @@
       Spotify.apuntarFallo(null); render();
     });
 
-    bind(root, '[data-a=conectar]', function (btn) {
-      btn.disabled = true;
+    /* hay dos botones de conectar: el principal y el de reintentar del aviso */
+    bindAll(root, '[data-a=conectar]', function (btn) {
+      root.querySelectorAll('[data-a=conectar]').forEach(function (b) { b.disabled = true; });
       Spotify.apuntarFallo(null);
       UI.toast('Abriendo Spotify para dar permiso…');
       Spotify.entrar().catch(function (e) {
-        btn.disabled = false;
+        root.querySelectorAll('[data-a=conectar]').forEach(function (b) { b.disabled = false; });
         UI.toast(e.message);
       });
     });
