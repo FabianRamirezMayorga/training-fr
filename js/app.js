@@ -700,10 +700,14 @@
               el viernes quieres pecho en vez de pierna, quita el viernes de una y
               pónselo a la otra.</p>
             </div>
-            <div class="row" style="padding:11px 13px 13px">
+            <div class="row" style="padding:11px 13px 0">
               <button class="btn sm grow" data-open="${r.id}">${raw(icon('edit'))} Editar</button>
               <button class="btn sm primary grow" data-train="${r.id}">
                 ${raw(icon('play'))} Entrenar</button>
+            </div>
+            <div style="padding:8px 13px 13px">
+              <button class="btn sm block" data-iarutina="${r.id}">
+                ${raw(icon('chispa'))} Revisar esta rutina con IA</button>
             </div>
           </div>` : '')}
       </div>`;
@@ -760,6 +764,7 @@
     }
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
     bindAll(root, '[data-train]', function (el) { empezar(el.dataset.train); });
+    bindAll(root, '[data-iarutina]', function (el) { auditarDesdeLista(el.dataset.iarutina); });
     bindAll(root, '[data-zona]', function (el) { irAZona(el.dataset.zona); });
   };
 
@@ -1643,6 +1648,7 @@
     bindAll(root, '[data-baja]', function (el) { mover(el.dataset.baja, 1); });
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
     bindAll(root, '[data-train]', function (el) { empezar(el.dataset.train); });
+    bindAll(root, '[data-iarutina]', function (el) { auditarDesdeLista(el.dataset.iarutina); });
 
     bindAll(root, '[data-desplegar]', function (el) {
       const id = el.dataset.desplegar;
@@ -2049,6 +2055,17 @@
      forma parte de la rutina: se pide, se aplica lo que valga y se tira. */
   let revIA = { id: null, cargando: false, datos: null };
 
+  /* Qué rutina hay que auditar nada más abrir el editor. Pedirlo desde la lista
+     y tener que buscar el botón al final de la pantalla de edición era esconder
+     lo que más se usa. */
+  let auditarAlEntrar = null;
+
+  function auditarDesdeLista(id) {
+    if (!IA.activa()) { go('claves'); UI.toast('Configura la clave de Gemini para esto'); return; }
+    auditarAlEntrar = id;
+    go('rutina', id);
+  }
+
   function auditoriaHTML() {
     if (!draft.id || !draft.exercises.length) return '';
 
@@ -2342,7 +2359,7 @@
         <button class="btn block" data-a="entrenar" style="margin-top:8px">
           ${raw(icon('play'))} Guardar y entrenar ahora</button>` : '')}
 
-      ${raw(auditoriaHTML())}`;
+      <div id="auditoria">${raw(auditoriaHTML())}</div>`;
   }
 
   /* La zona del borrador que se está editando */
@@ -2402,17 +2419,33 @@
     bind(root, '[data-a=atras]', function () { autoguardar(); go('rutinas'); });
 
     /* ---- la lectura de la IA sobre esta rutina ---- */
-    bindAll(root, '[data-a=auditar]', function () {
+    const auditar = function () {
       if (!IA.activa()) { go('claves'); UI.toast('Configura la clave de Gemini para esto'); return; }
       const r = autoguardar();
       if (!r) { UI.toast('Guárdala antes de pasarla por la IA'); return; }
       revIA = { id: r.id, cargando: true, datos: null };
       render();
+      const caja = document.getElementById('auditoria');
+      if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
       IA.revisarRutina(r)
         .then(function (x) { revIA.datos = x; })
         .catch(function (e) { UI.toast(e.message); })
-        .then(function () { revIA.cargando = false; render(); });
-    });
+        .then(function () {
+          revIA.cargando = false;
+          render();
+          const c = document.getElementById('auditoria');
+          if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    };
+
+    bindAll(root, '[data-a=auditar]', auditar);
+
+    /* Si se ha pedido desde la lista de rutinas, se lanza sola: el usuario ya
+       ha dicho lo que quiere, no tiene que volver a decirlo aquí abajo. */
+    if (auditarAlEntrar && auditarAlEntrar === draft.id) {
+      auditarAlEntrar = null;
+      auditar();
+    }
 
     bind(root, '[data-a=olvidarAuditoria]', function () {
       revIA = { id: null, cargando: false, datos: null };
