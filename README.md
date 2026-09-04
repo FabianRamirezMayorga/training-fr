@@ -182,8 +182,12 @@ que autorizar y dónde están los dos datos de conexión.
   series completadas en lugar de por volumen.
   Temporizador de descanso automático y aviso sonoro. Te muestra tu récord y lo que hiciste la vez
   anterior en ese mismo ejercicio. Si cierras el navegador a mitad, se recupera.
-- **Progreso** — racha, volumen por semana en gráfico animado, calendario de
-  entrenamientos, récords personales y el historial completo.
+- **Progreso, contado con gráficos** — una curva con la evolución semanal y cuánto has
+  subido o bajado respecto a la semana pasada; un **mapa de calor de tres meses** donde la
+  constancia se ve de un vistazo, con los días más oscuros cuanto más has entrenado; y el
+  **reparto por zona** de los últimos 30 días, que es lo que destapa los desequilibrios y te
+  dice en una frase lo que llevas sin entrenar. Más los récords personales y el historial
+  completo, cada sesión desplegable.
 - **Sin conexión** — desde Ajustes puedes descargar las imágenes de tus rutinas, de los
   ejercicios principales o del catálogo completo. Una vez descargadas, la app funciona
   entera sin internet: en el gimnasio sin cobertura, en el metro o sin datos.
@@ -403,6 +407,7 @@ js/vistas.js            perfil, objetivos y alertas
 js/vistas2.js           alimentación, entrenador y música
 js/vistas4.js           el programa personal
 js/vistas5.js           modo invitado y guía para crear la base de datos
+js/vistas6.js           progreso: curva, mapa de calor y reparto por zona
 js/workout.js           modo entrenamiento
 js/app.js               router y vistas
 sw.js                   service worker (uso sin conexión, una versión coherente por despliegue)
