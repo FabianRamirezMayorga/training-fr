@@ -294,7 +294,10 @@
     const pct = totalSets ? Math.round(doneSets / totalSets * 100) : 0;
     const pr = Store.prOf(entry.exId);
     const last = Store.lastPerformance(entry.exId);
-    const simple = Store.settings().registro === 'simple';
+    const modo = Store.settings().registro || 'detallado';
+    const simple = modo === 'simple';
+    const soloEjercicio = modo === 'ejercicio';
+    const hecho = entry.sets.every(function (x) { return x.done; });
 
     return html`
       <div class="wo-head">
@@ -336,6 +339,19 @@
         </div>
       </div>
 
+      ${raw(soloEjercicio ? html`
+        <div class="card center">
+          <div class="objetivo" style="margin-bottom:12px">
+            <b>${entry.sets.length} × ${entry.targetReps}</b>
+            <span>lo que te propongo${raw(entry.rest ? ' · descanso ' + entry.rest + ' s' : '')}</span>
+          </div>
+          <button class="btn ${hecho ? '' : 'primary'} block grande" data-w="hechoya">
+            ${raw(icon(hecho ? 'close' : 'check'))}
+            ${hecho ? 'Marcarlo como no hecho' : 'Marcar ejercicio como hecho'}
+          </button>
+          <button class="btn sm block ghost" data-w="rest" style="margin-top:8px">
+            ${raw(icon('timer'))} Descansar ${entry.rest}s</button>
+        </div>` : html`
       <div class="card">
         ${raw(simple ? html`
           <div class="objetivo">
@@ -383,7 +399,7 @@
             ? html`<button class="btn sm" data-w="delset">${raw(icon('trash'))}</button>` : '')}
           <button class="btn sm" data-w="rest">${raw(icon('timer'))} ${entry.rest}s</button>
         </div>
-      </div>
+      </div>`)}
 
       <div class="row" style="margin-top:12px">
         <button class="btn grow" data-w="prev" ${a.idx === 0 ? 'disabled' : ''}>${raw(icon('back'))} Anterior</button>
@@ -443,7 +459,10 @@
     /* el descanso sobrevive a los re-render */
     paintRest();
 
-    const simple = Store.settings().registro === 'simple';
+    const modo = Store.settings().registro || 'detallado';
+    const simple = modo === 'simple';
+    const soloEjercicio = modo === 'ejercicio';
+    const hecho = entry.sets.every(function (x) { return x.done; });
 
     /* en modo simple el peso es uno solo para todo el ejercicio, y es opcional */
     const campoPeso = root.querySelector('#peso-opcional');
@@ -529,6 +548,19 @@
     });
 
     act('rest', function () { startRest(entry.rest); });
+
+    /* Modo "marcar el ejercicio y ya": un toque da por hechas todas sus series */
+    act('hechoya', function () {
+      const todas = entry.sets.every(function (x) { return x.done; });
+      entry.sets.forEach(function (x) {
+        x.done = !todas;
+        if (!x.reps) x.reps = entry.targetReps;
+      });
+      Store.setActive(a);
+      if (!todas && entry.rest) startRest(entry.rest);
+      rerender();
+      UI.toast(todas ? 'Ejercicio desmarcado' : 'Hecho. A por el siguiente.');
+    });
 
     act('prev', function () {
       if (a.idx > 0) { a.idx--; Store.setActive(a); rerender(); }

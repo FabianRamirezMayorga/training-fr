@@ -11,7 +11,8 @@
     version: 1,
     settings: {
       unit: 'kg', theme: 'dark', rest: 90, sound: true, name: '', gear: '',
-      /* 'detallado' anota peso y repeticiones; 'simple' solo marca la serie hecha */
+      /* 'detallado' anota peso y repeticiones, 'simple' marca cada serie y
+         'ejercicio' da por hecho el ejercicio entero de un toque */
       registro: 'detallado',
       /* lleva también las claves de Gemini y Spotify a los demás dispositivos */
       sincronizarClaves: true
@@ -42,9 +43,15 @@
       }
       if (!raw) return clone(DEFAULTS);
       const data = JSON.parse(raw);
-      return Object.assign(clone(DEFAULTS), data, {
+      const st = Object.assign(clone(DEFAULTS), data, {
         settings: Object.assign({}, DEFAULTS.settings, data.settings || {})
       });
+      /* Las rutinas de antes del orden manual no tienen "orden": se les pone
+         una vez, en el orden en que estaban, para que no bailen luego. */
+      if (st.routines.some(function (r) { return r.orden == null; })) {
+        st.routines.forEach(function (r, i) { if (r.orden == null) r.orden = i; });
+      }
+      return st;
     } catch (e) {
       console.warn('No se pudo leer el almacenamiento local:', e);
       return clone(DEFAULTS);

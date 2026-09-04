@@ -150,7 +150,9 @@ que autorizar y dónde están los dos datos de conexión.
   de movimiento** y los músculos implicados, y se priorizan los que puedes hacer donde
   entrenas. En pleno entrenamiento el cambio es un botón: las series ya marcadas se
   quedan con el ejercicio original y el recambio continúa con las que faltan.
-- **Rutinas, en el orden que tú quieras** — crea las tuyas, genera el programa o parte de 8
+- **Rutinas, en el orden que tú quieras** — se guardan solas mientras las editas, así que
+  no se pierde ninguna por salir sin pulsar Guardar (una vacía del todo no se guarda, para
+  no dejar restos). Crea las tuyas, genera el programa o parte de 8
   plantillas probadas (Full Body, Push/Pull/Legs, Torso/Pierna, 5x5, en casa sin material).
   Series, repeticiones y descanso por ejercicio. Con el botón *Ordenar* las colocas a mano y
   ese orden viaja a tus demás dispositivos. Y **la del día va siempre la primera**: si hoy es
@@ -160,10 +162,11 @@ que autorizar y dónde están los dos datos de conexión.
   tiempo corriendo y el botón de terminar. Puedes entrenar solo con el tiempo, ir añadiendo
   ejercicios sobre la marcha o cargar una rutina encima sin reiniciar el reloj. Al terminar
   se guarda aunque no hayas anotado ninguna serie: el tiempo entrenado cuenta.
-- **Entrenar** — dos formas de registrar, a elegir en Ajustes: anotando **peso y
-  repeticiones** de cada serie, o **solo marcando la serie como hecha** sobre el objetivo
-  que te propone la app (3 × 12, por ejemplo), con el peso como campo opcional. En el
-  modo simple el progreso se mide por series completadas en lugar de por volumen.
+- **Entrenar** — tres formas de registrar, a elegir en Ajustes: anotando **peso y
+  repeticiones** de cada serie; **marcando cada serie** sobre el objetivo que te propone la
+  app (3 × 12, por ejemplo), con el peso opcional; o **marcando el ejercicio y ya**, un solo
+  botón sin peso, ni repeticiones, ni series. En los dos últimos el progreso se mide por
+  series completadas en lugar de por volumen.
   Temporizador de descanso automático y aviso sonoro. Te muestra tu récord y lo que hiciste la vez
   anterior en ese mismo ejercicio. Si cierras el navegador a mitad, se recupera.
 - **Progreso** — racha, volumen por semana en gráfico animado, calendario de

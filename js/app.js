@@ -287,8 +287,8 @@
       <div class="stats" style="margin-top:14px">
         <div class="stat"><b>${st.streak}</b><span>Días seguidos</span></div>
         <div class="stat"><b>${st.total}</b><span>Entrenos</span></div>
-        <div class="stat"><b>${UI.num(Store.settings().registro === 'simple' || st.totalVolume === 0
-          ? st.weekSets : st.weekVolume)}</b><span>${Store.settings().registro === 'simple' ||
+        <div class="stat"><b>${UI.num(Store.settings().registro !== 'detallado' || st.totalVolume === 0
+          ? st.weekSets : st.weekVolume)}</b><span>${Store.settings().registro !== 'detallado' ||
           st.totalVolume === 0 ? 'Series semana' : 'Volumen semana'}</span></div>
       </div>
 
@@ -1527,7 +1527,38 @@
       return Store.saveRoutine(draft);
     }
 
-    bind(root, '[data-a=atras]', function () { go('rutinas'); });
+    /* Guardado sobre la marcha: nadie debería perder una rutina por salir de
+       la pantalla sin pulsar Guardar. Una rutina vacía del todo no se guarda,
+       para no llenar la lista de restos al entrar y salir. */
+    function autoguardar() {
+      leerCampos();
+      if (!draft.id && !draft.name && !draft.exercises.length) return null;
+      if (!draft.name) draft.name = 'Rutina sin nombre';
+
+      /* si no ha cambiado nada, no se toca: guardar por guardar dispara una
+         subida a la nube cada vez que se entra y se sale de una rutina */
+      const guardada = draft.id ? Store.routine(draft.id) : null;
+      if (guardada) {
+        const limpio = function (r) {
+          const c = Object.assign({}, r);
+          delete c.updatedAt;
+          return JSON.stringify(c);
+        };
+        if (limpio(guardada) === limpio(draft)) return guardada;
+      }
+
+      const nueva = !draft.id;
+      const r = Store.saveRoutine(draft);
+      /* al nacer, la ruta pasa a apuntar a su id: así un repintado carga la
+         rutina guardada en vez de empezar otro borrador en blanco */
+      if (nueva) {
+        route.arg = r.id;
+        history.replaceState(null, '', location.pathname + '#/rutina/' + encodeURIComponent(r.id));
+      }
+      return r;
+    }
+
+    bind(root, '[data-a=atras]', function () { autoguardar(); go('rutinas'); });
 
     bindAll(root, '[data-day]', function (el) {
       const d = el.dataset.day;
@@ -1535,13 +1566,20 @@
       const i = draft.days.indexOf(d);
       if (i === -1) draft.days.push(d); else draft.days.splice(i, 1);
       el.classList.toggle('on', i === -1);
+      autoguardar();
     });
 
     root.querySelectorAll('input[data-f]').forEach(function (inp) {
       inp.onchange = function () {
         const v = Number(inp.value) || 0;
         draft.exercises[Number(inp.dataset.i)][inp.dataset.f] = v;
+        autoguardar();
       };
+    });
+
+    ['#r-name', '#r-note'].forEach(function (sel) {
+      const el = root.querySelector(sel);
+      if (el) el.onchange = function () { autoguardar(); };
     });
 
     bindAll(root, '[data-up]', function (el) {
@@ -1698,7 +1736,7 @@
     const sesiones = Store.sessions();
     const semanas = Store.weeklyVolume(8);
     /* sin peso anotado el volumen es cero: en ese caso la medida son las series */
-    const porSeries = Store.settings().registro === 'simple' || st.totalVolume === 0;
+    const porSeries = Store.settings().registro !== 'detallado' || st.totalVolume === 0;
     const valor = function (w) { return porSeries ? w.sets : w.volume; };
     const max = Math.max.apply(null, semanas.map(valor).concat([1]));
 
@@ -1874,19 +1912,28 @@
             <div class="list-row-sub">Anotas cada serie. Necesario para los récords,
               el volumen y las gráficas de progreso.</div>
           </div>
-          ${raw(s.registro !== 'simple' ? '<span class="chip solid">' + icon('check') + '</span>' : '')}
+          ${raw(s.registro === 'detallado' ? '<span class="chip solid">' + icon('check') + '</span>' : '')}
         </button>
         <button class="list-row tap" data-reg="simple">
           <span class="row-icon">${raw(icon('check'))}</span>
           <div class="grow">
-            <div class="list-row-title">Solo marcar como hecho</div>
+            <div class="list-row-title">Marcar cada serie</div>
             <div class="list-row-sub">Te propongo el objetivo (por ejemplo 3 × 12) y solo
-              marcas cada serie. El peso queda opcional.</div>
+              marcas las series que vas haciendo. El peso queda opcional.</div>
           </div>
           ${raw(s.registro === 'simple' ? '<span class="chip solid">' + icon('check') + '</span>' : '')}
         </button>
+        <button class="list-row tap" data-reg="ejercicio">
+          <span class="row-icon">${raw(icon('flag'))}</span>
+          <div class="grow">
+            <div class="list-row-title">Marcar el ejercicio y ya</div>
+            <div class="list-row-sub">Un botón por ejercicio. Ni peso, ni repeticiones,
+              ni series: lo haces y lo das por hecho.</div>
+          </div>
+          ${raw(s.registro === 'ejercicio' ? '<span class="chip solid">' + icon('check') + '</span>' : '')}
+        </button>
       </div>
-      ${raw(s.registro === 'simple'
+      ${raw(s.registro !== 'detallado'
         ? '<p class="tiny" style="margin:8px 4px 0">Sin peso anotado no hay récords ni ' +
           'volumen; el progreso se mide por series y entrenamientos completados.</p>' : '')}
 
@@ -2071,8 +2118,8 @@
     bindAll(root, '[data-reg]', function (el) {
       Store.setSetting('registro', el.dataset.reg);
       render();
-      UI.toast(el.dataset.reg === 'simple'
-        ? 'Ahora solo marcarás las series como hechas'
+      UI.toast(el.dataset.reg === 'simple' ? 'Ahora solo marcarás las series como hechas'
+        : el.dataset.reg === 'ejercicio' ? 'Ahora marcas el ejercicio entero de un toque'
         : 'Ahora anotarás peso y repeticiones');
     });
     bindAll(root, '[data-unit]', function (el) { Store.setSetting('unit', el.dataset.unit); render(); });
