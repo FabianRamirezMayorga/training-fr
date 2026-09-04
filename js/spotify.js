@@ -110,6 +110,12 @@
     const verificador = aleatorio(64);
     const estado = aleatorio(16);
 
+    /* Si esto deja de ser una cadena, el error aparece a los dos redirecciones
+       y disfrazado de otra cosa. Mejor cortar aquí. */
+    if (typeof verificador !== 'string' || typeof estado !== 'string') {
+      return Promise.reject(new Error('Fallo interno preparando la conexión con Spotify.'));
+    }
+
     /* Se guardan los últimos intentos, no solo el último.
        Un doble toque en el botón, o volver atrás y reintentar, dejaba guardado
        el verificador del segundo intento mientras Spotify respondía al primero:
@@ -503,7 +509,10 @@
       .then(function () { return si; });
   }
 
-  function aleatorio(si) {
+  /* Ojo con el nombre: arriba ya hay un aleatorio() que genera las cadenas de
+     PKCE. Al llamarse igual, esta declaración se comía a aquella y el "state"
+     que se mandaba a Spotify era una promesa, no una cadena. */
+  function ponerAleatorio(si) {
     return pedir('/me/player/shuffle?state=' + (si ? 'true' : 'false') +
       (deviceId ? '&device_id=' + encodeURIComponent(deviceId) : ''), { method: 'PUT' });
   }
@@ -793,7 +802,7 @@
     apuntarFallo: apuntarFallo,
     guardarPlaylist: guardarPlaylist, borrarConfig: borrarConfig,
     buscarListas: buscarListas, esFavorita: esFavorita, marcarFavorita: marcarFavorita,
-    aleatorio: aleatorio, repetir: repetir,
+    aleatorio: ponerAleatorio, repetir: repetir,
     activa: activa, entrar: entrar, salir: salir, capturarRedireccion: capturarRedireccion,
     urlRetorno: urlRetorno, sonando: sonando, play: play, pausa: pausa,
     siguiente: siguiente, anterior: anterior, alternar: alternar,
