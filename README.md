@@ -237,7 +237,10 @@ que autorizar y dónde están los dos datos de conexión.
 - **Entrenador con IA** *(opcional)* — analiza tu progreso, revisa tus rutinas y responde
   a lo que le preguntes, conociendo tu perfil y tu historial.
 - **Música** *(opcional)* — reproduce Spotify **dentro de la propia app** (la pestaña se
-  convierte en un dispositivo más de tu cuenta) y deja que la IA te prepare listas de
+  convierte en un dispositivo más de tu cuenta), con un reproductor de verdad: portada
+  grande, barra de progreso y controles como los de cualquier app de música. Y mientras
+  suene algo, una **barra de control en todas las pantallas**, igual que el cronómetro:
+  canción, pausa y siguiente sin ir a buscarla. Deja además que la IA te prepare listas de
   entrenamiento. Cada lista recuerda los artistas ya propuestos y no los repite, así que
   siempre descubres cosas nuevas. Se pueden guardar en tu Spotify con un toque.
 

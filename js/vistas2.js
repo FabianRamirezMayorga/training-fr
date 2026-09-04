@@ -557,20 +557,16 @@
       const l = listaGuardada();
       if (!l) return;
       btn.disabled = true;
-      Spotify.iniciarReproductor()
-        .then(function () { return Spotify.reproducirUris(l.pistas.map(function (p) { return p.uri; })); })
-        .then(function () { UI.toast('Sonando en la app'); btn.disabled = false; })
-        .catch(function (e) { btn.disabled = false; UI.toast(e.message); });
+      lanzar(l.pistas.map(function (p) { return p.uri; }))
+        .then(function () { btn.disabled = false; })
+        .catch(function () { btn.disabled = false; });
     });
 
     bindAll(root, '[data-pista]', function (el) {
       const l = listaGuardada();
       if (!l) return;
       const desde = Number(el.dataset.pista);
-      const uris = l.pistas.slice(desde).map(function (p) { return p.uri; });
-      Spotify.iniciarReproductor()
-        .then(function () { return Spotify.reproducirUris(uris); })
-        .catch(function (e) { UI.toast(e.message); });
+      lanzar(l.pistas.slice(desde).map(function (p) { return p.uri; }));
     });
 
     bind(root, '[data-a=guardarEnSpotify]', function (btn) {
@@ -582,6 +578,30 @@
         .catch(function (e) { btn.disabled = false; UI.toast(e.message); });
     });
   };
+
+  /* Poner a sonar una lista.
+     Primero se intenta el reproductor de la app; si no puede (hace falta
+     Premium, o el navegador no lo admite), no se deja al usuario con un error
+     y sin música: se lanza en el dispositivo de Spotify que esté activo y se
+     le dice dónde ha sonado. El desbloqueo del audio va antes de cualquier
+     espera, que es lo único que acepta Safari. */
+  function lanzar(uris) {
+    if (!uris.length) { UI.toast('Esa lista no tiene canciones'); return Promise.resolve(); }
+    Spotify.desbloquearAudio();
+
+    return Spotify.iniciarReproductor()
+      .then(function () {
+        return Spotify.reproducirUris(uris).then(function () { UI.toast('Sonando en la app'); });
+      })
+      .catch(function (e) {
+        return Spotify.reproducirUris(uris)
+          .then(function () { UI.toast('Aquí no se pudo, suena en tu Spotify abierto'); })
+          .catch(function () {
+            UI.toast(e.message + ' Abre Spotify en algún dispositivo y vuelve a probar.');
+            throw e;
+          });
+      });
+  }
 
   /* Asistente de generación: ambiente, duración y una indicación libre */
   function generarLista(btnOrigen) {
@@ -727,39 +747,55 @@
     }
   }
 
-  /* Reproductor compacto, reutilizado en la pantalla de entrenamiento */
+  /* Reproductor completo. La portada manda: es lo que hace que parezca un
+     reproductor y no una fila de botones. */
   function reproductorHTML(s) {
+    const pct = s.duracion ? Math.min(100, Math.round(s.progreso / s.duracion * 100)) : 0;
+
     return html`
-      <div class="card player">
-        <div class="row">
-          ${raw(s.portada ? '<img class="player-art" src="' + esc(s.portada) + '" alt="">'
-            : '<span class="row-icon">' + icon('musica') + '</span>')}
-          <div class="grow" style="min-width:0">
-            <div class="player-t">${s.titulo}</div>
-            <div class="tiny">${s.artista}</div>
-          </div>
+      <div class="player ${s.sonando ? 'sonando' : ''}">
+        ${raw(s.portada
+          ? '<img class="player-art" src="' + esc(s.portada) + '" alt="">'
+          : '<div class="player-art vacia">' + icon('musica') + '</div>')}
+
+        <div class="player-info">
+          <div class="player-t">${s.titulo}</div>
+          <div class="player-a">${s.artista}</div>
         </div>
-        <div class="row" style="justify-content:center;gap:18px;margin-top:12px">
-          <button class="btn icon" data-sp="anterior" aria-label="Anterior">
-            <svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none">
-              <path d="M6 5h2v14H6zM20 5v14l-11-7z"/></svg></button>
-          <button class="btn icon primary" data-sp="alternar"
+
+        <div class="player-barra"><i style="width:${pct}%"></i></div>
+        <div class="player-tiempos">
+          <span>${UI.mmss((s.progreso || 0) / 1000)}</span>
+          <span>${s.duracion ? UI.mmss(s.duracion / 1000) : ''}</span>
+        </div>
+
+        <div class="player-mandos">
+          <button class="player-b" data-sp="anterior" aria-label="Anterior">
+            ${raw(icon('anterior'))}</button>
+          <button class="player-b grande" data-sp="alternar"
             aria-label="${s.sonando ? 'Pausar' : 'Reproducir'}">
-            ${raw(icon(s.sonando ? 'pause' : 'play'))}</button>
-          <button class="btn icon" data-sp="siguiente" aria-label="Siguiente">
-            <svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none">
-              <path d="M16 5h2v14h-2zM4 5l11 7-11 7z"/></svg></button>
+            ${raw(icon(s.sonando ? 'pausaLleno' : 'playLleno'))}</button>
+          <button class="player-b" data-sp="siguiente" aria-label="Siguiente">
+            ${raw(icon('siguiente'))}</button>
         </div>
-        ${raw(s.dispositivo ? '<div class="tiny center" style="margin-top:8px">Sonando en ' +
-          esc(s.dispositivo) + '</div>' : '')}
+
+        ${raw(s.dispositivo ? html`
+          <div class="player-donde">
+            ${raw(icon('altavoz'))} <span>${s.dispositivo}</span>
+            ${raw(s.local ? '' : '<button class="btn sm" data-sp="traer">Traer aquí</button>')}
+          </div>` : '')}
       </div>`;
   }
 
   function montarReproductor(root) {
     root.querySelectorAll('[data-sp]').forEach(function (b) {
       b.onclick = function () {
+        /* Safari solo desbloquea el audio dentro del gesto: si se hace después
+           de esperar a una promesa, ya no vale y el sonido no sale. */
+        Spotify.desbloquearAudio();
         const acciones = {
-          alternar: Spotify.alternar, siguiente: Spotify.siguiente, anterior: Spotify.anterior
+          alternar: Spotify.alternar, siguiente: Spotify.siguiente,
+          anterior: Spotify.anterior, traer: Spotify.traerAqui
         };
         const fn = acciones[b.dataset.sp];
         if (!fn) return;
@@ -778,5 +814,75 @@
     });
   }
 
-  g.Reproductor = { html: reproductorHTML, montar: montarReproductor };
+  /* ---------- barra de música en toda la app ----------
+     Igual que el cronómetro: mientras suena algo, se controla desde cualquier
+     pantalla sin ir a buscar el reproductor. En la pantalla de música sobra,
+     que allí está el grande. */
+  let latidoMusica = null;
+  let ultimoEstado = null;
+
+  function pintarBarraMusica() {
+    const host = document.getElementById('musica-host');
+    if (!host) return;
+
+    /* al vaciar hay que olvidar la firma: si no, al volver cree que ya está
+       pintada y la barra no reaparece */
+    const vaciar = function () {
+      if (host.innerHTML) { host.innerHTML = ''; document.body.classList.remove('con-musica'); }
+      ultimoEstado = null;
+    };
+
+    const enMusica = location.hash.indexOf('musica') !== -1;
+    if (!Spotify.activa() || !Spotify.reproductorActivo() || enMusica) {
+      vaciar();
+      clearInterval(latidoMusica); latidoMusica = null;
+      return;
+    }
+
+    const s = Spotify.estado();
+    if (!s) { vaciar(); return; }
+
+    /* solo se redibuja cuando cambia la canción o el estado */
+    const firma = s.titulo + '|' + s.sonando;
+    if (firma !== ultimoEstado) {
+      ultimoEstado = firma;
+      host.innerHTML = html`
+        <div class="barra-musica">
+          <button class="bm-ir" data-m="ir">
+            ${raw(s.portada ? '<img src="' + esc(s.portada) + '" alt="">'
+              : '<span class="bm-sin">' + icon('musica') + '</span>')}
+            <span class="bm-txt">
+              <b>${s.titulo}</b>
+              <span>${s.artista}</span>
+            </span>
+          </button>
+          <button class="bm-b" data-m="alternar"
+                  aria-label="${s.sonando ? 'Pausar' : 'Reproducir'}">
+            ${raw(icon(s.sonando ? 'pausaLleno' : 'playLleno'))}</button>
+          <button class="bm-b" data-m="siguiente" aria-label="Siguiente">
+            ${raw(icon('siguiente'))}</button>
+        </div>`;
+
+      host.querySelector('[data-m=ir]').onclick = function () { App.go('musica'); };
+      host.querySelectorAll('[data-m=alternar],[data-m=siguiente]').forEach(function (b) {
+        b.onclick = function () {
+          Spotify.desbloquearAudio();
+          const fn = b.dataset.m === 'siguiente' ? Spotify.siguiente : Spotify.alternar;
+          b.disabled = true;
+          fn().catch(function (e) { UI.toast(e.message); })
+            .then(function () { setTimeout(function () { b.disabled = false; }, 300); });
+        };
+      });
+    }
+
+    document.body.classList.add('con-musica');
+    if (!latidoMusica) latidoMusica = setInterval(pintarBarraMusica, 3000);
+  }
+
+  /* el propio reproductor avisa de cada cambio: la barra se entera al momento */
+  if (g.Spotify && Spotify.alCambiar) Spotify.alCambiar(function () { pintarBarraMusica(); });
+
+  g.Reproductor = {
+    html: reproductorHTML, montar: montarReproductor, barra: pintarBarraMusica
+  };
 })(window);

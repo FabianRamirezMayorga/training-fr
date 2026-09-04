@@ -426,6 +426,7 @@
 
         player.addListener('ready', function (ev) {
           deviceId = ev.device_id;
+          desbloquearAudio();
           resolve(deviceId);
         });
 
@@ -562,10 +563,17 @@
       });
     };
 
-    /* si el reproductor propio está listo, suena aquí; si no, en el dispositivo activo */
+    /* Si el reproductor propio está listo, suena aquí. Se transfiere el mando
+       antes de lanzar: con otro dispositivo de Spotify activo (el móvil, el
+       ordenador), la reproducción se iba allí y aquí no sonaba nada. */
     if (reproductorActivo()) {
       desbloquearAudio();
-      return lanzar(deviceId);
+      return pedir('/me/player', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_ids: [deviceId], play: false })
+      }).catch(function () { /* si ya era el activo, da igual */ })
+        .then(function () { return lanzar(deviceId); });
     }
     return lanzar('');
   }

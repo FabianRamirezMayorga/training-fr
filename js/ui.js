@@ -58,7 +58,13 @@
     chevron: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
     llave: '<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4.2"/><path d="M11 11l9 9M17 17l2-2M14 14l2-2"/></svg>',
     ojo: '<svg viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></svg>',
-    cambiar: '<svg viewBox="0 0 24 24"><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>'
+    cambiar: '<svg viewBox="0 0 24 24"><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>',
+    /* transporte del reproductor: macizos, que a este tamaño se leen mejor */
+    anterior: '<svg viewBox="0 0 24 24" class="lleno"><path d="M7 6a1 1 0 012 0v4.6l8.5-4.9A1 1 0 0119 6.6v10.8a1 1 0 01-1.5.9L9 13.4V18a1 1 0 01-2 0z"/></svg>',
+    siguiente: '<svg viewBox="0 0 24 24" class="lleno"><path d="M17 6a1 1 0 00-2 0v4.6L6.5 5.7A1 1 0 005 6.6v10.8a1 1 0 001.5.9l8.5-4.9V18a1 1 0 002 0z"/></svg>',
+    playLleno: '<svg viewBox="0 0 24 24" class="lleno"><path d="M8 5.1a1 1 0 011.5-.9l9.2 5.9a1 1 0 010 1.7l-9.2 5.9a1 1 0 01-1.5-.9z"/></svg>',
+    pausaLleno: '<svg viewBox="0 0 24 24" class="lleno"><path d="M8 4.5h3v15H8zM13 4.5h3v15h-3z"/></svg>',
+    altavoz: '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 010 7"/></svg>'
   };
   function icon(n) { return ICON[n] || ''; }
 

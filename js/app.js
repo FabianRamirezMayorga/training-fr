@@ -60,8 +60,9 @@
     if (fn.mount) fn.mount(viewEl);
     UI.mountDemos(viewEl);
     pintarAvisos();
-    /* el cronómetro acompaña al usuario por toda la app mientras entrena */
+    /* el cronómetro y la música acompañan al usuario por toda la app */
     Workout.pintarBanner();
+    if (g.Reproductor && Reproductor.barra) Reproductor.barra();
 
     const chip = actionsEl.querySelector('[data-a=lugar]');
     if (chip) chip.onclick = lugarSheet;
