@@ -345,8 +345,64 @@
 
   function upperFirst(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 
+  /* Nombres que el traductor por piezas no puede componer: postura del niño,
+     el mejor estiramiento del mundo, la liberación miofascial... Salían como
+     «Child s pose» o «Estiramiento del mundo s mejor», que no dicen nada. Aquí
+     mandan estos y el resto sigue por el camino de siempre. */
+  const I_EXACTO = new Map([
+    ['adductor', 'Aductores con rodillo'],
+    ['ankle circles', 'Círculos de tobillo'],
+    ['arm circles', 'Círculos de brazos'],
+    ['bent knee hip raise', 'Elevación de cadera con rodillas flexionadas'],
+    ['butt lift bridge', 'Puente de glúteo'],
+    ['calves smr', 'Gemelos con rodillo'],
+    ['cat stretch', 'Estiramiento del gato'],
+    ['chair lower back stretch', 'Estiramiento lumbar en silla'],
+    ['child s pose', 'Postura del niño'],
+    ['chin to chest stretch', 'Barbilla al pecho'],
+    ['dead bug', 'Bicho muerto'],
+    ['dynamic chest stretch', 'Apertura de pecho dinámica'],
+    ['groiners', 'Zancada con apoyo de manos'],
+    ['hamstring smr', 'Isquiotibiales con rodillo'],
+    ['hip circles prone', 'Círculos de cadera en el suelo'],
+    ['hug knees to chest', 'Rodillas al pecho'],
+    ['iliotibial tract smr', 'Banda iliotibial con rodillo'],
+    ['inchworm', 'Oruga'],
+    ['knee across the body', 'Rodilla cruzada al lado contrario'],
+    ['knee circles', 'Círculos de rodilla'],
+    ['kneeling hip flexor', 'Estiramiento de psoas de rodillas'],
+    ['latissimus dorsi smr', 'Dorsal ancho con rodillo'],
+    ['lower back curl', 'Enrollamiento lumbar'],
+    ['lying glute', 'Estiramiento de glúteo tumbado'],
+    ['middle back stretch', 'Estiramiento de espalda media'],
+    ['one knee to chest', 'Una rodilla al pecho'],
+    ['pelvic tilt into bridge', 'Báscula pélvica a puente'],
+    ['peroneals smr', 'Peroneos con rodillo'],
+    ['piriformis smr', 'Piramidal con rodillo'],
+    ['quadriceps smr', 'Cuádriceps con rodillo'],
+    ['rhomboids smr', 'Romboides con rodillo'],
+    ['scissor kick', 'Tijeras'],
+    ['seated floor hamstring stretch', 'Estiramiento de isquiotibiales sentado'],
+    ['seated glute', 'Estiramiento de glúteo sentado'],
+    ['shoulder circles', 'Círculos de hombros'],
+    ['shoulder stretch', 'Estiramiento de hombro'],
+    ['side bridge', 'Plancha lateral'],
+    ['side neck stretch', 'Estiramiento lateral de cuello'],
+    ['single leg glute bridge', 'Puente de glúteo a una pierna'],
+    ['spinal stretch', 'Estiramiento de columna'],
+    ['standing gastrocnemius calf stretch', 'Estiramiento de gemelo de pie'],
+    ['standing hip circles', 'Círculos de cadera de pie'],
+    ['standing pelvic tilt', 'Báscula pélvica de pie'],
+    ['stomach vacuum', 'Vacío abdominal'],
+    ['superman', 'Superman'],
+    ['upper back stretch', 'Estiramiento de espalda alta'],
+    ['world s greatest stretch', 'El mejor estiramiento del mundo']
+  ]);
+
   /* Traduce un nombre de ejercicio del inglés al español. Best effort. */
   function translateName(name) {
+    const exacto = I_EXACTO.get(norm(name));
+    if (exacto) return exacto;
     const words = norm(name).split(' ').filter(Boolean);
     if (!words.length) return name;
 

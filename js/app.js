@@ -1288,24 +1288,36 @@
       <div class="list-title">Rutinas de ejemplo</div>
       <p class="muted">Al usar una plantilla se copia a tus rutinas; puedes cambiar ejercicios,
       series y descansos sin límite.</p>
-      <div class="stack">
-        ${raw(Templates.list.map(function (t) {
-          return html`
-            <div class="card">
-              <div class="row between" style="align-items:flex-start">
-                <div class="grow">
-                  <div style="font-weight:700">${t.name}</div>
-                  <div class="tiny">${t.goal} · ${t.level} · ${t.exercises.length} ejercicios</div>
-                  <div class="tiny">${UI.diasLargos(t.days)}</div>
-                  <span class="chip tiny-chip" style="margin:6px 0 0;display:inline-block">
-                    ${raw(icon('dumbbell'))} ${Data.GEAR[Templates.lugarNecesario(t)].label}</span>
-                </div>
-                <button class="btn sm" data-tpl="${t.id}">${raw(icon('copy'))} Usar</button>
-              </div>
-              <p class="muted" style="margin:9px 0 0;font-size:.82rem">${t.note}</p>
-            </div>`;
-        }).join(''))}
-      </div>`;
+      <div class="stack">${raw(plantillasHTML('fuerza'))}</div>
+
+      <div class="list-title">Estiramientos, pilates y terapia</div>
+      <p class="muted">Se copian y se hacen igual que las demás, con su cronómetro y sus
+      descansos. En estas las repeticiones son segundos.</p>
+      <div class="stack">${raw(plantillasHTML('movilidad'))}</div>`;
+  }
+
+  /* Las plantillas de un tipo. Las de movilidad se listan aparte porque
+     buscarlas entre las de fuerza era perderlas, pero la tarjeta es la misma:
+     se copian y se entrenan igual. */
+  function plantillasHTML(tipo) {
+    return Templates.list.filter(function (t) {
+      return (t.tipo || 'fuerza') === tipo;
+    }).map(function (t) {
+      return html`
+        <div class="card">
+          <div class="row between" style="align-items:flex-start">
+            <div class="grow">
+              <div style="font-weight:700">${t.name}</div>
+              <div class="tiny">${t.goal} · ${t.level} · ${t.exercises.length} ejercicios</div>
+              <div class="tiny">${UI.diasLargos(t.days)}</div>
+              <span class="chip tiny-chip" style="margin:6px 0 0;display:inline-block">
+                ${raw(icon('dumbbell'))} ${Data.GEAR[Templates.lugarNecesario(t)].label}</span>
+            </div>
+            <button class="btn sm" data-tpl="${t.id}">${raw(icon('copy'))} Usar</button>
+          </div>
+          <p class="muted" style="margin:9px 0 0;font-size:.82rem">${t.note}</p>
+        </div>`;
+    }).join('');
   }
 
   viewRutinas.mount = function (root) {
