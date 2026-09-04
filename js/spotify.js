@@ -625,11 +625,18 @@
      y pódcast salen mezclados por orden de tipo, que es como se busca de
      verdad —«pon algo de Fred again», «pon tal canción»—. Cada resultado sabe
      cómo se pone a sonar. */
-  function buscarListas(texto) {
+  function buscarListas(texto, tipos) {
     const q = String(texto || '').trim();
     if (!q) return Promise.resolve([]);
-    const tipos = 'track,playlist,album,artist,show';
-    return pedir('/search?type=' + tipos + '&limit=8&q=' + encodeURIComponent(q))
+    const todos = ['track', 'playlist', 'album', 'artist', 'show'];
+    const pide = (tipos && tipos.length ? todos.filter(function (t) {
+      return tipos.indexOf(t) !== -1;
+    }) : todos);
+    if (!pide.length) return Promise.resolve([]);
+    /* Con un solo tipo cabe traer más de cada uno sin llenar la pantalla */
+    const cuantos = pide.length === 1 ? 20 : 8;
+    return pedir('/search?type=' + pide.join(',') + '&limit=' + cuantos +
+      '&q=' + encodeURIComponent(q))
       .then(function (r) {
         r = r || {};
         const fuera = [];

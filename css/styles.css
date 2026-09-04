@@ -35,7 +35,11 @@ body{
 }
 /* Escala tipográfica de iOS: título grande, título, encabezado, cuerpo, pie. */
 h1,h2,h3{margin:0 0 .35em;font-weight:700;letter-spacing:-.022em}
-h1{font-size:1.94rem;line-height:1.15}
+/* Todos los títulos de pantalla miden lo mismo que el «Hola» de Inicio: era
+   el único que estaba bien y el resto se le comían. Las pantallas de bienvenida
+   sí llevan el título grande, que ahí es lo único que hay. */
+h1{font-size:1.35rem;line-height:1.22}
+h1.center{font-size:1.94rem;line-height:1.15}
 h2{font-size:1.29rem;line-height:1.25}
 h3{font-size:1.06rem;line-height:1.3}
 p{margin:0 0 .8em}

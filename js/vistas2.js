@@ -493,6 +493,13 @@
         <input id="sp-buscar" type="search" placeholder="Canciones, listas, álbumes o pódcast"
                autocomplete="off">
       </div>
+      <div class="pill-scroll" id="sp-filtros" style="padding-bottom:10px">
+        <button class="chip ${filtrosBusca.length ? '' : 'on'}" data-tipo="">Todo</button>
+        ${raw(TIPOS_BUSCA.map(function (t) {
+          return '<button class="chip ' + (filtrosBusca.indexOf(t.k) !== -1 ? 'on' : '') +
+            '" data-tipo="' + t.k + '">' + esc(t.n) + '</button>';
+        }).join(''))}
+      </div>
       <div id="sp-listas"><p class="tiny">Cargando tus listas…</p></div>
 
       <div class="list-title">Lista fija</div>
@@ -544,6 +551,18 @@
   }
 
   /* ---------- tus listas de Spotify ---------- */
+
+  /* Qué se busca. Vacío es todo, que es como se abre: quien busca «Fred again»
+     no quiere elegir antes si es canción, álbum o artista. */
+  let filtrosBusca = [];
+
+  const TIPOS_BUSCA = [
+    { k: 'track', n: 'Canciones' },
+    { k: 'playlist', n: 'Listas' },
+    { k: 'album', n: 'Álbumes' },
+    { k: 'artist', n: 'Artistas' },
+    { k: 'show', n: 'Pódcast' }
+  ];
 
   /* Spotify tiene cerrada la ruta que devuelve las canciones de una lista, así
      que no hay desplegable que valga: la fila entera suena y ya está. */
@@ -614,12 +633,15 @@
     const pedir = q
       ? Spotify.misListas().catch(function () { return []; }).then(function (mias) {
           const filtro = I18N.norm(q);
-          const suyas = mias.filter(function (l) {
+          /* Si ha marcado tipos y las listas no están entre ellos, las suyas
+             tampoco pintan nada aquí */
+          const quiereListas = !filtrosBusca.length || filtrosBusca.indexOf('playlist') !== -1;
+          const suyas = !quiereListas ? [] : mias.filter(function (l) {
             return I18N.norm(l.nombre).indexOf(filtro) !== -1;
           }).map(function (l) {
             return Object.assign({}, l, { tipo: 'Lista tuya' });
           });
-          return Spotify.buscarListas(q).catch(function () { return []; })
+          return Spotify.buscarListas(q, filtrosBusca).catch(function () { return []; })
             .then(function (fuera) {
               const vistas = {};
               return suyas.concat(fuera).filter(function (x) {
@@ -757,6 +779,27 @@
         deb = setTimeout(function () { pintarListas(root, busca.value); }, 350);
       };
       bind(root, '[data-a=recargarListas]', function () { pintarListas(root, busca.value); });
+
+      /* Los filtros se pintan a mano y no por render(), que si no el buscador
+         pierde el foco y el teclado se cierra a cada toque. */
+      const filtros = root.querySelector('#sp-filtros');
+      if (filtros) filtros.onclick = function (ev) {
+        const b = ev.target.closest('[data-tipo]');
+        if (!b) return;
+        const k = b.dataset.tipo;
+        if (!k) filtrosBusca = [];
+        else {
+          const i = filtrosBusca.indexOf(k);
+          if (i === -1) filtrosBusca.push(k); else filtrosBusca.splice(i, 1);
+        }
+        filtros.querySelectorAll('[data-tipo]').forEach(function (x) {
+          const suyo = x.dataset.tipo;
+          x.classList.toggle('on', suyo
+            ? filtrosBusca.indexOf(suyo) !== -1
+            : !filtrosBusca.length);
+        });
+        pintarListas(root, busca.value);
+      };
     }
 
     bind(root, '[data-a=ponerPl]', function () {
