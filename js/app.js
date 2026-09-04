@@ -3282,7 +3282,11 @@
   g.App = {
     go: go, render: render, exerciseSheet: exerciseSheet, pickExercise: pickExerciseSheet,
     bind: bind, bindAll: bindAll, aplicarTema: aplicarTema,
-    lugarSheet: lugarSheet, cuantosEn: cuantosEn, temaEfectivo: temaEfectivo
+    lugarSheet: lugarSheet, cuantosEn: cuantosEn, temaEfectivo: temaEfectivo,
+    /* La ficha del ejercicio ya sabía pintar los recambios y la guía de
+       técnica; el entrenamiento las necesita igual y no tiene sentido tener
+       dos versiones que se separen con el tiempo. */
+    alternativasHTML: alternativasHTML, guiaHTML: guiaHTML
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

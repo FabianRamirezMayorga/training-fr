@@ -147,6 +147,10 @@ a{color:var(--blue)}
 .chip:active{transform:scale(.95)}
 .chip.on{background:var(--acc-d);border-color:var(--acc);color:var(--acc)}
 .chip.solid{background:var(--acc-d);color:var(--acc);border-color:transparent}
+/* El músculo que se trabaja, en color: entre el nombre en inglés y la lista de
+   músculos todo era del mismo gris y no se distinguía de un vistazo. */
+.chip.musculo{background:var(--acc-d);color:var(--acc);border-color:var(--acc);font-weight:600}
+.chip.musculo-2{background:var(--card2);color:var(--dim);border-color:var(--line)}
 
 .pill-scroll{display:flex;gap:7px;overflow-x:auto;padding:2px 16px 8px;margin:0 -16px;scrollbar-width:none}
 .pill-scroll::-webkit-scrollbar{display:none}

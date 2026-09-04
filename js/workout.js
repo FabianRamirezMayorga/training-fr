@@ -278,6 +278,31 @@
       <button class="btn ghost block" data-w="cancel" style="margin-top:8px">Descartar entrenamiento</button>`;
   }
 
+  /* Los recambios y la guía de técnica, plegados. Estaban sólo en la ficha del
+     ejercicio, y en mitad de una serie no se va uno a otra pantalla a buscar
+     con qué sustituir la máquina ocupada. Van cerrados porque las dos son
+     largas y aquí lo que manda es el peso y las repeticiones. */
+  function ayudaHTML(ex) {
+    const hayAlt = !!(g.App && g.App.alternativasHTML && g.App.alternativasHTML(ex));
+    const guia = g.Tecnica ? Tecnica.para(ex) : null;
+    if (!hayAlt && !guia) return '';
+
+    function plegable(clave, titulo, icono, abierto) {
+      return html`
+        <button class="btn block sm plegar ${abierto ? 'abierta' : ''}"
+                data-ayuda="${clave}" aria-expanded="${!!abierto}" style="margin-top:10px">
+          ${raw(icon('chevron'))} ${raw(icono)} ${titulo}</button>
+        <div data-ayuda-caja="${clave}" ${raw(abierto ? '' : 'hidden')}></div>`;
+    }
+
+    return (hayAlt ? plegable('alt', 'Si está ocupado o no lo tienes', icon('cambiar'), ayudaAbierta === 'alt') : '')
+      + (guia ? plegable('guia', 'Cómo se hace, paso a paso', icon('search'), ayudaAbierta === 'guia') : '');
+  }
+
+  /* Cuál de las dos está abierta, para que sobreviva a los re-render que hace
+     cada serie marcada. Sólo una a la vez: las dos juntas son media pantalla. */
+  let ayudaAbierta = '';
+
   function view() {
     const a = Store.active();
     if (!a) return '<div class="empty">No hay ningún entrenamiento en curso.</div>';
@@ -322,8 +347,16 @@
           <div class="row between">
             <div class="grow">
               <h2 style="margin:0 0 2px">${entry.name}</h2>
-              <div class="tiny">${raw(ex ? UI.esc(ex.name) : '')}${raw(ex && ex.primaryMuscles.length
-                ? ' · ' + UI.esc(ex.primaryMuscles.map(I18N.muscle).join(', ')) : '')}</div>
+              <div class="tiny">${raw(ex ? UI.esc(ex.name) : '')}</div>
+              ${raw(ex && ex.primaryMuscles.length ? html`
+                <div class="row wrap" style="gap:5px;margin-top:5px">
+                  ${raw(ex.primaryMuscles.map(function (m) {
+                    return '<span class="chip musculo">' + UI.esc(I18N.muscle(m)) + '</span>';
+                  }).join(''))}
+                  ${raw((ex.secondaryMuscles || []).map(function (m) {
+                    return '<span class="chip musculo-2">' + UI.esc(I18N.muscle(m)) + '</span>';
+                  }).join(''))}
+                </div>` : '')}
             </div>
             <button class="btn icon" data-w="cambiar"
                     aria-label="Cambiar por otro ejercicio">${raw(icon('cambiar'))}</button>
@@ -338,6 +371,8 @@
             </div>` : '')}
         </div>
       </div>
+
+      ${raw(ex ? ayudaHTML(ex) : '')}
 
       ${raw(soloEjercicio ? html`
         <div class="card center">
@@ -458,6 +493,46 @@
 
     /* el descanso sobrevive a los re-render */
     paintRest();
+
+    /* La ayuda se rellena al abrirla y no antes: son dos bloques largos, con
+       imágenes, y en la mayoría de las series no se abren. */
+    const exActual = Data.get(entry.exId);
+
+    function llenarAyuda(clave) {
+      const caja = root.querySelector('[data-ayuda-caja="' + clave + '"]');
+      if (!caja || caja.dataset.puesta || !exActual || !g.App) return;
+      caja.innerHTML = clave === 'alt'
+        ? g.App.alternativasHTML(exActual)
+        : g.App.guiaHTML(Tecnica.para(exActual));
+      caja.dataset.puesta = '1';
+      /* los recambios llevan a su ficha, igual que en la pantalla del
+         ejercicio: si no, son fotos que no hacen nada */
+      caja.querySelectorAll('[data-ex]').forEach(function (t) {
+        t.onclick = function () { g.App.go('ejercicio', t.dataset.ex); };
+      });
+    }
+
+    /* si venía abierta de antes del repintado, se rellena sola: si no, quedaba
+       el bloque abierto y vacío al cambiar de ejercicio */
+    if (ayudaAbierta) llenarAyuda(ayudaAbierta);
+
+    root.querySelectorAll('[data-ayuda]').forEach(function (b) {
+      b.onclick = function () {
+        const clave = b.dataset.ayuda;
+        ayudaAbierta = ayudaAbierta === clave ? '' : clave;
+
+        root.querySelectorAll('[data-ayuda]').forEach(function (x) {
+          const suyo = x.dataset.ayuda;
+          const abierta = suyo === ayudaAbierta;
+          const caja = root.querySelector('[data-ayuda-caja="' + suyo + '"]');
+          x.classList.toggle('abierta', abierta);
+          x.setAttribute('aria-expanded', String(abierta));
+          if (!caja) return;
+          caja.hidden = !abierta;
+          if (abierta) llenarAyuda(suyo);
+        });
+      };
+    });
 
     const modo = Store.settings().registro || 'detallado';
     const simple = modo === 'simple';
