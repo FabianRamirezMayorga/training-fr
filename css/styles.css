@@ -495,13 +495,18 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 .dia-cab .chevron.abierta svg{transform:rotate(90deg)}
 
 /* Series por semana y músculo, con la marca del objetivo */
-.vol-fila{display:flex;align-items:center;gap:10px;padding:5px 0}
+.vol-fila{display:flex;align-items:center;gap:10px;padding:7px 0}
 .vol-nom{flex:none;width:104px;font-size:.78rem;color:var(--dim)}
 .vol-barra{position:relative;flex:1;height:9px;border-radius:5px;background:var(--line)}
 .vol-barra i{display:block;height:100%;border-radius:5px;background:var(--acc);
   transition:width .45s cubic-bezier(.2,.9,.3,1)}
 /* marca del objetivo semanal, sobresaliendo por arriba y por abajo de la barra */
 .vol-barra u{position:absolute;top:-4px;width:2px;height:17px;background:var(--txt);opacity:.5}
+/* La barra fina de debajo es lo que ha entrenado de verdad. El plan sin esto
+   era una foto de lo que debería pasar, no de lo que pasa. */
+.vol-barra b.vol-real{position:absolute;left:0;bottom:-6px;height:3px;border-radius:2px;
+  background:var(--blue);display:block}
+.vol-hecho{display:block;font-size:.68rem;font-weight:600;color:var(--blue);line-height:1.1}
 .vol-num{flex:none;width:34px;text-align:right;font-size:.8rem;font-weight:700;
   white-space:nowrap;font-variant-numeric:tabular-nums}
 

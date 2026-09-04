@@ -469,6 +469,8 @@
       return (volumen[m] || 0) < VOLUMEN_MIN;
     }).map(function (m) { return I18N.muscle(m); });
 
+    const real = volumenReal(4);
+
     return {
       objetivo: clave, objetivoLabel: obj.label, obj: obj,
       cortos: cortos,
@@ -480,8 +482,9 @@
       volumen: volumen,
       objetivoSeries: objetivoSeries,
       lesiones: claves.map(function (k) { return LESIONES[k].label; }),
+      real: real,
       razones: razones(p, obj, edad, sexo, experiencia, objetivoSeries, dias.length,
-        plantillas, cortos, minutos),
+        plantillas, cortos, minutos, volumen, real),
       avisos: r.notas.concat(edad.notas, r.sinMaximos ? [] : []),
       progresion: progresion(obj, r.sinMaximos),
       cardio: obj.cardio ? cardioTexto(p) : null,
@@ -544,7 +547,50 @@
   }
 
   /* ---------- 8. Por qué este plan y no otro ---------- */
-  function razones(p, obj, edad, sexo, experiencia, series, ndias, plantillas, cortos, minutos) {
+  /* Lo que de verdad ha entrenado, no lo que el plan propone: series por
+     músculo y semana en las últimas cuatro. Sin esto el análisis habla de un
+     perfil y no de él, que es justo lo que se le nota. */
+  function volumenReal(semanas) {
+    if (!g.Store || !Store.sessions) return null;
+    const desde = Date.now() - (semanas || 4) * 7 * 86400000;
+    const hechas = Store.sessions().filter(function (x) { return (x.end || x.start) >= desde; });
+    if (!hechas.length) return null;
+
+    const cuenta = {};
+    hechas.forEach(function (ses) {
+      (ses.entries || []).forEach(function (e) {
+        const ex = Data.get(e.exId);
+        if (!ex) return;
+        const n = (e.sets || []).filter(function (x) { return x.done; }).length;
+        if (!n) return;
+        (ex.primaryMuscles || []).forEach(function (m) {
+          cuenta[m] = (cuenta[m] || 0) + n;
+        });
+        (ex.secondaryMuscles || []).forEach(function (m) {
+          cuenta[m] = (cuenta[m] || 0) + n / 2;
+        });
+      });
+    });
+
+    const salida = {};
+    Object.keys(cuenta).forEach(function (m) {
+      salida[m] = Math.round(cuenta[m] / (semanas || 4) * 10) / 10;
+    });
+    return { porMusculo: salida, sesiones: hechas.length, semanas: semanas || 4 };
+  }
+
+  /* Lo que se ha quedado atrás de verdad: músculos que el plan pide y él apenas
+     ha tocado. Se dice con su número, que es lo que convence. */
+  function olvidados(volumenPlan, real) {
+    if (!real) return [];
+    return Object.keys(volumenPlan).filter(function (m) {
+      return volumenPlan[m] >= 8 && (real.porMusculo[m] || 0) < volumenPlan[m] / 2;
+    }).sort(function (a, b) {
+      return (real.porMusculo[a] || 0) - (real.porMusculo[b] || 0);
+    });
+  }
+
+  function razones(p, obj, edad, sexo, experiencia, series, ndias, plantillas, cortos, minutos, volumenPlan, real) {
     const out = [];
     const nivel = { beginner: 'principiante', intermediate: 'intermedio', expert: 'avanzado' };
 
@@ -585,6 +631,33 @@
     if (p.sueño && p.sueño < 7) {
       out.push('Duermes ' + p.sueño + ' h: por debajo de 7 la recuperación se resiente y ' +
         'el plan rinde menos de lo que puede. Es la palanca más barata que tienes.');
+    }
+
+    /* Lo que sale de sus propios entrenamientos. Sin esto el análisis describe
+       un perfil —hombre, 28, intermedio— y no a alguien concreto, que es lo que
+       hace que suene a plantilla por mucho que los números salgan de sus datos. */
+    if (real) {
+      const porSemana = Math.round(real.sesiones / real.semanas * 10) / 10;
+      if (porSemana + 0.6 < ndias) {
+        out.push('En el último mes has entrenado ' + String(porSemana).replace('.', ',') +
+          ' días por semana y este plan pide ' + ndias + '. O bajas los días y los ' +
+          'cumples, o el plan se queda en papel: vale más un plan de tres días hecho ' +
+          'que uno de cinco a medias.');
+      }
+
+      const flojos = olvidados(volumenPlan || {}, real);
+      if (flojos.length) {
+        out.push('Lo que vienes dejando de lado: ' + flojos.slice(0, 3).map(function (m) {
+          const n = real.porMusculo[m] || 0;
+          return I18N.muscle(m).toLowerCase() + ' (' + String(n).replace('.', ',') +
+            (n === 1 ? ' serie' : ' series') + ' por semana, el plan te pide ' +
+            String(volumenPlan[m]).replace('.', ',') + ')';
+        }).join('; ') + '. Ahí es donde este plan te va a cambiar algo.');
+      }
+    } else {
+      out.push('Todavía no tienes entrenamientos guardados, así que el plan sale solo de ' +
+        'tu perfil. En cuanto entrenes unas semanas, este análisis mira lo que de verdad ' +
+        'haces y deja de hablar en general.');
     }
 
     /* La aritmética del tiempo: en una hora no caben veinte series por músculo,
@@ -642,6 +715,7 @@
   }
 
   g.Programa = {
+    volumenReal: volumenReal, olvidados: olvidados,
     crear: crear, aRutinas: aRutinas, lesionesDe: lesionesDe,
     OBJETIVOS: OBJETIVOS, LESIONES: LESIONES
   };

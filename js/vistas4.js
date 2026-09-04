@@ -142,27 +142,44 @@
     if (!musculos.length) return '';
     const tope = Math.max(prog.objetivoSeries, prog.volumen[musculos[0]]);
 
+    const real = prog.real;
+    const topeReal = real ? Math.max.apply(null, [0].concat(musculos.map(function (m) {
+      return real.porMusculo[m] || 0;
+    }))) : 0;
+    const escala = Math.max(tope, topeReal);
+
     return html`
       <div class="list-title">Series por semana</div>
       <p class="tiny" style="margin:-4px 4px 10px">La línea es tu objetivo:
       <b>${prog.objetivoSeries} series</b> semanales por músculo. Debajo de 8 el estímulo se
-      queda corto; muy por encima ya no se recupera.</p>
+      queda corto; muy por encima ya no se recupera.${raw(real
+        ? ' La barra fina de debajo es lo que has hecho de verdad estas ' + real.semanas +
+          ' semanas, para que se vea la distancia entre el plan y la realidad.'
+        : ' Cuando lleves unas semanas entrenando, aquí saldrá también lo que haces de verdad.')}</p>
       <div class="card">
         ${raw(musculos.map(function (m) {
           const v = prog.volumen[m];
-          const pct = Math.round(v / tope * 100);
-          const meta = Math.round(prog.objetivoSeries / tope * 100);
+          const pct = Math.round(v / escala * 100);
+          const meta = Math.round(prog.objetivoSeries / escala * 100);
           const flojo = v < 8;
+          const hecho = real ? (real.porMusculo[m] || 0) : null;
           return html`
             <div class="vol-fila">
               <span class="vol-nom">${I18N.muscle(m)}</span>
               <span class="vol-barra">
                 <i style="width:${pct}%${raw(flojo ? ';background:var(--warn)' : '')}"></i>
                 <u style="left:${meta}%"></u>
+                ${raw(real ? '<b class="vol-real" style="width:' +
+                  Math.round(hecho / escala * 100) + '%"></b>' : '')}
               </span>
-              <span class="vol-num">${String(v).replace('.', ',')}</span>
+              <span class="vol-num">${String(v).replace('.', ',')}${raw(real
+                ? '<span class="vol-hecho">' + String(hecho).replace('.', ',') + '</span>' : '')}</span>
             </div>`;
         }).join(''))}
+        ${raw(real ? html`
+          <p class="tiny" style="margin:10px 0 0">Barra gruesa: el plan. Barra fina: tú, de
+          media, en las últimas ${real.semanas} semanas (${real.sesiones}
+          ${real.sesiones === 1 ? 'entrenamiento' : 'entrenamientos'} guardados).</p>` : '')}
       </div>`;
   }
 
@@ -208,12 +225,16 @@
     const r = est.ia;
     if (!r) {
       return html`
-        <button class="btn block" data-a="afinar" style="margin-top:12px">
-          ${raw(icon('chispa'))} Que la IA revise este programa
+        <button class="btn ${IA.activa() ? 'primary' : ''} block" data-a="afinar"
+                style="margin-top:12px">
+          ${raw(icon('chispa'))} Que un entrenador con IA lea tu plan
         </button>
         <p class="tiny center" style="margin:7px 4px 0">${raw(IA.activa()
-          ? 'Revisa el reparto de volumen, los patrones que falten y el riesgo para tus limitaciones.'
-          : 'Necesita la clave de Gemini, que se configura en la bóveda de Ajustes.')}</p>`;
+          ? 'Lee este plan concreto y tu historial: mira el reparto de volumen, los patrones '
+            + 'que falten y el riesgo para tus limitaciones, y propone cambios que puedes '
+            + 'aplicar de un toque.'
+          : 'Necesita la clave de Gemini, que se configura en la bóveda de Ajustes. Sin ella '
+            + 'el plan funciona igual, pero esta lectura no.')}</p>`;
     }
 
     return html`
@@ -264,12 +285,17 @@
       </div>
 
       <div class="list-title">Por qué este plan</div>
+      <p class="tiny" style="margin:-4px 4px 10px">Esto lo calcula la app con tus datos, sin
+      pedirle nada a nadie: por eso funciona sin conexión y sin clave. La lectura de un
+      entrenador, que es otra cosa, está justo debajo.</p>
       <div class="card">
         ${raw(prog.razones.map(function (t, i) {
           return '<div class="razon"><span class="rt-idx">' + (i + 1) + '</span><p>' +
             esc(t) + '</p></div>';
         }).join(''))}
       </div>
+
+      ${raw(bloqueIA())}
 
       ${raw(prog.avisos.length ? html`
         <div class="list-title">Lo que evito por tus limitaciones</div>
@@ -302,8 +328,6 @@
           <b>Fuera del gimnasio</b>
           <p class="muted" style="margin:6px 0 0">${prog.cardio}</p>
         </div>` : '')}
-
-      ${raw(bloqueIA())}
 
       <div class="card" style="margin-top:16px">
         <label class="tiny">CÓMO QUIERES LLAMARLAS</label>
