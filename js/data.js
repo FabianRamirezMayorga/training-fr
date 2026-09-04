@@ -268,7 +268,65 @@
       encodeURIComponent('como hacer ' + ex.nameEs + ' tecnica correcta');
   }
 
+  /* ---------- lo que la IA puede proponer ----------
+     Sin darle el catálogo, la IA propone de memoria: «remo con barra T»,
+     «hip thrust en máquina», cosas que aquí no existen. Entonces el cambio o se
+     descarta o acaba en el primer parecido que encuentre el buscador, que a
+     veces no tiene nada que ver. Se le pasa un menú cerrado: solo puede elegir
+     de ahí, y lo que elija se resuelve por nombre exacto.
+     No caben los 924, así que se recorta por músculo dejando primero lo
+     compuesto y el material de siempre, que es lo que uno acaba usando. */
+  const ORDEN_MATERIAL = {
+    barbell: 0, dumbbell: 1, machine: 2, cable: 3, 'body only': 4,
+    'e-z curl bar': 5, kettlebells: 6, bands: 7
+  };
+
+  function paraIA(opciones) {
+    opciones = opciones || {};
+    const foco = opciones.musculos || [];
+    const tope = opciones.porMusculo || 14;
+
+    const grupos = {};
+    search({ gear: opciones.gear || 'gym' }).forEach(function (e) {
+      const mus = (e.primaryMuscles || [])[0];
+      if (!mus) return;
+      (grupos[mus] = grupos[mus] || []).push(e);
+    });
+
+    return Object.keys(grupos).map(function (mus) {
+      const cuantos = foco.indexOf(mus) !== -1 ? tope + 8 : tope;
+      const lista = grupos[mus].slice().sort(function (a, b) {
+        const ca = a.mechanic === 'compound' ? 0 : 1;
+        const cb = b.mechanic === 'compound' ? 0 : 1;
+        if (ca !== cb) return ca - cb;
+        const ea = ORDEN_MATERIAL[a.equipment];
+        const eb = ORDEN_MATERIAL[b.equipment];
+        if ((ea === undefined ? 9 : ea) !== (eb === undefined ? 9 : eb)) {
+          return (ea === undefined ? 9 : ea) - (eb === undefined ? 9 : eb);
+        }
+        return String(a.nameEs).localeCompare(String(b.nameEs));
+      }).slice(0, cuantos);
+
+      return I18N.muscle(mus).toUpperCase() + ': ' +
+        lista.map(function (e) { return e.nameEs; }).join(' | ');
+    }).join('\n');
+  }
+
+  /* Nombre exacto — tal y como se le ofreció a la IA — al ejercicio del
+     catálogo. Devuelve null si no es uno de los nuestros, que es justo lo que
+     hay que saber antes de meterlo en una rutina. */
+  function porNombreEs(nombre) {
+    const buscado = I18N.norm(String(nombre || ''));
+    if (!buscado) return null;
+    const todos = all();
+    for (let i = 0; i < todos.length; i++) {
+      if (I18N.norm(todos[i].nameEs) === buscado) return todos[i];
+    }
+    return null;
+  }
+
   g.Data = {
+    paraIA: paraIA, porNombreEs: porNombreEs,
     load: load, all: all, get: get, search: search,
     img: img, frames: frames, youtube: youtube, PLACEHOLDER: PLACEHOLDER,
     GEAR: GEAR, gearAllows: gearAllows, gearFrase: gearFrase,

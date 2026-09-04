@@ -631,9 +631,14 @@
      nombres de vez en cuando y propone cosas que la persona no puede hacer:
      validar aquí es lo que separa una sugerencia de un destrozo. */
 
+  /* Primero por nombre exacto: a la IA se le da la lista de la que puede
+     elegir, así que lo normal es que acierte. El buscador queda de red por si
+     se le escapa una tilde o le sobra una palabra, y entonces se avisa de con
+     qué se ha quedado, que no es lo mismo que pidió. */
   function delCatalogo(nombre) {
-    const gear = Store.settings().gear;
-    const cand = Data.search({ q: String(nombre || ''), gear: gear });
+    const exacto = Data.porNombreEs(nombre);
+    if (exacto) return exacto;
+    const cand = Data.search({ q: String(nombre || ''), gear: Store.settings().gear });
     return cand[0] || null;
   }
 
@@ -712,6 +717,7 @@
     }
 
     const nuevo = delCatalogo(c.poner);
+    const aOjo = nuevo && I18N.norm(nuevo.nameEs) !== I18N.norm(String(c.poner || ''));
     if (!nuevo) {
       UI.toast('No encuentro «' + (c.poner || '') + '» en el catálogo. Cambio descartado.');
       est.ia.cambios.splice(i, 1);
@@ -759,6 +765,8 @@
       destino.minutos += minutosDe(entra);
       est.ia.cambios.splice(i, 1);
       apuntarAplicado(nuevo.nameEs + ': entra en ' + destino.nombre);
+      if (aOjo) UI.toast('Pedía «' + c.poner + '», que no está en el catálogo. He puesto ' +
+        nuevo.nameEs + '.');
       return;
     }
 
@@ -773,5 +781,7 @@
     e.note = 'Cambiado a propuesta del entrenador: ' + (c.porque || '');
     est.ia.cambios.splice(i, 1);
     apuntarAplicado(nuevo.nameEs + ' en lugar de ' + antes);
+    if (aOjo) UI.toast('Pedía «' + c.poner + '», que no está en el catálogo. He puesto ' +
+      nuevo.nameEs + '.');
   }
 })(window);

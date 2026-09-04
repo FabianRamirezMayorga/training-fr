@@ -2188,8 +2188,11 @@
       return;
     }
 
-    const nuevo = (Data.search({ q: String(c.poner || ''), gear: Store.settings().gear }) || [])[0];
+    /* por nombre exacto, que es como se le ofreció; el buscador solo de red */
+    const nuevo = Data.porNombreEs(c.poner) ||
+      (Data.search({ q: String(c.poner || ''), gear: Store.settings().gear }) || [])[0];
     if (!nuevo) { fuera('No encuentro «' + (c.poner || '') + '» en el catálogo.'); return; }
+    const aOjo = I18N.norm(nuevo.nameEs) !== I18N.norm(String(c.poner || ''));
 
     const claves = Programa.lesionesDe(Perfil.datos().lesiones);
     const patron = Alt.patron(nuevo);
@@ -2216,7 +2219,8 @@
         note: 'Lo mete el entrenador: ' + (c.porque || '')
       });
       guardar();
-      fuera('Entra ' + nuevo.nameEs);
+      fuera(aOjo ? 'Pedía «' + c.poner + '»; he puesto ' + nuevo.nameEs
+        : 'Entra ' + nuevo.nameEs);
       return;
     }
 
@@ -2226,7 +2230,8 @@
     draft.exercises[k].exId = nuevo.id;
     draft.exercises[k].note = 'Cambiado a propuesta del entrenador: ' + (c.porque || '');
     guardar();
-    fuera(nuevo.nameEs + ' en lugar de ' + antes);
+    fuera(aOjo ? 'Pedía «' + c.poner + '»; he puesto ' + nuevo.nameEs
+      : nuevo.nameEs + ' en lugar de ' + antes);
   }
 
   function viewRutina() {

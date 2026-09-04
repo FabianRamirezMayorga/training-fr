@@ -610,11 +610,26 @@
       'con su consecuencia. Cita las rutinas y los ejercicios por su nombre.\n' +
       '- Mira el reparto de volumen entre músculos, los patrones que falten, la ' +
       'frecuencia semanal y si lo que entreno de verdad se parece a lo que tengo ' +
-      'apuntado.\n\n' +
+      'apuntado.\n' +
+      '- Si nombras un ejercicio de recambio, que sea uno del catálogo de abajo y ' +
+      'escrito igual: lo que no esté ahí no lo tengo y no me sirve.\n' +
+      menuEjercicios([]) + '\n' +
       'Devuelve JSON: {"nota":número del 0 al 10,' +
       '"veredicto":"2 frases sin rodeos","puntos":[{"titulo":"3-5 palabras",' +
       '"detalle":"1-2 frases con la consecuencia"}]}';
     return llamarJSON(prompt, { maxTokens: 2048 });
+  }
+
+  /* El catálogo que se le enseña, con la advertencia de que es lo único que
+     puede proponer. Es lo que separa un cambio aplicable de un nombre bonito
+     que aquí no existe. */
+  function menuEjercicios(musculos, gear) {
+    return '\nCATÁLOGO DEL QUE PUEDES ELEGIR. Es el único material que existe en ' +
+      'esta app. Cualquier ejercicio que propongas tiene que estar en esta lista y ' +
+      'escrito EXACTAMENTE igual, tilde por tilde. Si lo que ibas a proponer no ' +
+      'está, coge el más parecido que sí esté; y si no hay nada parecido, no ' +
+      'propongas ese cambio. No te inventes nombres ni los traduzcas a tu manera:\n' +
+      Data.paraIA({ musculos: musculos || [], gear: gear || Store.settings().gear }) + '\n';
   }
 
   /* ---------- auditar UNA rutina ----------
@@ -635,8 +650,17 @@
 
     const dias = (r.days || []).length ? UI.diasLargos(r.days) : 'ningún día fijo';
 
+    const suyos = [];
+    (r.exercises || []).forEach(function (e) {
+      const ex = Data.get(e.exId);
+      if (ex) (ex.primaryMuscles || []).forEach(function (m) {
+        if (suyos.indexOf(m) === -1) suyos.push(m);
+      });
+    });
+
     const prompt = contexto({ progreso: true }) + '\n\n' +
       'RUTINA A AUDITAR — "' + (r.name || 'sin nombre') + '", ' + dias + ':\n' + lista + '\n' +
+      menuEjercicios(suyos) +
       (r.note ? 'NOTAS QUE LE PUSO: ' + r.note + '\n' : '') +
       '\nAudita esta rutina concreta. No me cuentes lo que ya está bien.\n' +
       '- Ponle nota del 0 al 10. Correcta pero mejorable es un 6 o un 7.\n' +
@@ -646,9 +670,10 @@
       'descansos mal puestos o riesgo para mis limitaciones.\n' +
       '- Propon de uno a tres cambios ejecutables, con su acción:\n' +
       '  "cambiar": sustituir un ejercicio. Rellena "quitar" con el nombre EXACTO ' +
-      'tal y como aparece arriba y "poner" con el recambio en español común.\n' +
+      'de la rutina y "poner" con el nombre EXACTO de un ejercicio del catálogo.\n' +
       '  "quitar": sobra. Rellena "quitar" con el nombre exacto.\n' +
-      '  "anadir": falta. Rellena "poner", y "series" y "reps".\n' +
+      '  "anadir": falta. Rellena "poner" con el nombre EXACTO de un ejercicio ' +
+      'del catálogo, y "series" y "reps".\n' +
       'Si un cambio no la mejora de verdad, no lo propongas.\n\n' +
       'Devuelve JSON: {"nota":número del 0 al 10,' +
       '"veredicto":"2 frases sin rodeos",' +
@@ -717,6 +742,7 @@
       ', unas ' + prog.objetivoSeries + ' series semanales por músculo):\n' + dias + '\n' +
       'SERIES POR SEMANA Y MÚSCULO QUE PIDE EL PLAN: ' + volumen + '\n' + historial + comida +
       (prog.lesiones.length ? 'LIMITACIONES YA APLICADAS: ' + prog.lesiones.join(', ') + '\n' : '') +
+      menuEjercicios(Object.keys(prog.volumen || {})) +
       '\nTe han contratado para auditar este programa, no para animar a nadie.\n\n' +
       'REGLAS INNEGOCIABLES:\n' +
       '- De los puntos que devuelvas, al menos tres tienen que ser críticas ' +
@@ -731,12 +757,13 @@
       'CAMBIOS: propon de dos a cuatro, y que sean ejecutables. Cada uno lleva ' +
       'una accion:\n' +
       '- "cambiar": sustituir un ejercicio por otro. Rellena "quitar" con el ' +
-      'nombre EXACTO en español tal y como aparece arriba y "poner" con el ' +
-      'recambio en español común.\n' +
+      'nombre EXACTO tal y como aparece en el programa y "poner" con el nombre ' +
+      'EXACTO de un ejercicio del catálogo de arriba.\n' +
       '- "quitar": sobra un ejercicio (repite estímulo, alarga la sesión sin ' +
       'aportar, o es un riesgo). Rellena "quitar" con el nombre exacto.\n' +
-      '- "anadir": falta un ejercicio. Rellena "poner" con el nombre en español ' +
-      'común, "dia" con el número de la sesión donde va, y "series" y "reps".\n' +
+      '- "anadir": falta un ejercicio. Rellena "poner" con el nombre EXACTO de un ' +
+      'ejercicio del catálogo, "dia" con el número de la sesión donde va, y ' +
+      '"series" y "reps".\n' +
       'Si un cambio no mejora el plan de verdad, no lo propongas.\n\n' +
       'Devuelve JSON: {"nota":número del 0 al 10,' +
       '"veredicto":"2-3 frases sin rodeos sobre qué le pasa a este plan",' +
