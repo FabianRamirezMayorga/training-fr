@@ -414,7 +414,11 @@
           <p class="muted">Conecta tu cuenta para reproducir aquí y generar listas.</p>
           <button class="btn primary block" data-a="conectar">
             ${raw(icon('musica'))} Conectar Spotify</button>
-        </div>`;
+        </div>
+        ${raw(falloSpotifyHTML())}
+        <p class="tiny" style="margin-top:12px">Al pulsar te lleva a Spotify para dar
+        permiso y vuelve aquí solo. Si vuelves sin conectar, aquí abajo aparecerá el
+        motivo exacto.</p>`;
     }
 
     const lista = listaGuardada();
@@ -427,6 +431,8 @@
         <h1 style="margin:0">Música</h1>
         <button class="btn sm" data-a="desconectar">Desconectar</button>
       </div>
+
+      ${raw(falloSpotifyHTML())}
 
       ${raw(Spotify.permisosCaducados() ? html`
         <div class="card" style="border-color:var(--warn);margin-top:12px">
@@ -480,6 +486,28 @@
         </div>
       </div>`;
   };
+
+  /* Si la última autorización falló, se enseña aquí con el texto exacto que
+     devolvió Spotify: un aviso de dos segundos no da tiempo ni a leerlo. */
+  function falloSpotifyHTML() {
+    const f = Spotify.ultimoFallo && Spotify.ultimoFallo();
+    if (!f) return '';
+    return html`
+      <div class="card" style="margin-top:12px;border-color:var(--bad)">
+        <div class="row between" style="align-items:flex-start">
+          <div class="grow">
+            <b style="color:var(--bad)">La última conexión con Spotify falló</b>
+            <p class="tiny" style="margin:6px 0 0">${UI.fecha(f.t)}</p>
+          </div>
+          <button class="btn icon sm" data-a="olvidarFallo" aria-label="Descartar">
+            ${raw(icon('close'))}</button>
+        </div>
+        <pre style="margin:10px 0 0;font-size:.72rem;white-space:pre-wrap">${f.texto}</pre>
+        <p class="tiny" style="margin:9px 0 0">Comprueba en el panel de Spotify que en
+        <b>Redirect URIs</b> está exactamente <code>${Spotify.urlRetorno()}</code> y que tu
+        cuenta figura en <b>User Management</b> si la app está en modo desarrollo.</p>
+      </div>`;
+  }
 
   /* ---------- tus listas de Spotify ---------- */
 
@@ -580,8 +608,18 @@
   V.musica.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=boveda]', function () { go('claves'); });
-    bind(root, '[data-a=conectar]', function () {
-      Spotify.entrar().catch(function (e) { UI.toast(e.message); });
+    bind(root, '[data-a=olvidarFallo]', function () {
+      Spotify.apuntarFallo(null); render();
+    });
+
+    bind(root, '[data-a=conectar]', function (btn) {
+      btn.disabled = true;
+      Spotify.apuntarFallo(null);
+      UI.toast('Abriendo Spotify para dar permiso…');
+      Spotify.entrar().catch(function (e) {
+        btn.disabled = false;
+        UI.toast(e.message);
+      });
     });
     bind(root, '[data-a=desconectar]', function () {
       Spotify.apagarReproductor();

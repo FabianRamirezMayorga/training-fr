@@ -100,6 +100,13 @@
     const c = config();
     if (!c.clientId) return Promise.reject(new Error('Falta el Client ID de Spotify.'));
 
+    /* PKCE necesita SHA-256 del navegador, que solo existe en páginas seguras.
+       Sin esto el botón se quedaba mudo y parecía que no hacía nada. */
+    if (!window.crypto || !crypto.subtle || !crypto.subtle.digest) {
+      return Promise.reject(new Error('Este navegador no permite la conexión segura con ' +
+        'Spotify. Abre la app en https, no en una copia local.'));
+    }
+
     const verificador = aleatorio(64);
     const estado = aleatorio(16);
     /* de dónde salió: al volver, Spotify manda a la raíz y sin esto uno acaba
@@ -119,6 +126,9 @@
         state: estado
       });
       location.href = 'https://accounts.spotify.com/authorize?' + q.toString();
+    }).catch(function (e) {
+      localStorage.removeItem(VERIF);
+      throw new Error(e.message || 'No se pudo iniciar la conexión con Spotify.');
     });
   }
 
@@ -138,6 +148,7 @@
     const code = q.get('code');
     const estado = q.get('state');
     const error = q.get('error');
+    const detalle = q.get('error_description');
     const guardado = leer(VERIF);
 
     /* Sin "state" esto no viene de aquí: será el enlace de la cuenta. Se deja
@@ -154,13 +165,21 @@
         'por el camino. Vuelve a pulsar Conectar desde este mismo navegador.' });
     }
 
+    /* Lo que responda Spotify se guarda tal cual: un aviso de dos segundos se
+       pierde, y sin el texto exacto no hay forma de saber qué ha rechazado. */
     if (error) {
+      const volver = guardado.volver;
       localStorage.removeItem(VERIF);
-      limpiarURL();
-      return Promise.resolve({ ok: false, error: 'Spotify denegó el permiso.' });
+      limpiarURL(volver);
+      const texto = traducirError(error, detalle);
+      apuntarFallo(error + (detalle ? ': ' + detalle : ''));
+      return Promise.resolve({ ok: false, error: texto, volver: volver });
     }
     if (!code) return Promise.resolve({ ok: false });
-    if (guardado.s !== estado) return Promise.resolve({ ok: false });
+    if (guardado.s !== estado) {
+      apuntarFallo('La respuesta no coincide con la petición (state distinto).');
+      return Promise.resolve({ ok: false });
+    }
 
     localStorage.removeItem(VERIF);
     limpiarURL(guardado.volver);
@@ -170,8 +189,39 @@
       code: code,
       redirect_uri: urlRetorno(),
       code_verifier: guardado.v
-    }).then(function () { return { ok: true, volver: guardado.volver || '#/musica' }; })
-      .catch(function (e) { return { ok: false, error: e.message }; });
+    }).then(function () {
+      apuntarFallo(null);
+      return { ok: true, volver: guardado.volver || '#/musica' };
+    }).catch(function (e) {
+      apuntarFallo('Al canjear el código: ' + e.message);
+      return { ok: false, error: e.message, volver: guardado.volver };
+    });
+  }
+
+  /* Último fallo de autorización, para poder enseñarlo con calma en la pantalla */
+  const FALLO = 'trainingfr.spotify.fallo';
+  function apuntarFallo(texto) {
+    if (!texto) { localStorage.removeItem(FALLO); return; }
+    escribir(FALLO, { t: Date.now(), texto: String(texto) });
+  }
+  function ultimoFallo() { return leer(FALLO); }
+
+  /* Los errores de Spotify vienen en inglés y en clave */
+  function traducirError(error, detalle) {
+    const e = String(error || '');
+    if (/access_denied/i.test(e)) return 'No diste permiso a la app en la pantalla de Spotify.';
+    if (/invalid_client/i.test(e)) {
+      return 'Spotify no reconoce el Client ID. Cópialo otra vez del panel de desarrollador.';
+    }
+    if (/invalid_redirect_uri|redirect/i.test(e)) {
+      return 'La dirección de retorno no está dada de alta en tu app de Spotify. Añade ' +
+        urlRetorno() + ' en Redirect URIs.';
+    }
+    if (/invalid_scope/i.test(e)) return 'Spotify ha rechazado alguno de los permisos pedidos.';
+    if (/unsupported_response_type|invalid_request/i.test(e)) {
+      return 'Spotify ha rechazado la petición: ' + (detalle || e);
+    }
+    return 'Spotify respondió: ' + e + (detalle ? ' (' + detalle + ')' : '');
   }
 
   function limpiarURL(destino) {
@@ -697,7 +747,8 @@
     buscarPista: buscarPista, buscarPistas: buscarPistas, reproducirUris: reproducirUris,
     crearPlaylist: crearPlaylist, misArtistas: misArtistas,
     config: config, configurado: configurado, guardarConfig: guardarConfig,
-    esperandoRedireccion: esperandoRedireccion,
+    esperandoRedireccion: esperandoRedireccion, ultimoFallo: ultimoFallo,
+    apuntarFallo: apuntarFallo,
     guardarPlaylist: guardarPlaylist, borrarConfig: borrarConfig,
     buscarListas: buscarListas, esFavorita: esFavorita, marcarFavorita: marcarFavorita,
     aleatorio: aleatorio, repetir: repetir,

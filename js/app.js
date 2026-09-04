@@ -3173,7 +3173,19 @@
            cierra y abre y sigue viendo el mismo fallo sin entender por qué. */
         const yaControlaba = !!navigator.serviceWorker.controller;
         navigator.serviceWorker.addEventListener('controllerchange', function () {
-          if (yaControlaba) avisarVersionNueva();
+          if (!yaControlaba) return;
+          /* La versión nueva ya manda, pero la página sigue con los archivos
+             viejos. Si no hay nada en marcha se recarga sola: pedirlo por un
+             aviso deja a medio mundo usando la versión de antes y viendo
+             fallos ya arreglados. Con un entrenamiento en curso o una hoja
+             abierta no se toca nada y se ofrece el botón. */
+          const ocupado = Workout.isActive() ||
+            !document.getElementById('modal').hidden ||
+            location.hash.indexOf('entrenar') !== -1;
+
+          if (ocupado) { avisarVersionNueva(); return; }
+          UI.toast('Actualizando a la versión nueva…');
+          setTimeout(function () { location.reload(); }, 900);
         });
         navigator.serviceWorker.register('sw.js').catch(function () { /* opcional */ });
       }
@@ -3190,7 +3202,13 @@
            que no ha pasado nada */
         if (sp.volver && location.hash !== sp.volver) location.hash = sp.volver;
         UI.toast('Spotify conectado. Ya puedes activar el reproductor.');
-      } else if (sp.error) UI.toast(sp.error);
+      } else if (sp.error) {
+        /* el detalle queda escrito en la pantalla de Música, que un aviso corto
+           no da tiempo a leerlo */
+        if (sp.volver && location.hash !== sp.volver) location.hash = sp.volver;
+        else go('musica');
+        setTimeout(function () { UI.toast(sp.error); }, 400);
+      }
 
       /* recordatorios: revisan cada minuto mientras la app esté abierta */
       Alertas.arrancar(function () { pintarAvisos(); });
