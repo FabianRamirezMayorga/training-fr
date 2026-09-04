@@ -588,28 +588,48 @@
      seguir deduciéndolo desde fuera. */
   function diagnostico() {
     const ses = sesion() || {};
+    const c = config() || {};
     const partes = [];
+    let pl = '';
 
+    /* Cada prueba imprime el código y el motivo tal cual llegan. La del catálogo
+       público es la que separa las dos causas posibles: no pide ningún permiso,
+       así que si esa también falla el problema es la app de Spotify y no el
+       token ni esta web. */
     function probar(nombre, ruta, opciones) {
       return fetch(API + ruta, Object.assign({
         headers: { 'Authorization': 'Bearer ' + ses.access_token }
       }, opciones || {})).then(function (r) {
         return r.text().then(function (t) {
-          partes.push(nombre + ': ' + r.status + ' ' + t.slice(0, 160));
+          let d = t.slice(0, 90);
+          try {
+            const j = JSON.parse(t);
+            if (j && j.error && j.error.message) d = j.error.message;
+            else if (r.ok) d = 'bien';
+          } catch (e) { if (r.ok) d = 'bien'; }
+          partes.push(nombre + ': ' + r.status + ' ' + d);
         });
       }).catch(function (e) { partes.push(nombre + ': sin red (' + e.message + ')'); });
     }
 
     return pedir('/me').then(function (yo) {
       partes.push('cuenta: ' + (yo && yo.id) + ' · ' + (yo && yo.product));
+      partes.push('app: ' + String(c.clientId || '').slice(0, 8) + '…');
       return pedir('/me/playlists?limit=1');
     }).then(function (r) {
       const uno = r && r.items && r.items[0];
-      partes.push('permisos: ' + (ses.scope || '(la sesión no lo apuntó)'));
-      return probar('leer canciones de una lista',
-        '/playlists/' + (uno ? uno.id : 'x') + '/tracks?limit=1');
+      pl = uno ? uno.id : '';
+      partes.push('tus listas: bien' + (uno ? ' (' + (uno.name || '') + ')' : ''));
     }).catch(function (e) {
       partes.push('fallo antes de empezar: ' + e.message);
+    }).then(function () {
+      return probar('catálogo público', '/albums/4aawyAB9vmqN3uQ7FjRGTy');
+    }).then(function () {
+      return probar('datos de la lista', '/playlists/' + (pl || 'x'));
+    }).then(function () {
+      return probar('canciones de la lista', '/playlists/' + (pl || 'x') + '/tracks?limit=1');
+    }).then(function () {
+      return probar('mis guardadas', '/me/tracks?limit=1');
     }).then(function () {
       return probar('favorita (contains)', '/me/tracks/contains?ids=4uLU6hMCjMI75M1A2tKUQC');
     }).then(function () {
