@@ -546,8 +546,10 @@
 
   /* ---------- tus listas de Spotify ---------- */
 
-  /* qué lista está desplegada, para no pedir sus canciones sin que se pidan */
-  let listaAbierta = '';
+  /* Spotify tiene cerrada la ruta que devuelve las canciones de una lista, así
+     que no hay desplegable que valga: la fila entera suena y ya está. */
+  const SORPRESA = 'Spotify no deja ver las canciones desde aquí, así que la '
+    + 'siguiente siempre es sorpresa. Tú dale al play y déjate sorprender.';
 
   function tarjetasListas(listas, propias) {
     if (!listas.length) {
@@ -555,11 +557,11 @@
         ? 'No tienes listas guardadas en Spotify todavía.'
         : 'Ninguna lista con ese nombre.') + '</p>';
     }
-    return '<div class="stack">' + listas.map(function (l) {
-      const abierta = listaAbierta === l.id;
+    return '<p class="tiny" style="margin:0 0 10px">' + SORPRESA + '</p>'
+      + '<div class="stack">' + listas.map(function (l) {
       return html`
         <div class="card lista-card" style="padding:0;overflow:hidden">
-          <button class="rt-item" data-abrir-lista="${l.id}" data-uri="${l.uri}"
+          <button class="rt-item" data-poner-ya="${l.uri}" data-nombre="${l.nombre}"
                   style="width:100%;text-align:left;background:none;border:0">
             ${raw(l.portada
               ? '<img src="' + esc(l.portada) + '" alt="" loading="lazy">'
@@ -569,11 +571,9 @@
               <div class="tiny">${raw(l.temas != null ? l.temas + ' canciones' : '')}${raw(
                 l.de ? ' · ' + esc(l.de) : '')}</div>
             </div>
-            <span class="chevron ${abierta ? 'abierta' : ''}">${raw(icon('chevron'))}</span>
           </button>
-          <button class="lista-play" data-poner-ya="${l.uri}"
+          <button class="lista-play" data-poner-ya="${l.uri}" data-nombre="${l.nombre}"
                   aria-label="Reproducir ${l.nombre}">${raw(icon('play'))}</button>
-          <div class="lista-temas" data-temas="${l.id}" ${raw(abierta ? '' : 'hidden')}></div>
         </div>`;
     }).join('') + '</div>';
   }
@@ -596,54 +596,7 @@
       render();
     }).catch(function () {
       /* si no deja leer sus canciones, al menos suena y se dice por qué */
-      UI.toast('Reproduciendo ' + l.nombre + ', pero Spotify no deja leer sus canciones.');
-    });
-  }
-
-  /* Las canciones de una lista, con su botón para sonar desde cualquiera */
-  function pintarTemas(caja, lista) {
-    caja.innerHTML = '<p class="tiny" style="padding:11px 13px">Cargando canciones…</p>';
-    Spotify.cancionesDeLista(lista.id).then(function (temas) {
-      caja.dataset.cargada = '1';
-      if (!temas.length) {
-        caja.innerHTML = '<p class="tiny" style="padding:11px 13px">Esta lista está vacía.</p>';
-        return;
-      }
-      caja.innerHTML = temas.map(function (t, i) {
-        return html`
-          <button class="pista" data-uri-tema="${t.uri}" data-desde="${i}">
-            <span class="rt-idx">${i + 1}</span>
-            <div class="grow">
-              <div class="player-t">${t.titulo}</div>
-              <div class="tiny">${t.artista}</div>
-            </div>
-            ${raw(icon('play'))}
-          </button>`;
-      }).join('') +
-        '<div style="padding:9px 13px 13px">' +
-        '<button class="btn primary block sm" data-poner-lista="' + esc(lista.uri) + '">' +
-        icon('play') + ' Reproducir la lista entera</button></div>';
-
-      const uris = temas.map(function (t) { return t.uri; });
-
-      caja.querySelectorAll('[data-uri-tema]').forEach(function (b) {
-        b.onclick = function () {
-          Spotify.desbloquearAudio();
-          lanzar(uris.slice(Number(b.dataset.desde)));
-        };
-      });
-      const todo = caja.querySelector('[data-poner-lista]');
-      if (todo) todo.onclick = function () {
-        Spotify.desbloquearAudio();
-        Spotify.iniciarReproductor()
-          .catch(function () { /* sin reproductor propio, donde se pueda */ })
-          .then(function () { return Spotify.ponerPlaylist(todo.dataset.ponerLista); })
-          .then(function () { UI.toast('Reproduciendo ' + lista.nombre); })
-          .catch(function (e) { UI.toast(e.message); });
-      };
-    }).catch(function (e) {
-      caja.innerHTML = '<p class="tiny" style="padding:11px 13px;color:var(--bad)">' +
-        esc(e.message) + '</p>';
+      UI.toast('Sonando ' + l.nombre + '. La siguiente es sorpresa — déjate llevar.');
     });
   }
 
@@ -677,28 +630,17 @@
         };
       });
 
-      caja.querySelectorAll('[data-abrir-lista]').forEach(function (b) {
-        b.onclick = function () {
-          const id = b.dataset.abrirLista;
-          const temas = caja.querySelector('[data-temas="' + id + '"]');
-          const chev = b.querySelector('.chevron');
-          const abrir = temas.hidden;
-
-          /* solo una abierta a la vez, que si no la pantalla es un rollo */
-          caja.querySelectorAll('.lista-temas').forEach(function (x) { x.hidden = true; });
-          caja.querySelectorAll('.chevron').forEach(function (x) { x.classList.remove('abierta'); });
-
-          listaAbierta = abrir ? id : '';
-          temas.hidden = !abrir;
-          if (chev) chev.classList.toggle('abierta', abrir);
-          if (abrir && !temas.dataset.cargada) {
-            pintarTemas(temas, listas.find(function (x) { return x.id === id; }));
-          }
-        };
-      });
     }).catch(function (e) {
       caja.innerHTML = '<p class="tiny" style="color:var(--bad)">' + esc(e.message) + '</p>';
     });
+  }
+
+  /* Las canciones de la lista se pueden plegar: diecinueve seguidas dejan los
+     botones de arriba fuera de la pantalla y hay que subir a buscarlos. */
+  let temasAbiertos = true;
+
+  function etiquetaPlegar(n) {
+    return temasAbiertos ? 'Ocultar las canciones' : 'Ver las ' + n + ' canciones';
   }
 
   function listaHTML(l) {
@@ -718,15 +660,18 @@
         <div class="row" style="margin-top:12px">
           <button class="btn primary grow" data-a="reproducirLista">
             ${raw(icon('play'))} Reproducir aquí</button>
-          <button class="btn" data-a="guardarEnSpotify" aria-label="Guardar en Spotify">
-            ${raw(icon('down'))}</button>
         </div>
         <div class="row" style="margin-top:8px">
           <button class="btn ghost grow sm" data-a="generar">${raw(icon('chispa'))} Crear otra distinta</button>
         </div>
+        <button class="btn ghost block sm plegar ${temasAbiertos ? 'abierta' : ''}"
+                data-a="plegarTemas" style="margin-top:8px"
+                aria-expanded="${temasAbiertos}">
+          ${raw(icon('chevron'))} ${raw(etiquetaPlegar(l.pistas.length))}</button>
       </div>
 
-      <div class="stack" style="margin-top:11px">
+      <div class="stack" data-temas-lista style="margin-top:11px"
+           ${raw(temasAbiertos ? '' : 'hidden')}>
         ${raw(l.pistas.map(function (p, i) {
           return html`
             <button class="pista" data-pista="${i}">
@@ -809,6 +754,17 @@
 
     bindAll(root, '[data-a=generar]', function (btn) { generarLista(btn); });
 
+    bind(root, '[data-a=plegarTemas]', function (btn) {
+      const caja = root.querySelector('[data-temas-lista]');
+      if (!caja) return;
+      temasAbiertos = !temasAbiertos;
+      caja.hidden = !temasAbiertos;
+      btn.classList.toggle('abierta', temasAbiertos);
+      btn.setAttribute('aria-expanded', String(temasAbiertos));
+      btn.innerHTML = icon('chevron') + ' ' +
+        etiquetaPlegar(caja.querySelectorAll('[data-pista]').length);
+    });
+
     bind(root, '[data-a=reproducirLista]', function (btn) {
       const l = listaGuardada();
       if (!l) return;
@@ -834,14 +790,6 @@
         .catch(function (e) { caja.textContent = 'No se pudo probar: ' + e.message; btn.disabled = false; });
     });
 
-    bind(root, '[data-a=guardarEnSpotify]', function (btn) {
-      const l = listaGuardada();
-      if (!l) return;
-      btn.disabled = true;
-      Spotify.crearPlaylist(l.nombre, l.descripcion, l.pistas.map(function (p) { return p.uri; }))
-        .then(function () { UI.toast('Guardada en tu Spotify'); btn.disabled = false; })
-        .catch(function (e) { btn.disabled = false; UI.toast(e.message); });
-    });
   };
 
   /* Poner a sonar una lista.

@@ -619,6 +619,10 @@ body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
 /* Sin el corazón la fila queda coja y el play deja de caer en el centro de la
    pantalla, que es donde se busca con el pulgar. Este hueco lo compensa. */
 .player-b.chico.hueco{visibility:hidden;pointer-events:none}
+/* El chevron del plegable mira abajo cuando está abierto y a la derecha cuando
+   está cerrado, como el resto de desplegables de la app. */
+.btn.plegar svg{width:15px;height:15px;transition:transform .18s ease}
+.btn.plegar.abierta svg{transform:rotate(90deg)}
 /* Volumen del reproductor propio */
 .player-vol{display:flex;align-items:center;gap:10px;margin-top:14px}
 .player-vol svg{width:17px;height:17px;flex:none;fill:none;stroke:var(--dim2);stroke-width:1.8;
