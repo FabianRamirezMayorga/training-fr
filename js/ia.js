@@ -617,6 +617,50 @@
     return llamarJSON(prompt, { maxTokens: 2048 });
   }
 
+  /* ---------- auditar UNA rutina ----------
+     Lo mismo que se le hace al programa entero, pero sobre una rutina suelta:
+     la que uno ya tiene montada y quiere pasar por otro par de ojos. Los
+     cambios vuelven en el mismo formato para que se apliquen igual, con la
+     misma validación contra el catálogo y las lesiones. */
+  function revisarRutina(r) {
+    const lista = (r.exercises || []).map(function (e, i) {
+      const ex = Data.get(e.exId);
+      return (i + 1) + ') ' + (ex ? ex.nameEs : e.exId) + ' ' + e.sets + 'x' + e.reps +
+        ' descanso ' + e.rest + 's' +
+        (ex && ex.primaryMuscles.length
+          ? ' (' + ex.primaryMuscles.map(I18N.muscle).join(', ') + ')' : '');
+    }).join('\n');
+
+    if (!lista) return Promise.reject(new Error('Esta rutina todavía no tiene ejercicios.'));
+
+    const dias = (r.days || []).length ? UI.diasLargos(r.days) : 'ningún día fijo';
+
+    const prompt = contexto({ progreso: true }) + '\n\n' +
+      'RUTINA A AUDITAR — "' + (r.name || 'sin nombre') + '", ' + dias + ':\n' + lista + '\n' +
+      (r.note ? 'NOTAS QUE LE PUSO: ' + r.note + '\n' : '') +
+      '\nAudita esta rutina concreta. No me cuentes lo que ya está bien.\n' +
+      '- Ponle nota del 0 al 10. Correcta pero mejorable es un 6 o un 7.\n' +
+      '- De dos a cuatro puntos, y al menos dos tienen que ser fallos con su ' +
+      'consecuencia: orden de los ejercicios, series o repeticiones que no ' +
+      'cuadran con mi objetivo, músculos repetidos, patrones que faltan, ' +
+      'descansos mal puestos o riesgo para mis limitaciones.\n' +
+      '- Propon de uno a tres cambios ejecutables, con su acción:\n' +
+      '  "cambiar": sustituir un ejercicio. Rellena "quitar" con el nombre EXACTO ' +
+      'tal y como aparece arriba y "poner" con el recambio en español común.\n' +
+      '  "quitar": sobra. Rellena "quitar" con el nombre exacto.\n' +
+      '  "anadir": falta. Rellena "poner", y "series" y "reps".\n' +
+      'Si un cambio no la mejora de verdad, no lo propongas.\n\n' +
+      'Devuelve JSON: {"nota":número del 0 al 10,' +
+      '"veredicto":"2 frases sin rodeos",' +
+      '"puntos":[{"titulo":"3-5 palabras","detalle":"1-2 frases con la consecuencia"}],' +
+      '"cambios":[{"accion":"cambiar|quitar|anadir","quitar":"nombre exacto o vacío",' +
+      '"poner":"nombre o vacío","series":número o 0,"reps":número o 0,' +
+      '"porque":"1 frase"}],' +
+      '"consejo":"lo que más cambiaría el resultado de esta rutina, 1 frase"}';
+
+    return llamarJSON(prompt, { maxTokens: 2048, temperatura: 0.55 });
+  }
+
   /* ---------- afinar el programa ----------
      El programa lo construye programa.js, que es determinista y siempre da algo
      coherente. La IA entra después, y entra a criticar: si lo único que devuelve
@@ -897,7 +941,8 @@
     config: config, guardarConfig: guardarConfig, borrarConfig: borrarConfig, activa: activa,
     llamar: llamar, llamarJSON: llamarJSON, contexto: contexto, limpiarCache: limpiarCache,
     listarModelos: listarModelos,
-    planNutricion: planNutricion, revisarRutinas: revisarRutinas, afinarPrograma: afinarPrograma,
+    planNutricion: planNutricion, revisarRutinas: revisarRutinas,
+    revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
     analizarComida: analizarComida,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,

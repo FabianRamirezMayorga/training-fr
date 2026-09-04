@@ -1526,8 +1526,8 @@
       ${raw(ordenando ? '<p class="tiny center" style="margin-top:10px">Con las flechas las ' +
         'colocas a tu gusto y con la papelera las borras. El orden viaja a tus demás ' +
         'dispositivos, y al salir de aquí la rutina de hoy vuelve a ponerse la primera.</p>'
-        : '<p class="tiny center" style="margin-top:10px">Abre un plan para ver sus d\u00edas. ' +
-        'Toca una rutina para desplegar sus ejercicios y cambiarle el d\u00eda, o pulsa ' +
+        : '<p class="tiny center" style="margin-top:10px">Abre un plan para ver sus días. ' +
+        'Toca una rutina para desplegar sus ejercicios y cambiarle el día, o pulsa ' +
         'Entrenar para hacerla ahora.</p>')}
 
       <div class="list-title">Rutinas de ejemplo</div>
@@ -1999,6 +1999,185 @@
 
   let draft = null;
 
+  /* La lectura de la IA sobre ESTA rutina. Vive fuera del borrador porque no
+     forma parte de la rutina: se pide, se aplica lo que valga y se tira. */
+  let revIA = { id: null, cargando: false, datos: null };
+
+  function auditoriaHTML() {
+    if (!draft.id || !draft.exercises.length) return '';
+
+    if (revIA.cargando) {
+      return html`
+        <div class="card center" style="margin-top:16px">
+          <div class="spinner" style="margin:6px auto"></div>
+          <p class="tiny" style="margin:8px 0 0">Auditando esta rutina…</p>
+        </div>`;
+    }
+
+    const r = revIA.id === draft.id ? revIA.datos : null;
+    if (!r) {
+      return html`
+        <button class="btn block" data-a="auditar" style="margin-top:16px">
+          ${raw(icon('chispa'))} Que la IA revise esta rutina
+        </button>
+        <p class="tiny center" style="margin:7px 4px 0">${IA.activa()
+          ? 'La lee con tu perfil y tu historial delante, le pone nota y propone cambios que aplicas de un toque.'
+          : 'Necesita la clave de Gemini, que se configura en la bóveda de Ajustes.'}</p>`;
+    }
+
+    const nota = Number(r.nota);
+    return html`
+      <div class="list-head">
+        <span class="list-title">Lo que dice el entrenador</span>
+        <button class="btn sm ghost" data-a="olvidarAuditoria">Descartar</button>
+      </div>
+      <div class="card">
+        ${raw(nota > 0 ? html`
+          <div class="row" style="gap:12px;align-items:center;margin-bottom:10px">
+            <div style="flex:none;font-size:1.9rem;font-weight:700;line-height:1;color:${raw(
+              nota >= 8 ? 'var(--acc)' : nota >= 6 ? 'var(--warn)' : 'var(--bad)')}">${nota}<span
+                 style="font-size:.9rem;color:var(--dim2)">/10</span></div>
+            <div class="tiny grow">Nota que le pone a esta rutina tal y como está.</div>
+          </div>` : '')}
+        <p style="margin:0 0 10px">${r.veredicto || ''}</p>
+        ${raw((r.puntos || []).map(function (x) {
+          return '<div class="error-item"><b>' + esc(x.titulo || '') + '</b><p>' +
+            esc(x.detalle || '') + '</p></div>';
+        }).join(''))}
+      </div>
+
+      ${raw((r.cambios || []).length ? html`
+        <div class="card">
+          <b>Cambios que propone</b>
+          <div class="stack" style="margin-top:9px">
+            ${raw(r.cambios.map(function (c, i) {
+              const acc = accionRutina(c);
+              const que = acc === 'quitar' ? c.quitar
+                : acc === 'anadir' ? c.poner
+                : c.poner + ' en lugar de ' + c.quitar;
+              return html`
+                <div class="row between" style="gap:10px;align-items:flex-start">
+                  <div class="grow">
+                    <div style="font-size:.86rem">
+                      <span class="chip tiny-chip">${acc === 'quitar' ? 'Quitar'
+                        : acc === 'anadir' ? 'Añadir' : 'Sustituir'}</span>
+                      <b>${que}</b></div>
+                    <div class="tiny">${c.porque || ''}</div>
+                  </div>
+                  <div class="row" style="gap:6px;flex:none">
+                    <button class="btn sm" data-rcambio="${i}">Aplicar</button>
+                    <button class="btn sm ghost" data-rnocambio="${i}"
+                            aria-label="Descartar">✕</button>
+                  </div>
+                </div>`;
+            }).join(''))}
+          </div>
+          <p class="tiny" style="margin:10px 0 0">Se comprueba antes de aplicarlo: si el
+          ejercicio no existe, no cabe con tu material o choca con tus limitaciones, se
+          descarta. Lo que apliques se guarda en la rutina al momento.</p>
+        </div>` : '')}
+
+      ${raw(r.consejo ? html`
+        <div class="card destacado-clave">
+          <h3 class="guia-h">${raw(icon('chispa'))} Si solo haces una cosa</h3>
+          <p style="margin:0">${r.consejo}</p>
+        </div>` : '')}`;
+  }
+
+  function accionRutina(c) {
+    const a = String(c.accion || '').toLowerCase().replace('ñ', 'n');
+    if (a.indexOf('quit') === 0 || a.indexOf('elimin') === 0) return 'quitar';
+    if (a.indexOf('anad') === 0 || a.indexOf('agreg') === 0 || a.indexOf('met') === 0) return 'anadir';
+    if (a.indexOf('cambi') === 0 || a.indexOf('sustit') === 0 || a.indexOf('reempl') === 0) return 'cambiar';
+    if (c.quitar && c.poner) return 'cambiar';
+    return c.poner ? 'anadir' : 'quitar';
+  }
+
+  /* Igual que en el programa: la IA se inventa nombres y propone cosas que la
+     persona no puede hacer, así que nada entra sin pasar por el catálogo, el
+     material y las limitaciones. */
+  function aplicarEnRutina(i, guardar) {
+    const c = ((revIA.datos || {}).cambios || [])[i];
+    if (!c) return;
+    const acc = accionRutina(c);
+    const fuera = function (aviso) {
+      revIA.datos.cambios.splice(i, 1);
+      if (aviso) UI.toast(aviso);
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+    };
+
+    const dondeEsta = function (nombre) {
+      const buscado = I18N.norm(String(nombre || ''));
+      if (!buscado) return -1;
+      let parcial = -1;
+      for (let k = 0; k < draft.exercises.length; k++) {
+        const ex = Data.get(draft.exercises[k].exId);
+        if (!ex) continue;
+        const n = I18N.norm(ex.nameEs);
+        if (n === buscado || ex.id === nombre) return k;
+        if (parcial === -1 && (n.indexOf(buscado) !== -1 || buscado.indexOf(n) !== -1)) parcial = k;
+      }
+      return parcial;
+    };
+
+    if (acc === 'quitar') {
+      const k = dondeEsta(c.quitar);
+      if (k === -1) { fuera('Ya no está «' + (c.quitar || '') + '» en la rutina.'); return; }
+      if (draft.exercises.length <= Store.MINIMO_EJERCICIOS) {
+        UI.toast('La rutina se quedaría por debajo del mínimo de ' +
+          Store.MINIMO_EJERCICIOS + ' ejercicios.');
+        return;
+      }
+      const nombre = (Data.get(draft.exercises[k].exId) || {}).nameEs || '';
+      draft.exercises.splice(k, 1);
+      guardar();
+      fuera('Fuera ' + nombre);
+      return;
+    }
+
+    const nuevo = (Data.search({ q: String(c.poner || ''), gear: Store.settings().gear }) || [])[0];
+    if (!nuevo) { fuera('No encuentro «' + (c.poner || '') + '» en el catálogo.'); return; }
+
+    const claves = Programa.lesionesDe(Perfil.datos().lesiones);
+    const patron = Alt.patron(nuevo);
+    const prohibido = claves.some(function (k) {
+      return (Programa.LESIONES[k].patronesFuera || []).indexOf(patron) !== -1;
+    });
+    if (prohibido) {
+      fuera('«' + nuevo.nameEs + '» no encaja con tus limitaciones.');
+      return;
+    }
+
+    if (acc === 'anadir') {
+      if (draft.exercises.some(function (e) { return e.exId === nuevo.id; })) {
+        fuera('«' + nuevo.nameEs + '» ya está en la rutina.');
+        return;
+      }
+      const modelo = draft.exercises[draft.exercises.length - 1] || {};
+      draft.exercises.push({
+        exId: nuevo.id,
+        sets: Math.min(15, Number(c.series) || modelo.sets || 3),
+        reps: Math.min(200, Number(c.reps) || modelo.reps || 12),
+        weight: 0,
+        rest: modelo.rest || 75,
+        note: 'Lo mete el entrenador: ' + (c.porque || '')
+      });
+      guardar();
+      fuera('Entra ' + nuevo.nameEs);
+      return;
+    }
+
+    const k = dondeEsta(c.quitar);
+    if (k === -1) { fuera('Ya no está «' + (c.quitar || '') + '» en la rutina.'); return; }
+    const antes = (Data.get(draft.exercises[k].exId) || {}).nameEs || '';
+    draft.exercises[k].exId = nuevo.id;
+    draft.exercises[k].note = 'Cambiado a propuesta del entrenador: ' + (c.porque || '');
+    guardar();
+    fuera(nuevo.nameEs + ' en lugar de ' + antes);
+  }
+
   function viewRutina() {
     if (route.arg === 'nueva') draft = Store.newRoutine();
     else {
@@ -2105,7 +2284,9 @@
       </div>
       ${raw(draft.id && draft.exercises.length ? html`
         <button class="btn block" data-a="entrenar" style="margin-top:8px">
-          ${raw(icon('play'))} Guardar y entrenar ahora</button>` : '')}`;
+          ${raw(icon('play'))} Guardar y entrenar ahora</button>` : '')}
+
+      ${raw(auditoriaHTML())}`;
   }
 
   /* La zona del borrador que se está editando */
@@ -2163,6 +2344,37 @@
     }
 
     bind(root, '[data-a=atras]', function () { autoguardar(); go('rutinas'); });
+
+    /* ---- la lectura de la IA sobre esta rutina ---- */
+    bind(root, '[data-a=auditar]', function () {
+      if (!IA.activa()) { go('claves'); UI.toast('Configura la clave de Gemini para esto'); return; }
+      const r = autoguardar();
+      if (!r) { UI.toast('Guárdala antes de pasarla por la IA'); return; }
+      revIA = { id: r.id, cargando: true, datos: null };
+      render();
+      IA.revisarRutina(r)
+        .then(function (x) { revIA.datos = x; })
+        .catch(function (e) { UI.toast(e.message); })
+        .then(function () { revIA.cargando = false; render(); });
+    });
+
+    bind(root, '[data-a=olvidarAuditoria]', function () {
+      revIA = { id: null, cargando: false, datos: null };
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+    });
+
+    bindAll(root, '[data-rcambio]', function (el) {
+      aplicarEnRutina(Number(el.dataset.rcambio), autoguardar);
+    });
+
+    bindAll(root, '[data-rnocambio]', function (el) {
+      revIA.datos.cambios.splice(Number(el.dataset.rnocambio), 1);
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+    });
 
     bindAll(root, '[data-day]', function (el) {
       const d = el.dataset.day;

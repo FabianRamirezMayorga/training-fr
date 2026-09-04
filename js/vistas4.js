@@ -41,6 +41,7 @@
     prog: null,
     ia: null,
     aplicados: [],
+    guardadas: [],
     cargandoIA: false,
     abierto: {}
   };
@@ -53,6 +54,8 @@
         if (x[k] !== undefined && x[k] !== null) est[k] = x[k];
       });
       est.aplicados = x.aplicados || [];
+      est.guardadas = x.guardadas || [];
+      est.recuperado = !!est.prog;
     } catch (e) { /* si el guardado está roto, se empieza de cero */ }
   })();
 
@@ -61,9 +64,16 @@
       localStorage.setItem(CLAVE, JSON.stringify({
         v: 1, ts: Date.now(),
         dias: est.dias, minutos: est.minutos, objetivo: est.objetivo, foco: est.foco,
-        nombre: est.nombre, prog: est.prog, ia: est.ia, aplicados: est.aplicados
+        nombre: est.nombre, prog: est.prog, ia: est.ia, aplicados: est.aplicados,
+        guardadas: est.guardadas
       }));
     } catch (e) { /* sin sitio: el plan sigue en pantalla, solo no sobrevive */ }
+  }
+
+  /* De las rutinas que creó este plan, las que siguen existiendo. Si el usuario
+     borró alguna a mano, deja de contar como suya. */
+  function vivas() {
+    return (est.guardadas || []).filter(function (id) { return !!Store.routine(id); });
   }
 
   function objetivoActual() {
@@ -441,10 +451,14 @@
 
       <div class="row" style="margin-top:12px">
         <button class="btn grow" data-a="otra">Otra propuesta</button>
-        <button class="btn primary grow" data-a="guardar">Guardar mis rutinas</button>
+        <button class="btn primary grow" data-a="guardar">${vivas().length
+          ? 'Actualizar mis rutinas' : 'Guardar mis rutinas'}</button>
       </div>
-      <p class="tiny center" style="margin-top:8px">Se crean ${prog.sesiones.length} rutinas
-      con sus días asignados. Lo que ya tengas no se borra.</p>`;
+      <p class="tiny center" style="margin-top:8px">${vivas().length
+        ? 'Este plan ya está en tus rutinas: se reescriben esas ' + vivas().length +
+          ', no se añaden otras. El resto de tus rutinas no se toca.'
+        : 'Se crean ' + prog.sesiones.length + ' rutinas con sus días asignados. ' +
+          'Lo que ya tengas no se borra.'}</p>`;
   }
 
   /* ---------- vista ---------- */
@@ -472,6 +486,16 @@
       No es una plantilla con tu nombre encima.</p>
 
       ${raw(fichaPerfil(p))}
+      ${raw(est.recuperado && est.prog ? html`
+        <div class="card" style="border-color:var(--acc)">
+          <b>Este es el plan que ya tenías</b>
+          <p class="tiny" style="margin:6px 0 0">Se guardó en este dispositivo con la lectura
+          del entrenador y los cambios que aplicaste. ${est.guardadas.length
+            ? 'Ya lo pasaste a tus rutinas: si vuelves a guardar, se actualizan esas mismas ' +
+              'y no se crean otras nuevas.'
+            : 'Todavía no lo has pasado a tus rutinas.'} Toca <b>Rehacer el programa</b>
+          aquí arriba si quieres montar otro desde cero.</p>
+        </div>` : '')}
       ${raw(controles())}
       ${raw(est.prog ? resultado(est.prog) : '')}`;
   };
@@ -520,10 +544,29 @@
     bind(root, '[data-a=guardar]', function () {
       const campo = root.querySelector('#prog-nombre');
       est.nombre = campo ? campo.value.trim() : '';
-      guardarEstado();
+
+      /* Guardar dos veces el mismo plan creaba dos juegos de rutinas iguales.
+         Se recuerdan los ids de la vez anterior: si siguen existiendo, se
+         reescriben esas y no se añade nada. */
+      const previas = vivas();
       const rutinas = Programa.aRutinas(est.prog, est.nombre);
-      rutinas.forEach(function (r) { Store.saveRoutine(r); });
-      UI.toast(rutinas.length + ' rutinas creadas con sus días');
+      const ids = [];
+
+      rutinas.forEach(function (r, i) {
+        if (previas[i]) r.id = previas[i];
+        ids.push(Store.saveRoutine(r).id);
+      });
+
+      /* si el plan nuevo tiene menos días que el de antes, las que sobran se van */
+      previas.slice(rutinas.length).forEach(function (id) { Store.deleteRoutine(id); });
+
+      est.guardadas = ids;
+      est.recuperado = true;
+      guardarEstado();
+
+      UI.toast(previas.length
+        ? ids.length + ' rutinas actualizadas'
+        : ids.length + ' rutinas creadas con sus días');
       go('rutinas');
       Offline.precargarRutinas();
     });
@@ -558,6 +601,8 @@
     });
     est.ia = null;
     est.aplicados = [];
+    est.guardadas = [];
+    est.recuperado = false;
     est.abierto = {};
     guardarEstado();
     render();
