@@ -1080,11 +1080,19 @@
     }
     if (!lista.length) return '';
 
+    /* Decir qué músculo es y no «mismo trabajo»: la duda de quien mira esto es
+       si va a entrenar lo mismo, y la respuesta se le da con el nombre. */
+    const musculos = (ex.primaryMuscles || []).map(function (m) {
+      return I18N.muscle(m).toLowerCase();
+    }).join(' y ');
+
     return html`
       <div class="list-title">Si está ocupado o no lo tienes</div>
-      <p class="tiny" style="margin:-4px 4px 10px">${raw(fuera
-        ? 'Con tu material no hay recambio, así que estas son del catálogo completo.'
-        : 'Mismo trabajo con otro material. Toca cualquiera para ver su técnica.')}</p>
+      <p class="tiny" style="margin:-4px 4px 10px">Entrenas el mismo músculo${raw(
+        musculos ? ' —' + esc(musculos) + '—' : '')} con otra máquina, otro material u otro
+        ejercicio. ${raw(fuera
+          ? 'Con tu material no sale ninguno, así que estos son del catálogo completo.'
+          : 'Toca cualquiera para ver su técnica.')}</p>
       <div class="carousel">
         ${raw(lista.map(function (a) {
           return html`

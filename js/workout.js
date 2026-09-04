@@ -297,8 +297,8 @@
 
     /* Los dos en la misma línea: uno debajo del otro se comían el sitio de lo
        que de verdad se mira aquí, el peso y las repeticiones. */
-    return '<div class="row" style="margin-top:11px">'
-      + (hayAlt ? boton('alt', 'Recambios', icon('cambiar')) : '')
+    return '<div class="row ayuda-fila">'
+      + (hayAlt ? boton('alt', 'Otra opción', icon('cambiar')) : '')
       + (guia ? boton('guia', 'Cómo se hace', icon('search')) : '')
       + '</div>'
       + (hayAlt ? '<div data-ayuda-caja="alt"' + (ayudaAbierta === 'alt' ? '' : ' hidden') + '></div>' : '')

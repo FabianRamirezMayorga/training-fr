@@ -150,6 +150,10 @@ a{color:var(--blue)}
 /* El músculo que se trabaja, en color: entre el nombre en inglés y la lista de
    músculos todo era del mismo gris y no se distinguía de un vistazo. Es texto y
    no una pastilla: parecían botones y no lo son, no se pulsan. */
+/* La fila de ayuda va suelta entre dos tarjetas, así que se separa por su
+   cuenta: la separación normal la dan las tarjetas entre sí y aquí no había
+   ninguna, con lo que la de abajo se pegaba a los botones. */
+.ayuda-fila{margin:11px 0}
 .musculos{font-size:.8rem;color:var(--dim2);margin-top:4px;letter-spacing:0}
 .musculos b{color:var(--acc);font-weight:600}
 
