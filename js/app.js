@@ -3230,12 +3230,19 @@
              aviso deja a medio mundo usando la versión de antes y viendo
              fallos ya arreglados. Con un entrenamiento en curso o una hoja
              abierta no se toca nada y se ofrece el botón. */
-          /* nada de recargar en los primeros segundos: puede haber una vuelta
-             de Spotify o del correo resolviéndose todavía */
+          /* La comprobación de versión ocurre nada más arrancar, así que la
+             espera fija de quince segundos significaba no recargarse nunca
+             sola: cerrabas y abrías la app y seguías en la versión de antes,
+             que es justo lo que se quería evitar. Ahora sólo se aplaza si de
+             verdad hay algo a medias —una vuelta de Spotify o del correo se
+             reconoce por lo que traen en la dirección—. */
+          const volviendoDeFuera = /(?:code|state|access_token|error)=/
+            .test(location.search + location.hash);
           const ocupado = Workout.isActive() ||
             !document.getElementById('modal').hidden ||
             location.hash.indexOf('entrenar') !== -1 ||
-            Date.now() - arranque < 15000;
+            volviendoDeFuera ||
+            Date.now() - arranque < 2000;
 
           if (ocupado) { avisarVersionNueva(); return; }
           UI.toast('Actualizando a la versión nueva…');
