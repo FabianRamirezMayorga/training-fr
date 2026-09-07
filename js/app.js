@@ -376,6 +376,16 @@
       <div id="comida-pensando"></div>`;
   }
 
+  /* Cómo llamar en un botón a lo que toca hoy: la zona que más se trabaja,
+     que es como uno lo tiene en la cabeza («hoy toca pecho»). */
+  function queEsHoy(deHoy) {
+    if (deHoy.length !== 1) return 'lo de hoy';
+    const r = deHoy[0];
+    if (r.mixta) return 'lo de hoy';
+    const zona = zonaDeRutina(r);
+    return zona ? zona.label.toLowerCase() : 'lo de hoy';
+  }
+
   function viewInicio() {
     const st = Store.stats();
     const rutinas = Store.routines();
@@ -419,6 +429,15 @@
             <button class="btn primary" data-a="resume">Continuar</button>
           </div>
         </div>`
+      : deHoy.length ? html`
+        <button class="btn primary block grande" data-a="entrenarhoy" style="margin-top:14px">
+          ${raw(icon('play'))} Entrenar ${queEsHoy(deHoy)}
+        </button>
+        <p class="tiny center" style="margin:7px 4px 0">${deHoy.length === 1
+          ? 'Es lo que tienes puesto para hoy. Empieza con sus ejercicios ya cargados.'
+          : 'Tienes ' + deHoy.length + ' rutinas para hoy: te dejo elegir.'}</p>
+        <button class="btn ghost block sm" data-a="empezarlibre" style="margin-top:8px">
+          O un entrenamiento libre</button>`
       : html`
         <button class="btn primary block grande" data-a="empezarlibre" style="margin-top:14px">
           ${raw(icon('play'))} Iniciar entrenamiento
@@ -721,6 +740,36 @@
       Workout.startLibre();
       go('entrenar');
       UI.toast('Cronómetro en marcha');
+    });
+
+    /* El botón grande arrancaba siempre un entrenamiento libre, aunque hubiera
+       una rutina puesta para hoy: había que bajar a la tarjeta y pulsar
+       Entrenar, y quien no lo supiera acababa entrenando a mano lo que ya
+       tenía programado. */
+    bind(root, '[data-a=entrenarhoy]', function () {
+      const hoy = UI.DAY_NAMES[new Date().getDay()];
+      const deHoy = Store.routines().filter(function (r) {
+        return (r.days || []).indexOf(hoy) !== -1;
+      });
+      if (!deHoy.length) return;
+      if (deHoy.length === 1) { empezar(deHoy[0].id); return; }
+
+      UI.modal(html`
+        <h2>¿Cuál de las de hoy?</h2>
+        <p class="muted">Tienes ${deHoy.length} rutinas puestas para ${UI.diaLargo(hoy).toLowerCase()}.</p>
+        <div class="list">
+          ${raw(deHoy.map(function (r) {
+            return '<div class="list-row tap" data-elige="' + esc(r.id) + '">' +
+              '<div class="grow"><div class="list-row-title">' + esc(tituloRutina(r)) + '</div>' +
+              '<div class="list-row-sub">' + r.exercises.length + ' ejercicios</div></div>' +
+              '<span class="chevron">' + icon('chevron') + '</span></div>';
+          }).join(''))}
+        </div>`,
+        function (el) {
+          el.querySelectorAll('[data-elige]').forEach(function (b) {
+            b.onclick = function () { UI.closeModal(); empezar(b.dataset.elige); };
+          });
+        });
     });
     bind(root, '[data-a=nueva]', function () { go('rutina', 'nueva'); });
     bind(root, '[data-a=programa]', function () { go('programa'); });
@@ -1555,8 +1604,12 @@
       series y los días. <b>Generar programa</b>: te lo monto yo con tu edad, tu nivel, tu
       objetivo y tus limitaciones, y luego lo editas igual.</p>
 
-      <button class="btn ghost block sm" data-a="actividad" style="margin-top:8px">
-        ${raw(icon('plus'))} Apuntar algo que ya hice</button>
+      <div class="row" style="margin-top:8px">
+        <button class="btn ghost grow sm" data-a="actividad">
+          ${raw(icon('plus'))} Apuntar algo que ya hice</button>
+        ${raw(Store.routines().some(function (r) { return (r.days || []).length; })
+          ? '<button class="btn ghost grow sm" data-a="correr">Correr el plan de día</button>' : '')}
+      </div>
       <p class="tiny center" style="margin-top:6px">Caminar una hora el domingo, la pachanga
       del sábado o la clase de pilates cuentan igual, aunque no salgan de una rutina.</p>
 
@@ -1688,6 +1741,7 @@
     });
 
     bind(root, '[data-a=actividad]', apuntarActividad);
+    bind(root, '[data-a=correr]', correrPlanSheet);
 
     bindAll(root, '[data-ver]', function (el) {
       const ex = Data.get(el.dataset.ver);
@@ -1722,6 +1776,67 @@
     { id: 'pesas', label: 'Pesas por mi cuenta', met: 5 },
     { id: 'otro', label: 'Otra cosa', met: 4 }
   ];
+
+  /* ---------- correr el plan de día ----------
+     Un día que no se puede ir al gimnasio no debería obligar a saltarse esa
+     sesión: lo que uno hace es empujar la semana entera. Mover rutina por
+     rutina desde la tarjeta son siete idas y venidas, así que se corren todas
+     de una vez, adelante o atrás. */
+  function diaCorrido(d, pasos) {
+    const i = DIAS.indexOf(d);
+    if (i === -1) return d;
+    return DIAS[((i + pasos) % 7 + 7) % 7];
+  }
+
+  function correrPlan(pasos) {
+    const rutinas = Store.routines().filter(function (r) { return (r.days || []).length; });
+    rutinas.forEach(function (r) {
+      r.days = r.days.map(function (d) { return diaCorrido(d, pasos); })
+        .sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
+      Store.saveRoutine(r);
+    });
+    return rutinas.length;
+  }
+
+  function correrPlanSheet() {
+    const rutinas = Store.routines().filter(function (r) { return (r.days || []).length; });
+    if (!rutinas.length) { UI.toast('Ninguna rutina tiene día asignado'); return; }
+
+    const previa = function (pasos) {
+      return rutinas.map(function (r) {
+        return '<div class="row between" style="gap:10px;padding:5px 0">' +
+          '<span style="font-size:.86rem">' + esc(nombreRutina(r) === r.name
+            ? r.name : tituloRutina(r)) + '</span>' +
+          '<span class="tiny">' + esc(UI.diasLargos(r.days)) + ' → ' +
+          esc(UI.diasLargos(r.days.map(function (d) { return diaCorrido(d, pasos); })
+            .sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); }))) +
+          '</span></div>';
+      }).join('');
+    };
+
+    UI.modal(html`
+      <h2>Correr el plan de día</h2>
+      <p class="muted">Hoy no has podido ir, pero la semana no se tira: se empuja. Lo del
+      lunes pasa al martes, lo del martes al miércoles, y así con todo.</p>
+      <div class="card" id="cp-previa">${raw(previa(1))}</div>
+      <button class="btn primary block" id="cp-mas" style="margin-top:14px">
+        Correr un día adelante</button>
+      <button class="btn block sm" id="cp-menos" style="margin-top:8px">
+        Adelantarlo un día en vez de eso</button>
+      <p class="tiny center" style="margin-top:10px">Solo cambia el día en el que te toca cada
+      rutina. Los ejercicios, las series y tu historial no se tocan.</p>`,
+      function (el) {
+        const hacer = function (pasos) {
+          const n = correrPlan(pasos);
+          UI.closeModal();
+          render();
+          UI.toast(n + (n === 1 ? ' rutina corrida ' : ' rutinas corridas ') +
+            (pasos > 0 ? 'un día adelante' : 'un día atrás'));
+        };
+        el.querySelector('#cp-mas').onclick = function () { hacer(1); };
+        el.querySelector('#cp-menos').onclick = function () { hacer(-1); };
+      });
+  }
 
   function apuntarActividad() {
     const p = Perfil.datos();
