@@ -74,7 +74,8 @@
       '(empieza por <code>gsk_</code>). Solo se enseña una vez.</li>',
       '<li>Pégala aquí y <b>Guardar</b>. Después toca <b>Ver los suyos</b> para que la ' +
       'lista de modelos se llene con los que tengas de verdad.</li>',
-      '<li>Mil peticiones al día gratis. Para lo que hace esta app, no las gastas.</li>'
+      '<li>La capa gratuita da de sobra para esta app. El límite exacto lo ves en tu ' +
+      'propia consola: lo cambian cada poco y no me lo invento aquí.</li>'
     ].join(''),
     openrouter: [
       '<li>Entra en <a href="https://openrouter.ai/keys" target="_blank" ' +

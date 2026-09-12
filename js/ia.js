@@ -42,8 +42,9 @@
     {
       id: 'gemini',
       label: 'Google Gemini',
-      nota: 'Gratis hasta 1.500 peticiones al día. Es el que trae la app de serie y el ' +
-        'que recomiendo si no quieres pagar nada.',
+      nota: 'Capa gratuita generosa y sin tarjeta, y lee fotos. Es el que trae la app ' +
+        'de serie y el que recomiendo si no quieres pagar nada. El límite que te toca ' +
+        'lo ves en tu consola de AI Studio.',
       donde: 'https://aistudio.google.com/apikey',
       dondeTxt: 'aistudio.google.com/apikey',
       pista: 'AIza…',
@@ -54,8 +55,9 @@
     {
       id: 'groq',
       label: 'Groq',
-      nota: 'Gratis hasta 1.000 peticiones al día, sin tarjeta. Corre modelos abiertos ' +
-        '(Llama, Qwen, GPT-OSS) a una velocidad que no tiene nadie más.',
+      nota: 'Capa gratuita sin tarjeta y muy rápido: corre modelos abiertos (Llama, ' +
+        'Qwen, GPT-OSS). Ojo, los de texto no leen fotos. El límite que te toca lo ves ' +
+        'en tu consola.',
       donde: 'https://console.groq.com/keys',
       dondeTxt: 'console.groq.com/keys',
       pista: 'gsk_…',
