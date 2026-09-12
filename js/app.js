@@ -574,6 +574,22 @@
     return r;
   }
 
+  /* Arrastre de las versiones de antes: hay rutinas guardadas con un día en el
+     nombre que ya no es el suyo, de cuando moverlas de día no reescribía nada.
+     Corregirlo solo al tocar el día no arreglaba lo que ya estaba mal: el
+     nombre viejo seguía saliendo al empezar a entrenar y de ahí al historial.
+     Se repasan todas al arrancar; es barato y solo escribe las que cambian. */
+  function normalizarNombres() {
+    Store.routines().forEach(function (r) {
+      const antes = r.name;
+      renombrarPorDia(r);
+      if (r.name !== antes) {
+        Store.saveRoutine(r);
+        refrescarActiva(r);
+      }
+    });
+  }
+
   /* El entrenamiento en curso se queda con una copia del nombre de cuando
      empezó. Si la rutina cambia mientras se entrena, esa copia hay que
      ponerla al día o el banner sigue anunciando lo de antes. */
@@ -4102,6 +4118,7 @@
       splash.classList.add('hide');
       setTimeout(function () { splash.remove(); }, 400);
       if (!location.hash) location.hash = '#/inicio';
+      normalizarNombres();
       render();
 
       if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
