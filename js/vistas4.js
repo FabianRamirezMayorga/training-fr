@@ -78,6 +78,19 @@
     return (est.guardadas || []).filter(function (id) { return !!Store.routine(id); });
   }
 
+  /* Las rutinas que ya existen con el nombre de este plan. Recordar los ids de
+     la vez anterior solo servía dentro de la misma sesión: generabas un plan,
+     lo guardabas, y al volver otro día —u otro dispositivo— esa memoria ya no
+     estaba y se creaba todo otra vez. De ahí los planes triplicados. Buscarlas
+     por nombre funciona siempre. */
+  function delMismoPlan(etiqueta) {
+    const nombre = String(etiqueta || '').trim();
+    if (!nombre) return [];
+    return Store.routines().filter(function (r) {
+      return (r.days || []).length && App.nombreRutina(r) === nombre;
+    });
+  }
+
   function objetivoActual() {
     if (est.objetivo) return est.objetivo;
     const p = Perfil.datos();
@@ -808,31 +821,62 @@
     bind(root, '[data-a=guardar]', function () {
       const campo = root.querySelector('#prog-nombre');
       est.nombre = campo ? campo.value.trim() : '';
+      const etiqueta = est.nombre || est.prog.nombreIA || '';
 
-      /* Guardar dos veces el mismo plan creaba dos juegos de rutinas iguales.
-         Se recuerdan los ids de la vez anterior: si siguen existiendo, se
-         reescriben esas y no se añade nada. */
-      const previas = vivas();
-      const rutinas = Programa.aRutinas(est.prog, est.nombre);
-      const ids = [];
+      /* Se emparejan por nombre de plan y día, no por los ids que recordara la
+         sesión: así reescribe las de verdad aunque el plan se generara otro día
+         o en otro móvil. */
+      const yaHay = delMismoPlan(etiqueta);
+      const seguir = function () {
+        const rutinas = Programa.aRutinas(est.prog, est.nombre);
+        const sobran = yaHay.slice();
+        const ids = [];
 
-      rutinas.forEach(function (r, i) {
-        if (previas[i]) r.id = previas[i];
-        ids.push(Store.saveRoutine(r).id);
-      });
+        rutinas.forEach(function (r, i) {
+          /* primero la que ocupa ese mismo día */
+          let k = sobran.findIndex(function (x) {
+            return (x.days || [])[0] === (r.days || [])[0];
+          });
+          /* si no la hay, la siguiente libre, para no dejar huérfanas */
+          if (k === -1) k = sobran.length ? 0 : -1;
+          if (k === -1 && est.guardadas[i] && Store.routine(est.guardadas[i])) {
+            r.id = est.guardadas[i];
+          } else if (k !== -1) {
+            r.id = sobran[k].id;
+            sobran.splice(k, 1);
+          }
+          ids.push(Store.saveRoutine(r).id);
+        });
 
-      /* si el plan nuevo tiene menos días que el de antes, las que sobran se van */
-      previas.slice(rutinas.length).forEach(function (id) { Store.deleteRoutine(id); });
+        /* lo que sobra del plan viejo se va: si no, el plan crece cada vez */
+        sobran.forEach(function (x) { Store.deleteRoutine(x.id); });
+        (est.guardadas || []).forEach(function (id) {
+          if (ids.indexOf(id) === -1 && Store.routine(id)) Store.deleteRoutine(id);
+        });
 
-      est.guardadas = ids;
-      est.recuperado = true;
-      guardarEstado();
+        est.guardadas = ids;
+        est.recuperado = true;
+        guardarEstado();
 
-      UI.toast(previas.length
-        ? ids.length + ' rutinas actualizadas'
-        : ids.length + ' rutinas creadas con sus días');
-      go('rutinas');
-      Offline.precargarRutinas();
+        UI.toast(yaHay.length
+          ? ids.length + ' rutinas actualizadas'
+          : ids.length + ' rutinas creadas con sus días');
+        go('rutinas');
+        Offline.precargarRutinas();
+      };
+
+      /* Reescribir rutinas que no se crearon en esta sesión no puede pasar en
+         silencio: puede haberlas editado a mano desde entonces. */
+      const deAntes = yaHay.filter(function (r) { return est.guardadas.indexOf(r.id) === -1; });
+      if (deAntes.length) {
+        UI.confirm('Ya tienes un plan llamado \u00ab' + etiqueta + '\u00bb',
+          'Tiene ' + yaHay.length + (yaHay.length === 1 ? ' rutina' : ' rutinas') +
+          '. Voy a reescribirlas con este plan y a borrar las que sobren, para que no ' +
+          'se te dupliquen. Si quieres conservarlo, cancela y ponle otro nombre a este.',
+          'Reescribir').then(function (ok) { if (ok) seguir(); });
+        return;
+      }
+      seguir();
     });
 
     bindAll(root, '[data-a=afinar]', afinar);

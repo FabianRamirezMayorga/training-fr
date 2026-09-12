@@ -1653,6 +1653,18 @@
       ${raw(Store.routines().some(function (r) { return (r.days || []).length; })
         ? '<button class="btn ghost block sm" data-a="correr" style="margin-top:6px">' +
           'Hoy no pude: correr el plan de día</button>' : '')}
+
+      ${raw((function () {
+        const n = duplicados().length;
+        if (!n) return '';
+        return '<div class="card aviso-seguridad" style="margin-top:10px">' +
+          '<b>Tienes rutinas repetidas</b>' +
+          '<p style="margin:7px 0 0;font-size:.9rem">Hay ' + n + ' ' +
+          (n === 1 ? 'rutina que repite' : 'rutinas que repiten') + ' plan y día de otra, ' +
+          'de haber generado el programa más de una vez. Se pueden quitar de golpe.</p>' +
+          '<button class="btn block" data-a="limpiardup" style="margin-top:11px">' +
+          'Revisar y limpiar</button></div>';
+      })())}
       <p class="tiny center" style="margin-top:6px">Caminar una hora el domingo, la pachanga
       del sábado o la clase de pilates cuentan igual, aunque no salgan de una rutina.</p>
 
@@ -1787,6 +1799,7 @@
 
     bind(root, '[data-a=actividad]', apuntarActividad);
     bind(root, '[data-a=correr]', correrPlanSheet);
+    bind(root, '[data-a=limpiardup]', limpiarDuplicadosSheet);
 
     bindAll(root, '[data-ver]', function (el) {
       const ex = Data.get(el.dataset.ver);
@@ -1821,6 +1834,63 @@
     { id: 'pesas', label: 'Pesas por mi cuenta', met: 5 },
     { id: 'otro', label: 'Otra cosa', met: 4 }
   ];
+
+  /* ---------- duplicados ----------
+     Generar un plan dos veces creaba dos juegos de rutinas, y al tercero te
+     encontrabas trece donde debía haber cinco. La causa ya está arreglada al
+     guardar, pero lo que se duplicó sigue ahí: esto lo detecta y lo limpia
+     dejando de cada pareja la más reciente. */
+  function duplicados() {
+    const grupos = {};
+    Store.routines().forEach(function (r) {
+      if (!(r.days || []).length) return;
+      const clave = nombreRutina(r) + '|' + (r.days || []).slice().sort().join('/');
+      (grupos[clave] = grupos[clave] || []).push(r);
+    });
+
+    const sobran = [];
+    Object.keys(grupos).forEach(function (k) {
+      const g = grupos[k];
+      if (g.length < 2) return;
+      /* se queda la última tocada; las demás sobran */
+      g.sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+      sobran.push.apply(sobran, g.slice(1));
+    });
+    return sobran;
+  }
+
+  function limpiarDuplicadosSheet() {
+    const sobran = duplicados();
+    if (!sobran.length) { UI.toast('No hay rutinas repetidas'); return; }
+
+    const lista = sobran.map(function (r) {
+      return '<div class="row between" style="padding:4px 0;gap:10px">' +
+        '<span style="font-size:.86rem">' + esc(tituloRutina(r)) + '</span>' +
+        '<span class="tiny">' + r.exercises.length + ' ejercicios \u00b7 ' +
+        (r.updatedAt ? UI.fechaCorta(r.updatedAt) : 'sin fecha') + '</span></div>';
+    }).join('');
+
+    UI.modal(html`
+      <h2>Rutinas repetidas</h2>
+      <p class="muted">Tienes ${sobran.length} ${sobran.length === 1 ? 'rutina repetida'
+        : 'rutinas repetidas'}: mismo plan y mismo día que otra. Se van estas y se queda
+      la más reciente de cada una.</p>
+      <div class="card">${raw(lista)}</div>
+      <p class="tiny" style="margin:10px 0 0">Tu historial de entrenamientos no se toca:
+      lo que hiciste con ellas se queda en Progreso.</p>
+      <button class="btn danger block" id="dup-ok" style="margin-top:14px">
+        Borrar las ${sobran.length} repetidas</button>
+      <button class="btn ghost block" id="dup-no" style="margin-top:8px">Dejarlo como está</button>`,
+      function (el) {
+        el.querySelector('#dup-no').onclick = function () { UI.closeModal(); };
+        el.querySelector('#dup-ok').onclick = function () {
+          sobran.forEach(function (r) { Store.deleteRoutine(r.id); });
+          UI.closeModal();
+          render();
+          UI.toast(sobran.length + (sobran.length === 1 ? ' rutina borrada' : ' rutinas borradas'));
+        };
+      });
+  }
 
   /* ---------- correr el plan de día ----------
      Un día que no se puede ir al gimnasio no debería obligar a saltarse esa
