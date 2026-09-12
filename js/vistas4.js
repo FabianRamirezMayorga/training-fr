@@ -44,6 +44,7 @@
     guardadas: [],
     cargandoIA: false,
     cargandoPlan: false,
+    todoAbierto: false,
     abierto: {}
   };
 
@@ -384,36 +385,77 @@
       </div>`;
   }
 
+  /* ---------- un día del plan ----------
+     Antes era una lista plana con todo desplegado de golpe: seis días abiertos
+     a la vez son cincuenta filas iguales y no se distingue un básico de un
+     accesorio ni se puede hacer nada con el día. Ahora la semana se lee de un
+     vistazo —cada día dice qué trabaja y cuánto cuesta— y se abre el que
+     interese, con el primero abierto para que no parezca vacío. */
   function tarjetaDia(s, i, prog) {
-    const abierto = est.abierto[i] !== false;
+    const abierto = est.abierto[i] === undefined ? i === 0 : est.abierto[i];
+    const series = s.ejercicios.reduce(function (n, e) { return n + e.sets; }, 0);
+
+    /* qué se trabaja ese día, por orden de series */
+    const porMusculo = {};
+    s.ejercicios.forEach(function (e) {
+      const ex = Data.get(e.exId);
+      const m = (ex && (ex.primaryMuscles || [])[0]) || e.musculo;
+      if (m) porMusculo[m] = (porMusculo[m] || 0) + e.sets;
+    });
+    const musculos = Object.keys(porMusculo)
+      .sort(function (a, b) { return porMusculo[b] - porMusculo[a]; })
+      .slice(0, 3).map(I18N.muscle).join(' · ');
+
+    /* si el plan está guardado, el día se puede entrenar desde aquí */
+    const suya = (prog.deRutinas || est.guardadas.length)
+      ? Store.routines().find(function (r) {
+          return (r.days || []).indexOf(s.dia) !== -1 &&
+            est.guardadas.indexOf(r.id) !== -1;
+        })
+      : null;
+
     return html`
-      <div class="card" style="padding:0;overflow:hidden">
-        <button class="dia-cab" data-dia-abrir="${i}">
-          <div class="grow">
-            <div style="font-weight:700">${s.nombre}</div>
-            <div class="tiny">${s.ejercicios.length} ejercicios · ${s.minutos} min ·
-              ${s.ejercicios.reduce(function (n, e) { return n + e.sets; }, 0)} series</div>
-          </div>
-          <span class="chevron ${abierto ? 'abierta' : ''}">${raw(icon('chevron'))}</span>
+      <div class="dia ${abierto ? 'abierto' : ''}">
+        <button class="dia-top" data-dia-abrir="${i}">
+          <span class="dia-ini">${UI.diaLargo(s.dia).slice(0, 3)}</span>
+          <span class="grow">
+            <span class="dia-nom">${s.nombre}</span>
+            <span class="dia-mus">${musculos || 'sin ejercicios'}</span>
+          </span>
+          <span class="dia-chev ${abierto ? 'abierto' : ''}">${raw(icon('chevron'))}</span>
         </button>
-        <div ${raw(abierto ? '' : 'hidden')}>
+
+        <div class="dia-datos">
+          <span><b>${s.ejercicios.length}</b> ejercicios</span>
+          <span><b>${series}</b> series</span>
+          <span><b>${s.minutos}</b> min</span>
+        </div>
+
+        <div class="dia-lista" ${raw(abierto ? '' : 'hidden')}>
           ${raw(s.ejercicios.map(function (e, n) {
             const ex = Data.get(e.exId);
+            const principal = e.rol === 'principal';
             return html`
-              <button class="rt-item" data-ver="${e.exId}" style="width:100%;text-align:left;
-                      border:0;border-top:1px solid var(--line);border-radius:0">
+              <button class="ejer ${principal ? 'clave' : ''}" data-ver="${e.exId}">
+                <span class="ejer-n">${n + 1}</span>
                 <img src="${ex ? Data.img(ex, 0) : Data.PLACEHOLDER}" alt="" loading="lazy">
-                <div class="grow">
-                  <div style="font-weight:600;font-size:.86rem">
-                    ${n + 1}. ${ex ? ex.nameEs : e.exId}
-                    ${raw(e.rol === 'principal' ? '<span class="chip solid tiny-chip">Principal</span>' : '')}
-                  </div>
-                  <div class="tiny">${e.sets} × ${e.reps} · descanso ${e.rest}s ·
-                    ${I18N.muscle(e.musculo)}</div>
-                  ${raw(e.note ? '<div class="tiny" style="color:var(--acc)">' + esc(e.note) + '</div>' : '')}
-                </div>
+                <span class="grow">
+                  <span class="ejer-nom">${ex ? ex.nameEs : e.exId}</span>
+                  <span class="ejer-meta">${e.sets} × ${e.reps}
+                    <i>·</i> ${e.rest}s de descanso</span>
+                  ${raw(e.note ? '<span class="ejer-nota">' + esc(e.note) + '</span>' : '')}
+                </span>
+                <span class="ejer-mus">${I18N.muscle(e.musculo)}</span>
               </button>`;
           }).join(''))}
+
+          ${raw(suya ? html`
+            <div class="dia-pie">
+              <button class="btn sm grow" data-editardia="${suya.id}">
+                ${raw(icon('edit'))} Editar</button>
+              <button class="btn sm primary grow" data-entrenardia="${suya.id}">
+                ${raw(icon('play'))} Entrenar este día</button>
+            </div>` : '')}
         </div>
       </div>`;
   }
@@ -605,8 +647,12 @@
 
       ${raw(barraVolumen(prog))}
 
-      <div class="list-title">Tu semana</div>
-      <div class="stack">
+      <div class="list-head">
+        <span class="list-title">Tu semana</span>
+        <button class="btn sm ghost" data-a="plegardias">${est.todoAbierto
+          ? 'Plegar todo' : 'Abrir todo'}</button>
+      </div>
+      <div class="semana-plan">
         ${raw(prog.sesiones.map(function (s, i) { return tarjetaDia(s, i, prog); }).join(''))}
       </div>
 
@@ -724,10 +770,34 @@
       if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
+    bindAll(root, '[data-entrenardia]', function (el) {
+      const r = Store.routine(el.dataset.entrenardia);
+      if (!r) { UI.toast('Esa rutina ya no está'); return; }
+      Workout.start(r);
+      go('entrenar');
+    });
+
+    bindAll(root, '[data-editardia]', function (el) { go('rutina', el.dataset.editardia); });
+
+    bind(root, '[data-a=plegardias]', function () {
+      est.todoAbierto = !est.todoAbierto;
+      (est.prog ? est.prog.sesiones : []).forEach(function (x, i) {
+        est.abierto[i] = est.todoAbierto;
+      });
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+    });
+
     bindAll(root, '[data-dia-abrir]', function (el) {
       const i = el.dataset.diaAbrir;
-      est.abierto[i] = est.abierto[i] === false;
+      /* el estado se lee de lo pintado: el primer día viene abierto y el resto
+         no, así que un booleano suelto no basta para saber en qué iba */
+      const caja = el.closest('.dia');
+      est.abierto[i] = !(caja && caja.classList.contains('abierto'));
+      const pos = window.scrollY;
       render();
+      window.scrollTo(0, pos);
     });
 
     bindAll(root, '[data-ver]', function (el) {
