@@ -235,7 +235,10 @@
     const sinGuardar = est.prog && !vivas().length;
 
     return html`
-      <div class="list-title">Lo que ya tienes</div>
+      <div class="list-head">
+        <span class="list-title">Lo que ya tienes</span>
+        <button class="btn sm primary" data-a="irgenerar">${raw(icon('plus'))} Nuevo</button>
+      </div>
       ${raw(sinGuardar ? html`
         <div class="card" style="border-color:var(--acc)">
           <div class="row between" style="align-items:flex-start">
@@ -277,7 +280,7 @@
 
   function controles() {
     return html`
-      <div class="list-title">Generar uno nuevo</div>
+      <div class="list-title" id="generar">Generar uno nuevo</div>
       <div class="card">
         <div class="row between" style="margin-bottom:9px">
           <b>¿Qué días entrenas?</b>
@@ -778,6 +781,11 @@
       if (est.prog && est.prog.porIA) crearConIA(); else crear();
     });
     bindAll(root, '[data-abrirplan]', function (el) { abrirPlan(el.dataset.abrirplan); });
+
+    bind(root, '[data-a=irgenerar]', function () {
+      const caja = root.querySelector('#generar');
+      if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
     bind(root, '[data-a=verplan]', function () {
       const caja = document.querySelector('.stats');
       if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
