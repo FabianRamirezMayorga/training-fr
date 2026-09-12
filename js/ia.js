@@ -21,7 +21,13 @@
   /* Google retira modelos cada pocos meses y los nuevos usuarios dejan de poder
      usar los viejos. Esta lista es solo el punto de partida: la app pregunta a
      Google qué modelos tiene disponibles tu clave y se queda con los que existan. */
-  const MODELOS = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+  /* Google retira modelos por cuenta, no para todos a la vez: una clave nueva
+     puede no tener gemini-2.5-flash y sí gemini-3.6-flash, y al revés. Por eso
+     la lista es solo el punto de partida —la app pregunta cuáles admite tu
+     clave— y los alias «latest», que Google mantiene apuntando a lo vigente,
+     van de red al final. */
+  const MODELOS = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-flash-latest',
+    'gemini-2.0-flash'];
   const CACHE_MODELOS = 'trainingfr.ia.modelos';
 
   const INSTRUCCIONES =
@@ -48,10 +54,13 @@
       donde: 'https://aistudio.google.com/apikey',
       dondeTxt: 'aistudio.google.com/apikey',
       pista: 'AIza…',
-      forma: /^AIza[\w-]{20,}$/,
-      formaTxt: 'Las de Gemini empiezan por AIza. Si lo que copiaste empieza por «AQ.» o ' +
-        '«ya29.» es un token de sesión de Google, no una clave de API: caduca en una hora ' +
-        'y no vale aquí. La buena está en la lista de aistudio.google.com/apikey.',
+      /* Google reparte dos formatos: las de siempre empiezan por AIza y las
+         nuevas por AQ. Las dos valen contra el endpoint REST —comprobado—, así
+         que aquí entran ambas. Lo único que se rechaza es un token de sesión
+         (ya29.), que caduca en una hora y no es una clave. */
+      forma: /^(AIza[\w-]{20,}|AQ\.[\w.-]{20,})$/,
+      formaTxt: 'Las de Gemini empiezan por AIza o por AQ. Si lo que copiaste empieza por ' +
+        '«ya29.» es un token de sesión, no una clave: sácala de aistudio.google.com/apikey.',
       modelos: MODELOS,
       imagen: true,
       gratis: true
@@ -587,8 +596,20 @@
     };
     if (opciones.json) cuerpo.generationConfig.responseMimeType = 'application/json';
 
-    const modelos = c.modelo ? [c.modelo].concat(MODELOS.filter(function (m) { return m !== c.modelo; }))
-      : MODELOS.slice();
+    /* Google retira modelos por cuenta. La lista escrita a mano gasta intentos en
+       modelos que esta clave ya no puede usar, así que si hay lista viva —la que
+       devolvió el propio Google con esta clave— manda esa. */
+    const vivos = modelosGuardados();
+    const respaldo = (vivos && vivos.length ? vivos : MODELOS).slice(0, 5);
+    const modelos = c.modelo
+      ? [c.modelo].concat(respaldo.filter(function (m) { return m !== c.modelo; }))
+      : respaldo.slice();
+
+    /* Se recuerda si en el camino hubo un 429: el último modelo de la lista
+       puede fallar por estar retirado y entonces se anunciaba «modelo no
+       disponible» cuando lo que pasaba de verdad era que la cuota estaba
+       agotada. El motivo que se cuenta tiene que ser el que manda. */
+    let huboCuota = false;
 
     /* si el modelo elegido ya no existe, se prueba el siguiente */
     function intentar(i) {
@@ -678,10 +699,25 @@
               throw new Error('Gemini rechazó la petición (' + msg + '). Prueba a elegir ' +
                 'otro modelo en la bóveda de claves.');
             }
-            if (r.status === 429) throw new Error('Has agotado la cuota gratuita por ahora. Inténtalo más tarde.');
+            /* La cuota va por modelo, no por clave: el flash del día tiene un
+               límite corto y los de la generación anterior uno mucho más ancho.
+               Rendirse al primer 429 dejaba sin IA a quien sí podía usarla con
+               otro modelo. */
+            if (r.status === 429) huboCuota = true;
+            if (r.status === 429 && i < modelos.length - 1) return intentar(i + 1);
+            if (r.status === 429) {
+              throw new Error('Has agotado la cuota de todos los modelos de Gemini por ahora. ' +
+                'Suele reponerse en un minuto si es el límite por minuto, o mañana si es el ' +
+                'diario. Si tienes otro proveedor puesto en la bóveda, cambia a él mientras.');
+            }
+            if (retirado && huboCuota) {
+              throw new Error('Has agotado la cuota gratuita de Gemini por ahora. Suele ' +
+                'reponerse en unos minutos si es el límite por minuto, o mañana si es el ' +
+                'diario. Si tienes otro proveedor puesto en la bóveda, cambia a él mientras.');
+            }
             if (retirado) {
               throw new Error('El modelo elegido ya no está disponible. Abre la bóveda y ' +
-                'vuelve a elegir modelo: la lista se actualiza sola.');
+                'pulsa «Ver los suyos» para refrescar la lista con los que admite tu clave.');
             }
             throw new Error(msg);
           }
