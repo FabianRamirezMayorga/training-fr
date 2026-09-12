@@ -1267,6 +1267,12 @@
       (o.lesiones && o.lesiones.length
         ? 'LIMITACIONES A RESPETAR: ' + o.lesiones.join(', ') + '. Esto manda sobre ' +
           'cualquier otra consideración.\n' : '') +
+      (o.molestias ? 'LE MOLESTA AHORA MISMO: "' + o.molestias + '". No es una lesión ' +
+        'diagnosticada, es lo que nota hoy: esquiva lo que le dé por ahí y dilo en las ' +
+        'razones.\n' : '') +
+      (o.notas ? 'LO QUE HA ESCRITO DE SU PUÑO Y LETRA: "' + o.notas + '". Esto pesa más ' +
+        'que cualquier norma general: si pide algo concreto, dáselo, y si lo que pide ' +
+        'choca con su objetivo, dale lo que pide y explícale el coste en una frase.\n' : '') +
       menuEjercicios(o.musculos || [], o.gear) + '\n' +
       'CÓMO TIENE QUE SER:\n' +
       '- Cada sesión, entre ' + minimo + ' y ' + (minimo + 3) + ' ejercicios, los ' +

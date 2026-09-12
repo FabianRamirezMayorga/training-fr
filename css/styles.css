@@ -550,6 +550,12 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 .dia-cab .chevron svg{transition:transform .18s}
 .dia-cab .chevron.abierta svg{transform:rotate(90deg)}
 
+/* Los pasos del asistente de plan: el número ancla la lectura */
+.paso-plan{padding:14px}
+.paso-plan .paso-n{flex:none;width:24px;height:24px;border-radius:50%;
+  background:var(--acc-d);color:var(--acc);display:flex;align-items:center;
+  justify-content:center;font-size:.76rem;font-weight:700}
+
 /* ---------- la semana del plan ----------
    Cada día es una ficha que se lee sola: qué trabaja, cuánto cuesta, y dentro
    los ejercicios en orden con los básicos marcados. Cerrados salvo el primero,

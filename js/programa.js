@@ -357,7 +357,15 @@
     candidatos.sort(function (a, b) {
       return puntuar(b, hueco, ctx.usados) - puntuar(a, hueco, ctx.usados);
     });
-    return candidatos[0];
+
+    /* Se quedaba siempre con el mejor, así que el mismo perfil daba siempre el
+       mismo plan y «otra propuesta» devolvía lo idéntico: parecía una plantilla
+       porque se comportaba como una. Ahora rota entre los tres mejores y
+       desplazado por el hueco, para que cambien unos ejercicios y no todos a la
+       vez. Siguen siendo los tres que mejor puntúan: varía sin empeorar. */
+    ctx.hueco = (ctx.hueco || 0) + 1;
+    const cuantos = Math.min(3, candidatos.length);
+    return candidatos[((ctx.variante || 0) + ctx.hueco) % cuantos];
   }
 
   /* ---------- 7. El programa ---------- */
@@ -398,7 +406,8 @@
     const foco = opts.foco || 'equilibrado';
 
     const usados = {};
-    const ctx = { gear: gear, r: r, maxNivel: maxNivel, usados: usados };
+    const ctx = { gear: gear, r: r, maxNivel: maxNivel, usados: usados,
+      variante: Number(opts.variante) || 0, hueco: 0 };
     const volumen = {};
     const sinCubrir = [];
 

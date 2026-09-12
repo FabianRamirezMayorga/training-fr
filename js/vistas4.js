@@ -45,6 +45,9 @@
     cargandoIA: false,
     cargandoPlan: false,
     todoAbierto: false,
+    molestias: '',
+    notas: '',
+    variante: 0,
     abierto: {}
   };
 
@@ -278,81 +281,130 @@
         proponga sobre estas mismas rutinas.</p>` : '')}`;
   }
 
+  function paso(n, titulo, cuerpo, nota) {
+    return html`
+      <div class="card paso-plan">
+        <div class="row" style="align-items:flex-start;gap:11px">
+          <span class="paso-n">${n}</span>
+          <div class="grow">
+            <b>${titulo}</b>
+            ${raw(cuerpo)}
+            ${raw(nota ? '<p class="tiny" style="margin:10px 0 0">' + nota + '</p>' : '')}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ---------- el asistente ----------
+     Antes era una pantalla de fichas sueltas y un botón al final: se podía
+     generar sin haber mirado nada, y el resultado salía idéntico una y otra
+     vez. Ahora va por pasos —tus datos, cuándo entrenas, qué buscas, y lo que
+     solo tú sabes— y los dos botones esperan al final, que es donde toca
+     decidir quién lo monta. */
   function controles() {
+    const p = Perfil.datos();
+    const nivel = { beginner: 'Principiante', intermediate: 'Intermedio', expert: 'Avanzado' };
+
+    const datos = html`
+      <div class="row wrap" style="gap:6px;margin-top:9px">
+        <span class="chip">${p.sexo === 'mujer' ? 'Mujer' : 'Hombre'}</span>
+        <span class="chip">${p.edad} años</span>
+        <span class="chip">${p.peso} kg · ${p.altura} cm</span>
+        <span class="chip">${nivel[p.experiencia] || 'Intermedio'}</span>
+        <span class="chip">Duerme ${p['sue\u00f1o']} h</span>
+      </div>
+      <button class="btn sm block" data-a="editarperfil" style="margin-top:10px">
+        Corregir mis datos</button>`;
+
+    const cuando = html`
+      <div class="row between" style="margin:9px 0 6px">
+        <span class="tiny">QUÉ DÍAS</span>
+        <span class="chip solid tiny-chip">${est.dias.length}
+          ${est.dias.length === 1 ? 'día' : 'días'}</span>
+      </div>
+      <div class="row wrap" style="gap:6px">
+        ${raw(DIAS.map(function (d) {
+          return '<button class="chip ' + (est.dias.indexOf(d) !== -1 ? 'on' : '') +
+            '" data-dia="' + d + '">' + UI.diaLargo(d) + '</button>';
+        }).join(''))}
+      </div>
+      <div class="tiny" style="margin:13px 0 6px">CUÁNTO DURA CADA SESIÓN</div>
+      <div class="row wrap" style="gap:6px">
+        ${raw([30, 45, 60, 75, 90].map(function (m) {
+          return '<button class="chip ' + (est.minutos === m ? 'on' : '') +
+            '" data-min="' + m + '">' + m + ' min</button>';
+        }).join(''))}
+      </div>`;
+
+    const busca = html`
+      <div class="row wrap" style="gap:6px;margin-top:9px">
+        ${raw(Object.keys(Programa.OBJETIVOS).map(function (k) {
+          return '<button class="chip ' + (objetivoActual() === k ? 'on' : '') +
+            '" data-obj="' + k + '">' + esc(Programa.OBJETIVOS[k].label) + '</button>';
+        }).join(''))}
+      </div>
+      <p class="tiny" style="margin:9px 0 0">${Programa.OBJETIVOS[objetivoActual()].resumen}</p>
+      <div class="tiny" style="margin:13px 0 6px">¿PRIORIZAR ALGUNA ZONA?</div>
+      <div class="pill-scroll" style="margin:0 -4px;padding-left:0">
+        ${raw(FOCOS.map(function (f) {
+          return '<button class="chip ' + (est.foco === f.id ? 'on' : '') +
+            '" data-foco="' + f.id + '">' + esc(f.label) + '</button>';
+        }).join(''))}
+      </div>`;
+
+    /* Lo que no está en ningún campo y es justo lo que hace que un plan deje de
+       parecer de plantilla: lo que le molesta hoy y lo que quiere o no quiere. */
+    const extra = html`
+      <label class="tiny" style="display:block;margin:9px 0 5px">
+        ¿ALGO TE MOLESTA AHORA MISMO?</label>
+      <input id="pg-molestias" value="${est.molestias || ''}" autocomplete="off"
+             placeholder="Ej. la rodilla al bajar, el hombro por encima de la cabeza">
+      <label class="tiny" style="display:block;margin:12px 0 5px">
+        ¿ALGO MÁS QUE DEBA SABER?</label>
+      <textarea id="pg-notas" rows="3" placeholder="Ej. quiero mejorar en dominadas; odio las sentadillas; los viernes voy con prisa; tengo una carrera en dos meses">${est.notas || ''}</textarea>`;
+
     return html`
       <div class="list-title" id="generar">Generar uno nuevo</div>
-      <div class="card">
-        <div class="row between" style="margin-bottom:9px">
-          <b>¿Qué días entrenas?</b>
-          <span class="chip solid">${est.dias.length} ${est.dias.length === 1 ? 'día' : 'días'}</span>
-        </div>
-        <div class="row wrap" style="gap:6px">
-          ${raw(DIAS.map(function (d) {
-            return '<button class="chip ' + (est.dias.indexOf(d) !== -1 ? 'on' : '') +
-              '" data-dia="' + d + '">' + UI.diaLargo(d) + '</button>';
-          }).join(''))}
-        </div>
-      </div>
 
-      <div class="card">
-        <b>¿Cuánto dura cada sesión?</b>
-        <div class="row wrap" style="gap:6px;margin-top:9px">
-          ${raw([30, 45, 60, 75, 90].map(function (m) {
-            return '<button class="chip ' + (est.minutos === m ? 'on' : '') +
-              '" data-min="' + m + '">' + m + ' min</button>';
-          }).join(''))}
-        </div>
-      </div>
-
-      <div class="card">
-        <b>¿Qué buscas entrenando?</b>
-        <div class="row wrap" style="gap:6px;margin-top:9px">
-          ${raw(Object.keys(Programa.OBJETIVOS).map(function (k) {
-            return '<button class="chip ' + (objetivoActual() === k ? 'on' : '') +
-              '" data-obj="' + k + '">' + esc(Programa.OBJETIVOS[k].label) + '</button>';
-          }).join(''))}
-        </div>
-        <p class="tiny" style="margin:10px 0 0">${Programa.OBJETIVOS[objetivoActual()].resumen}</p>
-      </div>
-
-      <div class="card">
-        <b>¿Quieres priorizar alguna zona?</b>
-        <div class="pill-scroll" style="margin:9px -4px 0;padding-left:0">
-          ${raw(FOCOS.map(function (f) {
-            return '<button class="chip ' + (est.foco === f.id ? 'on' : '') +
-              '" data-foco="' + f.id + '">' + esc(f.label) + '</button>';
-          }).join(''))}
-        </div>
-        <p class="tiny" style="margin:10px 0 0">Añade una serie extra de esa zona en los días
-        que ya la trabajan. El resto del plan no se toca.</p>
-      </div>
+      ${raw(paso(1, 'Tus datos', datos,
+        'Son los que usa el plan para el volumen, las repeticiones y el esfuerzo. ' +
+        'Si algo no cuadra, corr\u00edgelo antes de generar.'))}
+      ${raw(paso(2, '\u00bfCu\u00e1ndo puedes entrenar?', cuando,
+        'Ponlo realista: es mejor un plan de tres d\u00edas que cumples que uno de cinco que no.'))}
+      ${raw(paso(3, '\u00bfQu\u00e9 buscas?', busca, ''))}
+      ${raw(paso(4, '\u00bfAlgo que deba saber?', extra,
+        'Esto es opcional, pero es lo que separa un plan tuyo de uno gen\u00e9rico. ' +
+        'Solo lo aprovecha la IA; la calculadora no lee texto.'))}
 
       ${raw(est.cargandoPlan ? html`
         <div class="card center">
           <div class="spinner" style="margin:6px auto"></div>
-          <p class="tiny" style="margin:8px 0 0">Montándote la semana entera con tus
-          datos delante\u2026 esto tarda unos segundos.</p>
+          <p class="tiny" style="margin:8px 0 0">Mont\u00e1ndote la semana entera con tus datos
+          delante\u2026 esto tarda unos segundos.</p>
         </div>`
       : html`
-        <button class="btn primary block grande" data-a="crearia" style="margin-top:4px">
-          ${raw(icon('chispa'))} Generar con IA
+        <button class="btn primary block grande" data-a="crearia">
+          ${raw(icon('chispa'))} Generar rutina con IA
         </button>
         <p class="tiny center" style="margin:7px 4px 0">${IA.activa()
-          ? 'Lee todo lo que sabe de ti \u2014lo que levantas, lo que llevas abandonado, los ' +
-            'días que cumples de verdad, lo que comes, tus limitaciones\u2014 y elige los ' +
-            'ejercicios uno a uno del catálogo. No es una plantilla.'
-          : 'Necesita un proveedor de IA con su clave, en la bóveda de Ajustes.'}</p>
+          ? 'Lee todo lo anterior m\u00e1s lo que levantas, lo que llevas abandonado y los d\u00edas ' +
+            'que cumples de verdad, y elige los ejercicios uno a uno del cat\u00e1logo.'
+          : 'Necesita un proveedor de IA con su clave, en la b\u00f3veda de Ajustes.'}</p>
 
         <button class="btn block" data-a="crear" style="margin-top:10px">
-          Montarlo sin IA, con la calculadora
+          Generar rutina autom\u00e1ticamente
         </button>
-        <p class="tiny center" style="margin:7px 4px 0">Reparte patrones de movimiento sobre
-        plantillas según tu edad, tu nivel y tu objetivo. Sale al momento, funciona sin clave
-        y siempre es coherente, pero es el mismo reparto para todo el que tenga tu perfil.</p>`)}`;
+        <p class="tiny center" style="margin:7px 4px 0">Sin IA y al momento: reparte patrones
+        de movimiento seg\u00fan tu edad, tu nivel y tu objetivo. Cada vez que la pidas cambia
+        algunos ejercicios, pero no lee lo que hayas escrito arriba.</p>`)}`;
   }
 
-  /* ---------- el programa ---------- */
-
+  /* ---------- un día del plan ----------
+     Antes era una lista plana con todo desplegado de golpe: seis días abiertos
+     a la vez son cincuenta filas iguales y no se distingue un básico de un
+     accesorio ni se puede hacer nada con el día. Ahora la semana se lee de un
+     vistazo —cada día dice qué trabaja y cuánto cuesta— y se abre el que
+     interese, con el primero abierto para que no parezca vacío. */
   function barraVolumen(prog) {
     const musculos = Object.keys(prog.volumen).sort(function (a, b) {
       return prog.volumen[b] - prog.volumen[a];
@@ -401,12 +453,6 @@
       </div>`;
   }
 
-  /* ---------- un día del plan ----------
-     Antes era una lista plana con todo desplegado de golpe: seis días abiertos
-     a la vez son cincuenta filas iguales y no se distingue un básico de un
-     accesorio ni se puede hacer nada con el día. Ahora la semana se lee de un
-     vistazo —cada día dice qué trabaja y cuánto cuesta— y se abre el que
-     interese, con el primero abierto para que no parezca vacío. */
   function tarjetaDia(s, i, prog) {
     const abierto = est.abierto[i] === undefined ? i === 0 : est.abierto[i];
     const series = s.ejercicios.reduce(function (n, e) { return n + e.sets; }, 0);
@@ -732,7 +778,6 @@
       No es una plantilla con tu nombre encima.</p>
 
       ${raw(misProgramasHTML())}
-      ${raw(fichaPerfil(p))}
       ${raw(est.recuperado && est.prog ? html`
         <div class="card" style="border-color:var(--acc)">
           <b>Este es el plan que ya tenías</b>
@@ -781,6 +826,13 @@
       if (est.prog && est.prog.porIA) crearConIA(); else crear();
     });
     bindAll(root, '[data-abrirplan]', function (el) { abrirPlan(el.dataset.abrirplan); });
+
+    /* Los dos campos libres se guardan al escribir: si no, cualquier repintado
+       —tocar un día, cambiar el objetivo— se los llevaba por delante. */
+    const molestias = root.querySelector('#pg-molestias');
+    if (molestias) molestias.oninput = function () { est.molestias = molestias.value; };
+    const notas = root.querySelector('#pg-notas');
+    if (notas) notas.oninput = function () { est.notas = notas.value; };
 
     bind(root, '[data-a=irgenerar]', function () {
       const caja = root.querySelector('#generar');
@@ -1017,7 +1069,7 @@
     /* la calculadora primero: garantiza una forma válida y es la red si algo falla */
     const base = Programa.crear({
       dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(),
-      foco: est.foco, gear: Store.settings().gear
+      foco: est.foco, gear: Store.settings().gear, variante: est.variante
     });
 
     est.cargandoPlan = true;
@@ -1026,7 +1078,8 @@
     IA.crearPrograma({
       dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(), foco: est.foco,
       gear: Store.settings().gear, objetivoSeries: base.objetivoSeries,
-      lesiones: base.lesiones, musculos: Object.keys(base.volumen || {})
+      lesiones: base.lesiones, musculos: Object.keys(base.volumen || {}),
+      molestias: est.molestias, notas: est.notas
     }).then(function (r) {
       const prog = fusionarIA(base, r);
       if (!prog) {
@@ -1064,9 +1117,11 @@
 
   function crear() {
     if (!est.dias.length) { UI.toast('Elige al menos un día de entrenamiento'); return; }
+    /* cada vez que se pide, otra variante: antes devolvía el plan idéntico */
+    est.variante = (est.variante || 0) + 1;
     est.prog = Programa.crear({
       dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(),
-      foco: est.foco, gear: Store.settings().gear
+      foco: est.foco, gear: Store.settings().gear, variante: est.variante
     });
     est.ia = null;
     est.aplicados = [];
