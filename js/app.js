@@ -4412,7 +4412,10 @@
     /* La ficha del ejercicio ya sabía pintar los recambios y la guía de
        técnica; el entrenamiento las necesita igual y no tiene sentido tener
        dos versiones que se separen con el tiempo. */
-    alternativasHTML: alternativasHTML, guiaHTML: guiaHTML
+    alternativasHTML: alternativasHTML, guiaHTML: guiaHTML,
+    /* el nombre del plan sin el día delante, que la pantalla de Programa
+       necesita para agrupar igual que la de Rutinas */
+    nombreRutina: nombreRutina, tituloRutina: tituloRutina
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

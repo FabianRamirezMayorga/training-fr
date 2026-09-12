@@ -1229,6 +1229,71 @@
       Data.paraIA({ musculos: musculos || [], gear: gear || Store.settings().gear }) + '\n';
   }
 
+  /* ---------- montar el programa entero con IA ----------
+     El programa que hace programa.js es determinista: reparte patrones sobre
+     plantillas y sale siempre algo coherente, pero dos personas con el mismo
+     perfil reciben lo mismo. De ahí que se lea genérico. Esto es lo contrario:
+     se le da todo lo que la app sabe de la persona —lo que levanta, lo que
+     abandona, los días que cumple de verdad, lo que come, sus limitaciones— y
+     el catálogo del que puede elegir, y monta la semana entera.
+     La calculadora se queda: es la que responde sin clave y la que sirve de
+     red cuando la IA devuelve algo que no cuadra. */
+  function crearPrograma(o) {
+    o = o || {};
+    const dias = o.dias || [];
+    if (!dias.length) return Promise.reject(new Error('Elige al menos un día.'));
+
+    const objetivo = Programa.OBJETIVOS[o.objetivo] || {};
+    const minimo = Store.MINIMO_EJERCICIOS || 6;
+
+    /* los músculos que va a tocar la semana, para darle más catálogo de esos */
+    const foco = o.foco && o.foco !== 'equilibrado' ? o.foco : '';
+
+    const prompt = contexto({
+      progreso: true, cargas: true, comida: true, favoritos: true, rutinas: true
+    }) + '\n\n' +
+      'ENCARGO: móntale el programa de entrenamiento de una semana, entero.\n' +
+      'DÍAS QUE PUEDE ENTRENAR: ' + dias.map(UI.diaLargo).join(', ') +
+      ' (' + dias.length + ' sesiones).\n' +
+      'TIEMPO POR SESIÓN: ' + (o.minutos || 60) + ' minutos contando calentamiento ' +
+      'y descansos. Ajusta el número de ejercicios a ese tiempo de verdad: con los ' +
+      'descansos que pongas, la cuenta tiene que salir.\n' +
+      'OBJETIVO: ' + (objetivo.label || o.objetivo) + '. ' + (objetivo.resumen || '') + '\n' +
+      (foco ? 'QUIERE PRIORIZAR: ' + foco + '. Dale algo más de volumen sin desmontar ' +
+        'el resto.\n' : '') +
+      (o.objetivoSeries ? 'REFERENCIA DE VOLUMEN: la app calcula que le tocan unas ' +
+        o.objetivoSeries + ' series semanales por músculo grande para su nivel y su ' +
+        'objetivo. Puedes separarte de esa cifra si tienes un motivo, pero dilo.\n' : '') +
+      (o.lesiones && o.lesiones.length
+        ? 'LIMITACIONES A RESPETAR: ' + o.lesiones.join(', ') + '. Esto manda sobre ' +
+          'cualquier otra consideración.\n' : '') +
+      menuEjercicios(o.musculos || [], o.gear) + '\n' +
+      'CÓMO TIENE QUE SER:\n' +
+      '- Cada sesión, entre ' + minimo + ' y ' + (minimo + 3) + ' ejercicios, los ' +
+      'básicos delante y el accesorio detrás.\n' +
+      '- Reparte los músculos entre los días para que nada se entrene dos días ' +
+      'seguidos sin descanso, mirando los días concretos que te ha dado.\n' +
+      '- Si arriba ves que lleva músculos abandonados o que nunca ha entrenado ' +
+      'alguno, este plan es donde se arregla: méteselos y dilo en las razones.\n' +
+      '- Si ves con qué cargas entrena, usa ESOS ejercicios donde encajen: ya sabe ' +
+      'hacerlos y sabes por dónde va de fuerza.\n' +
+      '- Si los días que dice que va a entrenar no cuadran con los que cumple de ' +
+      'verdad, dilo en las razones sin sermonear.\n' +
+      '- Los nombres de ejercicio, EXACTOS del catálogo. Lo que no esté ahí no existe.\n\n' +
+      'Devuelve JSON, sin nada fuera de él:\n' +
+      '{"nombre":"cómo llamarías a este plan, 2-4 palabras",\n' +
+      '"razones":["4 a 6 frases. Cada una cita un dato suyo de arriba y explica una ' +
+      'decisión concreta del plan. Nada que valga para otra persona."],\n' +
+      '"sesiones":[{"dia":"Lun","nombre":"3-4 palabras, qué se trabaja",' +
+      '"ejercicios":[{"ejercicio":"nombre EXACTO del catálogo","series":número,' +
+      '"reps":número,"descanso":segundos,"porque":"media frase"}]}],\n' +
+      '"progresion":[{"semana":"Semanas 1-2","texto":"qué hacer esas semanas, con números"}],\n' +
+      '"cardio":"1-2 frases sobre qué hacer los días que no entrena, o cadena vacía",\n' +
+      '"aviso":"lo que deba tener presente por sus limitaciones o su edad, o cadena vacía"}';
+
+    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.6 });
+  }
+
   /* ---------- auditar UNA rutina ----------
      Lo mismo que se le hace al programa entero, pero sobre una rutina suelta:
      la que uno ya tiene montada y quiere pasar por otro par de ojos. Los
@@ -1622,6 +1687,7 @@
     listarModelos: listarModelos,
     planNutricion: planNutricion, revisarRutinas: revisarRutinas,
     revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
+    crearPrograma: crearPrograma,
     analizarComida: analizarComida,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,

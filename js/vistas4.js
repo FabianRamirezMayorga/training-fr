@@ -43,6 +43,7 @@
     aplicados: [],
     guardadas: [],
     cargandoIA: false,
+    cargandoPlan: false,
     abierto: {}
   };
 
@@ -116,8 +117,63 @@
   }
 
   /* ---------- controles ---------- */
+  /* Lo que ya tiene montado, antes de nada. Entrar a esta pantalla y ver un
+     formulario en blanco hace pensar que no hay nada guardado, y lo normal es
+     venir a mirar el plan, no a rehacerlo. */
+  function misProgramasHTML() {
+    const rutinas = Store.routines().filter(function (r) { return (r.days || []).length; });
+    if (!rutinas.length && !est.prog) return '';
+
+    /* agrupadas por plan, igual que en la pantalla de Rutinas */
+    const orden = [];
+    const planes = {};
+    rutinas.forEach(function (r) {
+      const k = App.nombreRutina ? App.nombreRutina(r) : r.name;
+      if (!planes[k]) { planes[k] = []; orden.push(k); }
+      planes[k].push(r);
+    });
+
+    return html`
+      <div class="list-title">Lo que ya tienes</div>
+      ${raw(est.prog ? html`
+        <div class="card" style="border-color:var(--acc)">
+          <div class="row between" style="align-items:flex-start">
+            <div class="grow">
+              <b>${est.prog.nombreIA || 'Plan sin guardar'}</b>
+              <div class="tiny" style="margin-top:2px">${est.prog.sesiones.length} sesiones
+                \u00b7 ${est.prog.porIA ? 'montado con IA' : 'montado con la calculadora'}
+                \u00b7 ${est.guardadas.length ? 'ya está en tus rutinas' : 'sin pasar a rutinas'}</div>
+            </div>
+            <button class="btn sm" data-a="verplan">Ver</button>
+          </div>
+        </div>` : '')}
+
+      ${raw(orden.length ? html`
+        <div class="list">
+          ${raw(orden.map(function (k) {
+            const suyas = planes[k];
+            const dias = [];
+            suyas.forEach(function (r) {
+              (r.days || []).forEach(function (d) { if (dias.indexOf(d) === -1) dias.push(d); });
+            });
+            dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
+            const n = suyas.reduce(function (t, r) { return t + r.exercises.length; }, 0);
+            return '<div class="list-row tap" data-verplan-rutinas>' +
+              '<span class="row-icon">' + icon('dumbbell') + '</span>' +
+              '<div class="grow"><div class="list-row-title">' + esc(k) + '</div>' +
+              '<div class="list-row-sub">' + suyas.length +
+              (suyas.length === 1 ? ' rutina' : ' rutinas') + ' \u00b7 ' + n +
+              ' ejercicios \u00b7 ' + dias.join(', ') + '</div></div>' +
+              '<span class="chevron">' + icon('chevron') + '</span></div>';
+          }).join(''))}
+        </div>
+        <p class="tiny" style="margin:8px 4px 0">Toca uno para verlo o entrenarlo en
+        Rutinas. Ahí también puedes pasar cualquiera por la IA.</p>` : '')}`;
+  }
+
   function controles() {
     return html`
+      <div class="list-title">Generar uno nuevo</div>
       <div class="card">
         <div class="row between" style="margin-bottom:9px">
           <b>¿Qué días entrenas?</b>
@@ -164,9 +220,28 @@
         que ya la trabajan. El resto del plan no se toca.</p>
       </div>
 
-      <button class="btn primary block grande" data-a="crear" style="margin-top:4px">
-        ${raw(icon('chispa'))} ${est.prog ? 'Rehacer el programa' : 'Crear mi programa'}
-      </button>`;
+      ${raw(est.cargandoPlan ? html`
+        <div class="card center">
+          <div class="spinner" style="margin:6px auto"></div>
+          <p class="tiny" style="margin:8px 0 0">Montándote la semana entera con tus
+          datos delante\u2026 esto tarda unos segundos.</p>
+        </div>`
+      : html`
+        <button class="btn primary block grande" data-a="crearia" style="margin-top:4px">
+          ${raw(icon('chispa'))} Generar con IA
+        </button>
+        <p class="tiny center" style="margin:7px 4px 0">${IA.activa()
+          ? 'Lee todo lo que sabe de ti \u2014lo que levantas, lo que llevas abandonado, los ' +
+            'días que cumples de verdad, lo que comes, tus limitaciones\u2014 y elige los ' +
+            'ejercicios uno a uno del catálogo. No es una plantilla.'
+          : 'Necesita un proveedor de IA con su clave, en la bóveda de Ajustes.'}</p>
+
+        <button class="btn block" data-a="crear" style="margin-top:10px">
+          Montarlo sin IA, con la calculadora
+        </button>
+        <p class="tiny center" style="margin:7px 4px 0">Reparte patrones de movimiento sobre
+        plantillas según tu edad, tu nivel y tu objetivo. Sale al momento, funciona sin clave
+        y siempre es coherente, pero es el mismo reparto para todo el que tenga tu perfil.</p>`)}`;
   }
 
   /* ---------- el programa ---------- */
@@ -402,15 +477,26 @@
       </div>
 
       <div class="list-title">Por qué este plan</div>
-      <p class="tiny" style="margin:-4px 4px 10px">Esto lo calcula la app con tus datos, sin
-      pedirle nada a nadie: por eso funciona sin conexión y sin clave. La lectura de un
-      entrenador, que es otra cosa, está justo debajo.</p>
+      <p class="tiny" style="margin:-4px 4px 10px">${prog.porIA
+        ? 'Lo ha montado la IA leyendo todo lo que la app sabe de ti, y ha elegido cada ' +
+          'ejercicio del catálogo. Abajo puedes pedirle además que se lo lea como auditor, ' +
+          'que es otra cosa.'
+        : 'Esto lo calcula la app con tus datos, sin pedirle nada a nadie: por eso funciona ' +
+          'sin conexión y sin clave. La lectura de un entrenador, que es otra cosa, está ' +
+          'justo debajo.'}</p>
       <div class="card">
         ${raw(prog.razones.map(function (t, i) {
           return '<div class="razon"><span class="rt-idx">' + (i + 1) + '</span><p>' +
             esc(t) + '</p></div>';
         }).join(''))}
       </div>
+
+      ${raw(prog.porIA && prog.descartados && prog.descartados.length ? html`
+        <div class="card">
+          <b>Lo que no le dejé poner</b>
+          <p class="tiny" style="margin:6px 0 0">Propuso esto y no entró, así que el hueco lo
+          completé yo: ${prog.descartados.join('; ')}.</p>
+        </div>` : '')}
 
       ${raw(bloqueIA())}
 
@@ -490,6 +576,7 @@
       <p class="muted">Construido con tu perfil: sexo, edad, nivel, objetivo y limitaciones.
       No es una plantilla con tu nombre encima.</p>
 
+      ${raw(misProgramasHTML())}
       ${raw(fichaPerfil(p))}
       ${raw(est.recuperado && est.prog ? html`
         <div class="card" style="border-color:var(--acc)">
@@ -533,7 +620,16 @@
     });
 
     bind(root, '[data-a=crear]', crear);
-    bind(root, '[data-a=otra]', crear);
+    bind(root, '[data-a=crearia]', crearConIA);
+    bind(root, '[data-a=otra]', function () {
+      /* «otra propuesta» rehace por donde vino: si el plan lo montó la IA, con IA */
+      if (est.prog && est.prog.porIA) crearConIA(); else crear();
+    });
+    bindAll(root, '[data-verplan-rutinas]', function () { go('rutinas'); });
+    bind(root, '[data-a=verplan]', function () {
+      const caja = document.querySelector('.stats');
+      if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 
     bindAll(root, '[data-dia-abrir]', function (el) {
       const i = el.dataset.diaAbrir;
@@ -597,6 +693,159 @@
       });
     });
   };
+
+  /* ---------- montar el plan con IA ----------
+     Lo que devuelve la IA se mete en el MISMO objeto que fabrica la calculadora.
+     Así toda la pantalla —la barra de volumen, las tarjetas por día, guardar
+     como rutinas, la auditoría— sigue funcionando sin enterarse de quién lo
+     montó, y si la IA devuelve algo que no cuadra queda la base buena debajo. */
+  function fusionarIA(base, r) {
+    const gear = Store.settings().gear;
+    const claves = Programa.lesionesDe(Perfil.datos().lesiones);
+    const descartados = [];
+
+    const prohibido = function (ex) {
+      const patron = Alt.patron(ex);
+      return claves.some(function (k) {
+        return (Programa.LESIONES[k].patronesFuera || []).indexOf(patron) !== -1;
+      });
+    };
+
+    const sesiones = (r.sesiones || []).map(function (ses, i) {
+      const dia = est.dias.indexOf(ses.dia) !== -1 ? ses.dia : est.dias[i] || est.dias[0];
+      const vistos = {};
+      const ejercicios = [];
+
+      (ses.ejercicios || []).forEach(function (f) {
+        const nombre = String(f.ejercicio || '').trim();
+        const ex = Data.porNombreEs(nombre) ||
+          (Data.search({ q: nombre, gear: gear }) || [])[0];
+        if (!ex) { descartados.push(nombre); return; }
+        if (vistos[ex.id]) return;
+        if (prohibido(ex)) { descartados.push(ex.nameEs + ' (tus limitaciones)'); return; }
+        vistos[ex.id] = true;
+
+        const sets = Math.min(8, Math.max(1, Number(f.series) || 3));
+        const rest = Math.min(300, Math.max(20, Number(f.descanso) || 90));
+        ejercicios.push({
+          exId: ex.id,
+          patron: Alt.patron(ex),
+          musculo: (ex.primaryMuscles || [])[0] || 'abdominals',
+          rol: ejercicios.length < 2 ? 'principal' : 'accesorio',
+          sets: sets,
+          reps: Math.min(90, Math.max(1, Number(f.reps) || 10)),
+          weight: 0,
+          rest: rest,
+          note: f.porque || ''
+        });
+      });
+
+      /* Si al filtrar se ha quedado corta —un ejercicio inventado, otro que
+         choca con una lesión— se completa con los de la calculadora para ese
+         mismo día. Perder un día entero de entrenamiento porque sobraba un
+         nombre es peor que cualquier plan. */
+      if (ejercicios.length < Store.MINIMO_EJERCICIOS) {
+        const deLaBase = (base.sesiones.find(function (x) { return x.dia === dia; }) ||
+          base.sesiones[i] || {}).ejercicios || [];
+        deLaBase.forEach(function (e) {
+          if (ejercicios.length >= Store.MINIMO_EJERCICIOS) return;
+          if (vistos[e.exId]) return;
+          const ex = Data.get(e.exId);
+          if (!ex || prohibido(ex)) return;
+          vistos[e.exId] = true;
+          ejercicios.push(Object.assign({}, e, {
+            note: 'Lo añade la app para completar el día.'
+          }));
+        });
+      }
+      if (ejercicios.length < Store.MINIMO_EJERCICIOS) return null;
+
+      const minutos = ejercicios.reduce(function (n, e) {
+        return n + Math.round(e.sets * (e.rest + 35) / 60);
+      }, 0);
+
+      return {
+        dia: dia,
+        nombre: UI.diaLargo(dia) + ' \u00b7 ' + (ses.nombre || 'Sesión'),
+        plantilla: ses.nombre || '',
+        ejercicios: ejercicios,
+        minutos: minutos + base.calentamiento
+      };
+    }).filter(Boolean);
+
+    /* si no ha salido ni una sesión aprovechable, se queda la de la calculadora */
+    if (!sesiones.length) return null;
+
+    const prog = Object.assign({}, base);
+    prog.sesiones = sesiones;
+    prog.porIA = true;
+    prog.nombreIA = r.nombre || '';
+    prog.descartados = descartados;
+
+    if (r.razones && r.razones.length) prog.razones = r.razones.slice(0, 8);
+    if (r.progresion && r.progresion.length) {
+      prog.progresion = r.progresion.map(function (x) {
+        return { semana: x.semana || '', texto: x.texto || '' };
+      });
+    }
+    if (r.cardio) prog.cardio = r.cardio;
+    if (r.aviso) prog.avisos = [r.aviso].concat(base.avisos || []);
+
+    Programa.revolumen(prog);
+    return prog;
+  }
+
+  function crearConIA() {
+    if (!est.dias.length) { UI.toast('Elige al menos un día de entrenamiento'); return; }
+    if (!IA.activa()) { go('claves'); UI.toast('Elige proveedor de IA y pon su clave'); return; }
+
+    /* la calculadora primero: garantiza una forma válida y es la red si algo falla */
+    const base = Programa.crear({
+      dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(),
+      foco: est.foco, gear: Store.settings().gear
+    });
+
+    est.cargandoPlan = true;
+    render();
+
+    IA.crearPrograma({
+      dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(), foco: est.foco,
+      gear: Store.settings().gear, objetivoSeries: base.objetivoSeries,
+      lesiones: base.lesiones, musculos: Object.keys(base.volumen || {})
+    }).then(function (r) {
+      const prog = fusionarIA(base, r);
+      if (!prog) {
+        UI.toast('La IA no devolvió un plan aprovechable. Te dejo el de la calculadora.');
+        est.prog = base;
+      } else {
+        est.prog = prog;
+        const faltan = est.dias.length - prog.sesiones.length;
+        if (faltan > 0) {
+          UI.toast('Plan listo, pero solo salieron ' + prog.sesiones.length + ' de los ' +
+            est.dias.length + ' días. Prueba a generarlo otra vez.');
+        } else if (prog.descartados.length) {
+          UI.toast('Plan listo. Descarté ' + prog.descartados.length + ' ejercicio' +
+            (prog.descartados.length === 1 ? '' : 's') + ' que no encajaban y completé el hueco.');
+        } else {
+          UI.toast('Plan montado a tu medida');
+        }
+      }
+    }).catch(function (e) {
+      UI.toast(e.message);
+      est.prog = base;
+    }).then(function () {
+      est.cargandoPlan = false;
+      est.ia = null;
+      est.aplicados = [];
+      est.guardadas = [];
+      est.recuperado = false;
+      est.abierto = {};
+      guardarEstado();
+      render();
+      const caja = document.querySelector('.stats');
+      if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 
   function crear() {
     if (!est.dias.length) { UI.toast('Elige al menos un día de entrenamiento'); return; }
