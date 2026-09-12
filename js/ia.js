@@ -42,13 +42,41 @@
     {
       id: 'gemini',
       label: 'Google Gemini',
-      nota: 'Tiene capa gratuita generosa. Es el que trae la app de serie.',
+      nota: 'Gratis hasta 1.500 peticiones al día. Es el que trae la app de serie y el ' +
+        'que recomiendo si no quieres pagar nada.',
       donde: 'https://aistudio.google.com/apikey',
       dondeTxt: 'aistudio.google.com/apikey',
       pista: 'AIza…',
       modelos: MODELOS,
       imagen: true,
-      listaViva: true
+      gratis: true
+    },
+    {
+      id: 'groq',
+      label: 'Groq',
+      nota: 'Gratis hasta 1.000 peticiones al día, sin tarjeta. Corre modelos abiertos ' +
+        '(Llama, Qwen, GPT-OSS) a una velocidad que no tiene nadie más.',
+      donde: 'https://console.groq.com/keys',
+      dondeTxt: 'console.groq.com/keys',
+      pista: 'gsk_…',
+      base: 'https://api.groq.com/openai/v1',
+      modelos: ['llama-3.3-70b-versatile'],
+      imagen: false,
+      gratis: true
+    },
+    {
+      id: 'openrouter',
+      label: 'OpenRouter',
+      nota: 'Una sola clave para casi todos los modelos que existen. Los que acaban en ' +
+        '«:free» no cuestan nada; el resto se paga por uso con saldo.',
+      donde: 'https://openrouter.ai/keys',
+      dondeTxt: 'openrouter.ai/keys',
+      pista: 'sk-or-v1-…',
+      base: 'https://openrouter.ai/api/v1',
+      modelos: ['deepseek/deepseek-chat'],
+      imagen: true,
+      gratis: true,
+      listaPublica: true
     },
     {
       id: 'anthropic',
@@ -63,25 +91,38 @@
       imagen: true
     },
     {
+      id: 'mistral',
+      label: 'Mistral',
+      nota: 'Tiene capa gratuita. Europeo, por si te importa dónde acaban tus datos.',
+      donde: 'https://console.mistral.ai/api-keys',
+      dondeTxt: 'console.mistral.ai',
+      pista: 'sin prefijo fijo',
+      base: 'https://api.mistral.ai/v1',
+      modelos: ['mistral-large-latest'],
+      imagen: true,
+      gratis: true
+    },
+    {
       id: 'deepseek',
       label: 'DeepSeek',
-      nota: 'De pago por uso y muy barato. No lee fotos: para la foto del plato ' +
-        'hace falta Gemini o Anthropic.',
+      nota: 'De pago por uso y de lo más barato que hay. No lee fotos: para el cálculo ' +
+        'de la comida por foto hace falta otro.',
       donde: 'https://platform.deepseek.com/api_keys',
       dondeTxt: 'platform.deepseek.com',
       pista: 'sk-…',
+      base: 'https://api.deepseek.com',
       modelos: ['deepseek-chat', 'deepseek-reasoner'],
       imagen: false
     },
     {
       id: 'grok',
       label: 'xAI (Grok)',
-      nota: 'De pago por uso. Los nombres de sus modelos cambian a menudo: si te ' +
-        'da error de modelo, escribe el que tengas en tu consola.',
+      nota: 'De pago por uso.',
       donde: 'https://console.x.ai',
       dondeTxt: 'console.x.ai',
       pista: 'xai-…',
-      modelos: ['grok-4', 'grok-3', 'grok-3-mini'],
+      base: 'https://api.x.ai/v1',
+      modelos: ['grok-4'],
       imagen: true
     }
   ];
@@ -250,12 +291,70 @@
     return null;
   }
 
+  /* Todos publican su catálogo con la clave del usuario, así que no hace falta
+     ninguna lista escrita a mano: se pregunta y punto. Es lo que evita el error
+     de «ese modelo no existe» cada vez que un proveedor renombra los suyos. */
+  function listarCompatibles(prov, clave) {
+    const cab = { 'content-type': 'application/json' };
+    if (clave) cab.authorization = 'Bearer ' + clave;
+    if (prov.id === 'openrouter') {
+      cab['HTTP-Referer'] = location.origin + location.pathname;
+      cab['X-Title'] = 'Training FR';
+    }
+
+    return fetch(prov.base + '/models', { headers: cab })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        const bruto = (j && (j.data || j.models)) || [];
+        if (!bruto.length) return prov.modelos.slice();
+
+        const lista = bruto.map(function (m) { return String(m.id || m.name || ''); })
+          .filter(Boolean);
+
+        /* En OpenRouter los gratis delante: son los que le interesan a quien no
+           quiere poner saldo, y entre 445 no se encuentran. */
+        if (prov.id === 'openrouter') {
+          const esGratis = function (x) { return /:free$/.test(x); };
+          lista.sort(function (a, b) {
+            return (esGratis(b) ? 1 : 0) - (esGratis(a) ? 1 : 0) || a.localeCompare(b);
+          });
+        } else {
+          lista.sort(function (a, b) { return a.localeCompare(b); });
+        }
+        return lista;
+      })
+      .catch(function () { return prov.modelos.slice(); });
+  }
+
+  function listarAnthropic(clave) {
+    const prov = proveedorPorId('anthropic');
+    return fetch('https://api.anthropic.com/v1/models?limit=40', { headers: {
+      'x-api-key': clave,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        const lista = ((j && j.data) || []).map(function (m) { return String(m.id || ''); })
+          .filter(Boolean);
+        return lista.length ? lista : prov.modelos.slice();
+      })
+      .catch(function () { return prov.modelos.slice(); });
+  }
+
   function listarModelos(forzar) {
-    /* Solo Gemini publica su catálogo de modelos con la clave del usuario. De
-       los demás se lleva una lista escrita a mano, que el usuario puede
-       cambiar a mano si su consola le ofrece otra cosa. */
     const prov = proveedorActual();
-    if (prov.id !== 'gemini') return Promise.resolve(prov.modelos.slice());
+    const clave = claveDe(prov.id);
+
+    if (prov.base) {
+      /* sin clave solo se puede preguntar a quien tenga la lista abierta */
+      if (!clave && !prov.listaPublica) return Promise.resolve(prov.modelos.slice());
+      return listarCompatibles(prov, clave);
+    }
+    if (prov.id === 'anthropic') {
+      if (!clave) return Promise.resolve(prov.modelos.slice());
+      return listarAnthropic(clave);
+    }
 
     const guardados = forzar ? null : modelosGuardados();
     if (guardados) return Promise.resolve(guardados);
@@ -317,12 +416,9 @@
 
     if (prov.id === 'gemini') return llamarGemini(prompt, opciones, clave, modeloDe('gemini'));
     if (prov.id === 'anthropic') return llamarAnthropic(prompt, opciones, clave, modeloDe('anthropic'));
-    if (prov.id === 'deepseek') {
-      return llamarCompatible('https://api.deepseek.com/chat/completions', prov,
-        prompt, opciones, clave, modeloDe('deepseek'));
-    }
-    return llamarCompatible('https://api.x.ai/v1/chat/completions', prov,
-      prompt, opciones, clave, modeloDe('grok'));
+    /* todos los demás hablan el dialecto de OpenAI: cambia la dirección, nada más */
+    return llamarCompatible(prov.base + '/chat/completions', prov,
+      prompt, opciones, clave, modeloDe(prov.id));
   }
 
   /* Lo común de los que hablan HTTP normal: un tiempo máximo, y traducir el
@@ -421,10 +517,14 @@
     };
     if (o.json) cuerpo.response_format = { type: 'json_object' };
 
-    return pedirHTTP(url, {
-      'content-type': 'application/json',
-      authorization: 'Bearer ' + clave
-    }, cuerpo, prov).then(function (j) {
+    const cab = { 'content-type': 'application/json', authorization: 'Bearer ' + clave };
+    /* OpenRouter pide saber quién llama para sus cuotas y sus listas públicas */
+    if (prov.id === 'openrouter') {
+      cab['HTTP-Referer'] = location.origin + location.pathname;
+      cab['X-Title'] = 'Training FR';
+    }
+
+    return pedirHTTP(url, cab, cuerpo, prov).then(function (j) {
       const m = ((j.choices || [])[0] || {}).message || {};
       const texto = String(m.content || '').trim();
       if (!texto) throw new Error(prov.label + ' no devolvió texto.');

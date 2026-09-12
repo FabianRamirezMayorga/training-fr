@@ -66,6 +66,33 @@
   /* Cómo se consigue la clave de cada uno. Son cuatro consolas distintas y
      ninguna se parece a otra, así que no vale un texto genérico. */
   const PASOS_CLAVE = {
+    groq: [
+      '<li>Entra en <a href="https://console.groq.com/keys" target="_blank" ' +
+      'rel="noopener noreferrer">console.groq.com/keys</a> y crea una cuenta. ' +
+      'No pide tarjeta.</li>',
+      '<li>Pulsa <b>Create API Key</b>, ponle un nombre y cópiala ' +
+      '(empieza por <code>gsk_</code>). Solo se enseña una vez.</li>',
+      '<li>Pégala aquí y <b>Guardar</b>. Después toca <b>Ver los suyos</b> para que la ' +
+      'lista de modelos se llene con los que tengas de verdad.</li>',
+      '<li>Mil peticiones al día gratis. Para lo que hace esta app, no las gastas.</li>'
+    ].join(''),
+    openrouter: [
+      '<li>Entra en <a href="https://openrouter.ai/keys" target="_blank" ' +
+      'rel="noopener noreferrer">openrouter.ai/keys</a> y crea una cuenta.</li>',
+      '<li>Pulsa <b>Create Key</b> y cópiala (empieza por <code>sk-or-v1-</code>).</li>',
+      '<li>Pégala aquí y <b>Guardar</b>. En la lista de modelos salen primero los que ' +
+      'acaban en <b>:free</b>: esos no cuestan nada y no hace falta meter saldo.</li>',
+      '<li>Si algún día quieres uno de pago —Claude, Gemini, GPT— metes saldo y lo ' +
+      'eliges de la misma lista, con la misma clave.</li>'
+    ].join(''),
+    mistral: [
+      '<li>Entra en <a href="https://console.mistral.ai/api-keys" target="_blank" ' +
+      'rel="noopener noreferrer">console.mistral.ai</a> y crea una cuenta.</li>',
+      '<li>Crea una clave en <b>API Keys</b> y cópiala.</li>',
+      '<li>Pégala aquí y <b>Guardar</b>, y toca <b>Ver los suyos</b> para la lista de ' +
+      'modelos.</li>',
+      '<li>Tiene capa gratuita; si la agotas, te lo dirá al llamar.</li>'
+    ].join(''),
     gemini: [
       '<li>Entra en <a href="https://aistudio.google.com/apikey" target="_blank" ' +
       'rel="noopener noreferrer">aistudio.google.com/apikey</a> con tu cuenta de Google.</li>',
@@ -142,6 +169,7 @@
             const tiene = puestos.indexOf(pv.id) !== -1;
             return '<button class="chip ' + (pv.id === provId ? 'on' : '') +
               '" data-prov="' + pv.id + '">' + esc(pv.label) +
+              (pv.gratis ? ' <span class="tiny" style="opacity:.7">gratis</span>' : '') +
               (tiene ? ' <span class="punto-ok"></span>' : '') + '</button>';
           }).join(''))}
         </div>
@@ -161,8 +189,8 @@
 
         <div class="row between" style="margin-bottom:5px">
           <span class="tiny">MODELO</span>
-          ${raw(prov.listaViva && claveProv
-            ? '<button class="btn sm ghost" data-a="refrescarModelos">Actualizar lista</button>' : '')}
+          ${raw(claveProv || prov.listaPublica
+            ? '<button class="btn sm ghost" data-a="refrescarModelos">Ver los suyos</button>' : '')}
         </div>
         <select id="k-ia-modelo" style="margin:0 0 8px">
           ${raw((function () {
@@ -175,8 +203,8 @@
             }).join('');
           })())}
         </select>
-        ${raw(prov.listaViva ? '' : '<input id="k-ia-modelo-libre" placeholder="o escribe otro ' +
-          'nombre de modelo" autocomplete="off" spellcheck="false" style="margin:0 0 12px">')}
+        <input id="k-ia-modelo-libre" placeholder="o escribe otro nombre de modelo"
+               autocomplete="off" spellcheck="false" style="margin:0 0 12px">
 
         <div class="row">
           <button class="btn primary grow" data-a="guardarIA">Guardar</button>
@@ -403,7 +431,7 @@
     const selectorModelo = root.querySelector('#k-ia-modelo');
     const rellenarModelos = function (forzar) {
       const prov = IA.proveedorActual();
-      if (!selectorModelo || !prov.listaViva || !IA.claveDe(prov.id)) return;
+      if (!selectorModelo || !(IA.claveDe(prov.id) || prov.listaPublica)) return;
       IA.listarModelos(forzar).then(function (lista) {
         if (!lista || !lista.length) return;
         const actual = selectorModelo.value;
@@ -445,7 +473,7 @@
       if (!clave) { UI.toast('Pega la clave de ' + prov.label); return; }
       try {
         IA.guardarProveedor(prov.id, clave, modelo);
-        if (prov.listaViva) {
+        {
           IA.listarModelos(true).then(function (lista) {
             if (lista && lista.length && lista.indexOf(IA.modeloDe(prov.id)) === -1) {
               IA.guardarProveedor(prov.id, clave, lista[0]);
