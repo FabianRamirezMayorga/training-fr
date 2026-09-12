@@ -81,15 +81,72 @@
     toastTimer = setTimeout(function () { el.classList.remove('on'); }, 2200);
   }
 
-  /* ---------- modal ---------- */
+  /* ---------- modal ----------
+     La barrita de arriba prometía un gesto que no existía: se tiraba de ella y
+     la hoja se quedaba quieta, y en una hoja larga —la de un ejercicio, con su
+     vídeo y su guía— tampoco se veía fondo que tocar para salir. Ahora la
+     cabecera se queda fija arriba, arrastra de verdad y lleva una X, que es lo
+     que busca quien no conoce el gesto. */
   function modal(contentHTML, onMount) {
     const box = document.getElementById('modal');
-    box.innerHTML = '<div class="modal-box"><div class="modal-grab"></div>' + contentHTML + '</div>';
+    box.innerHTML = '<div class="modal-box"><div class="modal-cab">' +
+      '<span class="modal-grab"></span>' +
+      '<button class="modal-x" data-cerrar aria-label="Cerrar">' + ICON.close + '</button>' +
+      '</div>' + contentHTML + '</div>';
     box.hidden = false;
     box.onclick = function (e) { if (e.target === box) closeModal(); };
+
     const inner = box.querySelector('.modal-box');
+    inner.querySelector('[data-cerrar]').onclick = closeModal;
+    tirarParaCerrar(inner);
+
     if (onMount) onMount(inner);
     return inner;
+  }
+
+  /* Arrastrar la cabecera hacia abajo cierra la hoja; un toque seco, también.
+     Solo desde arriba del todo: si no, bajar por el contenido cerraría la hoja
+     en lugar de desplazarla. */
+  function tirarParaCerrar(inner) {
+    const cab = inner.querySelector('.modal-cab');
+    if (!cab) return;
+
+    let desde = null;
+    let recorrido = 0;
+
+    const soltar = function () {
+      if (desde === null) return;
+      desde = null;
+      inner.style.transition = 'transform .22s cubic-bezier(.32,.72,0,1)';
+      if (recorrido > 90) {
+        inner.style.transform = 'translateY(100%)';
+        setTimeout(closeModal, 170);
+      } else {
+        inner.style.transform = '';
+      }
+    };
+
+    cab.addEventListener('touchstart', function (e) {
+      if (inner.scrollTop > 0) return;
+      desde = e.touches[0].clientY;
+      recorrido = 0;
+    }, { passive: true });
+
+    cab.addEventListener('touchmove', function (e) {
+      if (desde === null) return;
+      recorrido = Math.max(0, e.touches[0].clientY - desde);
+      inner.style.transition = 'none';
+      inner.style.transform = 'translateY(' + recorrido + 'px)';
+    }, { passive: true });
+
+    cab.addEventListener('touchend', soltar);
+    cab.addEventListener('touchcancel', soltar);
+
+    cab.addEventListener('click', function (e) {
+      if (e.target.closest('.modal-x')) return;   // la X ya cierra por su cuenta
+      if (recorrido > 8) return;                  // venía de arrastrar y volver
+      closeModal();
+    });
   }
 
   function closeModal() {

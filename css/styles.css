@@ -261,10 +261,22 @@ a{color:var(--blue)}
 /* ---------- modal / toast ---------- */
 .modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:0;animation:fade .2s}
 .modal-box{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-width:560px;
-  max-height:90vh;overflow-y:auto;padding:16px 17px calc(26px + var(--safe-b));
+  max-height:90vh;overflow-y:auto;padding:0 17px calc(26px + var(--safe-b));
   animation:up .34s cubic-bezier(.32,.72,0,1)}
 @media(min-width:640px){.modal{align-items:center;padding:20px}.modal-box{border-radius:22px}}
-.modal-grab{width:38px;height:4px;background:var(--line);border-radius:99px;margin:0 auto 14px}
+
+/* Cabecera de la hoja: se queda arriba aunque el contenido sea largo, se puede
+   arrastrar para cerrar y lleva la X para quien no vaya a adivinar el gesto. */
+.modal-cab{position:sticky;top:0;z-index:3;display:flex;align-items:center;
+  justify-content:center;margin:0 -17px 12px;padding:13px 17px 11px;
+  background:var(--bg2);border-radius:22px 22px 0 0;touch-action:none;cursor:pointer}
+.modal-grab{width:38px;height:5px;background:var(--line);border-radius:99px;margin:0}
+.modal-x{position:absolute;right:11px;top:7px;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;border:0;padding:0;
+  background:var(--card2);color:var(--dim)}
+.modal-x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;
+  stroke-linecap:round}
+.modal-x:active{background:var(--line)}
 .toast{position:fixed;bottom:calc(92px + var(--safe-b));left:50%;transform:translate(-50%,20px);
   background:color-mix(in srgb,var(--card2) 92%,transparent);
   backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
