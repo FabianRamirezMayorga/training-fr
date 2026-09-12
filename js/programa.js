@@ -330,6 +330,21 @@
     return 26 - Math.min(i, 8) * 2;
   }
 
+  /* El patrón «elevación lateral» mete en el mismo saco las frontales, las
+     laterales y las posteriores, que no entrenan lo mismo. En un día de empuje,
+     detrás de un press de banca y un press militar, el deltoides anterior ya ha
+     trabajado de sobra: meterle una elevación frontal es repetir, y es justo lo
+     que hacía. Lo que falta ahí es la porción lateral, y la posterior casi
+     siempre va corta en cualquier plan. */
+  function hombroQueToca(ex, hueco) {
+    if (hueco.patron !== 'elevacion lateral') return 0;
+    const n = I18N.norm(ex.nameEs || ex.name || '');
+    if (/frontal|sobre cabeza|above cabeza/.test(n)) return -40;
+    if (/posterior/.test(n)) return 14;
+    if (/lateral/.test(n)) return 12;
+    return 0;
+  }
+
   function puntuar(ex, hueco, usados) {
     let s = 0;
     const p = Alt.patron(ex);
@@ -343,6 +358,7 @@
     }
     if (FUERZA.indexOf(ex.category) !== -1) s += 8;
     s += bonusCurado(ex, hueco.musculo);
+    s += hombroQueToca(ex, hueco);
     if (usados[ex.id]) s -= 70;                 // ya sale esta semana
     return s;
   }

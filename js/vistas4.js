@@ -834,9 +834,31 @@
     const notas = root.querySelector('#pg-notas');
     if (notas) notas.oninput = function () { est.notas = notas.value; };
 
+    /* «Nuevo» tiene que dejar la pantalla en blanco: si abajo sigue colgando el
+       plan de antes, parece que ya te ha generado algo sin haberlo pedido. */
     bind(root, '[data-a=irgenerar]', function () {
-      const caja = root.querySelector('#generar');
-      if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const bajar = function () {
+        const caja = document.querySelector('#generar');
+        if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+      if (!est.prog) { bajar(); return; }
+
+      const sinGuardar = !vivas().length;
+      const limpiar = function () {
+        est.prog = null; est.ia = null; est.aplicados = []; est.guardadas = [];
+        est.recuperado = false; est.abierto = {};
+        guardarEstado();
+        render();
+        setTimeout(bajar, 60);
+      };
+
+      if (sinGuardar) {
+        UI.confirm('Empezar uno nuevo',
+          'El plan que tienes en pantalla no está en tus rutinas todavía. Si sigues, ' +
+          'se pierde.', 'Empezar de cero', true).then(function (ok) { if (ok) limpiar(); });
+        return;
+      }
+      limpiar();
     });
     bind(root, '[data-a=verplan]', function () {
       const caja = document.querySelector('.stats');
