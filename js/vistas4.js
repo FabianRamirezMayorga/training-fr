@@ -120,6 +120,87 @@
   /* Lo que ya tiene montado, antes de nada. Entrar a esta pantalla y ver un
      formulario en blanco hace pensar que no hay nada guardado, y lo normal es
      venir a mirar el plan, no a rehacerlo. */
+  /* Abrir un plan que ya está en rutinas: se reconstruye el mismo objeto que
+     usa toda esta pantalla, así que se ve igual que uno recién generado —sus
+     días, su reparto de volumen— y se le puede pedir la auditoría y aplicar
+     lo que proponga. Antes tocarlo te echaba a la pantalla de Rutinas, que es
+     justo donde no querías ir. */
+  function planDesdeRutinas(nombre) {
+    const suyas = Store.routines().filter(function (r) {
+      return (r.days || []).length && App.nombreRutina(r) === nombre;
+    });
+    if (!suyas.length) return null;
+
+    suyas.sort(function (a, b) {
+      return DIAS.indexOf((a.days || [])[0]) - DIAS.indexOf((b.days || [])[0]);
+    });
+
+    const dias = [];
+    suyas.forEach(function (r) {
+      (r.days || []).forEach(function (d) { if (dias.indexOf(d) === -1) dias.push(d); });
+    });
+    dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
+
+    /* la calculadora da los campos derivados —rpe, calentamiento, progresión—
+       que esta pantalla necesita y que una rutina guardada no guarda */
+    const base = Programa.crear({
+      dias: dias, minutos: est.minutos, objetivo: objetivoActual(),
+      foco: est.foco, gear: Store.settings().gear
+    });
+
+    const prog = Object.assign({}, base);
+    prog.sesiones = suyas.map(function (r) {
+      return {
+        dia: (r.days || [])[0],
+        nombre: App.tituloRutina(r),
+        plantilla: '',
+        ejercicios: (r.exercises || []).map(function (e) {
+          const ex = Data.get(e.exId);
+          return {
+            exId: e.exId,
+            patron: ex ? Alt.patron(ex) : '',
+            musculo: (ex && (ex.primaryMuscles || [])[0]) || 'abdominals',
+            rol: 'accesorio',
+            sets: e.sets, reps: e.reps, weight: 0, rest: e.rest, note: e.note || ''
+          };
+        }),
+        minutos: (r.exercises || []).reduce(function (n, e) {
+          return n + Math.round(e.sets * ((e.rest || 75) + 35) / 60);
+        }, 0) + base.calentamiento
+      };
+    });
+
+    prog.porIA = false;
+    prog.deRutinas = nombre;
+    prog.nombreIA = nombre;
+    prog.descartados = [];
+    prog.razones = ['Este es el plan que ya tienes guardado en tus rutinas, tal y como ' +
+      'está ahora mismo.',
+      'Debajo puedes pedirle al entrenador que lo audite y aplicar lo que proponga; los ' +
+      'cambios se guardan sobre estas mismas rutinas.'];
+
+    Programa.revolumen(prog);
+
+    est.dias = dias;
+    est.nombre = nombre;
+    est.guardadas = suyas.map(function (r) { return r.id; });
+    est.recuperado = false;
+    est.ia = null;
+    est.aplicados = [];
+    est.abierto = {};
+    return prog;
+  }
+
+  function abrirPlan(nombre) {
+    const prog = planDesdeRutinas(nombre);
+    if (!prog) { UI.toast('Ese plan ya no está'); return; }
+    est.prog = prog;
+    guardarEstado();
+    render();
+    const caja = document.querySelector('.stats');
+    if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   function misProgramasHTML() {
     const rutinas = Store.routines().filter(function (r) { return (r.days || []).length; });
     if (!rutinas.length && !est.prog) return '';
@@ -133,16 +214,22 @@
       planes[k].push(r);
     });
 
+    /* El plan en pantalla solo sale aparte si todavía NO está en rutinas. Si ya
+       se guardó, es el mismo que aparece abajo con el nombre que le pusiste, y
+       verlo dos veces con dos nombres distintos hace pensar que tienes planes
+       que no has creado. */
+    const sinGuardar = est.prog && !vivas().length;
+
     return html`
       <div class="list-title">Lo que ya tienes</div>
-      ${raw(est.prog ? html`
+      ${raw(sinGuardar ? html`
         <div class="card" style="border-color:var(--acc)">
           <div class="row between" style="align-items:flex-start">
             <div class="grow">
-              <b>${est.prog.nombreIA || 'Plan sin guardar'}</b>
+              <b>${est.prog.nombreIA || 'Plan recién montado'}</b>
               <div class="tiny" style="margin-top:2px">${est.prog.sesiones.length} sesiones
                 \u00b7 ${est.prog.porIA ? 'montado con IA' : 'montado con la calculadora'}
-                \u00b7 ${est.guardadas.length ? 'ya está en tus rutinas' : 'sin pasar a rutinas'}</div>
+                \u00b7 <span style="color:var(--warn)">sin pasar a tus rutinas</span></div>
             </div>
             <button class="btn sm" data-a="verplan">Ver</button>
           </div>
@@ -158,7 +245,9 @@
             });
             dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
             const n = suyas.reduce(function (t, r) { return t + r.exercises.length; }, 0);
-            return '<div class="list-row tap" data-verplan-rutinas>' +
+            const abierto = est.prog && est.prog.deRutinas === k;
+            return '<div class="list-row tap' + (abierto ? ' sel' : '') +
+              '" data-abrirplan="' + esc(k) + '">' +
               '<span class="row-icon">' + icon('dumbbell') + '</span>' +
               '<div class="grow"><div class="list-row-title">' + esc(k) + '</div>' +
               '<div class="list-row-sub">' + suyas.length +
@@ -167,8 +256,9 @@
               '<span class="chevron">' + icon('chevron') + '</span></div>';
           }).join(''))}
         </div>
-        <p class="tiny" style="margin:8px 4px 0">Toca uno para verlo o entrenarlo en
-        Rutinas. Ahí también puedes pasar cualquiera por la IA.</p>` : '')}`;
+        <p class="tiny" style="margin:8px 4px 0">Toca uno para abrirlo aquí: verás sus días
+        y su reparto, podrás pedirle al entrenador que lo audite y aplicar lo que
+        proponga sobre estas mismas rutinas.</p>` : '')}`;
   }
 
   function controles() {
@@ -477,13 +567,16 @@
       </div>
 
       <div class="list-title">Por qué este plan</div>
-      <p class="tiny" style="margin:-4px 4px 10px">${prog.porIA
-        ? 'Lo ha montado la IA leyendo todo lo que la app sabe de ti, y ha elegido cada ' +
-          'ejercicio del catálogo. Abajo puedes pedirle además que se lo lea como auditor, ' +
-          'que es otra cosa.'
-        : 'Esto lo calcula la app con tus datos, sin pedirle nada a nadie: por eso funciona ' +
-          'sin conexión y sin clave. La lectura de un entrenador, que es otra cosa, está ' +
-          'justo debajo.'}</p>
+      <p class="tiny" style="margin:-4px 4px 10px">${prog.deRutinas
+        ? 'Este es tu plan guardado, tal y como está ahora. Abajo puedes pedirle al ' +
+          'entrenador que lo audite; lo que apliques se guarda sobre estas mismas rutinas.'
+        : prog.porIA
+          ? 'Lo ha montado la IA leyendo todo lo que la app sabe de ti, y ha elegido cada ' +
+            'ejercicio del catálogo. Abajo puedes pedirle además que se lo lea como ' +
+            'auditor, que es otra cosa.'
+          : 'Esto lo calcula la app con tus datos, sin pedirle nada a nadie: por eso ' +
+            'funciona sin conexión y sin clave. La lectura de un entrenador, que es otra ' +
+            'cosa, está justo debajo.'}</p>
       <div class="card">
         ${raw(prog.razones.map(function (t, i) {
           return '<div class="razon"><span class="rt-idx">' + (i + 1) + '</span><p>' +
@@ -625,7 +718,7 @@
       /* «otra propuesta» rehace por donde vino: si el plan lo montó la IA, con IA */
       if (est.prog && est.prog.porIA) crearConIA(); else crear();
     });
-    bindAll(root, '[data-verplan-rutinas]', function () { go('rutinas'); });
+    bindAll(root, '[data-abrirplan]', function (el) { abrirPlan(el.dataset.abrirplan); });
     bind(root, '[data-a=verplan]', function () {
       const caja = document.querySelector('.stats');
       if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });

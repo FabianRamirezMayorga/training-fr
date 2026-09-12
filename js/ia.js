@@ -1410,7 +1410,15 @@
     }
 
     const prompt = contexto({ progreso: true, cargas: true, comida: true }) + '\n\n' +
-      'PROGRAMA PROPUESTO (objetivo ' + prog.objetivoLabel + ', RPE tope ' + prog.rpe +
+      (prog.deRutinas
+        ? 'ESTE ES EL PLAN QUE YA ENTRENA, guardado en sus rutinas como «' +
+          prog.deRutinas + '». No es una propuesta: es lo que hace cada semana, así ' +
+          'que háblale de lo que ya está haciendo, no de lo que «va a hacer».'
+        : prog.porIA
+          ? 'PROGRAMA QUE ACABAS DE MONTARLE TÚ. Reléelo con ojo crítico y no lo ' +
+            'defiendas por ser tuyo: si ves un fallo, dilo igual.'
+          : 'PROGRAMA PROPUESTO por la calculadora de la app') +
+      ' (objetivo ' + prog.objetivoLabel + ', RPE tope ' + prog.rpe +
       ', unas ' + prog.objetivoSeries + ' series semanales por músculo):\n' + dias + '\n' +
       'SERIES POR SEMANA Y MÚSCULO QUE PIDE EL PLAN: ' + volumen + '\n' + historial + comida +
       (prog.lesiones.length ? 'LIMITACIONES YA APLICADAS: ' + prog.lesiones.join(', ') + '\n' : '') +
