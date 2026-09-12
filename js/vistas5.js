@@ -170,14 +170,52 @@
       ]
     },
     {
-      titulo: 'Pégalos aquí abajo y ya está',
+      titulo: 'Pégalos aquí abajo y crea tu cuenta',
       pasos: [
         'Pega la Project URL y la Publishable key en los dos campos del final.',
         'Pulsa <b>Guardar la conexión</b>.',
-        'Después crea tu cuenta con tu correo y una contraseña de al menos 8 caracteres.',
-        'Cuando ya estés dentro, vuelve a Supabase y apaga <b>Allow new users to sign up</b>: ' +
-          'así nadie más puede crearse cuentas en tu proyecto.'
+        'Ve a <b>Perfil &rarr; Mi cuenta</b> y crea tu cuenta con tu correo y una ' +
+          'contraseña de al menos 8 caracteres.',
+        'Cuando ya estés dentro, vuelve a Supabase y apaga <b>Allow new users to sign ' +
+          'up</b>: así nadie más puede crearse cuentas en tu proyecto.'
       ]
+    },
+    {
+      titulo: 'Comprueba que ha funcionado',
+      pasos: [
+        'En <b>Mi cuenta</b> tiene que salir tu correo y <b>Todo al día</b>.',
+        'Entra con el mismo correo en el otro dispositivo: en un minuto deberías ver ' +
+          'ahí tus rutinas.',
+        'Si algo falla, la app te dice qué pasa con sus palabras; abajo tienes ' +
+          'qué significa cada aviso.'
+      ],
+      errores: true
+    }
+  ];
+
+  /* Los dos tropiezos que se repiten. Los mensajes de Supabase hablan de
+     relaciones que no existen y de claves inválidas; aquí se dice qué hacer. */
+  const TROPIEZOS = [
+    {
+      dice: '«Falta la tabla donde van los datos»',
+      es: 'El paso 3 no llegó a ejecutarse. Vuelve al <b>SQL Editor</b>, pega el bloque ' +
+        'otra vez y comprueba que responde <b>Success</b>.'
+    },
+    {
+      dice: '«Esa clave no vale para este proyecto»',
+      es: 'La clave y la URL son de proyectos distintos, o copiaste una <b>Secret key</b>. ' +
+        'Vuelve a <b>Project Settings &rarr; API Keys</b> y copia la <b>Publishable</b>.'
+    },
+    {
+      dice: '«Correo o contraseña incorrectos» recién creada la cuenta',
+      es: 'O el alta estaba cerrada y la cuenta no llegó a crearse, o la creaste con el ' +
+        'enlace del correo y todavía no tiene contraseña. En <b>Authentication &rarr; ' +
+        'Users</b> de Supabase ves si existe de verdad.'
+    },
+    {
+      dice: 'El correo de confirmación no llega',
+      es: 'El correo de serie de Supabase manda dos o tres mensajes por hora y nada más. ' +
+        'Por eso el paso 4 apaga <b>Confirm email</b>: así no depende de ningún correo.'
     }
   ];
 
@@ -189,15 +227,38 @@
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Mi cuenta</button>
       <h1>Tu base de datos</h1>
-      <p class="muted">Para sincronizar entre dispositivos hace falta una base de datos.
-      Se crea una vez, es gratis y es tuya: ni yo ni nadie más ve lo que hay dentro.
-      Son siete pasos y unos diez minutos.</p>
+      <p class="muted">Se crea una vez, es gratis, no pide tarjeta y es tuya: los datos van
+      a tu propio Supabase, no a ningún servidor mío. Ocho pasos y unos diez minutos.</p>
 
       ${raw(propia ? html`
         <div class="card" style="border-color:var(--acc)">
           <b>Ya tienes una conexión propia guardada</b>
           <p class="tiny" style="margin:6px 0 0">${c.url}</p>
-        </div>` : '')}
+        </div>`
+      : html`
+        <div class="card">
+          <b>Antes de empezar: ¿te hace falta?</b>
+          <div class="stack" style="margin-top:10px;gap:9px">
+            <div>
+              <div style="font-weight:600;font-size:.88rem">Si usas la app en un solo móvil</div>
+              <div class="tiny">No necesitas nada de esto. Todo funciona y se guarda en el
+              dispositivo. Lo único: si borras los datos del navegador, se pierde.</div>
+            </div>
+            <div>
+              <div style="font-weight:600;font-size:.88rem">Si ya tienes cuenta en esta app</div>
+              <div class="tiny">Tampoco. Ve a <b>Perfil &rarr; Mi cuenta</b> y entra con tu
+              correo; la conexión ya está puesta.</div>
+            </div>
+            <div>
+              <div style="font-weight:600;font-size:.88rem">Si quieres tus datos en varios
+              dispositivos y no tienes cuenta</div>
+              <div class="tiny">Entonces sí: la conexión que trae la app tiene el alta
+              cerrada a propósito, así que la tuya te la montas aquí.</div>
+            </div>
+          </div>
+          <p class="tiny" style="margin:11px 0 0">Los nombres de los menús van en inglés
+          porque Supabase viene así, aunque tu navegador esté en español.</p>
+        </div>`)}
 
       <div class="stack" style="margin-top:14px">
         ${raw(PASOS.map(function (p, i) {
@@ -221,6 +282,10 @@
                       <code class="tiny grow" style="word-break:break-all">${Sync.urlRetorno()}</code>
                       <button class="btn sm" data-a="copiarurl">${raw(icon('copy'))} Copiar</button>
                     </div>` : '')}
+                  ${raw(p.errores ? '<div class="stack" style="margin-top:11px;gap:8px">' +
+                    TROPIEZOS.map(function (t) {
+                      return '<div class="error-item"><b>' + t.dice + '</b><p>' + t.es + '</p></div>';
+                    }).join('') + '</div>' : '')}
                   ${raw(p.nota ? '<p class="tiny" style="margin:10px 0 0">' + p.nota + '</p>' : '')}
                 </div>
               </div>
@@ -241,9 +306,9 @@
           'style="margin-top:8px">Borrar esta conexión</button>' : '')}
       </div>
 
-      <p class="tiny" style="margin-top:12px">¿Se te ha atascado algún paso? Los nombres de
-      los menús son los de Supabase en inglés, que es como vienen aunque el navegador esté
-      en español.</p>`;
+      <p class="tiny" style="margin-top:12px">La <b>Publishable key</b> es pública a
+      propósito: va dentro de la app y cualquiera puede verla. Lo que protege tus datos es
+      la política del paso 3, que hace que cada fila solo la lea quien la escribió.</p>`;
   };
 
   V.basedatos.mount = function (root) {

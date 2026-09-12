@@ -104,18 +104,18 @@
           const msg = (cuerpo && (cuerpo.error_description || cuerpo.msg ||
             cuerpo.message || cuerpo.error)) || ('Error ' + r.status);
 
-          /* Quien monta su propio proyecto se salta el paso del SQL m\u00e1s veces
+          /* Quien monta su propio proyecto se salta el paso del SQL más veces
              que ninguno, y el error de la base de datos no lo dice de forma
-             que se entienda: habla de una relaci\u00f3n que no existe. */
+             que se entienda: habla de una relación que no existe. */
           if (/does not exist|schema cache|PGRST205|42P01/i.test(msg) &&
               /estado/i.test(msg + ' ' + String(ruta))) {
             throw new Error('En ese proyecto de Supabase falta la tabla donde van los datos. '
-              + 'Ve a Ajustes \u2192 B\u00f3veda de claves, copia el SQL que hay bajo la conexi\u00f3n de '
-              + 'Supabase y ejec\u00fatalo una vez en el SQL Editor de tu proyecto.');
+              + 'Ve a Ajustes → Bóveda de claves, copia el SQL que hay bajo la conexión de '
+              + 'Supabase y ejecútalo una vez en el SQL Editor de tu proyecto.');
           }
           if (/invalid api key|no api key/i.test(msg)) {
             throw new Error('Esa clave no vale para este proyecto. Copia otra vez la '
-              + 'Publishable key en Project Settings \u2192 API Keys.');
+              + 'Publishable key en Project Settings → API Keys.');
           }
           throw new Error(msg);
         }
@@ -144,9 +144,9 @@
     return ajustesProyecto().then(function (a) {
       if (a && a.disable_signup) {
         throw new Error(mensaje + ' Ojo: este proyecto tiene cerrado el alta de cuentas ' +
-          'nuevas, as\u00ed que si intentaste registrarte, la cuenta no lleg\u00f3 a crearse. ' +
-          '\u00c1brelo en Supabase (Authentication \u2192 Sign In / Providers \u2192 Allow new users ' +
-          'to sign up), reg\u00edstrate y vuelve a cerrarlo.');
+          'nuevas, así que si intentaste registrarte, la cuenta no llegó a crearse. ' +
+          'Ábrelo en Supabase (Authentication → Sign In / Providers → Allow new users ' +
+          'to sign up), regístrate y vuelve a cerrarlo.');
       }
       throw new Error(mensaje);
     });
@@ -278,9 +278,9 @@
     }).catch(function (e) {
       const t = String(e.message || '');
       if (/invalid login credentials/i.test(t)) {
-        return conMotivo('Correo o contrase\u00f1a incorrectos. Si creaste la cuenta con el ' +
-          'enlace del correo, todav\u00eda no tiene contrase\u00f1a: entra con el enlace en el ' +
-          'dispositivo de siempre y p\u00f3nsela desde la pantalla de cuenta.');
+        return conMotivo('Correo o contraseña incorrectos. Si creaste la cuenta con el ' +
+          'enlace del correo, todavía no tiene contraseña: entra con el enlace en el ' +
+          'dispositivo de siempre y pónsela desde la pantalla de cuenta.');
       }
       if (/email not confirmed/i.test(t)) {
         throw new Error('Falta confirmar el correo. Ábrelo y pulsa el enlace, o desactiva ' +
@@ -957,6 +957,7 @@
     sesion: sesion, email: email, activa: activa,
     sincronizaClaves: sincronizaClaves, enlaceConfiguracion: enlaceConfiguracion,
     configPropia: configPropia, hayFabrica: hayFabrica,
+    ajustesProyecto: ajustesProyecto,
     aplicarEnlace: aplicarEnlace, ultimoUsuario: ultimoUsuario,
     limpiarDatosDeCuenta: limpiarDatosDeCuenta, fusionar: fusionar,
     enviarEnlace: enviarEnlace, capturarRedireccion: capturarRedireccion, salir: salir,

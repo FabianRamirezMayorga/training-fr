@@ -216,20 +216,25 @@
           ${raw(copiable(retorno, 'dirección de retorno'))}
         </div>
 
-        ${raw(guia('sb', 'Cómo configuro Supabase', [
-          '<li>Entra en <a href="https://supabase.com" target="_blank" ' +
-          'rel="noopener noreferrer">supabase.com</a>, crea una cuenta y pulsa ' +
-          '<b>New project</b>. Elige nombre, contraseña y la región más cercana.</li>',
-          '<li>Copia la <b>Project URL</b> en <b>Project Settings &rarr; Data API</b>.</li>',
-          '<li>En <b>Project Settings &rarr; API Keys</b> copia la <b>Publishable key</b> ' +
-          '(empieza por <code>sb_publishable_</code>). Si tu proyecto es antiguo, sirve ' +
-          'igual la <b>anon public</b> de la pestaña <i>Legacy</i>.</li>',
-          '<li>Ve a <b>SQL Editor</b>, pega el bloque de abajo y pulsa <b>Run</b>. Crea la ' +
-          'tabla de tus datos con la seguridad que impide que nadie más los vea.</li>',
-          '<li>Ve a <b>Authentication &rarr; URL Configuration</b> y pon la dirección de ' +
-          'retorno en <b>Site URL</b> y en <b>Redirect URLs</b>.</li>',
-          '<li>Vuelve aquí, pega los dos valores y guarda. Después entra con tu correo ' +
-          'desde Ajustes.</li>'
+        <button class="btn block sm" data-a="verpasoapaso" style="margin-top:12px">
+          ${raw(icon('chevron'))} Montarla paso a paso, con capturas de cada menú</button>
+        <p class="tiny" style="margin:7px 0 0">Si es tu primera vez, ve por ahí: son ocho
+        pasos y dice exactamente qué botón tocar. Esta pantalla es el atajo para quien ya
+        tiene el proyecto montado y solo viene a pegar los dos datos.</p>
+
+        ${raw(guia('sb', 'El resumen, si ya te lo sabes', [
+          '<li><b>Project Settings &rarr; Data API</b>: copia la <b>Project URL</b>.</li>',
+          '<li><b>Project Settings &rarr; API Keys</b>: copia la <b>Publishable key</b> ' +
+          '(empieza por <code>sb_publishable_</code>). En proyectos antiguos es la ' +
+          '<b>anon public</b> de la pestaña <i>Legacy</i>. Las <b>Secret</b> no, nunca.</li>',
+          '<li><b>SQL Editor</b>: pega el bloque de abajo y <b>Run</b>. Sin este paso la ' +
+          'app se conecta pero no tiene dónde escribir, y es el que más se salta la gente.</li>',
+          '<li><b>Authentication &rarr; Sign In / Providers</b>: apaga <b>Confirm email</b>. ' +
+          'Viene encendido de fábrica y el correo de Supabase manda dos mensajes por hora.</li>',
+          '<li><b>Authentication &rarr; URL Configuration</b>: la dirección de retorno de ' +
+          'aquí arriba, en <b>Site URL</b> y en <b>Redirect URLs</b>.</li>',
+          '<li>Pega los dos valores aquí y guarda. Luego crea tu cuenta en ' +
+          '<b>Perfil &rarr; Mi cuenta</b>.</li>'
         ].join('')) + html`
           <div class="row between" style="margin:12px 0 6px">
             <span class="tiny">SQL PARA CREAR LA TABLA</span>
@@ -314,6 +319,8 @@
       if (navigator.clipboard) navigator.clipboard.writeText(v);
       UI.toast('Copiado');
     });
+
+    bind(root, '[data-a=verpasoapaso]', function () { go('basedatos'); });
 
     const sql = root.querySelector('[data-a=copiarsql]');
     if (sql) sql.onclick = function () {

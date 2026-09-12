@@ -3410,6 +3410,8 @@
         reintenta solo.</p>` : '')}
 
       ${raw(Sync.configurado() && !Sync.activa() ? html`
+        <div id="aviso-alta"></div>
+
         <div class="card" style="margin-top:12px">
           <div style="font-weight:600;margin-bottom:4px">Cómo funciona</div>
           <ol class="instr" style="margin-top:8px">
@@ -3417,9 +3419,8 @@
             <li>Al entrar se descarga lo que tengas en la nube y se une con lo de aquí.</li>
             <li>A partir de ahí, cada cambio sube solo unos segundos después.</li>
           </ol>
-          <p class="tiny" style="margin:0">No hace falta configurar nada más: la app ya sabe
-          a qué cuenta conectarse. Si prefieres entrar sin contraseña, tienes la opción del
-          enlace por correo debajo.</p>
+          <p class="tiny" style="margin:0">Si prefieres entrar sin contraseña, tienes la
+          opción del enlace por correo debajo.</p>
         </div>` : '')}`;
   }
 
@@ -3467,7 +3468,41 @@
       '<span class="list-row-val">' + esc(String(valor)) + '</span></div>';
   }
 
+  /* Lo que más tiempo ha hecho perder a la gente: la conexión que trae la app
+     tiene el alta de cuentas cerrada a propósito, así que quien no sea el dueño
+     puede rellenar el formulario, darle a crear cuenta y quedarse sin nada, sin
+     entender por qué luego no puede entrar desde otro móvil. Se pregunta al
+     propio proyecto —lo publica sin necesidad de sesión— y se dice antes de
+     escribir nada. Si algún día se abre el alta, este aviso desaparece solo. */
+  function avisarSiElAltaEstaCerrada(root) {
+    const caja = root.querySelector('#aviso-alta');
+    if (!caja || !Sync.ajustesProyecto) return;
+
+    Sync.ajustesProyecto().then(function (a) {
+      if (!a || !a.disable_signup) return;
+      const propia = Sync.configPropia();
+      caja.innerHTML = html`
+        <div class="card aviso-seguridad" style="margin-top:12px">
+          <b>Aquí no se pueden crear cuentas nuevas</b>
+          <p style="margin:8px 0 0;font-size:.9rem">${propia
+            ? 'Tu proyecto de Supabase tiene cerrada el alta. Ábrela un momento en '
+              + 'Authentication → Sign In / Providers → Allow new users to sign up, '
+              + 'regístrate, y vuelve a cerrarla.'
+            : 'La conexión que trae la app es la mía y está cerrada a propósito: si '
+              + 'ya tienes cuenta, entra con tu correo aquí abajo. Si no la tienes, '
+              + 'monta la tuya —es gratis, son diez minutos y los datos quedan en tu '
+              + 'propia base de datos, no en la mía.'}</p>
+          ${raw(propia ? '' :
+            '<button class="btn primary block" data-a="montarbd" style="margin-top:11px">' +
+            'Montar mi base de datos</button>')}
+        </div>`;
+      const b = caja.querySelector('[data-a=montarbd]');
+      if (b) b.onclick = function () { go('basedatos'); };
+    });
+  }
+
   viewCuenta.mount = function (root) {
+    avisarSiElAltaEstaCerrada(root);
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     mountCuenta(root);
 
