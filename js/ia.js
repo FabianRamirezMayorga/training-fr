@@ -48,6 +48,10 @@
       donde: 'https://aistudio.google.com/apikey',
       dondeTxt: 'aistudio.google.com/apikey',
       pista: 'AIza…',
+      forma: /^AIza[\w-]{20,}$/,
+      formaTxt: 'Las de Gemini empiezan por AIza. Si lo que copiaste empieza por «AQ.» o ' +
+        '«ya29.» es un token de sesión de Google, no una clave de API: caduca en una hora ' +
+        'y no vale aquí. La buena está en la lista de aistudio.google.com/apikey.',
       modelos: MODELOS,
       imagen: true,
       gratis: true
@@ -61,6 +65,8 @@
       donde: 'https://console.groq.com/keys',
       dondeTxt: 'console.groq.com/keys',
       pista: 'gsk_…',
+      forma: /^gsk_[\w-]{20,}$/,
+      formaTxt: 'Las de Groq empiezan por gsk_.',
       base: 'https://api.groq.com/openai/v1',
       modelos: ['llama-3.3-70b-versatile'],
       imagen: false,
@@ -74,6 +80,8 @@
       donde: 'https://openrouter.ai/keys',
       dondeTxt: 'openrouter.ai/keys',
       pista: 'sk-or-v1-…',
+      forma: /^sk-or-[\w-]{20,}$/,
+      formaTxt: 'Las de OpenRouter empiezan por sk-or-.',
       base: 'https://openrouter.ai/api/v1',
       modelos: ['deepseek/deepseek-chat'],
       imagen: true,
@@ -89,6 +97,9 @@
       donde: 'https://console.anthropic.com/settings/keys',
       dondeTxt: 'console.anthropic.com',
       pista: 'sk-ant-…',
+      forma: /^sk-ant-[\w-]{20,}$/,
+      formaTxt: 'Las de Anthropic empiezan por sk-ant-. Ojo: la de tu suscripción de Claude ' +
+        'Pro no sirve, la API se factura aparte.',
       modelos: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5'],
       imagen: true
     },
@@ -123,6 +134,8 @@
       donde: 'https://console.x.ai',
       dondeTxt: 'console.x.ai',
       pista: 'xai-…',
+      forma: /^xai-[\w-]{20,}$/,
+      formaTxt: 'Las de xAI empiezan por xai-.',
       base: 'https://api.x.ai/v1',
       modelos: ['grok-4'],
       imagen: true
@@ -178,6 +191,15 @@
     const prov = proveedorPorId(id);
     clave = String(clave || '').trim();
     if (clave && clave.length < 20) throw new Error('Esa clave no parece válida.');
+
+    /* Cada proveedor tiene su prefijo y no cuesta nada mirarlo. Sin esto, pegar
+       un token de sesión en vez de la clave se guardaba tan campante y el fallo
+       no aparecía hasta la primera llamada, con un mensaje del servidor que no
+       explicaba qué había que hacer. */
+    if (clave && prov.forma && !prov.forma.test(clave)) {
+      throw new Error('Eso no parece una clave de ' + prov.label + '. ' +
+        (prov.formaTxt || ''));
+    }
 
     const c = config();
     if (clave) c.claves[prov.id] = clave; else delete c.claves[prov.id];
