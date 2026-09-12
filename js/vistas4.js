@@ -44,6 +44,7 @@
     guardadas: [],
     cargandoIA: false,
     cargandoPlan: false,
+    falloIA: '',
     todoAbierto: false,
     molestias: '',
     notas: '',
@@ -376,6 +377,17 @@
         'Esto es opcional, pero es lo que separa un plan tuyo de uno gen\u00e9rico. ' +
         'Solo lo aprovecha la IA; la calculadora no lee texto.'))}
 
+      ${raw(est.falloIA ? html`
+        <div class="card aviso-seguridad">
+          <b>La IA no ha podido montarlo</b>
+          <p style="margin:7px 0 0;font-size:.9rem">${est.falloIA}</p>
+          <p class="tiny" style="margin:9px 0 0">Lo que ves abajo lo ha montado la
+          calculadora, no la IA. Arregla lo de arriba y vuelve a darle a
+          <b>Generar rutina con IA</b>.</p>
+          <button class="btn block" data-a="irclaves" style="margin-top:11px">
+            Revisar mi proveedor de IA</button>
+        </div>` : '')}
+
       ${raw(est.cargandoPlan ? html`
         <div class="card center">
           <div class="spinner" style="margin:6px auto"></div>
@@ -671,7 +683,10 @@
       </div>
 
       <div class="list-title">Por qué este plan</div>
-      <p class="tiny" style="margin:-4px 4px 10px">${prog.deRutinas
+      <p class="tiny" style="margin:-4px 4px 10px">${!prog.porIA && !prog.deRutinas && est.falloIA
+        ? 'Ojo: esto lo ha montado la calculadora porque la IA ha fallado. No es el plan ' +
+          'que pediste.'
+        : prog.deRutinas
         ? 'Este es tu plan guardado, tal y como está ahora. Abajo puedes pedirle al ' +
           'entrenador que lo audite; lo que apliques se guarda sobre estas mismas rutinas.'
         : prog.porIA
@@ -821,6 +836,7 @@
 
     bind(root, '[data-a=crear]', crear);
     bind(root, '[data-a=crearia]', crearConIA);
+    bind(root, '[data-a=irclaves]', function () { go('claves'); });
     bind(root, '[data-a=otra]', function () {
       /* «otra propuesta» rehace por donde vino: si el plan lo montó la IA, con IA */
       if (est.prog && est.prog.porIA) crearConIA(); else crear();
@@ -1095,6 +1111,7 @@
     });
 
     est.cargandoPlan = true;
+    est.falloIA = '';
     render();
 
     IA.crearPrograma({
@@ -1121,7 +1138,11 @@
         }
       }
     }).catch(function (e) {
-      UI.toast(e.message);
+      /* Antes esto colaba el plan de la calculadora con un aviso que se iba en
+         dos segundos: pulsabas «generar con IA», la llamada fallaba en medio
+         segundo y te quedabas con un plan que parecía de la IA y no lo era.
+         Ahora el fallo se queda escrito en la pantalla hasta que se resuelva. */
+      est.falloIA = e.message;
       est.prog = base;
     }).then(function () {
       est.cargandoPlan = false;
