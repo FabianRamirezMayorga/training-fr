@@ -851,6 +851,12 @@
     'despacha en cinco palabras y se pasa a lo que no lo está.\n' +
     '- Concreto y con números: series, gramos, kilos, días, semanas. Un consejo ' +
     'que le valdría a cualquiera es un consejo que sobra; bórralo y busca otro.\n' +
+    '- Debajo tienes sus datos reales: lo que entrena, con cuántos kilos, qué lleva ' +
+    'abandonado, cuántos días cumple de verdad y qué come. ÚSALOS. Cada afirmación ' +
+    'que hagas sobre él tiene que poder señalar un dato de ahí. Cítalos: «llevas 34 ' +
+    'días sin tocar dorsales», no «deberías equilibrar tu espalda».\n' +
+    '- No contradigas esos datos ni los redondees a tu gusto, y no supongas nada que ' +
+    'no esté: si dice que no apunta lo que come, no le cuentes cuántas calorías toma.\n' +
     '- Lo que está mal se dice claro y con su consecuencia: qué va a pasar si ' +
     'sigue así.\n' +
     '- No te inventas nada. Si un dato no está, lo dices en vez de rellenarlo, y ' +
@@ -860,6 +866,180 @@
     '- Lo que sea un riesgo para la salud va primero, y donde haga falta un ' +
     'médico o un fisio lo dices sin rodeos y sin asustar.\n' +
     '- Español de España, de tú, frases cortas, sin relleno de cortesía.';
+
+  /* ---------- lo que se le cuenta de la persona ----------
+     Un perfil declarado —edad, peso, objetivo— lo tiene cualquiera, y con eso
+     salen consejos que valen para cualquiera. Lo que hace acertada una
+     respuesta es lo que la persona HACE: con cuántos kilos entrena de verdad,
+     qué músculos lleva un mes sin tocar, cuántos días cumple de los que se
+     propone, qué come de verdad frente a lo que debería. Todo eso lo tiene la
+     app guardado y hasta ahora casi nada llegaba al modelo. */
+
+  /* Con qué entrena de verdad: los ejercicios que más repite, con la carga de
+     su última sesión y su mejor marca. Sin esto, cualquier consejo de progresión
+     es humo. */
+  function cargasReales(cuantos) {
+    const ses = Store.sessions().slice(0, 40);
+    if (!ses.length) return '';
+
+    const veces = {};
+    ses.forEach(function (x) {
+      (x.entries || []).forEach(function (e) {
+        if (!e.exId) return;
+        veces[e.exId] = (veces[e.exId] || 0) + 1;
+      });
+    });
+
+    const top = Object.keys(veces)
+      .sort(function (a, b) { return veces[b] - veces[a]; })
+      .slice(0, cuantos || 10);
+
+    const filas = top.map(function (id) {
+      const ex = Data.get(id);
+      if (!ex) return null;
+      const ult = Store.lastPerformance ? Store.lastPerformance(id) : null;
+      const pr = Store.prOf(id);
+      const partes = [ex.nameEs];
+
+      const series = (ult && ult.sets) || [];
+      const hechas = series.filter(function (x) { return x.done !== false && (x.reps || 0) > 0; });
+      if (hechas.length) {
+        const s0 = hechas[hechas.length - 1];
+        partes.push('última vez ' + hechas.length + 'x' + s0.reps +
+          (s0.weight > 0 ? ' con ' + s0.weight + ' kg' : ' sin peso'));
+      }
+      if (pr && pr.best && pr.best.weight > 0) partes.push('tope ' + pr.best.weight + ' kg');
+      partes.push(veces[id] + (veces[id] === 1 ? ' sesión' : ' sesiones'));
+      return partes.join(', ');
+    }).filter(Boolean);
+
+    return filas.length ? filas.join(' | ') : '';
+  }
+
+  /* Series por semana y músculo de lo entrenado de verdad, y lo que lleva
+     abandonado. Es la diferencia entre «equilibra tu plan» y «llevas 34 días
+     sin tocar dorsales». */
+  /* Los grandes. Que uno de estos no aparezca nunca en el historial dice más
+     que cualquier otra cosa, y hasta ahora no se contaba: solo salían los que
+     se habían entrenado alguna vez y llevaban tiempo parados. */
+  const MUSCULOS_GRANDES = ['chest', 'lats', 'middle back', 'shoulders', 'quadriceps',
+    'hamstrings', 'glutes', 'biceps', 'triceps', 'abdominals'];
+
+  function volumenYolvidos() {
+    const salida = [];
+    const tieneVolumen = {};
+
+    if (g.Programa && Programa.volumenReal) {
+      /* volumenReal devuelve {porMusculo, sesiones, semanas}: iterar el objeto
+         entero metía «sesiones 8, semanas 6» en la lista de músculos. */
+      const real = Programa.volumenReal(6);
+      const porMusculo = (real && real.porMusculo) || {};
+      const claves = Object.keys(porMusculo).filter(function (m) { return porMusculo[m] > 0; });
+      claves.forEach(function (m) { tieneVolumen[m] = true; });
+      if (claves.length) {
+        claves.sort(function (a, b) { return porMusculo[b] - porMusculo[a]; });
+        salida.push('SERIES REALES POR SEMANA (últimas 6 semanas, de lo que ha ' +
+          'registrado): ' + claves.map(function (m) {
+            return I18N.muscle(m) + ' ' + String(porMusculo[m]).replace('.', ',');
+          }).join(', ') + '.');
+      }
+    }
+
+    /* cuándo se tocó por última vez cada músculo */
+    /* Se apuntan primarios y secundarios. Mirando solo los primarios, un
+       músculo que sí recibe trabajo indirecto —el hombro en todo lo que sea
+       empujar— salía como «nunca entrenado» mientras el volumen de arriba le
+       contaba series. Dos bloques contradiciéndose en el mismo prompt es la
+       forma más rápida de que salga un consejo equivocado. */
+    const ultima = {};
+    const apunta = function (m, cuando) {
+      if (!ultima[m] || cuando > ultima[m]) ultima[m] = cuando;
+    };
+    Store.sessions().forEach(function (x) {
+      (x.entries || []).forEach(function (e) {
+        const ex = Data.get(e.exId);
+        if (!ex) return;
+        (ex.primaryMuscles || []).forEach(function (m) { apunta(m, x.start); });
+        (ex.secondaryMuscles || []).forEach(function (m) { apunta(m, x.start); });
+      });
+    });
+
+    const olvidados = Object.keys(ultima).map(function (m) {
+      return { m: m, dias: Math.floor((Date.now() - ultima[m]) / 864e5) };
+    }).filter(function (x) { return x.dias >= 10; })
+      .sort(function (a, b) { return b.dias - a.dias; })
+      .slice(0, 5);
+
+    if (olvidados.length) {
+      salida.push('SIN TOCAR DESDE HACE TIEMPO: ' + olvidados.map(function (x) {
+        return I18N.muscle(x.m) + ' (' + x.dias + ' días)';
+      }).join(', ') + '.');
+    }
+
+    /* los que no aparecen en ninguna sesión, nunca */
+    if (Store.sessions().length >= 3) {
+      const jamas = MUSCULOS_GRANDES.filter(function (m) {
+        return !ultima[m] && !tieneVolumen[m];
+      });
+      if (jamas.length) {
+        salida.push('NUNCA HA ENTRENADO (no aparece en ninguna sesión registrada): ' +
+          jamas.map(I18N.muscle).join(', ') + '.');
+      }
+    }
+
+    return salida.join('\n');
+  }
+
+  /* Lo que se propone frente a lo que cumple. Una respuesta que da por hecho
+     que entrena cinco días cuando entrena dos no sirve de nada. */
+  function constancia() {
+    const ses = Store.sessions();
+    if (ses.length < 3) return '';
+
+    const desde = Date.now() - 28 * 864e5;
+    const mes = ses.filter(function (x) { return x.start >= desde; });
+    const dias = {};
+    let minutos = 0;
+    let conDuracion = 0;
+
+    mes.forEach(function (x) {
+      dias[Store.dayKey(x.start)] = true;
+      const d = ((x.end || x.start) - x.start) / 60000;
+      if (d > 5 && d < 240) { minutos += d; conDuracion++; }
+    });
+
+    const porSemana = (Object.keys(dias).length / 4).toFixed(1).replace('.', ',');
+    const partes = ['CONSTANCIA REAL: ' + porSemana + ' días por semana en el último mes'];
+    if (conDuracion) partes.push('sesiones de ' + Math.round(minutos / conDuracion) + ' min de media');
+
+    const previstos = Store.routines().reduce(function (n, r) {
+      return n + ((r.days || []).length ? 1 : 0);
+    }, 0);
+    if (previstos) partes.push('tiene ' + previstos + ' rutinas con día asignado');
+
+    return partes.join(', ') + '.';
+  }
+
+  /* Lo que come de verdad contra lo que le toca */
+  function comidaReal() {
+    if (!g.Comidas) return '';
+    const dd = Comidas.ultimos(14).filter(function (d) { return d.kcal > 0; });
+    if (!dd.length) return 'COMIDA: no apunta lo que come, así que de su alimentación ' +
+      'solo sabes el objetivo calculado. No des por hecho que lo cumple.';
+
+    const mk = Math.round(dd.reduce(function (a, d) { return a + d.kcal; }, 0) / dd.length);
+    const mp = Math.round(dd.reduce(function (a, d) { return a + d.prot; }, 0) / dd.length);
+    return 'COMIDA REAL: media de ' + mk + ' kcal y ' + mp + ' g de proteína en los ' +
+      dd.length + ' días que ha apuntado de las dos últimas semanas.';
+  }
+
+  function favoritos() {
+    const f = (Store.favorites() || []).map(function (id) {
+      const ex = Data.get(id);
+      return ex ? ex.nameEs : null;
+    }).filter(Boolean).slice(0, 12);
+    return f.length ? 'EJERCICIOS QUE SE HA MARCADO COMO FAVORITOS: ' + f.join(', ') + '.' : '';
+  }
 
   /* ---------- contexto que se envía ---------- */
 
@@ -876,40 +1056,71 @@
 
     const p = Perfil.resumen();
     if (p) trozos.push('PERFIL: ' + p);
+    else {
+      trozos.push('PERFIL: sin completar. No te inventes edad, peso ni objetivo: si te ' +
+        'hacen falta para responder bien, dilo y pide que rellene su perfil.');
+    }
 
     if (incluir.objetivos !== false) {
       const o = Objetivos.resumen();
-      if (o) trozos.push('OBJETIVOS: ' + o);
+      if (o) trozos.push('OBJETIVOS QUE SE HA PUESTO: ' + o);
     }
 
     if (incluir.rutinas) {
       const r = Store.routines();
       if (r.length) {
         trozos.push('RUTINAS ACTUALES: ' + r.map(function (x) {
-          return x.name + ' (' + (x.days || []).join('/') + '): ' +
+          return x.name + ' (' + ((x.days || []).join('/') || 'sin día') + '): ' +
             x.exercises.map(function (e) {
               const ex = Data.get(e.exId);
               return (ex ? ex.nameEs : e.exId) + ' ' + e.sets + 'x' + e.reps;
             }).join(', ');
         }).join(' | '));
+      } else {
+        trozos.push('RUTINAS ACTUALES: ninguna guardada.');
       }
     }
 
-    if (incluir.progreso) {
+    if (incluir.progreso !== false) {
       const s = Store.stats();
       trozos.push('PROGRESO: ' + s.total + ' entrenamientos registrados, ' +
-        s.week + ' esta semana, racha de ' + s.streak + ' días, ' +
-        'volumen semanal ' + Math.round(s.weekVolume) + ' kg.');
+        s.week + ' esta semana, racha de ' + s.streak + ' días.');
+
+      const c = constancia();
+      if (c) trozos.push(c);
+
+      const v = volumenYolvidos();
+      if (v) trozos.push(v);
+
       const t = Perfil.tendencia(30);
       if (t) {
-        trozos.push('PESO: ' + (t.dif >= 0 ? '+' : '') + t.dif.toFixed(1) +
-          ' kg en los últimos 30 días.');
+        trozos.push('PESO: ' + (t.dif >= 0 ? '+' : '') + t.dif.toFixed(1).replace('.', ',') +
+          ' kg en los últimos 30 días, con ' + t.n + ' pesajes.');
+      } else {
+        trozos.push('PESO: no se pesa con regularidad, así que no puedes saber si sube o baja.');
       }
+    }
+
+    if (incluir.cargas) {
+      const c = cargasReales(incluir.cargas === true ? 10 : incluir.cargas);
+      if (c) trozos.push('CON QUÉ ENTRENA DE VERDAD (de sus sesiones registradas): ' + c + '.');
+      else trozos.push('Aún no ha registrado series con peso, así que no sabes qué cargas mueve.');
+    }
+
+    if (incluir.comida) {
+      const c = comidaReal();
+      if (c) trozos.push(c);
+    }
+
+    if (incluir.favoritos) {
+      const f = favoritos();
+      if (f) trozos.push(f);
     }
 
     const gset = Data.GEAR[Store.settings().gear];
-    if (gset) trozos.push('ENTRENA: ' + Data.gearFrase(Store.settings().gear) +
-      ' (' + gset.note.toLowerCase() + ').');
+    if (gset) trozos.push('DÓNDE ENTRENA: ' + Data.gearFrase(Store.settings().gear) +
+      ' (' + gset.note.toLowerCase() + '). No le propongas nada que necesite material ' +
+      'que no tiene.');
 
     return trozos.join('\n');
   }
@@ -938,7 +1149,7 @@
 
     const litros = Perfil.agua(p);
 
-    const prompt = contexto({ progreso: true }) + '\n\n' +
+    const prompt = contexto({ progreso: true, comida: true }) + '\n\n' +
       'OBJETIVO DIARIO: ' + m.kcal + ' kcal, ' + m.prot + ' g de proteína, ' +
       m.carbo + ' g de hidratos y ' + m.grasa + ' g de grasa, en ' + p.comidas + ' comidas.\n' +
       'HORARIO: se levanta a las ' + (p.despertar || '07:00') + ' y se acuesta a las ' +
@@ -987,8 +1198,8 @@
 
   /* Revisión de las rutinas actuales frente al perfil y el progreso */
   function revisarRutinas() {
-    const prompt = contexto({ rutinas: true, progreso: true }) + '\n\n' +
-      'Audita mis rutinas tal y como están. No las reescribas enteras ni me ' +
+    const prompt = contexto({ rutinas: true, progreso: true, cargas: true, favoritos: true }) +
+      '\n\n' + 'Audita mis rutinas tal y como están. No las reescribas enteras ni me ' +
       'cuentes lo que ya está bien.\n\n' +
       '- Ponles nota del 0 al 10. Un conjunto correcto pero mejorable es un 6 o ' +
       'un 7; el 9 y el 10 son para lo que no tocarías.\n' +
@@ -1045,7 +1256,7 @@
       });
     });
 
-    const prompt = contexto({ progreso: true }) + '\n\n' +
+    const prompt = contexto({ progreso: true, cargas: true, favoritos: true }) + '\n\n' +
       'RUTINA A AUDITAR — "' + (r.name || 'sin nombre') + '", ' + dias + ':\n' + lista + '\n' +
       menuEjercicios(suyos) +
       (r.note ? 'NOTAS QUE LE PUSO: ' + r.note + '\n' : '') +
@@ -1106,10 +1317,10 @@
     /* Lo que de verdad entrena, no lo que dice que va a entrenar. Sin esto la
        crítica sale de manual y vale para cualquiera. */
     let historial = '';
-    if (prog.real && Object.keys(prog.real).length) {
+    if (prog.real && prog.real.porMusculo && Object.keys(prog.real.porMusculo).length) {
       historial = 'SERIES REALES POR SEMANA (últimas 6 semanas, de sus entrenamientos ' +
-        'registrados): ' + Object.keys(prog.real).map(function (m) {
-          return I18N.muscle(m) + ' ' + prog.real[m];
+        'registrados): ' + Object.keys(prog.real.porMusculo).map(function (m) {
+          return I18N.muscle(m) + ' ' + prog.real.porMusculo[m];
         }).join(', ') + '\n';
     }
 
@@ -1133,7 +1344,7 @@
       }
     }
 
-    const prompt = contexto({ progreso: true }) + '\n\n' +
+    const prompt = contexto({ progreso: true, cargas: true, comida: true }) + '\n\n' +
       'PROGRAMA PROPUESTO (objetivo ' + prog.objetivoLabel + ', RPE tope ' + prog.rpe +
       ', unas ' + prog.objetivoSeries + ' series semanales por músculo):\n' + dias + '\n' +
       'SERIES POR SEMANA Y MÚSCULO QUE PIDE EL PLAN: ' + volumen + '\n' + historial + comida +
@@ -1180,8 +1391,31 @@
      es la pregunta de verdad, no para contar calorías al gramo. */
   function analizarComida(imagen, pista) {
     const m = Perfil.macros ? Perfil.macros() : null;
-    const suyo = m ? 'Al día le tocan unas ' + m.kcal + ' kcal y ' + m.prot +
-      ' g de proteína, por si ayuda a juzgar el tamaño de la ración.\n' : '';
+    const p = Perfil.datos ? Perfil.datos() : {};
+
+    let suyo = '';
+    if (m) {
+      suyo = 'Al día le tocan ' + m.kcal + ' kcal y ' + m.prot + ' g de proteína' +
+        (p.objetivo ? ', con el objetivo de ' + (Perfil.OBJETIVO[p.objetivo] || {}).label : '') +
+        '.\n';
+
+      /* Lo que ya lleva comido hoy: sin eso, «te has pasado» o «te falta» son
+         frases al aire. Con eso, la nota puede decir cuánto le queda. */
+      if (g.Comidas) {
+        const h = Comidas.hoy();
+        suyo += h.kcal > 0
+          ? 'Hoy lleva ya ' + h.kcal + ' kcal y ' + h.prot + ' g de proteína ANTES de ' +
+            'este plato, así que le quedan ' + Math.max(0, m.kcal - h.kcal) + ' kcal y ' +
+            Math.max(0, m.prot - h.prot) + ' g de proteína para el resto del día.\n'
+          : 'Este es el primer plato que apunta hoy.\n';
+      }
+    }
+    if (p.dieta && p.dieta !== 'omnivora') {
+      suyo += 'Sigue una dieta ' + (Perfil.DIETA[p.dieta] || p.dieta) + '.\n';
+    }
+    if (p.alergias) suyo += 'No puede comer: ' + p.alergias + '. Si ves algo de eso en ' +
+      'el plato, dilo en la nota antes que nada.\n';
+    if (p.condiciones) suyo += 'Condiciones de salud: ' + p.condiciones + '.\n';
 
     const prompt = PERSONA + '\n\nAhora estás mirando la foto de un plato.\n' + suyo +
       (pista ? 'Quien la ha hecho añade: "' + pista + '".\n' : '') +
@@ -1195,8 +1429,10 @@
       '"confianza":"alta|media|baja","nota":"una frase con lo que no has podido ' +
       'ver bien o lo que has dado por supuesto"}\n\n' +
       'Estima sin miedo pero sin adornar: si el plato lleva más aceite o más ' +
-      'azúcar de lo que parece, cuéntalo; y si la ración se le va de lo que le ' +
-      'toca al día, dilo en la nota.';
+      'azúcar de lo que parece, cuéntalo. Mira el tamaño de la ración contra lo que ' +
+      'hay alrededor en la foto —el plato, los cubiertos, el vaso— antes de decidir ' +
+      'los gramos, que es donde más se falla. Y en la nota, habla de lo que le queda ' +
+      'del día con los números de arriba, no en abstracto.';
 
     return llamarJSON(prompt, {
       imagen: imagen, maxTokens: 1024, temperatura: 0.3
@@ -1212,7 +1448,7 @@
 
     if (!sesiones) return Promise.reject(new Error('Aún no hay entrenamientos que analizar.'));
 
-    const prompt = contexto({ progreso: true }) + '\n\nÚLTIMAS SESIONES: ' + sesiones + '\n\n' +
+    const prompt = contexto({ progreso: true, cargas: true }) + '\n\nÚLTIMAS SESIONES: ' + sesiones + '\n\n' +
       'Analiza cómo voy de verdad, mirando fechas, huecos, series y cargas.\n' +
       '- "bien": una frase, y solo lo que se sostenga con estos datos. Si no hay ' +
       'nada destacable, escribe exactamente eso y no lo maquilles.\n' +
@@ -1225,7 +1461,9 @@
 
   /* Pregunta libre al entrenador */
   function preguntar(texto) {
-    const prompt = contexto({ rutinas: true, progreso: true }) + '\n\nPREGUNTA: ' + texto +
+    const prompt = contexto({
+      rutinas: true, progreso: true, cargas: true, comida: true, favoritos: true
+    }) + '\n\nPREGUNTA: ' + texto +
       '\n\nResponde en menos de 150 palabras, sin listas salvo que ayuden de verdad. ' +
       'No des la razón por costumbre: si la pregunta parte de algo falso o de un ' +
       'mito de gimnasio, corrígelo antes de contestar. Si la respuesta honesta es ' +
@@ -1341,13 +1579,27 @@
 
   /* Explicación de un ejercicio concreto, en español */
   function explicarEjercicio(ex) {
-    const clave = 'ejercicio:' + ex.id;
+    const p = Perfil.datos ? Perfil.datos() : {};
+    const nivel = { beginner: 'principiante', intermediate: 'intermedio', expert: 'avanzado' }[p.experiencia];
+
+    /* La explicación se guarda un mes para no gastar cuota repitiéndola. Al
+       depender ahora del nivel y de las limitaciones, la clave las incluye: si
+       cambian, la explicación se rehace en vez de servir la de antes. */
+    const clave = 'ejercicio:' + ex.id + ':' + (nivel || '-') + ':' +
+      String(p.lesiones || '').slice(0, 40);
     const guardado = leerCache(clave, 24 * 30);
     if (guardado) return Promise.resolve(guardado);
 
+    const suyo = (nivel ? 'Quien lo va a hacer es ' + nivel + '. ' : '') +
+      (p.edad ? 'Tiene ' + p.edad + ' años. ' : '') +
+      (p.lesiones ? 'Arrastra esto: ' + p.lesiones + '. Si alguna de esas cosas cambia ' +
+        'cómo hay que hacer este ejercicio, dilo en el primer paso; y si el ejercicio ' +
+        'no le conviene, dilo claro en el primer fallo. ' : '');
+
     const prompt = PERSONA + '\n\nEjercicio: ' + ex.nameEs + ' (' + ex.name + '). ' +
       'Músculos: ' + ex.primaryMuscles.map(I18N.muscle).join(', ') + '. ' +
-      'Material: ' + I18N.equip(ex.equipment) + '.\n\n' +
+      'Material: ' + I18N.equip(ex.equipment) + '.\n' +
+      (suyo ? suyo + '\n' : '') + '\n' +
       'Explica cómo se hace bien: la ejecución en 3 o 4 pasos, los dos fallos más ' +
       'habituales y un truco para notarlo en el músculo correcto. Los pasos son ' +
       'instrucciones, no ánimos: postura, recorrido y respiración. Si el ejercicio ' +
