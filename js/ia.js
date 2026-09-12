@@ -53,12 +53,13 @@
     {
       id: 'anthropic',
       label: 'Anthropic (Claude)',
-      nota: 'De pago por uso. Es el que mejor sigue instrucciones largas, que es ' +
-        'lo que más hace esta app.',
+      nota: 'De pago por uso: tu suscripción de Claude Pro no sirve aquí, la API se ' +
+        'factura aparte. Es el que mejor sigue instrucciones largas, que es lo que más ' +
+        'hace esta app. Opus es el bueno; Haiku, el barato.',
       donde: 'https://console.anthropic.com/settings/keys',
       dondeTxt: 'console.anthropic.com',
       pista: 'sk-ant-…',
-      modelos: ['claude-sonnet-5', 'claude-opus-5', 'claude-haiku-4-5-20251001'],
+      modelos: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5'],
       imagen: true
     },
     {

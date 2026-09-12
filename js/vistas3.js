@@ -77,7 +77,9 @@
     anthropic: [
       '<li>Entra en <a href="https://console.anthropic.com/settings/keys" target="_blank" ' +
       'rel="noopener noreferrer">console.anthropic.com</a> y crea una cuenta.</li>',
-      '<li>Mete saldo en <b>Billing</b>: se paga por uso y no hay capa gratuita.</li>',
+      '<li>Mete saldo en <b>Billing</b>: se paga por uso y no hay capa gratuita. ' +
+      'Si tienes Claude Pro, <b>no vale aquí</b>: la suscripción y la API se facturan ' +
+      'por separado.</li>',
       '<li>En <b>API Keys</b> pulsa <b>Create Key</b> y copia la clave ' +
       '(empieza por <code>sk-ant-</code>). Solo se enseña una vez.</li>',
       '<li>Pégala aquí y <b>Guardar</b>. Con lo que hace esta app, unos pocos euros ' +
