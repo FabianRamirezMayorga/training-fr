@@ -487,18 +487,57 @@
       } catch (e) { UI.toast(e.message); }
     });
 
+    /* El test comprueba las dos cosas de las que depende la app, no una.
+       Contestar en texto lo hace cualquiera; devolver JSON bien formado no, y
+       de eso viven la auditoría de rutinas, el menú semanal y la foto del
+       plato. Un modelo pequeño pasa la primera y falla la segunda, y sin este
+       aviso te enterabas a mitad de una auditoría. */
     bind(root, '[data-a=probarIA]', function (btn) {
       const salida = root.querySelector('#ia-estado');
+      const prov = IA.proveedorActual();
+      const linea = function (color, txt) {
+        return '<div style="color:var(--' + color + ')">' + txt + '</div>';
+      };
+
       btn.disabled = true;
-      salida.textContent = 'Probando la conexión…';
+      salida.innerHTML = '<div class="row" style="gap:8px;align-items:center">' +
+        '<span class="spinner" style="width:14px;height:14px"></span>' +
+        '<span>Probando ' + esc(prov.label) + '…</span></div>';
+
+      const resultados = [];
       IA.llamar('Responde solo con la palabra: listo', { maxTokens: 512, temperatura: 0 })
         .then(function (r) {
-          salida.innerHTML = '<span style="color:var(--acc)">Funciona. ' +
-            esc(IA.proveedorActual().label) + ' respondió: ' + esc(r.slice(0, 40)) + '</span>';
+          resultados.push(linea('acc', '✓ Responde: «' + esc(r.slice(0, 40)) + '»'));
+          salida.innerHTML = resultados.join('') +
+            '<div class="tiny">Comprobando que sepa devolver JSON…</div>';
+
+          return IA.llamarJSON('Devuelve JSON y nada más, con esta forma exacta: ' +
+            '{"ok":true,"musculo":"pecho"}', { maxTokens: 512, temperatura: 0 });
+        })
+        .then(function (j) {
+          if (j && typeof j === 'object') {
+            resultados.push(linea('acc', '✓ Devuelve JSON bien formado'));
+            resultados.push('<div class="tiny" style="margin-top:4px">Listo. ' +
+              esc(prov.label) + ' con <b>' + esc(IA.modeloDe(prov.id)) + '</b> vale para ' +
+              'todo lo de la app.</div>');
+          } else {
+            resultados.push(linea('warn', '⚠ Contesta, pero su JSON no se entiende'));
+          }
+          salida.innerHTML = resultados.join('');
           btn.disabled = false;
         })
         .catch(function (e) {
-          salida.innerHTML = '<span style="color:var(--bad)">' + esc(e.message) + '</span>';
+          /* si falló la primera llamada no hay nada verde que enseñar */
+          if (!resultados.length) {
+            salida.innerHTML = linea('bad', '✕ ' + esc(e.message));
+          } else {
+            resultados.push(linea('warn', '⚠ Contesta en texto, pero falla al pedirle ' +
+              'JSON: ' + esc(e.message)));
+            resultados.push('<div class="tiny" style="margin-top:4px">Sirve para preguntarle ' +
+              'cosas, pero la auditoría de rutinas, el menú y la foto del plato van a ' +
+              'fallar. Prueba con otro modelo de la lista.</div>');
+            salida.innerHTML = resultados.join('');
+          }
           btn.disabled = false;
         });
     });
