@@ -127,7 +127,7 @@
             <span class="crono-pulso"></span>
             <span class="crono-txt">
               <span>ENTRENANDO</span>
-              <b>${a.routineName}</b>
+              <b data-crono-nombre>${a.routineName}</b>
             </span>
           </button>
           <b class="crono-t" data-crono-out>0:00</b>
@@ -137,6 +137,13 @@
       host.querySelector('[data-c=fin]').onclick = doFinish;
       salida = host.querySelector('[data-crono-out]');
     }
+
+    /* El banner se dibuja una sola vez para no reiniciar su animación, pero eso
+       dejaba el nombre congelado: cambiabas la rutina de día mientras la
+       entrenabas y el banner seguía anunciando el día de antes. El texto se
+       repasa en cada pintado; cuesta una comparación de cadenas. */
+    const nombre = host.querySelector('[data-crono-nombre]');
+    if (nombre && nombre.textContent !== a.routineName) nombre.textContent = a.routineName;
 
     salida.textContent = UI.mmss((Date.now() - a.start) / 1000);
     if (!bannerTimer) bannerTimer = setInterval(pintarBanner, 1000);

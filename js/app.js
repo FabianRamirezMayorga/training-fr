@@ -544,16 +544,44 @@
       .map(function (m) { return I18N.muscle(m); });
   }
 
+  /* «Lunes y Miércoles y Viernes» se lee mal; así se enumera en castellano */
+  function listaDias(dias) {
+    if (!dias.length) return '';
+    if (dias.length === 1) return dias[0];
+    return dias.slice(0, -1).join(', ') + ' y ' + dias[dias.length - 1];
+  }
+
   /* Título de la tarjeta: el día y lo que se trabaja, que es lo que uno busca */
   function tituloRutina(r) {
     const zona = zonaDeRutina(r);
     const dias = (r.days || []).map(UI.diaLargo);
     const que = r.mixta ? 'Mixta' : (zona ? zona.label : 'Sin ejercicios');
     if (!dias.length) return que;
-    /* Tres días unidos con «y» daban «Lunes y Miércoles y Viernes» */
-    const lista = dias.length < 2 ? dias[0]
-      : dias.slice(0, -1).join(', ') + ' y ' + dias[dias.length - 1];
-    return lista + ' · ' + que;
+    return listaDias(dias) + ' · ' + que;
+  }
+
+  /* El nombre guardado lleva el día delante desde que lo generó el programa
+     («Lunes · Fabián»). Al mover la rutina de día ese prefijo se quedaba
+     mintiendo: la lista lo esconde, pero el nombre entero sale en el banner del
+     entrenamiento en curso y se queda escrito en el historial, así que uno
+     acababa con un «Lunes · Fabián» entrenado un viernes. Se reescribe con el
+     día nuevo; si nunca llevó día delante, no se toca nada. */
+  function renombrarPorDia(r) {
+    const base = nombreRutina(r);
+    if (!r.name || base === r.name) return r;
+    const dias = (r.days || []).map(UI.diaLargo);
+    r.name = dias.length ? listaDias(dias) + ' · ' + base : base;
+    return r;
+  }
+
+  /* El entrenamiento en curso se queda con una copia del nombre de cuando
+     empezó. Si la rutina cambia mientras se entrena, esa copia hay que
+     ponerla al día o el banner sigue anunciando lo de antes. */
+  function refrescarActiva(r) {
+    const a = Store.active();
+    if (!a || !r || a.routineId !== r.id || a.routineName === r.name) return;
+    a.routineName = r.name;
+    Store.setActive(a);
   }
 
   /* Los nombres que salen del generador llevan el día delante —«Viernes · Rutina
@@ -1604,12 +1632,11 @@
       series y los días. <b>Generar programa</b>: te lo monto yo con tu edad, tu nivel, tu
       objetivo y tus limitaciones, y luego lo editas igual.</p>
 
-      <div class="row" style="margin-top:8px">
-        <button class="btn ghost grow sm" data-a="actividad">
-          ${raw(icon('plus'))} Apuntar algo que ya hice</button>
-        ${raw(Store.routines().some(function (r) { return (r.days || []).length; })
-          ? '<button class="btn ghost grow sm" data-a="correr">Correr el plan de día</button>' : '')}
-      </div>
+      <button class="btn ghost block sm" data-a="actividad" style="margin-top:8px">
+        ${raw(icon('plus'))} Apuntar algo que ya hice</button>
+      ${raw(Store.routines().some(function (r) { return (r.days || []).length; })
+        ? '<button class="btn ghost block sm" data-a="correr" style="margin-top:6px">' +
+          'Hoy no pude: correr el plan de día</button>' : '')}
       <p class="tiny center" style="margin-top:6px">Caminar una hora el domingo, la pachanga
       del sábado o la clase de pilates cuentan igual, aunque no salgan de una rutina.</p>
 
@@ -1732,7 +1759,9 @@
       if (i === -1) dias.push(d); else dias.splice(i, 1);
       dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
       r.days = dias;
+      renombrarPorDia(r);
       Store.saveRoutine(r);
+      refrescarActiva(r);
       const pos = window.scrollY;
       render();
       window.scrollTo(0, pos);
@@ -1793,7 +1822,9 @@
     rutinas.forEach(function (r) {
       r.days = r.days.map(function (d) { return diaCorrido(d, pasos); })
         .sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
+      renombrarPorDia(r);
       Store.saveRoutine(r);
+      refrescarActiva(r);
     });
     return rutinas.length;
   }
@@ -2497,7 +2528,9 @@
     function guardar() {
       leerCampos();
       if (!draft.name) draft.name = 'Rutina sin nombre';
-      return Store.saveRoutine(draft);
+      const r = Store.saveRoutine(draft);
+      refrescarActiva(r);
+      return r;
     }
 
     /* Guardado sobre la marcha: nadie debería perder una rutina por salir de
@@ -2522,6 +2555,7 @@
 
       const nueva = !draft.id;
       const r = Store.saveRoutine(draft);
+      refrescarActiva(r);
       /* al nacer, la ruta pasa a apuntar a su id: así un repintado carga la
          rutina guardada en vez de empezar otro borrador en blanco */
       if (nueva) {
@@ -2585,7 +2619,15 @@
       draft.days = draft.days || [];
       const i = draft.days.indexOf(d);
       if (i === -1) draft.days.push(d); else draft.days.splice(i, 1);
+      draft.days.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
       el.classList.toggle('on', i === -1);
+
+      /* si el nombre llevaba el día delante, sigue al día que acaba de cambiar */
+      leerCampos();
+      renombrarPorDia(draft);
+      const campo = root.querySelector('#r-name');
+      if (campo) campo.value = draft.name;
+
       autoguardar();
     });
 
