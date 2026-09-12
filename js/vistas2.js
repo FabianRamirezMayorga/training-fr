@@ -123,15 +123,15 @@
 
         <div class="row between" style="align-items:flex-end">
           <div><b style="font-size:1.3rem;color:var(--brand-1)">${h.prot}</b>
-            <span class="tiny"> de ${m.prot} g de prote\u00edna</span></div>
+            <span class="tiny"> de ${m.prot} g de proteína</span></div>
           <div class="tiny">${pp}%</div>
         </div>
         <div class="prog" style="margin:6px 0 0">
           <i style="width:${pp}%;background:var(--brand-1)"></i></div>
 
         <p class="tiny" style="margin:11px 0 0">${raw(faltaProt > 0
-          ? 'Te faltan <b>' + faltaProt + ' g de prote\u00edna</b> para llegar al objetivo del d\u00eda.'
-          : 'Prote\u00edna del d\u00eda cubierta.')}</p>
+          ? 'Te faltan <b>' + faltaProt + ' g de proteína</b> para llegar al objetivo del día.'
+          : 'Proteína del día cubierta.')}</p>
 
         <div class="row" style="margin-top:12px">
           <label class="btn primary grow" for="foto-comida" style="cursor:pointer">
@@ -139,9 +139,9 @@
           <button class="btn" data-a="comidaMano">${raw(icon('plus'))}</button>
         </div>
         <input type="file" id="foto-comida" accept="image/*" capture="environment" hidden>
-        <p class="tiny" style="margin:8px 0 0">La foto se encoge en el m\u00f3vil, se manda para
-        que la IA la lea y se suelta: no se guarda ni aqu\u00ed ni en ning\u00fan sitio. Solo quedan
-        el nombre del plato y los n\u00fameros.</p>
+        <p class="tiny" style="margin:8px 0 0">La foto se encoge en el móvil, se manda para
+        que la IA la lea y se suelta: no se guarda ni aquí ni en ningún sitio. Solo quedan
+        el nombre del plato y los números.</p>
       </div>
 
       <div id="comida-pensando"></div>
@@ -157,9 +157,9 @@
         <div class="row between" style="align-items:flex-start;gap:10px">
           <div class="grow">
             <div style="font-weight:600;font-size:.92rem">${c.plato}</div>
-            <div class="tiny">${UI.num(c.kcal)} kcal \u00b7 ${c.prot} g de prote\u00edna
-              \u00b7 ${raw(UI.hora ? UI.hora(c.t) : new Date(c.t).toTimeString().slice(0, 5))}
-              ${raw(dudosa ? ' \u00b7 <span style="color:var(--warn)">estimaci\u00f3n floja</span>' : '')}</div>
+            <div class="tiny">${UI.num(c.kcal)} kcal · ${c.prot} g de proteína
+              · ${raw(UI.hora ? UI.hora(c.t) : new Date(c.t).toTimeString().slice(0, 5))}
+              ${raw(dudosa ? ' · <span style="color:var(--warn)">estimación floja</span>' : '')}</div>
             ${raw(c.detalle ? '<div class="tiny" style="margin-top:3px">' +
               esc(c.detalle) + '</div>' : '')}
           </div>
@@ -279,7 +279,7 @@
      memoria hasta que se acaba. */
   function mirarFoto(file) {
     if (!IA.activa()) {
-      UI.toast('Esto necesita la clave de Gemini, que se pone en la b\u00f3veda de Ajustes.');
+      UI.toast('Esto necesita un proveedor de IA con su clave, en la bóveda de Ajustes.');
       go('entrenador');
       return;
     }
@@ -291,7 +291,7 @@
     let foto = null;
 
     const soltar = function () {
-      foto = null;                      // la imagen deja de existir aqu\u00ed
+      foto = null;                      // la imagen deja de existir aquí
       if (caja) caja.innerHTML = '';
     };
 
@@ -303,7 +303,7 @@
             <img src="${f.vista}" alt="" style="width:64px;height:64px;object-fit:cover;
                  border-radius:10px;flex:none">
             <div class="grow">
-              <div style="font-weight:600;font-size:.9rem">Mirando el plato\u2026</div>
+              <div style="font-weight:600;font-size:.9rem">Mirando el plato…</div>
               <div class="tiny">La foto se borra en cuanto termine.</div>
             </div>
             <div class="spinner" style="flex:none"></div>
@@ -313,7 +313,7 @@
     }).then(function (r) {
       soltar();
       if (!r || !(Number(r.kcal) > 0)) {
-        UI.toast('No he visto comida en esa foto. Prueba con m\u00e1s luz o m\u00e1s cerca.');
+        UI.toast('No he visto comida en esa foto. Prueba con más luz o más cerca.');
         return;
       }
       const detalle = (r.alimentos || []).map(function (a) {
@@ -329,7 +329,7 @@
       });
       render();
       UI.toast('Anotado: ' + Math.round(r.kcal) + ' kcal y ' + Math.round(r.prot) +
-        ' g de prote\u00edna' + (r.confianza === 'baja' ? ' (a ojo, ret\u00f3calo si quieres)' : ''));
+        ' g de proteína' + (r.confianza === 'baja' ? ' (a ojo, retócalo si quieres)' : ''));
     }).catch(function (e) {
       soltar();
       UI.toast(e.message || 'No he podido leer esa foto.');
@@ -341,17 +341,17 @@
   function comidaAMano() {
     UI.modal(html`
       <h2>Apuntar a mano</h2>
-      <p class="muted">Para lo que ya sabes de memoria, o para arreglar una estimaci\u00f3n
-      que se qued\u00f3 corta.</p>
-      <label class="tiny">QU\u00c9 HAS COMIDO</label>
+      <p class="muted">Para lo que ya sabes de memoria, o para arreglar una estimación
+      que se quedó corta.</p>
+      <label class="tiny">QUÉ HAS COMIDO</label>
       <input id="cm-plato" placeholder="Ej. Arroz con pollo" autocomplete="off">
       <div class="row" style="margin-top:10px">
         <div class="grow">
-          <label class="tiny">CALOR\u00cdAS</label>
+          <label class="tiny">CALORÍAS</label>
           <input id="cm-kcal" type="number" inputmode="numeric" min="0" placeholder="0">
         </div>
         <div class="grow">
-          <label class="tiny">PROTE\u00cdNA (g)</label>
+          <label class="tiny">PROTEÍNA (g)</label>
           <input id="cm-prot" type="number" inputmode="numeric" min="0" placeholder="0">
         </div>
       </div>
@@ -362,7 +362,7 @@
           const kcal = Number(el.querySelector('#cm-kcal').value) || 0;
           const prot = Number(el.querySelector('#cm-prot').value) || 0;
           if (!kcal && !prot) {
-            UI.toast('Pon al menos las calor\u00edas o la prote\u00edna');
+            UI.toast('Pon al menos las calorías o la proteína');
             return;
           }
           Comidas.anotar({ plato: plato || 'Comida', kcal: kcal, prot: prot, fuente: 'mano' });
@@ -397,7 +397,7 @@
     const campoFoto = root.querySelector('#foto-comida');
     if (campoFoto) campoFoto.onchange = function () {
       const file = campoFoto.files && campoFoto.files[0];
-      /* se vac\u00eda ya: si no, elegir dos veces la misma foto no dispara nada */
+      /* se vacía ya: si no, elegir dos veces la misma foto no dispara nada */
       campoFoto.value = '';
       if (file) mirarFoto(file);
     };
@@ -474,7 +474,8 @@
 
       <div class="list-title">Ajustes de la IA</div>
       <div class="list">
-        ${raw(filaAccion('chispa', 'Cambiar la clave', IA.config().modelo || 'gemini-2.5-flash', 'config'))}
+        ${raw(filaAccion('chispa', 'Proveedor y clave',
+          IA.proveedorActual().label + ' · ' + (IA.config().modelo || ''), 'config'))}
       </div>
       <p class="tiny" style="margin-top:10px">Al preguntar se envían a Google tus datos de
       perfil, rutinas y progreso. Tu clave se guarda solo en este dispositivo.</p>`;
@@ -494,7 +495,7 @@
         ${raw(icon('back'))} Perfil</button>
       <h1>Entrenador con IA</h1>
       <p class="muted">Analiza tu progreso, revisa tus rutinas y te prepara el plan de comidas.
-      Funciona con la capa gratuita de Google Gemini.</p>
+      Funciona con el proveedor que elijas: Gemini tiene capa gratuita.</p>
 
       <div class="card">
         <ol class="instr">

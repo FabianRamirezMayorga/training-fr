@@ -2223,7 +2223,7 @@
   let auditarAlEntrar = null;
 
   function auditarDesdeLista(id) {
-    if (!IA.activa()) { go('claves'); UI.toast('Configura la clave de Gemini para esto'); return; }
+    if (!IA.activa()) { go('claves'); UI.toast('Elige proveedor de IA y pon su clave'); return; }
     auditarAlEntrar = id;
     go('rutina', id);
   }
@@ -2247,7 +2247,7 @@
         </button>
         <p class="tiny center" style="margin:7px 4px 0">${IA.activa()
           ? 'La lee con tu perfil y tu historial delante, le pone nota y propone cambios que aplicas de un toque.'
-          : 'Necesita la clave de Gemini, que se configura en la bóveda de Ajustes.'}</p>`;
+          : 'Necesita un proveedor de IA con su clave, en Ajustes → Bóveda de claves.'}</p>`;
     }
 
     const nota = Number(r.nota);
@@ -2271,9 +2271,11 @@
         }).join(''))}
       </div>
 
+      ${raw(resueltaHTML(r))}
+
       ${raw((r.cambios || []).length ? html`
         <div class="card">
-          <b>Cambios que propone</b>
+          <b>Cambios sueltos, si prefieres ir uno a uno</b>
           <div class="stack" style="margin-top:9px">
             ${raw(r.cambios.map(function (c, i) {
               const acc = accionRutina(c);
@@ -2312,6 +2314,88 @@
         ${raw(icon('chispa'))} Analizar otra vez</button>
       <p class="tiny center" style="margin:7px 4px 0">Con los cambios que acabas de aplicar
       delante, el dictamen cambia. Cada pulsación es una llamada a la IA.</p>`;
+  }
+
+  /* La rutina entera ya corregida, no solo los parches. Es lo que uno quiere
+     de verdad cuando pide que le revisen algo: «pues móntamela bien». Se
+     resuelve contra el catálogo antes de enseñarla, así que lo que se ve es
+     exactamente lo que va a quedar guardado. */
+  function rutinaPropuesta(r) {
+    const filas = (r && r.rutina) || [];
+    if (filas.length < 2) return null;
+
+    const gear = Store.settings().gear;
+    const claves = Programa.lesionesDe(Perfil.datos().lesiones);
+    const fuera = [];
+    const dentro = [];
+    const vistos = {};
+
+    filas.forEach(function (f) {
+      const nombre = String(f.ejercicio || f.nombre || '').trim();
+      const ex = Data.porNombreEs(nombre) ||
+        (Data.search({ q: nombre, gear: gear }) || [])[0];
+      if (!ex) { fuera.push(nombre + ' (no está en el catálogo)'); return; }
+      if (vistos[ex.id]) return;
+
+      const patron = Alt.patron(ex);
+      const prohibido = claves.some(function (k) {
+        return (Programa.LESIONES[k].patronesFuera || []).indexOf(patron) !== -1;
+      });
+      if (prohibido) { fuera.push(ex.nameEs + ' (choca con tus limitaciones)'); return; }
+
+      vistos[ex.id] = true;
+      dentro.push({
+        ex: ex,
+        porque: f.porque || '',
+        fila: {
+          exId: ex.id,
+          sets: Math.min(15, Math.max(1, Number(f.series) || 3)),
+          reps: Math.min(200, Math.max(1, Number(f.reps) || 10)),
+          weight: 0,
+          rest: Math.min(600, Math.max(0, Number(f.descanso) || 90)),
+          note: f.porque || ''
+        }
+      });
+    });
+
+    if (dentro.length < Store.MINIMO_EJERCICIOS) return null;
+    return { dentro: dentro, fuera: fuera };
+  }
+
+  function resueltaHTML(r) {
+    const prop = rutinaPropuesta(r);
+    if (!prop) return '';
+
+    return html`
+      <div class="card" style="border-color:var(--acc)">
+        <b>Cómo la dejaría él</b>
+        <p class="tiny" style="margin:5px 0 10px">La rutina entera rehecha, en el orden en
+        que hay que hacerla. Sustituye a la de arriba de una vez.</p>
+
+        <div class="stack" style="gap:0">
+          ${raw(prop.dentro.map(function (x, i) {
+            return html`
+              <div class="rt-item" style="border-top:${raw(i ? '1px solid var(--line)' : '0')}">
+                <img src="${Data.img(x.ex, 0)}" alt="" loading="lazy">
+                <div class="grow">
+                  <div style="font-weight:600;font-size:.86rem">${i + 1}. ${x.ex.nameEs}</div>
+                  <div class="tiny">${x.fila.sets} × ${x.fila.reps} · descanso
+                    ${x.fila.rest}s${raw(x.porque
+                      ? ' · <span style="color:var(--acc)">' + esc(x.porque) + '</span>' : '')}</div>
+                </div>
+              </div>`;
+          }).join(''))}
+        </div>
+
+        ${raw(prop.fuera.length ? '<p class="tiny" style="margin:10px 0 0">Se ha descartado: ' +
+          esc(prop.fuera.join('; ')) + '.</p>' : '')}
+
+        <button class="btn primary block" data-a="aplicartoda" style="margin-top:12px">
+          ${raw(icon('check'))} Dejar la rutina así</button>
+        <p class="tiny center" style="margin:7px 0 0">Se reemplazan los
+        ${prop.dentro.length === 1 ? 'ejercicios' : 'ejercicios'} de esta rutina y se guarda.
+        Tu historial no se toca.</p>
+      </div>`;
   }
 
   function accionRutina(c) {
@@ -2585,7 +2669,7 @@
 
     /* ---- la lectura de la IA sobre esta rutina ---- */
     const auditar = function () {
-      if (!IA.activa()) { go('claves'); UI.toast('Configura la clave de Gemini para esto'); return; }
+      if (!IA.activa()) { go('claves'); UI.toast('Elige proveedor de IA y pon su clave'); return; }
       const r = autoguardar();
       if (!r) { UI.toast('Guárdala antes de pasarla por la IA'); return; }
       revIA = { id: r.id, cargando: true, datos: null };
@@ -2621,6 +2705,24 @@
 
     bindAll(root, '[data-rcambio]', function (el) {
       aplicarEnRutina(Number(el.dataset.rcambio), autoguardar);
+    });
+
+    bind(root, '[data-a=aplicartoda]', function () {
+      const prop = rutinaPropuesta(revIA.datos);
+      if (!prop) { UI.toast('Esa propuesta ya no se puede aplicar.'); return; }
+      UI.confirm('Dejar la rutina así',
+        'Se sustituyen los ' + draft.exercises.length + ' ejercicios de ahora por los ' +
+        prop.dentro.length + ' que propone. Lo que ya entrenaste sigue en tu historial.',
+        'Reemplazar').then(function (ok) {
+        if (!ok) return;
+        draft.exercises = prop.dentro.map(function (x) { return x.fila; });
+        autoguardar();
+        revIA.datos.cambios = [];
+        const pos = window.scrollY;
+        render();
+        window.scrollTo(0, pos);
+        UI.toast('Rutina rehecha con ' + prop.dentro.length + ' ejercicios');
+      });
     });
 
     bindAll(root, '[data-rnocambio]', function (el) {
@@ -3196,10 +3298,10 @@
   /* Qué servicios están ya configurados, para la fila de la bóveda */
   function resumenClaves() {
     const puestas = [];
-    if (g.IA && IA.activa()) puestas.push('Gemini');
+    if (g.IA && IA.activa()) puestas.push(IA.proveedorActual().label);
     if (g.Spotify && Spotify.configurado()) puestas.push('Spotify');
     if (Sync.configurado()) puestas.push('Supabase');
-    return puestas.length ? puestas.join(' · ') : 'Gemini, Spotify y sincronización';
+    return puestas.length ? puestas.join(' · ') : 'IA, Spotify y sincronización';
   }
 
   /* ================= cuenta y sincronización ================= */
@@ -3401,7 +3503,7 @@
           ${raw(filaSync('nutricion', 'Menú de comidas',
             (Store.settings().menu ? 'Guardado' : 'Sin generar')))}
           ${raw(filaSync('perfil', 'Perfil y hábitos', Perfil.completo() ? 'Completo' : 'Sin completar'))}
-          ${raw(filaSync('llave', 'Claves de Gemini y Spotify',
+          ${raw(filaSync('llave', 'Claves de IA y Spotify',
             Sync.sincronizaClaves() ? 'Incluidas' : 'Solo en este dispositivo'))}
         </div>
         <p class="tiny" style="margin-top:10px">No hay que pulsar nada: lo que cambies sube

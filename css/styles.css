@@ -501,6 +501,10 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 
 /* ---------- programa personal ---------- */
 /* Cabecera plegable de cada día del programa */
+/* El punto verde de un proveedor de IA que ya tiene clave puesta */
+.punto-ok{display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--acc);vertical-align:middle;margin-left:2px}
+
 /* La versión, al pie de la portada. Callada cuando no hay nada que hacer y
    con cara de botón cuando hay una nueva esperando. */
 .pie-version{margin:22px 4px 4px;font-size:.72rem;color:var(--dim2);text-align:center}

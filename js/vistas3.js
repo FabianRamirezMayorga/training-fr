@@ -63,8 +63,51 @@
       </div>`;
   }
 
+  /* Cómo se consigue la clave de cada uno. Son cuatro consolas distintas y
+     ninguna se parece a otra, así que no vale un texto genérico. */
+  const PASOS_CLAVE = {
+    gemini: [
+      '<li>Entra en <a href="https://aistudio.google.com/apikey" target="_blank" ' +
+      'rel="noopener noreferrer">aistudio.google.com/apikey</a> con tu cuenta de Google.</li>',
+      '<li>Pulsa <b>Create API key</b>. Si pide proyecto, deja el que propone.</li>',
+      '<li>Copia la clave (empieza por <code>AIza</code>), pégala aquí y <b>Guardar</b>.</li>',
+      '<li>Es gratis dentro del límite diario, que sobra para uso personal. Al superarlo ' +
+      'la app avisa y el resto sigue funcionando.</li>'
+    ].join(''),
+    anthropic: [
+      '<li>Entra en <a href="https://console.anthropic.com/settings/keys" target="_blank" ' +
+      'rel="noopener noreferrer">console.anthropic.com</a> y crea una cuenta.</li>',
+      '<li>Mete saldo en <b>Billing</b>: se paga por uso y no hay capa gratuita.</li>',
+      '<li>En <b>API Keys</b> pulsa <b>Create Key</b> y copia la clave ' +
+      '(empieza por <code>sk-ant-</code>). Solo se enseña una vez.</li>',
+      '<li>Pégala aquí y <b>Guardar</b>. Con lo que hace esta app, unos pocos euros ' +
+      'duran meses.</li>'
+    ].join(''),
+    deepseek: [
+      '<li>Entra en <a href="https://platform.deepseek.com/api_keys" target="_blank" ' +
+      'rel="noopener noreferrer">platform.deepseek.com</a> y crea una cuenta.</li>',
+      '<li>Mete saldo: se paga por uso y es de lo más barato que hay.</li>',
+      '<li>En <b>API keys</b> crea una y cópiala (empieza por <code>sk-</code>).</li>',
+      '<li>Pégala aquí y <b>Guardar</b>. Ojo: no lee fotos, así que deja Gemini o ' +
+      'Anthropic puestos si usas el cálculo de comida por foto.</li>'
+    ].join(''),
+    grok: [
+      '<li>Entra en <a href="https://console.x.ai" target="_blank" ' +
+      'rel="noopener noreferrer">console.x.ai</a> y crea una cuenta.</li>',
+      '<li>Mete saldo en <b>Billing</b> y crea una clave en <b>API Keys</b> ' +
+      '(empieza por <code>xai-</code>).</li>',
+      '<li>Pégala aquí y <b>Guardar</b>.</li>',
+      '<li>Los nombres de sus modelos cambian a menudo. Si da error de modelo, mira ' +
+      'cuál tienes disponible en tu consola y escríbelo en el campo de abajo.</li>'
+    ].join('')
+  };
+
   V.claves = function () {
     const cfgIA = IA.config();
+    const provId = IA.proveedor();
+    const prov = IA.proveedorActual();
+    const claveProv = IA.claveDe(provId);
+    const puestos = IA.configurados();
     const cfgSp = Spotify.config();
     const cfgSync = Sync.config() || {};
     const retorno = location.origin + location.pathname;
@@ -76,60 +119,73 @@
       <p class="muted">Aquí se guardan las claves de los servicios que usa la app.
       Se quedan en este dispositivo: no viajan al repositorio ni las ve nadie más.</p>
 
-      <!-- ============ Gemini ============ -->
-      <div class="list-title">Entrenador con IA · Google Gemini</div>
+      <!-- ============ nucleo inteligente ============ -->
+      <div class="list-title">Núcleo inteligente</div>
       <div class="card">
         <div class="row between" style="margin-bottom:11px">
           <div class="grow">
-            <div style="font-weight:600">Clave de Gemini</div>
-            <div class="tiny">Análisis de progreso, revisión de rutinas y plan de comidas</div>
+            <div style="font-weight:600">Quién piensa por la app</div>
+            <div class="tiny">Auditoría de rutinas, plan de comidas, foto del plato,
+            entrenador y listas de música</div>
           </div>
-          ${raw(estado(IA.activa(), 'Activa', 'Sin configurar'))}
+          ${raw(estado(IA.activa(), 'Activo', 'Sin configurar'))}
         </div>
 
-        <label class="tiny">CLAVE DE API</label>
-        ${raw(campoSecreto('k-ia', cfgIA.clave, 'AIzaSy...'))}
-        ${raw(cfgIA.clave ? '<div class="tiny" style="margin:6px 0 10px">Guardada: <code>' +
-          esc(resumida(cfgIA.clave)) + '</code></div>' : '<div style="height:10px"></div>')}
+        <p class="tiny" style="margin:0 0 9px">Elige quién contesta. Cada uno guarda su
+        propia clave, así que puedes tener varios puestos y cambiar de uno a otro con un
+        toque; lo que cambies aquí vale para toda la app.</p>
+
+        <div class="row wrap" style="gap:6px;margin-bottom:12px" id="ia-provs">
+          ${raw(IA.PROVEEDORES.map(function (pv) {
+            const tiene = puestos.indexOf(pv.id) !== -1;
+            return '<button class="chip ' + (pv.id === provId ? 'on' : '') +
+              '" data-prov="' + pv.id + '">' + esc(pv.label) +
+              (tiene ? ' <span class="punto-ok"></span>' : '') + '</button>';
+          }).join(''))}
+        </div>
+
+        <div class="card" style="background:var(--bg);margin-bottom:12px">
+          <div class="tiny">${prov.nota}</div>
+          <div class="tiny" style="margin-top:5px">La clave se saca en
+            <a href="${prov.donde}" target="_blank" rel="noopener noreferrer">${prov.dondeTxt}</a>.
+            ${raw(prov.imagen ? '' : '<b>No lee fotos</b>, así que el cálculo de la comida ' +
+              'por foto necesita Gemini o Anthropic.')}</div>
+        </div>
+
+        <label class="tiny">CLAVE DE ${esc(prov.label.toUpperCase())}</label>
+        ${raw(campoSecreto('k-ia', claveProv, prov.pista))}
+        ${raw(claveProv ? '<div class="tiny" style="margin:6px 0 10px">Guardada: <code>' +
+          esc(resumida(claveProv)) + '</code></div>' : '<div style="height:10px"></div>')}
 
         <div class="row between" style="margin-bottom:5px">
           <span class="tiny">MODELO</span>
-          ${raw(IA.activa()
+          ${raw(prov.listaViva && claveProv
             ? '<button class="btn sm ghost" data-a="refrescarModelos">Actualizar lista</button>' : '')}
         </div>
-        <select id="k-ia-modelo" style="margin:0 0 12px">
+        <select id="k-ia-modelo" style="margin:0 0 8px">
           ${raw((function () {
-            const actual = cfgIA.modelo || IA.MODELOS[0];
-            const lista = IA.MODELOS.indexOf(actual) === -1
-              ? [actual].concat(IA.MODELOS) : IA.MODELOS;
+            const actual = IA.modeloDe(prov.id);
+            const lista = prov.modelos.indexOf(actual) === -1
+              ? [actual].concat(prov.modelos) : prov.modelos;
             return lista.map(function (m) {
               return '<option value="' + esc(m) + '"' + (actual === m ? ' selected' : '') +
                 '>' + esc(m) + '</option>';
             }).join('');
           })())}
         </select>
+        ${raw(prov.listaViva ? '' : '<input id="k-ia-modelo-libre" placeholder="o escribe otro ' +
+          'nombre de modelo" autocomplete="off" spellcheck="false" style="margin:0 0 12px">')}
 
         <div class="row">
           <button class="btn primary grow" data-a="guardarIA">Guardar</button>
-          <button class="btn" data-a="probarIA" ${IA.activa() ? '' : 'disabled'}>Probar</button>
+          <button class="btn" data-a="probarIA" ${claveProv ? '' : 'disabled'}>Probar</button>
         </div>
         <div class="tiny" id="ia-estado" style="margin-top:9px"></div>
 
-        ${raw(guia('ia', 'Cómo consigo esta clave', [
-          '<li>Entra en <a href="https://aistudio.google.com/apikey" target="_blank" ' +
-          'rel="noopener noreferrer">aistudio.google.com/apikey</a> e inicia sesión con tu ' +
-          'cuenta de Google.</li>',
-          '<li>Pulsa <b>Create API key</b>. Si te pide un proyecto, deja el que te propone ' +
-          'o crea uno nuevo con cualquier nombre.</li>',
-          '<li>Copia la clave que aparece (empieza por <code>AIza</code>).</li>',
-          '<li>Pégala aquí arriba y pulsa <b>Guardar</b>. Después <b>Probar</b> para ' +
-          'confirmar que responde.</li>',
-          '<li>Es gratis dentro del límite diario de la capa gratuita, que sobra para uso ' +
-          'personal. Al superarlo la app te avisa y el resto sigue funcionando.</li>'
-        ].join('')))}
+        ${raw(guia('ia', 'Cómo consigo la clave de ' + prov.label, PASOS_CLAVE[prov.id]))}
 
-        ${raw(IA.activa() ? '<button class="btn danger block sm" data-a="borrarIA" ' +
-          'style="margin-top:10px">Borrar la clave de Gemini</button>' : '')}
+        ${raw(claveProv ? '<button class="btn danger block sm" data-a="borrarIA" ' +
+          'style="margin-top:10px">Borrar la clave de ' + esc(prov.label) + '</button>' : '')}
       </div>
 
       <!-- ============ Spotify ============ -->
@@ -252,7 +308,7 @@
         <div class="row between">
           <div class="grow">
             <div style="font-weight:600">Sincronizar mis claves</div>
-            <div class="tiny">La clave de Gemini y el Client ID de Spotify viajan con tus
+            <div class="tiny">Las claves de IA y el Client ID de Spotify viajan con tus
               datos, para no repetirlos en cada dispositivo</div>
           </div>
           <button class="sw ${Store.settings().sincronizarClaves !== false ? 'on' : ''}"
@@ -290,7 +346,7 @@
         de datos de Supabase, donde solo tú puedes leerlas.</p>
         <p class="tiny" style="margin:0 0 12px">La clave <i>publishable</i> de Supabase y el
         <i>Client ID</i> de Spotify están pensados para ir en el navegador y no son
-        secretos. La de Gemini sí lo es: no la compartas ni la pegues en el código.</p>
+        secretos. Las de IA sí lo son: no las compartas ni las pegues en el código.</p>
         <button class="btn danger block" data-a="borrarTodo">Borrar todas las claves</button>
       </div>`;
   };
@@ -329,13 +385,23 @@
       UI.toast('SQL copiado');
     };
 
-    /* ---- Gemini ---- */
+    /* ---- núcleo inteligente ---- */
 
-    /* Al abrir la bóveda se consulta qué modelos admite la clave: Google retira
-       los antiguos y una lista escrita a mano deja de valer al poco tiempo. */
+    /* Cambiar de proveedor no guarda nada todavía: solo cambia qué se está
+       mirando. Lo que ya tenga clave puesta se queda como estaba. */
+    bindAll(root, '[data-prov]', function (el) {
+      IA.elegirProveedor(el.dataset.prov);
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+    });
+
+    /* Solo Gemini publica su catálogo con la clave del usuario; los demás llevan
+       una lista escrita a mano y un campo para escribir cualquier otra. */
     const selectorModelo = root.querySelector('#k-ia-modelo');
     const rellenarModelos = function (forzar) {
-      if (!selectorModelo || !IA.activa()) return;
+      const prov = IA.proveedorActual();
+      if (!selectorModelo || !prov.listaViva || !IA.claveDe(prov.id)) return;
       IA.listarModelos(forzar).then(function (lista) {
         if (!lista || !lista.length) return;
         const actual = selectorModelo.value;
@@ -343,10 +409,9 @@
           return '<option value="' + esc(m) + '"' + (m === actual ? ' selected' : '') +
             '>' + esc(m) + '</option>';
         }).join('');
-        /* si el guardado ya no existe, se pasa al primero disponible */
         if (lista.indexOf(actual) === -1) {
           selectorModelo.value = lista[0];
-          IA.guardarConfig(IA.config().clave, lista[0]);
+          IA.guardarProveedor(prov.id, IA.claveDe(prov.id), lista[0]);
         }
       }).catch(function () { /* se queda la lista por defecto */ });
     };
@@ -368,21 +433,27 @@
     });
 
     bind(root, '[data-a=guardarIA]', function () {
+      const prov = IA.proveedorActual();
       const campo = root.querySelector('#k-ia');
-      const modelo = root.querySelector('#k-ia-modelo').value;
-      const clave = campo.value.trim() || IA.config().clave || '';
-      if (!clave) { UI.toast('Pega la clave de Gemini'); return; }
+      const libre = root.querySelector('#k-ia-modelo-libre');
+      const modelo = (libre && libre.value.trim()) ||
+        root.querySelector('#k-ia-modelo').value;
+      const clave = campo.value.trim() || IA.claveDe(prov.id) || '';
+
+      if (!clave) { UI.toast('Pega la clave de ' + prov.label); return; }
       try {
-        IA.guardarConfig(clave, modelo);
-        IA.listarModelos(true).then(function (lista) {
-          if (lista && lista.length && lista.indexOf(IA.config().modelo) === -1) {
-            IA.guardarConfig(clave, lista[0]);
-            UI.toast('Clave guardada. Modelo ajustado a ' + lista[0]);
-            render();
-          }
-        }).catch(function () { /* nada */ });
+        IA.guardarProveedor(prov.id, clave, modelo);
+        if (prov.listaViva) {
+          IA.listarModelos(true).then(function (lista) {
+            if (lista && lista.length && lista.indexOf(IA.modeloDe(prov.id)) === -1) {
+              IA.guardarProveedor(prov.id, clave, lista[0]);
+              UI.toast('Clave guardada. Modelo ajustado a ' + lista[0]);
+              render();
+            }
+          }).catch(function () { /* nada */ });
+        }
         render();
-        UI.toast('Clave guardada');
+        UI.toast(prov.label + ' guardado. Ahora piensa por toda la app.');
       } catch (e) { UI.toast(e.message); }
     });
 
@@ -392,8 +463,8 @@
       salida.textContent = 'Probando la conexión…';
       IA.llamar('Responde solo con la palabra: listo', { maxTokens: 512, temperatura: 0 })
         .then(function (r) {
-          salida.innerHTML = '<span style="color:var(--acc)">Funciona. La IA respondió: ' +
-            esc(r.slice(0, 40)) + '</span>';
+          salida.innerHTML = '<span style="color:var(--acc)">Funciona. ' +
+            esc(IA.proveedorActual().label) + ' respondió: ' + esc(r.slice(0, 40)) + '</span>';
           btn.disabled = false;
         })
         .catch(function (e) {
@@ -403,7 +474,9 @@
     });
 
     bind(root, '[data-a=borrarIA]', function () {
-      UI.confirm('Borrar la clave', 'El entrenador con IA dejará de funcionar en este dispositivo.',
+      const prov = IA.proveedorActual();
+      UI.confirm('Borrar la clave de ' + prov.label,
+        'Se olvida solo esa. Si tienes otro proveedor puesto, la app pasa a usarlo.',
         'Borrar', true).then(function (ok) {
         if (ok) { IA.borrarConfig(); render(); UI.toast('Clave borrada'); }
       });
@@ -487,10 +560,11 @@
     /* ---- todo ---- */
     bind(root, '[data-a=borrarTodo]', function () {
       UI.confirm('Borrar todas las claves',
-        'Se olvidarán Gemini, Spotify y Supabase en este dispositivo. Tus rutinas y tu ' +
+        'Se olvidarán todos los proveedores de IA, Spotify y Supabase en este ' +
+        'dispositivo. Tus rutinas y tu ' +
         'historial no se tocan.', 'Borrar todas', true).then(function (ok) {
         if (!ok) return;
-        IA.borrarConfig();
+        IA.borrarTodo();
         Spotify.borrarConfig();
         Sync.borrarConfig();
         render();

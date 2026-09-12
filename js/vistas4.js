@@ -303,7 +303,7 @@
           ? 'No viene a darte la razón: le pedimos que le ponga nota, que señale lo que '
             + 'falla y que proponga quitar, meter o cambiar ejercicios. Lo que diga se '
             + 'queda guardado y se aplica de un toque.'
-          : 'Necesita la clave de Gemini, que se configura en la bóveda de Ajustes. Sin ella '
+          : 'Necesita un proveedor de IA con su clave, en la bóveda de Ajustes. Sin eso '
             + 'el plan funciona igual, pero esta lectura no.')}</p>`;
     }
 
@@ -616,7 +616,7 @@
   }
 
   function afinar() {
-    if (!IA.activa()) { go('claves'); UI.toast('Configura la clave de Gemini para esto'); return; }
+    if (!IA.activa()) { go('claves'); UI.toast('Elige proveedor de IA y pon su clave'); return; }
     est.cargandoIA = true;
     render();
     IA.afinarPrograma(est.prog)

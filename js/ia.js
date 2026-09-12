@@ -1,7 +1,13 @@
-/* ia.js — asistente opcional apoyado en Gemini (Google), que tiene capa gratuita.
+/* ia.js — el núcleo inteligente de la app.
 
-   La clave se guarda solo en este navegador y nunca viaja al repositorio: la
-   introduce el usuario en Ajustes, igual que la configuración de la cuenta.
+   Detrás puede haber varios proveedores: Gemini, Anthropic, DeepSeek o Grok. Se
+   elige uno en la bóveda de claves y todo lo demás —el entrenador, la auditoría
+   de rutinas, la foto del plato, el menú semanal, las listas de música— sale por
+   ahí sin enterarse de cuál es. Cada proveedor guarda su propia clave y su
+   propio modelo, así que cambiar de uno a otro es un toque y no hay que volver
+   a pegar nada.
+
+   Las claves se guardan solo en este navegador y nunca viajan al repositorio.
 
    Todo lo que la app calcula por su cuenta (calorías, macros, rutinas) sigue
    funcionando sin clave; la IA añade explicación y planes redactados, no
@@ -28,25 +34,161 @@
     'No propones dietas por debajo de las calorías que te indiquen ni pérdidas de peso ' +
     'agresivas. No usas emojis.';
 
-  function config() {
+  /* ---------- quién puede contestar ----------
+     Cada uno habla su propio protocolo. Lo que la app le pide es siempre lo
+     mismo: un texto de vuelta. Añadir otro proveedor es añadir una entrada
+     aquí, no tocar ninguna pantalla. */
+  const PROVEEDORES = [
+    {
+      id: 'gemini',
+      label: 'Google Gemini',
+      nota: 'Tiene capa gratuita generosa. Es el que trae la app de serie.',
+      donde: 'https://aistudio.google.com/apikey',
+      dondeTxt: 'aistudio.google.com/apikey',
+      pista: 'AIza…',
+      modelos: MODELOS,
+      imagen: true,
+      listaViva: true
+    },
+    {
+      id: 'anthropic',
+      label: 'Anthropic (Claude)',
+      nota: 'De pago por uso. Es el que mejor sigue instrucciones largas, que es ' +
+        'lo que más hace esta app.',
+      donde: 'https://console.anthropic.com/settings/keys',
+      dondeTxt: 'console.anthropic.com',
+      pista: 'sk-ant-…',
+      modelos: ['claude-sonnet-5', 'claude-opus-5', 'claude-haiku-4-5-20251001'],
+      imagen: true
+    },
+    {
+      id: 'deepseek',
+      label: 'DeepSeek',
+      nota: 'De pago por uso y muy barato. No lee fotos: para la foto del plato ' +
+        'hace falta Gemini o Anthropic.',
+      donde: 'https://platform.deepseek.com/api_keys',
+      dondeTxt: 'platform.deepseek.com',
+      pista: 'sk-…',
+      modelos: ['deepseek-chat', 'deepseek-reasoner'],
+      imagen: false
+    },
+    {
+      id: 'grok',
+      label: 'xAI (Grok)',
+      nota: 'De pago por uso. Los nombres de sus modelos cambian a menudo: si te ' +
+        'da error de modelo, escribe el que tengas en tu consola.',
+      donde: 'https://console.x.ai',
+      dondeTxt: 'console.x.ai',
+      pista: 'xai-…',
+      modelos: ['grok-4', 'grok-3', 'grok-3-mini'],
+      imagen: true
+    }
+  ];
+
+  function proveedorPorId(id) {
+    return PROVEEDORES.find(function (p) { return p.id === id; }) || PROVEEDORES[0];
+  }
+
+  /* ---------- lo guardado ----------
+     Antes solo había Gemini y se guardaba {clave, modelo}. Eso se traduce a la
+     forma nueva la primera vez, para que nadie tenga que volver a pegar nada. */
+  function crudo() {
     try { return JSON.parse(localStorage.getItem(CFG) || 'null') || {}; }
     catch (e) { return {}; }
   }
 
-  function guardarConfig(clave, modelo) {
-    clave = String(clave || '').trim();
-    if (clave && clave.length < 20) throw new Error('Esa clave no parece válida.');
-    localStorage.setItem(CFG, JSON.stringify({
-      clave: clave, modelo: modelo || MODELOS[0], _ts: Date.now()
-    }));
+  function guardarCrudo(c) {
+    c._ts = Date.now();
+    localStorage.setItem(CFG, JSON.stringify(c));
   }
 
+  function config() {
+    const c = crudo();
+
+    /* traducción de lo de antes */
+    if (c.clave && !c.claves) {
+      c.claves = { gemini: c.clave };
+      c.modelos = { gemini: c.modelo || MODELOS[0] };
+      c.proveedor = 'gemini';
+      guardarCrudo(c);
+    }
+
+    c.claves = c.claves || {};
+    c.modelos = c.modelos || {};
+    c.proveedor = c.proveedor && proveedorPorId(c.proveedor).id === c.proveedor
+      ? c.proveedor : 'gemini';
+
+    /* lo que el resto de la app sigue leyendo como si solo hubiera uno */
+    c.clave = c.claves[c.proveedor] || '';
+    c.modelo = c.modelos[c.proveedor] || proveedorPorId(c.proveedor).modelos[0];
+    return c;
+  }
+
+  function proveedor() { return config().proveedor; }
+  function proveedorActual() { return proveedorPorId(proveedor()); }
+  function claveDe(id) { return config().claves[id] || ''; }
+  function modeloDe(id) { return config().modelos[id] || proveedorPorId(id).modelos[0]; }
+
+  /* Guarda la clave y el modelo de UN proveedor, sin tocar los demás */
+  function guardarProveedor(id, clave, modelo) {
+    const prov = proveedorPorId(id);
+    clave = String(clave || '').trim();
+    if (clave && clave.length < 20) throw new Error('Esa clave no parece válida.');
+
+    const c = config();
+    if (clave) c.claves[prov.id] = clave; else delete c.claves[prov.id];
+    c.modelos[prov.id] = modelo || prov.modelos[0];
+    if (clave) c.proveedor = prov.id;
+    guardarCrudo(c);
+  }
+
+  function elegirProveedor(id) {
+    const c = config();
+    c.proveedor = proveedorPorId(id).id;
+    guardarCrudo(c);
+  }
+
+  function recordarModelo(id, modelo) {
+    const c = config();
+    c.modelos[id] = modelo;
+    guardarCrudo(c);
+  }
+
+  /* Compatibilidad: lo que llamaba guardarConfig(clave, modelo) hablaba de Gemini
+     cuando solo había Gemini; ahora guarda en el proveedor que esté elegido. */
+  function guardarConfig(clave, modelo) {
+    guardarProveedor(proveedor(), clave, modelo);
+  }
+
+  /* Borra solo el proveedor que esté elegido; para dejarlo todo limpio está
+     borrarTodo(), que es lo que usa «olvidar todas mis claves». */
   function borrarConfig() {
+    const c = config();
+    const id = c.proveedor;
+    delete c.claves[id];
+    delete c.modelos[id];
+    /* se pasa al primero que sí tenga clave, si queda alguno */
+    const queda = PROVEEDORES.find(function (p) { return !!c.claves[p.id]; });
+    c.proveedor = queda ? queda.id : 'gemini';
+    guardarCrudo(c);
+    localStorage.removeItem(CACHE);
+    if (id === 'gemini') localStorage.removeItem(LIMITES);
+  }
+
+  function borrarTodo() {
     localStorage.removeItem(CFG);
     localStorage.removeItem(CACHE);
     localStorage.removeItem(LIMITES);
+    localStorage.removeItem(CACHE_MODELOS);
   }
+
   function activa() { return !!config().clave; }
+
+  /* Cuáles tienen clave puesta, para pintarlo en la bóveda */
+  function configurados() {
+    const c = config();
+    return PROVEEDORES.filter(function (p) { return !!c.claves[p.id]; }).map(function (p) { return p.id; });
+  }
 
   /* ---------- caché, para no gastar cuota repitiendo la misma consulta ---------- */
 
@@ -108,6 +250,12 @@
   }
 
   function listarModelos(forzar) {
+    /* Solo Gemini publica su catálogo de modelos con la clave del usuario. De
+       los demás se lleva una lista escrita a mano, que el usuario puede
+       cambiar a mano si su consola le ofrece otra cosa. */
+    const prov = proveedorActual();
+    if (prov.id !== 'gemini') return Promise.resolve(prov.modelos.slice());
+
     const guardados = forzar ? null : modelosGuardados();
     if (guardados) return Promise.resolve(guardados);
 
@@ -148,12 +296,146 @@
       .catch(function () { return MODELOS.slice(); });
   }
 
-  /* ---------- llamada ---------- */
-
+  /* ---------- la llamada, según quién conteste ----------
+     Una sola puerta para toda la app. Lo que cambia detrás —la URL, las
+     cabeceras, cómo se pide JSON, dónde viene el texto en la respuesta— se queda
+     en cada implementación y no sale de aquí. */
   function llamar(prompt, opciones) {
     opciones = opciones || {};
-    const c = config();
-    if (!c.clave) return Promise.reject(new Error('Falta la clave de la IA. Configúrala en Ajustes.'));
+    const prov = proveedorActual();
+    const clave = claveDe(prov.id);
+
+    if (!clave) {
+      return Promise.reject(new Error('Falta la clave de ' + prov.label +
+        '. Ponla en Ajustes → Bóveda de claves.'));
+    }
+    if (opciones.imagen && opciones.imagen.datos && !prov.imagen) {
+      return Promise.reject(new Error(prov.label + ' no lee imágenes. Para esto elige ' +
+        'Gemini o Anthropic como proveedor en la bóveda de claves.'));
+    }
+
+    if (prov.id === 'gemini') return llamarGemini(prompt, opciones, clave, modeloDe('gemini'));
+    if (prov.id === 'anthropic') return llamarAnthropic(prompt, opciones, clave, modeloDe('anthropic'));
+    if (prov.id === 'deepseek') {
+      return llamarCompatible('https://api.deepseek.com/chat/completions', prov,
+        prompt, opciones, clave, modeloDe('deepseek'));
+    }
+    return llamarCompatible('https://api.x.ai/v1/chat/completions', prov,
+      prompt, opciones, clave, modeloDe('grok'));
+  }
+
+  /* Lo común de los que hablan HTTP normal: un tiempo máximo, y traducir el
+     fallo a algo que se entienda. Un fetch que ni llega a contestar desde el
+     navegador casi siempre es CORS —el proveedor no deja que se le llame desde
+     una página web— y eso no lo arregla la app. */
+  function pedirHTTP(url, cabeceras, cuerpo, prov) {
+    const corte = new AbortController();
+    const reloj = setTimeout(function () { corte.abort(); }, 90000);
+
+    return fetch(url, {
+      method: 'POST', headers: cabeceras, body: JSON.stringify(cuerpo), signal: corte.signal
+    }).catch(function (e) {
+      clearTimeout(reloj);
+      if (e && e.name === 'AbortError') {
+        throw new Error(prov.label + ' ha tardado demasiado en responder. Vuelve a intentarlo.');
+      }
+      throw new Error('El navegador no ha podido conectar con ' + prov.label + '. Puede que ' +
+        'no permita llamadas desde una página web; si se repite, elige Gemini o Anthropic ' +
+        'en la bóveda de claves.');
+    }).then(function (r) {
+      clearTimeout(reloj);
+      return r.text().then(function (t) { return { r: r, t: t }; });
+    }).then(function (x) {
+      let j = null;
+      try { j = JSON.parse(x.t); } catch (e) { j = null; }
+
+      if (!x.r.ok) {
+        const err = j && j.error;
+        const msg = (err && (err.message || (typeof err === 'string' ? err : ''))) ||
+          (j && j.message) || ('Error ' + x.r.status);
+        if (x.r.status === 401 || x.r.status === 403) {
+          throw new Error('La clave de ' + prov.label + ' no vale o no tiene permiso.');
+        }
+        if (x.r.status === 429) {
+          throw new Error('Has agotado la cuota de ' + prov.label + ' por ahora. ' +
+            'Inténtalo más tarde.');
+        }
+        if (x.r.status === 404 || /model/i.test(msg)) {
+          throw new Error(prov.label + ': ' + msg + ' Prueba a escribir otro modelo en la ' +
+            'bóveda de claves.');
+        }
+        throw new Error(prov.label + ': ' + msg);
+      }
+      if (!j) throw new Error(prov.label + ' devolvió una respuesta que no se entiende.');
+      return j;
+    });
+  }
+
+  /* Anthropic no tiene modo JSON, pero se le puede empezar la respuesta: si ya
+     lleva una llave escrita no puede colocar un preámbulo delante. */
+  function llamarAnthropic(prompt, o, clave, modelo) {
+    const prov = proveedorPorId('anthropic');
+    const contenido = [];
+    if (o.imagen && o.imagen.datos) {
+      contenido.push({ type: 'image', source: {
+        type: 'base64', media_type: o.imagen.mime || 'image/jpeg', data: o.imagen.datos
+      } });
+    }
+    contenido.push({ type: 'text', text: prompt });
+
+    const mensajes = [{ role: 'user', content: contenido }];
+    if (o.json) mensajes.push({ role: 'assistant', content: '{' });
+
+    return pedirHTTP('https://api.anthropic.com/v1/messages', {
+      'content-type': 'application/json',
+      'x-api-key': clave,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    }, {
+      model: modelo,
+      max_tokens: Math.max(o.maxTokens || 2048, 256),
+      temperature: Math.min(1, o.temperatura == null ? 0.7 : o.temperatura),
+      system: INSTRUCCIONES,
+      messages: mensajes
+    }, prov).then(function (j) {
+      const texto = (j.content || [])
+        .filter(function (x) { return x.type === 'text'; })
+        .map(function (x) { return x.text || ''; })
+        .join('').trim();
+      if (!texto) throw new Error('Anthropic no devolvió texto.');
+      return o.json ? '{' + texto : texto;
+    });
+  }
+
+  /* DeepSeek y xAI hablan el mismo dialecto que OpenAI, así que comparten código */
+  function llamarCompatible(url, prov, prompt, o, clave, modelo) {
+    const cuerpo = {
+      model: modelo,
+      messages: [
+        { role: 'system', content: INSTRUCCIONES },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: Math.max(o.maxTokens || 2048, 256),
+      temperature: o.temperatura == null ? 0.7 : o.temperatura
+    };
+    if (o.json) cuerpo.response_format = { type: 'json_object' };
+
+    return pedirHTTP(url, {
+      'content-type': 'application/json',
+      authorization: 'Bearer ' + clave
+    }, cuerpo, prov).then(function (j) {
+      const m = ((j.choices || [])[0] || {}).message || {};
+      const texto = String(m.content || '').trim();
+      if (!texto) throw new Error(prov.label + ' no devolvió texto.');
+      return texto;
+    });
+  }
+
+  /* ---------- Gemini ---------- */
+
+  function llamarGemini(prompt, opciones, claveIA, modeloIA) {
+    opciones = opciones || {};
+    const c = { clave: claveIA, modelo: modeloIA };
 
     /* Los modelos recientes razonan antes de responder y ese razonamiento gasta
        del mismo presupuesto de tokens. Con un límite corto se lo consumen entero
@@ -254,7 +536,8 @@
               if (i < modelos.length - 1) return intentar(i + 1);
               if (!opciones._esperado) {
                 return new Promise(function (res) { setTimeout(res, 2500); }).then(function () {
-                  return llamar(prompt, Object.assign({}, opciones, { _esperado: true }));
+                  return llamarGemini(prompt, Object.assign({}, opciones, { _esperado: true }),
+                    claveIA, modeloIA);
                 });
               }
               throw new Error('Los modelos de Gemini están saturados ahora mismo. ' +
@@ -292,10 +575,10 @@
             /* se quedó sin tokens antes de escribir nada: se reintenta con más
                margen, que es la causa habitual de una respuesta vacía */
             if (razon === 'MAX_TOKENS' && !opciones._ampliado) {
-              return llamar(prompt, Object.assign({}, opciones, {
+              return llamarGemini(prompt, Object.assign({}, opciones, {
                 _ampliado: true,
                 maxTokens: Math.min((cuerpo.generationConfig.maxOutputTokens || 2048) * 4, 16384)
-              }));
+              }), claveIA, modeloIA);
             }
 
             if (razon === 'SAFETY' || razon === 'PROHIBITED_CONTENT') {
@@ -312,7 +595,7 @@
           }
           /* el modelo que ha respondido pasa a ser el preferido */
           if (modelos[i] !== c.modelo) {
-            try { guardarConfig(c.clave, modelos[i]); } catch (e) { /* nada */ }
+            try { recordarModelo('gemini', modelos[i]); } catch (e) { /* nada */ }
           }
           return texto.trim();
         });
@@ -649,6 +932,7 @@
     if (!lista) return Promise.reject(new Error('Esta rutina todavía no tiene ejercicios.'));
 
     const dias = (r.days || []).length ? UI.diasLargos(r.days) : 'ningún día fijo';
+    const minimo = Store.MINIMO_EJERCICIOS || 6;
 
     const suyos = [];
     (r.exercises || []).forEach(function (e) {
@@ -674,16 +958,25 @@
       '  "quitar": sobra. Rellena "quitar" con el nombre exacto.\n' +
       '  "anadir": falta. Rellena "poner" con el nombre EXACTO de un ejercicio ' +
       'del catálogo, y "series" y "reps".\n' +
-      'Si un cambio no la mejora de verdad, no lo propongas.\n\n' +
+      'Si un cambio no la mejora de verdad, no lo propongas.\n' +
+      '- Y aparte de los cambios sueltos, escribe en "rutina" cómo quedaría la ' +
+      'sesión entera ya corregida: todos los ejercicios en el orden en que hay que ' +
+      'hacerlos, con sus series, repeticiones y descanso. Es la rutina que tú ' +
+      'montarías para esta persona, no una lista de parches: los básicos delante y ' +
+      'el accesorio detrás. Entre ' + minimo + ' y ' + (minimo + 3) + ' ejercicios, ' +
+      'ni uno menos de ' + minimo + ' —que es el mínimo que admite la app—, todos ' +
+      'con el nombre EXACTO del catálogo.\n\n' +
       'Devuelve JSON: {"nota":número del 0 al 10,' +
       '"veredicto":"2 frases sin rodeos",' +
       '"puntos":[{"titulo":"3-5 palabras","detalle":"1-2 frases con la consecuencia"}],' +
       '"cambios":[{"accion":"cambiar|quitar|anadir","quitar":"nombre exacto o vacío",' +
       '"poner":"nombre o vacío","series":número o 0,"reps":número o 0,' +
       '"porque":"1 frase"}],' +
+      '"rutina":[{"ejercicio":"nombre EXACTO del catálogo","series":número,' +
+      '"reps":número,"descanso":segundos,"porque":"media frase"}],' +
       '"consejo":"lo que más cambiaría el resultado de esta rutina, 1 frase"}';
 
-    return llamarJSON(prompt, { maxTokens: 2048, temperatura: 0.55 });
+    return llamarJSON(prompt, { maxTokens: 3072, temperatura: 0.55 });
   }
 
   /* ---------- afinar el programa ----------
@@ -784,18 +1077,18 @@
      es la pregunta de verdad, no para contar calorías al gramo. */
   function analizarComida(imagen, pista) {
     const m = Perfil.macros ? Perfil.macros() : null;
-    const suyo = m ? 'Al d\u00eda le tocan unas ' + m.kcal + ' kcal y ' + m.prot +
-      ' g de prote\u00edna, por si ayuda a juzgar el tama\u00f1o de la raci\u00f3n.\n' : '';
+    const suyo = m ? 'Al día le tocan unas ' + m.kcal + ' kcal y ' + m.prot +
+      ' g de proteína, por si ayuda a juzgar el tamaño de la ración.\n' : '';
 
     const prompt = PERSONA + '\n\nAhora estás mirando la foto de un plato.\n' + suyo +
-      (pista ? 'Quien la ha hecho a\u00f1ade: "' + pista + '".\n' : '') +
-      '\nDi qu\u00e9 alimentos ves y estima la raci\u00f3n de cada uno en gramos o en medidas ' +
-      'caseras. Suma las calor\u00edas y la prote\u00edna del plato entero. Si la foto no deja ' +
-      'ver bien algo, tira por lo m\u00e1s probable en una comida normal y b\u00e1jale la ' +
+      (pista ? 'Quien la ha hecho añade: "' + pista + '".\n' : '') +
+      '\nDi qué alimentos ves y estima la ración de cada uno en gramos o en medidas ' +
+      'caseras. Suma las calorías y la proteína del plato entero. Si la foto no deja ' +
+      'ver bien algo, tira por lo más probable en una comida normal y bájale la ' +
       'confianza. Si en la foto no hay comida, dilo con kcal 0.\n\n' +
-      'Devuelve JSON: {"plato":"c\u00f3mo llamar\u00edas a esto en 2-5 palabras",' +
-      '"alimentos":[{"que":"nombre","cuanto":"raci\u00f3n estimada","kcal":n\u00famero,' +
-      '"prot":n\u00famero}],"kcal":n\u00famero,"prot":n\u00famero,' +
+      'Devuelve JSON: {"plato":"cómo llamarías a esto en 2-5 palabras",' +
+      '"alimentos":[{"que":"nombre","cuanto":"ración estimada","kcal":número,' +
+      '"prot":número}],"kcal":número,"prot":número,' +
       '"confianza":"alta|media|baja","nota":"una frase con lo que no has podido ' +
       'ver bien o lo que has dado por supuesto"}\n\n' +
       'Estima sin miedo pero sin adornar: si el plato lleva más aceite o más ' +
@@ -966,6 +1259,10 @@
 
   g.IA = {
     config: config, guardarConfig: guardarConfig, borrarConfig: borrarConfig, activa: activa,
+    PROVEEDORES: PROVEEDORES, proveedor: proveedor, proveedorActual: proveedorActual,
+    proveedorPorId: proveedorPorId, claveDe: claveDe, modeloDe: modeloDe,
+    guardarProveedor: guardarProveedor, elegirProveedor: elegirProveedor,
+    configurados: configurados, borrarTodo: borrarTodo,
     llamar: llamar, llamarJSON: llamarJSON, contexto: contexto, limpiarCache: limpiarCache,
     listarModelos: listarModelos,
     planNutricion: planNutricion, revisarRutinas: revisarRutinas,
