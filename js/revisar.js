@@ -191,27 +191,43 @@
     });
   }
 
+  const GRANDES_PATRONES = AXIALES.concat(
+    ['empuje horizontal', 'empuje vertical', 'traccion vertical']);
+
+  function esPesado(e) {
+    const ex = Data.get(e.exId);
+    return !!(ex && ex.mechanic === 'compound' &&
+      GRANDES_PATRONES.indexOf(Alt.patron(ex)) !== -1);
+  }
+
+  /* Un hallazgo por sesión, no uno por ejercicio mal puesto. Sacándolos sueltos,
+     cada arreglo se calculaba sobre la lista original y al aplicar el primero
+     los demás apuntaban a un sitio que ya no existía: dos básicos pidiendo «al
+     primer puesto» acababan en el orden contrario al bueno. */
   function reglaOrden(sesiones, hallazgos) {
     sesiones.forEach(function (s, i) {
       const lista = ejerciciosDe(s);
       let vistoAislado = -1;
+      const tarde = [];
       lista.forEach(function (e, k) {
         const ex = Data.get(e.exId);
         if (!ex) return;
         if (ex.mechanic === 'isolation' && vistoAislado === -1) vistoAislado = k;
-        if (ex.mechanic === 'compound' && vistoAislado !== -1 &&
-            AXIALES.concat(['empuje horizontal', 'empuje vertical', 'traccion vertical'])
-              .indexOf(Alt.patron(ex)) !== -1) {
-          hallazgos.push({
-            id: 'orden:' + i + ':' + e.exId, gravedad: 2,
-            titulo: nombre(e) + ' va demasiado tarde',
-            dato: 'en ' + tituloSesion(s, i) + ' lo haces el ' + (k + 1) + '.º, detrás de ' +
-              nombre(lista[vistoAislado]) + ', que es de aislamiento: llegas cansado al ' +
-              'ejercicio que más peso mueve',
-            arreglo: { tipo: 'orden', exId: e.exId, dia: i }
-          });
-          vistoAislado = -1;
+        if (esPesado(e) && vistoAislado !== -1) {
+          tarde.push({ e: e, k: k, tras: lista[vistoAislado] });
         }
+      });
+      if (!tarde.length) return;
+
+      hallazgos.push({
+        id: 'orden:' + i, gravedad: 2,
+        titulo: tarde.length === 1
+          ? nombre(tarde[0].e) + ' va demasiado tarde'
+          : tarde.length + ' básicos van demasiado tarde',
+        dato: 'en ' + tituloSesion(s, i) + ', ' + tarde.map(function (t) {
+          return nombre(t.e) + ' es el ' + (t.k + 1) + '.º, detrás de ' + nombre(t.tras);
+        }).join('; ') + ': llegas cansado a lo que más peso mueve',
+        arreglo: { tipo: 'orden', dia: i }
       });
     });
   }
@@ -539,6 +555,53 @@
       const a = h.arreglo;
       if (!a) return;
 
+      /* El orden y el descanso se salían sin arreglo: el dictamen decía que el
+         básico iba demasiado tarde o que descansabas poco, y luego no había
+         forma de aplicarlo. Son dos de las tres cosas que más cambian una
+         sesión y las dos se arreglan solas. */
+      if (a.tipo === 'orden') {
+        const ses = sesiones[a.dia];
+        if (!ses) return;
+        const lista = ejerciciosDe(ses);
+
+        /* El orden entero de la sesión, de una vez: los básicos pesados delante
+           —entre ellos, como estuvieran—, luego el resto de compuestos y al final
+           el aislamiento. Se conserva el orden relativo dentro de cada grupo para
+           no reescribir una sesión que por dentro ya estaba pensada. */
+        const pesados = [], compuestos = [], aislados = [];
+        lista.forEach(function (e) {
+          const x = Data.get(e.exId);
+          if (esPesado(e)) pesados.push(e);
+          else if (x && x.mechanic === 'compound') compuestos.push(e);
+          else aislados.push(e);
+        });
+        const nuevo = pesados.concat(compuestos, aislados);
+
+        const igual = nuevo.every(function (e, k) { return lista[k] === e; });
+        if (igual) return;
+
+        cambios.push({
+          accion: 'orden', sobre: tituloSesion(ses, a.dia), poner: '', quitar: '',
+          dia: a.dia + 1,
+          lista: nuevo.map(function (e) { return (Data.get(e.exId) || {}).nameEs || ''; }),
+          porque: 'los básicos delante y el aislamiento al final, para llegar ' +
+            'descansado a lo que más peso mueve'
+        });
+        return;
+      }
+
+      if (a.tipo === 'descanso' && a.donde) {
+        a.donde.forEach(function (d) {
+          const ex = Data.get(d.exId);
+          if (!ex) return;
+          cambios.push({ accion: 'descanso', sobre: ex.nameEs, poner: '', quitar: '',
+            dia: d.dia + 1, rest: a.valor,
+            porque: 'subir el descanso a ' + a.valor + ' segundos, que es lo que ' +
+              'necesita un básico pesado para repetir la serie con fuerza' });
+        });
+        return;
+      }
+
       if (a.tipo === 'quitar' && a.exId) {
         const ex = Data.get(a.exId);
         if (!ex) return;
@@ -604,6 +667,29 @@
           .sort(function (x, y) { return (rev.directas[x] || 0) - (rev.directas[y] || 0); })
           .slice(0, 2);
         lista.forEach(function (m) {
+          /* Si ya hay un ejercicio de ese músculo con pocas series, sale más a
+             cuenta subirle las series que meter otro ejercicio: la sesión no se
+             alarga y el estímulo sube igual. */
+          let flojo = null;
+          sesiones.forEach(function (ses, i) {
+            ejerciciosDe(ses).forEach(function (e) {
+              const x = Data.get(e.exId);
+              if (!x || (x.primaryMuscles || []).indexOf(m) === -1) return;
+              if (e.sets >= 4) return;
+              if (!flojo || e.sets < flojo.e.sets) flojo = { e: e, dia: i, ex: x };
+            });
+          });
+          if (flojo) {
+            const suben = Math.min(5, flojo.e.sets +
+              Math.max(1, MINIMO - (rev.directas[m] || 0)));
+            cambios.push({ accion: 'series', sobre: flojo.ex.nameEs, poner: '', quitar: '',
+              dia: flojo.dia + 1, series: suben,
+              porque: 'de ' + flojo.e.sets + ' a ' + suben + ' series para subir ' +
+                I18N.muscle(m).toLowerCase() + ', que está en ' + (rev.directas[m] || 0) +
+                ' y el mínimo es ' + MINIMO });
+            return;
+          }
+
           const ex = mejorPara(m, gear, dentro);
           if (!ex) return;
           const dia = diaAfin(sesiones, ex, -1, false);

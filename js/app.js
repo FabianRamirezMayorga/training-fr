@@ -2599,19 +2599,25 @@
 
       ${raw((r.cambios || []).length ? html`
         <div class="card">
-          <b>Cambios sueltos, si prefieres ir uno a uno</b>
+          <b>Los cambios, para aplicarlos de uno en uno</b>
           <div class="stack" style="margin-top:9px">
             ${raw(r.cambios.map(function (c, i) {
               const acc = accionRutina(c);
+              const etiqueta = { quitar: 'Quitar', anadir: 'Añadir', cambiar: 'Sustituir',
+                orden: 'Reordenar', descanso: 'Descanso', series: 'Series' }[acc] || 'Cambiar';
               const que = acc === 'quitar' ? c.quitar
                 : acc === 'anadir' ? c.poner
+                : acc === 'orden' ? ((c.lista || []).length
+                    ? 'Los básicos delante en ' + c.sobre
+                    : c.sobre + ' al ' + (c.posicion || 1) + '.º')
+                : acc === 'descanso' ? c.sobre + ' a ' + (c.rest || 0) + 's'
+                : acc === 'series' ? c.sobre + ' a ' + (c.series || 0) + ' series'
                 : c.poner + ' en lugar de ' + c.quitar;
               return html`
                 <div class="row between" style="gap:10px;align-items:flex-start">
                   <div class="grow">
                     <div style="font-size:.86rem">
-                      <span class="chip tiny-chip">${acc === 'quitar' ? 'Quitar'
-                        : acc === 'anadir' ? 'Añadir' : 'Sustituir'}</span>
+                      <span class="chip tiny-chip">${etiqueta}</span>
                       <b>${que}</b></div>
                     <div class="tiny">${c.porque || ''}</div>
                   </div>
@@ -2724,6 +2730,12 @@
 
   function accionRutina(c) {
     const a = String(c.accion || '').toLowerCase().replace('ñ', 'n');
+    /* Las tres que no tocan qué ejercicios hay, sino cómo se hacen. Sin
+       reconocerlas aquí caían en el «si no trae poner, es un quitar» del final y
+       borraban el ejercicio que venían a arreglar. */
+    if (a.indexOf('orden') === 0) return 'orden';
+    if (a.indexOf('descans') === 0) return 'descanso';
+    if (a.indexOf('serie') === 0) return 'series';
     if (a.indexOf('quit') === 0 || a.indexOf('elimin') === 0) return 'quitar';
     if (a.indexOf('anad') === 0 || a.indexOf('agreg') === 0 || a.indexOf('met') === 0) return 'anadir';
     if (a.indexOf('cambi') === 0 || a.indexOf('sustit') === 0 || a.indexOf('reempl') === 0) return 'cambiar';
@@ -2759,6 +2771,64 @@
       }
       return parcial;
     };
+
+    /* Estas tres trabajan sobre un ejercicio que ya está: no hay nada que buscar
+       en el catálogo ni que validar contra el material. */
+    /* Reordenar la sesión entera: viene la lista final y se recoloca contra
+       ella. Un cambio por ejercicio se pisaba con el siguiente, porque cada uno
+       apuntaba a una posición de la lista de antes. */
+    if (acc === 'orden' && (c.lista || []).length) {
+      const pedido = c.lista.map(function (n) { return I18N.norm(String(n || '')); });
+      const quedan = draft.exercises.slice();
+      const puestos = [];
+      pedido.forEach(function (n) {
+        const k = quedan.findIndex(function (e) {
+          const ex = Data.get(e.exId);
+          return ex && I18N.norm(ex.nameEs) === n;
+        });
+        if (k !== -1) puestos.push(quedan.splice(k, 1)[0]);
+      });
+      /* lo que no venga nombrado se queda detrás, no se pierde */
+      draft.exercises = puestos.concat(quedan);
+      guardar();
+      fuera('Sesión reordenada');
+      return;
+    }
+
+    if (acc === 'orden' || acc === 'descanso' || acc === 'series') {
+      const k = dondeEsta(c.sobre || c.quitar || c.poner);
+      if (k === -1) {
+        fuera('Ya no está «' + (c.sobre || c.quitar || '') + '» en la rutina.');
+        return;
+      }
+      const nombre = (Data.get(draft.exercises[k].exId) || {}).nameEs || '';
+
+      if (acc === 'orden') {
+        const destino = Math.max(0, Math.min(draft.exercises.length - 1,
+          (Number(c.posicion) || 1) - 1));
+        const movido = draft.exercises.splice(k, 1)[0];
+        draft.exercises.splice(destino, 0, movido);
+        guardar();
+        fuera(nombre + ' pasa al ' + (destino + 1) + '.º');
+        return;
+      }
+
+      if (acc === 'descanso') {
+        const seg = Math.max(0, Math.min(600, Number(c.rest) || 0));
+        if (!seg) { fuera('Ese cambio no dice cuánto descanso poner.'); return; }
+        draft.exercises[k].rest = seg;
+        guardar();
+        fuera(nombre + ': descanso a ' + seg + 's');
+        return;
+      }
+
+      const series = Math.max(1, Math.min(15, Number(c.series) || 0));
+      if (!series) { fuera('Ese cambio no dice cuántas series poner.'); return; }
+      draft.exercises[k].sets = series;
+      guardar();
+      fuera(nombre + ': ' + series + ' series');
+      return;
+    }
 
     if (acc === 'quitar') {
       const k = dondeEsta(c.quitar);

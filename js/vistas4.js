@@ -630,7 +630,8 @@
   }
 
   const ETIQUETA_ACCION = {
-    cambiar: 'Sustituir', quitar: 'Quitar', anadir: 'Añadir'
+    cambiar: 'Sustituir', quitar: 'Quitar', anadir: 'Añadir',
+    orden: 'Reordenar', descanso: 'Descanso', series: 'Series'
   };
 
   /* Cómo se lee un cambio antes de aplicarlo. Escrito como lo diría alguien de
@@ -643,11 +644,23 @@
         ? ' en ' + est.prog.sesiones[Number(c.dia) - 1].nombre : '';
       return html`<b>${c.poner}</b>${donde}`;
     }
+    if (acc === 'orden') {
+      return (c.lista || []).length
+        ? html`Los básicos delante en <b>${c.sobre}</b>`
+        : html`<b>${c.sobre}</b> al ${c.posicion || 1}.º`;
+    }
+    if (acc === 'descanso') return html`<b>${c.sobre}</b> a ${c.rest || 0}s de descanso`;
+    if (acc === 'series') return html`<b>${c.sobre}</b> a ${c.series || 0} series`;
     return html`<b>${c.poner}</b> en lugar de ${c.quitar}`;
   }
 
   function accionDe(c) {
     const a = String(c.accion || '').toLowerCase().replace('ñ', 'n');
+    /* Las que no cambian qué ejercicios hay, sino cómo se hacen. Sin
+       reconocerlas caen en el «si no trae poner, es un quitar» del final. */
+    if (a === 'orden') return 'orden';
+    if (a === 'descanso') return 'descanso';
+    if (a === 'series') return 'series';
     if (a === 'quitar' || a === 'eliminar' || a === 'sacar') return 'quitar';
     if (a === 'anadir' || a === 'agregar' || a === 'meter' || a === 'sumar') return 'anadir';
     if (a === 'cambiar' || a === 'sustituir' || a === 'reemplazar') return 'cambiar';
@@ -1468,6 +1481,75 @@
     const c = (est.ia.cambios || [])[i];
     if (!c) return;
     const accion = accionDe(c);
+
+    /* Sobre un ejercicio que ya está: ni catálogo ni material que validar. */
+    /* La sesión entera de una vez: ver app.js, mismo motivo. */
+    if (accion === 'orden' && (c.lista || []).length) {
+      const ses = est.prog.sesiones[Number(c.dia) - 1];
+      if (!ses) {
+        UI.toast('Ese día ya no está en el plan.');
+        est.ia.cambios.splice(i, 1);
+        guardarEstado();
+        repintarQuieto();
+        return;
+      }
+      const pedido = c.lista.map(function (n) { return I18N.norm(String(n || '')); });
+      const quedan = ses.ejercicios.slice();
+      const puestos = [];
+      pedido.forEach(function (n) {
+        const k = quedan.findIndex(function (e) {
+          const ex = Data.get(e.exId);
+          return ex && I18N.norm(ex.nameEs) === n;
+        });
+        if (k !== -1) puestos.push(quedan.splice(k, 1)[0]);
+      });
+      ses.ejercicios = puestos.concat(quedan);
+      est.ia.cambios.splice(i, 1);
+      apuntarAplicado(ses.nombre + ': reordenada, los básicos delante');
+      return;
+    }
+
+    if (accion === 'orden' || accion === 'descanso' || accion === 'series') {
+      const sitio = enElPlan(c.sobre || c.quitar || c.poner);
+      if (!sitio) {
+        UI.toast('Ya no está «' + (c.sobre || c.quitar || '') + '» en el plan.');
+        est.ia.cambios.splice(i, 1);
+        guardarEstado();
+        repintarQuieto();
+        return;
+      }
+
+      if (accion === 'orden') {
+        const lista = sitio.ses.ejercicios;
+        const destino = Math.max(0, Math.min(lista.length - 1, (Number(c.posicion) || 1) - 1));
+        const movido = lista.splice(sitio.i, 1)[0];
+        lista.splice(destino, 0, movido);
+        est.ia.cambios.splice(i, 1);
+        apuntarAplicado(sitio.ex.nameEs + ': pasa al ' + (destino + 1) + '.º en ' +
+          sitio.ses.nombre);
+        return;
+      }
+
+      if (accion === 'descanso') {
+        const seg = Math.max(0, Math.min(600, Number(c.rest) || 0));
+        if (!seg) { UI.toast('Ese cambio no dice cuánto descanso poner.'); return; }
+        sitio.ses.ejercicios[sitio.i].rest = seg;
+        est.ia.cambios.splice(i, 1);
+        apuntarAplicado(sitio.ex.nameEs + ': descanso a ' + seg + 's');
+        return;
+      }
+
+      const series = Math.max(1, Math.min(15, Number(c.series) || 0));
+      if (!series) { UI.toast('Ese cambio no dice cuántas series poner.'); return; }
+      const antes = sitio.ses.ejercicios[sitio.i];
+      sitio.ses.minutos = Math.max(15, sitio.ses.minutos - minutosDe(antes));
+      antes.sets = series;
+      sitio.ses.minutos += minutosDe(antes);
+      Programa.revolumen(est.prog);
+      est.ia.cambios.splice(i, 1);
+      apuntarAplicado(sitio.ex.nameEs + ': ' + series + ' series');
+      return;
+    }
 
     if (accion === 'quitar') {
       const sitio = enElPlan(c.quitar);
