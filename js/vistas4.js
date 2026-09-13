@@ -45,6 +45,7 @@
     cargandoIA: false,
     cargandoPlan: false,
     creando: false,
+    ordenes: '',
     gear: '',
     falloIA: '',
     todoAbierto: false,
@@ -561,7 +562,15 @@
              placeholder="Ej. la rodilla al bajar, el hombro por encima de la cabeza">
       <label class="tiny" style="display:block;margin:12px 0 5px">
         ¿ALGO MÁS QUE DEBA SABER?</label>
-      <textarea id="pg-notas" rows="3" placeholder="Ej. quiero mejorar en dominadas; odio las sentadillas; los viernes voy con prisa; tengo una carrera en dos meses">${est.notas || ''}</textarea>`;
+      <textarea id="pg-notas" rows="3" placeholder="Ej. quiero mejorar en dominadas; odio las sentadillas; los viernes voy con prisa; tengo una carrera en dos meses">${est.notas || ''}</textarea>
+
+      <div class="hr"></div>
+      <label class="tiny" style="display:block;margin:0 0 5px">
+        ¿LE PIDES ALGO CONCRETO AL ENTRENADOR?</label>
+      <div class="tiny" style="margin:0 0 6px">Lo de arriba es contexto sobre ti; esto son
+        órdenes. Lo que escribas aquí manda sobre lo demás, siempre que no sea un riesgo
+        ni choque con tus limitaciones.</div>
+      <textarea id="pg-ordenes" rows="3" placeholder="Ej. nada de peso muerto; empieza siempre por dominadas; que el viernes no pase de 40 minutos; mete abdomen todos los días">${est.ordenes || ''}</textarea>`;
 
     return html`
       <div class="list-head" id="generar">
@@ -1144,6 +1153,8 @@
     if (molestias) molestias.oninput = function () { est.molestias = molestias.value; };
     const notas = root.querySelector('#pg-notas');
     if (notas) notas.oninput = function () { est.notas = notas.value; };
+    const ordenes = root.querySelector('#pg-ordenes');
+    if (ordenes) ordenes.oninput = function () { est.ordenes = ordenes.value; };
 
     /* «Nuevo» tiene que dejar la pantalla en blanco: si abajo sigue colgando el
        plan de antes, parece que ya te ha generado algo sin haberlo pedido. */
@@ -1475,7 +1486,7 @@
       dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(), foco: est.foco,
       gear: gearActual(), objetivoSeries: base.objetivoSeries,
       lesiones: base.lesiones, musculos: Object.keys(base.volumen || {}),
-      molestias: est.molestias, notas: est.notas
+      molestias: est.molestias, notas: est.notas, ordenes: est.ordenes
     }).then(function (r) {
       const prog = fusionarIA(base, r);
       if (!prog) {

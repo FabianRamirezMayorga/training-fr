@@ -377,8 +377,10 @@
       });
   }
 
-  /* La usa también la portada, que tiene su propio botón de cámara */
+  /* Las usa también la portada y la pantalla del día, que tienen sus propios
+     botones de cámara y de apuntar a mano. */
   V.mirarFotoComida = mirarFoto;
+  V.comidaAMano = comidaAMano;
 
   V.nutricion.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });

@@ -1453,6 +1453,14 @@
       (o.notas ? 'LO QUE HA ESCRITO DE SU PUÑO Y LETRA: "' + o.notas + '". Esto pesa más ' +
         'que cualquier norma general: si pide algo concreto, dáselo, y si lo que pide ' +
         'choca con su objetivo, dale lo que pide y explícale el coste en una frase.\n' : '') +
+      (o.ordenes ? 'INSTRUCCIONES QUE TE DA ÉL MISMO PARA ESTE PLAN: "' + o.ordenes +
+        '".\nEsto no es contexto, son órdenes, y van por delante de cualquier norma ' +
+        'general de las de abajo: si te dice que no metas un ejercicio, no lo metes; si ' +
+        'te dice por dónde empezar cada sesión, empiezas por ahí. Lo único que manda más ' +
+        'que esto son sus limitaciones y el material que tiene: si lo que pide choca con ' +
+        'eso, hazlo lo más parecido que se pueda y dile en las razones por qué no ha ' +
+        'podido ser tal cual. Si choca con su objetivo pero no es peligroso, se lo das ' +
+        'igual y le explicas el coste en una frase.\n' : '') +
       menuEjercicios(o.musculos || [], o.gear) + '\n' +
       'CÓMO TIENE QUE SER:\n' +
       '- Cada sesión, entre ' + minimo + ' y ' + (minimo + 3) + ' ejercicios, los ' +

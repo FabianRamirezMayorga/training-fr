@@ -326,7 +326,13 @@
       else if (plan) clases.push('plan');
       if (esHoy) clases.push('es-hoy');
 
-      return '<div class="' + clases.join(' ') + '"><span>' + d.charAt(0) + '</span><i></i></div>';
+      /* La inicial sola no dice qué día es: para saber si el hueco vacío del
+         miércoles es el de esta semana o el de la que viene hay que contar con
+         el dedo. Con el número debajo se lee de un vistazo, y el de hoy se
+         dice con todas las letras. */
+      return '<div class="' + clases.join(' ') + '">' +
+        '<span>' + (esHoy ? 'Hoy' : d.charAt(0)) + '</span>' +
+        '<b>' + fecha.getDate() + '</b><i></i></div>';
     }).join('');
 
     const frase = previstos
@@ -384,9 +390,11 @@
 
         <div class="row" style="margin-top:12px">
           <label class="btn primary grow" for="foto-inicio" style="cursor:pointer">
-            ${raw(icon('nutricion'))} Foto de lo que como</label>
-          <button class="btn" data-a="irnutricion">Ver el día</button>
+            ${raw(icon('nutricion'))} Foto</label>
+          <button class="btn grow" data-a="comidamano">${raw(icon('plus'))} A mano</button>
         </div>
+        <button class="btn block sm" data-a="verdia" style="margin-top:8px">
+          Ver mi día entero</button>
         <input type="file" id="foto-inicio" accept="image/*" capture="environment" hidden>
       </div>
 
@@ -921,6 +929,10 @@
     bind(root, '[data-a=plantillas]', function () { go('rutinas'); });
     bind(root, '[data-a=verprogreso]', function () { go('progreso'); });
     bind(root, '[data-a=irnutricion]', function () { go('nutricion'); });
+    bind(root, '[data-a=verdia]', function () { go('dia'); });
+    bind(root, '[data-a=comidamano]', function () {
+      if (g.VISTAS && VISTAS.comidaAMano) VISTAS.comidaAMano();
+    });
 
     /* La cámara, a un toque desde la portada: es lo que más veces al día se
        hace y estaba dos pantallas adentro. */
