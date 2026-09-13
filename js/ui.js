@@ -303,7 +303,7 @@
     if (!fila) return;
     const cara = fila.querySelector(':scope > .desliza-cara');
     if (cara) cara.style.transform = '';
-    fila.classList.remove('abierta');
+    fila.classList.remove('abierta', 'abierta-izq');
     if (abierta === fila) abierta = null;
   }
 
@@ -315,17 +315,21 @@
       fila._listo = true;
 
       const cara = fila.querySelector(':scope > .desliza-cara');
-      const panel = fila.querySelector(':scope > .desliza-acciones');
-      if (!cara || !panel) return;
+      const panel = fila.querySelector(':scope > .desliza-acciones.der');
+      const panelIzq = fila.querySelector(':scope > .desliza-acciones.izq');
+      if (!cara || (!panel && !panelIzq)) return;
 
       let x0 = 0, y0 = 0, dx = 0, eje = '', activo = false, movido = false;
 
       /* Nunca se empuja tanto como para que la fila deje de decir qué es: con
          los botones ocupando casi todo el ancho, al abrir un plan solo se veía
          el final de su texto y no se sabía cuál se estaba tocando. */
-      const ancho = function () {
-        return Math.min(panel.offsetWidth || 0, Math.max(0, fila.offsetWidth - 130));
+      const tope = function (el) {
+        if (!el) return 0;
+        return Math.min(el.offsetWidth || 0, Math.max(0, fila.offsetWidth - 112));
       };
+      const ancho = function () { return tope(panel); };
+      const anchoIzq = function () { return tope(panelIzq); };
 
       cara.addEventListener('pointerdown', function (e) {
         if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -350,10 +354,13 @@
 
         movido = true;
         fila.classList.add('moviendo');
-        const base = fila.classList.contains('abierta') ? -ancho() : 0;
-        /* de cero a -ancho, con un poco de resistencia si se pasa */
-        dx = Math.max(-ancho() - 20, Math.min(0, base + ex));
+        const base = fila.classList.contains('abierta') ? -ancho()
+          : fila.classList.contains('abierta-izq') ? anchoIzq() : 0;
+        /* a la izquierda las acciones, a la derecha el renombrar; un poco de
+           resistencia al pasarse de cualquiera de los dos lados */
+        dx = Math.max(-ancho() - 20, Math.min(anchoIzq() + 20, base + ex));
         cara.style.transform = 'translateX(' + dx + 'px)';
+        fila.classList.toggle('mirando-izq', dx > 0);
       });
 
       const soltar = function () {
@@ -362,10 +369,15 @@
         cara.style.transition = '';
         fila.classList.remove('moviendo');
         if (!movido) return;
-        const abrir = dx < -ancho() / 2;
-        cara.style.transform = abrir ? 'translateX(' + (-ancho()) + 'px)' : '';
-        fila.classList.toggle('abierta', abrir);
-        abierta = abrir ? fila : (abierta === fila ? null : abierta);
+
+        const abrirDer = ancho() && dx < -ancho() / 2;
+        const abrirIzq = anchoIzq() && dx > anchoIzq() / 2;
+        cara.style.transform = abrirDer ? 'translateX(' + (-ancho()) + 'px)'
+          : abrirIzq ? 'translateX(' + anchoIzq() + 'px)' : '';
+        fila.classList.toggle('abierta', !!abrirDer);
+        fila.classList.toggle('abierta-izq', !!abrirIzq);
+        fila.classList.toggle('mirando-izq', !!abrirIzq);
+        abierta = (abrirDer || abrirIzq) ? fila : (abierta === fila ? null : abierta);
       };
 
       cara.addEventListener('pointerup', soltar);
@@ -382,7 +394,9 @@
       }, true);
 
       /* Al usar una acción, la fila se cierra: lo que hay debajo va a repintarse */
-      panel.addEventListener('click', function () { cerrarDeslizada(fila); });
+      [panel, panelIzq].forEach(function (pl) {
+        if (pl) pl.addEventListener('click', function () { cerrarDeslizada(fila); });
+      });
     });
   }
 

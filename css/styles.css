@@ -951,17 +951,29 @@ body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
    del botón de borrar asomaba como una raya fina con la fila cerrada. El hueco
    no se ve al abrir porque la caja lleva el mismo color detrás. */
 .desliza.abierta{background:var(--card2)}
-.desliza-acciones{position:absolute;top:1px;right:0;bottom:1px;display:flex;
+.desliza-acciones{position:absolute;top:1px;bottom:1px;display:flex;
   align-items:stretch;z-index:0;visibility:hidden}
+.desliza-acciones.der{right:0}
+/* El renombrar vive al otro lado: se descubre empujando hacia la derecha.
+   Solo se pinta el panel del lado al que se está tirando, que si no los dos
+   asoman a la vez en cuanto la cara se mueve un píxel. */
+.desliza-acciones.izq{left:0}
+/* Un solo botón a ese lado, y «Renombrar» no cabe en el ancho de los otros:
+   se parte por la mitad. Aquí hay sitio de sobra. */
+.desliza-acciones.izq .desliza-btn{width:86px}
+.desliza .desliza-acciones.izq{visibility:hidden}
+.desliza.mirando-izq .desliza-acciones.izq{visibility:visible}
+.desliza.mirando-izq .desliza-acciones.der{visibility:hidden}
+.desliza-btn.suave{background:var(--blue);color:#04252b}
 /* Con la fila quieta el panel no existe. Jugar con el tamaño exacto no basta:
    la cara y el panel se redondean a píxel entero por separado y el rojo del
    botón de borrar asomaba como una raya fina. Si no está pintado, no asoma. */
 .desliza.abierta .desliza-acciones,
 .desliza.moviendo .desliza-acciones{visibility:visible}
 .desliza-btn{display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:4px;width:60px;border:0;padding:0 3px;
-  background:var(--card2);color:var(--txt);font-size:.66rem;font-weight:600;
-  letter-spacing:.02em}
+  justify-content:center;gap:3px;width:49px;border:0;padding:0 2px;
+  background:var(--card2);color:var(--txt);font-size:.6rem;font-weight:600;
+  letter-spacing:0;line-height:1.1}
 .desliza-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;
   stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .desliza-btn.malo{background:var(--bad);color:#fff}

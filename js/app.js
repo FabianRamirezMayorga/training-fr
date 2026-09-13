@@ -706,9 +706,13 @@
       return html`
         ${raw(deslizable(cabecera, [
           { icono: 'chispa', texto: 'Auditar', attr: 'data-iaplan="' + esc(k) + '"' },
-          { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicarplan="' + esc(k) + '"' },
+          { icono: 'copiar', texto: 'Copiar', attr: 'data-duplicarplan="' + esc(k) + '"' },
+          { icono: 'compartir', texto: 'Enviar', attr: 'data-compartirplan="' + esc(k) + '"' },
           { icono: 'trash', texto: 'Borrar', tono: 'malo',
             attr: 'data-borrarplan="' + esc(k) + '"' }
+        ], [
+          { icono: 'edit', texto: 'Renombrar', tono: 'suave',
+            attr: 'data-renombrarplan="' + esc(k) + '"' }
         ]))}
         ${raw(abierto ? '<div class="stack">' +
           suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' +
@@ -732,15 +736,19 @@
   /* Fila que se desliza para descubrir sus acciones. El contenido va delante y
      los botones detrás; lo de iOS de toda la vida. Evita tener que desplegar un
      plan entero solo para duplicarlo o borrarlo. */
-  function deslizable(contenido, acciones) {
+  function botonesDe(acciones) {
+    return acciones.map(function (a) {
+      return '<button class="desliza-btn' + (a.tono ? ' ' + a.tono : '') + '" ' +
+        a.attr + ' aria-label="' + esc(a.texto) + '">' +
+        icon(a.icono) + '<span>' + esc(a.texto) + '</span></button>';
+    }).join('');
+  }
+
+  function deslizable(contenido, acciones, izquierda) {
     return '<div class="desliza">' +
-      '<div class="desliza-acciones">' +
-      acciones.map(function (a) {
-        return '<button class="desliza-btn' + (a.tono ? ' ' + a.tono : '') + '" ' +
-          a.attr + ' aria-label="' + esc(a.texto) + '">' +
-          icon(a.icono) + '<span>' + esc(a.texto) + '</span></button>';
-      }).join('') +
-      '</div>' +
+      (izquierda && izquierda.length
+        ? '<div class="desliza-acciones izq">' + botonesDe(izquierda) + '</div>' : '') +
+      '<div class="desliza-acciones der">' + botonesDe(acciones) + '</div>' +
       '<div class="desliza-cara">' + contenido + '</div>' +
       '</div>';
   }
@@ -830,8 +838,12 @@
 
     return deslizable(tarjeta, [
       { icono: 'chispa', texto: 'Auditar', attr: 'data-iarutina="' + r.id + '"' },
-      { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicar="' + r.id + '"' },
+      { icono: 'copiar', texto: 'Copiar', attr: 'data-duplicar="' + r.id + '"' },
+      { icono: 'compartir', texto: 'Enviar', attr: 'data-compartir="' + r.id + '"' },
       { icono: 'trash', texto: 'Borrar', tono: 'malo', attr: 'data-borrar="' + r.id + '"' }
+    ], [
+      { icono: 'edit', texto: 'Renombrar', tono: 'suave',
+        attr: 'data-renombrarrutina="' + r.id + '"' }
     ]);
   }
 
@@ -1860,6 +1872,8 @@
     bind(root, '[data-a=correr]', correrPlanSheet);
     bind(root, '[data-a=limpiardup]', limpiarDuplicadosSheet);
     bindAll(root, '[data-duplicar]', function (el) { duplicarRutinaSheet(el.dataset.duplicar); });
+    bindAll(root, '[data-renombrarplan]', function (el) { renombrarPlanSheet(el.dataset.renombrarplan); });
+    bindAll(root, '[data-renombrarrutina]', function (el) { renombrarRutinaSheet(el.dataset.renombrarrutina); });
     bindAll(root, '[data-compartir]', function (el) {
       if (g.Compartir) Compartir.compartirRutina(el.dataset.compartir);
     });
@@ -2101,6 +2115,96 @@
           gruposAbiertos[destino] = true;
           render();
           UI.toast('Plan «' + destino + '» creado');
+        };
+      });
+  }
+
+  /* ---------- renombrar ----------
+     El nombre de un plan no se guarda en ningún sitio: es lo que queda de cada
+     rutina al quitarle el día de delante. Así que cambiarlo es reescribir el
+     nombre de sus cinco rutinas, no tocar un campo. */
+  function renombrarPlanSheet(nombre) {
+    const suyas = Store.routines().filter(function (r) {
+      return App.nombreRutina(r) === nombre;
+    });
+    if (!suyas.length) { UI.toast('Ese plan ya no está'); return; }
+
+    UI.modal(html`
+      <h2>Renombrar plan</h2>
+      <p class="muted">Se cambia en las ${suyas.length}
+        ${suyas.length === 1 ? 'rutina' : 'rutinas'} del plan. Los días y los
+        ejercicios no se tocan.</p>
+
+      <div class="tiny" style="margin:14px 0 6px">CÓMO SE LLAMA</div>
+      <input id="rn-nombre" class="input" value="${nombre}" maxlength="40">
+      <p class="tiny" style="margin:7px 0 0">Lo verás aquí, en el banner del
+        entrenamiento en curso y en tu historial.</p>
+
+      <button class="btn primary block" id="rn-ok" style="margin-top:16px">Guardar</button>
+      <button class="btn ghost block" id="rn-no" style="margin-top:8px">Cancelar</button>`,
+      function (el) {
+        const campo = el.querySelector('#rn-nombre');
+        campo.focus();
+        campo.select();
+        el.querySelector('#rn-no').onclick = function () { UI.closeModal(); };
+        el.querySelector('#rn-ok').onclick = function () {
+          const nuevo = String(campo.value || '').trim();
+          if (!nuevo) { UI.toast('Ponle un nombre'); return; }
+          if (nuevo === nombre) { UI.closeModal(); return; }
+          if (Store.routines().some(function (r) { return App.nombreRutina(r) === nuevo; })) {
+            UI.toast('Ya tienes un plan con ese nombre');
+            return;
+          }
+          suyas.forEach(function (r) {
+            r.name = nombreConDia(nuevo, r.days);
+            Store.saveRoutine(r);
+            refrescarActiva(r);
+          });
+          UI.closeModal();
+          gruposAbiertos[nuevo] = gruposAbiertos[nombre];
+          render();
+          UI.toast('Ahora se llama «' + nuevo + '»');
+        };
+      });
+  }
+
+  /* Una rutina suelta: se le cambia el plan al que pertenece, que es lo único
+     que su nombre guarda aparte del día. Se dice claro, porque cambiarlo la
+     saca del grupo en el que estaba. */
+  function renombrarRutinaSheet(id) {
+    const r = Store.routine(id);
+    if (!r) { UI.toast('Esa rutina ya no está'); return; }
+    const actual = nombreRutina(r);
+
+    UI.modal(html`
+      <h2>Renombrar rutina</h2>
+      <p class="muted">${tituloRutina(r)} — ahora está en el plan
+        «${actual}». El día se mantiene delante solo.</p>
+
+      <div class="tiny" style="margin:14px 0 6px">A QUÉ PLAN PERTENECE</div>
+      <input id="rr-nombre" class="input" value="${actual}" maxlength="40">
+      <p class="tiny" style="margin:7px 0 0">Si le pones un nombre distinto al de
+        sus compañeras, esta rutina se va sola a un plan nuevo.</p>
+
+      <button class="btn primary block" id="rr-ok" style="margin-top:16px">Guardar</button>
+      <button class="btn ghost block" id="rr-no" style="margin-top:8px">Cancelar</button>`,
+      function (el) {
+        const campo = el.querySelector('#rr-nombre');
+        campo.focus();
+        campo.select();
+        el.querySelector('#rr-no').onclick = function () { UI.closeModal(); };
+        el.querySelector('#rr-ok').onclick = function () {
+          const nuevo = String(campo.value || '').trim();
+          if (!nuevo) { UI.toast('Ponle un nombre'); return; }
+          if (nuevo === actual) { UI.closeModal(); return; }
+          r.name = nombreConDia(nuevo, r.days);
+          Store.saveRoutine(r);
+          refrescarActiva(r);
+          UI.closeModal();
+          gruposAbiertos[nuevo] = true;
+          rutinaAbierta = r.id;
+          render();
+          UI.toast('Ahora está en «' + nuevo + '»');
         };
       });
   }
