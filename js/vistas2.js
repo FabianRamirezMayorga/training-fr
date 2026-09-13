@@ -1123,10 +1123,47 @@
   /* Subirla a la cuenta de Spotify. La lista ya está resuelta —cada canción
      tiene su uri de cuando se buscó—, así que esto es crearla y meterlas: no hay
      que volver a buscar nada ni gastar una llamada a la IA. */
+  /* Crear una lista necesita «playlist-modify-private», y Spotify no amplía los
+     permisos al renovar el token: una conexión hecha antes de que existiera esta
+     función se renueva sola para siempre sin ese permiso, y lo único que se ve
+     es un «Forbidden» pelado. Así que se dice antes de intentarlo. */
+  function reconectarSheet(motivo) {
+    UI.modal(html`
+      <h2>Hay que reconectar Spotify</h2>
+      <p class="muted">${motivo}</p>
+      <p class="tiny" style="margin:10px 0 0">Spotify da los permisos el día que
+      autorizas y ya no los amplía: el token se renueva solo, pero con los permisos
+      de aquel día. Reconectar es un toque y no pierdes nada —ni tus listas, ni lo
+      que suena.</p>
+      <button class="btn primary block" id="sp-re" style="margin-top:16px">
+        Reconectar Spotify</button>
+      <button class="btn ghost block" id="sp-no" style="margin-top:8px">Ahora no</button>`,
+      function (el) {
+        el.querySelector('#sp-no').onclick = function () { UI.closeModal(); };
+        el.querySelector('#sp-re').onclick = function () {
+          UI.closeModal();
+          UI.toast('Abriendo Spotify para dar permiso…');
+          Spotify.entrar().catch(function (e) { UI.toast(e.message); });
+        };
+      });
+  }
+
   function subirASpotify(root) {
     const l = listaGuardada();
     if (!l || !l.pistas || !l.pistas.length) { UI.toast('No hay lista que guardar'); return; }
     if (!Spotify.activa()) { UI.toast('Entra en Spotify primero'); return; }
+
+    /* Si ya se sabe que al token le falta el permiso, no se gasta el intento ni
+       se le enseña un error críptico: se le ofrece lo que lo arregla. */
+    if (Spotify.permisosCaducados && Spotify.permisosCaducados()) {
+      const faltan = (Spotify.permisosQueFaltan && Spotify.permisosQueFaltan()) || [];
+      reconectarSheet(faltan.length
+        ? 'A tu conexión con Spotify le falta el permiso «' + faltan[0] + '», que es ' +
+          'justo el que hace falta para crear la lista en tu cuenta.'
+        : 'Tu conexión con Spotify es anterior a esta función, así que no incluye el ' +
+          'permiso para crear listas en tu cuenta.');
+      return;
+    }
 
     const boton = root.querySelector('[data-a=aSpotify]');
     if (boton) { boton.disabled = true; boton.textContent = 'Guardándola en Spotify…'; }
@@ -1149,6 +1186,12 @@
       })
       .catch(function (e) {
         if (boton) { boton.disabled = false; boton.textContent = 'Guardarla en mi Spotify'; }
+        /* Un 403 al crear la lista es, casi siempre, permisos: se ofrece el
+           arreglo en vez de dejarlo en un aviso que se va solo. */
+        if (/\[403 /.test(e.message || '')) {
+          reconectarSheet('Spotify ha rechazado crear la lista. ' + e.message);
+          return;
+        }
         UI.toast(e.message || 'No se ha podido guardar en Spotify.');
       });
   }

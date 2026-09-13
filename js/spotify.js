@@ -68,6 +68,15 @@
   function sesion() { return leer(SES); }
   function activa() { return !!(configurado() && sesion()); }
 
+  /* Una sesión de antes de que esto se guardara. No se sabe qué concedió
+     Spotify, y como los permisos no se amplían al renovar el token, lo más
+     probable cuando algo da 403 es justo esto: el token es viejo y le faltan
+     permisos que la app pide desde hace tiempo. */
+  function sesionSinApuntar() {
+    const s = sesion();
+    return !!s && typeof s.scope !== 'string';
+  }
+
   /* Los permisos que faltan en la sesión de ahora mismo */
   function permisosQueFaltan() {
     const s = sesion();
@@ -373,6 +382,17 @@
           const suyo = e.message ? ' Spotify dice: "' + e.message + '".' : '';
           if (ruta.indexOf('/me/player') !== 0) {
             const faltan = permisosQueFaltan();
+            /* Un «Forbidden» pelado no dice nada, y así se quedaba el aviso en
+               un callejón sin salida. Cuando la sesión es anterior a que se
+               apuntaran los permisos, esa es con diferencia la causa: el token
+               se renueva solo pero conserva los permisos del día que se dio, y
+               los que la app pidió después nunca llegan. */
+            if (!faltan.length && sesionSinApuntar()) {
+              throw new Error('Tu conexión con Spotify es anterior a esta función y no ' +
+                'incluye el permiso para crear listas. Los permisos no se amplían solos ' +
+                'al renovar: hay que reconectar la cuenta una vez.' + suyo +
+                ' [403 ' + ruta.split('?')[0] + ']');
+            }
             throw new Error('Spotify no ha autorizado esta acción'
               + (faltan.length ? ' (falta el permiso ' + faltan[0] + ')' : '')
               + '.' + suyo + ' [403 ' + ruta.split('?')[0] + ']');
@@ -801,6 +821,44 @@
         body: JSON.stringify({ ids: [] })
       });
     }).then(function () {
+      /* La prueba que importa para «Guardarla en mi Spotify». Crea una lista de
+         verdad —no hay forma de preguntarlo sin crearla— y la deshace acto
+         seguido, así que no queda nada en su cuenta. */
+      let uid = '';
+      return pedir('/me').then(function (yo) { uid = (yo && yo.id) || ''; })
+        .catch(function () { /* ya se ha dicho arriba */ })
+        .then(function () {
+          if (!uid) { partes.push('crear lista: no se sabe la cuenta'); return null; }
+          return fetch(API + '/users/' + encodeURIComponent(uid) + '/playlists', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + ses.access_token,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: 'Training FR · prueba', description: 'prueba, se borra sola', public: false
+            })
+          }).then(function (r) {
+            return r.text().then(function (t) {
+              let j = null;
+              try { j = JSON.parse(t); } catch (e) { /* sin cuerpo */ }
+              const motivo = (j && j.error && j.error.message) || (r.ok ? 'bien' : t.slice(0, 90));
+              partes.push('crear lista: ' + r.status + ' ' + motivo);
+              return (j && j.id) ? j.id : null;
+            });
+          }).catch(function (e) {
+            partes.push('crear lista: sin red (' + e.message + ')');
+            return null;
+          });
+        })
+        .then(function (id) {
+          if (!id) return null;
+          /* dejar de seguirla es como se borra una lista en Spotify */
+          return pedir('/playlists/' + id + '/followers', { method: 'DELETE' })
+            .then(function () { partes.push('   (la de prueba, deshecha)'); })
+            .catch(function () { partes.push('   (ojo: la de prueba se ha quedado)'); });
+        });
+    }).then(function () {
       return partes.join(SALTO);
     });
   }
@@ -1153,6 +1211,7 @@
   const PUBLICO = {
     SCOPES_V: SCOPES_V, permisosCaducados: permisosCaducados, volumen: volumen,
     permisosQueFaltan: permisosQueFaltan, diagnostico: diagnostico,
+    sesionSinApuntar: sesionSinApuntar,
     puedeGuardar: puedeGuardar,
     nombreDeContexto: nombreDeContexto, apuntarContexto: apuntarContexto,
     ponerUri: ponerUri,
