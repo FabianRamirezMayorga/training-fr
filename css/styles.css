@@ -1268,7 +1268,7 @@ img[src^="data/img/"] {
 .bov > summary::marker { content: ''; }
 
 .bov-flecha { transition: transform .18s ease; flex: none; }
-.bov[open] > summary .bov-flecha { transform: rotate(90deg); }
+.bov[open] > summary .bov-flecha { transform: rotate(180deg); }
 
 .bov-tit { display: block; font-weight: 600; font-size: .95rem; }
 .bov-sub { display: block; margin-top: 2px; }
@@ -1336,8 +1336,34 @@ img[src^="data/img/"] {
 .plantilla > summary::-webkit-details-marker { display: none; }
 .plantilla > summary::marker { content: ''; }
 .pl-flecha { transition: transform .18s ease; flex: none; }
-.plantilla[open] > summary .pl-flecha { transform: rotate(90deg); }
+.plantilla[open] > summary .pl-flecha { transform: rotate(180deg); }
 .plantilla summary .grow { min-width: 0; }
 .pl-usar { flex: none; }
 .plantilla:not([open]) > .pl-cuerpo { display: none; }
 .plantilla > .pl-cuerpo { padding: 0 13px 13px; }
+
+/* ---------- una seccion entera plegada ----------
+   Plegar cada plantilla por separado no bastaba: catorce fichas cerradas
+   siguen siendo catorce fichas entre uno y el final de la pantalla. Aqui se
+   pliega el bloque completo y el titulo dice cuantas hay dentro. */
+.seccion > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  margin: 22px 0 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+.seccion > summary::-webkit-details-marker { display: none; }
+.seccion > summary::marker { content: ''; }
+/* El galon ya viene girado 90 por .chevron.down, asi que aqui hay que girar
+   180 mas para que apunte arriba al abrir. Con 90 quedaba mirando a la
+   izquierda, que no significa nada. */
+.sec-flecha { transition: transform .18s ease; flex: none; }
+.seccion[open] > summary .sec-flecha { transform: rotate(180deg); }
+.sec-num {
+  flex: none; min-width: 20px; padding: 1px 7px; border-radius: 999px;
+  background: var(--card2); font-weight: 700;
+}
+.seccion:not([open]) > .sec-cuerpo { display: none; }

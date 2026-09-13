@@ -2099,15 +2099,17 @@
         'Toca una rutina para desplegar sus ejercicios y cambiarle el día, o pulsa ' +
         'Entrenar para hacerla ahora.</p>')}
 
-      <div class="list-title">Rutinas de ejemplo</div>
-      <p class="muted">Al usar una plantilla se copia a tus rutinas; puedes cambiar ejercicios,
-      series y descansos sin límite.</p>
-      <div class="stack">${raw(plantillasHTML('fuerza'))}</div>
+      ${raw(seccionPlegable('fuerza', 'Rutinas de ejemplo',
+        Templates.list.filter(function (t) { return (t.tipo || 'fuerza') === 'fuerza'; }).length,
+        'Al usar una plantilla se copia a tus rutinas; puedes cambiar ejercicios, ' +
+        'series y descansos sin límite.',
+        plantillasHTML('fuerza')))}
 
-      <div class="list-title">Estiramientos, pilates y terapia</div>
-      <p class="muted">Se copian y se hacen igual que las demás, con su cronómetro y sus
-      descansos. En estas las repeticiones son segundos.</p>
-      <div class="stack">${raw(plantillasHTML('movilidad'))}</div>`;
+      ${raw(seccionPlegable('movilidad', 'Estiramientos, pilates y terapia',
+        Templates.list.filter(function (t) { return (t.tipo || 'fuerza') === 'movilidad'; }).length,
+        'Se copian y se hacen igual que las demás, con su cronómetro y sus descansos. ' +
+        'En estas las repeticiones son segundos.',
+        plantillasHTML('movilidad')))}`;
   }
 
   /* Las plantillas de un tipo. Las de movilidad se listan aparte porque
@@ -2116,6 +2118,28 @@
   /* Qué plantillas quedan abiertas. Fuera del pintado, que la pantalla se
      repinta entera al copiar una y si no se cierra la que acabas de abrir. */
   const plantillasAbiertas = {};
+
+  /* Qué secciones de plantillas quedan abiertas */
+  const seccionesAbiertas = {};
+
+  /* Una sección entera plegada tras su título. Plegar cada plantilla por
+     separado no bastaba: catorce fichas cerradas siguen siendo catorce fichas
+     entre uno y el final de la pantalla. Aquí se pliega el bloque completo y el
+     título dice cuántas hay dentro. */
+  function seccionPlegable(id, titulo, cuantas, sub, cuerpo) {
+    return html`
+      <details class="seccion" data-sec="${id}"${raw(seccionesAbiertas[id] ? ' open' : '')}>
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="list-title" style="margin:0">${titulo}</span>
+          <span class="tiny sec-num">${cuantas}</span>
+        </summary>
+        <div class="sec-cuerpo">
+          <p class="muted" style="margin:0 0 10px">${sub}</p>
+          <div class="stack">${raw(cuerpo)}</div>
+        </div>
+      </details>`;
+  }
 
   function plantillasHTML(tipo) {
     return Templates.list.filter(function (t) {
@@ -2256,6 +2280,13 @@
 
     /* Recordar qué plantillas quedan abiertas, y que «Usar» no pliegue la ficha:
        va dentro del <summary>, donde un clic despliega por defecto. */
+    root.querySelectorAll('details.seccion').forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (d.open) seccionesAbiertas[d.dataset.sec] = true;
+        else delete seccionesAbiertas[d.dataset.sec];
+      });
+    });
+
     root.querySelectorAll('details.plantilla').forEach(function (d) {
       d.addEventListener('toggle', function () {
         if (d.open) plantillasAbiertas[d.dataset.tplCaja] = true;
