@@ -438,6 +438,7 @@
     const ctx = { gear: gear, r: r, maxNivel: maxNivel, usados: usados,
       variante: Number(opts.variante) || 0, hueco: 0, delDia: {} };
     const volumen = {};
+    const directas = {};
     const sinCubrir = [];
 
     const sesiones = dias.map(function (dia, i) {
@@ -476,7 +477,7 @@
         const reps = estatico ? 40 : cfg.reps + (hueco.rol === 'accesorio' ? sexo.repsExtra : 0);
         const rest = Math.round(cfg.rest * (hueco.rol === 'accesorio' ? sexo.descanso : 1) / 5) * 5;
 
-        sumarVolumen(volumen, ex, hueco.musculo, cfg.series);
+        sumarVolumen(volumen, ex, hueco.musculo, cfg.series, directas);
         ejercicios.push({
           exId: ex.id, patron: hueco.patron, musculo: hueco.musculo, rol: hueco.rol,
           sets: cfg.series, reps: reps, weight: 0, rest: rest,
@@ -520,6 +521,7 @@
       calentamiento: edad.calentamiento,
       sesiones: sesiones,
       volumen: volumen,
+      directas: directas,
       objetivoSeries: objetivoSeries,
       lesiones: claves.map(function (k) { return LESIONES[k].label; }),
       real: real,
@@ -535,9 +537,18 @@
   /* Volumen efectivo: el músculo que trabaja de verdad suma la serie entera y
      el que ayuda suma media. Contar solo el objetivo del hueco deja el tríceps
      a cero aunque se hayan hecho doce series de press. */
-  function sumarVolumen(volumen, ex, musculo, series) {
+  /* Dos cuentas, no una. El total mezcla lo que un músculo entrena a propósito
+     con lo que le cae de rebote —media serie por cada vez que aparece como
+     secundario—, y el hombro aparece de secundario en todos los press. Así, un
+     plan con 13 series de hombro sale como 28,5 y cualquiera que lea ese número
+     concluye que sobra hombro. Las directas son las que deciden si un músculo
+     está bien servido; el total sigue valiendo para la gráfica de reparto. */
+  function sumarVolumen(volumen, ex, musculo, series, directas) {
     const directos = (ex.primaryMuscles || []).length ? ex.primaryMuscles : [musculo];
-    directos.forEach(function (m) { volumen[m] = (volumen[m] || 0) + series; });
+    directos.forEach(function (m) {
+      volumen[m] = (volumen[m] || 0) + series;
+      if (directas) directas[m] = (directas[m] || 0) + series;
+    });
     (ex.secondaryMuscles || []).forEach(function (m) {
       volumen[m] = (volumen[m] || 0) + series / 2;
     });
@@ -760,16 +771,18 @@
      no el que se va a entrenar. */
   function revolumen(prog) {
     const volumen = {};
+    const directas = {};
     prog.sesiones.forEach(function (ses) {
       ses.ejercicios.forEach(function (e) {
         const ex = Data.get(e.exId);
-        if (ex) sumarVolumen(volumen, ex, e.musculo, e.sets);
+        if (ex) sumarVolumen(volumen, ex, e.musculo, e.sets, directas);
       });
     });
     Object.keys(volumen).forEach(function (m) {
       volumen[m] = Math.round(volumen[m] * 2) / 2;
     });
     prog.volumen = volumen;
+    prog.directas = directas;
     return volumen;
   }
 

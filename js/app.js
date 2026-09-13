@@ -1904,7 +1904,8 @@
       note: r.note || '',
       mixta: !!r.mixta,
       exercises: (r.exercises || []).map(function (e) {
-        return { exId: e.exId, sets: e.sets, reps: e.reps, rest: e.rest, nota: e.nota || '' };
+        return { exId: e.exId, sets: e.sets, reps: e.reps, weight: 0, rest: e.rest,
+                 note: e.note || '' };
       })
     };
   }

@@ -1555,8 +1555,17 @@
         }).join('; ');
     }).join('\n');
 
+    /* Dos cuentas separadas, y dichas como lo que son. Juntar las series que un
+       músculo entrena a propósito con las que le caen de rebote infla al hombro
+       —sale de secundario en todos los press— y hunde al pecho, que no recibe
+       rebote de nada. Con el total a secas, el dictamen concluía «el doble de
+       hombro que de pecho» en planes con 13 de hombro y 11 de pecho, y ahí se le
+       iba un punto de tres en una crítica falsa. */
+    const dir = prog.directas || {};
     const volumen = Object.keys(prog.volumen).map(function (m) {
-      return I18N.muscle(m) + ' ' + prog.volumen[m];
+      const d = dir[m] || 0;
+      const t = prog.volumen[m];
+      return I18N.muscle(m) + ' ' + d + (t > d ? ' (+' + (t - d) + ' indirectas)' : '');
     }).join(', ');
 
     /* Lo que de verdad entrena, no lo que dice que va a entrenar. Sin esto la
@@ -1604,7 +1613,14 @@
           : 'PROGRAMA PROPUESTO por la calculadora de la app') +
       ' (objetivo ' + prog.objetivoLabel + ', RPE tope ' + prog.rpe +
       ', unas ' + prog.objetivoSeries + ' series semanales por músculo):\n' + dias + '\n' +
-      'SERIES POR SEMANA Y MÚSCULO QUE PIDE EL PLAN: ' + volumen + '\n' + historial + comida +
+      'SERIES DIRECTAS POR SEMANA Y MÚSCULO: ' + volumen + '\n' +
+      'Las directas son las que cuentan para decidir si un músculo está bien ' +
+      'servido: son las de los ejercicios que lo tienen como objetivo. Entre paréntesis ' +
+      'va el trabajo indirecto, el que le cae por salir de secundario en otros ' +
+      'ejercicios; ese NO se suma para juzgar el reparto y no lo cites como si fueran ' +
+      'series del músculo. Para hipertrofia, de 10 a 20 directas por músculo y semana ' +
+      'es la franja razonable: no llames excesivo a lo que esté dentro, ni escaso a lo ' +
+      'que pase de 10.\n' + historial + comida +
       (prog.lesiones.length ? 'LIMITACIONES YA APLICADAS: ' + prog.lesiones.join(', ') + '\n' : '') +
       menuEjercicios(Object.keys(prog.volumen || {})) +
       '\nTe han contratado para auditar este programa, no para animar a nadie.\n\n' +
