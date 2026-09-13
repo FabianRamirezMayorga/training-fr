@@ -614,6 +614,38 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 .dia-pie{display:flex;gap:8px;padding:11px 14px;border-top:1px solid var(--line);
   background:var(--bg2)}
 
+/* ---------- reparto de la semana ----------
+   El objetivo es el centro y cada barra sale de ahí: a la derecha lo que sobra,
+   a la izquierda lo que falta. Once barras iguales no dicen nada; una barra que
+   se va hacia un lado se lee sin pensar. */
+.vol2{display:flex;flex-direction:column;gap:2px}
+.vol2-fila{display:flex;align-items:center;gap:9px;padding:3px 0}
+.vol2-nom{flex:none;width:92px;font-size:.76rem;color:var(--dim)}
+.vol2-pista{position:relative;flex:1;height:16px}
+/* el carril, con su marca central */
+.vol2-pista::before{content:'';position:absolute;left:0;right:0;top:7px;height:2px;
+  border-radius:2px;background:var(--line)}
+.vol2-meta{position:absolute;left:50%;top:0;width:2px;height:16px;margin-left:-1px;
+  background:var(--dim2);opacity:.7}
+.vol2-barra{position:absolute;top:4px;height:8px;border-radius:4px;
+  transition:width .4s cubic-bezier(.2,.9,.3,1)}
+.vol2-barra.bien{background:var(--acc)}
+.vol2-barra.pasa{background:var(--warn)}
+.vol2-barra.corto{background:var(--bad)}
+.vol2-num{flex:none;width:58px;text-align:right;font-size:.8rem;font-weight:700}
+.vol2-num.bien{color:var(--txt)}
+.vol2-num.pasa{color:var(--warn)}
+.vol2-num.corto{color:var(--bad)}
+.vol2-real{display:block;font-size:.66rem;font-weight:600;color:var(--brand-1)}
+
+.vol2-leyenda{display:flex;gap:14px;justify-content:center;margin-top:11px;
+  padding-top:10px;border-top:1px solid var(--line)}
+.vol2-leyenda span{font-size:.7rem;color:var(--dim2);display:flex;align-items:center;gap:5px}
+.vol2-leyenda .pt{width:8px;height:8px;border-radius:50%;display:inline-block}
+.vol2-leyenda .pt.bien{background:var(--acc)}
+.vol2-leyenda .pt.pasa{background:var(--warn)}
+.vol2-leyenda .pt.corto{background:var(--bad)}
+
 /* Series por semana y músculo, con la marca del objetivo */
 .vol-fila{display:flex;align-items:center;gap:10px;padding:7px 0}
 .vol-nom{flex:none;width:104px;font-size:.78rem;color:var(--dim)}

@@ -730,11 +730,24 @@
             .map(function (p) { return p.text || ''; })
             .join('');
 
-          if (!texto) {
-            const razon = cand && cand.finishReason;
+          const razon = cand && cand.finishReason;
 
-            /* se quedó sin tokens antes de escribir nada: se reintenta con más
-               margen, que es la causa habitual de una respuesta vacía */
+          /* Los modelos nuevos razonan antes de contestar y ese razonamiento sale
+             del mismo presupuesto de tokens: thinkingConfig con presupuesto cero
+             lo ignoran. Si se les acaba pensando, devuelven media respuesta —un
+             JSON cortado del que solo se salva el primer campo— y eso llegaba a
+             la pantalla como una nota suelta sin veredicto ni cambios. Cortado es
+             cortado: se repite con más margen aunque haya texto. */
+          if (razon === 'MAX_TOKENS' && texto && !opciones._ampliado) {
+            return llamarGemini(prompt, Object.assign({}, opciones, {
+              _ampliado: true,
+              maxTokens: Math.min((cuerpo.generationConfig.maxOutputTokens || 2048) * 4, 32768)
+            }), claveIA, modeloIA);
+          }
+
+          if (!texto) {
+
+            /* se quedó sin tokens antes de escribir nada */
             if (razon === 'MAX_TOKENS' && !opciones._ampliado) {
               return llamarGemini(prompt, Object.assign({}, opciones, {
                 _ampliado: true,
@@ -1272,7 +1285,7 @@
       'Devuelve JSON: {"nota":número del 0 al 10,' +
       '"veredicto":"2 frases sin rodeos","puntos":[{"titulo":"3-5 palabras",' +
       '"detalle":"1-2 frases con la consecuencia"}]}';
-    return llamarJSON(prompt, { maxTokens: 2048 });
+    return llamarJSON(prompt, { maxTokens: 6144 });
   }
 
   /* El catálogo que se le enseña, con la advertencia de que es lo único que
@@ -1419,7 +1432,7 @@
       '"reps":número,"descanso":segundos,"porque":"media frase"}],' +
       '"consejo":"lo que más cambiaría el resultado de esta rutina, 1 frase"}';
 
-    return llamarJSON(prompt, { maxTokens: 3072, temperatura: 0.55 });
+    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.55 });
   }
 
   /* ---------- afinar el programa ----------
@@ -1519,7 +1532,7 @@
       'que este entrenamiento sirva de algo, con números",' +
       '"consejo":"la única cosa que más le cambiaría el resultado, 1 frase"}';
 
-    return llamarJSON(prompt, { maxTokens: 2600, temperatura: 0.55 });
+    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.55 });
   }
 
   /* Mira una foto de comida y estima lo que hay. Es una aproximación y se dice
@@ -1572,7 +1585,7 @@
       'del día con los números de arriba, no en abstracto.';
 
     return llamarJSON(prompt, {
-      imagen: imagen, maxTokens: 1024, temperatura: 0.3
+      imagen: imagen, maxTokens: 4096, temperatura: 0.3
     });
   }
 
@@ -1593,7 +1606,7 @@
       'igual. Aquí no te cortes.\n' +
       '- "accion": una sola cosa, concreta y hacedera esta semana.\n\n' +
       'Devuelve JSON: {"bien":"1 frase","flojo":"2 frases","accion":"1 frase"}';
-    return llamarJSON(prompt, { maxTokens: 1024 });
+    return llamarJSON(prompt, { maxTokens: 4096 });
   }
 
   /* Pregunta libre al entrenador */
@@ -1605,7 +1618,7 @@
       'No des la razón por costumbre: si la pregunta parte de algo falso o de un ' +
       'mito de gimnasio, corrígelo antes de contestar. Si la respuesta honesta es ' +
       '"depende", di de qué depende y con qué números, en vez de escurrir el bulto.';
-    return llamar(prompt, { maxTokens: 1024 });
+    return llamar(prompt, { maxTokens: 4096 });
   }
 
   /* ---------- listas de reproducción para entrenar ----------
@@ -1743,7 +1756,7 @@
       'tiene un riesgo real cuando se hace mal, dilo en el fallo que corresponda.\n\n' +
       'Devuelve JSON: {"pasos":["paso"],"fallos":["fallo y su corrección"],"truco":"1 frase"}';
 
-    return llamarJSON(prompt, { maxTokens: 1024 }).then(function (r) {
+    return llamarJSON(prompt, { maxTokens: 4096 }).then(function (r) {
       escribirCache(clave, r);
       return r;
     });

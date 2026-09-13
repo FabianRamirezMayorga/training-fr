@@ -426,51 +426,93 @@
      accesorio ni se puede hacer nada con el día. Ahora la semana se lee de un
      vistazo —cada día dice qué trabaja y cuánto cuesta— y se abre el que
      interese, con el primero abierto para que no parezca vacío. */
+  /* ---------- el reparto de la semana ----------
+     El gráfico de antes pintaba once barras verdes casi iguales y dejaba la
+     pregunta de verdad —¿dónde me paso y dónde me quedo corto?— para que la
+     dedujera el ojo. Ahora el objetivo es el centro: cada barra sale de ahí y
+     se mide por su desvío, con el color diciendo si sobra, falta o está en
+     rango. Y lo que más se aleja va primero, que es lo que hay que arreglar. */
   function barraVolumen(prog) {
-    const musculos = Object.keys(prog.volumen).sort(function (a, b) {
-      return prog.volumen[b] - prog.volumen[a];
+    const meta = prog.objetivoSeries || 15;
+    const musculos = Object.keys(prog.volumen).filter(function (m) {
+      return prog.volumen[m] > 0;
     });
     if (!musculos.length) return '';
-    const tope = Math.max(prog.objetivoSeries, prog.volumen[musculos[0]]);
 
-    const real = prog.real;
-    const topeReal = real ? Math.max.apply(null, [0].concat(musculos.map(function (m) {
-      return real.porMusculo[m] || 0;
-    }))) : 0;
-    const escala = Math.max(tope, topeReal);
+    const real = prog.real && prog.real.porMusculo ? prog.real : null;
+    const conHistorial = real && Object.keys(real.porMusculo || {}).some(function (m) {
+      return real.porMusculo[m] > 0;
+    });
+
+    /* cuánto se separa cada músculo de su objetivo, en tanto por uno */
+    const desvio = function (m) { return (prog.volumen[m] - meta) / meta; };
+
+    const filas = musculos.slice().sort(function (a, b) {
+      return Math.abs(desvio(b)) - Math.abs(desvio(a));
+    });
+
+    /* el ancho máximo que hay que representar a cada lado del objetivo */
+    const mayor = Math.max(0.35, Math.max.apply(null, filas.map(function (m) {
+      return Math.abs(desvio(m));
+    })));
+
+    const pasan = filas.filter(function (m) { return desvio(m) > 0.34; });
+    const cortos = filas.filter(function (m) { return prog.volumen[m] < 8; });
 
     return html`
-      <div class="list-title">Series por semana</div>
-      <p class="tiny" style="margin:-4px 4px 10px">La línea es tu objetivo:
-      <b>${prog.objetivoSeries} series</b> semanales por músculo. Debajo de 8 el estímulo se
-      queda corto; muy por encima ya no se recupera.${raw(real
-        ? ' La barra fina de debajo es lo que has hecho de verdad estas ' + real.semanas +
-          ' semanas, para que se vea la distancia entre el plan y la realidad.'
-        : ' Cuando lleves unas semanas entrenando, aquí saldrá también lo que haces de verdad.')}</p>
+      <div class="list-title">Reparto de la semana</div>
+      <p class="tiny" style="margin:-4px 4px 10px">La línea del centro es tu objetivo:
+      <b>${meta} series</b> por músculo y semana. A la derecha, lo que se pasa; a la
+      izquierda, lo que se queda corto. Ordenado por lo que más se aleja.</p>
+
       <div class="card">
-        ${raw(musculos.map(function (m) {
-          const v = prog.volumen[m];
-          const pct = Math.round(v / escala * 100);
-          const meta = Math.round(prog.objetivoSeries / escala * 100);
-          const flojo = v < 8;
-          const hecho = real ? (real.porMusculo[m] || 0) : null;
-          return html`
-            <div class="vol-fila">
-              <span class="vol-nom">${I18N.muscle(m)}</span>
-              <span class="vol-barra">
-                <i style="width:${pct}%${raw(flojo ? ';background:var(--warn)' : '')}"></i>
-                <u style="left:${meta}%"></u>
-                ${raw(real ? '<b class="vol-real" style="width:' +
-                  Math.round(hecho / escala * 100) + '%"></b>' : '')}
-              </span>
-              <span class="vol-num">${String(v).replace('.', ',')}${raw(real
-                ? '<span class="vol-hecho">' + String(hecho).replace('.', ',') + '</span>' : '')}</span>
-            </div>`;
-        }).join(''))}
-        ${raw(real ? html`
-          <p class="tiny" style="margin:10px 0 0">Barra gruesa: el plan. Barra fina: tú, de
-          media, en las últimas ${real.semanas} semanas (${real.sesiones}
-          ${real.sesiones === 1 ? 'entrenamiento' : 'entrenamientos'} guardados).</p>` : '')}
+        <div class="vol2">
+          ${raw(filas.map(function (m) {
+            const v = prog.volumen[m];
+            const d = desvio(m);
+            const ancho = Math.min(50, Math.abs(d) / mayor * 50);
+            const estado = v < 8 ? 'corto' : d > 0.34 ? 'pasa' : 'bien';
+            const hecho = real ? (real.porMusculo[m] || 0) : null;
+            return html`
+              <div class="vol2-fila">
+                <span class="vol2-nom">${I18N.muscle(m)}</span>
+                <span class="vol2-pista">
+                  <i class="vol2-barra ${estado}" style="${raw(d >= 0
+                    ? 'left:50%;width:' + ancho + '%'
+                    : 'right:50%;width:' + ancho + '%')}"></i>
+                  <u class="vol2-meta"></u>
+                </span>
+                <span class="vol2-num ${estado}">${String(v).replace('.', ',')}
+                  ${raw(conHistorial
+                    ? '<span class="vol2-real">' + String(hecho).replace('.', ',') + ' real</span>'
+                    : '')}</span>
+              </div>`;
+          }).join(''))}
+        </div>
+
+        <div class="vol2-leyenda">
+          <span><i class="pt corto"></i> corto</span>
+          <span><i class="pt bien"></i> en rango</span>
+          <span><i class="pt pasa"></i> se pasa</span>
+        </div>
+
+        ${raw(pasan.length || cortos.length ? html`
+          <p class="tiny" style="margin:11px 0 0">${raw(
+            (cortos.length ? '<b>Se queda corto:</b> ' + cortos.map(I18N.muscle).join(', ') +
+              '. Por debajo de 8 series apenas hay est\u00edmulo. ' : '') +
+            (pasan.length ? '<b>Se pasa:</b> ' + pasan.map(I18N.muscle).join(', ') +
+              '. M\u00e1s volumen del que se recupera no construye m\u00e1s.' : ''))}</p>` : html`
+          <p class="tiny" style="margin:11px 0 0">Todo dentro de rango. Este reparto no tiene
+          nada que arreglar.</p>`)}
+
+        ${raw(conHistorial ? html`
+          <p class="tiny" style="margin:7px 0 0">El número pequeño es lo que has hecho de
+          verdad de media en las últimas ${real.semanas} semanas
+          (${real.sesiones} ${real.sesiones === 1 ? 'entrenamiento' : 'entrenamientos'}).</p>`
+        : html`
+          <p class="tiny" style="margin:7px 0 0">Cuando lleves unas semanas registrando
+          entrenamientos, aquí saldrá también lo que haces de verdad, al lado de lo que
+          dice el plan.</p>`)}
       </div>`;
   }
 
