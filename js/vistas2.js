@@ -249,7 +249,7 @@
         <div class="row between">
           <div class="tiny">Creado el ${UI.fecha(cuando)}</div>
           <div class="row" style="gap:6px">
-            <button class="btn sm" data-a="regenerar">Otro</button>
+            <button class="btn sm" data-a="regenerar">${raw(icon('cambiar'))} Rehacer</button>
             <button class="btn sm danger" data-a="borrarPlan">${raw(icon('trash'))}</button>
           </div>
         </div>
@@ -314,6 +314,18 @@
         <div class="card"><ol class="instr">
           ${raw(plan.consejos.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join(''))}
         </ol></div>` : '')}
+
+      <div class="list-title">¿No te encaja?</div>
+      <div class="card">
+        <p class="muted" style="margin:0 0 10px">Dile qué cambiarías y lo rehace con eso
+        delante. Lo que escribas aquí se guarda con tus preferencias, así que los
+        siguientes menús también lo tendrán en cuenta.</p>
+        <textarea id="nu-cambios" rows="3" placeholder="Ej. demasiada merluza, cambia el pescado por carne; el desayuno que sea más rápido; quita el pan"></textarea>
+        <button class="btn primary block" data-a="rehacerCon" style="margin-top:10px">
+          ${raw(icon('chispa'))} Rehacer el menú con esto</button>
+        <button class="btn block sm" data-a="regenerar" style="margin-top:8px">
+          ${raw(icon('cambiar'))} Solo quiero otro distinto</button>
+      </div>
 
       <p class="tiny" style="margin-top:14px">Generado por IA a partir de tus datos.
       Revísalo con criterio y consulta a un dietista si tienes alguna condición de salud.</p>`;
@@ -492,6 +504,17 @@
 
     bind(root, '[data-a=generar]', function () { generar(false); });
     bind(root, '[data-a=regenerar]', function () { generar(true); });
+
+    /* Reformular es regenerar, pero guardando antes lo que pide: así no hay que
+       ir a buscar el campo de órdenes y vale también para los menús siguientes. */
+    bind(root, '[data-a=rehacerCon]', function () {
+      const campo = root.querySelector('#nu-cambios');
+      const texto = campo ? campo.value.trim() : '';
+      if (!texto) { UI.toast('Escribe qué quieres cambiar'); if (campo) campo.focus(); return; }
+      const antes = String(Perfil.datos().ordenesComida || '').trim();
+      Perfil.guardar({ ordenesComida: antes ? antes + '; ' + texto : texto });
+      generar(true);
+    });
     bind(root, '[data-a=borrarPlan]', function () {
       UI.confirm('Borrar el plan', 'Podrás generar otro cuando quieras.', 'Borrar', true)
         .then(function (ok) { if (ok) { guardarPlan(null); render(); } });

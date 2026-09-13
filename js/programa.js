@@ -308,6 +308,11 @@
   function permitido(ex, hueco, r, gear, maxNivel) {
     if (!ex.images || ex.images.length < 2) return false;
     if (!Data.gearAllows(gear, ex.equipment)) return false;
+    /* El campo «equipment» del catálogo marca como «body only» un remo invertido,
+       una dominada o un fondo en paralelas. Filtrando solo por él, a quien entrena
+       en el salón sin nada le salían ejercicios de jaula de sentadillas: el veto
+       por nombre hacía falta aquí también, que es donde se monta el plan. */
+    if (!Data.permiteNombre(gear, ex.nameEs)) return false;
     if ((NIVELES[ex.level] || 2) > maxNivel) return false;
     if (ex.category === 'stretching') return false;
 
@@ -484,6 +489,34 @@
           note: notaDeEjercicio(hueco, ex, edad, r, estatico)
         });
       });
+
+      /* Sin material no hay nada de lo que colgarse, así que los huecos de
+         tracción se quedan sin cubrir y la sesión podía acabar vacía: un día con
+         cero ejercicios no es un día de descanso, es un plan roto. Se completa
+         con lo que SÍ se pueda hacer, de los músculos que toquen ese día. */
+      if (ejercicios.length < 4) {
+        const zonas = huecos.map(function (h) { return h.musculo; })
+          .filter(function (m, i, a) { return m && a.indexOf(m) === i; });
+        const rellenos = ['chest', 'quadriceps', 'abdominals', 'glutes', 'hamstrings',
+          'shoulders', 'triceps', 'calves'];
+
+        zonas.concat(rellenos).forEach(function (m) {
+          if (ejercicios.length >= 4) return;
+          const ex = elegir(h(P.exc, m, 'accesorio'), ctx) ||
+            elegir(h('', m, 'accesorio'), ctx);
+          if (!ex) return;
+          usados[ex.id] = true;
+          ctx.delDia[ex.id] = true;
+          const cfg = obj.accesorio;
+          sumarVolumen(volumen, ex, m, cfg.series, directas);
+          ejercicios.push({
+            exId: ex.id, patron: Alt.patron(ex), musculo: m, rol: 'accesorio',
+            sets: cfg.series, reps: cfg.reps + sexo.repsExtra, weight: 0,
+            rest: Math.round(cfg.rest * sexo.descanso / 5) * 5,
+            note: 'Entra para que el día no se quede corto con el material que tienes.'
+          });
+        });
+      }
 
       return {
         dia: dia,

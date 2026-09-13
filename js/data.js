@@ -244,6 +244,10 @@
     const terms = q ? q.split(' ').filter(Boolean) : [];
     return list.filter(function (e) {
       if (f.gear && !gearAllows(f.gear, e.equipment)) return false;
+      /* El veto por nombre también aquí: antes solo lo aplicaban el generador y
+         la lista que se le pasa a la IA, así que el buscador seguía ofreciendo
+         dominadas a quien entrena sin nada. */
+      if (f.gear && !permiteNombre(f.gear, e.nameEs)) return false;
       if (f.group && e.groups.indexOf(f.group) === -1) return false;
       if (f.muscle && (e.primaryMuscles || []).indexOf(f.muscle) === -1) return false;
       /* varios músculos a la vez: una zona del cuerpo, no un músculo suelto */
@@ -287,10 +291,35 @@
      lista de peso corporal. A quien entrena en casa sin nada, proponerle un
      cruce de poleas le deja la rutina inservible, así que el nombre se mira
      también. */
+  /* El campo «equipment» del catálogo no es de fiar: marca como «body only» un
+     remo invertido —que necesita una barra a la altura de la cadera—, una
+     dominada, un fondo en paralelas o un cruce de poleas tumbado. Filtrando solo
+     por ese campo, a quien entrena en el salón sin nada le salían ejercicios de
+     jaula de sentadillas.
+
+     Así que el nombre también veta, y no solo por el material suelto —mancuerna,
+     polea— sino por lo que hay que tener instalado: una barra fija, unas
+     paralelas, una jaula, una máquina. La raya está en si se improvisa con lo que
+     hay en una casa: un banco es una silla y un escalón son las escaleras, así
+     que esos se quedan; de una barra de dominadas no hay sustituto. */
+  const INFRAESTRUCTURA =
+    'barra fija|dominada|jal[oó]n|paralela|rack|jaula|press de banca|' +
+    'hiperextensi[oó]n|romana|anilla|trx|suspensi[oó]n|remo invertido|' +
+    'cinta|el[ií]ptica|bicicleta|remoergometro|remo erg|' +
+    /* de los fondos solo caen los de paralelas o máquina: el de banco se hace
+       con una silla */
+    'fondo para|fondo en m[aá]quina|fondo parallel|fondo anilla';
+
   const PROHIBIDO_POR_SITIO = {
-    home:      /mancuerna|polea|m[aá]quina|smith|kettlebell|banda el[aá]stica|con barra/i,
-    bands:     /mancuerna|polea|m[aá]quina|smith|kettlebell|con barra/i,
-    dumbbell:  /polea|m[aá]quina|smith|con barra|barra z|barra ez/i
+    home: new RegExp('mancuerna|polea|m[aá]quina|smith|kettlebell|banda el[aá]stica|' +
+      'con barra|barra z|barra ez|disco|lastre|' + INFRAESTRUCTURA, 'i'),
+    bands: new RegExp('mancuerna|polea|m[aá]quina|smith|kettlebell|con barra|barra z|' +
+      'barra ez|disco|' + INFRAESTRUCTURA, 'i'),
+    /* Con mancuernas en casa sí puede haber una silla para los fondos, pero una
+       barra fija para dominadas ya es otra cosa. */
+    dumbbell: new RegExp('polea|m[aá]quina|smith|con barra|barra z|barra ez|' +
+      'rack|jaula|paralela|press de banca|cinta|el[ií]ptica|bicicleta|dominada|' +
+      'barra fija|jal[oó]n', 'i')
   };
 
   function permiteNombre(gear, nombre) {

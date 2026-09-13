@@ -1627,20 +1627,20 @@
   /* Las instrucciones originales quedan como material de apoyo, plegadas */
   function instruccionesHTML(ex) {
     if (!ex.instructions || !ex.instructions.length) return '';
-    const traducidas = localStorage.getItem('trainingfr.tr.' + ex.id);
-    const pasos = traducidas ? JSON.parse(traducidas) : ex.instructions;
+    const traducidas = traduccionGuardada(ex);
+    const pasos = traducidas || ex.instructions;
 
     return html`
       <button class="guia-tit" data-a="verOriginal" style="margin-top:18px">
-        ${raw(icon('chevron'))} Instrucciones originales del catálogo
+        ${raw(icon('chevron'))} Cómo se hace, paso a paso
       </button>
       <div class="guia" id="orig" hidden>
         <div class="card">
           <ol class="instr" id="instr">
             ${raw(pasos.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join(''))}
           </ol>
-          ${raw(traducidas ? '' : '<button class="btn sm block" data-a="traducir">' +
-            'Traducir al español</button>')}
+          ${raw(traducidas ? '' : '<p class="tiny" id="tr-aviso" style="margin:10px 0 0">' +
+            'Traduciendo del catálogo original…</p>')}
         </div>
       </div>`;
   }
@@ -1657,12 +1657,108 @@
     });
     bind(root, '[data-a=addrutina]', function () { pickRoutineSheet(ex); });
     bindAll(root, '[data-ex]', function (el) { go('ejercicio', el.dataset.ex); window.scrollTo(0, 0); });
-    bind(root, '[data-a=traducir]', function (el) { traducirInstrucciones(ex, el); });
+    /* Se traduce sola al abrir: el botón estaba dentro de un bloque plegado y
+       casi nadie llegaba a pulsarlo. */
+    asegurarTraduccion(ex).then(function (pasos) {
+      if (!pasos) {
+        const aviso = root.querySelector('#tr-aviso');
+        if (aviso) aviso.textContent = 'No he podido traducirlas; las dejo como vienen.';
+        return;
+      }
+      const lista = root.querySelector('#instr');
+      if (lista) lista.innerHTML = pasos.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+      const aviso = root.querySelector('#tr-aviso');
+      if (aviso) aviso.remove();
+    });
     bind(root, '[data-a=verOriginal]', function (el) {
       const c = root.querySelector('#orig');
       if (c) { c.hidden = !c.hidden; el.classList.toggle('abierta', !c.hidden); }
     });
   };
+
+  /* ---------- las instrucciones, en español ----------
+     El catálogo viene en inglés y la traducción estaba escondida detrás de un
+     botón, dentro de un bloque plegado: casi nadie llegaba, y la hoja rápida del
+     entrenamiento —la que se abre a mitad de serie— enseñaba el inglés tal cual.
+
+     Ahora se traduce sola al abrir la ficha y se guarda, así que solo se hace
+     una vez por ejercicio. Si hay entrenador con IA se le pide a él, que traduce
+     los pasos de golpe y entiende de qué va; si no, al servicio gratuito, que va
+     frase a frase y a veces se atraganta. Si fallan los dos, se queda el
+     original, que es mejor que nada. */
+  const TR_PREFIJO = 'trainingfr.tr.';
+  const traduciendo = {};
+
+  function traduccionGuardada(ex) {
+    try {
+      const v = localStorage.getItem(TR_PREFIJO + ex.id);
+      return v ? JSON.parse(v) : null;
+    } catch (e) { return null; }
+  }
+
+  function pasosDe(ex) {
+    return traduccionGuardada(ex) || ex.instructions || [];
+  }
+
+  function guardarTraduccion(ex, pasos) {
+    try { localStorage.setItem(TR_PREFIJO + ex.id, JSON.stringify(pasos)); }
+    catch (e) { /* cuota llena: se traducirá otra vez, no es grave */ }
+  }
+
+  function traducirConIA(ex) {
+    if (!g.IA || !IA.activa()) return Promise.reject(new Error('sin IA'));
+    return IA.llamarJSON(
+      'Traduce al español de España estas instrucciones de un ejercicio de gimnasio. ' +
+      'Es lenguaje de sala: usa los términos que se usan aquí —escápulas, cadera, ' +
+      'agarre, recorrido— y no traduzcas palabra por palabra. Una frase por paso, en ' +
+      'el mismo orden y sin añadir ni quitar ninguno.\n\n' +
+      'EJERCICIO: ' + ex.nameEs + '\n' +
+      'PASOS:\n' + (ex.instructions || []).map(function (t, i) {
+        return (i + 1) + ') ' + t;
+      }).join('\n') + '\n\n' +
+      'Devuelve JSON: {"pasos":["paso 1","paso 2"]}',
+      { maxTokens: 2048, temperatura: 0.2 }
+    ).then(function (r) {
+      const pasos = (r && r.pasos) || [];
+      if (pasos.length !== (ex.instructions || []).length) throw new Error('no cuadran');
+      return pasos.map(function (t) { return String(t).trim(); });
+    });
+  }
+
+  function traducirConServicio(ex) {
+    return Promise.all((ex.instructions || []).map(function (frase) {
+      const url = 'https://api.mymemory.translated.net/get?q=' +
+        encodeURIComponent(frase.slice(0, 480)) + '&langpair=en|es';
+      return fetch(url)
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          const t = j && j.responseData && j.responseData.translatedText;
+          if (!t || /MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(t)) throw new Error('sin traducción');
+          return t;
+        });
+    }));
+  }
+
+  /* Se pide una vez por ejercicio; si ya hay una en marcha, se espera a esa. */
+  function asegurarTraduccion(ex) {
+    if (!ex || !ex.instructions || !ex.instructions.length) return Promise.resolve(null);
+    const ya = traduccionGuardada(ex);
+    if (ya) return Promise.resolve(ya);
+    if (traduciendo[ex.id]) return traduciendo[ex.id];
+
+    traduciendo[ex.id] = traducirConIA(ex)
+      .catch(function () { return traducirConServicio(ex); })
+      .then(function (pasos) {
+        guardarTraduccion(ex, pasos);
+        delete traduciendo[ex.id];
+        return pasos;
+      })
+      .catch(function () {
+        delete traduciendo[ex.id];
+        return null;
+      });
+    return traduciendo[ex.id];
+  }
 
   /* Traducción bajo demanda de las instrucciones (servicio gratuito, sin clave).
      Si falla, el texto original en inglés sigue visible. */
@@ -4783,9 +4879,8 @@
           <div><b>Ritmo</b><p>${guia.tempo}</p></div>
         </div>`
       : html`
-        <ol class="instr" style="margin-top:14px">
-          ${raw((JSON.parse(localStorage.getItem('trainingfr.tr.' + ex.id) || 'null') || ex.instructions)
-            .map(function (s) { return '<li>' + esc(s) + '</li>'; }).join(''))}
+        <ol class="instr" id="hoja-instr" style="margin-top:14px">
+          ${raw(pasosDe(ex).map(function (s) { return '<li>' + esc(s) + '</li>'; }).join(''))}
         </ol>`)}
 
       <div class="row" style="margin-top:16px">
@@ -4794,6 +4889,14 @@
       </div>`,
       function (el) {
         UI.mountDemos(el);
+        /* Aquí también: es la pantalla que se abre a mitad de serie y enseñaba el
+           inglés del catálogo tal cual. */
+        asegurarTraduccion(ex).then(function (pasos) {
+          const lista = el.querySelector('#hoja-instr');
+          if (pasos && lista) {
+            lista.innerHTML = pasos.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+          }
+        });
         el.querySelector('[data-x=cerrar]').onclick = UI.closeModal;
         el.querySelector('[data-x=ficha]').onclick = function () {
           UI.closeModal();
