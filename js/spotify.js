@@ -149,6 +149,10 @@
       v: verificador, s: estado, t: Date.now(), volver: location.hash || '#/musica'
     });
 
+    /* Fuera la sesión anterior antes de ir: si la vuelta falla a medias, no se
+       queda mezclado un token viejo con permisos nuevos a medio dar. */
+    escribir(SES, null);
+
     return reto(verificador).then(function (challenge) {
       const q = new URLSearchParams({
         client_id: c.clientId,
@@ -157,7 +161,13 @@
         code_challenge_method: 'S256',
         code_challenge: challenge,
         scope: SCOPES,
-        state: estado
+        state: estado,
+        /* Sin esto, Spotify ve que ya le diste permiso una vez y te devuelve al
+           momento sin enseñar la pantalla: se reaprovecha el consentimiento
+           viejo y los permisos nuevos no llegan nunca. Es decir, «reconectar»
+           no reconectaba nada. Con show_dialog la pantalla sale siempre y el
+           permiso se concede de verdad. */
+        show_dialog: 'true'
       });
       location.href = 'https://accounts.spotify.com/authorize?' + q.toString();
     }).catch(function (e) {
@@ -811,8 +821,18 @@
     return pedir('/me').then(function (yo) {
       miId = (yo && yo.id) || '';
       partes.push('cuenta: ' + miId + ' · ' + (yo && yo.product));
-      partes.push('app: ' + String(c.clientId || '').slice(0, 8) + '…');
+      partes.push('app: ' + String(c.clientId || '').slice(0, 8) + '…' +
+        (g.APP_VERSION ? ' · Training FR ' + g.APP_VERSION : ''));
       partes.push('conexión: ' + edadDeLaConexion());
+      /* Los permisos que de verdad importan aquí, uno a uno. Hasta ahora solo
+         se decía «no falta ninguno», y eso tapaba el caso en el que Spotify
+         dice que concedió y luego no deja. */
+      const dados = String(ses.scope || '');
+      partes.push('permisos clave: ' + ['playlist-modify-private', 'playlist-modify-public',
+        'user-library-read', 'user-library-modify'].map(function (x) {
+        return x.replace('playlist-modify-', 'pl-mod-').replace('user-library-', 'lib-') +
+          (dados.indexOf(x) === -1 ? ' NO' : ' sí');
+      }).join(' · '));
       return pedir('/me/playlists?limit=50');
     }).then(function (r) {
       const items = (r && r.items) || [];

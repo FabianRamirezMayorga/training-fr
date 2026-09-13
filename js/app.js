@@ -4777,7 +4777,12 @@
       const t = setTimeout(function () { ok(''); }, 1500);
       canal.port1.onmessage = function (e) {
         clearTimeout(t);
-        ok((e.data || {}).version || '');
+        const v = (e.data || {}).version || '';
+        /* A mano, para que cualquier informe de fallo diga con qué versión se
+           sacó: si no, no hay forma de saber si lo que se está mirando es lo
+           recién desplegado o lo de ayer guardado en caché. */
+        if (v) g.APP_VERSION = v.replace('trainingfr-', '');
+        ok(v);
       };
       try { sw.postMessage({ tipo: 'version' }, [canal.port2]); }
       catch (e) { clearTimeout(t); ok(''); }
@@ -5040,6 +5045,11 @@
               (v ? ' (' + v.replace('trainingfr-', '') + ')' : '') + '.');
           });
         }
+
+        /* Se pregunta una vez al arrancar para tener la versión a mano: el
+           diagnóstico de Spotify la imprime, y sin eso no hay forma de saber si
+           lo que se está mirando es la versión recién desplegada o una guardada. */
+        versionDelSW();
 
         navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
           .then(function (reg) {
