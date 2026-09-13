@@ -263,6 +263,39 @@
      permite que entren en los filtros, en las rutinas y en el entrenamiento
      sin tocar nada más. Una sola imagen: no son un movimiento con ida y
      vuelta, son una postura que se sostiene. */
+  /* Las posturas que el catalogo en espanol ilustra de verdad. Las de Yoga
+     API son iconos planos y al lado de una ilustracion cantan; donde hay
+     foto, manda la foto. */
+  const FOTOS = {
+    yoga_boat: 'es_boat_pose',
+    yoga_bow: 'es_bow_pose',
+    yoga_camel: 'es_camel_pose',
+    yoga_chair: 'es_chair_pose',
+    yoga_childs_pose: 'es_childs_pose',
+    yoga_corpse: 'es_savasana',
+    yoga_crescent_lunge: 'es_lunge',
+    yoga_crow: 'es_crow_pose',
+    yoga_dolphin: 'es_dolphin_pose',
+    yoga_downward_facing_dog: 'es_downward_dog',
+    yoga_eagle: 'es_eagle_pose',
+    yoga_extended_side_angle: 'es_extended_side_angle',
+    yoga_garland_pose: 'es_garland_pose',
+    yoga_half_moon: 'es_half_moon_pose',
+    yoga_low_lunge: 'es_low_lunge',
+    yoga_plank: 'es_plank',
+    yoga_plow: 'es_plow_pose',
+    yoga_pyramid: 'es_pyramid_pose',
+    yoga_reverse_warrior: 'es_warrior_one',
+    yoga_side_plank: 'es_plank',
+    yoga_sphinx: 'es_sphinx_pose',
+    yoga_tree: 'es_tree_pose',
+    yoga_triangle: 'es_triangle_pose',
+    yoga_upward_facing_dog: 'es_upward_dog',
+    yoga_warrior_one: 'es_warrior_one',
+    yoga_warrior_three: 'es_warrior_three',
+    yoga_warrior_two: 'es_warrior_two'
+  };
+
   function crudos() {
     return POSTURAS.map(function (p) {
       return {
@@ -276,6 +309,7 @@
         primaryMuscles: p.primary ? [p.primary] : [],
         secondaryMuscles: p.secondary,
         instructions: [p.desc, p.bien ? 'Beneficios: ' + p.bien : ''].filter(Boolean),
+        foto: FOTOS[p.id] || null,
         category: 'yoga',
         images: [p.img]
       };

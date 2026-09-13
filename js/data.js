@@ -244,6 +244,20 @@
 
     if (g.Yoga) todo = todo.concat(Yoga.crudos());
     if (g.Calistenia) todo = todo.concat(Calistenia.crudos());
+
+    /* El dibujo era el último recurso, no la primera opción. Donde el catálogo
+       en español ilustra el mismo movimiento, se usa su imagen: los escalones de
+       una progresión se quedan con la de la figura completa —es el mismo
+       movimiento, y el texto ya dice en qué escalón estás—. El muñeco sobrevive
+       solo donde no hay foto de nada. */
+    const porId = {};
+    enEspanol.forEach(function (e) { porId[e.id] = e; });
+    todo.forEach(function (e) {
+      if (!e.foto) return;
+      const fuente = porId[e.foto];
+      if (fuente && fuente.images && fuente.images.length) e.images = fuente.images;
+    });
+
     return todo;
   }
 

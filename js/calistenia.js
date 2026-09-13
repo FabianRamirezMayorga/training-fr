@@ -29,7 +29,7 @@
   const EJERCICIOS = [
 
     /* ---------------- EMPUJE: de la flexión al planche ---------------- */
-    { id: 'cal_flex_pica', name: 'Pike Push-Up', nameEs: 'Flexión en pica',
+    { id: 'cal_flex_pica', foto: 'es_pike_push_ups', name: 'Pike Push-Up', nameEs: 'Flexión en pica',
       nivel: 'beginner', fuerza: 'push', suelo: true,
       primary: 'shoulders', secondary: ['triceps', 'chest'],
       familia: 'Vertical: hacia el pino', paso: 1,
@@ -39,7 +39,7 @@
         'Los codos hacia delante y algo abiertos, no pegados al cuerpo.',
         'La coronilla toca por delante de las manos, no entre ellas.'] },
 
-    { id: 'cal_flex_pica_elev', name: 'Elevated Pike Push-Up', nameEs: 'Flexión en pica elevada',
+    { id: 'cal_flex_pica_elev', foto: 'es_pike_push_ups', name: 'Elevated Pike Push-Up', nameEs: 'Flexión en pica elevada',
       nivel: 'intermediate', fuerza: 'push', suelo: true,
       primary: 'shoulders', secondary: ['triceps'],
       familia: 'Vertical: hacia el pino', paso: 2,
@@ -48,7 +48,7 @@
       claves: ['Sube la altura poco a poco: cada palmo es bastante más difícil.',
         'Si la espalda baja se arquea, has subido demasiado.'] },
 
-    { id: 'cal_pino_pared', name: 'Wall Handstand Hold', nameEs: 'Pino contra la pared (aguante)',
+    { id: 'cal_pino_pared', foto: 'es_handstand_push_ups', name: 'Wall Handstand Hold', nameEs: 'Pino contra la pared (aguante)',
       nivel: 'beginner', fuerza: 'static', suelo: true,
       primary: 'shoulders', secondary: ['triceps', 'abdominals'],
       familia: 'Vertical: hacia el pino', paso: 3,
@@ -58,7 +58,7 @@
         'Costillas metidas y glúteo apretado, que la espalda no se arquee.',
         'Empieza por aguantes de 20 s y sube hasta el minuto.'] },
 
-    { id: 'cal_pino_libre', name: 'Freestanding Handstand', nameEs: 'Pino libre',
+    { id: 'cal_pino_libre', foto: 'es_handstand_push_ups', name: 'Freestanding Handstand', nameEs: 'Pino libre',
       nivel: 'expert', fuerza: 'static', suelo: true,
       primary: 'shoulders', secondary: ['abdominals', 'forearms'],
       familia: 'Vertical: hacia el pino', paso: 4,
@@ -68,7 +68,7 @@
         'Mira al suelo entre las manos, no hacia delante.',
         'Es coordinación, así que va mejor muchos intentos cortos que pocos largos.'] },
 
-    { id: 'cal_flex_pino', name: 'Wall Handstand Push-Up', nameEs: 'Flexión en pino contra pared',
+    { id: 'cal_flex_pino', foto: 'es_handstand_push_ups', name: 'Wall Handstand Push-Up', nameEs: 'Flexión en pino contra pared',
       nivel: 'expert', fuerza: 'push', suelo: true,
       primary: 'shoulders', secondary: ['triceps', 'traps'],
       familia: 'Vertical: hacia el pino', paso: 5,
@@ -78,7 +78,7 @@
         'Baja controlado; la parte que fabrica fuerza es la bajada.',
         'Si no sale entera, empieza por bajadas lentas y sube con los pies.'] },
 
-    { id: 'cal_planche_lean', name: 'Planche Lean', nameEs: 'Planche lean (inclinación)',
+    { id: 'cal_planche_lean', foto: 'es_pseudo_planche_push_ups', name: 'Planche Lean', nameEs: 'Planche lean (inclinación)',
       nivel: 'beginner', fuerza: 'static', suelo: true,
       primary: 'shoulders', secondary: ['chest', 'abdominals', 'forearms'],
       familia: 'Planche', paso: 1,
@@ -88,7 +88,7 @@
         'Escápulas separadas y hacia abajo, nunca juntas.',
         'Mide con los pies: cuanto más lejos quedan los hombros de las manos, más avanzas.'] },
 
-    { id: 'cal_planche_tuck', name: 'Tuck Planche', nameEs: 'Planche agrupado (tuck)',
+    { id: 'cal_planche_tuck', foto: 'es_planche', name: 'Tuck Planche', nameEs: 'Planche agrupado (tuck)',
       nivel: 'intermediate', fuerza: 'static', suelo: true,
       primary: 'shoulders', secondary: ['chest', 'abdominals'],
       familia: 'Planche', paso: 2,
@@ -98,7 +98,7 @@
         'Empuja el suelo y redondea la espalda alta.',
         'La cadera a la altura de los hombros, no más baja.'] },
 
-    { id: 'cal_planche_tuck_av', name: 'Advanced Tuck Planche', nameEs: 'Planche agrupado avanzado',
+    { id: 'cal_planche_tuck_av', foto: 'es_planche', name: 'Advanced Tuck Planche', nameEs: 'Planche agrupado avanzado',
       nivel: 'expert', fuerza: 'static', suelo: true,
       primary: 'shoulders', secondary: ['chest', 'abdominals', 'lower back'],
       familia: 'Planche', paso: 3,
@@ -107,7 +107,7 @@
       claves: ['La espalda deja de estar redondeada: costillas metidas y cadera abierta.',
         'Si la cadera se hunde, vuelve al agrupado normal unas semanas.'] },
 
-    { id: 'cal_planche_straddle', name: 'Straddle Planche', nameEs: 'Planche en straddle',
+    { id: 'cal_planche_straddle', foto: 'es_planche', name: 'Straddle Planche', nameEs: 'Planche en straddle',
       nivel: 'expert', fuerza: 'static', suelo: true,
       primary: 'shoulders', secondary: ['chest', 'abdominals', 'glutes'],
       familia: 'Planche', paso: 4,
@@ -116,7 +116,7 @@
       claves: ['Cuanto más abras, más fácil: se cierra poco a poco con los meses.',
         'Glúteo y cuádriceps apretados; las piernas no cuelgan.'] },
 
-    { id: 'cal_planche_full', name: 'Full Planche', nameEs: 'Planche completo',
+    { id: 'cal_planche_full', foto: 'es_planche', name: 'Full Planche', nameEs: 'Planche completo',
       nivel: 'expert', fuerza: 'static', suelo: true,
       primary: 'shoulders', secondary: ['chest', 'abdominals', 'lower back'],
       familia: 'Planche', paso: 5,
@@ -125,7 +125,7 @@
       claves: ['Antes de entrar, codos y muñecas bien calentados; el tendón del codo es el que avisa.',
         'Mejor aguantes de 3-5 s muy limpios que uno de 10 doblando los brazos.'] },
 
-    { id: 'cal_flex_planche', name: 'Planche Push-Up', nameEs: 'Flexión planche',
+    { id: 'cal_flex_planche', foto: 'es_planche', name: 'Planche Push-Up', nameEs: 'Flexión planche',
       nivel: 'expert', fuerza: 'push', suelo: true,
       primary: 'shoulders', secondary: ['chest', 'triceps'],
       familia: 'Planche', paso: 6,
@@ -134,7 +134,7 @@
       claves: ['El cuerpo no se mueve hacia atrás al bajar: el hombro se queda por delante.',
         'Recorrido corto al principio; ya se irá ganando.'] },
 
-    { id: 'cal_flex_arquera', name: 'Archer Push-Up', nameEs: 'Flexión arquera',
+    { id: 'cal_flex_arquera', foto: 'es_archer_push_ups', name: 'Archer Push-Up', nameEs: 'Flexión arquera',
       nivel: 'intermediate', fuerza: 'push', suelo: true,
       primary: 'chest', secondary: ['triceps', 'shoulders'],
       familia: 'Hacia la flexión a una mano', paso: 1,
@@ -143,7 +143,7 @@
       claves: ['El brazo estirado ayuda lo justo: cuanto menos empuje, mejor.',
         'La cadera mirando al suelo, sin girar el torso para hacer trampa.'] },
 
-    { id: 'cal_flex_una_mano', name: 'One-Arm Push-Up Progression',
+    { id: 'cal_flex_una_mano', foto: 'es_archer_push_ups', name: 'One-Arm Push-Up Progression',
       nameEs: 'Flexión a una mano (progresión)',
       nivel: 'expert', fuerza: 'push', suelo: true,
       primary: 'chest', secondary: ['triceps', 'abdominals', 'obliques'],
@@ -155,7 +155,7 @@
         'Baja lento; a una mano, el hombro no perdona un rebote.'] },
 
     /* ---------------- TRACCIÓN: dominadas y palancas ---------------- */
-    { id: 'cal_dominada_negativa', name: 'Negative Pull-Up', nameEs: 'Dominada negativa',
+    { id: 'cal_dominada_negativa', foto: 'es_negative_pull_ups', name: 'Negative Pull-Up', nameEs: 'Dominada negativa',
       nivel: 'beginner', fuerza: 'pull', suelo: false,
       primary: 'lats', secondary: ['biceps', 'middle back'],
       familia: 'Base de tracción', paso: 3,
@@ -165,7 +165,7 @@
         'Hombros abajo y atrás desde el principio, no encogidos.',
         '3 series de 4 bajadas, tres veces por semana, y llega sola.'] },
 
-    { id: 'cal_dominada_arquera', name: 'Archer Pull-Up', nameEs: 'Dominada arquera',
+    { id: 'cal_dominada_arquera', foto: 'es_archer_pull_ups', name: 'Archer Pull-Up', nameEs: 'Dominada arquera',
       nivel: 'expert', fuerza: 'pull', suelo: false,
       primary: 'lats', secondary: ['biceps', 'middle back'],
       familia: 'Hacia la dominada a un brazo', paso: 1,
@@ -174,7 +174,7 @@
       claves: ['El brazo estirado no se dobla: si se dobla, es una dominada normal desplazada.',
         'La barbilla va a la mano que trabaja, no al centro.'] },
 
-    { id: 'cal_dominada_typewriter', name: 'Typewriter Pull-Up', nameEs: 'Dominada typewriter',
+    { id: 'cal_dominada_typewriter', foto: 'es_archer_pull_ups', name: 'Typewriter Pull-Up', nameEs: 'Dominada typewriter',
       nivel: 'expert', fuerza: 'pull', suelo: false,
       primary: 'lats', secondary: ['biceps', 'middle back'],
       familia: 'Hacia la dominada a un brazo', paso: 2,
@@ -183,7 +183,7 @@
       claves: ['La barbilla no baja mientras te desplazas.',
         'Ve despacio: el valor está en el recorrido, no en el número.'] },
 
-    { id: 'cal_dominada_un_brazo_asist', name: 'Assisted One-Arm Pull-Up',
+    { id: 'cal_dominada_un_brazo_asist', foto: 'es_archer_pull_ups', name: 'Assisted One-Arm Pull-Up',
       nameEs: 'Dominada a un brazo asistida',
       nivel: 'expert', fuerza: 'pull', suelo: false,
       primary: 'lats', secondary: ['biceps', 'forearms'],
@@ -193,7 +193,7 @@
       claves: ['La ayuda tiene que ser medible, para saber si progresas.',
         'El hombro que trabaja, abajo y atrás antes de tirar: si se encoge, se resiente.'] },
 
-    { id: 'cal_dominada_un_brazo', name: 'One-Arm Pull-Up', nameEs: 'Dominada a un brazo',
+    { id: 'cal_dominada_un_brazo', foto: 'es_archer_pull_ups', name: 'One-Arm Pull-Up', nameEs: 'Dominada a un brazo',
       nivel: 'expert', fuerza: 'pull', suelo: false,
       primary: 'lats', secondary: ['biceps', 'forearms', 'middle back'],
       familia: 'Hacia la dominada a un brazo', paso: 4,
@@ -202,7 +202,7 @@
       claves: ['El cuerpo gira solo: se compensa apretando el abdominal y el glúteo del lado libre.',
         'El codo y el bíceps son los que sufren; calienta de verdad antes.'] },
 
-    { id: 'cal_dominada_explosiva', name: 'Explosive Pull-Up', nameEs: 'Dominada explosiva',
+    { id: 'cal_dominada_explosiva', foto: 'es_muscle_ups', name: 'Explosive Pull-Up', nameEs: 'Dominada explosiva',
       nivel: 'intermediate', fuerza: 'pull', suelo: false,
       primary: 'lats', secondary: ['biceps', 'traps'],
       familia: 'Hacia el muscle-up', paso: 1,
@@ -211,7 +211,7 @@
       claves: ['Tira del pecho a la barra, no de la barbilla.',
         'Sin balanceo: si la haces con impulso, no estás ganando nada.'] },
 
-    { id: 'cal_transicion_mu', name: 'Muscle-Up Transition Drill',
+    { id: 'cal_transicion_mu', foto: 'es_muscle_ups', name: 'Muscle-Up Transition Drill',
       nameEs: 'Transición de muscle-up (en banda o salto)',
       nivel: 'intermediate', fuerza: 'pull', suelo: false,
       primary: 'lats', secondary: ['triceps', 'chest', 'shoulders'],
@@ -221,7 +221,7 @@
       claves: ['Las muñecas giran por encima de la barra: es un giro, no un tirón más fuerte.',
         'Mete el pecho por delante en cuanto pases; quedarte debajo te devuelve abajo.'] },
 
-    { id: 'cal_mu_negativo', name: 'Negative Muscle-Up', nameEs: 'Muscle-up negativo',
+    { id: 'cal_mu_negativo', foto: 'es_muscle_ups', name: 'Negative Muscle-Up', nameEs: 'Muscle-up negativo',
       nivel: 'expert', fuerza: 'pull', suelo: false,
       primary: 'lats', secondary: ['triceps', 'chest'],
       familia: 'Hacia el muscle-up', paso: 3,
@@ -230,7 +230,7 @@
       claves: ['Cuanto más lento bajes la transición, antes sale la subida.',
         'Fíjate en dónde se te van los codos: ahí es donde se rompe la subida.'] },
 
-    { id: 'cal_fl_tuck', name: 'Tuck Front Lever', nameEs: 'Front lever agrupado (tuck)',
+    { id: 'cal_fl_tuck', foto: 'es_front_lever', name: 'Tuck Front Lever', nameEs: 'Front lever agrupado (tuck)',
       nivel: 'intermediate', fuerza: 'static', suelo: false,
       primary: 'lats', secondary: ['abdominals', 'middle back', 'lower back'],
       familia: 'Front lever', paso: 1,
@@ -240,7 +240,7 @@
         'La espalda paralela al suelo; si la cadera queda más baja, aún no estás en la posición.',
         'Aguantes de 10-15 s.'] },
 
-    { id: 'cal_fl_tuck_av', name: 'Advanced Tuck Front Lever',
+    { id: 'cal_fl_tuck_av', foto: 'es_front_lever', name: 'Advanced Tuck Front Lever',
       nameEs: 'Front lever agrupado avanzado',
       nivel: 'expert', fuerza: 'static', suelo: false,
       primary: 'lats', secondary: ['abdominals', 'lower back'],
@@ -250,7 +250,7 @@
       claves: ['La espalda baja plana: si se arquea, has abierto más de lo que aguantas.',
         'Costillas metidas, como si quisieras juntarlas con la pelvis.'] },
 
-    { id: 'cal_fl_straddle', name: 'Straddle Front Lever', nameEs: 'Front lever en straddle',
+    { id: 'cal_fl_straddle', foto: 'es_front_lever', name: 'Straddle Front Lever', nameEs: 'Front lever en straddle',
       nivel: 'expert', fuerza: 'static', suelo: false,
       primary: 'lats', secondary: ['abdominals', 'glutes', 'lower back'],
       familia: 'Front lever', paso: 3,
@@ -259,7 +259,7 @@
       claves: ['Abre todo lo que puedas al principio y ve cerrando con los meses.',
         'Punta de pie estirada y glúteo apretado: si las piernas cuelgan, pesan más.'] },
 
-    { id: 'cal_fl_full', name: 'Full Front Lever', nameEs: 'Front lever completo',
+    { id: 'cal_fl_full', foto: 'es_front_lever', name: 'Full Front Lever', nameEs: 'Front lever completo',
       nivel: 'expert', fuerza: 'static', suelo: false,
       primary: 'lats', secondary: ['abdominals', 'lower back', 'middle back'],
       familia: 'Front lever', paso: 4,
@@ -268,7 +268,7 @@
       claves: ['Todo el cuerpo en una línea: hombros, cadera y talones.',
         'Cuenta solo el tiempo en el que estás horizontal de verdad.'] },
 
-    { id: 'cal_fl_remo', name: 'Front Lever Row', nameEs: 'Remo en front lever',
+    { id: 'cal_fl_remo', foto: 'es_front_lever', name: 'Front Lever Row', nameEs: 'Remo en front lever',
       nivel: 'expert', fuerza: 'pull', suelo: false,
       primary: 'lats', secondary: ['middle back', 'biceps', 'abdominals'],
       familia: 'Front lever', paso: 5,
@@ -277,7 +277,7 @@
       claves: ['El cuerpo sube paralelo al suelo, sin que la cadera se hunda.',
         'Hazlo en el escalón anterior al que aguantas: en agrupado si tu aguante es el avanzado.'] },
 
-    { id: 'cal_bl_tuck', name: 'Tuck Back Lever', nameEs: 'Back lever agrupado',
+    { id: 'cal_bl_tuck', foto: 'es_back_lever', name: 'Tuck Back Lever', nameEs: 'Back lever agrupado',
       nivel: 'intermediate', fuerza: 'static', suelo: false,
       primary: 'chest', secondary: ['shoulders', 'biceps', 'lower back'],
       familia: 'Back lever', paso: 1,
@@ -286,7 +286,7 @@
       claves: ['Los hombros y el bíceps se estiran mucho: entra despacio la primera vez.',
         'Mejor agarre prono para proteger el codo.'] },
 
-    { id: 'cal_bl_straddle', name: 'Straddle Back Lever', nameEs: 'Back lever en straddle',
+    { id: 'cal_bl_straddle', foto: 'es_back_lever', name: 'Straddle Back Lever', nameEs: 'Back lever en straddle',
       nivel: 'expert', fuerza: 'static', suelo: false,
       primary: 'chest', secondary: ['shoulders', 'biceps', 'glutes'],
       familia: 'Back lever', paso: 2,
@@ -294,7 +294,7 @@
       desc: 'Boca abajo, horizontal, piernas rectas y abiertas. Igual que en el front lever, abrir acorta la palanca.',
       claves: ['Mirada al suelo y cuerpo en línea, sin arquear la lumbar.'] },
 
-    { id: 'cal_bl_full', name: 'Full Back Lever', nameEs: 'Back lever completo',
+    { id: 'cal_bl_full', foto: 'es_back_lever', name: 'Full Back Lever', nameEs: 'Back lever completo',
       nivel: 'expert', fuerza: 'static', suelo: false,
       primary: 'chest', secondary: ['shoulders', 'biceps', 'lower back'],
       familia: 'Back lever', paso: 3,
@@ -302,7 +302,7 @@
       desc: 'Cuerpo recto y horizontal, boca abajo, brazos rectos por detrás. Pide bastante movilidad de hombro además de fuerza.',
       claves: ['Si notas tirón en la parte interna del codo, sal: es la lesión típica de esta postura.'] },
 
-    { id: 'cal_skin_the_cat', name: 'Skin the Cat', nameEs: 'Skin the cat (vuelta colgado)',
+    { id: 'cal_skin_the_cat', foto: 'es_ring_dead_hang', name: 'Skin the Cat', nameEs: 'Skin the cat (vuelta colgado)',
       nivel: 'intermediate', fuerza: 'pull', suelo: false,
       primary: 'lats', secondary: ['shoulders', 'abdominals', 'biceps'],
       familia: 'Back lever', paso: 0,
@@ -312,7 +312,7 @@
         'Hazlo lento en los dos sentidos; la vuelta es tan importante como la ida.'] },
 
     /* ---------------- CORE: L-sit, dragon flag y compañía ---------------- */
-    { id: 'cal_hollow', name: 'Hollow Body Hold', nameEs: 'Hollow body (aguante hueco)',
+    { id: 'cal_hollow', foto: 'es_hollow_body_hold', name: 'Hollow Body Hold', nameEs: 'Hollow body (aguante hueco)',
       nivel: 'beginner', fuerza: 'static', suelo: true,
       primary: 'abdominals', secondary: ['quadriceps'],
       familia: 'Base de core', paso: 1,
@@ -321,7 +321,7 @@
       claves: ['La lumbar NO se despega del suelo: si se despega, sube más las piernas.',
         'Si aguantas un minuto, baja las piernas en vez de alargar el tiempo.'] },
 
-    { id: 'cal_hollow_rock', name: 'Hollow Rock', nameEs: 'Hollow rock (balanceo hueco)',
+    { id: 'cal_hollow_rock', foto: 'es_hollow_body_hold', name: 'Hollow Rock', nameEs: 'Hollow rock (balanceo hueco)',
       nivel: 'beginner', fuerza: 'static', suelo: true,
       primary: 'abdominals', secondary: ['hip flexors'],
       familia: 'Base de core', paso: 2,
@@ -330,7 +330,7 @@
       claves: ['El balanceo sale de los hombros, no de doblar la cadera.',
         'Si el cuerpo se «rompe» por la mitad, vuelve al aguante.'] },
 
-    { id: 'cal_lsit_tuck', name: 'Tuck L-Sit', nameEs: 'L-sit agrupado',
+    { id: 'cal_lsit_tuck', foto: 'es_l_sit', name: 'Tuck L-Sit', nameEs: 'L-sit agrupado',
       nivel: 'beginner', fuerza: 'static', suelo: true,
       primary: 'abdominals', secondary: ['triceps', 'shoulders', 'quadriceps'],
       familia: 'L-sit', paso: 1,
@@ -339,7 +339,7 @@
       claves: ['Hombros abajo, lejos de las orejas: es lo que permite subir la cadera.',
         'Si no despegas, usa dos libros o unas paralelas bajas.'] },
 
-    { id: 'cal_lsit_una', name: 'One-Leg L-Sit', nameEs: 'L-sit a una pierna',
+    { id: 'cal_lsit_una', foto: 'es_l_sit', name: 'One-Leg L-Sit', nameEs: 'L-sit a una pierna',
       nivel: 'intermediate', fuerza: 'static', suelo: true,
       primary: 'abdominals', secondary: ['triceps', 'quadriceps'],
       familia: 'L-sit', paso: 2,
@@ -347,7 +347,7 @@
       desc: 'Igual que el agrupado pero estirando una pierna, alternando. Medio escalón que evita el salto brusco al L-sit completo.',
       claves: ['La pierna estirada, a la altura de la cadera y con el cuádriceps apretado.'] },
 
-    { id: 'cal_lsit', name: 'L-Sit', nameEs: 'L-sit',
+    { id: 'cal_lsit', foto: 'es_l_sit', name: 'L-Sit', nameEs: 'L-sit',
       nivel: 'intermediate', fuerza: 'static', suelo: true,
       primary: 'abdominals', secondary: ['triceps', 'shoulders', 'quadriceps'],
       familia: 'L-sit', paso: 3,
@@ -356,7 +356,7 @@
       claves: ['Si no llegas, casi siempre son los isquios y no el abdomen: estíralos.',
         'Codos bloqueados y escápulas hacia abajo.'] },
 
-    { id: 'cal_vsit', name: 'V-Sit', nameEs: 'V-sit',
+    { id: 'cal_vsit', foto: 'es_v_sit', name: 'V-Sit', nameEs: 'V-sit',
       nivel: 'expert', fuerza: 'static', suelo: true,
       primary: 'abdominals', secondary: ['hip flexors', 'triceps'],
       familia: 'L-sit', paso: 4,
@@ -364,7 +364,7 @@
       desc: 'Desde el L-sit, subes las piernas rectas por encima de la cadera hasta formar una uve. Pide compresión, que es una cualidad que se entrena aparte.',
       claves: ['Entrena la compresión sentado en el suelo, levantando las piernas rectas con las manos apoyadas.'] },
 
-    { id: 'cal_dragon_negativa', name: 'Negative Dragon Flag', nameEs: 'Dragon flag negativa',
+    { id: 'cal_dragon_negativa', foto: 'es_dragon_flag', name: 'Negative Dragon Flag', nameEs: 'Dragon flag negativa',
       nivel: 'intermediate', fuerza: 'static', suelo: true,
       primary: 'abdominals', secondary: ['lower back', 'lats'],
       familia: 'Dragon flag', paso: 1,
@@ -373,7 +373,7 @@
       claves: ['Solo los omóplatos tocan: ni la lumbar, ni el glúteo.',
         'El cuerpo baja recto como una tabla; si se dobla por la cadera, es otro ejercicio.'] },
 
-    { id: 'cal_dragon_tuck', name: 'Tuck Dragon Flag', nameEs: 'Dragon flag agrupada',
+    { id: 'cal_dragon_tuck', foto: 'es_dragon_flag', name: 'Tuck Dragon Flag', nameEs: 'Dragon flag agrupada',
       nivel: 'intermediate', fuerza: 'static', suelo: true,
       primary: 'abdominals', secondary: ['lower back'],
       familia: 'Dragon flag', paso: 2,
@@ -381,7 +381,7 @@
       desc: 'La dragon flag con las rodillas dobladas, subiendo y bajando con control. Palanca corta para poder hacer repeticiones de verdad.',
       claves: ['Sube y baja sin apoyar la espalda entre repeticiones.'] },
 
-    { id: 'cal_dragon_full', name: 'Dragon Flag', nameEs: 'Dragon flag completa',
+    { id: 'cal_dragon_full', foto: 'es_dragon_flag', name: 'Dragon Flag', nameEs: 'Dragon flag completa',
       nivel: 'expert', fuerza: 'static', suelo: true,
       primary: 'abdominals', secondary: ['lower back', 'lats', 'glutes'],
       familia: 'Dragon flag', paso: 3,
@@ -390,7 +390,7 @@
       claves: ['Glúteo apretado: es lo que impide que la cadera se rompa por la mitad.',
         'Mejor 3 repeticiones perfectas que 8 dobladas.'] },
 
-    { id: 'cal_limpia_parabrisas', name: 'Hanging Windshield Wipers',
+    { id: 'cal_limpia_parabrisas', foto: 'es_hanging_leg_raise', name: 'Hanging Windshield Wipers',
       nameEs: 'Limpiaparabrisas colgado',
       nivel: 'expert', fuerza: 'static', suelo: false,
       primary: 'abdominals', secondary: ['lats', 'obliques'],
@@ -401,7 +401,7 @@
         'Aguanta un segundo en cada lado en vez de dejarte caer.'] },
 
     /* ---------------- BANDERA ---------------- */
-    { id: 'cal_bandera_apoyo', name: 'Human Flag Support Hold',
+    { id: 'cal_bandera_apoyo', foto: 'es_human_flag', name: 'Human Flag Support Hold',
       nameEs: 'Bandera: apoyo vertical',
       nivel: 'intermediate', fuerza: 'static', suelo: false,
       primary: 'shoulders', secondary: ['lats', 'abdominals', 'obliques'],
@@ -411,7 +411,7 @@
       claves: ['La mano de abajo EMPUJA, no tira: ahí se decide la bandera entera.',
         'Los brazos rectos los dos.'] },
 
-    { id: 'cal_bandera_tuck', name: 'Tuck Human Flag', nameEs: 'Bandera agrupada',
+    { id: 'cal_bandera_tuck', foto: 'es_human_flag', name: 'Tuck Human Flag', nameEs: 'Bandera agrupada',
       nivel: 'expert', fuerza: 'static', suelo: false,
       primary: 'shoulders', secondary: ['lats', 'obliques', 'abdominals'],
       familia: 'Bandera humana', paso: 2,
@@ -420,7 +420,7 @@
       claves: ['Sal desde arriba, dejándote caer poco a poco, no desde abajo subiendo.',
         'Cadera y hombros en el mismo plano; si te giras boca abajo, es más fácil pero no es bandera.'] },
 
-    { id: 'cal_bandera_straddle', name: 'Straddle Human Flag', nameEs: 'Bandera en straddle',
+    { id: 'cal_bandera_straddle', foto: 'es_human_flag', name: 'Straddle Human Flag', nameEs: 'Bandera en straddle',
       nivel: 'expert', fuerza: 'static', suelo: false,
       primary: 'shoulders', secondary: ['lats', 'obliques', 'glutes'],
       familia: 'Bandera humana', paso: 3,
@@ -428,7 +428,7 @@
       desc: 'Piernas rectas y abiertas, cuerpo horizontal sostenido de lado en el poste.',
       claves: ['La pierna de arriba tira hacia el techo; es lo que sostiene la horizontal.'] },
 
-    { id: 'cal_bandera_full', name: 'Full Human Flag', nameEs: 'Bandera humana completa',
+    { id: 'cal_bandera_full', foto: 'es_human_flag', name: 'Full Human Flag', nameEs: 'Bandera humana completa',
       nivel: 'expert', fuerza: 'static', suelo: false,
       primary: 'shoulders', secondary: ['lats', 'obliques', 'abdominals'],
       familia: 'Bandera humana', paso: 4,
@@ -438,7 +438,7 @@
         'Un poste que no se mueva: esto se prueba una vez en algo que aguante.'] },
 
     /* ---------------- PIERNA SIN MATERIAL ---------------- */
-    { id: 'cal_sent_caja_una', name: 'Single-Leg Box Squat', nameEs: 'Sentadilla a una pierna a cajón',
+    { id: 'cal_sent_caja_una', foto: 'es_pistol_squat', name: 'Single-Leg Box Squat', nameEs: 'Sentadilla a una pierna a cajón',
       nivel: 'beginner', fuerza: 'push', suelo: true,
       primary: 'quadriceps', secondary: ['glutes', 'hamstrings'],
       familia: 'Hacia la pistol', paso: 1,
@@ -447,7 +447,7 @@
       claves: ['La rodilla apuntando a la punta del pie, sin irse hacia dentro.',
         'Baja el asiento un par de dedos cada vez que te salgan 8 repeticiones.'] },
 
-    { id: 'cal_shrimp', name: 'Shrimp Squat', nameEs: 'Sentadilla shrimp',
+    { id: 'cal_shrimp', foto: 'es_pistol_squat', name: 'Shrimp Squat', nameEs: 'Sentadilla shrimp',
       nivel: 'intermediate', fuerza: 'push', suelo: true,
       primary: 'quadriceps', secondary: ['glutes', 'hamstrings'],
       familia: 'Hacia la pistol', paso: 2,
@@ -456,7 +456,7 @@
       claves: ['El torso recto; inclinarte convierte esto en otra cosa.',
         'Pon una toalla bajo la rodilla las primeras semanas.'] },
 
-    { id: 'cal_pistol_asistida', name: 'Assisted Pistol Squat', nameEs: 'Pistol asistida',
+    { id: 'cal_pistol_asistida', foto: 'es_pistol_squat', name: 'Assisted Pistol Squat', nameEs: 'Pistol asistida',
       nivel: 'intermediate', fuerza: 'push', suelo: true,
       primary: 'quadriceps', secondary: ['glutes', 'hamstrings', 'calves'],
       familia: 'Hacia la pistol', paso: 3,
@@ -465,7 +465,7 @@
       claves: ['El brazo equilibra, no tira. Si tiras, no estás progresando.',
         'Si el talón se despega, el problema es el tobillo: estira gemelo y sóleo.'] },
 
-    { id: 'cal_pistol', name: 'Pistol Squat', nameEs: 'Pistol squat (sentadilla a una pierna)',
+    { id: 'cal_pistol', foto: 'es_pistol_squat', name: 'Pistol Squat', nameEs: 'Pistol squat (sentadilla a una pierna)',
       nivel: 'expert', fuerza: 'push', suelo: true,
       primary: 'quadriceps', secondary: ['glutes', 'hamstrings', 'abdominals'],
       familia: 'Hacia la pistol', paso: 4,
@@ -474,7 +474,7 @@
       claves: ['El talón pegado al suelo todo el recorrido.',
         'Los brazos delante hacen de contrapeso.'] },
 
-    { id: 'cal_nordic', name: 'Nordic Hamstring Curl', nameEs: 'Curl nórdico',
+    { id: 'cal_nordic', foto: 'es_nordic_hamstring_curl', name: 'Nordic Hamstring Curl', nameEs: 'Curl nórdico',
       nivel: 'expert', fuerza: 'pull', suelo: true,
       primary: 'hamstrings', secondary: ['glutes', 'calves'],
       familia: 'Pierna sin material', paso: 1,
@@ -483,7 +483,7 @@
       claves: ['El cuerpo cae recto desde la rodilla: sin doblar la cadera.',
         'Al principio frena solo el primer tramo y empuja con las manos para volver.'] },
 
-    { id: 'cal_gemelo_una', name: 'Single-Leg Calf Raise', nameEs: 'Elevación de gemelo a una pierna',
+    { id: 'cal_gemelo_una', foto: 'es_single_leg_calf_raise', name: 'Single-Leg Calf Raise', nameEs: 'Elevación de gemelo a una pierna',
       nivel: 'beginner', fuerza: 'push', suelo: true,
       primary: 'calves', secondary: [],
       familia: 'Pierna sin material', paso: 2,
@@ -493,7 +493,7 @@
         'Un segundo arriba en cada repetición.'] },
 
     /* ---------------- ESTÁTICOS DE APOYO ---------------- */
-    { id: 'cal_apoyo_paralelas', name: 'Parallel Bar Support Hold',
+    { id: 'cal_apoyo_paralelas', foto: 'es_ring_dips', name: 'Parallel Bar Support Hold',
       nameEs: 'Apoyo en paralelas (aguante)',
       nivel: 'beginner', fuerza: 'static', suelo: false,
       primary: 'triceps', secondary: ['chest', 'shoulders', 'abdominals'],
@@ -504,7 +504,7 @@
         'Codos bloqueados del todo.',
         'Aguantes de 30 s hasta llegar al minuto.'] },
 
-    { id: 'cal_colgado', name: 'Dead Hang', nameEs: 'Colgarse de la barra',
+    { id: 'cal_colgado', foto: 'es_dead_hang', name: 'Dead Hang', nameEs: 'Colgarse de la barra',
       nivel: 'beginner', fuerza: 'static', suelo: false,
       primary: 'forearms', secondary: ['lats', 'shoulders'],
       familia: 'Base de tracción', paso: 1,
@@ -513,7 +513,7 @@
       claves: ['Primero colgado suelto, después activo: bajando los hombros sin doblar los codos.',
         'Si buscas agarre, suma tiempo total del día; no hace falta que sea seguido.'] },
 
-    { id: 'cal_escapular', name: 'Scapular Pull-Up', nameEs: 'Dominada escapular',
+    { id: 'cal_escapular', foto: 'es_scapular_pull_ups', name: 'Scapular Pull-Up', nameEs: 'Dominada escapular',
       nivel: 'beginner', fuerza: 'pull', suelo: false,
       primary: 'traps', secondary: ['lats', 'middle back'],
       familia: 'Base de tracción', paso: 2,
@@ -879,6 +879,9 @@ const FIGURAS = {
         instructions: pasos,
         /* Los fotogramas salen dibujados, no de una foto: entran por el mismo
            sitio que las del catálogo y el reproductor de siempre los anima. */
+        /* La ilustracion de verdad manda sobre el dibujo. El muñeco se queda
+           solo donde no hay foto de nada. */
+        foto: e.foto || null,
         figura: FIGURAS[e.id] || null,
         /* Escrito en español de origen. Sin esto, la app las mandaría a
            traducir «del catálogo original» como hace con las del inglés, y lo
