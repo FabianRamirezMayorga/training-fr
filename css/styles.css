@@ -1026,3 +1026,27 @@ body.escribiendo .toast { opacity: 0; pointer-events: none; }
 
 /* La misma barra de progreso, en el azul de la proteína */
 .prog.azul i { background: var(--blue); }
+
+/* ---------- mapa muscular ----------
+   Dos siluetas y lo que se trabaja pintado encima. Las etiquetas dicen
+   «dorsales» y «espalda media» y hay que saberse la anatomía para situarlas;
+   el dibujo lo resuelve sin leer. */
+.mapa-musculos { display: flex; gap: 14px; align-items: center;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
+  padding: 14px; margin-top: 14px; }
+.mapa-figuras { display: flex; gap: 6px; flex: none; }
+.cuerpo { width: 74px; height: auto; display: block; }
+.cuerpo .silueta { fill: var(--card2); }
+.cuerpo .sec { fill: var(--warn); opacity: .42; }
+.cuerpo .pri { fill: var(--warn); }
+.mapa-lista { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.mapa-grupo { display: flex; gap: 8px; align-items: flex-start; }
+.mapa-grupo b { font-size: .9rem; }
+.mapa-grupo .punto { flex: none; width: 11px; height: 11px; border-radius: 50%;
+  margin-top: 3px; background: var(--warn); }
+.mapa-grupo .punto.sec { opacity: .42; }
+/* En pantallas estrechas el texto cabe peor al lado: las siluetas arriba */
+@media (max-width: 400px) {
+  .mapa-musculos { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .cuerpo { width: 88px; }
+}

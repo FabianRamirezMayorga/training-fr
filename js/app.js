@@ -1476,6 +1476,8 @@
            aria-label="Buscar vídeo en YouTube">${raw(icon('youtube'))}</a>
       </div>
 
+      ${raw(g.Musculos ? Musculos.mapa(ex.primaryMuscles, ex.secondaryMuscles) : '')}
+
       ${raw(alternativasHTML(ex))}
 
       ${raw(marcos.length > 1 ? html`
