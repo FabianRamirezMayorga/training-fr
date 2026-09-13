@@ -314,6 +314,14 @@
      en el del entrenador se pide en ese momento, para que hable de cómo vas hoy
      y no de cómo ibas el día que lo creaste. Si la IA no está o falla, sale el
      de reserva: más vale un aviso genérico que ninguno. */
+  /* El título del aviso, con su nombre. Un «Tu entrenador» en la pantalla de
+     bloqueo, entre los avisos de otras veinte apps, no dice que sea para ti. */
+  function tituloDe(x) {
+    if (!esDeIA(x.alerta.tipo)) return x.titulo;
+    const n = String(Store.settings().name || '').trim();
+    return n ? n + ', un momento' : x.titulo;
+  }
+
   function textoDe(x) {
     if (!esDeIA(x.alerta.tipo)) return Promise.resolve(x.mensaje);
     if (!g.IA || !IA.activa || !IA.activa() || !IA.pildora) {
@@ -338,6 +346,7 @@
         marcarLanzada(x.alerta.id, x.hora);
         textoDe(x).then(function (cuerpo) {
           x.mensaje = cuerpo;
+          x.titulo = tituloDe(x);
           avisar(x.titulo, cuerpo);
         });
       });
@@ -428,7 +437,7 @@
   }
 
   g.Alertas = {
-    esDeIA: esDeIA, textoDe: textoDe,
+    esDeIA: esDeIA, textoDe: textoDe, tituloDe: tituloDe,
     TIPOS: TIPOS, DIAS: DIAS,
     lista: lista, nueva: nueva, guardar: guardar, borrar: borrar, desdeRutinas: desdeRutinas,
     soportado: soportado, permiso: permiso, pedirPermiso: pedirPermiso, avisar: avisar,

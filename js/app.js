@@ -3981,6 +3981,14 @@
           </div>
         </div>
         <div class="hr"></div>
+        <div class="row between"><span>Cada cuánto cambia la frase del entrenador</span>
+          <div class="row" style="gap:6px;max-width:130px">
+            <input id="s-pildora" type="number" min="1" max="24" step="1"
+                   value="${IA.horasPildora ? IA.horasPildora() : 6}"
+                   style="text-align:center"><span class="tiny nowrap">h</span>
+          </div>
+        </div>
+        <div class="hr"></div>
         <div class="row between"><span>Aviso sonoro al terminar el descanso</span>
           <button class="chip ${s.sound ? 'on' : ''}" data-a="sound">${s.sound ? 'Activado' : 'Apagado'}</button>
         </div>
@@ -4180,6 +4188,14 @@
       aplicarTema();
       render();
     });
+    const campoPildora = root.querySelector('#s-pildora');
+    if (campoPildora) campoPildora.onchange = function () {
+      const n = Math.min(24, Math.max(1, Number(campoPildora.value) || 6));
+      campoPildora.value = n;
+      Store.setSetting('pildoraHoras', n);
+      UI.toast('La frase cambiará cada ' + n + (n === 1 ? ' hora' : ' horas'));
+    };
+
     bind(root, '[data-a=sound]', function () {
       Store.setSetting('sound', !Store.settings().sound);
       render();

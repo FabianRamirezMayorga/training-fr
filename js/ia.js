@@ -1412,38 +1412,96 @@
      Va donde antes no había nada. Tiene que ser corta y suya: un «tú puedes»
      genérico no lo lee nadie dos veces. Se guarda medio día para no gastar una
      llamada por cada vez que se entra en la pantalla. */
+  /* CADA CUÁNTO CAMBIA LA FRASE.
+     Antes se guardaba por día: entrabas por la tarde y leías la misma de la
+     mañana. Ahora el día se parte en bloques y cada bloque trae la suya, así
+     que cambia sola sin gastar una llamada por cada vez que abres la app. */
+  function horasPildora() {
+    const n = Number(Store.settings().pildoraHoras);
+    return n >= 1 && n <= 24 ? n : 6;
+  }
+
+  function bloqueDelDia() {
+    const h = horasPildora();
+    return Math.floor(new Date().getHours() / h);
+  }
+
+  /* De qué va la de este bloque. Una frase de ánimo cuatro veces al día cansa;
+     rotando el tipo, cada una trae algo distinto y alguna enseña algo. */
+  const CLASES_PILDORA = [
+    { id: 'empujon', que: 'un empujón para hoy, enganchado a algo suyo de los datos ' +
+      'de arriba: lo que levanta, lo que ya ha conseguido, lo que tiene a tiro' },
+    { id: 'dato', que: 'un dato que no sepa y que le sirva, de fisiología del ' +
+      'entrenamiento o de nutrición; algo concreto, no una obviedad de revista' },
+    { id: 'tecnica', que: 'un detalle de técnica de alguno de los ejercicios que hace, ' +
+      'de los que cambian el ejercicio cuando los corriges' },
+    { id: 'comida', que: 'algo útil sobre su alimentación, mirando lo que lleva comido ' +
+      'y lo que le falta' },
+    { id: 'descanso', que: 'algo sobre el descanso, el sueño o la recuperación, que es ' +
+      'donde se hace el músculo y lo que todo el mundo descuida' }
+  ];
+
+  /* Una frase, la que toque ahora.
+     Va donde antes no había nada. Tiene que ser corta y suya: un «tú puedes»
+     genérico no lo lee nadie dos veces. Se guarda lo que dura el bloque para no
+     gastar una llamada por cada vez que se entra en la pantalla. */
   function pildora() {
     const ses = Store.sessions();
-    const clave = 'pildora:' + Store.dayKey(Date.now()) + ':' +
+    const bloque = bloqueDelDia();
+    const clase = CLASES_PILDORA[(Number(Store.dayKey(Date.now()).replace(/\D/g, '')) + bloque) %
+      CLASES_PILDORA.length];
+
+    const clave = 'pildora:' + Store.dayKey(Date.now()) + ':' + bloque + ':' + clase.id + ':' +
       Store.routines().length + ':' + ses.length;
-    const guardado = leerCache(clave, 12);
+    const guardado = leerCache(clave, horasPildora());
     if (guardado) return Promise.resolve(guardado);
 
+    const nombre = String(Store.settings().name || '').trim();
+
     const prompt = contexto({ progreso: true, cargas: true, comida: true }) + '\n\n' +
-      'EXCEPCIÓN A TUS NORMAS, solo para esto: aquí SÍ quiero que animes. Es la frase ' +
+      'EXCEPCIÓN A TUS NORMAS, solo para esto: aquí SÍ quiero que animes. Es lo ' +
       'que ve al abrir su programa y tiene que dejarle con ganas de entrenar, no ' +
       'regañado. Sigues sin adular en hueco y sin prometer nada, pero el tono es de ' +
       'alguien que está de su lado.\n\n' +
-      'Escríbele UNA frase, la que más le empuje hoy.\n' +
-      '- Máximo 20 palabras. Una frase, no dos.\n' +
-      '- Engánchala a algo suyo de los datos de arriba: lo que levanta, lo que ya ha ' +
-      'conseguido, lo que tiene a tiro, su meta. Una frase que le valga a cualquiera no ' +
-      'sirve.\n' +
+      'Escríbele UNA cosa, y que sea ' + clase.que + '.\n' +
+      (nombre ? '- Llámale ' + nombre + ' por su nombre. No es opcional: esto lo lee ' +
+        'solo, en su móvil, y sin su nombre suena a circular.\n' : '') +
+      '- Máximo 25 palabras. Una frase o dos cortas, no un párrafo.\n' +
+      '- Que sea suyo: si apenas tiene datos, empújale a entrenar hoy, que el primer ' +
+      'registro es el que pone todo lo demás en marcha.\n' +
       '- Si va bien, díselo y dile qué viene ahora. Si lleva tiempo parado, que sea una ' +
       'invitación a volver, no un reproche.\n' +
-      '- Si apenas tiene datos, empújale a entrenar hoy: el primer registro es el que ' +
-      'pone todo lo demás en marcha.\n' +
       '- Nada de signos de exclamación, emojis, ni «tú puedes» de calendario.\n\n' +
-      'Devuelve JSON: {"frase":"la frase","tipo":"empujon|tecnica|aviso"}';
+      'Devuelve JSON: {"frase":"la frase","tipo":"' + clase.id + '"}';
 
     return llamarJSON(prompt, { maxTokens: 3072, temperatura: 0.8 }).then(function (r) {
-      const limpio = { frase: String((r && r.frase) || '').trim(), tipo: (r && r.tipo) || '' };
+      const limpio = { frase: String((r && r.frase) || '').trim(), tipo: (r && r.tipo) || clase.id };
       if (!limpio.frase) throw new Error('sin frase');
       escribirCache(clave, limpio);
       return limpio;
     });
   }
 
+  /* El catálogo que se le enseña, con la advertencia de que es lo único que
+     puede proponer. Es lo que separa un cambio aplicable de un nombre bonito
+     que aquí no existe. */
+  function menuEjercicios(musculos, gear, porMusculo) {
+    return '\nCATÁLOGO DEL QUE PUEDES ELEGIR. Es el único material que existe en ' +
+      'esta app. Cualquier ejercicio que propongas tiene que estar en esta lista y ' +
+      'escrito EXACTAMENTE igual, tilde por tilde. Si lo que ibas a proponer no ' +
+      'está, coge el más parecido que sí esté; y si no hay nada parecido, no ' +
+      'propongas ese cambio. No te inventes nombres ni los traduzcas a tu manera:\n' +
+      Data.paraIA({
+        musculos: musculos || [],
+        gear: gear || Store.settings().gear,
+        porMusculo: porMusculo
+      }) + '\n';
+  }
+
+  /* ---------- una frase, la que toque hoy ----------
+     Va donde antes no había nada. Tiene que ser corta y suya: un «tú puedes»
+     genérico no lo lee nadie dos veces. Se guarda medio día para no gastar una
+     llamada por cada vez que se entra en la pantalla. */
   /* ---------- montar el programa entero con IA ----------
      El programa que hace programa.js es determinista: reparte patrones sobre
      plantillas y sale siempre algo coherente, pero dos personas con el mismo
@@ -2181,7 +2239,7 @@
     listarModelos: listarModelos,
     planNutricion: planNutricion, revisarRutinas: revisarRutinas,
     revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
-    crearPrograma: crearPrograma, pildora: pildora,
+    crearPrograma: crearPrograma, pildora: pildora, horasPildora: horasPildora,
     analizarComida: analizarComida, estimarComida: estimarComida,
     leerRutina: leerRutina,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
