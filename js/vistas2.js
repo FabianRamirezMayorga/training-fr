@@ -1453,10 +1453,7 @@
 
   /* Asistente de generación: ambiente, duración y una indicación libre */
   function generarLista(btnOrigen) {
-    const hoy = UI.DAY_NAMES[new Date().getDay()];
-    const rutinaHoy = Store.routines().find(function (r) {
-      return (r.days || []).indexOf(hoy) !== -1;
-    });
+    const rutinaHoy = (App.rutinasDeHoy ? App.rutinasDeHoy() : [])[0];
 
     let ambiente = 'ritmo';
 

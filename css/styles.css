@@ -1301,3 +1301,10 @@ img[src^="data/img/"] {
 .plan-caja .desliza { margin-top: 0; }
 .plan-caja .desliza-cara > .dia-grupo { padding: 10px 6px; }
 .plan-caja .stack { margin-top: 4px; }
+
+/* El plan que manda. Con varios planes que compartan dia, este es el unico que
+   cuenta para «hoy»; la insignia lo dice sin tener que abrirlo. */
+.plan-marca {
+  border-color: color-mix(in srgb, var(--acc) 55%, transparent);
+  color: var(--acc);
+}

@@ -23,10 +23,9 @@
   let pidiendoFrase = false;
 
   function rutinaDeHoy() {
-    const hoy = UI.DAY_NAMES[new Date().getDay()];
-    return Store.routines().filter(function (r) {
-      return (r.days || []).indexOf(hoy) !== -1 && (r.exercises || []).length;
-    })[0] || null;
+    /* Por App y no a mano: así respeta el plan marcado como activo y no hay dos
+       ideas distintas de qué toca hoy. */
+    return (App.rutinasDeHoy ? App.rutinasDeHoy(true) : [])[0] || null;
   }
 
   /* El día de hoy dentro del menú semanal, si es que hay menú generado */

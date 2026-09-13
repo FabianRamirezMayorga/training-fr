@@ -428,7 +428,7 @@
     const rutinas = Store.routines();
     const activa = Store.active();
     const hoy = UI.DAY_NAMES[new Date().getDay()];
-    const deHoy = rutinas.filter(function (r) { return (r.days || []).indexOf(hoy) !== -1; });
+    const deHoy = rutinasDeHoy();
     const nombre = Store.settings().name;
     const olvido = abandonados();
     const peso = Perfil.tendencia(30);
@@ -652,6 +652,39 @@
      del grupo y otra vez en el título de la tarjeta: escribirlo una tercera vez
      no añade nada. Se quita al pintar, no al guardar: el nombre completo sigue
      siendo el que viaja al historial y a los otros dispositivos. */
+  /* EL PLAN QUE MANDA HOY.
+     Con dos planes que tengan lunes, el lunes salían los dos y había que elegir
+     a mano cada vez. Se marca uno como activo y es el único que cuenta para
+     «hoy»; los demás siguen ahí enteros, para abrirlos y entrenar de ellos
+     cuando quieras.
+
+     Si el plan marcado ya no existe —lo borraste o lo renombraste— la marca se
+     ignora sola y vuelven a contar todos: más vale ver de más que quedarse sin
+     entrenamiento por una marca huérfana. */
+  function planActivo() {
+    const n = Store.settings().planActivo;
+    if (!n) return '';
+    const hay = Store.routines().some(function (r) { return nombreRutina(r) === n; });
+    return hay ? n : '';
+  }
+
+  function marcarPlanActivo(nombre) {
+    Store.setSetting('planActivo', nombre || null);
+  }
+
+  /* Las rutinas que tocan hoy, ya filtradas por el plan activo. Lo usa todo el
+     mundo —portada, rutinas, el día entero, la lista de música— para que no haya
+     dos ideas distintas de qué toca hoy. */
+  function rutinasDeHoy(conEjercicios) {
+    const hoy = UI.DAY_NAMES[new Date().getDay()];
+    const activo = planActivo();
+    return Store.routines().filter(function (r) {
+      if ((r.days || []).indexOf(hoy) === -1) return false;
+      if (conEjercicios && !(r.exercises || []).length) return false;
+      return !activo || nombreRutina(r) === activo;
+    });
+  }
+
   function nombreRutina(r) {
     const n = String(r.name || '').trim();
     if (!n) return 'Rutina sin nombre';
@@ -697,7 +730,8 @@
 
   function porPlanes(rutinas) {
     const hoy = UI.DAY_NAMES[new Date().getDay()];
-    const deHoy = rutinas.filter(function (r) { return (r.days || []).indexOf(hoy) !== -1; });
+    const deHoy = rutinasDeHoy();
+    const activo = planActivo();
 
     const orden = [];
     const planes = {};
@@ -721,8 +755,11 @@
       <div class="stack">${raw(deHoy.map(function (r) { return routineCard(r); }).join(''))}</div>`
       : html`
       <div class="list-title">Hoy es ${UI.diaLargo(hoy).toLowerCase()}</div>
-      <p class="tiny" style="margin:-4px 0 4px">No tienes nada asignado a hoy. Abre un plan
-      y toca los días de una rutina para moverla aquí.</p>`;
+      <p class="tiny" style="margin:-4px 0 4px">${raw(activo
+        ? 'Tu plan principal —' + esc(activo) + '— no tiene nada para hoy. Otros planes ' +
+          'sí: ábrelos abajo y entrena de ellos, o cambia de plan principal.'
+        : 'No tienes nada asignado a hoy. Abre un plan y toca los días de una rutina para ' +
+          'moverla aquí.')}</p>`;
 
     const bloques = orden.map(function (k, i) {
       const suyas = planes[k];
@@ -742,6 +779,7 @@
         <button class="dia-grupo" data-grupo="${k}">
           <div class="grow">
             <div class="rt-titulo">${k}
+              ${raw(k === activo ? '<span class="chip tiny-chip plan-marca">EN CURSO</span>' : '')}
               ${raw(dias.indexOf(hoy) !== -1 ? '<span class="chip solid tiny-chip">HOY</span>' : '')}</div>
             <div class="tiny" style="margin-top:2px">${suyas.length}
               ${suyas.length === 1 ? 'rutina' : 'rutinas'} · ${ejercicios} ejercicios
@@ -774,6 +812,16 @@
         ]))}
         ${raw(abierto ? '<div class="stack">' +
           suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' +
+          (k === activo
+            ? '<p class="tiny" style="margin:10px 0 0">Este es el plan que manda: en ' +
+              '«hoy» solo salen sus rutinas.</p>' +
+              '<button class="btn block sm" data-planactivo="" style="margin-top:6px">' +
+              'Dejar de usarlo como plan principal</button>'
+            : '<button class="btn block sm" data-planactivo="' + esc(k) + '" ' +
+              'style="margin-top:10px">' + icon('check') + ' Usar este como plan principal' +
+              '</button>' +
+              '<p class="tiny" style="margin:6px 0 0">En «hoy» solo saldrán las rutinas ' +
+              'de este plan. Los demás siguen aquí para entrenarlos cuando quieras.</p>') +
           '<button class="btn block sm" data-iaplan="' + esc(k) + '" ' +
           'style="margin-top:10px">' + icon('chispa') + ' Revisar el plan con IA</button>' +
           '<p class="tiny" style="margin:6px 0 0">Lee los ' + suyas.length +
@@ -935,10 +983,7 @@
        Entrenar, y quien no lo supiera acababa entrenando a mano lo que ya
        tenía programado. */
     bind(root, '[data-a=entrenarhoy]', function () {
-      const hoy = UI.DAY_NAMES[new Date().getDay()];
-      const deHoy = Store.routines().filter(function (r) {
-        return (r.days || []).indexOf(hoy) !== -1;
-      });
+      const deHoy = rutinasDeHoy();
       if (!deHoy.length) return;
       if (deHoy.length === 1) { empezar(deHoy[0].id); return; }
 
@@ -1965,8 +2010,10 @@
     const rutinas = Store.routines();
     if (ordenando) return rutinas;
     const hoy = UI.DAY_NAMES[new Date().getDay()];
-    const deHoy = rutinas.filter(function (r) { return (r.days || []).indexOf(hoy) !== -1; });
-    const resto = rutinas.filter(function (r) { return (r.days || []).indexOf(hoy) === -1; });
+    const deHoy = rutinasDeHoy();
+    const resto = rutinas.filter(function (r) {
+      return deHoy.indexOf(r) === -1;
+    });
     return deHoy.concat(resto);
   }
 
@@ -2109,6 +2156,13 @@
       const pos = window.scrollY;
       render();
       window.scrollTo(0, pos);
+    });
+
+    bindAll(root, '[data-planactivo]', function (el) {
+      const n = el.dataset.planactivo;
+      marcarPlanActivo(n);
+      render();
+      UI.toast(n ? 'Plan principal: ' + n : 'Ya no hay plan principal');
     });
 
     bindAll(root, '[data-grupo]', function (el) {
@@ -5289,6 +5343,8 @@
     nombreRutina: nombreRutina, tituloRutina: tituloRutina,
     /* compartir.js pinta según el trozo de hash que trae el plan dentro */
     ruta: function () { return route; },
+    planActivo: planActivo, marcarPlanActivo: marcarPlanActivo,
+    rutinasDeHoy: rutinasDeHoy,
     /* Abrir una rutina y lanzarle la auditoría: lo pide la pantalla que trae
        rutinas de fuera, que es justo donde más falta hace pasarlas por el
        entrenador —no las ha montado la app y nadie las ha mirado. */
