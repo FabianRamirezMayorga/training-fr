@@ -1147,6 +1147,67 @@
       });
   }
 
+  /* Permisos completos y Spotify sigue diciendo que no. Entonces no es el
+     token: o es la app del panel de Spotify, o es esa cuenta. Se averigua aquí
+     mismo en vez de mandarle a otra pantalla. */
+  function noSonLosPermisosSheet(mensaje) {
+    UI.modal(html`
+      <h2>Esto no son los permisos</h2>
+      <p class="muted">Tu conexión tiene todos los permisos que la app pide, y aun así
+      Spotify rechaza crear la lista. Reconectar no lo va a arreglar.</p>
+      <pre class="tiny" style="white-space:pre-wrap;word-break:break-word;margin:10px 0 0;
+        opacity:.8">${mensaje}</pre>
+
+      <p class="tiny" style="margin:12px 0 0">Voy a probar unas cuantas llamadas y a
+      ver cuáles pasan. La que lo decide es la del catálogo público: no pide ningún
+      permiso, así que si esa también falla el problema es la app del panel de
+      Spotify, no tu cuenta ni esta web.</p>
+
+      <button class="btn primary block" id="sp-diag2" style="margin-top:14px">
+        Averiguar por qué</button>
+      <pre class="tiny" id="sp-res" style="white-space:pre-wrap;word-break:break-word;
+        margin:12px 0 0"></pre>
+      <button class="btn block sm" id="sp-copiar" style="margin-top:10px;display:none">
+        Copiar el resultado</button>
+      <button class="btn ghost block" id="sp-cerrar" style="margin-top:8px">Cerrar</button>`,
+      function (el) {
+        const res = el.querySelector('#sp-res');
+        const copiar = el.querySelector('#sp-copiar');
+        el.querySelector('#sp-cerrar').onclick = function () { UI.closeModal(); };
+        el.querySelector('#sp-diag2').onclick = function (ev) {
+          const b = ev.currentTarget;
+          b.disabled = true;
+          b.textContent = 'Probando…';
+          res.textContent = '';
+          Spotify.diagnostico().then(function (t) {
+            res.textContent = t;
+            copiar.style.display = '';
+            b.disabled = false;
+            b.textContent = 'Probar otra vez';
+            /* La conclusión, dicha, que si no son ocho líneas de códigos */
+            const publicoFalla = /público hondo: (401|403)/.test(t);
+            res.textContent = t + '\n\n' + (publicoFalla
+              ? 'CONCLUSIÓN: falla hasta el catálogo público, que no pide ningún '
+                + 'permiso. El problema es la app del panel de Spotify, no tu cuenta. '
+                + 'Entra en developer.spotify.com, abre tu app y mira si está en modo '
+                + 'desarrollo y qué APIs tiene marcadas.'
+              : 'CONCLUSIÓN: el catálogo público responde, así que la app del panel '
+                + 'está bien. Lo que falla es solo escribir en tu cuenta: mándame estas '
+                + 'líneas.');
+          }).catch(function (e) {
+            res.textContent = 'No se ha podido probar: ' + e.message;
+            b.disabled = false;
+            b.textContent = 'Probar otra vez';
+          });
+        };
+        copiar.onclick = function () {
+          navigator.clipboard.writeText(res.textContent)
+            .then(function () { UI.toast('Copiado'); })
+            .catch(function () { UI.toast('Selecciona el texto y cópialo a mano'); });
+        };
+      });
+  }
+
   function subirASpotify(root) {
     const l = listaGuardada();
     if (!l || !l.pistas || !l.pistas.length) { UI.toast('No hay lista que guardar'); return; }
@@ -1187,8 +1248,17 @@
         if (boton) { boton.disabled = false; boton.textContent = 'Guardarla en mi Spotify'; }
         /* Un 403 al crear la lista es, casi siempre, permisos: se ofrece el
            arreglo en vez de dejarlo en un aviso que se va solo. */
-        if (/\[403 /.test(e.message || '')) {
-          reconectarSheet('Spotify ha rechazado crear la lista. ' + e.message);
+        if (/\[40[13] /.test(e.message || '')) {
+          /* Si a la conexión le falta algo, reconectar lo arregla. Si no le
+             falta nada —como le pasó a él tras reconectar— decirle que
+             reconecte es mandarle a dar otra vuelta para nada. */
+          const faltan = (Spotify.permisosQueFaltan && Spotify.permisosQueFaltan()) || [];
+          const aOscuras = Spotify.sesionSinApuntar && Spotify.sesionSinApuntar();
+          if (faltan.length || aOscuras) {
+            reconectarSheet('Spotify ha rechazado crear la lista. ' + e.message);
+          } else {
+            noSonLosPermisosSheet(e.message);
+          }
           return;
         }
         UI.toast(e.message || 'No se ha podido guardar en Spotify.');
