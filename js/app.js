@@ -5148,7 +5148,11 @@
        necesita para agrupar igual que la de Rutinas */
     nombreRutina: nombreRutina, tituloRutina: tituloRutina,
     /* compartir.js pinta según el trozo de hash que trae el plan dentro */
-    ruta: function () { return route; }
+    ruta: function () { return route; },
+    /* Abrir una rutina y lanzarle la auditoría: lo pide la pantalla que trae
+       rutinas de fuera, que es justo donde más falta hace pasarlas por el
+       entrenador —no las ha montado la app y nadie las ha mirado. */
+    auditarRutina: auditarDesdeLista
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

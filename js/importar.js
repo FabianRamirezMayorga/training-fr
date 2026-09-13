@@ -18,6 +18,10 @@
   let cargando = false;
   let fallo = '';
   let pista = '';
+  /* El archivo ya preparado, en memoria y nada más: hace falta para poder
+     corregir la lectura sin obligar a buscar la foto otra vez en el carrete. No
+     se escribe en disco ni se sincroniza; se suelta al salir de la pantalla. */
+  let archivoEnMano = null;
 
   const LIMITE = 8 * 1024 * 1024;
 
@@ -55,11 +59,25 @@
     leido = null;
     App.render();
 
-    preparar(file)
+    /* Con archivo nuevo se prepara; sin él se reusa el que ya está en memoria,
+       que es lo que permite corregir la lectura sin volver a buscar la foto. */
+    const listo = file ? preparar(file).then(function (a) { archivoEnMano = a; return a; })
+      : (archivoEnMano ? Promise.resolve(archivoEnMano)
+        : Promise.reject(new Error('Elige antes una foto o un PDF.')));
+
+    listo
       .then(function (archivo) { return IA.leerRutina(archivo, pista); })
       .then(function (r) { leido = resolver(r); })
       .catch(function (e) { fallo = e.message || 'No he podido leerla.'; })
       .then(function () { cargando = false; App.render(); });
+  }
+
+  /* Al salir de la pantalla no queda nada del archivo en ninguna parte. */
+  function olvidar() {
+    archivoEnMano = null;
+    leido = null;
+    pista = '';
+    fallo = '';
   }
 
   /* Lo que dice la IA contra lo que existe de verdad. Un nombre que no resuelve
@@ -76,7 +94,12 @@
            pegados en la misma línea. */
         const delPapel = String(e.comoVenia || '')
           .replace(/\d+\s*[x×]\s*\d+/gi, ' ')
-          .replace(/\d+\s*(min|s|seg|segundos|minutos)\b/gi, ' ')
+          .replace(/\d+\s*(min|s|seg|segundos|minutos|reps?|series?)\b/gi, ' ')
+          /* Las unidades que quedan sueltas cuando su número ya se fue con la
+             regla de arriba: «Plancha 3 x 45 s» dejaba un «Plancha s» que no
+             casa con nada del catálogo. */
+          .replace(/\b(min|s|seg|segundos|minutos|reps?|series?|kg)\b/gi, ' ')
+          .replace(/[\d.,;:–-]+/g, ' ')
           .replace(/\s{2,}/g, ' ').trim();
 
         /* El orden importa. A la IA se le pasa un catálogo recortado —unos
@@ -229,6 +252,14 @@
   V.importar.mount = function (root) {
     App.bind(root, '[data-a=atras]', function () { App.go('rutinas'); });
 
+    /* En cuanto se sale de aquí, el archivo deja de existir para la app. */
+    const alSalir = function () {
+      if (location.hash.indexOf('importar') !== -1) return;
+      olvidar();
+      window.removeEventListener('hashchange', alSalir);
+    };
+    window.addEventListener('hashchange', alSalir);
+
     const campoPista = root.querySelector('#imp-pista');
     if (campoPista) campoPista.oninput = function () { pista = campoPista.value; };
 
@@ -250,9 +281,7 @@
       const texto = ajuste ? ajuste.value.trim() : '';
       if (!texto) { UI.toast('Escribe qué hay que corregir'); return; }
       pista = (pista ? pista + '. ' : '') + texto;
-      UI.toast('Vuelve a elegir el archivo y lo leo con eso delante');
-      const input = root.querySelector('#imp-archivo');
-      if (input) input.click();
+      analizar(null);
     });
 
     App.bind(root, '[data-a=crear]', function () { crearSheet(); });
@@ -293,11 +322,12 @@
           if (!destino) { UI.toast('Ponle un nombre'); return; }
 
           let creadas = 0;
+          let ultima = null;
           leido.dias.forEach(function (d) {
             const dias = (d.dia && !ocupados[d.dia]) ? [d.dia] : [];
             if (dias.length) ocupados[d.dia] = true;
             const largos = dias.map(UI.diaLargo);
-            Store.saveRoutine({
+            ultima = Store.saveRoutine({
               name: largos.length ? largos.join(' y ') + ' · ' + destino : destino,
               days: dias,
               note: '',
@@ -307,9 +337,17 @@
           });
 
           UI.closeModal();
-          leido = null;
-          pista = '';
-          App.go('rutinas');
+          olvidar();
+
+          /* Lo que se trae de fuera es justo lo que conviene pasar por el
+             entrenador: no la ha montado la app y nadie la ha mirado todavía. */
+          if (creadas === 1 && ultima && App.auditarRutina) {
+            App.auditarRutina(ultima.id);
+          } else if (creadas > 1 && g.VISTAS && VISTAS.auditarPlan) {
+            VISTAS.auditarPlan(destino);
+          } else {
+            App.go('rutinas');
+          }
           UI.toast(creadas + (creadas === 1 ? ' rutina creada' : ' rutinas creadas'));
         };
       });
