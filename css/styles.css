@@ -962,7 +962,7 @@ body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
 .desliza-acciones.izq{left:0}
 /* Un solo botón a ese lado, y «Renombrar» no cabe en el ancho de los otros:
    se parte por la mitad. Aquí hay sitio de sobra. */
-.desliza-acciones.izq .desliza-btn{width:86px}
+.desliza-acciones.izq .desliza-btn{min-width:86px}
 .desliza .desliza-acciones.izq{visibility:hidden}
 .desliza.mirando-izq .desliza-acciones.izq{visibility:visible}
 .desliza.mirando-izq .desliza-acciones.der{visibility:hidden}
@@ -973,9 +973,15 @@ body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
 .desliza.abierta .desliza-acciones,
 .desliza.moviendo .desliza-acciones{visibility:visible}
 .desliza-btn{display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:3px;width:49px;border:0;padding:0 2px;
+  justify-content:center;gap:3px;min-width:49px;border:0;padding:0 7px;
   background:var(--card2);color:var(--txt);font-size:.6rem;font-weight:600;
-  letter-spacing:0;line-height:1.1}
+  letter-spacing:0;line-height:1.15}
+/* El texto manda el ancho y ninguna palabra se parte: con el ancho fijo, la
+   erre de «Compartir» se quedaba sola en la línea de abajo en unos móviles y
+   en otros no, según la fuente del sistema. Eso no se puede medir desde el
+   navegador de otro. */
+.desliza-txt{display:flex;flex-direction:column;align-items:center}
+.desliza-txt i{font-style:normal;white-space:nowrap}
 .desliza-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;
   stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .desliza-btn.malo{background:var(--bad);color:#fff}

@@ -719,7 +719,7 @@
 
       return html`
         ${raw(deslizable(cabecera, [
-          { icono: 'chispa', texto: 'Analizar con IA', attr: 'data-iaplan="' + esc(k) + '"' },
+          { icono: 'chispa', texto: 'Analizar' + BAJA + 'con IA', attr: 'data-iaplan="' + esc(k) + '"' },
           { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicarplan="' + esc(k) + '"' },
           { icono: 'compartir', texto: 'Compartir', attr: 'data-compartirplan="' + esc(k) + '"' },
           { icono: 'trash', texto: 'Borrar', tono: 'malo',
@@ -752,11 +752,23 @@
   /* Fila que se desliza para descubrir sus acciones. El contenido va delante y
      los botones detrás; lo de iOS de toda la vida. Evita tener que desplegar un
      plan entero solo para duplicarlo o borrarlo. */
+  /* Cada línea de la etiqueta va en su propio trozo y no se parte nunca. Con un
+     ancho fijo y el texto suelto, «Compartir» cabía en unos móviles y en otros
+     dejaba la erre sola en la línea de abajo: la letra que entra o no depende de
+     la fuente del sistema, y eso no se puede medir desde aquí. Ahora manda el
+     texto y el botón se ensancha lo que haga falta. */
+  /* El corte de línea de una etiqueta, como constante: escribirlo escapado
+     dentro de la cadena es fácil de romper sin darse cuenta. */
+  const BAJA = String.fromCharCode(10);
+
   function botonesDe(acciones) {
     return acciones.map(function (a) {
+      const lineas = String(a.texto).split(BAJA);
       return '<button class="desliza-btn' + (a.tono ? ' ' + a.tono : '') + '" ' +
-        a.attr + ' aria-label="' + esc(a.texto) + '">' +
-        icon(a.icono) + '<span>' + esc(a.texto) + '</span></button>';
+        a.attr + ' aria-label="' + esc(lineas.join(' ')) + '">' +
+        icon(a.icono) + '<span class="desliza-txt">' +
+        lineas.map(function (l) { return '<i>' + esc(l) + '</i>'; }).join('') +
+        '</span></button>';
     }).join('');
   }
 
@@ -853,7 +865,7 @@
     if (!total && !sinPlan) return tarjeta;
 
     return deslizable(tarjeta, [
-      { icono: 'chispa', texto: 'Analizar con IA', attr: 'data-iarutina="' + r.id + '"' },
+      { icono: 'chispa', texto: 'Analizar' + BAJA + 'con IA', attr: 'data-iarutina="' + r.id + '"' },
       { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicar="' + r.id + '"' },
       { icono: 'compartir', texto: 'Compartir', attr: 'data-compartir="' + r.id + '"' },
       { icono: 'trash', texto: 'Borrar', tono: 'malo', attr: 'data-borrar="' + r.id + '"' }
