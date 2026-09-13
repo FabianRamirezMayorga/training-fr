@@ -1242,3 +1242,60 @@ img[src^="data/img/"] {
 @media (max-width: 400px) {
   .mapa-figuras.compacto .cuerpo { width: 42px; }
 }
+
+/* ---------- boveda de claves, plegada ----------
+   Seis tarjetas abiertas en fila obligaban a pasar por toda la configuracion
+   de la IA para llegar a Supabase. Plegadas se ve el estado de todo de un
+   vistazo y se abre solo lo que se va a tocar. */
+.bov {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.bov > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  cursor: pointer;
+  list-style: none;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+.bov > summary::-webkit-details-marker { display: none; }
+.bov > summary::marker { content: ''; }
+
+.bov-flecha { transition: transform .18s ease; flex: none; }
+.bov[open] > summary .bov-flecha { transform: rotate(90deg); }
+
+.bov-tit { display: block; font-weight: 600; font-size: .95rem; }
+.bov-sub { display: block; margin-top: 2px; }
+.bov summary .grow { min-width: 0; }
+.bov-probar { flex: none; }
+
+/* El .stack global es display:flex y le gana a la regla del navegador que
+   pliega el contenido, asi que se pliega a mano igual que los dias de comidas. */
+.bov:not([open]) > .bov-cuerpo { display: none; }
+.bov > .bov-cuerpo { padding: 0 13px 13px; }
+
+/* ---------- el cajon de cada plan ----------
+   Los planes iban sueltos sobre el fondo de la pagina y no se veia donde
+   empezaba uno y acababa el otro: con su borde y su filo verde a la izquierda
+   se lee como una unidad, y al abrirlo el filo se enciende. */
+.plan-caja {
+  border: 1px solid var(--line);
+  border-left: 3px solid color-mix(in srgb, var(--acc) 45%, transparent);
+  border-radius: var(--r);
+  padding: 2px 11px 11px;
+  margin-top: 12px;
+  background: color-mix(in srgb, var(--card) 55%, transparent);
+  transition: border-color .18s;
+}
+.plan-caja.abierta {
+  border-left-color: var(--acc);
+  background: var(--card);
+}
+/* la cabecera ya trae su propio margen superior; dentro del cajon sobra */
+.plan-caja .dia-grupo { margin-top: 6px; }

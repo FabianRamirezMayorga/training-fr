@@ -26,6 +26,36 @@
       </div>`;
   }
 
+  /* Qué secciones quedan abiertas. Vive fuera del pintado porque esta pantalla
+     se repinta entera al guardar una clave o cambiar de proveedor, y sin esto la
+     sección que acabas de abrir se te cierra sola. */
+  const abiertas = {};
+
+  /* Cada servicio, plegado. Antes la bóveda era una tira de seis tarjetas
+     abiertas: para llegar a Supabase había que pasar por toda la configuración
+     de la IA y de Spotify. Plegadas se ve el estado de todo de un vistazo y se
+     abre lo que se va a tocar.
+
+     El botón de probar va EN la cabecera, que es lo que se quiere hacer sin
+     tener que abrir nada; y al probar se abre la sección sola, porque la
+     respuesta entera se pinta dentro. */
+  function plegable(o) {
+    return html`
+      <details class="bov" data-bov="${o.id}"${raw(abiertas[o.id] ? ' open' : '')}>
+        <summary>
+          <span class="chevron down bov-flecha">${raw(icon('chevron'))}</span>
+          <span class="grow">
+            <span class="bov-tit">${o.titulo}</span>
+            <span class="tiny bov-sub">${o.resumen}</span>
+          </span>
+          ${raw(o.probar ? '<button class="btn sm bov-probar" data-probar="' +
+            esc(o.probar) + '">Probar</button>' : '')}
+          ${raw(o.chip || '')}
+        </summary>
+        <div class="bov-cuerpo">${raw(o.cuerpo)}</div>
+      </details>`;
+  }
+
   function estado(ok, textoOk, textoNo) {
     return ok
       ? '<span class="chip solid">' + icon('check') + ' ' + esc(textoOk) + '</span>'
@@ -142,6 +172,25 @@
     const cfgSync = Sync.config() || {};
     const retorno = location.origin + location.pathname;
 
+    /* La línea que se lee sin abrir. Dice lo único que uno quiere saber de un
+       vistazo: si está puesto y con qué. */
+    const resumenIA = claveProv
+      ? prov.label + ' · clave guardada · ' + esc(IA.modeloDe(prov.id))
+      : (puestos.length
+        ? 'Activo con otro proveedor; ' + prov.label + ' aún sin clave'
+        : 'Sin clave: el entrenador y el plan de comidas no funcionan');
+
+    const resumenSp = Spotify.permisosCaducados()
+      ? 'Hay que reconectar para dar los permisos nuevos'
+      : (Spotify.activa() ? 'Conectado · puede reproducir y crear listas'
+        : (Spotify.configurado() ? 'Client ID puesto, falta conectar la cuenta'
+          : 'Sin Client ID: la música no se puede controlar desde aquí'));
+
+    const resumenSb = Sync.activa()
+      ? 'Sesión abierta · tus datos viajan entre dispositivos'
+      : (Sync.configurado() ? 'Proyecto configurado, sin sesión iniciada'
+        : 'Sin configurar: los datos solo viven en este dispositivo');
+
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Ajustes</button>
@@ -151,15 +200,15 @@
 
       <!-- ============ nucleo inteligente ============ -->
       <div class="list-title">Núcleo inteligente</div>
-      <div class="card">
-        <div class="row between" style="margin-bottom:11px">
-          <div class="grow">
-            <div style="font-weight:600">Quién piensa por la app</div>
-            <div class="tiny">Auditoría de rutinas, plan de comidas, foto del plato,
-            entrenador y listas de música</div>
-          </div>
-          ${raw(estado(IA.activa(), 'Activo', 'Sin configurar'))}
-        </div>
+      ${raw(plegable({
+        id: 'ia',
+        titulo: 'Quién piensa por la app',
+        resumen: resumenIA,
+        chip: estado(IA.activa(), 'Activo', 'Sin configurar'),
+        probar: claveProv ? 'ia' : '',
+        cuerpo: html`
+        <p class="tiny" style="margin:0 0 9px">Auditoría de rutinas, plan de comidas, foto
+        del plato, entrenador y listas de música.</p>
 
         <p class="tiny" style="margin:0 0 9px">Elige quién contesta. Cada uno guarda su
         propia clave, así que puedes tener varios puestos y cambiar de uno a otro con un
@@ -216,22 +265,22 @@
         ${raw(guia('ia', 'Cómo consigo la clave de ' + prov.label, PASOS_CLAVE[prov.id]))}
 
         ${raw(claveProv ? '<button class="btn danger block sm" data-a="borrarIA" ' +
-          'style="margin-top:10px">Borrar la clave de ' + esc(prov.label) + '</button>' : '')}
-      </div>
+          'style="margin-top:10px">Borrar la clave de ' + esc(prov.label) + '</button>' : '')}`
+      }))}
 
       <!-- ============ Spotify ============ -->
       <div class="list-title">Música · Spotify</div>
-      <div class="card">
-        <div class="row between" style="margin-bottom:11px">
-          <div class="grow">
-            <div style="font-weight:600">Client ID de Spotify</div>
-            <div class="tiny">Controlar la música desde la pantalla de entrenamiento</div>
-          </div>
-          ${raw(Spotify.permisosCaducados()
-            ? '<span class="chip" style="border-color:var(--warn);color:var(--warn)">Reconectar</span>'
-            : estado(Spotify.activa(), 'Conectado',
-                Spotify.configurado() ? 'Sin conectar' : 'Sin configurar'))}
-        </div>
+      ${raw(plegable({
+        id: 'sp',
+        titulo: 'Client ID de Spotify',
+        resumen: resumenSp,
+        chip: Spotify.permisosCaducados()
+          ? '<span class="chip" style="border-color:var(--warn);color:var(--warn)">Reconectar</span>'
+          : estado(Spotify.activa(), 'Conectado',
+              Spotify.configurado() ? 'Sin conectar' : 'Sin configurar'),
+        cuerpo: html`
+        <p class="tiny" style="margin:0 0 9px">Controlar la música desde la pantalla de
+        entrenamiento.</p>
         ${raw(Spotify.permisosCaducados()
           ? '<p class="tiny" style="margin:0 0 11px;color:var(--warn)">La app ya puede ' +
             'reproducir por sí misma y crear listas. Pulsa Conectar para dar los permisos nuevos.</p>'
@@ -273,8 +322,8 @@
         ].join('')))}
 
         ${raw(Spotify.configurado() ? '<button class="btn danger block sm" data-a="borrarSp" ' +
-          'style="margin-top:10px">Borrar la configuración de Spotify</button>' : '')}
-      </div>
+          'style="margin-top:10px">Borrar la configuración de Spotify</button>' : '')}`
+      }))}
 
       <!-- ============ Supabase ============ -->
       ${raw(!Sync.puedeConfigurar() ? html`
@@ -286,15 +335,15 @@
           persona. Aquí no hay nada que configurar.</p>
         </div>` : html`
       <div class="list-title">Cuenta y sincronización · Supabase</div>
-      <div class="card">
-        <div class="row between" style="margin-bottom:11px">
-          <div class="grow">
-            <div style="font-weight:600">Proyecto de Supabase</div>
-            <div class="tiny">Entrar con tu correo y sincronizar entre dispositivos</div>
-          </div>
-          ${raw(estado(Sync.activa(), 'Conectado',
-            Sync.configurado() ? 'Sin sesión' : 'Sin configurar'))}
-        </div>
+      ${raw(plegable({
+        id: 'sb',
+        titulo: 'Proyecto de Supabase',
+        resumen: resumenSb,
+        chip: estado(Sync.activa(), 'Conectado',
+          Sync.configurado() ? 'Sin sesión' : 'Sin configurar'),
+        cuerpo: html`
+        <p class="tiny" style="margin:0 0 9px">Entrar con tu correo y sincronizar entre
+        dispositivos.</p>
 
         <label class="tiny">PROJECT URL</label>
         <input id="k-sb-url" autocomplete="off" spellcheck="false"
@@ -338,15 +387,21 @@
           <pre id="sql-box">${Sync.SQL}</pre>`)}
 
         ${raw(Sync.configurado() ? '<button class="btn danger block sm" data-a="borrarSb" ' +
-          'style="margin-top:10px">Borrar la configuración de Supabase</button>' : '')}
-      </div>`)}
+          'style="margin-top:10px">Borrar la configuración de Supabase</button>' : '')}`
+      }))}`)}
 
       <!-- ============ varios dispositivos ============ -->
       <div class="list-title">Varios dispositivos</div>
-      <div class="card">
+      ${raw(plegable({
+        id: 'disp',
+        titulo: 'Sincronizar mis claves',
+        resumen: Store.settings().sincronizarClaves !== false
+          ? 'Encendido · no hay que repetirlas en cada dispositivo'
+          : 'Apagado · cada dispositivo lleva las suyas',
+        chip: '',
+        cuerpo: html`
         <div class="row between">
           <div class="grow">
-            <div style="font-weight:600">Sincronizar mis claves</div>
             <div class="tiny">Las claves de IA y el Client ID de Spotify viajan con tus
               datos, para no repetirlos en cada dispositivo</div>
           </div>
@@ -357,8 +412,8 @@
         </div>
         <p class="tiny" style="margin:10px 0 0">Las sesiones abiertas nunca se sincronizan:
         cada dispositivo abre la suya, que es lo correcto. En uno nuevo solo tendrás que
-        pulsar Conectar en Spotify.</p>
-      </div>
+        pulsar Conectar en Spotify.</p>`
+      }))}
 
       ${raw(Sync.configurado() && Sync.puedeConfigurar() ? html`
         <div class="card">
@@ -379,19 +434,49 @@
 
       <!-- ============ seguridad ============ -->
       <div class="list-title">Seguridad</div>
-      <div class="card">
+      ${raw(plegable({
+        id: 'seg',
+        titulo: 'Dónde viven las claves',
+        resumen: 'Y cómo borrarlas todas de golpe',
+        chip: '',
+        cuerpo: html`
         <p class="muted" style="margin:0 0 10px">Las claves viven en el almacenamiento de
         este navegador y, si la sincronización de claves está activada, también en tu base
         de datos de Supabase, donde solo tú puedes leerlas.</p>
         <p class="tiny" style="margin:0 0 12px">La clave <i>publishable</i> de Supabase y el
         <i>Client ID</i> de Spotify están pensados para ir en el navegador y no son
         secretos. Las de IA sí lo son: no las compartas ni las pegues en el código.</p>
-        <button class="btn danger block" data-a="borrarTodo">Borrar todas las claves</button>
-      </div>`;
+        <button class="btn danger block" data-a="borrarTodo">Borrar todas las claves</button>`
+      }))}`;
   };
 
   V.claves.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('ajustes'); });
+
+    /* Abrir y cerrar no repinta nada; solo se apunta, para que el repintado
+       siguiente —guardar una clave, cambiar de proveedor— respete lo abierto. */
+    root.querySelectorAll('details.bov').forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (d.open) abiertas[d.dataset.bov] = true;
+        else delete abiertas[d.dataset.bov];
+      });
+    });
+
+    /* Probar desde la cabecera: se abre la sección y se lanza la prueba de
+       siempre, porque la respuesta entera se pinta dentro. */
+    /* A mano y no con bindAll: hace falta preventDefault, porque un clic dentro
+       de un <summary> pliega o despliega por defecto y aquí queremos abrir
+       siempre, nunca cerrar. */
+    root.querySelectorAll('[data-probar]').forEach(function (btn) {
+      btn.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const caja = btn.closest('details.bov');
+        if (caja) { caja.open = true; abiertas[caja.dataset.bov] = true; }
+        const real = root.querySelector('[data-a=probarIA]');
+        if (real) real.click();
+      });
+    });
 
     /* guías plegables */
     bindAll(root, '[data-guia]', function (el) {

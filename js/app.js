@@ -705,8 +705,6 @@
       planes[k].sort(function (a, b) { return pos(a) - pos(b); });
     });
 
-    const soloUno = orden.length === 1;
-
     const arriba = deHoy.length ? html`
       <div class="list-title">Hoy es ${UI.diaLargo(hoy).toLowerCase()}, y esto es lo que toca</div>
       <div class="stack">${raw(deHoy.map(function (r) { return routineCard(r); }).join(''))}</div>`
@@ -717,7 +715,10 @@
 
     const bloques = orden.map(function (k) {
       const suyas = planes[k];
-      const abierto = gruposAbiertos[k] === undefined ? soloUno : gruposAbiertos[k];
+      /* Siempre plegado de entrada, también cuando solo hay un plan. Abierto por
+         defecto, el plan se comía la pantalla entera y las rutinas de abajo no se
+         veían: cada uno se abre cuando se va a usar. */
+      const abierto = gruposAbiertos[k] === true;
       const dias = [];
       suyas.forEach(function (r) {
         (r.days || []).forEach(function (d) { if (dias.indexOf(d) === -1) dias.push(d); });
@@ -740,7 +741,11 @@
             ${raw(icon('chevron'))}</span>
         </button>`;
 
+      /* El plan, dentro de su cajón. Suelto sobre el fondo de la página no se
+         veía dónde empieza uno y acaba el otro; con su borde y su filo verde a
+         la izquierda se lee como una unidad. */
       return html`
+        <div class="plan-caja${raw(abierto ? ' abierta' : '')}">
         ${raw(deslizable(cabecera, [
           { icono: 'chispa', texto: 'Analizar' + BAJA + 'con IA', attr: 'data-iaplan="' + esc(k) + '"' },
           { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicarplan="' + esc(k) + '"' },
@@ -766,7 +771,8 @@
           'style="margin-top:8px">' + icon('compartir') + ' Compartir el plan</button>' +
           '<button class="btn ghost block sm danger" data-borrarplan="' + esc(k) + '" ' +
           'style="margin-top:10px">' + icon('trash') + ' Borrar el plan entero (' +
-          suyas.length + (suyas.length === 1 ? ' rutina' : ' rutinas') + ')</button>' : '')}`;
+          suyas.length + (suyas.length === 1 ? ' rutina' : ' rutinas') + ')</button>' : '')}
+        </div>`;
     }).join('');
 
     return arriba + html`<div class="list-title">Tus planes</div>` + bloques;
