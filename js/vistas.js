@@ -112,8 +112,16 @@
 
   /* ================= datos y hábitos ================= */
 
+  /* «la edad» / «la edad y el peso» / «la edad, el peso y la altura» */
+  function listaEs(xs) {
+    if (xs.length === 1) return esc(xs[0]);
+    return esc(xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1]);
+  }
+
   V.datos = function () {
     const p = Perfil.datos();
+    const faltan = Perfil.loQueFalta(p);
+    const horas = Perfil.horasDeSueno(p.acostar, p.despertar);
     const grupo = function (titulo, contenido) {
       return '<div class="list-title">' + esc(titulo) + '</div><div class="card">' + contenido + '</div>';
     };
@@ -132,6 +140,16 @@
       <h1>Datos y hábitos</h1>
       <p class="muted">Sirven para calcular tus calorías y ajustar lo que te propongo.
       No salen de tu dispositivo salvo que actives la sincronización o el entrenador con IA.</p>
+
+      ${raw(faltan.length ? html`
+        <div class="card" style="border-color:var(--warn)">
+          <b>Falta ${raw(listaEs(faltan))}</b>
+          <p class="tiny" style="margin:6px 0 0">Sin eso no puedo calcular tus calorías ni
+          ajustarte el entrenamiento. Es lo único obligatorio; lo demás lo vas rellenando
+          cuando quieras.</p>
+        </div>` : html`
+        <p class="tiny" style="margin:-4px 0 0">Todo lo que cambies aquí se guarda solo al
+        salir del campo. No hay que pulsar nada.</p>`)}
 
       ${raw(grupo('Quién eres', html`
         <label class="tiny">TU NOMBRE</label>
@@ -175,18 +193,9 @@
           : '')))}
 
       ${raw(grupo('Hábitos', html`
-        <div class="row" style="gap:10px">
-          <div class="grow"><div class="tiny">HORAS DE SUEÑO</div>
-            <input type="number" inputmode="numeric" min="3" max="12" value="${p.sueño}"
-                   data-num="sueño" style="text-align:center;margin-top:4px"></div>
-          <div class="grow"><div class="tiny">COMIDAS AL DÍA</div>
-            <input type="number" inputmode="numeric" min="2" max="7" value="${p.comidas}"
-                   data-num="comidas" style="text-align:center;margin-top:4px"></div>
-        </div>
-        <div class="hr"></div>
         <label class="tiny">TU DÍA</label>
         <div class="tiny" style="margin:2px 0 0">Con esto reparto los recordatorios de agua
-        y comidas por tus horas reales, no por unas por defecto.</div>
+        y comidas por tus horas reales, no por unas por defecto, y saco cuánto duermes.</div>
         <div class="row" style="gap:10px;margin-top:8px">
           <div class="grow"><div class="tiny">ME LEVANTO</div>
             <input type="time" value="${p.despertar || '07:00'}" data-txt="despertar"
@@ -195,6 +204,20 @@
             <input type="time" value="${p.acostar || '23:00'}" data-txt="acostar"
                    style="margin-top:4px"></div>
         </div>
+        ${raw(horas != null ? html`
+          <div class="row between" style="margin-top:10px;gap:10px;align-items:center">
+            <span class="tiny">DUERMES</span>
+            <b>${String(horas).replace('.', ',')} h</b>
+          </div>
+          <div class="tiny" style="margin-top:2px">Sale de esas dos horas, no hace falta
+          apuntarlo aparte.${raw(horas < 6
+            ? ' Con menos de 6 h cuesta recuperar entre sesiones.' : '')}</div>`
+          : html`<div class="tiny" style="margin-top:8px">Pon las dos horas y calculo
+          cuánto duermes.</div>`)}
+        <div class="hr"></div>
+        <div class="tiny">COMIDAS AL DÍA</div>
+        <input type="number" inputmode="numeric" min="2" max="7" value="${p.comidas}"
+               data-num="comidas" style="text-align:center;margin-top:4px;max-width:120px">
         <div style="height:10px"></div>
         <div class="tiny">HORA A LA QUE ENTRENAS (OPCIONAL)</div>
         <input type="time" value="${p.horaEntreno || ''}" data-txt="horaEntreno"
@@ -202,14 +225,27 @@
         <div class="tiny" style="margin-top:4px">Si la dejas vacía, la deduzco de las horas a
         las que sueles entrenar.</div>
         <div class="hr"></div>
+        <div class="destacado-clave" style="padding:11px 12px;border-radius:var(--r-s)">
+          <b style="font-size:.88rem">Lo de aquí abajo es lo que más cambia lo que te propongo</b>
+          <p class="tiny" style="margin:5px 0 0">De estos cuatro campos salen los menús que
+          te sugiero y los ejercicios que entran o no en tus rutinas. Si los dejas vacíos,
+          te propongo lo de siempre para cualquiera; si los rellenas, te propongo lo tuyo.</p>
+        </div>
+        <div style="height:12px"></div>
         <label class="tiny">ALIMENTACIÓN</label>
+        <div class="tiny" style="margin:2px 0 0">Ningún menú te va a ofrecer algo que no comas.</div>
         ${raw(opciones('dieta', Perfil.DIETA, p.dieta))}
         <div class="hr"></div>
         <label class="tiny">ALERGIAS O ALIMENTOS QUE EVITAS</label>
+        <div class="tiny" style="margin:2px 0 0">Quedan fuera de todo lo que te proponga, y si
+        salen en la foto de un plato te aviso.</div>
         <input value="${p.alergias}" data-txt="alergias" placeholder="Lactosa, frutos secos…"
                style="margin-top:5px">
         <div style="height:10px"></div>
         <label class="tiny">LESIONES O LIMITACIONES</label>
+        <div class="tiny" style="margin:2px 0 0">Lo que escribas aquí retira ejercicios de tus
+        rutinas y de lo que te propone el entrenador. Es lo que evita que te ofrezca algo que
+        te haga daño.</div>
         <input value="${p.lesiones}" data-txt="lesiones" placeholder="Hombro derecho, rodilla…"
                style="margin-top:5px">
         <div style="height:10px"></div>
@@ -235,10 +271,12 @@
 
       <div class="list-title">Registro de peso</div>
       <div class="card">
-        <div class="row">
+        <div class="tiny">Esto no guarda la página: apunta cuánto pesas hoy para ver tu
+        evolución. Tu peso de siempre se cambia arriba, en Cuerpo.</div>
+        <div class="row" style="margin-top:8px">
           <input type="number" inputmode="decimal" step="0.1" id="peso-hoy"
                  placeholder="Peso de hoy" class="grow">
-          <button class="btn primary" data-a="pesar">Guardar</button>
+          <button class="btn primary" data-a="pesar">Apuntar</button>
         </div>
         ${raw(pesoHistorial())}
       </div>`;
@@ -295,6 +333,14 @@
         const cambio = {};
         cambio[inp.dataset.txt] = inp.value.trim();
         Perfil.guardar(cambio);
+        /* Las horas cambian lo que dice la pantalla —cuánto duermes—, así que hay
+           que repintar. Los demás campos son texto libre y repintar solo serviría
+           para dar un salto mientras se escribe. */
+        if (inp.dataset.txt === 'despertar' || inp.dataset.txt === 'acostar') {
+          const pos = window.scrollY;
+          render();
+          window.scrollTo(0, pos);
+        }
       };
     });
 
@@ -307,6 +353,14 @@
     bind(root, '[data-a=pesar]', function () {
       const campo = root.querySelector('#peso-hoy');
       const kg = Number(campo.value);
+      /* El único botón de la pantalla era este, así que quien cambiaba cualquier
+         otra cosa lo pulsaba creyendo que guardaba, y se encontraba con que le
+         pedían un peso que no venía a poner. */
+      if (!String(campo.value || '').trim()) {
+        UI.toast('Lo demás ya está guardado. Esto es solo para apuntar tu peso.');
+        campo.focus();
+        return;
+      }
       if (!kg || kg < 25 || kg > 300) { UI.toast('Escribe un peso válido'); return; }
       Perfil.registrarPeso(kg);
       Objetivos.revisar();

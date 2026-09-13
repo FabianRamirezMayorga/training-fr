@@ -53,11 +53,37 @@
 
   function datos() {
     const p = Store.settings().perfil;
-    return Object.assign({}, VACIO, p || {});
+    const d = Object.assign({}, VACIO, p || {});
+    /* El sueño no se guarda a mano: se deduce de las horas. Derivarlo aquí y no
+       solo al guardar evita que un perfil de antes siga diciendo siete horas
+       cuando sus horas dicen otra cosa —y que la IA lea una cifra y la pantalla
+       otra. */
+    const h = horasDeSueno(d.acostar, d.despertar);
+    if (h != null) d.sueño = h;
+    return d;
+  }
+
+  /* Cuánto duerme, deducido de a qué hora se acuesta y a cuál se levanta.
+     Pedírselo aparte era pedirle una cuenta que ya había hecho la app dos campos
+     más arriba, y con dos sitios donde decir lo mismo siempre acaban
+     discrepando. Cruza la medianoche, que es lo normal. */
+  function horasDeSueno(acostar, despertar) {
+    const min = function (hhmm) {
+      const m = /^(\d{1,2}):(\d{2})$/.exec(String(hhmm || ''));
+      return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+    };
+    const a = min(acostar), d = min(despertar);
+    if (a == null || d == null) return null;
+    let horas = (d - a + 1440) % 1440 / 60;
+    if (horas < 2 || horas > 14) return null;
+    return Math.round(horas * 10) / 10;
   }
 
   function guardar(cambios) {
     const p = Object.assign({}, datos(), cambios);
+    /* si han cambiado las horas, el sueño se recalcula solo */
+    const h = horasDeSueno(p.acostar, p.despertar);
+    if (h != null) p.sueño = h;
     Store.setSetting('perfil', p);
     return p;
   }
@@ -66,6 +92,18 @@
   function completo(p) {
     p = p || datos();
     return !!(p.sexo && p.edad > 0 && p.altura > 0 && p.peso > 0);
+  }
+
+  /* Lo que falta para poder calcular nada. Con esto la pantalla puede decir
+     qué pedir en lugar de callarse y no enseñar los números. */
+  function loQueFalta(p) {
+    p = p || datos();
+    const faltan = [];
+    if (!p.sexo) faltan.push('el sexo biológico');
+    if (!(p.edad > 0)) faltan.push('la edad');
+    if (!(p.altura > 0)) faltan.push('la altura');
+    if (!(p.peso > 0)) faltan.push('el peso');
+    return faltan;
   }
 
   function imc(p) {
@@ -229,7 +267,8 @@
 
   g.Perfil = {
     ACTIVIDAD: ACTIVIDAD, OBJETIVO: OBJETIVO, RITMO: RITMO, DIETA: DIETA,
-    datos: datos, guardar: guardar, completo: completo,
+    datos: datos, guardar: guardar, completo: completo, loQueFalta: loQueFalta,
+    horasDeSueno: horasDeSueno,
     imc: imc, categoriaIMC: categoriaIMC, pesoSaludable: pesoSaludable,
     tmb: tmb, tdee: tdee, calorias: calorias, macros: macros, agua: agua,
     previsión: previsión, registrarPeso: registrarPeso, pesajes: pesajes,
