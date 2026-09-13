@@ -1639,7 +1639,8 @@
           <ol class="instr" id="instr">
             ${raw(pasos.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join(''))}
           </ol>
-          ${raw(traducidas ? '' : '<p class="tiny" id="tr-aviso" style="margin:10px 0 0">' +
+          ${raw(traducidas || ex.yaEnEspanol ? ''
+            : '<p class="tiny" id="tr-aviso" style="margin:10px 0 0">' +
             'Traduciendo del catálogo original…</p>')}
         </div>
       </div>`;
@@ -1690,6 +1691,11 @@
   const traduciendo = {};
 
   function traduccionGuardada(ex) {
+    /* Lo que ya viene escrito en español no tiene traducción válida posible, y
+       si quedó una guardada de una versión anterior hay que ignorarla: el
+       traductor automático convierte «Front lever» en «Palanca delantera» y
+       destroza el nombre de la progresión. */
+    if (!ex || ex.yaEnEspanol) return null;
     try {
       const v = localStorage.getItem(TR_PREFIJO + ex.id);
       return v ? JSON.parse(v) : null;
@@ -1742,6 +1748,8 @@
   /* Se pide una vez por ejercicio; si ya hay una en marcha, se espera a esa. */
   function asegurarTraduccion(ex) {
     if (!ex || !ex.instructions || !ex.instructions.length) return Promise.resolve(null);
+    /* Los que ya vienen escritos en español no pasan por el traductor. */
+    if (ex.yaEnEspanol) return Promise.resolve(null);
     const ya = traduccionGuardada(ex);
     if (ya) return Promise.resolve(ya);
     if (traduciendo[ex.id]) return traduciendo[ex.id];

@@ -89,6 +89,9 @@
     { id: 'yoga', label: 'Yoga', test: function (e) {
       return e.category === 'yoga';
     } },
+    { id: 'calistenia', label: 'Calistenia', test: function (e) {
+      return e.category === 'calistenia';
+    } },
     { id: 'pilates', label: 'Pilates', test: function (e) {
       return PILATES.indexOf(e.id) !== -1;
     } },
@@ -165,7 +168,7 @@
      compuestos; los estiramientos y el trabajo accesorio, al final. Sin esto la
      lista es alfabética y "Estiramiento de cuádriceps" precede a "Sentadilla". */
   const CAT_RANK = {
-    strength: 0, powerlifting: 0, 'olympic weightlifting': 1,
+    strength: 0, powerlifting: 0, calistenia: 0, 'olympic weightlifting': 1,
     plyometrics: 2, strongman: 2, cardio: 3, stretching: 4, yoga: 4
   };
 
@@ -173,7 +176,10 @@
     let r = CAT_RANK[ex.category];
     if (r === undefined) r = 3;
     if (ex.mechanic !== 'compound') r += 0.5;
-    if (!ex.images || ex.images.length < 2) r += 2;
+    /* Sin fotos se baja en la lista, porque normalmente significa una entrada
+       pobre. La calistenia no trae fotos —no hay fuente libre que copiar— pero
+       sí trae descripción y progresión, así que no se la penaliza por eso. */
+    if (ex.category !== 'calistenia' && (!ex.images || ex.images.length < 2)) r += 2;
     /* los ejercicios recomendados por el planificador encabezan su músculo */
     if (window.Planner && Planner.RECOMENDADOS.has(ex.id)) r -= 3;
     return r;
@@ -204,12 +210,15 @@
     return list;
   }
 
-  /* El yoga vive en su propio fichero y se suma al catálogo descargado. Va
-     fuera de la copia guardada a propósito: así una versión nueva de la app
-     trae posturas nuevas sin esperar a que caduque lo guardado. */
-  function conYoga(raw) {
-    if (!g.Yoga) return raw;
-    return raw.concat(Yoga.crudos());
+  /* El yoga y la calistenia viven en sus propios ficheros y se suman al
+     catálogo descargado. Van fuera de la copia guardada a propósito: así una
+     versión nueva de la app trae ejercicios nuevos sin esperar a que caduque
+     lo guardado. */
+  function conExtras(raw) {
+    let todo = raw;
+    if (g.Yoga) todo = todo.concat(Yoga.crudos());
+    if (g.Calistenia) todo = todo.concat(Calistenia.crudos());
+    return todo;
   }
 
   function fetchJSON(url) {
@@ -225,11 +234,11 @@
       .catch(function () { return fetchJSON(MIRROR + JSON_PATH); })
       .then(function (raw) {
         try { localStorage.setItem(CACHE_KEY, JSON.stringify(raw)); } catch (e) { /* cuota llena: no es crítico */ }
-        return prepare(conYoga(raw));
+        return prepare(conExtras(raw));
       })
       .catch(function (err) {
         const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) return prepare(conYoga(JSON.parse(cached)));
+        if (cached) return prepare(conExtras(JSON.parse(cached)));
         throw err;
       });
   }
@@ -338,6 +347,12 @@
       const mus = (e.primaryMuscles || [])[0];
       if (!mus) return;
       if (!permiteNombre(gear, e.nameEs)) return;
+      /* La calistenia avanzada se queda fuera del menú que se le enseña a la
+         IA. Un planche o un front lever no son ejercicios que se receten en un
+         plan: se buscan a propósito, se trabajan por escalones y llevan años.
+         En el catálogo están para quien los busque; aquí sobran, porque aquí
+         es donde se arma la rutina de alguien que a lo mejor lleva dos meses. */
+      if (e.category === 'calistenia' && e.level === 'expert') return;
       (grupos[mus] = grupos[mus] || []).push(e);
     });
 
