@@ -523,6 +523,325 @@
         'El movimiento es pequeño, de unos centímetros. Está bien así.'] }
   ];
 
+  /* Las posturas, para el muñeco de figura.js. Cada una son unos cuantos
+     ángulos: 0 mira a la derecha y crecen en el sentido de las agujas del
+     reloj, o sea 90 abajo y 270 arriba. El suelo está en y=66, la barra alta en
+     y=14 y las paralelas en y=40.
+
+     Las que solo traen una postura son los aguantes, y está bien que no se
+     muevan: un front lever no se mueve, se sostiene. */
+const FIGURAS = {
+
+  /* ---- empuje en el suelo ---- */
+  cal_flex_pica: { escena: 'suelo', a:
+    { cadera: [48, 26], tronco: 35, cabeza: 35, brazo1: [70, 70], brazo2: [66, 66],
+      pierna1: [130, 108, 50], pierna2: [126, 112, 50] },
+    b:
+    { cadera: [48, 26], tronco: 35, cabeza: 50, brazo1: [95, 25], brazo2: [91, 21],
+      pierna1: [130, 108, 50], pierna2: [126, 112, 50] } },
+
+  cal_flex_pica_elev: { escena: 'cajon', a:
+    { cadera: [62, 30], tronco: 125, cabeza: 125, brazo1: [82, 82], brazo2: [78, 78],
+      pierna1: [5, 5, 75], pierna2: [8, 2, 72] },
+    b:
+    { cadera: [62, 30], tronco: 125, cabeza: 140, brazo1: [110, 35], brazo2: [106, 31],
+      pierna1: [5, 5, 75], pierna2: [8, 2, 72] } },
+
+  cal_pino_pared: { escena: 'pared', a:
+    { cadera: [32, 30], tronco: 95, cabeza: 100, brazo1: [78, 82], brazo2: [72, 78],
+      pierna1: [272, 268, 200], pierna2: [268, 272, 200] } },
+
+  cal_pino_libre: { escena: 'suelo', a:
+    { cadera: [50, 30], tronco: 95, cabeza: 100, brazo1: [78, 82], brazo2: [72, 78],
+      pierna1: [272, 268, 200], pierna2: [266, 274, 200] },
+    b:
+    { cadera: [52, 31], tronco: 100, cabeza: 105, brazo1: [80, 84], brazo2: [74, 80],
+      pierna1: [280, 262, 195], pierna2: [258, 278, 205] } },
+
+  cal_flex_pino: { escena: 'pared', a:
+    { cadera: [32, 28], tronco: 95, cabeza: 100, brazo1: [78, 82], brazo2: [72, 78],
+      pierna1: [272, 268, 200], pierna2: [268, 272, 200] },
+    b:
+    { cadera: [32, 40], tronco: 95, cabeza: 100, brazo1: [35, 130], brazo2: [30, 125],
+      pierna1: [272, 268, 200], pierna2: [268, 272, 200] } },
+
+  cal_planche_lean: { escena: 'suelo', a:
+    { cadera: [40, 52], tronco: 345, cabeza: 335, brazo1: [80, 80], brazo2: [80, 80],
+      pierna1: [160, 160, 60], pierna2: [160, 160, 60] },
+    b:
+    { cadera: [36, 50], tronco: 350, cabeza: 340, brazo1: [65, 65], brazo2: [65, 65],
+      pierna1: [165, 165, 60], pierna2: [165, 165, 60] } },
+
+  cal_planche_tuck: { escena: 'suelo', a:
+    { cadera: [40, 48], tronco: 350, cabeza: 340, brazo1: [70, 70], brazo2: [70, 70],
+      pierna1: [330, 80, 150], pierna2: [330, 80, 150] } },
+
+  cal_planche_tuck_av: { escena: 'suelo', a:
+    { cadera: [38, 46], tronco: 355, cabeza: 345, brazo1: [70, 70], brazo2: [70, 70],
+      pierna1: [185, 105, 175], pierna2: [185, 105, 175] } },
+
+  cal_planche_straddle: { escena: 'suelo', a:
+    { cadera: [38, 45], tronco: 358, cabeza: 348, brazo1: [70, 70], brazo2: [70, 70],
+      pierna1: [200, 200, 270], pierna2: [160, 160, 230] } },
+
+  cal_planche_full: { escena: 'suelo', a:
+    { cadera: [38, 45], tronco: 0, cabeza: 350, brazo1: [70, 70], brazo2: [70, 70],
+      pierna1: [180, 180, 250], pierna2: [180, 180, 250] } },
+
+  cal_flex_planche: { escena: 'suelo', a:
+    { cadera: [38, 45], tronco: 0, cabeza: 350, brazo1: [70, 70], brazo2: [70, 70],
+      pierna1: [180, 180, 250], pierna2: [180, 180, 250] },
+    b:
+    { cadera: [38, 53], tronco: 0, cabeza: 350, brazo1: [40, 120], brazo2: [40, 120],
+      pierna1: [180, 180, 250], pierna2: [180, 180, 250] } },
+
+  cal_flex_arquera: { escena: 'suelo', a:
+    { cadera: [45, 51], tronco: 340, cabeza: 330, brazo1: [85, 85], brazo2: [110, 110],
+      pierna1: [150, 150, 60], pierna2: [150, 150, 60] },
+    b:
+    { cadera: [45, 57], tronco: 340, cabeza: 330, brazo1: [125, 55], brazo2: [120, 120],
+      pierna1: [150, 150, 60], pierna2: [150, 150, 60] } },
+
+  cal_flex_una_mano: { escena: 'suelo', a:
+    { cadera: [45, 51], tronco: 340, cabeza: 330, brazo1: [85, 85], brazo2: [230, 200],
+      pierna1: [150, 150, 60], pierna2: [140, 140, 60] },
+    b:
+    { cadera: [45, 57], tronco: 340, cabeza: 330, brazo1: [125, 55], brazo2: [230, 200],
+      pierna1: [150, 150, 60], pierna2: [140, 140, 60] } },
+
+  /* ---- tracción en barra ---- */
+  cal_colgado: { escena: 'barra', a:
+    { cadera: [50, 47], tronco: 270, cabeza: 270, brazo1: [275, 275], brazo2: [265, 265],
+      pierna1: [90, 90, 160], pierna2: [90, 90, 160] } },
+
+  cal_escapular: { escena: 'barra', a:
+    { cadera: [50, 49], tronco: 270, cabeza: 270, brazo1: [272, 272], brazo2: [268, 268],
+      pierna1: [90, 90, 160], pierna2: [90, 90, 160] },
+    b:
+    { cadera: [50, 44], tronco: 270, cabeza: 270, brazo1: [272, 272], brazo2: [268, 268],
+      pierna1: [90, 90, 160], pierna2: [90, 90, 160] } },
+
+  cal_dominada_negativa: { escena: 'barra', a:
+    { cadera: [50, 38], tronco: 270, cabeza: 270, brazo1: [310, 240], brazo2: [230, 300],
+      pierna1: [95, 105, 175], pierna2: [95, 105, 175] },
+    b:
+    { cadera: [50, 48], tronco: 270, cabeza: 270, brazo1: [273, 273], brazo2: [267, 267],
+      pierna1: [90, 90, 160], pierna2: [90, 90, 160] } },
+
+  cal_dominada_explosiva: { escena: 'barra', a:
+    { cadera: [50, 48], tronco: 270, cabeza: 270, brazo1: [273, 273], brazo2: [267, 267],
+      pierna1: [90, 90, 160], pierna2: [90, 90, 160] },
+    b:
+    { cadera: [50, 34], tronco: 265, cabeza: 265, brazo1: [320, 230], brazo2: [220, 310],
+      pierna1: [100, 110, 180], pierna2: [100, 110, 180] } },
+
+  cal_dominada_arquera: { escena: 'barra', a:
+    { cadera: [56, 46], tronco: 270, cabeza: 275, brazo1: [300, 250], brazo2: [215, 215],
+      pierna1: [95, 100, 170], pierna2: [95, 100, 170] },
+    b:
+    { cadera: [60, 38], tronco: 272, cabeza: 278, brazo1: [320, 225], brazo2: [205, 205],
+      pierna1: [98, 105, 175], pierna2: [98, 105, 175] } },
+
+  cal_dominada_typewriter: { escena: 'barra', a:
+    { cadera: [60, 38], tronco: 272, cabeza: 278, brazo1: [320, 225], brazo2: [205, 205],
+      pierna1: [98, 105, 175], pierna2: [98, 105, 175] },
+    b:
+    { cadera: [40, 38], tronco: 268, cabeza: 262, brazo1: [220, 315], brazo2: [335, 335],
+      pierna1: [82, 75, 5], pierna2: [82, 75, 5] } },
+
+  cal_dominada_un_brazo_asist: { escena: 'barra', a:
+    { cadera: [50, 46], tronco: 268, cabeza: 272, brazo1: [280, 262], brazo2: [290, 250],
+      pierna1: [95, 100, 170], pierna2: [95, 100, 170] },
+    b:
+    { cadera: [50, 36], tronco: 268, cabeza: 272, brazo1: [310, 235], brazo2: [315, 230],
+      pierna1: [100, 108, 178], pierna2: [100, 108, 178] } },
+
+  cal_dominada_un_brazo: { escena: 'barra', a:
+    { cadera: [52, 46], tronco: 272, cabeza: 276, brazo1: [278, 268], brazo2: [120, 150],
+      pierna1: [95, 100, 170], pierna2: [95, 100, 170] },
+    b:
+    { cadera: [54, 36], tronco: 274, cabeza: 280, brazo1: [312, 232], brazo2: [125, 155],
+      pierna1: [100, 108, 178], pierna2: [100, 108, 178] } },
+
+  cal_transicion_mu: { escena: 'barra', a:
+    { cadera: [50, 34], tronco: 265, cabeza: 265, brazo1: [320, 230], brazo2: [220, 310],
+      pierna1: [100, 110, 180], pierna2: [100, 110, 180] },
+    b:
+    { cadera: [50, 30], tronco: 280, cabeza: 290, brazo1: [340, 80], brazo2: [200, 100],
+      pierna1: [95, 95, 165], pierna2: [95, 95, 165] } },
+
+  cal_mu_negativo: { escena: 'barra', a:
+    { cadera: [50, 26], tronco: 275, cabeza: 275, brazo1: [95, 85], brazo2: [85, 95],
+      pierna1: [92, 92, 162], pierna2: [92, 92, 162] },
+    b:
+    { cadera: [50, 46], tronco: 270, cabeza: 270, brazo1: [275, 275], brazo2: [265, 265],
+      pierna1: [90, 90, 160], pierna2: [90, 90, 160] } },
+
+  cal_skin_the_cat: { escena: 'barra', a:
+    { cadera: [50, 40], tronco: 270, cabeza: 270, brazo1: [280, 265], brazo2: [260, 275],
+      pierna1: [30, 0, 330], pierna2: [30, 0, 330] },
+    b:
+    { cadera: [46, 30], tronco: 100, cabeza: 100, brazo1: [340, 300], brazo2: [340, 300],
+      pierna1: [95, 95, 165], pierna2: [95, 95, 165] } },
+
+  /* ---- palancas ---- */
+  cal_fl_tuck: { escena: 'barra', a:
+    { cadera: [58, 36], tronco: 180, cabeza: 190, brazo1: [265, 265], brazo2: [265, 265],
+      pierna1: [320, 60, 130], pierna2: [320, 60, 130] } },
+
+  cal_fl_tuck_av: { escena: 'barra', a:
+    { cadera: [58, 36], tronco: 180, cabeza: 190, brazo1: [265, 265], brazo2: [265, 265],
+      pierna1: [0, 70, 140], pierna2: [0, 70, 140] } },
+
+  cal_fl_straddle: { escena: 'barra', a:
+    { cadera: [58, 36], tronco: 180, cabeza: 190, brazo1: [265, 265], brazo2: [265, 265],
+      pierna1: [20, 20, 90], pierna2: [340, 340, 50] } },
+
+  cal_fl_full: { escena: 'barra', a:
+    { cadera: [58, 36], tronco: 180, cabeza: 190, brazo1: [265, 265], brazo2: [265, 265],
+      pierna1: [0, 0, 70], pierna2: [0, 0, 70] } },
+
+  cal_fl_remo: { escena: 'barra', a:
+    { cadera: [64, 40], tronco: 180, cabeza: 190, brazo1: [280, 280], brazo2: [280, 280],
+      pierna1: [0, 0, 70], pierna2: [0, 0, 70] },
+    b:
+    { cadera: [64, 26], tronco: 180, cabeza: 190, brazo1: [225, 315], brazo2: [225, 315],
+      pierna1: [0, 0, 70], pierna2: [0, 0, 70] } },
+
+  cal_bl_tuck: { escena: 'barra', a:
+    { cadera: [42, 36], tronco: 0, cabeza: 10, brazo1: [255, 275], brazo2: [255, 275],
+      pierna1: [220, 120, 50], pierna2: [220, 120, 50] } },
+
+  cal_bl_straddle: { escena: 'barra', a:
+    { cadera: [42, 36], tronco: 0, cabeza: 10, brazo1: [255, 275], brazo2: [255, 275],
+      pierna1: [200, 200, 270], pierna2: [160, 160, 230] } },
+
+  cal_bl_full: { escena: 'barra', a:
+    { cadera: [42, 36], tronco: 0, cabeza: 10, brazo1: [255, 275], brazo2: [255, 275],
+      pierna1: [180, 180, 250], pierna2: [180, 180, 250] } },
+
+  /* ---- core en el suelo ---- */
+  cal_hollow: { escena: 'suelo', a:
+    { cadera: [50, 60], tronco: 200, cabeza: 215, brazo1: [200, 200], brazo2: [200, 200],
+      pierna1: [340, 340, 50], pierna2: [340, 340, 50] } },
+
+  cal_hollow_rock: { escena: 'suelo', a:
+    { cadera: [48, 60], tronco: 205, cabeza: 220, brazo1: [205, 205], brazo2: [205, 205],
+      pierna1: [335, 335, 45], pierna2: [335, 335, 45] },
+    b:
+    { cadera: [52, 58], tronco: 190, cabeza: 205, brazo1: [190, 190], brazo2: [190, 190],
+      pierna1: [350, 350, 60], pierna2: [350, 350, 60] } },
+
+  cal_lsit_tuck: { escena: 'suelo', a:
+    { cadera: [50, 50], tronco: 280, cabeza: 280, brazo1: [95, 95], brazo2: [95, 95],
+      pierna1: [350, 80, 150], pierna2: [350, 80, 150] } },
+
+  cal_lsit_una: { escena: 'suelo', a:
+    { cadera: [50, 50], tronco: 280, cabeza: 280, brazo1: [95, 95], brazo2: [95, 95],
+      pierna1: [0, 0, 70], pierna2: [350, 80, 150] } },
+
+  cal_lsit: { escena: 'suelo', a:
+    { cadera: [50, 50], tronco: 280, cabeza: 280, brazo1: [95, 95], brazo2: [95, 95],
+      pierna1: [0, 0, 70], pierna2: [0, 0, 70] } },
+
+  cal_vsit: { escena: 'suelo', a:
+    { cadera: [50, 54], tronco: 300, cabeza: 300, brazo1: [95, 95], brazo2: [92, 92],
+      pierna1: [305, 305, 15], pierna2: [302, 302, 12] } },
+
+  cal_dragon_negativa: { escena: 'suelo', a:
+    { cadera: [50, 38], tronco: 160, cabeza: 170, brazo1: [190, 175], brazo2: [190, 175],
+      pierna1: [340, 340, 50], pierna2: [340, 340, 50] },
+    b:
+    { cadera: [56, 56], tronco: 195, cabeza: 205, brazo1: [175, 165], brazo2: [175, 165],
+      pierna1: [10, 10, 80], pierna2: [10, 10, 80] } },
+
+  cal_dragon_tuck: { escena: 'suelo', a:
+    { cadera: [50, 40], tronco: 165, cabeza: 175, brazo1: [190, 175], brazo2: [190, 175],
+      pierna1: [300, 40, 110], pierna2: [300, 40, 110] },
+    b:
+    { cadera: [56, 54], tronco: 195, cabeza: 205, brazo1: [175, 165], brazo2: [175, 165],
+      pierna1: [330, 60, 130], pierna2: [330, 60, 130] } },
+
+  cal_dragon_full: { escena: 'suelo', a:
+    { cadera: [50, 36], tronco: 160, cabeza: 170, brazo1: [190, 175], brazo2: [190, 175],
+      pierna1: [340, 340, 50], pierna2: [340, 340, 50] },
+    b:
+    { cadera: [56, 58], tronco: 200, cabeza: 210, brazo1: [175, 165], brazo2: [175, 165],
+      pierna1: [15, 15, 85], pierna2: [15, 15, 85] } },
+
+  cal_limpia_parabrisas: { escena: 'barra', a:
+    { cadera: [50, 44], tronco: 270, cabeza: 270, brazo1: [275, 275], brazo2: [265, 265],
+      pierna1: [330, 330, 40], pierna2: [330, 330, 40] },
+    b:
+    { cadera: [50, 44], tronco: 270, cabeza: 270, brazo1: [275, 275], brazo2: [265, 265],
+      pierna1: [210, 210, 280], pierna2: [210, 210, 280] } },
+
+  /* ---- bandera ---- */
+  cal_bandera_apoyo: { escena: 'poste', a:
+    { cadera: [34, 44], tronco: 275, cabeza: 275, brazo1: [255, 250], brazo2: [175, 185],
+      pierna1: [92, 92, 162], pierna2: [92, 92, 162] } },
+
+  cal_bandera_tuck: { escena: 'poste', a:
+    { cadera: [52, 34], tronco: 180, cabeza: 190, brazo1: [230, 200], brazo2: [160, 190],
+      pierna1: [320, 60, 130], pierna2: [320, 60, 130] } },
+
+  cal_bandera_straddle: { escena: 'poste', a:
+    { cadera: [52, 34], tronco: 180, cabeza: 190, brazo1: [230, 200], brazo2: [160, 190],
+      pierna1: [20, 20, 90], pierna2: [340, 340, 50] } },
+
+  cal_bandera_full: { escena: 'poste', a:
+    { cadera: [52, 34], tronco: 180, cabeza: 190, brazo1: [230, 200], brazo2: [160, 190],
+      pierna1: [0, 0, 70], pierna2: [0, 0, 70] } },
+
+  /* ---- pierna ---- */
+  cal_sent_caja_una: { escena: 'cajon', a:
+    { cadera: [56, 38], tronco: 275, cabeza: 275, brazo1: [10, 10], brazo2: [10, 10],
+      pierna1: [90, 90, 160], pierna2: [20, 90, 160] },
+    b:
+    { cadera: [58, 52], tronco: 300, cabeza: 300, brazo1: [350, 350], brazo2: [350, 350],
+      pierna1: [130, 60, 130], pierna2: [350, 85, 155] } },
+
+  cal_shrimp: { escena: 'suelo', a:
+    { cadera: [50, 40], tronco: 275, cabeza: 275, brazo1: [200, 200], brazo2: [10, 10],
+      pierna1: [90, 90, 160], pierna2: [120, 200, 270] },
+    b:
+    { cadera: [52, 48], tronco: 285, cabeza: 285, brazo1: [200, 200], brazo2: [350, 350],
+      pierna1: [110, 70, 140], pierna2: [150, 230, 300] } },
+
+  cal_pistol_asistida: { escena: 'suelo', a:
+    { cadera: [50, 40], tronco: 275, cabeza: 275, brazo1: [340, 340], brazo2: [340, 340],
+      pierna1: [90, 90, 160], pierna2: [10, 10, 80] },
+    b:
+    { cadera: [48, 56], tronco: 300, cabeza: 300, brazo1: [340, 340], brazo2: [340, 340],
+      pierna1: [140, 50, 120], pierna2: [350, 350, 60] } },
+
+  cal_pistol: { escena: 'suelo', a:
+    { cadera: [50, 40], tronco: 275, cabeza: 275, brazo1: [0, 0], brazo2: [0, 0],
+      pierna1: [90, 90, 160], pierna2: [10, 10, 80] },
+    b:
+    { cadera: [48, 56], tronco: 300, cabeza: 300, brazo1: [350, 350], brazo2: [350, 350],
+      pierna1: [140, 50, 120], pierna2: [350, 350, 60] } },
+
+  cal_nordic: { escena: 'suelo', a:
+    { cadera: [50, 44], tronco: 270, cabeza: 270, brazo1: [0, 0], brazo2: [0, 0],
+      pierna1: [110, 175, 245], pierna2: [110, 175, 245] },
+    b:
+    { cadera: [42, 52], tronco: 330, cabeza: 330, brazo1: [40, 60], brazo2: [40, 60],
+      pierna1: [150, 175, 245], pierna2: [150, 175, 245] } },
+
+  cal_gemelo_una: { escena: 'suelo', a:
+    { cadera: [50, 40], tronco: 275, cabeza: 275, brazo1: [90, 90], brazo2: [90, 90],
+      pierna1: [90, 90, 160], pierna2: [70, 110, 180] },
+    b:
+    { cadera: [50, 34], tronco: 275, cabeza: 275, brazo1: [90, 90], brazo2: [90, 90],
+      pierna1: [90, 90, 120], pierna2: [70, 110, 180] } },
+
+  /* ---- apoyo ---- */
+  cal_apoyo_paralelas: { escena: 'paralelas', a:
+    { cadera: [50, 48], tronco: 272, cabeza: 272, brazo1: [272, 272], brazo2: [268, 268],
+      pierna1: [90, 90, 160], pierna2: [90, 90, 160] } }
+};
+
   /* Al catálogo. Lo de siempre —id, músculos, material— más lo propio de la
      calistenia, que es de dónde vienes y qué necesitas para estar aquí: eso va
      dentro de las instrucciones, porque es donde la app ya sabe enseñarlo. */
@@ -558,13 +877,17 @@
           return m;
         }).filter(function (m, i, a) { return a.indexOf(m) === i; }),
         instructions: pasos,
+        /* Los fotogramas salen dibujados, no de una foto: entran por el mismo
+           sitio que las del catálogo y el reproductor de siempre los anima. */
+        figura: FIGURAS[e.id] || null,
         /* Escrito en español de origen. Sin esto, la app las mandaría a
            traducir «del catálogo original» como hace con las del inglés, y lo
            que saldría sería español pasado por un traductor: peor que lo que
            ya hay, y gastando una llamada por ejercicio. */
         yaEnEspanol: true,
         category: 'calistenia',
-        images: []
+        images: (g.Figura && FIGURAS[e.id])
+          ? Figura.fotogramas(FIGURAS[e.id]) : []
       };
     });
   }

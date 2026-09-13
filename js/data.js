@@ -139,7 +139,9 @@
   /* URL del fotograma i de un ejercicio (0 = inicio, 1 = final del movimiento) */
   /* Las del yoga vienen de otra fuente y ya traen la direccion entera */
   function rutaImagen(p) {
-    return /^https?:/i.test(p) ? p : CDN + 'exercises/' + p;
+    /* Las del yoga vienen con la dirección entera y las de calistenia son
+       dibujos en un data: URI; solo las del catálogo llevan el CDN delante. */
+    return /^(https?:|data:)/i.test(p) ? p : CDN + 'exercises/' + p;
   }
 
   function img(ex, i) {
