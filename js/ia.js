@@ -1095,8 +1095,9 @@
   function comidaReal() {
     if (!g.Comidas) return '';
     const dd = Comidas.ultimos(14).filter(function (d) { return d.kcal > 0; });
-    if (!dd.length) return 'COMIDA: no apunta lo que come, así que de su alimentación ' +
-      'solo sabes el objetivo calculado. No des por hecho que lo cumple.';
+    if (!dd.length) return 'COMIDA: todavía no hay días apuntados, así que de su ' +
+      'alimentación solo sabes el objetivo calculado. No des por hecho que lo cumple, ' +
+      'pero tampoco se lo eches en cara: sin datos, de comida no opinas.';
 
     const mk = Math.round(dd.reduce(function (a, d) { return a + d.kcal; }, 0) / dd.length);
     const mp = Math.round(dd.reduce(function (a, d) { return a + d.prot; }, 0) / dd.length);
@@ -1110,6 +1111,13 @@
       return ex ? ex.nameEs : null;
     }).filter(Boolean).slice(0, 12);
     return f.length ? 'EJERCICIOS QUE SE HA MARCADO COMO FAVORITOS: ' + f.join(', ') + '.' : '';
+  }
+
+  /* ¿Está estrenando la app? No ha llegado a registrar ni una serie. Eso no es
+     dejadez, es el primer día: no se le puede auditar lo que aún no ha tenido
+     ocasión de hacer, y menos descontarle nota del plan por ello. */
+  function sinHistorial() {
+    return !Store.sessions().length || !Store.stats().totalSets;
   }
 
   /* ---------- contexto que se envía ---------- */
@@ -1152,7 +1160,24 @@
       }
     }
 
-    if (incluir.progreso !== false) {
+    /* Sin historial no hay nada que reprochar: quien no ha registrado series es
+       porque acaba de instalar la app, no porque entrene mal. Sin avisar de
+       esto, el dictamen gastaba un punto de tres en regañarle por no tener
+       datos y le bajaba la nota del plan por algo que no es del plan. */
+    const arrancando = sinHistorial();
+    if (arrancando) {
+      trozos.push('ACABA DE EMPEZAR CON LA APP: todavía no ha registrado ningún ' +
+        'entrenamiento ni ninguna comida, y eso es lo normal en quien está montando su ' +
+        'primer plan. NO se lo reproches, no lo cuentes como un fallo suyo y no lo ' +
+        'menciones entre los defectos: no tienes derecho a juzgar a alguien por datos ' +
+        'que aún no ha tenido ocasión de generar. Júzgale el plan y nada más.');
+    }
+
+    if (incluir.progreso !== false && arrancando) {
+      trozos.push('PROGRESO: no hay historial todavía. No tienes con qué juzgar su ' +
+        'progreso, su constancia ni sus cargas, así que no opines de eso —ni para bien ' +
+        'ni para mal— y no lo cuentes como defecto.');
+    } else if (incluir.progreso !== false) {
       const s = Store.stats();
       trozos.push('PROGRESO: ' + s.total + ' entrenamientos registrados, ' +
         s.week + ' esta semana, racha de ' + s.streak + ' días.');
@@ -1175,7 +1200,7 @@
     if (incluir.cargas) {
       const c = cargasReales(incluir.cargas === true ? 10 : incluir.cargas);
       if (c) trozos.push('CON QUÉ ENTRENA DE VERDAD (de sus sesiones registradas): ' + c + '.');
-      else trozos.push('Aún no ha registrado series con peso, así que no sabes qué cargas mueve.');
+      else if (!arrancando) trozos.push('Aún no ha registrado series con peso, así que no sabes qué cargas mueve.');
     }
 
     if (incluir.comida) {
@@ -1281,9 +1306,13 @@
       BAREMO +
       '- De tres a cinco puntos, y al menos tres tienen que ser fallos concretos ' +
       'con su consecuencia. Cita las rutinas y los ejercicios por su nombre.\n' +
-      '- Mira el reparto de volumen entre músculos, los patrones que falten, la ' +
-      'frecuencia semanal y si lo que entreno de verdad se parece a lo que tengo ' +
-      'apuntado.\n' +
+      '- Mira el reparto de volumen entre músculos, los patrones que falten y la ' +
+      'frecuencia semanal' +
+      (sinHistorial()
+        ? '. Aún no he registrado ni una serie porque acabo de montar esto: ' +
+          'no me lo eches en cara ni lo cuentes como fallo, audita las rutinas por ' +
+          'cómo están escritas.\n'
+        : ', y si lo que entreno de verdad se parece a lo que tengo apuntado.\n') +
       '- Si nombras un ejercicio de recambio, que sea uno del catálogo de abajo y ' +
       'escrito igual: lo que no esté ahí no lo tengo y no me sirve.\n' +
       menuEjercicios([]) + '\n' +
@@ -1426,13 +1455,16 @@
     'CÓMO SE PONE LA NOTA —ciñete a esto, no la pongas a ojo:\n' +
     '- 9 o 10: no tocarías nada.\n' +
     '- 7 u 8: correcto; como mucho detalles menores.\n' +
-    '- 5 o 6: funciona, pero tiene UN fallo claro que frena el progreso.\n' +
-    '- 3 o 4: DOS o más fallos claros, o uno grave.\n' +
+    '- 5 o 6: funciona, pero tiene uno o dos fallos que frenan el progreso.\n' +
+    '- 3 o 4: TRES o más fallos, o uno que suponga riesgo.\n' +
     '- 0 a 2: hay riesgo de lesión o el plan es incoherente.\n' +
-    'La nota sale de los fallos que encuentres en el propio plan y de su ' +
-    'gravedad. Números enteros. Lo que haga o deje de hacer fuera del plan ' +
-    '—no registrar entrenamientos, no apuntar la comida— se comenta, pero NO ' +
-    'baja la nota del plan: el plan no tiene la culpa de que no se cumpla.\n';
+    'La nota sale de los fallos que encuentres EN EL PROPIO PLAN —qué ejercicios ' +
+    'lleva, cómo reparte el volumen, en qué orden, con qué descansos— y de su ' +
+    'gravedad. Números enteros.\n' +
+    'Lo que haga o deje de hacer fuera del plan —no registrar entrenamientos, no ' +
+    'apuntar la comida, cumplir menos días de los que dice— NO es un fallo del plan ' +
+    'y no baja su nota. Si aun así merece un comentario, va en el consejo final, no ' +
+    'entre los puntos.\n';
 
   /* ---------- auditar UNA rutina ----------
      Lo mismo que se le hace al programa entero, pero sobre una rutina suelta:
@@ -1467,6 +1499,11 @@
       menuEjercicios(suyos) +
       (r.note ? 'NOTAS QUE LE PUSO: ' + r.note + '\n' : '') +
       '\nAudita esta rutina concreta. No me cuentes lo que ya está bien.\n' +
+      (sinHistorial()
+        ? 'Ojo: acaba de empezar con la app y no tiene nada registrado. Audítale la ' +
+          'rutina por lo que es —los ejercicios, el orden, las series— y no por lo que ' +
+          'no ha apuntado todavía.\n'
+        : '') +
       BAREMO +
       '- De dos a cuatro puntos, y al menos dos tienen que ser fallos con su ' +
       'consecuencia: orden de los ejercicios, series o repeticiones que no ' +
@@ -1548,7 +1585,11 @@
         comida += 'LO QUE REALMENTE COME: media de ' + mk + ' kcal y ' + mp +
           ' g de proteína en los ' + dd.length + ' días que ha apuntado esta semana.\n';
       } else {
-        comida += 'NO APUNTA LO QUE COME, así que de la comida solo sabes el objetivo.\n';
+        comida += 'AÚN NO HA APUNTADO NINGÚN DÍA DE COMIDA, así que de su alimentación ' +
+          'solo sabes el objetivo calculado. Con eso no puedes auditarle la dieta: en ' +
+          '"nutricion" dile qué tiene que cuadrar para que este plan rinda —proteína al ' +
+          'día, calorías— usando esos números, y no gastes el hueco en pedirle que ' +
+          'apunte la comida.\n';
       }
     }
 
@@ -1568,6 +1609,12 @@
       menuEjercicios(Object.keys(prog.volumen || {})) +
       '\nTe han contratado para auditar este programa, no para animar a nadie.\n\n' +
       'REGLAS INNEGOCIABLES:\n' +
+      (sinHistorial()
+        ? '- Acaba de instalar la app y todavía no ha registrado ni un entrenamiento ni ' +
+          'una comida. Eso NO es un defecto y no puede aparecer entre los puntos ni ' +
+          'bajarle la nota: está montando su primer plan, que es exactamente lo que ' +
+          'toca hacer primero. Juzga el papel que tienes delante.\n'
+        : '') +
       '- De los puntos que devuelvas, al menos tres tienen que ser críticas ' +
       'concretas con su consecuencia: qué falla, por qué importa y qué pasa si se ' +
       'deja así. Nada de generalidades que valgan para cualquiera.\n' +
