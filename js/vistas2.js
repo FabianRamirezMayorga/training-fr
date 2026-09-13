@@ -1011,7 +1011,19 @@
           <button class="btn primary grow" data-a="reproducirLista">
             ${raw(icon('play'))} Reproducir aquí</button>
         </div>
-        <div class="row" style="margin-top:8px">
+
+        ${raw(l.spotify ? html`
+          <a class="btn block sm" href="${l.spotify}" target="_blank" rel="noopener noreferrer"
+             style="margin-top:8px">${raw(icon('musica'))} Abrirla en Spotify</a>
+          <p class="tiny center" style="margin:6px 4px 0">Ya está en tu cuenta: la tienes en
+          la app de Spotify, en el móvil, en el coche o donde la abras.</p>`
+        : html`
+          <button class="btn block sm" data-a="aSpotify" style="margin-top:8px">
+            ${raw(icon('musica'))} Guardarla en mi Spotify</button>
+          <p class="tiny center" style="margin:6px 4px 0">Se crea como lista privada en tu
+          cuenta, con estas mismas canciones, para poder oírla desde la app de Spotify.</p>`)}
+
+        <div class="row" style="margin-top:10px">
           <button class="btn ghost grow sm" data-a="generar">${raw(icon('chispa'))} Crear otra distinta</button>
         </div>
         <button class="btn ghost block sm plegar ${temasAbiertos ? 'abierta' : ''}"
@@ -1036,8 +1048,42 @@
       </div>`;
   }
 
+  /* Subirla a la cuenta de Spotify. La lista ya está resuelta —cada canción
+     tiene su uri de cuando se buscó—, así que esto es crearla y meterlas: no hay
+     que volver a buscar nada ni gastar una llamada a la IA. */
+  function subirASpotify(root) {
+    const l = listaGuardada();
+    if (!l || !l.pistas || !l.pistas.length) { UI.toast('No hay lista que guardar'); return; }
+    if (!Spotify.activa()) { UI.toast('Entra en Spotify primero'); return; }
+
+    const boton = root.querySelector('[data-a=aSpotify]');
+    if (boton) { boton.disabled = true; boton.textContent = 'Guardándola en Spotify…'; }
+
+    const uris = l.pistas.map(function (p) { return p.uri; }).filter(Boolean);
+    if (!uris.length) {
+      UI.toast('Estas canciones no tienen enlace de Spotify.');
+      if (boton) { boton.disabled = false; boton.textContent = 'Guardarla en mi Spotify'; }
+      return;
+    }
+
+    Spotify.crearPlaylist(l.nombre || 'Entrenamiento',
+      (l.descripcion || '') + ' — hecha con Training FR', uris)
+      .then(function (pl) {
+        const url = (pl.external_urls && pl.external_urls.spotify) ||
+          ('https://open.spotify.com/playlist/' + pl.id);
+        guardarLista(Object.assign({}, l, { spotify: url }));
+        render();
+        UI.toast('Guardada en tu Spotify');
+      })
+      .catch(function (e) {
+        if (boton) { boton.disabled = false; boton.textContent = 'Guardarla en mi Spotify'; }
+        UI.toast(e.message || 'No se ha podido guardar en Spotify.');
+      });
+  }
+
   V.musica.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
+    bind(root, '[data-a=aSpotify]', function () { subirASpotify(root); });
     bind(root, '[data-a=boveda]', function () { go('claves'); });
     bind(root, '[data-a=olvidarFallo]', function () {
       Spotify.apuntarFallo(null); render();
