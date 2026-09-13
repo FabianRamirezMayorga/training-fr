@@ -693,7 +693,10 @@
             ${raw(icon('chevron'))}</span>
         </button>
         ${raw(abierto ? '<div class="stack">' +
-          suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' : '')}`;
+          suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' +
+          '<button class="btn ghost block sm danger" data-borrarplan="' + esc(k) + '" ' +
+          'style="margin-top:8px">' + icon('trash') + ' Borrar el plan entero (' +
+          suyas.length + (suyas.length === 1 ? ' rutina' : ' rutinas') + ')</button>' : '')}`;
     }).join('');
 
     return arriba + html`<div class="list-title">Tus planes</div>` + bloques;
@@ -1800,6 +1803,7 @@
     bind(root, '[data-a=actividad]', apuntarActividad);
     bind(root, '[data-a=correr]', correrPlanSheet);
     bind(root, '[data-a=limpiardup]', limpiarDuplicadosSheet);
+    bindAll(root, '[data-borrarplan]', function (el) { borrarPlanSheet(el.dataset.borrarplan); });
 
     bindAll(root, '[data-ver]', function (el) {
       const ex = Data.get(el.dataset.ver);
@@ -1857,6 +1861,52 @@
       sobran.push.apply(sobran, g.slice(1));
     });
     return sobran;
+  }
+
+  /* Borrar un plan de cinco días era borrar cinco rutinas de una en una desde
+     «Editar lista». Aquí se ve qué se va antes de irse, que es lo que evita el
+     arrepentimiento. */
+  function borrarPlanSheet(nombre) {
+    const suyas = Store.routines().filter(function (r) {
+      return (r.days || []).length && nombreRutina(r) === nombre;
+    });
+    if (!suyas.length) { UI.toast('Ese plan ya no está'); return; }
+
+    suyas.sort(function (a, b) {
+      return DIAS.indexOf((a.days || [])[0]) - DIAS.indexOf((b.days || [])[0]);
+    });
+
+    const hechas = Store.sessions().filter(function (s) {
+      return suyas.some(function (r) { return r.id === s.routineId; });
+    }).length;
+
+    UI.modal(html`
+      <h2>Borrar «${nombre}»</h2>
+      <p class="muted">Se van estas ${suyas.length}
+        ${suyas.length === 1 ? 'rutina' : 'rutinas'} y el plan desaparece de tu lista.</p>
+      <div class="card">
+        ${raw(suyas.map(function (r) {
+          return '<div class="row between" style="padding:4px 0;gap:10px">' +
+            '<span style="font-size:.86rem">' + esc(tituloRutina(r)) + '</span>' +
+            '<span class="tiny">' + r.exercises.length + ' ejercicios</span></div>';
+        }).join(''))}
+      </div>
+      <p class="tiny" style="margin:10px 0 0">${hechas
+        ? 'Los ' + hechas + ' entrenamientos que ya hiciste con ellas se quedan en tu ' +
+          'historial: esto no borra nada de Progreso.'
+        : 'Tu historial de entrenamientos no se toca.'}</p>
+      <button class="btn danger block" id="bp-ok" style="margin-top:14px">
+        Borrar las ${suyas.length}</button>
+      <button class="btn ghost block" id="bp-no" style="margin-top:8px">Dejarlo como está</button>`,
+      function (el) {
+        el.querySelector('#bp-no').onclick = function () { UI.closeModal(); };
+        el.querySelector('#bp-ok').onclick = function () {
+          suyas.forEach(function (r) { Store.deleteRoutine(r.id); });
+          UI.closeModal();
+          render();
+          UI.toast('Plan «' + nombre + '» borrado');
+        };
+      });
   }
 
   function limpiarDuplicadosSheet() {
