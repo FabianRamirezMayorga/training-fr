@@ -1917,6 +1917,33 @@
     });
   }
 
+  /* Lo mismo que la foto pero desde lo que uno escribe. Nadie sabe cuántas
+     calorías tiene «arroz con fideos, lentejas y carne asada», y pedírselo era
+     pedirle un dato que no tiene: o lo dejaba en blanco o se lo inventaba, y un
+     número inventado ensucia el recuento igual que no anotar nada.
+
+     Si no dice cantidades se asume una racion normal y se dice en la nota, para
+     que se vea que es una estimación y no una medida. */
+  function estimarComida(texto) {
+    const t = String(texto || '').trim();
+    if (!t) return Promise.reject(new Error('Escribe antes qu\u00e9 has comido.'));
+
+    const prompt = contexto({ comida: true }) + '\n\n' +
+      'Ha escrito esto de lo que ha comido: "' + t + '".\n\n' +
+      'Calúcula las calorías y la proteína. Es una estimación y se sabe: no hace ' +
+      'falta que claves los gramos, hace falta que no te vayas por un factor de dos.\n' +
+      '- Si no dice cantidades, asume una ración normal de una persona adulta y ' +
+      'díselo en "nota".\n' +
+      '- Si dice cantidades, respeta las suyas.\n' +
+      '- Comida de casa, cocinada como se cocina en casa: con su aceite.\n' +
+      '- Si lo que ha escrito no es comida, devuelve kcal 0 y dilo en "nota".\n\n' +
+      'Devuelve JSON: {"plato":"cómo llamarlo, corto","kcal":número,"prot":gramos,' +
+      '"alimentos":[{"que":"alimento","cuanto":"cantidad que has supuesto"}],' +
+      '"confianza":"alta|media|baja","nota":"una frase, lo que has supuesto"}';
+
+    return llamarJSON(prompt, { maxTokens: 1024, temperatura: 0.2 });
+  }
+
   /* Mira una foto de comida y estima lo que hay. Es una aproximación y se dice
      que lo es: nadie acierta los gramos de un plato por una foto, ni una
      persona ni un modelo. Sirve para saber si el día va corto de proteína, que
@@ -2155,7 +2182,8 @@
     planNutricion: planNutricion, revisarRutinas: revisarRutinas,
     revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
     crearPrograma: crearPrograma, pildora: pildora,
-    analizarComida: analizarComida, leerRutina: leerRutina,
+    analizarComida: analizarComida, estimarComida: estimarComida,
+    leerRutina: leerRutina,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,
     analizarProgreso: analizarProgreso, preguntar: preguntar, explicarEjercicio: explicarEjercicio,

@@ -459,12 +459,24 @@
   /* A mano, para lo que no tiene foto o para corregir lo que la IA no acertó */
   /* A mano, para lo que no tiene foto o para corregir lo que la IA no acertó */
   function comidaAMano() {
+    const conIA = IA.activa() && IA.estimarComida;
+
     UI.modal(html`
       <h2>Apuntar a mano</h2>
-      <p class="muted">Para lo que ya sabes de memoria, o para arreglar una estimación
-      que se quedó corta.</p>
+      <p class="muted">${conIA
+        ? 'Escribe lo que has comido y yo calculo las calorías y la proteína. Si ya te ' +
+          'sabes los números, pónlos tú y mando los tuyos.'
+        : 'Para lo que ya sabes de memoria, o para arreglar una estimación que se quedó corta.'}</p>
+
       <label class="tiny">QUÉ HAS COMIDO</label>
-      <input id="cm-plato" placeholder="Ej. Arroz con pollo" autocomplete="off">
+      <input id="cm-plato" placeholder="Ej. arroz con lentejas y carne asada" autocomplete="off">
+
+      ${raw(conIA ? html`
+        <button class="btn block sm" id="cm-calcular" style="margin-top:10px">
+          ${raw(icon('chispa'))} Calcular con IA</button>` : '')}
+
+      <div id="cm-visto" class="tiny" style="margin-top:10px"></div>
+
       <div class="row" style="margin-top:10px">
         <div class="grow">
           <label class="tiny">CALORÍAS</label>
@@ -475,24 +487,94 @@
           <input id="cm-prot" type="number" inputmode="numeric" min="0" placeholder="0">
         </div>
       </div>
+
       <button class="btn primary block" id="cm-ok" style="margin-top:14px">Anotar</button>`,
       function (el) {
+        const campoPlato = el.querySelector('#cm-plato');
+        const campoKcal = el.querySelector('#cm-kcal');
+        const campoProt = el.querySelector('#cm-prot');
+        const visto = el.querySelector('#cm-visto');
+        const btnCalc = el.querySelector('#cm-calcular');
+        const btnOk = el.querySelector('#cm-ok');
+        let detalle = '';
+        let confianza = '';
+
+        /* Rellena los números con lo que calcule la IA, pero SIN guardar: lo que
+           sale de una estimación se mira antes, y si algo no cuadra se corrige
+           encima. */
+        const calcular = function () {
+          const t = campoPlato.value.trim();
+          if (!t) { UI.toast('Escribe antes qué has comido'); campoPlato.focus(); return; }
+          if (btnCalc) { btnCalc.disabled = true; btnCalc.textContent = 'Calculando…'; }
+          visto.textContent = '';
+
+          return IA.estimarComida(t).then(function (r) {
+            if (!r || !(Number(r.kcal) > 0)) {
+              visto.innerHTML = '<span style="color:var(--warn)">' +
+                esc((r && r.nota) || 'No he sabido qu\u00e9 es eso. Pon t\u00fa los n\u00fameros.') + '</span>';
+              return;
+            }
+            campoKcal.value = Math.round(r.kcal);
+            campoProt.value = Math.round(r.prot || 0);
+            if (r.plato) campoPlato.value = r.plato;
+
+            detalle = (r.alimentos || []).map(function (a) {
+              return a.que + (a.cuanto ? ' (' + a.cuanto + ')' : '');
+            }).join(', ');
+            confianza = r.confianza || '';
+
+            visto.innerHTML = (detalle ? esc(detalle) + '<br>' : '') +
+              '<span style="opacity:.8">' + esc(r.nota || 'Estimaci\u00f3n: corrige los n\u00fameros si no te cuadra.') +
+              '</span>';
+          }).catch(function (e) {
+            visto.innerHTML = '<span style="color:var(--bad)">' +
+              esc(e.message || 'No he podido calcularlo.') + '</span>';
+          }).then(function () {
+            if (btnCalc) { btnCalc.disabled = false; btnCalc.innerHTML = icon('chispa') + ' Calcular con IA'; }
+          });
+        };
+
         const guardar = function () {
-          const plato = el.querySelector('#cm-plato').value.trim();
-          const kcal = Number(el.querySelector('#cm-kcal').value) || 0;
-          const prot = Number(el.querySelector('#cm-prot').value) || 0;
+          const plato = campoPlato.value.trim();
+          const kcal = Number(campoKcal.value) || 0;
+          const prot = Number(campoProt.value) || 0;
+
+          /* Sin números y con IA disponible, se calculan en vez de regañar. Pedirle
+             las calorías de un plato a quien no las sabe era pedirle que se las
+             inventara, y un número inventado ensucia el recuento igual que no
+             anotar nada. */
           if (!kcal && !prot) {
-            UI.toast('Pon al menos las calorías o la proteína');
+            if (conIA && plato) {
+              btnOk.disabled = true;
+              const antes = btnOk.textContent;
+              btnOk.textContent = 'Calculando…';
+              calcular().then(function () {
+                btnOk.disabled = false;
+                btnOk.textContent = antes;
+                if (Number(campoKcal.value) > 0) UI.toast('Mira los números y dale a Anotar');
+              });
+              return;
+            }
+            UI.toast(plato ? 'Pon al menos las calorías o la proteína'
+              : 'Escribe qué has comido');
             return;
           }
-          Comidas.anotar({ plato: plato || 'Comida', kcal: kcal, prot: prot, fuente: 'mano' });
+
+          Comidas.anotar({
+            plato: plato || 'Comida', kcal: kcal, prot: prot,
+            detalle: detalle, confianza: confianza,
+            fuente: detalle ? 'texto' : 'mano'
+          });
           UI.closeModal();
           render();
           UI.toast('Anotado');
         };
-        el.querySelector('#cm-ok').onclick = guardar;
-        el.querySelector('#cm-prot').onkeydown = function (ev) {
-          if (ev.key === 'Enter') guardar();
+
+        if (btnCalc) btnCalc.onclick = calcular;
+        btnOk.onclick = guardar;
+        campoProt.onkeydown = function (ev) { if (ev.key === 'Enter') guardar(); };
+        campoPlato.onkeydown = function (ev) {
+          if (ev.key === 'Enter' && conIA) { ev.preventDefault(); calcular(); }
         };
       });
   }
