@@ -1975,6 +1975,65 @@
     });
   }
 
+  /* Lo que uno hace fuera del gimnasio, contado con sus palabras: «jugué un
+     partido de fútbol», «subí a Monserrate», «fui a la ciclovía».
+
+     Se pide el MET —el coste de la actividad por kilo y por hora— y no las
+     calorías directamente: así salen del peso real y del tiempo real que marque
+     el cronómetro, y siguen cuadrando si el partido dura hora y media en vez de
+     una. De paso dice qué se trabaja, que es lo que necesitan el mapa de
+     músculos y la lista de lo que llevas abandonado.
+
+     Las líneas van en una lista y se unen con el salto: un prompt largo a base
+     de concatenar comillas y saltos escapados se rompe a la primera. */
+  const MUSCULOS_VALIDOS = ['abdominals', 'abductors', 'adductors', 'biceps', 'calves',
+    'chest', 'forearms', 'glutes', 'hamstrings', 'lats', 'lower back', 'middle back',
+    'neck', 'quadriceps', 'shoulders', 'traps', 'triceps'];
+
+  const SALTO = String.fromCharCode(10);
+
+  function estimarActividad(texto) {
+    const t = String(texto || '').trim();
+    if (!t) return Promise.reject(new Error('Escribe antes qué has hecho.'));
+
+    const datos = g.Perfil ? Perfil.datos() : null;
+    const peso = Number(datos && datos.peso) || 0;
+
+    const prompt = [
+      'Eres su entrenador. Ha hecho esto, contado con sus palabras: "' + t + '".',
+      '',
+      peso ? 'Pesa ' + peso + ' kg.' : '',
+      'Dime qué actividad es y cuánto cuesta.',
+      '- "met": el equivalente metabólico de la actividad, del compendio de ' +
+        'Ainsworth. Caminar tranquilo 3.5, bici suave 6, fútbol 7, correr 9, ' +
+        'subir monte 7.5. Si lo que cuenta suena más duro o más suave de lo ' +
+        'normal, ajústalo.',
+      '- "musculos": los que de verdad trabaja, en inglés y solo de esta lista: ' +
+        MUSCULOS_VALIDOS.join(', ') + '. Entre dos y cinco. No te inventes nombres.',
+      '- "nombre": cómo llamarlo en su historial, corto y en español.',
+      '- "nota": una frase con lo que has supuesto, o algo útil de esa actividad. ' +
+        'Sin adular y sin signos de exclamación.',
+      '- Si lo que ha escrito no es una actividad física, devuelve met 0 y dilo ' +
+        'en "nota".',
+      '',
+      'Devuelve JSON: {"nombre":"","met":número,"intensidad":"suave|media|fuerte",' +
+        '"musculos":["..."],"nota":""}'
+    ].join(SALTO);
+
+    return llamarJSON(prompt, { maxTokens: 1024, temperatura: 0.2 }).then(function (r) {
+      const met = Number(r && r.met) || 0;
+      return {
+        nombre: String((r && r.nombre) || t).slice(0, 60),
+        met: met > 0 ? Math.min(20, Math.max(1.5, met)) : 0,
+        intensidad: (r && r.intensidad) || '',
+        musculos: ((r && r.musculos) || []).filter(function (m) {
+          return MUSCULOS_VALIDOS.indexOf(m) !== -1;
+        }).slice(0, 5),
+        nota: String((r && r.nota) || '')
+      };
+    });
+  }
+
   /* Lo mismo que la foto pero desde lo que uno escribe. Nadie sabe cuántas
      calorías tiene «arroz con fideos, lentejas y carne asada», y pedírselo era
      pedirle un dato que no tiene: o lo dejaba en blanco o se lo inventaba, y un
@@ -2241,6 +2300,7 @@
     revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
     crearPrograma: crearPrograma, pildora: pildora, horasPildora: horasPildora,
     analizarComida: analizarComida, estimarComida: estimarComida,
+    estimarActividad: estimarActividad,
     leerRutina: leerRutina,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,

@@ -283,14 +283,18 @@
     if (ses.length < 4) return [];
 
     const ultima = {};
+    const marcar = function (m, cuando) {
+      if (!ultima[m] || cuando > ultima[m]) ultima[m] = cuando;
+    };
     ses.forEach(function (s) {
       (s.entries || []).forEach(function (e) {
         const ex = Data.get(e.exId);
         if (!ex) return;
-        (ex.primaryMuscles || []).forEach(function (m) {
-          if (!ultima[m] || s.start > ultima[m]) ultima[m] = s.start;
-        });
+        (ex.primaryMuscles || []).forEach(function (m) { marcar(m, s.start); });
       });
+      /* Lo que se hizo fuera del gimnasio tambien cuenta: un partido de futbol
+         trabaja la pierna, y sin esto seguia saliendo como abandonada. */
+      (s.musculos || []).forEach(function (m) { marcar(m, s.start); });
     });
 
     const filas = MUSCULOS_CLAVE.map(function (m) {

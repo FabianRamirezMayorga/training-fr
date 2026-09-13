@@ -539,19 +539,20 @@
           const kcal = Number(campoKcal.value) || 0;
           const prot = Number(campoProt.value) || 0;
 
-          /* Sin números y con IA disponible, se calculan en vez de regañar. Pedirle
-             las calorías de un plato a quien no las sabe era pedirle que se las
-             inventara, y un número inventado ensucia el recuento igual que no
-             anotar nada. */
+          /* Sin números y con IA disponible, se calculan y SE GUARDA. Antes esto
+             solo rellenaba los campos y esperaba un segundo toque en Anotar:
+             daba igual lo claro que fuera el aviso, uno le da a Anotar, ve los
+             números aparecer y cierra convencido de que ya está apuntado. Se
+             quedaba sin guardar. Quien quiera revisar antes tiene el botón de
+             calcular; Anotar apunta. */
           if (!kcal && !prot) {
             if (conIA && plato) {
               btnOk.disabled = true;
-              const antes = btnOk.textContent;
               btnOk.textContent = 'Calculando…';
               calcular().then(function () {
                 btnOk.disabled = false;
-                btnOk.textContent = antes;
-                if (Number(campoKcal.value) > 0) UI.toast('Mira los números y dale a Anotar');
+                btnOk.textContent = 'Anotar';
+                if (Number(campoKcal.value) > 0) guardar();
               });
               return;
             }
@@ -567,7 +568,9 @@
           });
           UI.closeModal();
           render();
-          UI.toast('Anotado');
+          UI.toast(detalle
+            ? 'Anotado: ' + UI.num(kcal) + ' kcal y ' + prot + ' g de proteína'
+            : 'Anotado');
         };
 
         if (btnCalc) btnCalc.onclick = calcular;

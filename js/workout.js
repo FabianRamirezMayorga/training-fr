@@ -187,6 +187,17 @@
     };
     session.volume = Store.volumeOf(session);
 
+    /* Una actividad no deja series ni volumen, pero sí calorías y músculos:
+       sin esto el partido no contaba para nada y «lo que llevas abandonado»
+       seguía diciendo que hace un mes que no tocas la pierna. */
+    if (a.actividad) {
+      session.actividad = 'otro';
+      session.minutos = Math.max(1, Math.round((session.end - session.start) / 60000));
+      session.kcal = kcalActividad(a, session.end);
+      session.musculos = a.actividad.musculos || [];
+      session.nota = a.actividad.nota || '';
+    }
+
     stopTimers();
     Store.clearActive();
     pintarBanner();
@@ -271,18 +282,65 @@
 
       <div id="wo-musica"></div>
 
+      ${raw(a.actividad ? tarjetaActividad(a) : html`
       <div class="card center">
         <p class="muted" style="margin-bottom:12px">El cronómetro ya está corriendo. Puedes
-        entrenar así, solo con el tiempo, o ir añadiendo los ejercicios que hagas para
-        registrar series y pesos.</p>
-        <button class="btn primary block" data-w="anadir">${raw(icon('plus'))} Añadir ejercicio</button>
+        entrenar así, solo con el tiempo, contarme qué estás haciendo, o ir añadiendo
+        los ejercicios para registrar series y pesos.</p>
+        <button class="btn primary block" data-w="actividad">
+          ${raw(icon('chispa'))} Cuéntame qué estoy haciendo</button>
+        <button class="btn block" data-w="anadir" style="margin-top:8px">
+          ${raw(icon('plus'))} Añadir ejercicio</button>
         <button class="btn block" data-w="rutina" style="margin-top:8px">Cargar una rutina</button>
-      </div>
+      </div>`)}
 
       <button class="btn danger block" data-w="finish" style="margin-top:16px">
         ${raw(icon('flag'))} Terminar y guardar el tiempo
       </button>
       <button class="btn ghost block" data-w="cancel" style="margin-top:8px">Descartar entrenamiento</button>`;
+  }
+
+  /* Lo que se está haciendo cuando no son series: un partido, una subida, la
+     ciclovía. Las calorías se pintan con el reloj en marcha —salen del MET, del
+     peso y del tiempo que lleve— así que suben solas mientras dura. */
+  function kcalActividad(a, hasta) {
+    if (!a || !a.actividad || !a.actividad.met) return 0;
+    const datos = g.Perfil ? Perfil.datos() : null;
+    const peso = Number(datos && datos.peso) || 75;
+    const horas = Math.max(0, (hasta || Date.now()) - a.start) / 3600000;
+    return Math.round(a.actividad.met * peso * horas);
+  }
+
+  function tarjetaActividad(a) {
+    const act = a.actividad;
+    const musculos = (act.musculos || []).map(function (m) {
+      return g.I18N ? I18N.muscle(m) : m;
+    });
+
+    return html`
+      <div class="card">
+        <div class="row between" style="align-items:flex-start">
+          <div class="grow" style="min-width:0">
+            <div class="tiny">ESTÁS HACIENDO</div>
+            <div style="font-weight:700;font-size:1.05rem">${act.nombre}</div>
+          </div>
+          <div class="center nowrap">
+            <b id="wo-kcal" style="font-size:1.15rem">~${UI.num(kcalActividad(a))}</b>
+            <div class="tiny">kcal</div>
+          </div>
+        </div>
+
+        ${raw(musculos.length ? '<div class="row wrap" style="gap:6px;margin-top:10px">' +
+          musculos.map(function (m) { return '<span class="chip">' + UI.esc(m) + '</span>'; }).join('') +
+          '</div>' : '')}
+
+        ${raw(act.nota ? '<p class="tiny" style="margin:10px 0 0">' + UI.esc(act.nota) + '</p>' : '')}
+
+        <div class="row" style="margin-top:12px">
+          <button class="btn sm grow" data-w="actividad">Cambiarlo</button>
+          <button class="btn sm grow" data-w="anadir">${raw(icon('plus'))} Añadir ejercicio</button>
+        </div>
+      </div>`;
   }
 
   /* Los recambios y la guía de técnica, plegados. Estaban sólo en la ficha del
@@ -496,9 +554,12 @@
 
     /* cronómetro total */
     const clock = root.querySelector('#wo-clock');
+    const campoKcal = root.querySelector('#wo-kcal');
     function paintClock() {
-      if (!clock || !Store.active()) return;
-      clock.textContent = UI.mmss((Date.now() - Store.active().start) / 1000);
+      const viva = Store.active();
+      if (!viva) return;
+      if (clock) clock.textContent = UI.mmss((Date.now() - viva.start) / 1000);
+      if (campoKcal) campoKcal.textContent = '~' + UI.num(kcalActividad(viva));
     }
     paintClock();
     clearInterval(clockTimer);
@@ -509,7 +570,7 @@
 
     /* La ayuda se rellena al abrirla y no antes: son dos bloques largos, con
        imágenes, y en la mayoría de las series no se abren. */
-    const exActual = Data.get(entry.exId);
+    const exActual = entry ? Data.get(entry.exId) : null;
 
     function llenarAyuda(clave) {
       const caja = root.querySelector('[data-ayuda-caja="' + clave + '"]');
@@ -550,7 +611,7 @@
     const modo = Store.settings().registro || 'detallado';
     const simple = modo === 'simple';
     const soloEjercicio = modo === 'ejercicio';
-    const hecho = entry.sets.every(function (x) { return x.done; });
+    const hecho = !!entry && entry.sets.every(function (x) { return x.done; });
 
     /* en modo simple el peso es uno solo para todo el ejercicio, y es opcional */
     const campoPeso = root.querySelector('#peso-opcional');
@@ -683,6 +744,8 @@
       });
     });
 
+    act('actividad', function () { actividadSheet(rerender); });
+
     act('rutina', function () { g.App.go('rutinas'); });
 
     act('finish', doFinish);
@@ -710,6 +773,83 @@
      con otro material y se conserva lo que ya llevas hecho: las series ya
      marcadas se quedan con el ejercicio original y el recambio arranca con
      las que faltan. */
+  /* «Jugué un partido de fútbol». Pedirle el MET y los músculos a quien viene
+     de jugar no tiene sentido: lo escribe con sus palabras y la IA pone los
+     números. Sin IA se apunta igual, con un coste medio, que es mejor que no
+     registrar nada. */
+  function actividadSheet(rerender) {
+    const a = Store.active();
+    if (!a) return;
+    const conIA = g.IA && IA.activa() && IA.estimarActividad;
+    const yaHay = a.actividad || null;
+
+    UI.modal(html`
+      <h2>¿Qué estás haciendo?</h2>
+      <p class="muted">Escríbelo como lo dirías: «partido de fútbol», «subí a
+      Monserrate», «ciclovía». ${raw(conIA
+        ? 'Yo calculo el gasto y qué partes del cuerpo trabajas.'
+        : 'Sin la IA conectada lo apunto con un gasto medio.')}</p>
+
+      <input id="ac-que" placeholder="Partido de fútbol" autocomplete="off"
+             value="${yaHay ? yaHay.nombre : ''}">
+
+      <div id="ac-visto" class="tiny" style="margin-top:10px"></div>
+
+      <button class="btn primary block" id="ac-listo" style="margin-top:14px">
+        ${raw(conIA ? 'Calcular y empezar' : 'Empezar')}</button>`,
+      function (el) {
+        const campo = el.querySelector('#ac-que');
+        const visto = el.querySelector('#ac-visto');
+        const btn = el.querySelector('#ac-listo');
+
+        const guardar = function (act) {
+          const viva = Store.active();
+          if (!viva) return;
+          viva.actividad = act;
+          viva.routineName = act.nombre;
+          Store.setActive(viva);
+          UI.closeModal();
+          rerender();
+          pintarBanner();
+          UI.toast(act.nombre + ' en marcha');
+        };
+
+        btn.onclick = function () {
+          const t = campo.value.trim();
+          if (!t) { UI.toast('Escribe qué estás haciendo'); campo.focus(); return; }
+
+          if (!conIA) {
+            guardar({ nombre: t, met: 4, musculos: [], nota: '', intensidad: '' });
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Calculando…';
+          visto.textContent = '';
+
+          IA.estimarActividad(t).then(function (r) {
+            if (!r || !r.met) {
+              visto.innerHTML = '<span style="color:var(--warn)">' +
+                UI.esc(r && r.nota ? r.nota : 'Eso no me suena a actividad física.') + '</span>';
+              btn.disabled = false;
+              btn.textContent = 'Calcular y empezar';
+              return;
+            }
+            guardar(r);
+          }).catch(function (e) {
+            visto.innerHTML = '<span style="color:var(--bad)">' +
+              UI.esc(e.message || 'No he podido calcularlo.') + '</span>';
+            btn.disabled = false;
+            btn.textContent = 'Calcular y empezar';
+          });
+        };
+
+        campo.onkeydown = function (ev) {
+          if (ev.key === 'Enter') { ev.preventDefault(); btn.click(); }
+        };
+      });
+  }
+
   function cambiarSheet(ex, rerender) {
     const gear = Store.settings().gear || '';
     let lista = g.Alt ? Alt.para(ex, { limite: 10, soloDisponible: !!gear }) : [];

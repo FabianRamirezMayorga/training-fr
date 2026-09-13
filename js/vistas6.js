@@ -374,6 +374,8 @@
                   <div style="font-weight:700">${s.routineName}</div>
                   <div class="tiny">${UI.fecha(s.start)} · ${raw(s.manual
                     ? esc('apuntado a mano' + (s.kcal ? ' · ~' + UI.num(s.kcal) + ' kcal' : ''))
+                    : s.actividad && !s.setsDone
+                    ? esc('~' + UI.num(s.kcal || 0) + ' kcal')
                     : s.setsDone + ' series' + (s.volume ? ' · ' + esc(UI.kg(s.volume)) : ''))} ·
                     ${UI.mmss(((s.end || s.start) - s.start) / 1000)}</div>
                 </div>
