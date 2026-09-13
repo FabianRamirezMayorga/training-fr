@@ -45,6 +45,7 @@
     cargandoIA: false,
     cargandoPlan: false,
     creando: false,
+    gear: '',
     falloIA: '',
     todoAbierto: false,
     molestias: '',
@@ -94,6 +95,13 @@
     return Store.routines().filter(function (r) {
       return (r.days || []).length && App.nombreRutina(r) === nombre;
     });
+  }
+
+  /* El sitio donde va a entrenar ESTE plan. Por defecto el de los ajustes, pero
+     se puede cambiar aquí sin tocar el global: montar un plan para las vacaciones
+     no debería cambiarle el catálogo de toda la app. */
+  function gearActual() {
+    return est.gear || Store.settings().gear || 'gym';
   }
 
   function objetivoActual() {
@@ -361,6 +369,17 @@
             '" data-dia="' + d + '">' + UI.diaLargo(d) + '</button>';
         }).join(''))}
       </div>
+      <div class="tiny" style="margin:13px 0 6px">DÓNDE VAS A ENTRENAR</div>
+      <div class="row wrap" style="gap:6px">
+        ${raw(Object.keys(Data.GEAR).filter(function (k) { return k !== 'todo'; })
+          .map(function (k) {
+            return '<button class="chip ' + (gearActual() === k ? 'on' : '') +
+              '" data-gear="' + k + '">' + esc(Data.GEAR[k].label) + '</button>';
+          }).join(''))}
+      </div>
+      <p class="tiny" style="margin:7px 0 0">${esc(Data.GEAR[gearActual()].note)}. Solo vale
+      para este plan; no cambia el catálogo del resto de la app.</p>
+
       <div class="tiny" style="margin:13px 0 6px">CUÁNTO DURA CADA SESIÓN</div>
       <div class="row wrap" style="gap:6px">
         ${raw([30, 45, 60, 75, 90].map(function (m) {
@@ -893,6 +912,13 @@
     bindAll(root, '[data-foco]', function (el) {
       est.foco = el.dataset.foco; guardarEstado(); render();
     });
+    bindAll(root, '[data-gear]', function (el) {
+      est.gear = el.dataset.gear;
+      guardarEstado();
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+    });
 
     bind(root, '[data-a=crear]', crear);
     bind(root, '[data-a=crearia]', crearConIA);
@@ -1079,7 +1105,7 @@
      como rutinas, la auditoría— sigue funcionando sin enterarse de quién lo
      montó, y si la IA devuelve algo que no cuadra queda la base buena debajo. */
   function fusionarIA(base, r) {
-    const gear = Store.settings().gear;
+    const gear = gearActual();
     const claves = Programa.lesionesDe(Perfil.datos().lesiones);
     const descartados = [];
 
@@ -1101,6 +1127,10 @@
           (Data.search({ q: nombre, gear: gear }) || [])[0];
         if (!ex) { descartados.push(nombre); return; }
         if (vistos[ex.id]) return;
+        if (!Data.permiteNombre(gear, ex.nameEs)) {
+          descartados.push(ex.nameEs + ' (no lo tienes donde entrenas)');
+          return;
+        }
         if (prohibido(ex)) { descartados.push(ex.nameEs + ' (tus limitaciones)'); return; }
         vistos[ex.id] = true;
 
@@ -1181,7 +1211,7 @@
     /* la calculadora primero: garantiza una forma válida y es la red si algo falla */
     const base = Programa.crear({
       dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(),
-      foco: est.foco, gear: Store.settings().gear, variante: est.variante
+      foco: est.foco, gear: gearActual(), variante: est.variante
     });
 
     est.cargandoPlan = true;
@@ -1190,7 +1220,7 @@
 
     IA.crearPrograma({
       dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(), foco: est.foco,
-      gear: Store.settings().gear, objetivoSeries: base.objetivoSeries,
+      gear: gearActual(), objetivoSeries: base.objetivoSeries,
       lesiones: base.lesiones, musculos: Object.keys(base.volumen || {}),
       molestias: est.molestias, notas: est.notas
     }).then(function (r) {
@@ -1238,7 +1268,7 @@
     est.variante = (est.variante || 0) + 1;
     est.prog = Programa.crear({
       dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(),
-      foco: est.foco, gear: Store.settings().gear, variante: est.variante
+      foco: est.foco, gear: gearActual(), variante: est.variante
     });
     est.ia = null;
     est.aplicados = [];

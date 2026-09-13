@@ -1188,10 +1188,16 @@
       if (f) trozos.push(f);
     }
 
-    const gset = Data.GEAR[Store.settings().gear];
-    if (gset) trozos.push('DÓNDE ENTRENA: ' + Data.gearFrase(Store.settings().gear) +
-      ' (' + gset.note.toLowerCase() + '). No le propongas nada que necesite material ' +
-      'que no tiene.');
+    /* El sitio puede venir impuesto por quien llama —al montar un plan se elige
+       ahí—; si no, manda el ajuste global. Leer siempre el global hacía que el
+       contexto dijera «gimnasio» mientras el catálogo era de peso corporal. */
+    const gear = incluir.gear || Store.settings().gear;
+    const gset = Data.GEAR[gear];
+    if (gset) {
+      trozos.push('DÓNDE ENTRENA Y CON QUÉ: ' + Data.gearFrase(gear) + '. Material ' +
+        'disponible: ' + gset.note.toLowerCase() + '. Esto es innegociable: un ejercicio ' +
+        'que necesite algo que no tiene no le sirve de nada, por bueno que sea.');
+    }
 
     return trozos.join('\n');
   }
@@ -1356,10 +1362,16 @@
     /* los músculos que va a tocar la semana, para darle más catálogo de esos */
     const foco = o.foco && o.foco !== 'equilibrado' ? o.foco : '';
 
+    const gset = Data.GEAR[o.gear] || {};
     const prompt = contexto({
-      progreso: true, cargas: true, comida: true, favoritos: true, rutinas: true
+      progreso: true, cargas: true, comida: true, favoritos: true, rutinas: true,
+      gear: o.gear
     }) + '\n\n' +
       'ENCARGO: móntale el programa de entrenamiento de una semana, entero.\n' +
+      'DÓNDE VA A ENTRENAR: ' + (gset.label || o.gear) +
+      (gset.note ? ' — ' + gset.note.toLowerCase() + '—' : '') + '. Todo el plan tiene ' +
+      'que poder hacerse ahí. El catálogo de abajo ya viene filtrado por ese material: ' +
+      'si eliges algo que no está en él, la rutina no se le puede aplicar.\n' +
       'DÍAS QUE PUEDE ENTRENAR: ' + dias.map(UI.diaLargo).join(', ') +
       ' (' + dias.length + ' sesiones).\n' +
       'TIEMPO POR SESIÓN: ' + (o.minutos || 60) + ' minutos contando calentamiento ' +
@@ -1434,7 +1446,8 @@
       });
     });
 
-    const prompt = contexto({ progreso: true, cargas: true, favoritos: true }) + '\n\n' +
+    const prompt = contexto({ progreso: true, cargas: true, favoritos: true,
+      gear: Store.settings().gear }) + '\n\n' +
       'RUTINA A AUDITAR — "' + (r.name || 'sin nombre') + '", ' + dias + ':\n' + lista + '\n' +
       menuEjercicios(suyos) +
       (r.note ? 'NOTAS QUE LE PUSO: ' + r.note + '\n' : '') +

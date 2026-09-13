@@ -281,15 +281,34 @@
     'e-z curl bar': 5, kettlebells: 6, bands: 7
   };
 
+  /* El filtro por material mira el campo «equipment» del catálogo, y ese campo
+     viene del origen con erratas: hay flexiones fichadas como «body only» que
+     en el nombre piden mancuernas, y cruces de poleas que se cuelan en una
+     lista de peso corporal. A quien entrena en casa sin nada, proponerle un
+     cruce de poleas le deja la rutina inservible, así que el nombre se mira
+     también. */
+  const PROHIBIDO_POR_SITIO = {
+    home:      /mancuerna|polea|m[aá]quina|smith|kettlebell|banda el[aá]stica|con barra/i,
+    bands:     /mancuerna|polea|m[aá]quina|smith|kettlebell|con barra/i,
+    dumbbell:  /polea|m[aá]quina|smith|con barra|barra z|barra ez/i
+  };
+
+  function permiteNombre(gear, nombre) {
+    const veto = PROHIBIDO_POR_SITIO[gear];
+    return !veto || !veto.test(String(nombre || ''));
+  }
+
   function paraIA(opciones) {
     opciones = opciones || {};
     const foco = opciones.musculos || [];
     const tope = opciones.porMusculo || 14;
 
+    const gear = opciones.gear || 'gym';
     const grupos = {};
-    search({ gear: opciones.gear || 'gym' }).forEach(function (e) {
+    search({ gear: gear }).forEach(function (e) {
       const mus = (e.primaryMuscles || [])[0];
       if (!mus) return;
+      if (!permiteNombre(gear, e.nameEs)) return;
       (grupos[mus] = grupos[mus] || []).push(e);
     });
 
@@ -326,7 +345,7 @@
   }
 
   g.Data = {
-    paraIA: paraIA, porNombreEs: porNombreEs,
+    paraIA: paraIA, porNombreEs: porNombreEs, permiteNombre: permiteNombre,
     load: load, all: all, get: get, search: search,
     img: img, frames: frames, youtube: youtube, PLACEHOLDER: PLACEHOLDER,
     GEAR: GEAR, gearAllows: gearAllows, gearFrase: gearFrase,
