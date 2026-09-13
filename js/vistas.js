@@ -649,7 +649,7 @@
         <span class="list-title">Lo que te propongo</span>
         <button class="btn sm ghost" data-a="crearTodas">Crear todas</button>
       </div>
-      <p class="tiny" style="margin:-4px 4px 10px">Calculado con tus datos, no son horas por
+      <p class="tiny" style="margin:-4px 0 10px">Calculado con tus datos, no son horas por
       defecto. Puedes cambiarlas después.</p>
       <div class="stack">
         ${raw(sug.map(function (x, i) {

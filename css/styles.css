@@ -110,8 +110,12 @@ a{color:var(--blue)}
 .list-row.tap{cursor:pointer}
 .list-row.tap:active{background:var(--card2)}
 .list-row .chevron{width:8px;height:14px;flex:none;opacity:.35}
+/* Sin sangría lateral: el h1 y el texto de la página arrancan en el borde del
+   contenido y estos títulos llevaban 4px más. Cuatro píxeles no se ven de uno
+   en uno, pero dejan dos líneas verticales en toda la app y es lo que la hace
+   parecer descuadrada. */
 .list-title{font-size:.76rem;font-weight:600;color:var(--dim2);letter-spacing:.04em;
-  text-transform:uppercase;margin:22px 4px 8px}
+  text-transform:uppercase;margin:22px 0 8px}
 /* Un hijo de un flex no encoge por debajo de su contenido salvo que se le
    diga: es min-width:auto por defecto. La fila del día del menú —«Miércoles
    ENTRENO» y «2580 kcal · 179 g proteína»— no cabía, se salía por la derecha
@@ -125,7 +129,7 @@ a{color:var(--blue)}
 .tiny{font-size:.78rem;color:var(--dim2);letter-spacing:0}
 .stack{display:flex;flex-direction:column;gap:10px}
 .list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
-  margin:22px 4px 8px}
+  margin:22px 0 8px}
 .list-head .list-title{margin:0}
 .list-head .btn{margin-bottom:-3px;flex:none}
 .center{text-align:center}

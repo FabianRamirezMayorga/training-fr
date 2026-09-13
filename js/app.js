@@ -699,7 +699,7 @@
       <div class="stack">${raw(deHoy.map(function (r) { return routineCard(r); }).join(''))}</div>`
       : html`
       <div class="list-title">Hoy es ${UI.diaLargo(hoy).toLowerCase()}</div>
-      <p class="tiny" style="margin:-4px 4px 4px">No tienes nada asignado a hoy. Abre un plan
+      <p class="tiny" style="margin:-4px 0 4px">No tienes nada asignado a hoy. Abre un plan
       y toca los días de una rutina para moverla aquí.</p>`;
 
     const bloques = orden.map(function (k) {
@@ -1122,20 +1122,20 @@
       </div>
 
       ${raw(exFilters.tipo === 'yoga' ? html`
-        <p class="tiny" style="margin:-2px 4px 12px">48 posturas de
+        <p class="tiny" style="margin:-2px 0 12px">48 posturas de
         <a href="https://github.com/alexcumplido/yoga-api" target="_blank" rel="noopener">Yoga API</a>.
         Ilustraciones CC0 y de Flaticon:
         <a href="https://www.flaticon.com/free-icons/easy" target="_blank" rel="noopener">Easy icons de monkik</a> y
         <a href="https://www.flaticon.com/free-icons/yoga" target="_blank" rel="noopener">Yoga icons de dDara</a>.</p>` : '')}
 
       ${raw(exFilters.tipo === 'pilates' ? html`
-        <p class="tiny" style="margin:-2px 4px 12px">No existe ningún catálogo libre de
+        <p class="tiny" style="margin:-2px 0 12px">No existe ningún catálogo libre de
         pilates, así que estos están escogidos a mano del catálogo por lo que comparten
         con un mat de pilates: control del centro y trabajo de suelo.</p>` : '')}
 
 
       ${raw(zonaQ ? html`
-        <p class="tiny" style="margin:-2px 4px 10px">Has buscado una zona del cuerpo:
+        <p class="tiny" style="margin:-2px 0 10px">Has buscado una zona del cuerpo:
         te enseño ${raw(zonaQ.tipo === 'region'
           ? 'todos sus músculos por separado'
           : 'todos los ejercicios de ' + esc(I18N.muscle(musculo).toLowerCase()))}, no solo
@@ -1553,7 +1553,7 @@
 
     return html`
       <div class="list-title">Si está ocupado o no lo tienes</div>
-      <p class="tiny" style="margin:-4px 4px 10px">Entrenas el mismo músculo${raw(
+      <p class="tiny" style="margin:-4px 0 10px">Entrenas el mismo músculo${raw(
         musculos ? ' —' + esc(musculos) + '—' : '')} con otra máquina, otro material u otro
         ejercicio. ${raw(fuera
           ? 'Con tu material no sale ninguno, así que estos son del catálogo completo.'
@@ -3237,7 +3237,7 @@
         <span class="list-title">Ejercicios (${draft.exercises.length})</span>
         <button class="btn sm primary" data-a="add">${raw(icon('plus'))} Añadir</button>
       </div>
-      <p class="tiny" style="margin:-4px 4px 10px">${raw(draft.exercises.length < Store.MINIMO_EJERCICIOS
+      <p class="tiny" style="margin:-4px 0 10px">${raw(draft.exercises.length < Store.MINIMO_EJERCICIOS
         ? 'Te faltan ' + (Store.MINIMO_EJERCICIOS - draft.exercises.length) +
           ' para llegar al mínimo de ' + Store.MINIMO_EJERCICIOS + '.'
         : 'Puedes añadir los que quieras y cambiar cualquiera por otro. Quitar, hasta ' +

@@ -210,7 +210,7 @@
       <div class="list-head" style="margin-top:18px">
         <span class="list-title" style="margin:0">Esto es lo que he entendido</span>
       </div>
-      <p class="tiny" style="margin:-4px 4px 10px">Míralo antes de crearla: lo que sale de
+      <p class="tiny" style="margin:-4px 0 10px">Míralo antes de crearla: lo que sale de
       una foto conviene revisarlo. Luego se edita como cualquier otra rutina.</p>
 
       ${raw(r.dias.map(function (d, i) {

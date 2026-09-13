@@ -665,7 +665,7 @@
 
     return html`
       <div class="list-title">De qué está hecha tu semana</div>
-      <p class="tiny" style="margin:-4px 4px 10px">Cómo se reparten las
+      <p class="tiny" style="margin:-4px 0 10px">Cómo se reparten las
       <b>${Math.round(total)} series</b> del plan entre las zonas del cuerpo. Es la
       composición de lo que vas a hacer; si cumples o no con ello se ve en Progreso.</p>
 
@@ -958,7 +958,7 @@
       </div>
 
       <div class="list-title">Por qué este plan</div>
-      <p class="tiny" style="margin:-4px 4px 10px">${!prog.porIA && !prog.deRutinas && est.falloIA
+      <p class="tiny" style="margin:-4px 0 10px">${!prog.porIA && !prog.deRutinas && est.falloIA
         ? 'Ojo: esto lo ha montado la calculadora porque la IA ha fallado. No es el plan ' +
           'que pediste.'
         : prog.deRutinas
@@ -1009,7 +1009,7 @@
       </div>
 
       <div class="list-title">Cómo progresar</div>
-      <p class="tiny" style="margin:-4px 4px 10px">Repetir el mismo peso cinco semanas no
+      <p class="tiny" style="margin:-4px 0 10px">Repetir el mismo peso cinco semanas no
       construye nada. Este es el bloque:</p>
       <div class="card">
         ${raw(prog.progresion.map(function (x) {
