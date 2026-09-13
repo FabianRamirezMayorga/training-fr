@@ -228,6 +228,17 @@
     if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  /* Entrar en la pantalla no es pedir nada: al abrirla solo se listan los planes
+     y el botón de crear. El plan de la sesión anterior se recupera igual —sigue
+     guardado— pero no se despliega solo; se abre tocándolo. Lo único que sí se
+     enseña sin pedirlo es un plan recién generado que aún no está en rutinas,
+     porque si no se perdería. */
+  function mostrandoPlan() {
+    if (!est.prog) return false;
+    if (!est.recuperado) return true;
+    return !vivas().length;
+  }
+
   function misProgramasHTML() {
     const rutinas = Store.routines().filter(function (r) { return (r.days || []).length; });
     if (!rutinas.length && !est.prog) return '';
@@ -816,18 +827,11 @@
       No es una plantilla con tu nombre encima.</p>
 
       ${raw(misProgramasHTML())}
-      ${raw(est.recuperado && est.prog ? html`
-        <div class="card" style="border-color:var(--acc)">
-          <b>Este es el plan que ya tenías</b>
-          <p class="tiny" style="margin:6px 0 0">Se guardó en este dispositivo con la lectura
-          del entrenador y los cambios que aplicaste. ${est.guardadas.length
-            ? 'Ya lo pasaste a tus rutinas: si vuelves a guardar, se actualizan esas mismas ' +
-              'y no se crean otras nuevas.'
-            : 'Todavía no lo has pasado a tus rutinas.'} Toca <b>Rehacer el programa</b>
-          aquí arriba si quieres montar otro desde cero.</p>
-        </div>` : '')}
-      ${raw(est.prog && est.prog.deRutinas ? '' : controles())}
-      ${raw(est.prog ? resultado(est.prog) : '')}`;
+
+      ${raw(!mostrandoPlan() ? '<div id="pildora" class="pildora-hueco"></div>' : '')}
+
+      ${raw(mostrandoPlan() && est.prog.deRutinas ? '' : controles())}
+      ${raw(mostrandoPlan() ? resultado(est.prog) : '')}`;
   };
 
   V.programa.mount = function (root) {
@@ -896,6 +900,19 @@
 
     /* «Nuevo» tiene que dejar la pantalla en blanco: si abajo sigue colgando el
        plan de antes, parece que ya te ha generado algo sin haberlo pedido. */
+    /* La frase del día. Se pide en segundo plano: si no hay clave o falla, el
+       hueco se queda vacío y no se nota. */
+    const hueco = root.querySelector('#pildora');
+    if (hueco && IA.activa() && IA.pildora) {
+      IA.pildora().then(function (p) {
+        if (!p || !p.frase) return;
+        hueco.className = 'card pildora';
+        hueco.innerHTML = html`
+          <span class="pildora-ico">${raw(icon('chispa'))}</span>
+          <span class="grow">${p.frase}</span>`;
+      }).catch(function () { /* sin frase hoy, no pasa nada */ });
+    }
+
     bind(root, '[data-a=irgenerar]', function () {
       const bajar = function () {
         const caja = document.querySelector('#generar');

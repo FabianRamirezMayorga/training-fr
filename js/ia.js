@@ -1300,6 +1300,36 @@
       Data.paraIA({ musculos: musculos || [], gear: gear || Store.settings().gear }) + '\n';
   }
 
+  /* ---------- una frase, la que toque hoy ----------
+     Va donde antes no había nada. Tiene que ser corta y suya: un «tú puedes»
+     genérico no lo lee nadie dos veces. Se guarda medio día para no gastar una
+     llamada por cada vez que se entra en la pantalla. */
+  function pildora() {
+    const ses = Store.sessions();
+    const clave = 'pildora:' + Store.dayKey(Date.now()) + ':' +
+      Store.routines().length + ':' + ses.length;
+    const guardado = leerCache(clave, 12);
+    if (guardado) return Promise.resolve(guardado);
+
+    const prompt = contexto({ progreso: true, cargas: true, comida: true }) + '\n\n' +
+      'Esc\u00edbele UNA sola frase para la pantalla de su programa. Puede ser un empuj\u00f3n o ' +
+      'un apunte t\u00e9cnico, lo que m\u00e1s le sirva hoy seg\u00fan sus datos de arriba.\n' +
+      '- M\u00e1ximo 22 palabras. Una frase, no dos.\n' +
+      '- Sobre \u00c9L: cita algo suyo \u2014lo que lleva abandonado, los d\u00edas que cumple, una ' +
+      'carga concreta, lo que come\u2014. Si vale para cualquiera, no vale.\n' +
+      '- Ni halagos ni \u00abt\u00fa puedes\u00bb. Ni signos de exclamaci\u00f3n.\n' +
+      '- Si no tiene datos suficientes, dile en una frase qu\u00e9 le conviene empezar a ' +
+      'registrar y por qu\u00e9.\n\n' +
+      'Devuelve JSON: {"frase":"la frase","tipo":"empujon|tecnica|aviso"}';
+
+    return llamarJSON(prompt, { maxTokens: 3072, temperatura: 0.8 }).then(function (r) {
+      const limpio = { frase: String((r && r.frase) || '').trim(), tipo: (r && r.tipo) || '' };
+      if (!limpio.frase) throw new Error('sin frase');
+      escribirCache(clave, limpio);
+      return limpio;
+    });
+  }
+
   /* ---------- montar el programa entero con IA ----------
      El programa que hace programa.js es determinista: reparte patrones sobre
      plantillas y sale siempre algo coherente, pero dos personas con el mismo
@@ -1772,7 +1802,7 @@
     listarModelos: listarModelos,
     planNutricion: planNutricion, revisarRutinas: revisarRutinas,
     revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
-    crearPrograma: crearPrograma,
+    crearPrograma: crearPrograma, pildora: pildora,
     analizarComida: analizarComida,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,

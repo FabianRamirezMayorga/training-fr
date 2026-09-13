@@ -631,6 +631,16 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 .pvr-leyenda .pt.plan{background:var(--line)}
 .pvr-leyenda .pt.real{background:var(--acc)}
 
+/* La frase del día, donde antes había un hueco */
+.pildora-hueco{min-height:0}
+.pildora{display:flex;align-items:flex-start;gap:11px;margin-top:14px;
+  border-color:color-mix(in srgb,var(--acc) 30%,var(--line));
+  background:color-mix(in srgb,var(--acc) 6%,var(--card))}
+.pildora .grow{font-size:.9rem;line-height:1.45}
+.pildora-ico{flex:none;display:flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:50%;background:var(--acc-d);color:var(--acc)}
+.pildora-ico svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+
 /* Composición del plan: qué zonas y en qué proporción */
 .comp{display:flex;flex-direction:column;gap:3px}
 .comp-fila{display:flex;align-items:center;gap:10px;padding:4px 0}
