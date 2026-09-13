@@ -192,6 +192,11 @@
     let r = CAT_RANK[ex.category];
     if (r === undefined) r = 3;
     if (ex.mechanic !== 'compound') r += 0.5;
+    /* A igualdad de todo lo demás, primero las ilustradas. Media biblioteca son
+       fotos de gimnasio y la otra media ilustraciones planas, y mezcladas sin
+       orden la lista parece un colaje. No se esconde nada: solo suben las que
+       hablan el mismo idioma visual que el resto de la app. */
+    if (ex.images && String(ex.images[0]).indexOf('data/img/') === 0) r -= 0.25;
     /* Sin fotos se baja en la lista, porque normalmente significa una entrada
        pobre. La calistenia no trae fotos —no hay fuente libre que copiar— pero
        sí trae descripción y progresión, así que no se la penaliza por eso. */
@@ -260,12 +265,21 @@
          mejora: el nombre escrito en español, la ilustración y las
          instrucciones. Los del catálogo español que no casan con ninguno se
          añaden aparte. */
+      /* Se casa por el nombre en INGLÉS además de por el español. El inglés es
+         el original de los dos catálogos; el español del de fuera sale de un
+         diccionario palabra a palabra y casi nunca coincide letra por letra con
+         el escrito a mano. Por el español casaban 60; añadiendo el inglés, 101. */
       const porNombre = {};
-      enEspanol.forEach(function (e) { porNombre[I18N.norm(e.nameEs)] = e; });
+      const porIngles = {};
+      enEspanol.forEach(function (e) {
+        porNombre[I18N.norm(e.nameEs)] = e;
+        if (e.name) porIngles[I18N.norm(e.name)] = e;
+      });
 
       const aprovechados = {};
       todo = todo.map(function (e) {
-        const mejor = porNombre[I18N.norm(e.nameEs || I18N.name(e.name))];
+        const mejor = porIngles[I18N.norm(e.name)] ||
+          porNombre[I18N.norm(e.nameEs || I18N.name(e.name))];
         if (!mejor) return e;
         aprovechados[mejor.id] = true;
         alias[mejor.id] = e.id;
