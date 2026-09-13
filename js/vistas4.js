@@ -466,7 +466,7 @@
         ${raw(orden.length > 1 ? '<button class="btn block sm" data-a="comparar" ' +
           'style="margin-top:10px">' + icon('grafica') + ' Comparar mis ' + orden.length +
           ' planes</button>' : '')}
-        <p class="tiny" style="margin:8px 4px 0">Toca uno para abrirlo aquí: verás sus días
+        <p class="tiny" style="margin:8px 0 0">Toca uno para abrirlo aquí: verás sus días
         y su reparto, podrás pedirle al entrenador que lo audite y aplicar lo que
         proponga sobre estas mismas rutinas.</p>` : '')}`;
   }
@@ -610,7 +610,7 @@
         <button class="btn primary block grande" data-a="crearia">
           ${raw(icon('chispa'))} Generar rutina con IA
         </button>
-        <p class="tiny center" style="margin:7px 4px 0">${IA.activa()
+        <p class="tiny" style="margin:7px 0 0">${IA.activa()
           ? 'Lee todo lo anterior m\u00e1s lo que levantas, lo que llevas abandonado y los d\u00edas ' +
             'que cumples de verdad, y elige los ejercicios uno a uno del cat\u00e1logo.'
           : 'Necesita un proveedor de IA con su clave, en la b\u00f3veda de Ajustes.'}</p>
@@ -618,7 +618,7 @@
         <button class="btn block" data-a="crear" style="margin-top:10px">
           Generar rutina autom\u00e1ticamente
         </button>
-        <p class="tiny center" style="margin:7px 4px 0">Sin IA y al momento: reparte patrones
+        <p class="tiny" style="margin:7px 0 0">Sin IA y al momento: reparte patrones
         de movimiento seg\u00fan tu edad, tu nivel y tu objetivo. Cada vez que la pidas cambia
         algunos ejercicios, pero no lee lo que hayas escrito arriba.</p>`)}`;
   }
@@ -819,7 +819,7 @@
                 style="margin-top:12px">
           ${raw(icon('chispa'))} Que un entrenador con IA audite tu plan
         </button>
-        <p class="tiny center" style="margin:7px 4px 0">${raw(IA.activa()
+        <p class="tiny" style="margin:7px 0 0">${raw(IA.activa()
           ? 'No viene a darte la razón: le pedimos que le ponga nota, que señale lo que '
             + 'falla y que proponga quitar, meter o cambiar ejercicios. Lo que diga se '
             + 'queda guardado y se aplica de un toque.'
@@ -918,7 +918,7 @@
 
       <button class="btn block" data-a="afinar" style="margin-top:12px">
         ${raw(icon('chispa'))} Auditar otra vez</button>
-      <p class="tiny center" style="margin:7px 4px 0">${raw(r.deCache
+      <p class="tiny" style="margin:7px 0 0">${raw(r.deCache
         ? 'Este dictamen es el que ya se hizo para este plan: mientras no lo cambies, ' +
           'volver a pulsar enseña lo mismo en vez de inventarse otra cosa. En cuanto ' +
           'apliques un cambio, se rehace solo.'
@@ -926,7 +926,7 @@
       ${raw(r.deCache ? html`
         <button class="btn ghost block sm" data-a="reafinar" style="margin-top:8px">
           Pedir otra redacción</button>
-        <p class="tiny center" style="margin:6px 4px 0">Los fallos serán los mismos —son
+        <p class="tiny" style="margin:6px 0 0">Los fallos serán los mismos —son
         cuentas sobre el plan—; lo que cambia es cómo están explicados. Gasta una
         llamada a la IA.</p>` : '')}`;
   }
@@ -1036,7 +1036,7 @@
         <button class="btn primary grow" data-a="guardar">${vivas().length
           ? 'Actualizar mis rutinas' : 'Guardar mis rutinas'}</button>
       </div>
-      <p class="tiny center" style="margin-top:8px">${vivas().length
+      <p class="tiny" style="margin-top:8px">${vivas().length
         ? 'Este plan ya está en tus rutinas: se reescriben esas ' + vivas().length +
           ', no se añaden otras. El resto de tus rutinas no se toca.'
         : 'Se crean ' + prog.sesiones.length + ' rutinas con sus días asignados. ' +

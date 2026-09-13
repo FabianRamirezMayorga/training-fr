@@ -317,7 +317,7 @@
               ${delta >= 0 ? '+' : ''}${delta}% vs. periodo anterior</span>`)}
         </div>
         ${raw(grafica(puntos, porSeries ? 'series' : 'kg'))}
-        <div class="tiny center" style="margin-top:8px">${r.paso === 'dia'
+        <div class="tiny" style="margin-top:8px">${r.paso === 'dia'
           ? 'Cada punto es un día' : 'Cada punto es una semana'}</div>
       </div>
 

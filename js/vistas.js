@@ -98,7 +98,7 @@
           : '')}
       </div>
 
-      <p class="tiny center" style="margin:22px 0 0">Training FR</p>`;
+      <p class="tiny" style="margin:22px 0 0">Training FR</p>`;
   };
 
   V.perfil.mount = function (root) {
@@ -312,7 +312,7 @@
             alto + '%"></i><span>' + esc(UI.fechaCorta(x.fecha)) + '</span></div>';
         }).join(''))}
       </div>
-      ${raw(t ? '<div class="tiny center" style="margin-top:8px">' +
+      ${raw(t ? '<div class="tiny" style="margin-top:8px">' +
         (t.dif > 0 ? '+' : '') + t.dif.toFixed(1) + ' kg en 30 días</div>' : '')}`;
   }
 

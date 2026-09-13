@@ -349,7 +349,7 @@
       <button class="btn primary block" data-a="quedarmelo" style="margin-top:16px">
         ${raw(icon('copiar'))} Guardarlo en mis rutinas</button>
       <button class="btn ghost block" data-a="acasa" style="margin-top:8px">Ir a mi app</button>
-      <p class="tiny center" style="margin:10px 4px 0">Al guardarlo se crea una copia
+      <p class="tiny" style="margin:10px 0 0">Al guardarlo se crea una copia
         tuya. Lo que hagas con ella no le llega a quien te lo pasó.</p>`;
   }
 

@@ -255,7 +255,7 @@
 
       <button class="btn primary block" data-a="crear" style="margin-top:16px">
         ${raw(icon('check'))} Crear esta rutina</button>
-      <p class="tiny center" style="margin:7px 4px 0">Se guarda en tus rutinas y desde ahí
+      <p class="tiny" style="margin:7px 0 0">Se guarda en tus rutinas y desde ahí
       puedes editarla, ponerle los días y pedirle al entrenador que la analice.</p>`;
   }
 

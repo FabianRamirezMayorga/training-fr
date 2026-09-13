@@ -1087,12 +1087,12 @@
         ${raw(l.spotify ? html`
           <a class="btn block sm" href="${l.spotify}" target="_blank" rel="noopener noreferrer"
              style="margin-top:8px">${raw(icon('musica'))} Abrirla en Spotify</a>
-          <p class="tiny center" style="margin:6px 4px 0">Ya está en tu cuenta: la tienes en
+          <p class="tiny" style="margin:6px 0 0">Ya está en tu cuenta: la tienes en
           la app de Spotify, en el móvil, en el coche o donde la abras.</p>`
         : html`
           <button class="btn block sm" data-a="aSpotify" style="margin-top:8px">
             ${raw(icon('musica'))} Guardarla en mi Spotify</button>
-          <p class="tiny center" style="margin:6px 4px 0">Se crea como lista privada en tu
+          <p class="tiny" style="margin:6px 0 0">Se crea como lista privada en tu
           cuenta, con estas mismas canciones, para poder oírla desde la app de Spotify.</p>`)}
 
         <div class="row" style="margin-top:10px">
@@ -1489,7 +1489,7 @@
         esc(rutinaHoy.name) + '.</p>' : '')}
 
       <button class="btn primary block" data-x="crear">${raw(icon('chispa'))} Crear lista</button>
-      <div class="tiny center" id="pl-estado" style="margin-top:12px"></div>`,
+      <div class="tiny" id="pl-estado" style="margin-top:12px"></div>`,
       function (el) {
         let num = 20;
 

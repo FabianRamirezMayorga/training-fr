@@ -187,7 +187,7 @@
               '</div>';
           }).join('<div class="hr"></div>'))}
         </div>
-        <p class="tiny center" style="margin:8px 4px 0">Del menú que te preparó el
+        <p class="tiny" style="margin:8px 0 0">Del menú que te preparó el
         entrenador. <b data-a="menu" style="color:var(--acc)">Ver la semana entera</b></p>`
       : html`
         <div class="card">

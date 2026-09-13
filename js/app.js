@@ -118,8 +118,18 @@
   }
 
   function tarjetasLugar(actual) {
+    /* «Ver todo» y «En el gimnasio» dan el mismo número, y eso desconcierta con
+       razón: parece que uno de los dos miente. No miente ninguno —el gimnasio
+       permite los doce materiales que existen en el catálogo, así que quitar el
+       filtro no puede añadir nada— pero repetir la cifra como si fuera
+       información distinta es lo que confunde. Se dice. */
+    const enGym = cuantosEn('gym');
+
     return Object.keys(Data.GEAR).map(function (k) {
       const gset = Data.GEAR[k];
+      const cuantos = cuantosEn(k);
+      const igualQueGym = k === 'todo' && cuantos === enGym;
+
       return html`
         <button class="rt-item" data-lugar="${k}" style="width:100%;text-align:left;padding:13px;
                 ${actual === k ? 'border-color:var(--acc);background:var(--acc-d)' : ''}">
@@ -127,7 +137,10 @@
             <div style="font-weight:700;font-size:.95rem">${gset.label}</div>
             <div class="tiny">${gset.note}</div>
             <div class="tiny" style="color:var(--acc);margin-top:2px">
-              ${UI.num(cuantosEn(k))} ejercicios disponibles</div>
+              ${UI.num(cuantos)} ejercicios disponibles</div>
+            ${raw(igualQueGym ? '<div class="tiny" style="margin-top:3px;white-space:normal">' +
+              'Los mismos que en el gimnasio: el catálogo no tiene nada que el gimnasio ' +
+              'no permita.</div>' : '')}
           </div>
           ${raw(actual === k ? '<span class="chip solid">Actual</span>' : '')}
         </button>`;
@@ -149,7 +162,7 @@
       return html`
         ${raw(cabecera)}
         <h1 class="center">¿Cómo quieres empezar?</h1>
-        <p class="muted center">Puedes usar la app tal cual, sin dar ningún dato, o crear
+        <p class="muted">Puedes usar la app tal cual, sin dar ningún dato, o crear
         tu cuenta para tenerlo todo en cualquier dispositivo.</p>
 
         <div class="stack" style="margin-top:18px">
@@ -194,11 +207,11 @@
     return html`
       ${raw(cabecera)}
       <h1 class="center">¿Dónde vas a entrenar?</h1>
-      <p class="muted center">Con esto te muestro solo los ejercicios que puedes hacer de verdad,
+      <p class="muted">Con esto te muestro solo los ejercicios que puedes hacer de verdad,
       y las rutinas que te genere usarán únicamente ese material. Si vienes a mirar,
       elige <b>Ver todo</b> y tendrás el catálogo entero.</p>
       <div class="stack" style="margin-top:18px">${raw(tarjetasLugar(''))}</div>
-      <p class="tiny center" style="margin-top:16px">Podrás cambiarlo cuando quieras
+      <p class="tiny" style="margin-top:16px">Podrás cambiarlo cuando quieras
       desde el botón de arriba o en Ajustes.</p>`;
   }
 
@@ -457,7 +470,7 @@
         <button class="btn primary block grande" data-a="entrenarhoy" style="margin-top:14px">
           ${raw(icon('play'))} Entrenar ${queEsHoy(deHoy)}
         </button>
-        <p class="tiny center" style="margin:7px 4px 0">${deHoy.length === 1
+        <p class="tiny" style="margin:7px 0 0">${deHoy.length === 1
           ? 'Es lo que tienes puesto para hoy. Empieza con sus ejercicios ya cargados.'
           : 'Tienes ' + deHoy.length + ' rutinas para hoy: te dejo elegir.'}</p>
         <button class="btn ghost block sm" data-a="empezarlibre" style="margin-top:8px">
@@ -466,7 +479,7 @@
         <button class="btn primary block grande" data-a="empezarlibre" style="margin-top:14px">
           ${raw(icon('play'))} Iniciar entrenamiento
         </button>
-        <p class="tiny center" style="margin:7px 4px 0">Arranca el cronómetro ahora y añade los
+        <p class="tiny" style="margin:7px 0 0">Arranca el cronómetro ahora y añade los
         ejercicios sobre la marcha. El tiempo se ve desde cualquier pantalla.</p>`)}
 
       <div class="stats" style="margin-top:14px">
@@ -744,7 +757,7 @@
           suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' +
           '<button class="btn block sm" data-iaplan="' + esc(k) + '" ' +
           'style="margin-top:10px">' + icon('chispa') + ' Revisar el plan con IA</button>' +
-          '<p class="tiny center" style="margin:6px 4px 0">Lee los ' + suyas.length +
+          '<p class="tiny" style="margin:6px 0 0">Lee los ' + suyas.length +
           ' d\u00edas juntos: el reparto entre m\u00fasculos, lo que se repite y lo que falta. ' +
           'Lo que proponga se aplica sobre estas mismas rutinas.</p>' +
           '<button class="btn block sm" data-duplicarplan="' + esc(k) + '" ' +
@@ -1960,7 +1973,7 @@
 
       <button class="btn block sm" data-a="importar" style="margin-top:8px">
         ${raw(icon('nutricion'))} Traer una rutina que ya tengo en papel</button>
-      <p class="tiny center" style="margin:6px 4px 0">Una foto de la hoja del gimnasio o el
+      <p class="tiny" style="margin:6px 0 0">Una foto de la hoja del gimnasio o el
       PDF de tu entrenador: la leo, te enseño lo que he entendido y tú decides.</p>
       ${raw(Store.routines().some(function (r) { return (r.days || []).length; })
         ? '<button class="btn ghost block sm" data-a="correr" style="margin-top:6px">' +
@@ -1977,7 +1990,7 @@
           '<button class="btn block" data-a="limpiardup" style="margin-top:11px">' +
           'Revisar y limpiar</button></div>';
       })())}
-      <p class="tiny center" style="margin-top:6px">Caminar una hora el domingo, la pachanga
+      <p class="tiny" style="margin-top:6px">Caminar una hora el domingo, la pachanga
       del sábado o la clase de pilates cuentan igual, aunque no salgan de una rutina.</p>
 
       ${raw(rutinas.length ? html`
@@ -1994,10 +2007,10 @@
         : porPlanes(rutinas))
       : '<p class="muted">Aún no tienes rutinas propias. Copia una plantilla de abajo para empezar.</p>')}
 
-      ${raw(ordenando ? '<p class="tiny center" style="margin-top:10px">Con las flechas las ' +
+      ${raw(ordenando ? '<p class="tiny" style="margin-top:10px">Con las flechas las ' +
         'colocas a tu gusto y con la papelera las borras. El orden viaja a tus demás ' +
         'dispositivos, y al salir de aquí la rutina de hoy vuelve a ponerse la primera.</p>'
-        : '<p class="tiny center" style="margin-top:10px">Abre un plan para ver sus días. ' +
+        : '<p class="tiny" style="margin-top:10px">Abre un plan para ver sus días. ' +
         'Toca una rutina para desplegar sus ejercicios y cambiarle el día, o pulsa ' +
         'Entrenar para hacerla ahora.</p>')}
 
@@ -2578,7 +2591,7 @@
         Correr un día adelante</button>
       <button class="btn block sm" id="cp-menos" style="margin-top:8px">
         Adelantarlo un día en vez de eso</button>
-      <p class="tiny center" style="margin-top:10px">Solo cambia el día en el que te toca cada
+      <p class="tiny" style="margin-top:10px">Solo cambia el día en el que te toca cada
       rutina. Los ejercicios, las series y tu historial no se tocan.</p>`,
       function (el) {
         const hacer = function (pasos) {
@@ -2848,7 +2861,7 @@
         <button class="btn grow" data-a="otra">${raw(icon('copy'))} Otra propuesta</button>
         <button class="btn primary grow" data-a="guardarplan">${raw(icon('check'))} Guardar plan</button>
       </div>
-      <p class="tiny center" style="margin-top:10px">Guardar añade ${plan.length} rutinas nuevas;
+      <p class="tiny" style="margin-top:10px">Guardar añade ${plan.length} rutinas nuevas;
       no se borra nada de lo que ya tengas.</p>`;
   }
 
@@ -2953,7 +2966,7 @@
         <button class="btn block" data-a="auditar" style="margin-top:16px">
           ${raw(icon('chispa'))} Que la IA revise esta rutina
         </button>
-        <p class="tiny center" style="margin:7px 4px 0">${IA.activa()
+        <p class="tiny" style="margin:7px 0 0">${IA.activa()
           ? 'La lee con tu perfil y tu historial delante, le pone nota y propone cambios que aplicas de un toque.'
           : 'Necesita un proveedor de IA con su clave, en Ajustes → Bóveda de claves.'}</p>`;
     }
@@ -3026,7 +3039,7 @@
 
       <button class="btn block" data-a="auditar" style="margin-top:12px">
         ${raw(icon('chispa'))} Analizar otra vez</button>
-      <p class="tiny center" style="margin:7px 4px 0">Con los cambios que acabas de aplicar
+      <p class="tiny" style="margin:7px 0 0">Con los cambios que acabas de aplicar
       delante, el dictamen cambia. Cada pulsación es una llamada a la IA.</p>`;
   }
 
@@ -3106,7 +3119,7 @@
 
         <button class="btn primary block" data-a="aplicartoda" style="margin-top:12px">
           ${raw(icon('check'))} Dejar la rutina así</button>
-        <p class="tiny center" style="margin:7px 0 0">Se reemplazan los
+        <p class="tiny" style="margin:7px 0 0">Se reemplazan los
         ${prop.dentro.length === 1 ? 'ejercicios' : 'ejercicios'} de esta rutina y se guarda.
         Tu historial no se toca.</p>
       </div>`;
@@ -3355,13 +3368,13 @@
                   </div>
                 </div>
                 <div class="row" style="margin-top:10px;gap:8px">
-                  <div class="grow"><div class="tiny center">Series</div>
+                  <div class="grow"><div class="tiny">Series</div>
                     <input type="number" min="1" max="15" value="${re.sets}" data-i="${i}" data-f="sets"
                            style="text-align:center"></div>
-                  <div class="grow"><div class="tiny center">Reps</div>
+                  <div class="grow"><div class="tiny">Reps</div>
                     <input type="number" min="1" max="200" value="${re.reps}" data-i="${i}" data-f="reps"
                            style="text-align:center"></div>
-                  <div class="grow"><div class="tiny center">Descanso (s)</div>
+                  <div class="grow"><div class="tiny">Descanso (s)</div>
                     <input type="number" min="0" max="600" step="15" value="${re.rest}" data-i="${i}" data-f="rest"
                            style="text-align:center"></div>
                 </div>
@@ -3661,7 +3674,7 @@
               <div class="tiny">${ex.primaryMuscles.map(I18N.muscle).join(', ')} · ${I18N.equip(ex.equipment)}</div>
             </div>
           </button>`;
-      }).join('') || '<p class="muted center">Sin resultados</p>';
+      }).join('') || '<p class="muted">Sin resultados</p>';
 
       el.querySelectorAll('[data-p]').forEach(function (b) {
         b.onclick = function () { onPick(Data.get(b.dataset.p)); };
@@ -3794,7 +3807,7 @@
         </button>
       </div>
       ${raw(s.registro !== 'detallado'
-        ? '<p class="tiny" style="margin:8px 4px 0">Sin peso anotado no hay récords ni ' +
+        ? '<p class="tiny" style="margin:8px 0 0">Sin peso anotado no hay récords ni ' +
           'volumen; el progreso se mide por series y entrenamientos completados.</p>' : '')}
 
       <div class="card">
@@ -3898,7 +3911,7 @@
         <button class="btn danger block" data-a="wipe">${raw(icon('trash'))} Borrar todos mis datos</button>
       </div>
 
-      <p class="tiny center" style="margin-top:22px">
+      <p class="tiny" style="margin-top:22px">
         Training FR · Catálogo de ejercicios de
         <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener noreferrer">free-exercise-db</a>
         (dominio público) y

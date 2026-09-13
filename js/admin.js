@@ -127,7 +127,7 @@
               '</div>';
           }).join(''))}
         </div>
-        <p class="tiny center" style="margin:10px 4px 0">${usuarios.length}
+        <p class="tiny" style="margin:10px 0 0">${usuarios.length}
         ${usuarios.length === 1 ? 'cuenta' : 'cuentas'} en el proyecto.</p>`
       : (!cargando && !fallo ? html`
         <p class="muted">Todavía no hay ninguna cuenta aparte de la tuya.</p>` : ''))}`;
