@@ -305,8 +305,68 @@
         (t.dif > 0 ? '+' : '') + t.dif.toFixed(1) + ' kg en 30 días</div>' : '')}`;
   }
 
+  /* ---------- que se vea que se ha guardado ----------
+     Los campos se guardaban al salir de ellos, y ahí había dos problemas: si
+     escribías y te ibas de la pantalla sin salir del campo —que en un móvil es
+     lo normal, se toca otra pestaña y ya está— lo escrito se perdía; y aunque
+     se guardara, nada lo decía, así que uno se queda buscando un botón de
+     guardar que no existe.
+
+     Ahora se guarda mientras se escribe, con medio segundo de margen para no
+     escribir en disco en cada tecla, y el propio campo lo confirma. */
+  function marcaDeGuardado(inp) {
+    let caja = inp.parentNode;
+    if (!caja || !caja.classList || !caja.classList.contains('campo-ok')) {
+      caja = document.createElement('span');
+      caja.className = 'campo-ok';
+      inp.parentNode.insertBefore(caja, inp);
+      caja.appendChild(inp);
+      const ok = document.createElement('span');
+      ok.className = 'campo-ok-aviso';
+      ok.textContent = 'Guardado';
+      caja.appendChild(ok);
+    }
+    return caja.querySelector('.campo-ok-aviso');
+  }
+
+  function avisarGuardado(inp) {
+    const ok = marcaDeGuardado(inp);
+    if (!ok) return;
+    ok.classList.remove('visible');
+    /* reiniciar la animación aunque se guarde dos veces seguidas */
+    void ok.offsetWidth;
+    ok.classList.add('visible');
+    clearTimeout(ok._t);
+    ok._t = setTimeout(function () { ok.classList.remove('visible'); }, 1600);
+  }
+
+  /* Guarda sin esperar a que se salga del campo */
+  function alEscribir(inp, guardar) {
+    inp.addEventListener('input', function () {
+      clearTimeout(inp._espera);
+      inp._espera = setTimeout(function () {
+        guardar();
+        avisarGuardado(inp);
+      }, 500);
+    });
+  }
+
   V.datos.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
+
+    /* Si se sale de la pantalla con el cursor todavía dentro de un campo, el
+       navegador no avisa de nada: lo escrito se quedaba sin guardar. */
+    const alSalir = function () {
+      const foco = document.activeElement;
+      if (foco && root.contains(foco) && (foco.dataset.txt || foco.dataset.num ||
+          foco.id === 'p-nombre')) {
+        foco.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      window.removeEventListener('hashchange', alSalir);
+      window.removeEventListener('pagehide', alSalir);
+    };
+    window.addEventListener('hashchange', alSalir);
+    window.addEventListener('pagehide', alSalir);
 
     /* Personalizar es justo el momento de decidir dónde va a vivir todo esto */
     Modo.pedirCuenta('Vas a guardar tu peso, tus hábitos y tus limitaciones. Es lo que ' +
@@ -320,23 +380,30 @@
     });
 
     root.querySelectorAll('[data-num]').forEach(function (inp) {
-      inp.onchange = function () {
+      const guardar = function () {
         const cambio = {};
         cambio[inp.dataset.num] = Number(inp.value) || 0;
         Perfil.guardar(cambio);
-        render();
       };
+      alEscribir(inp, guardar);
+      inp.onchange = function () { guardar(); avisarGuardado(inp); render(); };
     });
 
     root.querySelectorAll('[data-txt]').forEach(function (inp) {
-      inp.onchange = function () {
+      const esHora = inp.dataset.txt === 'despertar' || inp.dataset.txt === 'acostar';
+      const guardar = function () {
         const cambio = {};
         cambio[inp.dataset.txt] = inp.value.trim();
         Perfil.guardar(cambio);
+      };
+      if (!esHora) alEscribir(inp, guardar);
+      inp.onchange = function () {
+        guardar();
+        avisarGuardado(inp);
         /* Las horas cambian lo que dice la pantalla —cuánto duermes—, así que hay
            que repintar. Los demás campos son texto libre y repintar solo serviría
            para dar un salto mientras se escribe. */
-        if (inp.dataset.txt === 'despertar' || inp.dataset.txt === 'acostar') {
+        if (esHora) {
           const pos = window.scrollY;
           render();
           window.scrollTo(0, pos);
@@ -345,10 +412,16 @@
     });
 
     const campoNombre = root.querySelector('#p-nombre');
-    if (campoNombre) campoNombre.onchange = function () {
-      Store.setSetting('name', campoNombre.value.trim());
-      UI.toast(campoNombre.value.trim() ? 'Encantado, ' + campoNombre.value.trim() : 'Nombre borrado');
-    };
+    if (campoNombre) {
+      const guardarNombre = function () {
+        Store.setSetting('name', campoNombre.value.trim());
+      };
+      alEscribir(campoNombre, guardarNombre);
+      campoNombre.onchange = function () {
+        guardarNombre();
+        avisarGuardado(campoNombre);
+      };
+    }
 
     bind(root, '[data-a=pesar]', function () {
       const campo = root.querySelector('#peso-hoy');

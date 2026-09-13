@@ -1001,3 +1001,16 @@ body.escribiendo .hud { opacity: 0; pointer-events: none; transform: translateY(
 /* el aviso flotante se centra con un transform propio, así que a ese solo se
    le baja la opacidad: tocarle el transform lo descoloca */
 body.escribiendo .toast { opacity: 0; pointer-events: none; }
+
+/* ---------- confirmación de que un campo se ha guardado ----------
+   Va dentro del propio campo, a la derecha: un aviso abajo del todo no se ve
+   con el teclado abierto, que es justo cuando hace falta saberlo. Se coloca
+   encima sin empujar nada, así que la página no da saltos al aparecer. */
+.campo-ok { position: relative; display: block; }
+.campo-ok-aviso { position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  font-size: .68rem; font-weight: 700; letter-spacing: .02em; color: var(--acc);
+  background: var(--acc-d); padding: 3px 8px; border-radius: 999px;
+  opacity: 0; pointer-events: none; transition: opacity .18s; }
+.campo-ok-aviso.visible { opacity: 1; }
+/* sitio para que el aviso no se coma lo escrito */
+.campo-ok:has(> .campo-ok-aviso.visible) > input { padding-right: 84px; }
