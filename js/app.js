@@ -1243,8 +1243,11 @@
       exFilters.favs = !exFilters.favs; exFilters.group = ''; exFilters.muscle = '';
       exLimit = 40; render();
     });
+    /* «Ver todos» lleva a la pantalla de la zona. Antes filtraba aquí mismo y
+       te dejaba en el mismo sitio con menos cosas: ni sabías dónde estabas ni
+       tenías dónde volver. */
     bindAll(root, '[data-vermusculo]', function (el) {
-      exFilters.muscle = el.dataset.vermusculo; exLimit = 40; render();
+      go('zona', el.dataset.vermusculo);
     });
     bind(root, '[data-a=quitarmusculo]', function () { exFilters.muscle = ''; render(); });
     bind(root, '[data-a=sesionzona]', function () {

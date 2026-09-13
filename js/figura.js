@@ -23,18 +23,38 @@
   /* Proporciones. Salen de una figura de siete cabezas y media, encogida para
      que quepa el escenario —barra, suelo, pared— dentro del mismo cuadro. */
   const L = {
-    cabeza: 4.6,      // radio
-    cuello: 3.4,
-    tronco: 20,       // cadera -> hombro
-    brazoSup: 11,
-    brazoInf: 11,
-    muslo: 13,
-    pierna: 13,
-    pie: 4.5
+    cabeza: 6.4,      // radio
+    cuello: 2.6,
+    tronco: 19,       // cadera -> hombro
+    brazoSup: 10.5,
+    brazoInf: 10.5,
+    muslo: 12.5,
+    pierna: 12.5,
+    pie: 4.2
   };
 
+  /* Los gruesos. El primer intento iba con trazos de 3 y 4 sobre un cuadro de
+     100 y salía un muñeco de palotes: fino, frágil y con la cabeza flotando.
+     Los pictogramas que funcionan —los blancos de la app de Fitness, sin ir más
+     lejos— son trazos MUY gruesos, cabeza grande y un solo color plano. */
+  const GRUESO = {
+    tronco: 9.5,
+    brazo: 6,
+    pierna: 7,
+    pie: 5,
+    cuello: 6
+  };
+
+  /* El contorno. Engordar el trazo sin más convertía al muñeco en una mancha:
+     brazo, tronco y pierna se tocan y se funden. Cada pieza se dibuja dos
+     veces, primero un halo oscuro algo más ancho y encima el color, en orden de
+     lejos a cerca. Es lo que separa las piezas y lo que hace que un pictograma
+     se lea de un vistazo en miniatura. */
+  const TINTA = '#11151c';
+  const HALO = 3.2;
+
   const VERDE = '#3ddc84';
-  const GRIS = '#8a94a6';
+  const GRIS = '#5b6577';
 
   function rad(a) { return a * Math.PI / 180; }
 
@@ -44,11 +64,34 @@
 
   function n(v) { return Math.round(v * 10) / 10; }
 
-  function linea(a, b, ancho, color, op) {
+  function trazo(a, b, ancho, color) {
     return '<path d="M' + n(a[0]) + ' ' + n(a[1]) + 'L' + n(b[0]) + ' ' + n(b[1]) +
       '" stroke="' + color + '" stroke-width="' + ancho +
-      '" stroke-linecap="round" fill="none"' +
-      (op ? ' opacity="' + op + '"' : '') + '/>';
+      '" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+  }
+
+  /* Una cadena de puntos —hombro, codo, mano— de una sola tirada: primero el
+     halo entero y encima el color entero. Haciéndolo tramo a tramo, el halo se
+     metía también en el codo y la rodilla y el muñeco parecía una oruga. */
+  function cadena(puntos, ancho, color) {
+    const d = puntos.map(function (p, i) {
+      return (i ? 'L' : 'M') + n(p[0]) + ' ' + n(p[1]);
+    }).join('');
+    const uno = function (a, c) {
+      return '<path d="' + d + '" stroke="' + c + '" stroke-width="' + a +
+        '" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+    };
+    return uno(ancho + HALO, TINTA) + uno(ancho, color);
+  }
+
+  /* El material se dibuja con el mismo trazo grueso y redondeado que el cuerpo,
+     en un tono apagado del mismo color. Antes eran rayas finas grises y parecían
+     suciedad en la imagen más que una barra. */
+  function barra(d, ancho) {
+    return '<path d="' + d + '" stroke="' + TINTA + '" stroke-width="' + (ancho + HALO) +
+      '" stroke-linecap="round" fill="none"/>' +
+      '<path d="' + d + '" stroke="' + GRIS + '" stroke-width="' + ancho +
+      '" stroke-linecap="round" fill="none"/>';
   }
 
   /* ---------- el escenario ----------
@@ -56,36 +99,27 @@
      barra encima es una persona flotando. */
   const ESCENAS = {
     suelo: function () {
-      return '<path d="M6 66h88" stroke="' + GRIS + '" stroke-width="1.6" ' +
-        'stroke-linecap="round" opacity=".55"/>';
+      return barra('M10 68h80', 5);
     },
     barra: function () {
-      return '<path d="M14 14h72" stroke="' + GRIS + '" stroke-width="2.4" ' +
-        'stroke-linecap="round" opacity=".75"/>' +
-        '<path d="M18 14v-6M82 14v-6" stroke="' + GRIS + '" stroke-width="1.6" ' +
-        'stroke-linecap="round" opacity=".4"/>';
+      return barra('M12 13h76', 5.5);
     },
     barraBaja: function () {
-      return '<path d="M14 40h72" stroke="' + GRIS + '" stroke-width="2.4" ' +
-        'stroke-linecap="round" opacity=".75"/>' + ESCENAS.suelo();
+      return barra('M12 40h76', 5.5) + ESCENAS.suelo();
     },
     pared: function () {
-      return '<path d="M12 4v64" stroke="' + GRIS + '" stroke-width="2.2" ' +
-        'stroke-linecap="round" opacity=".6"/>' + ESCENAS.suelo();
+      return barra('M10 6v62', 5.5) + ESCENAS.suelo();
     },
     paralelas: function () {
-      return '<path d="M20 40h60" stroke="' + GRIS + '" stroke-width="2.4" ' +
-        'stroke-linecap="round" opacity=".75"/>' +
-        '<path d="M26 40v26M74 40v26" stroke="' + GRIS + '" stroke-width="1.8" ' +
-        'stroke-linecap="round" opacity=".4"/>' + ESCENAS.suelo();
+      return barra('M18 40h64', 5.5) + barra('M24 43v24', 4.5) + barra('M76 43v24', 4.5) +
+        ESCENAS.suelo();
     },
     poste: function () {
-      return '<path d="M26 4v62" stroke="' + GRIS + '" stroke-width="2.6" ' +
-        'stroke-linecap="round" opacity=".7"/>' + ESCENAS.suelo();
+      return barra('M24 6v62', 6) + ESCENAS.suelo();
     },
     cajon: function () {
-      return '<rect x="62" y="52" width="30" height="14" rx="2" fill="none" stroke="' +
-        GRIS + '" stroke-width="1.6" opacity=".55"/>' + ESCENAS.suelo();
+      return barra('M64 54h28', 5.5) + barra('M67 57v10', 4.5) + barra('M89 57v10', 4.5) +
+        ESCENAS.suelo();
     },
     nada: function () { return ''; }
   };
@@ -99,35 +133,33 @@
     const cuello = mover(hombro, p.tronco, L.cuello);
     const cabeza = mover(cuello, p.cabeza === undefined ? p.tronco : p.cabeza, L.cabeza);
 
-    function brazo(a, grueso, op) {
+    function brazo(a, grueso) {
       if (!a) return '';
       const codo = mover(hombro, a[0], L.brazoSup);
-      const mano = mover(codo, a[1], L.brazoInf);
-      return linea(hombro, codo, grueso, VERDE, op) +
-        linea(codo, mano, grueso, VERDE, op);
+      return cadena([hombro, codo, mover(codo, a[1], L.brazoInf)], grueso, VERDE);
     }
 
-    function pierna(a, grueso, op) {
+    function pierna(a, grueso) {
       if (!a) return '';
       const rodilla = mover(cadera, a[0], L.muslo);
       const tobillo = mover(rodilla, a[1], L.pierna);
       const pie = mover(tobillo, a[2] === undefined ? a[1] + 70 : a[2], L.pie);
-      return linea(cadera, rodilla, grueso, VERDE, op) +
-        linea(rodilla, tobillo, grueso, VERDE, op) +
-        linea(tobillo, pie, grueso * 0.72, VERDE, op);
+      return cadena([cadera, rodilla, tobillo, pie], grueso, VERDE);
     }
 
-    /* lado de lejos */
-    let s = brazo(p.brazo2, 3.1, '.42') + pierna(p.pierna2, 3.4, '.42');
+    /* De lejos a cerca. El lado de lejos va algo más fino, pero del MISMO color
+       y sin transparencia: el desvanecido de antes no leía como profundidad,
+       leía como un fallo de dibujo. */
+    let s = brazo(p.brazo2, GRUESO.brazo - 1.2) + pierna(p.pierna2, GRUESO.pierna - 1.2);
 
-    /* tronco y cabeza */
-    s += linea(cadera, hombro, 5.2, VERDE);
-    s += linea(hombro, cuello, 3, VERDE);
-    s += '<circle cx="' + n(cabeza[0]) + '" cy="' + n(cabeza[1]) + '" r="' + L.cabeza +
+    /* tronco, cuello y cabeza son una sola pieza */
+    s += cadena([cadera, hombro, cuello], GRUESO.tronco, VERDE);
+    s += '<circle cx="' + n(cabeza[0]) + '" cy="' + n(cabeza[1]) + '" r="' +
+      (L.cabeza + HALO / 2) + '" fill="' + TINTA + '"/>' +
+      '<circle cx="' + n(cabeza[0]) + '" cy="' + n(cabeza[1]) + '" r="' + L.cabeza +
       '" fill="' + VERDE + '"/>';
 
-    /* lado de cerca */
-    s += brazo(p.brazo1, 3.6, null) + pierna(p.pierna1, 4, null);
+    s += brazo(p.brazo1, GRUESO.brazo) + pierna(p.pierna1, GRUESO.pierna);
     return s;
   }
 

@@ -1115,3 +1115,67 @@ body.escribiendo .toast { opacity: 0; pointer-events: none; }
   border-radius: 0;
   padding: 11px 2px;
 }
+
+/* ---------- pantalla de zona: cabecera, titular y filas ----------
+   El patron de las listas de Fitness: una franja de color a sangre con las
+   siluetas, debajo el nombre en grande con su explicacion, y luego filas con
+   la miniatura grande a la izquierda. La miniatura ocupa media fila a
+   proposito: a ese tamano la foto sirve para reconocer el ejercicio, que es
+   para lo que esta, y no de adorno de 40 pixeles. */
+.hero {
+  margin: -16px -16px 0;
+  padding: 18px 16px 22px;
+  position: relative;
+  min-height: 168px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+.hero.verde   { background: linear-gradient(150deg, #1d7a4c, #3ddc84 130%); }
+.hero.azul    { background: linear-gradient(150deg, #1b3f8f, #4f8cf5 130%); }
+.hero.naranja { background: linear-gradient(150deg, #b03612, #ff8a2b 130%); }
+.hero.morado  { background: linear-gradient(150deg, #4a2a8f, #a06bf0 130%); }
+
+.hero-atras {
+  position: absolute; top: 14px; left: 14px;
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.28); backdrop-filter: blur(8px);
+  color: #fff; border: 0;
+}
+.hero-atras svg { width: 17px; height: 17px; fill: none; stroke: currentColor;
+  stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+.hero-figs { display: flex; gap: 0; align-items: flex-end; }
+.hero-fig { width: 148px; max-width: 40vw; margin: 0 -10px; }
+.hero-fig svg { width: 100%; height: auto; display: block; }
+
+.prog-tit {
+  font-size: 2.05rem; font-weight: 800; letter-spacing: -.035em;
+  margin: 18px 0 7px; line-height: 1.06;
+}
+.prog-sub {
+  color: var(--dim); font-size: .95rem; line-height: 1.45;
+  margin: 0; letter-spacing: -.01em;
+}
+
+.lista-prog { display: flex; flex-direction: column; gap: 14px; }
+.fila-prog {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; padding: 0; background: none; border: 0;
+  text-align: left; color: var(--txt);
+}
+.fila-prog:active { opacity: .6; }
+.fp-foto {
+  flex: none; width: 45%; max-width: 210px; aspect-ratio: 16/10;
+  border-radius: 14px; overflow: hidden; background: var(--card2);
+}
+.fp-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fp-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.fp-nom { font-weight: 600; font-size: .95rem; line-height: 1.25; }
+.fp-sub { color: var(--dim2); font-size: .82rem; }
+.fila-prog > svg {
+  flex: none; width: 9px; height: 15px; fill: none; stroke: var(--dim2);
+  stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+}
