@@ -1211,3 +1211,17 @@ body.escribiendo .toast { opacity: 0; pointer-events: none; }
   background: rgba(0,0,0,.22); color: inherit;
   font-size: .72rem; font-weight: 700; line-height: 18px; text-align: center;
 }
+
+/* Las ilustraciones vienen cuadradas. En el marco 4:3 de siempre y con
+   object-fit:cover se les corta la cabeza y los pies, que es justo lo que hay
+   que ver en una zancada. Se les da marco cuadrado y se enteran enteras. */
+.demo.ilus { aspect-ratio: 1 / 1; }
+.demo.ilus img { object-fit: contain; }
+
+/* Lo mismo en las miniaturas de las listas: la ilustracion se reconoce por su
+   ruta, asi que no hace falta marcarla desde el javascript. El fondo claro es
+   el mismo que traen ellas, para que no quede un recuadro oscuro alrededor. */
+img[src^="data/img/"] {
+  object-fit: contain;
+  background: #eaf2f9;
+}

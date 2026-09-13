@@ -360,7 +360,8 @@
     const speed = opts.speed || 900;
     const controls = opts.controls !== false && frames.length > 1;
     return html`
-      <div class="demo" data-demo="${JSON.stringify(frames)}" data-speed="${speed}"
+      <div class="demo${raw(Data.esIlustracion && Data.esIlustracion(ex) ? ' ilus' : '')}"
+           data-demo="${JSON.stringify(frames)}" data-speed="${speed}"
            ${raw(opts.fases ? 'data-fases="' + esc(JSON.stringify(opts.fases)) + '"' : '')}>
         ${raw(frames.map(function (src, i) {
           return '<img class="' + (i === 0 ? 'on' : '') + '" src="' + esc(src) +

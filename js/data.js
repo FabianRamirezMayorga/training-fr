@@ -155,6 +155,14 @@
     return rutaImagen(ex.images[Math.min(i || 0, ex.images.length - 1)]);
   }
 
+  /* Las ilustraciones del catálogo en español son cuadradas; las fotos del de
+     fuera, apaisadas. Hay que saberlo para no recortarlas: en un marco 4:3 y
+     con object-fit:cover, a un dibujo cuadrado se le va la cabeza y los pies. */
+  function esIlustracion(ex) {
+    return !!(ex && ex.images && ex.images.length &&
+      String(ex.images[0]).indexOf('data/img/') === 0);
+  }
+
   function frames(ex) {
     if (!ex || !ex.images || !ex.images.length) return [PLACEHOLDER];
     return ex.images.map(rutaImagen);
@@ -230,6 +238,11 @@
      No se borra nada más: el de fuera son 876 ejercicios y el español 467, o
      sea que la mayoría del catálogo sigue viniendo de ahí. */
   let enEspanol = [];
+  /* Cuando un ejercicio del catálogo español se funde con el de fuera, su id
+     deja de existir por su cuenta. Cualquier sitio que lo nombrara —la foto de
+     una cabecera de zona, la de un dibujo de calistenia— se quedaba sin nada.
+     Se apunta a dónde fue a parar y get() lo sigue encontrando. */
+  const alias = {};
 
   function conExtras(raw) {
     let todo = raw;
@@ -255,6 +268,7 @@
         const mejor = porNombre[I18N.norm(e.nameEs || I18N.name(e.name))];
         if (!mejor) return e;
         aprovechados[mejor.id] = true;
+        alias[mejor.id] = e.id;
         const copia = Object.assign({}, e);
         copia.nameEs = mejor.nameEs;
         copia.images = mejor.images;
@@ -276,6 +290,7 @@
        solo donde no hay foto de nada. */
     const porId = {};
     enEspanol.forEach(function (e) { porId[e.id] = e; });
+    todo.forEach(function (e) { porId[e.id] = porId[e.id] || e; });
     todo.forEach(function (e) {
       if (!e.foto) return;
       const fuente = porId[e.foto];
@@ -318,7 +333,9 @@
   }
 
   function all() { return list; }
-  function get(id) { return byId[id] || null; }
+  function get(id) {
+    return byId[id] || (alias[id] ? byId[alias[id]] : null) || null;
+  }
 
   /* filtros: {q, group, muscle, equipment, level, category, favs, gear} */
   function search(f) {
@@ -465,7 +482,7 @@
   g.Data = {
     paraIA: paraIA, porNombreEs: porNombreEs, permiteNombre: permiteNombre,
     load: load, all: all, get: get, search: search,
-    img: img, frames: frames, youtube: youtube, PLACEHOLDER: PLACEHOLDER,
+    img: img, frames: frames, esIlustracion: esIlustracion, youtube: youtube, PLACEHOLDER: PLACEHOLDER,
     GEAR: GEAR, gearAllows: gearAllows, gearFrase: gearFrase,
     TIPOS: TIPOS, tipoDe: tipoDe
   };
