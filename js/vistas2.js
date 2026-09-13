@@ -5,6 +5,7 @@
 
   const html = UI.html, raw = UI.raw, icon = UI.icon, esc = UI.esc;
   const V = g.VISTAS = g.VISTAS || {};
+  const BAJA = String.fromCharCode(10);
 
   const bind = function (r, s, f) { return App.bind(r, s, f); };
   const bindAll = function (r, s, f) { return App.bindAll(r, s, f); };
@@ -1153,58 +1154,81 @@
   function noSonLosPermisosSheet(mensaje) {
     UI.modal(html`
       <h2>Esto no son los permisos</h2>
-      <p class="muted">Tu conexión tiene todos los permisos que la app pide, y aun así
-      Spotify rechaza crear la lista. Reconectar no lo va a arreglar.</p>
+      <p class="muted">Tu conexión tiene todos los permisos que la app pide y aun así
+      Spotify rechaza crear la lista. Estoy probando qué pasa y qué no.</p>
       <pre class="tiny" style="white-space:pre-wrap;word-break:break-word;margin:10px 0 0;
         opacity:.8">${mensaje}</pre>
 
-      <p class="tiny" style="margin:12px 0 0">Voy a probar unas cuantas llamadas y a
-      ver cuáles pasan. La que lo decide es la del catálogo público: no pide ningún
-      permiso, así que si esa también falla el problema es la app del panel de
-      Spotify, no tu cuenta ni esta web.</p>
+      <div id="sp-espera" class="center" style="margin:16px 0 0">
+        <div class="spinner" style="margin:0 auto"></div>
+        <p class="tiny" style="margin:8px 0 0">Probando las llamadas…</p>
+      </div>
 
-      <button class="btn primary block" id="sp-diag2" style="margin-top:14px">
-        Averiguar por qué</button>
-      <pre class="tiny" id="sp-res" style="white-space:pre-wrap;word-break:break-word;
+      <pre class="tiny" id="sp-res" hidden style="white-space:pre-wrap;word-break:break-word;
         margin:12px 0 0"></pre>
-      <button class="btn block sm" id="sp-copiar" style="margin-top:10px;display:none">
-        Copiar el resultado</button>
-      <button class="btn ghost block" id="sp-cerrar" style="margin-top:8px">Cerrar</button>`,
+      <div id="sp-fin" hidden>
+        <button class="btn block sm" id="sp-copiar" style="margin-top:10px">
+          Copiar el resultado</button>
+        <button class="btn block sm" id="sp-otra" style="margin-top:8px">
+          Probar otra vez</button>
+        <p class="tiny" style="margin:12px 0 0">Si acabas de tocar algo en el panel de
+        Spotify, tu conexión es de antes del cambio: reconecta y vuelve a probar.</p>
+        <button class="btn block sm" id="sp-re2" style="margin-top:8px">
+          Reconectar Spotify</button>
+      </div>
+      <button class="btn ghost block" id="sp-cerrar" style="margin-top:10px">Cerrar</button>`,
       function (el) {
+        const espera = el.querySelector('#sp-espera');
         const res = el.querySelector('#sp-res');
-        const copiar = el.querySelector('#sp-copiar');
+        const fin = el.querySelector('#sp-fin');
+
         el.querySelector('#sp-cerrar').onclick = function () { UI.closeModal(); };
-        el.querySelector('#sp-diag2').onclick = function (ev) {
-          const b = ev.currentTarget;
-          b.disabled = true;
-          b.textContent = 'Probando…';
-          res.textContent = '';
-          Spotify.diagnostico().then(function (t) {
-            res.textContent = t;
-            copiar.style.display = '';
-            b.disabled = false;
-            b.textContent = 'Probar otra vez';
-            /* La conclusión, dicha, que si no son ocho líneas de códigos */
-            const publicoFalla = /público hondo: (401|403)/.test(t);
-            res.textContent = t + '\n\n' + (publicoFalla
-              ? 'CONCLUSIÓN: falla hasta el catálogo público, que no pide ningún '
-                + 'permiso. El problema es la app del panel de Spotify, no tu cuenta. '
-                + 'Entra en developer.spotify.com, abre tu app y mira si está en modo '
-                + 'desarrollo y qué APIs tiene marcadas.'
-              : 'CONCLUSIÓN: el catálogo público responde, así que la app del panel '
-                + 'está bien. Lo que falla es solo escribir en tu cuenta: mándame estas '
-                + 'líneas.');
-          }).catch(function (e) {
-            res.textContent = 'No se ha podido probar: ' + e.message;
-            b.disabled = false;
-            b.textContent = 'Probar otra vez';
-          });
+        el.querySelector('#sp-re2').onclick = function () {
+          UI.closeModal();
+          UI.toast('Abriendo Spotify para dar permiso…');
+          Spotify.entrar().catch(function (e) { UI.toast(e.message); });
         };
-        copiar.onclick = function () {
+        el.querySelector('#sp-copiar').onclick = function () {
           navigator.clipboard.writeText(res.textContent)
             .then(function () { UI.toast('Copiado'); })
             .catch(function () { UI.toast('Selecciona el texto y cópialo a mano'); });
         };
+        el.querySelector('#sp-otra').onclick = function () { probar(); };
+
+        /* Sin botón de por medio: si se ha llegado hasta aquí es porque algo va
+           mal, y hacerle pulsar otra vez para empezar a mirar no aporta nada. */
+        function probar() {
+          espera.hidden = false;
+          fin.hidden = true;
+          res.hidden = true;
+          Spotify.diagnostico().then(function (t) {
+            /* La llamada que lo decide no pide ningún permiso: si hasta esa
+               falla, el problema es la app del panel y no la cuenta. */
+            const publicoFalla = /público hondo: (401|403)/.test(t);
+            const crearVa = /crear lista: 20\d/.test(t);
+            res.textContent = t + BAJA + BAJA + (crearVa
+              ? 'CONCLUSIÓN: ahora sí deja crear listas. Cierra esto y dale otra vez a '
+                + 'guardar.'
+              : publicoFalla
+                ? 'CONCLUSIÓN: falla hasta el catálogo público, que no pide ningún '
+                  + 'permiso. El problema está en la app del panel de Spotify, no en tu '
+                  + 'cuenta: mira si sigue en modo desarrollo y si tu cuenta está en '
+                  + 'User Management.'
+                : 'CONCLUSIÓN: el catálogo público responde, así que la app del panel '
+                  + 'está bien. Lo que Spotify no deja es escribir en tu cuenta. '
+                  + 'Mándame estas líneas.');
+            espera.hidden = true;
+            res.hidden = false;
+            fin.hidden = false;
+          }).catch(function (e) {
+            res.textContent = 'No se ha podido probar: ' + e.message;
+            espera.hidden = true;
+            res.hidden = false;
+            fin.hidden = false;
+          });
+        }
+
+        probar();
       });
   }
 
