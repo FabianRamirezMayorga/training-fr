@@ -277,6 +277,14 @@
       </div>
 
       <!-- ============ Supabase ============ -->
+      ${raw(!Sync.puedeConfigurar() ? html`
+        <div class="list-title">Cuenta y sincronización</div>
+        <div class="card">
+          <div style="font-weight:600;margin-bottom:4px">La lleva quien administra</div>
+          <p class="muted" style="margin:0">Tus datos viajan a la base de datos de quien te
+          dio el acceso, y solo los ves tú: la base no deja que nadie lea lo de otra
+          persona. Aquí no hay nada que configurar.</p>
+        </div>` : html`
       <div class="list-title">Cuenta y sincronización · Supabase</div>
       <div class="card">
         <div class="row between" style="margin-bottom:11px">
@@ -331,7 +339,7 @@
 
         ${raw(Sync.configurado() ? '<button class="btn danger block sm" data-a="borrarSb" ' +
           'style="margin-top:10px">Borrar la configuración de Supabase</button>' : '')}
-      </div>
+      </div>`)}
 
       <!-- ============ varios dispositivos ============ -->
       <div class="list-title">Varios dispositivos</div>
@@ -352,7 +360,7 @@
         pulsar Conectar en Spotify.</p>
       </div>
 
-      ${raw(Sync.configurado() ? html`
+      ${raw(Sync.configurado() && Sync.puedeConfigurar() ? html`
         <div class="card">
           <div style="font-weight:600;margin-bottom:4px">Enlazar un dispositivo nuevo</div>
           <p class="muted" style="margin:0 0 10px">La configuración de Supabase no puede

@@ -7,6 +7,9 @@
   const actionsEl = document.getElementById('topbar-actions');
 
   let route = { name: 'inicio', arg: null };
+  /* qué pantalla hay pintada ahora mismo, para saber si un render es un
+     cambio de pantalla o solo un repintado de la misma */
+  let pantallaPintada = '';
   let exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', tipo: '', favs: false, todo: false };
   let exLimit = 40;
 
@@ -54,8 +57,19 @@
     const fn = views[route.name] || viewInicio;
 
     actionsEl.innerHTML = route.name === 'bienvenida' ? temaChip() : lugarChip() + temaChip();
+
+    /* Subir al principio solo al cambiar de pantalla. Repintar es lo que hace
+       esta app cada vez que se toca algo —marcar una opción, escribir un
+       número—, y subía arriba en cada toque: rellenar el perfil o los ajustes
+       era perseguir la página hacia abajo después de cada elección. Si la
+       pantalla es la misma, uno sigue donde estaba. */
+    const donde = route.name + '/' + (route.arg || '');
+    const mismaPantalla = donde === pantallaPintada;
+    const alturaPrevia = window.scrollY;
+    pantallaPintada = donde;
+
     viewEl.innerHTML = fn();
-    window.scrollTo(0, route.name === 'ejercicios' ? window.scrollY : 0);
+    window.scrollTo(0, mismaPantalla ? alturaPrevia : 0);
 
     if (fn.mount) fn.mount(viewEl);
     UI.mountDemos(viewEl);
@@ -4266,6 +4280,18 @@
 
   /* Camino largo: no hay cuenta todavía */
   function altaNuevaHTML() {
+    if (!Sync.puedeConfigurar()) {
+      return html`
+        <button class="btn sm ghost" data-alta="" style="margin-bottom:10px">
+          ${raw(icon('back'))} Volver</button>
+        <div class="card">
+          <div style="font-weight:600;margin-bottom:4px">Las cuentas las crea quien administra</div>
+          <p class="muted" style="margin:0">Pídele que te dé de alta con tu correo y te
+          pase una contraseña. Luego entras aquí arriba con esos datos y ya puedes
+          cambiarla desde Mi cuenta.</p>
+        </div>`;
+    }
+
     return html`
       <button class="btn sm ghost" data-alta="" style="margin-bottom:10px">
         ${raw(icon('back'))} Volver</button>
@@ -4820,6 +4846,10 @@
       setTimeout(function () { splash.remove(); }, 400);
       if (!location.hash) location.hash = '#/inicio';
       normalizarNombres();
+      /* Se pregunta al servidor si esta cuenta administra. De ello depende
+         que se enseñe la pantalla de cuentas y la configuración de la base de
+         datos, y hace falta saberlo en cualquier pantalla, no solo en Perfil. */
+      if (g.Admin) Admin.comprobar().then(function (si) { if (si) render(); });
       render();
 
       if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {

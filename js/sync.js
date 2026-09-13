@@ -48,6 +48,21 @@
 
   function hayFabrica() { return !!(DE_FABRICA.url && DE_FABRICA.key); }
 
+  /* ¿Se le enseña a esta persona dónde vive la base de datos y cómo cambiarla?
+     A quien monta su propio proyecto, sí: es suyo. A quien entra invitado en el
+     proyecto de otro, no: no es su base, no la va a configurar, y enseñársela
+     solo sirve para que la rompa sin querer o se lleve el enlace a otro sitio.
+
+     Ojo con lo que esto es y lo que no: la clave publishable viaja en el propio
+     código de la app, que es público, y está pensada para eso. Esconder la
+     pantalla no la hace secreta. Lo que protege los datos son las políticas RLS
+     de la tabla, que solo dejan ver y escribir las filas del usuario que ha
+     iniciado sesión. */
+  function puedeConfigurar() {
+    if (configPropia()) return true;
+    return !!(g.Admin && Admin.administra());
+  }
+
   /* Manda lo guardado en el dispositivo; si no hay nada, la conexión de fábrica */
   function config() {
     const c = leer(CFG_KEY);
@@ -957,6 +972,7 @@
     sesion: sesion, email: email, activa: activa,
     sincronizaClaves: sincronizaClaves, enlaceConfiguracion: enlaceConfiguracion,
     configPropia: configPropia, hayFabrica: hayFabrica,
+    puedeConfigurar: puedeConfigurar,
     ajustesProyecto: ajustesProyecto,
     aplicarEnlace: aplicarEnlace, ultimoUsuario: ultimoUsuario,
     limpiarDatosDeCuenta: limpiarDatosDeCuenta, fusionar: fusionar,

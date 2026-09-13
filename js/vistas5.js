@@ -223,6 +223,21 @@
     const c = Sync.config() || {};
     const propia = Sync.configPropia();
 
+    /* Quien entra invitado en el proyecto de otro no monta ninguna base: esta
+       pantalla no es suya y enseñarle dónde vive solo sirve para que la cambie
+       sin querer y se quede fuera. */
+    if (!Sync.puedeConfigurar()) {
+      return html`
+        <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+          ${raw(icon('back'))} Mi cuenta</button>
+        <h1>Tu base de datos</h1>
+        <p class="muted">Tus datos se guardan en el proyecto de quien te dio el acceso, y
+        solo los ves tú: la base de datos no deja que nadie lea lo de otra persona, ni
+        siquiera quien administra.</p>
+        <p class="muted">De la conexión se encarga quien administra; no hay nada que
+        configures aquí.</p>`;
+    }
+
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Mi cuenta</button>
