@@ -84,6 +84,14 @@
      no se puede entrenar, así que se aparta y se dice, en vez de crear una
      rutina con huecos. */
   function resolver(r) {
+    /* El material NO filtra aquí. Copiar una hoja no es diseñar una rutina: si
+       el papel pone prensa de piernas, es la prensa, aunque en los ajustes
+       ponga «Sin material». Filtrando, una hoja de gimnasio entera acababa
+       convertida en estiramientos, porque con «Sin material» el catálogo son
+       184 ejercicios de suelo y no había otra cosa que ofrecer.
+
+       Lo que sí se hace es contarlo y decirlo abajo, para que se vea que la
+       rutina pide más de lo que hay marcado. */
     const gear = Store.settings().gear;
     const fuera = [];
 
@@ -114,8 +122,8 @@
            palabras. */
         const ex = (delPapel && Data.porNombreEs(delPapel)) ||
           Data.porNombreEs(nombre) ||
-          (Data.search({ q: nombre, gear: gear }) || [])[0] ||
-          (delPapel && (Data.search({ q: delPapel, gear: gear }) || [])[0]);
+          (Data.search({ q: nombre }) || [])[0] ||
+          (delPapel && (Data.search({ q: delPapel }) || [])[0]);
 
         if (!ex) {
           fuera.push((delPapel || nombre) + ' (no está en el catálogo)');
@@ -230,6 +238,8 @@
           </div>`;
       }).join(''))}
 
+      ${raw(avisoMaterial(r))}
+
       ${raw(r.dudas.length ? html`
         <div class="card" style="border-color:var(--warn)">
           <b>Esto no lo tengo claro</b>
@@ -247,6 +257,43 @@
         ${raw(icon('check'))} Crear esta rutina</button>
       <p class="tiny center" style="margin:7px 4px 0">Se guarda en tus rutinas y desde ahí
       puedes editarla, ponerle los días y pedirle al entrenador que la analice.</p>`;
+  }
+
+  /* La hoja pide un material y en los ajustes hay otro. No se toca la rutina
+     por eso —lo que pone en el papel manda— pero decirlo evita la sorpresa de
+     llegar al gimnasio con media rutina que no puedes hacer, o al revés. */
+  function avisoMaterial(r) {
+    /* Se cuenta al pintar, no al leer: el botón de aquí abajo cambia el sitio y
+       el aviso tiene que enterarse en el mismo repintado. */
+    const gear = Store.settings().gear;
+    const gset = Data.GEAR[gear];
+    if (!gset) return '';
+
+    let total = 0, ajenos = 0;
+    r.dias.forEach(function (d) {
+      d.ejercicios.forEach(function (e) {
+        total++;
+        if (!Data.gearAllows(gear, e.ex.equipment) ||
+            !Data.permiteNombre(gear, e.ex.nameEs)) ajenos++;
+      });
+    });
+    if (!ajenos) return '';
+    const todos = ajenos === total;
+
+    const cuantos = todos
+      ? 'Todos los ejercicios de esta rutina piden'
+      : ajenos + ' de los ' + total + ' ejercicios piden';
+
+    return html`
+      <div class="card" style="border-color:var(--warn)">
+        <b>Pide más material del que tienes marcado</b>
+        <p class="tiny" style="margin:6px 0 0">${cuantos} material que
+        «${esc(gset.label)}» no contempla. La he copiado tal cual, que para eso
+        la traes, pero si vas a entrenarla cambia dónde entrenas o no te va a
+        cuadrar.</p>
+        <button class="btn sm block" data-a="lugar" style="margin-top:10px">
+          ${raw(icon('dumbbell'))} Cambiar dónde entreno</button>
+      </div>`;
   }
 
   V.importar.mount = function (root) {
@@ -284,6 +331,7 @@
       analizar(null);
     });
 
+    App.bind(root, '[data-a=lugar]', function () { App.lugarSheet(); });
     App.bind(root, '[data-a=crear]', function () { crearSheet(); });
   };
 

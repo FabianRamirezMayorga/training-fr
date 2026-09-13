@@ -1383,13 +1383,17 @@
   /* El catálogo que se le enseña, con la advertencia de que es lo único que
      puede proponer. Es lo que separa un cambio aplicable de un nombre bonito
      que aquí no existe. */
-  function menuEjercicios(musculos, gear) {
+  function menuEjercicios(musculos, gear, porMusculo) {
     return '\nCATÁLOGO DEL QUE PUEDES ELEGIR. Es el único material que existe en ' +
       'esta app. Cualquier ejercicio que propongas tiene que estar en esta lista y ' +
       'escrito EXACTAMENTE igual, tilde por tilde. Si lo que ibas a proponer no ' +
       'está, coge el más parecido que sí esté; y si no hay nada parecido, no ' +
       'propongas ese cambio. No te inventes nombres ni los traduzcas a tu manera:\n' +
-      Data.paraIA({ musculos: musculos || [], gear: gear || Store.settings().gear }) + '\n';
+      Data.paraIA({
+        musculos: musculos || [],
+        gear: gear || Store.settings().gear,
+        porMusculo: porMusculo
+      }) + '\n';
   }
 
   /* ---------- una frase, la que toque hoy ----------
@@ -1852,7 +1856,11 @@
       return Promise.reject(new Error('No has elegido ningún archivo.'));
     }
 
-    const prompt = contexto({ rutinas: true, gear: Store.settings().gear }) + '\n\n' +
+    /* Aquí NO va el contexto de quien la sube, a propósito. Copiar una hoja no
+       es diseñar una rutina: ni su material, ni su nivel, ni sus lesiones
+       cambian lo que pone en el papel. Metiéndolo, el modelo «ayudaba» y
+       adaptaba lo que leía a lo que podía hacer. */
+    const prompt =
       'Te paso ' + (archivo.mime === 'application/pdf' ? 'un PDF' : 'una foto') +
       ' con una rutina de entrenamiento: puede ser una hoja del gimnasio, una ' +
       'libreta, una captura o un plan que le ha dado alguien.\n' +
@@ -1871,7 +1879,18 @@
       'el número de en medio. Si no viene el descanso, pon 90.\n' +
       '- Si en la imagen no hay ninguna rutina, devuelve "dias" vacío y dilo en ' +
       '"dudas".\n' +
-      menuEjercicios([]) + '\n' +
+      '- El catálogo de abajo va ENTERO y sin filtrar por material. Da igual con ' +
+      'qué entrene quien la sube: si en el papel pone prensa, es la prensa. No ' +
+      'sustituyas nada por una versión más fácil ni por un estiramiento.\n' +
+      '\nCÓMO SE ESCRIBE EN UNA HOJA DE GIMNASIO (abreviaturas que vas a ver):\n' +
+      'mq / mc / máq = en máquina · db = mancuernas · barra z = barra EZ · ' +
+      'polea = en polea · predicador = banco Scott · push-down = extensión de ' +
+      'tríceps en polea · copa = extensión de tríceps sobre la cabeza · vuelos = ' +
+      'elevaciones (vuelos posteriores = pájaro, deltoides posterior) · ' +
+      'jalón abierto/cerrado = jalón al pecho, agarre ancho o estrecho · ' +
+      'press plano = press de banca · femoral = curl femoral · ' +
+      'prensa = prensa de piernas · fondos = fondos de tríceps.\n' +
+      menuEjercicios([], 'todo', 999) + '\n' +
       'Devuelve JSON: {"nombre":"cómo llamarla, corto",' +
       '"dias":[{"dia":"Lun|Mar|Mié|Jue|Vie|Sáb|Dom o vacío si no lo dice",' +
       '"titulo":"lo que pone en el papel, si pone algo",' +

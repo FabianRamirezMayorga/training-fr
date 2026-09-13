@@ -191,8 +191,71 @@
 
       <div id="comida-pensando"></div>
 
-      ${raw(h.lista.length ? '<div class="stack" style="margin-top:11px">' +
-        h.lista.map(comidaFilaHTML).join('') + '</div>' : '')}`;
+      ${raw(historialHTML(m))}`;
+  }
+
+  /* Qué días quedan abiertos. Vive fuera del pintado porque la app repinta la
+     pantalla entera a cada cambio —al borrar un plato, por ejemplo— y sin esto
+     el día que acabas de abrir se te cierra en la cara. */
+  const diasAbiertos = {};
+  let arranque = true;
+
+  /* Lo comido, por días y plegado.
+     Registrando de verdad son cinco o seis platos diarios: en una semana la
+     lista plana pasaba de cuarenta filas y el día de hoy quedaba enterrado.
+     Cada día es una fila con su total; se abre el que interese. */
+  function historialHTML(m) {
+    const dias = Comidas.porDias(60);
+    if (!dias.length) return '';
+
+    /* La primera vez, hoy abierto y el resto plegado: es el día que estás
+       llenando. A partir de ahí manda lo que hayas abierto tú. */
+    const hoyClave = Comidas.claveDia();
+    if (arranque) { diasAbiertos[hoyClave] = true; arranque = false; }
+
+    return html`
+      <div class="list-title" style="margin-top:18px">Lo que has comido</div>
+      <div class="stack">
+        ${raw(dias.map(function (d) { return diaComidasHTML(d, m, hoyClave); }).join(''))}
+      </div>`;
+  }
+
+  function diaComidasHTML(d, m, hoyClave) {
+    const abierto = !!diasAbiertos[d.dia];
+    const cuantos = d.lista.length;
+    /* El objetivo de proteína es el de hoy; para días pasados sirve igual de
+       referencia, que el objetivo no cambia de un día para otro. */
+    const cumple = m && m.prot && d.prot >= m.prot;
+
+    return html`
+      <details class="dia-comidas" data-dia="${d.dia}"${raw(abierto ? ' open' : '')}>
+        <summary>
+          <span class="row-icon dia-flecha">${raw(icon('chevron'))}</span>
+          <div class="grow">
+            <div class="dia-nombre">${nombreDeDia(d, hoyClave)}</div>
+            <div class="tiny">${cuantos} ${cuantos === 1 ? 'registro' : 'registros'}</div>
+          </div>
+          <div class="dia-suma">
+            <b>${UI.num(d.kcal)}</b><span class="tiny"> kcal</span>
+            <div class="tiny"${raw(cumple ? ' style="color:var(--brand-1)"' : '')}>${d.prot} g
+              de proteína</div>
+          </div>
+        </summary>
+        <div class="stack" style="padding:0 0 11px">
+          ${raw(d.lista.map(comidaFilaHTML).join(''))}
+        </div>
+      </details>`;
+  }
+
+  /* «Hoy», «Ayer» y, más atrás, el día de la semana con su fecha: es como se
+     acuerda uno de lo que comió, no por «2026-09-07». */
+  function nombreDeDia(d, hoyClave) {
+    if (d.dia === hoyClave) return 'Hoy';
+    const ayer = Comidas.claveDia(Date.now() - 864e5);
+    if (d.dia === ayer) return 'Ayer';
+    const p = d.dia.split('-');
+    const f = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    return UI.diaLargo(UI.DAY_NAMES[f.getDay()]) + ' ' + UI.fechaCorta(f.getTime());
   }
 
   function comidaFilaHTML(c) {
@@ -445,6 +508,15 @@
     bind(root, '[data-a=configIA]', function () { go('entrenador'); });
 
     /* ---- lo que has comido hoy ---- */
+    /* Abrir y cerrar no repinta nada: solo se apunta, para que el repintado
+       siguiente respete lo que tenías abierto. */
+    root.querySelectorAll('details.dia-comidas').forEach(function (el) {
+      el.addEventListener('toggle', function () {
+        if (el.open) diasAbiertos[el.dataset.dia] = true;
+        else delete diasAbiertos[el.dataset.dia];
+      });
+    });
+
     bindAll(root, '[data-borrar-comida]', function (el) {
       Comidas.borrar(el.dataset.borrarComida);
       render();

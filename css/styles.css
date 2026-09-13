@@ -1050,3 +1050,51 @@ body.escribiendo .toast { opacity: 0; pointer-events: none; }
   .mapa-musculos { flex-direction: column; align-items: flex-start; gap: 12px; }
   .cuerpo { width: 88px; }
 }
+
+/* ---------- lo comido, por días ----------
+   Cada día es una tarjeta que se pliega. La flecha gira al abrir, que es lo
+   que hace que se entienda que ahí hay algo debajo sin tener que rotularlo. */
+.dia-comidas {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.dia-comidas > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 13px;
+  cursor: pointer;
+  list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Safari pinta su propio triángulo y no hay forma de quitarlo sin esto */
+.dia-comidas > summary::-webkit-details-marker { display: none; }
+.dia-comidas > summary::marker { content: ''; }
+
+.dia-flecha {
+  transition: transform .18s ease;
+  color: var(--dim);
+  flex: 0 0 auto;
+}
+.dia-comidas[open] > summary .dia-flecha { transform: rotate(90deg); }
+
+.dia-nombre { font-weight: 700; font-size: .95rem; }
+.dia-suma { text-align: right; flex: 0 0 auto; }
+.dia-suma b { font-size: 1.05rem; }
+
+/* Las filas de dentro ya son tarjetas; aquí sobran su borde y su fondo, que si
+   no se ve una tarjeta metida en otra. */
+/* El .stack global es display:flex y le gana en especificidad a la regla del
+   navegador que pliega el contenido, asi que cerrado seguia ocupando: solo lo
+   tapaba el overflow. Se pliega a mano. */
+.dia-comidas:not([open]) > .stack { display: none; }
+.dia-comidas > .stack { padding: 0 11px; }
+.dia-comidas > .stack > .card {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  padding: 11px 2px;
+}

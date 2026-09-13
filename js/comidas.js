@@ -82,6 +82,35 @@
     escribir(todas().filter(function (x) { return x.id !== id; }));
   }
 
+  /* Lo comido agrupado por días, solo los días en los que hay algo.
+     Registrando cinco o seis cosas al día, una lista plana de tres semanas son
+     más de cien filas y no hay quien encuentre nada: se agrupa y cada día se
+     abre si se quiere. Los días vacíos no salen —no aportan— y por eso esto no
+     sirve para «ultimos()», que sí necesita los huecos para pintar la racha. */
+  function porDias(limite) {
+    const grupos = {};
+    const orden = [];
+    todas().forEach(function (x) {
+      const d = claveDia(x.t);
+      if (!grupos[d]) { grupos[d] = []; orden.push(d); }
+      grupos[d].push(x);
+    });
+
+    return orden.slice(0, limite || 60).map(function (d) {
+      const lista = grupos[d];
+      const s = suma(lista);
+      return {
+        dia: d,
+        /* la hora del registro más tardío: vale para saber qué día es y para
+           ordenar, sin volver a parsear la clave */
+        t: lista[0].t,
+        lista: lista,
+        kcal: Math.round(s.kcal),
+        prot: Math.round(s.prot)
+      };
+    });
+  }
+
   /* Los últimos días con su total, para ver si es un mal día o una costumbre */
   function ultimos(dias) {
     const n = dias || 7;
@@ -147,7 +176,7 @@
 
   g.Comidas = {
     hoy: hoy, todas: todas, del: del, anotar: anotar, borrar: borrar,
-    ultimos: ultimos, vaciar: vaciar, claveDia: claveDia,
+    ultimos: ultimos, porDias: porDias, vaciar: vaciar, claveDia: claveDia,
     prepararFoto: prepararFoto
   };
 })(window);
