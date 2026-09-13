@@ -1028,6 +1028,130 @@
     return I18N.GROUPS.reduce(function (acc, gr) { return acc.concat(gr.muscles); }, []);
   }
 
+  /* Cuántos filtros hay puestos. Va en el botón, que es lo que evita el
+     «¿por qué salen tan pocos?» cuando uno se deja algo marcado de ayer. */
+  function cuantosFiltros() {
+    let n = 0;
+    if (exFilters.group) n++;
+    if (exFilters.muscle) n++;
+    if (exFilters.tipo) n++;
+    if (exFilters.equipment) n++;
+    if (exFilters.level) n++;
+    if (exFilters.favs) n++;
+    return n;
+  }
+
+  /* Lo que hay puesto, en fichas que se quitan tocando. Antes había tres filas
+     de chips y dos desplegables SIEMPRE en pantalla —cuatro filas de mandos
+     antes de ver un solo ejercicio, y la mitad cortados por el borde—. Ahora
+     solo se ve lo que está puesto, y si no hay nada puesto no se ve nada. */
+  function chipsActivosHTML() {
+    const fichas = [];
+    if (exFilters.favs) fichas.push(['favs', 'Favoritos']);
+    if (exFilters.group) {
+      const gr = I18N.GROUPS.filter(function (x) { return x.id === exFilters.group; })[0];
+      if (gr) fichas.push(['group', gr.label]);
+    }
+    if (exFilters.muscle) fichas.push(['muscle', I18N.muscle(exFilters.muscle)]);
+    if (exFilters.tipo) {
+      const t = Data.TIPOS.filter(function (x) { return x.id === exFilters.tipo; })[0];
+      if (t) fichas.push(['tipo', t.label]);
+    }
+    if (exFilters.equipment) fichas.push(['equipment', I18N.EQUIP[exFilters.equipment]]);
+    if (exFilters.level) fichas.push(['level', I18N.LEVEL[exFilters.level]]);
+    if (!fichas.length) return '';
+
+    return '<div class="pill-scroll" style="margin-bottom:12px">' +
+      fichas.map(function (f) {
+        return '<button class="chip on" data-quitar="' + f[0] + '">' + esc(f[1]) +
+          ' <span style="opacity:.65">\u00d7</span></button>';
+      }).join('') +
+      (fichas.length > 1
+        ? '<button class="chip" data-a="limpiar">Quitar todo</button>' : '') +
+      '</div>';
+  }
+
+  /* Todos los filtros en una hoja, que es donde estorban menos. Con fichas y no
+     con desplegables del navegador: un select del sistema en medio de la
+     pantalla es justo lo que hace que una app parezca hecha a mano. */
+  function filtrosSheet() {
+    const gear = gearActual();
+
+    const grupo = function (titulo, cuerpo) {
+      return '<div class="tiny" style="margin:16px 0 7px">' + titulo + '</div>' +
+        '<div class="row wrap" style="gap:6px">' + cuerpo + '</div>';
+    };
+    const ficha = function (attr, valor, texto, activo) {
+      return '<button class="chip ' + (activo ? 'on' : '') + '" data-' + attr + '="' +
+        esc(valor) + '">' + esc(texto) + '</button>';
+    };
+
+    UI.modal(html`
+      <h2>Filtrar ejercicios</h2>
+
+      ${raw(grupo('ZONA DEL CUERPO',
+        ficha('f-grp', '', 'Todas', !exFilters.group && !exFilters.muscle) +
+        I18N.GROUPS.map(function (gr) {
+          return ficha('f-grp', gr.id, gr.label, exFilters.group === gr.id);
+        }).join('')))}
+
+      ${raw(grupo('TIPO DE TRABAJO',
+        ficha('f-tipo', '', 'Todo', !exFilters.tipo) +
+        Data.TIPOS.map(function (t) {
+          return ficha('f-tipo', t.id, t.label, exFilters.tipo === t.id);
+        }).join('')))}
+
+      ${raw(grupo('MATERIAL',
+        ficha('f-eq', '', 'Todo', !exFilters.equipment) +
+        Object.keys(I18N.EQUIP).filter(function (k) {
+          return !gear || Data.gearAllows(gear, k);
+        }).map(function (k) {
+          return ficha('f-eq', k, I18N.EQUIP[k], exFilters.equipment === k);
+        }).join('')))}
+
+      ${raw(grupo('NIVEL',
+        ficha('f-lv', '', 'Cualquiera', !exFilters.level) +
+        Object.keys(I18N.LEVEL).map(function (k) {
+          return ficha('f-lv', k, I18N.LEVEL[k], exFilters.level === k);
+        }).join('')))}
+
+      ${raw(grupo('SOLO',
+        '<button class="chip ' + (exFilters.favs ? 'on' : '') + '" data-f-favs="1">' +
+        icon('star') + ' Favoritos</button>' +
+        (Store.settings().gear === 'todo' ? ''
+          : '<button class="chip ' + (exFilters.todo ? '' : 'on') + '" data-f-todo="1">' +
+            icon('dumbbell') + ' Lo que puedo hacer donde entreno</button>')))}
+
+      <button class="btn primary block" id="f-ver" style="margin-top:20px">Ver ejercicios</button>
+      <button class="btn ghost block sm" id="f-limpiar" style="margin-top:8px">Quitar los filtros</button>`,
+      function (el) {
+        const repintar = function () { UI.closeModal(); exLimit = 40; render(); filtrosSheet(); };
+
+        bindAll(el, '[data-f-grp]', function (b) {
+          exFilters.group = b.dataset.fGrp; exFilters.muscle = ''; exFilters.q = '';
+          exFilters.favs = false; repintar();
+        });
+        bindAll(el, '[data-f-tipo]', function (b) { exFilters.tipo = b.dataset.fTipo; repintar(); });
+        bindAll(el, '[data-f-eq]', function (b) { exFilters.equipment = b.dataset.fEq; repintar(); });
+        bindAll(el, '[data-f-lv]', function (b) { exFilters.level = b.dataset.fLv; repintar(); });
+        bind(el, '[data-f-favs]', function () {
+          exFilters.favs = !exFilters.favs;
+          if (exFilters.favs) { exFilters.group = ''; exFilters.muscle = ''; }
+          repintar();
+        });
+        bind(el, '[data-f-todo]', function () { exFilters.todo = !exFilters.todo; repintar(); });
+
+        el.querySelector('#f-ver').onclick = function () {
+          UI.closeModal(); exLimit = 40; render(); window.scrollTo(0, 0);
+        };
+        el.querySelector('#f-limpiar').onclick = function () {
+          exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', tipo: '',
+            favs: false, todo: exFilters.todo };
+          UI.closeModal(); exLimit = 40; render(); window.scrollTo(0, 0);
+        };
+      });
+  }
+
   function viewEjercicios() {
     const gear = gearActual();
 
@@ -1084,13 +1208,15 @@
     /* Con el sitio en «Ver todo» el catálogo ya está entero: el interruptor sobra */
     const sinFiltro = exFilters.todo || Store.settings().gear === 'todo';
 
+    const puestos = cuantosFiltros();
+
     return html`
       <div class="row between">
         <h1 style="margin:0">Ejercicios</h1>
-        ${raw(Store.settings().gear === 'todo' ? '' : html`
-          <button class="chip ${exFilters.todo ? '' : 'on'}" data-a="togglegear">
-            ${exFilters.todo ? 'Solo mi material' : 'Ver todo'}
-          </button>`)}
+        <button class="btn-filtro${puestos ? ' on' : ''}" data-a="filtros">
+          ${raw(icon('filtro'))} Filtro${raw(puestos
+            ? '<span class="bf-num">' + puestos + '</span>' : '')}
+        </button>
       </div>
       <p class="muted" style="margin-top:6px">
         ${UI.num(res.length)} ejercicios${raw(sinFiltro
@@ -1104,22 +1230,7 @@
                value="${exFilters.q}" autocomplete="off">
       </div>
 
-      <div class="pill-scroll">
-        <button class="chip ${!exFilters.group && !exFilters.favs && !zonaQ ? 'on' : ''}" data-grp="">Todos</button>
-        <button class="chip ${exFilters.favs ? 'on' : ''}" data-favs="1">${raw(icon('star'))} Favoritos</button>
-        ${raw(I18N.GROUPS.map(function (gr) {
-          return '<button class="chip ' + (exFilters.group === gr.id && !zonaQ ? 'on' : '') +
-                 '" data-grp="' + gr.id + '">' + esc(gr.label) + '</button>';
-        }).join(''))}
-      </div>
-
-      <div class="pill-scroll">
-        <button class="chip ${exFilters.tipo ? '' : 'on'}" data-tipoex="">Todo el trabajo</button>
-        ${raw(Data.TIPOS.map(function (t) {
-          return '<button class="chip ' + (exFilters.tipo === t.id ? 'on' : '') +
-                 '" data-tipoex="' + t.id + '">' + esc(t.label) + '</button>';
-        }).join(''))}
-      </div>
+      ${raw(chipsActivosHTML())}
 
       ${raw(exFilters.tipo === 'yoga' ? html`
         <p class="tiny" style="margin:-2px 0 12px">48 posturas de
@@ -1141,31 +1252,9 @@
           : 'todos los ejercicios de ' + esc(I18N.muscle(musculo).toLowerCase()))}, no solo
         los que llevan esa palabra en el nombre.</p>` : '')}
 
-      ${raw(exFilters.muscle ? html`
-        <div class="row wrap" style="gap:6px;margin-bottom:12px">
-          <button class="chip on" data-a="quitarmusculo">${I18N.muscle(exFilters.muscle)} ×</button>
-        </div>` : '')}
 
       ${raw(tarjetaZona)}
 
-      <div class="row" style="margin-bottom:14px">
-        <select id="ex-eq" class="grow">
-          <option value="">Todo el material</option>
-          ${raw(Object.keys(I18N.EQUIP).filter(function (k) {
-            return !gear || Data.gearAllows(gear, k);
-          }).map(function (k) {
-            return '<option value="' + esc(k) + '"' + (exFilters.equipment === k ? ' selected' : '') +
-                   '>' + esc(I18N.EQUIP[k]) + '</option>';
-          }).join(''))}
-        </select>
-        <select id="ex-lv" class="grow">
-          <option value="">Cualquier nivel</option>
-          ${raw(Object.keys(I18N.LEVEL).map(function (k) {
-            return '<option value="' + esc(k) + '"' + (exFilters.level === k ? ' selected' : '') +
-                   '>' + esc(I18N.LEVEL[k]) + '</option>';
-          }).join(''))}
-        </select>
-      </div>
 
       ${raw(segmentar ? secciones.map(function (s) {
         return html`
@@ -1229,18 +1318,18 @@
       }, 220);
     };
 
-    bindAll(root, '[data-grp]', function (el) {
-      /* el chip manda: se limpia la búsqueda para no cruzar dos criterios y
-         acabar sin resultados ("banca" + pierna no existe) */
-      exFilters.group = el.dataset.grp; exFilters.favs = false; exFilters.muscle = '';
-      exFilters.q = '';
+    bind(root, '[data-a=filtros]', function () { filtrosSheet(); });
+
+    /* quitar un filtro desde su ficha */
+    bindAll(root, '[data-quitar]', function (el) {
+      const k = el.dataset.quitar;
+      if (k === 'favs') exFilters.favs = false;
+      else exFilters[k] = '';
       exLimit = 40; render();
     });
-    bindAll(root, '[data-tipoex]', function (el) {
-      exFilters.tipo = el.dataset.tipoex; exLimit = 40; render();
-    });
-    bind(root, '[data-favs]', function () {
-      exFilters.favs = !exFilters.favs; exFilters.group = ''; exFilters.muscle = '';
+    bind(root, '[data-a=limpiar]', function () {
+      exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', tipo: '',
+        favs: false, todo: exFilters.todo };
       exLimit = 40; render();
     });
     /* «Ver todos» lleva a la pantalla de la zona. Antes filtraba aquí mismo y
@@ -1260,12 +1349,6 @@
         ? 'Mostrando el catálogo completo'
         : 'Mostrando solo lo que puedes hacer donde entrenas');
     });
-    root.querySelector('#ex-eq').onchange = function (e) {
-      exFilters.equipment = e.target.value; exLimit = 40; render();
-    };
-    root.querySelector('#ex-lv').onchange = function (e) {
-      exFilters.level = e.target.value; exLimit = 40; render();
-    };
     bind(root, '[data-a=mas]', function () {
       exLimit += 40;
       const pos = window.scrollY; render(); window.scrollTo(0, pos);

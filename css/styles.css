@@ -1179,3 +1179,26 @@ body.escribiendo .toast { opacity: 0; pointer-events: none; }
   flex: none; width: 9px; height: 15px; fill: none; stroke: var(--dim2);
   stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
 }
+
+/* El boton de filtrar: una sola pastilla en la cabecera en vez de tres filas
+   de fichas y dos desplegables del navegador siempre en pantalla. El numero
+   dice cuantos hay puestos, que es lo que evita el «por que salen tan pocos»
+   cuando queda algo marcado de ayer. */
+.btn-filtro {
+  display: inline-flex; align-items: center; gap: 7px; flex: none;
+  padding: .5em .95em; border-radius: 999px;
+  background: var(--card2); color: var(--txt); border: 1px solid transparent;
+  font-weight: 600; font-size: .88rem; letter-spacing: -.01em;
+  transition: transform .14s cubic-bezier(.2,.9,.3,1), filter .15s;
+}
+.btn-filtro:active { transform: scale(.955); filter: brightness(.94); }
+.btn-filtro svg {
+  width: 16px; height: 16px; fill: none; stroke: currentColor;
+  stroke-width: 2.2; stroke-linecap: round;
+}
+.btn-filtro.on { background: var(--acc); color: var(--on-acc); }
+.bf-num {
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+  background: rgba(0,0,0,.22); color: inherit;
+  font-size: .72rem; font-weight: 700; line-height: 18px; text-align: center;
+}
