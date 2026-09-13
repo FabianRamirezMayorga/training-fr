@@ -265,7 +265,7 @@ a{color:var(--blue)}
 .prog i{display:block;height:100%;background:var(--acc);transition:width .35s}
 /* Pila fija sobre la barra de pestañas: cronómetro arriba, descanso debajo.
    Sin puntero salvo en sus hijos, para no tapar la página que hay detrás. */
-.hud{position:fixed;left:0;right:0;bottom:calc(80px + var(--safe-b));z-index:55;
+.hud{position:fixed;left:0;right:0;bottom:calc(64px + var(--safe-b));z-index:55;
   padding:0 16px;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .hud>*{pointer-events:auto}
 .hud:empty{display:none}
@@ -521,7 +521,7 @@ code{font-family:var(--mono);
 .crono-fin{flex:none;font-weight:700;font-size:.8rem;background:rgba(0,0,0,.16);color:inherit;
   padding:.5em .85em;border-radius:9px}
 .crono-fin:active{transform:scale(.95)}
-body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
+body.con-crono{padding-bottom:calc(134px + var(--safe-b))}
 
 /* ---------- programa personal ---------- */
 /* Cabecera plegable de cada día del programa */
@@ -850,8 +850,8 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
   justify-content:center;background:none;color:var(--txt);padding:0}
 .bm-b svg{width:21px;height:21px;fill:currentColor;stroke:none}
 .bm-b:active{transform:scale(.9)}
-body.con-musica{padding-bottom:calc(140px + var(--safe-b))}
-body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
+body.con-musica{padding-bottom:calc(120px + var(--safe-b))}
+body.con-musica.con-crono{padding-bottom:calc(196px + var(--safe-b))}
 /* Aleatorio y corazón: más pequeños, que son secundarios */
 .player-b.chico{width:38px;height:38px;color:var(--dim2)}
 .player-b.chico svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;
