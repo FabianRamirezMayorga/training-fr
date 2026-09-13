@@ -1839,6 +1839,53 @@
       });
   }
 
+  /* ---------- traer una rutina de fuera ----------
+     La hoja del gimnasio, la foto del cuaderno, el PDF que te pasa tu entrenador.
+     Se lee, se saca lo que pone y se devuelve en el formato de la app; el
+     archivo no se guarda en ningún sitio, ni aquí ni en el dispositivo.
+
+     Lo importante es que los ejercicios salgan con el nombre EXACTO del
+     catálogo: si no, luego no hay forma de resolverlos y la rutina se queda en
+     una lista de texto que no se puede entrenar. */
+  function leerRutina(archivo, pista) {
+    if (!archivo || !archivo.datos) {
+      return Promise.reject(new Error('No has elegido ningún archivo.'));
+    }
+
+    const prompt = contexto({ rutinas: true, gear: Store.settings().gear }) + '\n\n' +
+      'Te paso ' + (archivo.mime === 'application/pdf' ? 'un PDF' : 'una foto') +
+      ' con una rutina de entrenamiento: puede ser una hoja del gimnasio, una ' +
+      'libreta, una captura o un plan que le ha dado alguien.\n' +
+      (pista ? 'Quien la manda añade: "' + pista + '".\n' : '') +
+      '\nSácala tal y como está. No la mejores, no la corrijas y no le añadas nada: ' +
+      'esto es copiarla a la app, no diseñarla. Si algo no se lee o no viene ' +
+      '—las series, el descanso—, dilo en "dudas" en vez de inventarlo.\n\n' +
+      'REGLAS:\n' +
+      '- Cada ejercicio tiene que salir con el nombre EXACTO de una entrada del ' +
+      'catálogo de abajo, tilde por tilde. Si en el papel pone algo que no está, ' +
+      'coge el más parecido que sí esté y apúntalo en "dudas" diciendo qué ponía y ' +
+      'con qué lo has sustituido.\n' +
+      '- Si la rutina viene repartida en días, devuelve un día por cada uno, en el ' +
+      'orden del papel. Si es una sola sesión, devuelve un solo día.\n' +
+      '- Las series y las repeticiones, como vengan. Si pone un rango (8-12), coge ' +
+      'el número de en medio. Si no viene el descanso, pon 90.\n' +
+      '- Si en la imagen no hay ninguna rutina, devuelve "dias" vacío y dilo en ' +
+      '"dudas".\n' +
+      menuEjercicios([]) + '\n' +
+      'Devuelve JSON: {"nombre":"cómo llamarla, corto",' +
+      '"dias":[{"dia":"Lun|Mar|Mié|Jue|Vie|Sáb|Dom o vacío si no lo dice",' +
+      '"titulo":"lo que pone en el papel, si pone algo",' +
+      '"ejercicios":[{"ejercicio":"nombre EXACTO del catálogo","series":número,' +
+      '"reps":número,"descanso":segundos,"comoVenia":"lo que ponía en el papel"}]}],' +
+      '"dudas":["lo que no se leía o has tenido que interpretar"]}';
+
+    return llamarJSON(prompt, {
+      maxTokens: 8192,
+      temperatura: 0.1,
+      imagen: { datos: archivo.datos, mime: archivo.mime || 'image/jpeg' }
+    });
+  }
+
   /* Mira una foto de comida y estima lo que hay. Es una aproximación y se dice
      que lo es: nadie acierta los gramos de un plato por una foto, ni una
      persona ni un modelo. Sirve para saber si el día va corto de proteína, que
@@ -2077,7 +2124,7 @@
     planNutricion: planNutricion, revisarRutinas: revisarRutinas,
     revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
     crearPrograma: crearPrograma, pildora: pildora,
-    analizarComida: analizarComida,
+    analizarComida: analizarComida, leerRutina: leerRutina,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,
     analizarProgreso: analizarProgreso, preguntar: preguntar, explicarEjercicio: explicarEjercicio,
