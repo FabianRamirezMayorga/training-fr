@@ -92,6 +92,10 @@
           sub: Sync.activa() ? Sync.email() : 'Sin sincronizar' }))}
         ${raw(fila({ icono: 'timer', titulo: 'Ajustes', accion: 'ajustes',
           sub: 'Unidades, tema, descanso, copias y sin conexión' }))}
+        ${raw(g.Admin && Admin.administra()
+          ? fila({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
+              sub: 'Crear, desactivar y borrar cuentas del proyecto' })
+          : '')}
       </div>
 
       <p class="tiny center" style="margin:22px 0 0">Training FR</p>`;
@@ -100,7 +104,14 @@
   V.perfil.mount = function (root) {
     const ir = { datos: 'datos', objetivos: 'objetivos', nutricion: 'nutricion',
       alertas: 'alertas', entrenador: 'entrenador', musica: 'musica',
-      cuenta: 'cuenta', ajustes: 'ajustes' };
+      cuenta: 'cuenta', ajustes: 'ajustes', usuarios: 'usuarios' };
+
+    /* Se pregunta al servidor si esta cuenta administra; mientras no conteste,
+       la entrada no está. Enseñarla o no es comodidad: el permiso lo decide la
+       función, no esta pantalla. */
+    if (g.Admin && !Admin.administra()) {
+      Admin.comprobar().then(function (si) { if (si) render(); });
+    }
     bindAll(root, '[data-fila]', function (el) {
       const d = el.dataset.fila;
       if (d === 'lugar') return App.lugarSheet();
