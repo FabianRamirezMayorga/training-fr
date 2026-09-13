@@ -1487,23 +1487,38 @@ img[src^="data/img/"] {
 .sec-cola { margin-left: auto; color: var(--dim); text-align: right;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* Un plegable fino: una linea en mayusculas con su galon y, a la derecha, lo
+   que dice plegado —la siguiente comida, cuantos entrenos tuvo la semana—. Lo
+   usan el menu del dia y el historial por semanas. */
+.plegable-fino > summary {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  list-style: none;
+  font-size: .78rem; font-weight: 800; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--dim);
+}
+.plegable-fino > summary::-webkit-details-marker { display: none; }
+.plegable-fino > summary::marker { content: ''; }
+.plegable-fino > summary .tiny { text-transform: none; letter-spacing: 0; font-weight: 600; }
+.plegable-fino[open] > summary .sec-flecha { transform: rotate(180deg); }
+.plegable-fino:not([open]) > .fino-cuerpo { display: none; }
+.fino-cuerpo { padding-top: 4px; }
+
 /* El menu del dia vive DENTRO de la tarjeta de comida, no como una seccion
    suelta: una fila mas en la portada cuesta 38px y en un movil corto eso es
    justo lo que sobra. Ademas es donde toca —comida con comida— y plegado solo
    dice cual es la siguiente. */
 .menu-hoy > summary {
-  display: flex; align-items: center; gap: 8px; cursor: pointer;
-  list-style: none; margin-top: 9px; padding-top: 9px;
-  border-top: 1px solid var(--line);
-  font-size: .78rem; font-weight: 800; letter-spacing: .04em;
-  text-transform: uppercase; color: var(--dim);
+  margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line);
 }
-.menu-hoy > summary::-webkit-details-marker { display: none; }
-.menu-hoy > summary::marker { content: ''; }
-.menu-hoy > summary .tiny { text-transform: none; letter-spacing: 0; font-weight: 600; }
-.menu-hoy[open] > summary .sec-flecha { transform: rotate(180deg); }
-.menu-hoy:not([open]) > .menu-cuerpo { display: none; }
-.menu-cuerpo { padding-top: 4px; }
+
+/* Cada semana del historial. Plegada es una linea; abierta, sus entrenos
+   separados por un pelo de raya, sin tarjeta dentro de tarjeta. */
+.sem-caja { padding: 11px 13px; }
+.sem-caja[open] > summary { color: var(--txt); }
+.ses-fila { padding: 9px 0; }
+.ses-fila + .ses-fila { border-top: 1px solid var(--line); }
+.ses-musculos { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.ses-musculos .chip { padding: 1px 7px; font-size: .7rem; background: var(--card2); }
 
 /* Abierto el menu, la tarjeta deja de tener tope: el max-height que la hace
    crecer con la pantalla le cortaria la lista por la mitad. */

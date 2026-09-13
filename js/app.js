@@ -450,14 +450,14 @@
     const kcal = comidas.reduce(function (n, c) { return n + (Number(c.kcal) || 0); }, 0);
 
     return html`
-      <details class="menu-hoy" data-sec="menu"${raw(seccionesAbiertas.menu ? ' open' : '')}>
+      <details class="menu-hoy plegable-fino" data-sec="menu"${raw(seccionesAbiertas.menu ? ' open' : '')}>
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="grow">Menú de hoy</span>
           <span class="tiny nowrap">${toca
             ? 'Ahora: ' + (toca.nombre || 'comer') : UI.num(kcal) + ' kcal'}</span>
         </summary>
-        <div class="menu-cuerpo">
+        <div class="fino-cuerpo">
           ${raw(comidas.map(function (c) {
             const esAhora = c === toca;
             return '<div class="menu-fila' + (esAhora ? ' ahora' : '') + '">' +

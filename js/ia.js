@@ -1990,6 +1990,43 @@
     'chest', 'forearms', 'glutes', 'hamstrings', 'lats', 'lower back', 'middle back',
     'neck', 'quadriceps', 'shoulders', 'traps', 'triceps'];
 
+  /* Se pide en inglés, pero el resto del encargo va en español y a veces
+     contesta «cuádriceps» o «glúteos». Filtrarlo a secas dejaba la lista vacía
+     y la actividad salía sin músculos, que es justo lo que se ha pedido. Aquí se
+     acepta el nombre en cualquiera de los dos idiomas, y de paso las maneras
+     normales de decirlo. */
+  const SINONIMOS_MUSCULO = {
+    piernas: 'quadriceps', pierna: 'quadriceps', cuadriceps: 'quadriceps',
+    muslos: 'quadriceps', femorales: 'hamstrings', isquios: 'hamstrings',
+    pantorrillas: 'calves', gemelos: 'calves', soleo: 'calves',
+    core: 'abdominals', abdomen: 'abdominals', abdominales: 'abdominals',
+    espalda: 'lats', dorsal: 'lats', lumbares: 'lower back', lumbar: 'lower back',
+    hombro: 'shoulders', deltoides: 'shoulders', pectorales: 'chest', pecho: 'chest',
+    gluteo: 'glutes', gluteos: 'glutes', trapecio: 'traps', biceps: 'biceps',
+    triceps: 'triceps', antebrazo: 'forearms', cuello: 'neck'
+  };
+
+  const MUSCULO_POR_NOMBRE = (function () {
+    const mapa = {};
+    MUSCULOS_VALIDOS.forEach(function (id) {
+      mapa[I18N.norm(id)] = id;
+      mapa[I18N.norm(I18N.muscle(id))] = id;
+    });
+    Object.keys(SINONIMOS_MUSCULO).forEach(function (k) {
+      mapa[I18N.norm(k)] = SINONIMOS_MUSCULO[k];
+    });
+    return mapa;
+  })();
+
+  function musculosLimpios(lista) {
+    const fuera = [];
+    (lista || []).forEach(function (m) {
+      const id = MUSCULO_POR_NOMBRE[I18N.norm(m)];
+      if (id && fuera.indexOf(id) === -1) fuera.push(id);
+    });
+    return fuera.slice(0, 5);
+  }
+
   const SALTO = String.fromCharCode(10);
 
   function estimarActividad(texto) {
@@ -2026,9 +2063,7 @@
         nombre: String((r && r.nombre) || t).slice(0, 60),
         met: met > 0 ? Math.min(20, Math.max(1.5, met)) : 0,
         intensidad: (r && r.intensidad) || '',
-        musculos: ((r && r.musculos) || []).filter(function (m) {
-          return MUSCULOS_VALIDOS.indexOf(m) !== -1;
-        }).slice(0, 5),
+        musculos: musculosLimpios(r && r.musculos),
         nota: String((r && r.nota) || '')
       };
     });

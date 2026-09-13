@@ -365,37 +365,7 @@
         </div>` : '')}
 
       <div class="list-title">Historial</div>
-      <div class="stack">
-        ${raw(sesiones.slice(0, 30).map(function (s) {
-          return html`
-            <div class="card">
-              <div class="row between">
-                <div class="grow" style="cursor:pointer" data-ses="${s.id}">
-                  <div style="font-weight:700">${s.routineName}</div>
-                  <div class="tiny">${UI.fecha(s.start)} · ${raw(s.manual
-                    ? esc('apuntado a mano' + (s.kcal ? ' · ~' + UI.num(s.kcal) + ' kcal' : ''))
-                    : s.actividad && !s.setsDone
-                    ? esc('~' + UI.num(s.kcal || 0) + ' kcal')
-                    : s.setsDone + ' series' + (s.volume ? ' · ' + esc(UI.kg(s.volume)) : ''))} ·
-                    ${UI.mmss(((s.end || s.start) - s.start) / 1000)}</div>
-                </div>
-                <button class="btn icon sm danger" data-delses="${s.id}"
-                        aria-label="Borrar">${raw(icon('trash'))}</button>
-              </div>
-              <div class="stack" data-detail="${s.id}" hidden style="margin-top:10px">
-                ${raw((s.entries || []).map(function (e) {
-                  const hechas = (e.sets || []).filter(function (x) { return x.done; });
-                  if (!hechas.length) return '';
-                  return html`<div class="row between" style="font-size:.82rem">
-                    <span class="grow">${e.name}</span>
-                    <span class="tiny">${hechas.map(function (x) {
-                      return UI.num(x.weight) + '×' + x.reps;
-                    }).join(' · ')}</span></div>`;
-                }).join(''))}
-              </div>
-            </div>`;
-        }).join(''))}
-      </div>`;
+      ${raw(historialHTML(sesiones))}`;
   };
 
   /* ---------- metas ----------
@@ -546,6 +516,126 @@
     return 'Reparto equilibrado entre las zonas que entrenas.';
   }
 
+  /* ---------- el historial, por semanas ----------
+     Una lista plana de entrenamientos crece sin fin: a los tres meses son
+     cincuenta tarjetas y encontrar la del martes pasado es bajar y bajar. Se
+     agrupa por semana, cada una plegable como el menú del día —una línea fina
+     que dice de cuándo a cuándo y cuántos entrenos hubo— y solo la semana en
+     curso viene abierta, que es la que se mira. */
+  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+    'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+  /* Qué semanas quedan abiertas. Fuera del pintado porque esta pantalla se
+     repinta entera al borrar una sesión o al cambiar de rango. */
+  const semanasAbiertas = {};
+
+  function lunesDe(t) {
+    const d = new Date(t);
+    const dia = (d.getDay() + 6) % 7;           // lunes = 0
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() - dia).getTime();
+  }
+
+  function tituloSemana(lunes) {
+    const hoyLunes = lunesDe(Date.now());
+    if (lunes === hoyLunes) return 'Esta semana';
+    if (lunes === hoyLunes - 7 * 86400000) return 'La semana pasada';
+
+    const a = new Date(lunes);
+    const b = new Date(lunes + 6 * 86400000);
+    return a.getMonth() === b.getMonth()
+      ? 'Del ' + a.getDate() + ' al ' + b.getDate() + ' de ' + MESES[b.getMonth()]
+      : 'Del ' + a.getDate() + ' de ' + MESES[a.getMonth()] + ' al ' +
+        b.getDate() + ' de ' + MESES[b.getMonth()];
+  }
+
+  /* Qué se trabajó en una sesión. De los ejercicios si los hubo, y de lo que
+     dijo la IA si fue una actividad de fuera del gimnasio. Sin esto el historial
+     decía «19 series» y había que abrirlo para saber de qué. */
+  function musculosDeSesion(s) {
+    const fuera = [];
+    const mete = function (m) { if (m && fuera.indexOf(m) === -1) fuera.push(m); };
+    (s.entries || []).forEach(function (e) {
+      const ex = g.Data ? Data.get(e.exId) : null;
+      if (ex) (ex.primaryMuscles || []).forEach(mete);
+    });
+    (s.musculos || []).forEach(mete);
+    return fuera.slice(0, 4).map(function (m) { return I18N.muscle(m); });
+  }
+
+  function lineaSesion(s) {
+    const dura = UI.mmss(((s.end || s.start) - s.start) / 1000);
+    const que = s.manual
+      ? 'apuntado a mano' + (s.kcal ? ' · ~' + UI.num(s.kcal) + ' kcal' : '')
+      : s.actividad && !s.setsDone
+      ? '~' + UI.num(s.kcal || 0) + ' kcal'
+      : s.setsDone + ' series' + (s.volume ? ' · ' + UI.kg(s.volume) : '');
+    return que + ' · ' + dura;
+  }
+
+  function sesionHTML(s) {
+    const musculos = musculosDeSesion(s);
+    return html`
+      <div class="ses-fila">
+        <div class="row between" style="gap:10px">
+          <div class="grow" style="cursor:pointer;min-width:0" data-ses="${s.id}">
+            <div style="font-weight:700;font-size:.92rem">${s.routineName}</div>
+            <div class="tiny">${UI.fecha(s.start)} · ${lineaSesion(s)}</div>
+            ${raw(musculos.length
+              ? '<div class="ses-musculos">' + musculos.map(function (m) {
+                  return '<span class="chip tiny-chip">' + esc(m) + '</span>';
+                }).join('') + '</div>'
+              : '')}
+          </div>
+          <button class="btn icon sm danger" data-delses="${s.id}"
+                  aria-label="Borrar">${raw(icon('trash'))}</button>
+        </div>
+        <div class="stack" data-detail="${s.id}" hidden style="margin-top:9px">
+          ${raw((s.entries || []).map(function (e) {
+            const hechas = (e.sets || []).filter(function (x) { return x.done; });
+            if (!hechas.length) return '';
+            return html`<div class="row between" style="font-size:.82rem">
+              <span class="grow">${e.name}</span>
+              <span class="tiny">${hechas.map(function (x) {
+                return UI.num(x.weight) + '×' + x.reps;
+              }).join(' · ')}</span></div>`;
+          }).join(''))}
+        </div>
+      </div>`;
+  }
+
+  function historialHTML(sesiones) {
+    if (!sesiones.length) return '';
+
+    const orden = [];
+    const grupos = {};
+    sesiones.slice(0, 120).forEach(function (s) {
+      const k = lunesDe(s.start);
+      if (!grupos[k]) { grupos[k] = []; orden.push(k); }
+      grupos[k].push(s);
+    });
+
+    const estaSemana = lunesDe(Date.now());
+
+    return '<div class="stack">' + orden.map(function (k) {
+      const lista = grupos[k];
+      const abierta = k === estaSemana ? semanasAbiertas[k] !== false : !!semanasAbiertas[k];
+      const series = lista.reduce(function (n, s) { return n + (s.setsDone || 0); }, 0);
+
+      return html`
+        <details class="card plegable-fino sem-caja" data-sem="${k}"${raw(abierta ? ' open' : '')}>
+          <summary>
+            <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+            <span class="grow">${tituloSemana(k)}</span>
+            <span class="tiny nowrap">${lista.length} ${lista.length === 1
+              ? 'entreno' : 'entrenos'}${raw(series ? ' · ' + series + ' series' : '')}</span>
+          </summary>
+          <div class="fino-cuerpo">
+            ${raw(lista.map(sesionHTML).join(''))}
+          </div>
+        </details>`;
+    }).join('') + '</div>';
+  }
+
   V.progreso.mount = function (root) {
     bind(root, '[data-a=ir]', function () { go('rutinas'); });
 
@@ -590,6 +680,10 @@
     });
 
     bindAll(root, '[data-ex]', function (el) { go('ejercicio', el.dataset.ex); });
+    root.querySelectorAll('details[data-sem]').forEach(function (d) {
+      d.addEventListener('toggle', function () { semanasAbiertas[d.dataset.sem] = d.open; });
+    });
+
     bindAll(root, '[data-ses]', function (el) {
       const d = root.querySelector('[data-detail="' + el.dataset.ses + '"]');
       if (d) d.hidden = !d.hidden;
