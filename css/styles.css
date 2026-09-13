@@ -119,7 +119,7 @@ a{color:var(--blue)}
    contenido y estos títulos llevaban 4px más. Cuatro píxeles no se ven de uno
    en uno, pero dejan dos líneas verticales en toda la app y es lo que la hace
    parecer descuadrada. */
-.list-title{font-size:.76rem;font-weight:600;color:var(--dim2);letter-spacing:.04em;
+.list-title{font-size:.84rem;font-weight:800;color:var(--txt);letter-spacing:.04em;
   text-transform:uppercase;margin:22px 0 8px}
 /* Un hijo de un flex no encoge por debajo de su contenido salvo que se le
    diga: es min-width:auto por defecto. La fila del día del menú —«Miércoles
@@ -1308,3 +1308,11 @@ img[src^="data/img/"] {
   border-color: color-mix(in srgb, var(--acc) 55%, transparent);
   color: var(--acc);
 }
+
+/* Las tres acciones sueltas de Rutinas: cada boton con su descripcion pegada
+   debajo y separadas entre si, para que se lea que son tres cosas distintas y
+   no una lista de botones con un parrafo perdido al final. */
+.acciones-sueltas { margin-top: 10px; }
+.acciones-sueltas .btn { margin-top: 0; }
+.acciones-sueltas .btn + .tiny { margin: 6px 0 0; }
+.acciones-sueltas .tiny + .btn { margin-top: 14px; }

@@ -844,7 +844,7 @@
         </div>`;
     }).join('');
 
-    return arriba + html`<div class="list-title">Tus planes</div>` + bloques;
+    return arriba + html`<div class="list-title">Mis planes</div>` + bloques;
   }
 
   /* Fila que se desliza para descubrir sus acciones. El contenido va delante y
@@ -2042,16 +2042,29 @@
       series y los días. <b>Generar programa</b>: te lo monto yo con tu edad, tu nivel, tu
       objetivo y tus limitaciones, y luego lo editas igual.</p>
 
-      <button class="btn ghost block sm" data-a="actividad" style="margin-top:8px">
-        ${raw(icon('plus'))} Apuntar algo que ya hice</button>
+      <!-- Las tres van juntas y cada una con su descripción debajo. Antes
+           estaban sueltas y desordenadas: el texto de «apuntar algo que ya
+           hice» salía tres bloques más abajo, detrás de otros dos botones, así
+           que parecía la explicación de otra cosa. -->
+      <div class="acciones-sueltas">
+        <button class="btn block sm" data-a="actividad">
+          ${raw(icon('plus'))} Apuntar algo que ya hice</button>
+        <p class="tiny">Caminar una hora el domingo, la pachanga del sábado o la clase de
+        pilates cuentan igual, aunque no salgan de una rutina.</p>
 
-      <button class="btn block sm" data-a="importar" style="margin-top:8px">
-        ${raw(icon('nutricion'))} Traer una rutina que ya tengo en papel</button>
-      <p class="tiny" style="margin:6px 0 0">Una foto de la hoja del gimnasio o el
-      PDF de tu entrenador: la leo, te enseño lo que he entendido y tú decides.</p>
-      ${raw(Store.routines().some(function (r) { return (r.days || []).length; })
-        ? '<button class="btn ghost block sm" data-a="correr" style="margin-top:6px">' +
-          'Hoy no pude: correr el plan de día</button>' : '')}
+        ${raw(Store.routines().some(function (r) { return (r.days || []).length; })
+          ? '<button class="btn block sm" data-a="correr">' + icon('cambiar') +
+            ' Hoy no pude: correr el plan de día</button>' +
+            '<p class="tiny">Si te saltas un día, corre el plan entero una jornada ' +
+            'en vez de perder la sesión: lo que tocaba hoy pasa a mañana, y así el ' +
+            'resto.</p>'
+          : '')}
+
+        <button class="btn block sm" data-a="importar">
+          ${raw(icon('nutricion'))} Traer una rutina que ya tengo en papel</button>
+        <p class="tiny">Una foto de la hoja del gimnasio o el PDF de tu entrenador: la
+        leo, te enseño lo que he entendido y tú decides.</p>
+      </div>
 
       ${raw((function () {
         const n = duplicados().length;
@@ -2064,8 +2077,6 @@
           '<button class="btn block" data-a="limpiardup" style="margin-top:11px">' +
           'Revisar y limpiar</button></div>';
       })())}
-      <p class="tiny" style="margin-top:6px">Caminar una hora el domingo, la pachanga
-      del sábado o la clase de pilates cuentan igual, aunque no salgan de una rutina.</p>
 
       ${raw(rutinas.length ? html`
         <div class="list-head">
