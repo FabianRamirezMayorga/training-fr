@@ -1316,3 +1316,28 @@ img[src^="data/img/"] {
 .acciones-sueltas .btn { margin-top: 0; }
 .acciones-sueltas .btn + .tiny { margin: 6px 0 0; }
 .acciones-sueltas .tiny + .btn { margin-top: 14px; }
+
+/* ---------- plantillas, plegadas ----------
+   Once plantillas con su descripcion entera eran cuatro pantallas de texto
+   para elegir una. Con el nombre, el nivel y los dias ya se decide; el resto
+   se lee si interesa. El boton de usar se queda en la cabecera para poder
+   copiarla sin abrirla. */
+.plantilla { padding: 0; overflow: hidden; }
+.plantilla > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  cursor: pointer;
+  list-style: none;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+.plantilla > summary::-webkit-details-marker { display: none; }
+.plantilla > summary::marker { content: ''; }
+.pl-flecha { transition: transform .18s ease; flex: none; }
+.plantilla[open] > summary .pl-flecha { transform: rotate(90deg); }
+.plantilla summary .grow { min-width: 0; }
+.pl-usar { flex: none; }
+.plantilla:not([open]) > .pl-cuerpo { display: none; }
+.plantilla > .pl-cuerpo { padding: 0 13px 13px; }

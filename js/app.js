@@ -844,7 +844,7 @@
         </div>`;
     }).join('');
 
-    return arriba + html`<div class="list-title">Mis planes</div>` + bloques;
+    return arriba + html`<div class="list-title">Mis planes de entrenamiento</div>` + bloques;
   }
 
   /* Fila que se desliza para descubrir sus acciones. El contenido va delante y
@@ -2113,24 +2113,37 @@
   /* Las plantillas de un tipo. Las de movilidad se listan aparte porque
      buscarlas entre las de fuerza era perderlas, pero la tarjeta es la misma:
      se copian y se entrenan igual. */
+  /* Qué plantillas quedan abiertas. Fuera del pintado, que la pantalla se
+     repinta entera al copiar una y si no se cierra la que acabas de abrir. */
+  const plantillasAbiertas = {};
+
   function plantillasHTML(tipo) {
     return Templates.list.filter(function (t) {
       return (t.tipo || 'fuerza') === tipo;
     }).map(function (t) {
+      /* Plegada de entrada. Once plantillas con su descripción entera son
+         cuatro pantallas de texto para elegir una; con el nombre, el nivel y
+         los días ya se decide, y el resto se lee si interesa. El botón de usar
+         se queda fuera para poder copiarla sin abrirla. */
       return html`
-        <div class="card">
-          <div class="row between" style="align-items:flex-start">
-            <div class="grow">
-              <div style="font-weight:700">${t.name}</div>
-              <div class="tiny">${t.goal} · ${t.level} · ${t.exercises.length} ejercicios</div>
-              <div class="tiny">${UI.diasLargos(t.days)}</div>
-              <span class="chip tiny-chip" style="margin:6px 0 0;display:inline-block">
-                ${raw(icon('dumbbell'))} ${Data.GEAR[Templates.lugarNecesario(t)].label}</span>
-            </div>
-            <button class="btn sm" data-tpl="${t.id}">${raw(icon('copy'))} Usar</button>
+        <details class="card plantilla" data-tpl-caja="${t.id}"${raw(
+          plantillasAbiertas[t.id] ? ' open' : '')}>
+          <summary>
+            <span class="chevron down pl-flecha">${raw(icon('chevron'))}</span>
+            <span class="grow">
+              <span style="font-weight:700;display:block">${t.name}</span>
+              <span class="tiny" style="display:block">${t.goal} · ${t.level}
+                · ${t.exercises.length} ejercicios</span>
+              <span class="tiny" style="display:block">${UI.diasLargos(t.days)}</span>
+            </span>
+            <button class="btn sm pl-usar" data-tpl="${t.id}">${raw(icon('copy'))} Usar</button>
+          </summary>
+          <div class="pl-cuerpo">
+            <span class="chip tiny-chip" style="display:inline-block">
+              ${raw(icon('dumbbell'))} ${Data.GEAR[Templates.lugarNecesario(t)].label}</span>
+            <p class="muted" style="margin:9px 0 0;font-size:.82rem">${t.note}</p>
           </div>
-          <p class="muted" style="margin:9px 0 0;font-size:.82rem">${t.note}</p>
-        </div>`;
+        </details>`;
     }).join('');
   }
 
@@ -2239,6 +2252,18 @@
     bindAll(root, '[data-ver]', function (el) {
       const ex = Data.get(el.dataset.ver);
       if (ex) exerciseSheet(ex);
+    });
+
+    /* Recordar qué plantillas quedan abiertas, y que «Usar» no pliegue la ficha:
+       va dentro del <summary>, donde un clic despliega por defecto. */
+    root.querySelectorAll('details.plantilla').forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (d.open) plantillasAbiertas[d.dataset.tplCaja] = true;
+        else delete plantillasAbiertas[d.dataset.tplCaja];
+      });
+    });
+    root.querySelectorAll('.pl-usar').forEach(function (b) {
+      b.addEventListener('click', function (ev) { ev.preventDefault(); });
     });
 
     bindAll(root, '[data-tpl]', function (el) {
