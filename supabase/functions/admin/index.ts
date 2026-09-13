@@ -21,7 +21,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, content-type',
+  /* la app manda también apikey; si no se permite aquí, el navegador corta la
+     petición en el preflight y no llega a ejecutarse nada */
+  'Access-Control-Allow-Headers': 'authorization, content-type, apikey, x-client-info',
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
 
