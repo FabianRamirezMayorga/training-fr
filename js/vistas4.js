@@ -692,7 +692,12 @@
             <div style="flex:none;font-size:1.9rem;font-weight:700;line-height:1;
                         color:${raw(colorNota(nota))}">${nota}<span
                  style="font-size:.9rem;color:var(--dim2)">/10</span></div>
-            <div class="tiny grow">Nota que le pone a este plan tal y como está ahora.</div>
+            <div class="tiny grow">${raw(r.revision
+              ? 'Sale de ' + r.revision.hallazgos.length + ' ' +
+                (r.revision.hallazgos.length === 1 ? 'fallo encontrado' : 'fallos encontrados') +
+                ' al repasar el plan y de lo graves que son. La calcula la app, no la IA: ' +
+                'el mismo plan da siempre la misma nota.'
+              : 'Nota de este plan tal y como está ahora.')}</div>
           </div>` : '')}
         <p style="margin:0 0 10px">${r.veredicto || ''}</p>
         ${raw((r.puntos || []).map(function (x) {
@@ -763,8 +768,17 @@
 
       <button class="btn block" data-a="afinar" style="margin-top:12px">
         ${raw(icon('chispa'))} Auditar otra vez</button>
-      <p class="tiny center" style="margin:7px 4px 0">Con los cambios que acabas de aplicar
-      delante, el dictamen cambia. Cada pulsación es una llamada a la IA.</p>`;
+      <p class="tiny center" style="margin:7px 4px 0">${raw(r.deCache
+        ? 'Este dictamen es el que ya se hizo para este plan: mientras no lo cambies, ' +
+          'volver a pulsar enseña lo mismo en vez de inventarse otra cosa. En cuanto ' +
+          'apliques un cambio, se rehace solo.'
+        : 'Se guarda para este plan. Si aplicas cambios, la próxima auditoría será nueva.')}</p>
+      ${raw(r.deCache ? html`
+        <button class="btn ghost block sm" data-a="reafinar" style="margin-top:8px">
+          Pedir otra redacción</button>
+        <p class="tiny center" style="margin:6px 4px 0">Los fallos serán los mismos —son
+        cuentas sobre el plan—; lo que cambia es cómo están explicados. Gasta una
+        llamada a la IA.</p>` : '')}`;
   }
 
   /* Un plan abierto tiene que poder cerrarse. Sin esto, tocar uno por error
@@ -1161,7 +1175,8 @@
       seguir();
     });
 
-    bindAll(root, '[data-a=afinar]', afinar);
+    bindAll(root, '[data-a=afinar]', function () { afinar(false); });
+    bindAll(root, '[data-a=reafinar]', function () { afinar(true); });
     bindAll(root, '[data-cambio]', function (el) { aplicarCambio(Number(el.dataset.cambio)); });
 
     bindAll(root, '[data-nocambio]', function (el) {
@@ -1368,11 +1383,11 @@
     if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function afinar() {
+  function afinar(rehacer) {
     if (!IA.activa()) { go('claves'); UI.toast('Elige proveedor de IA y pon su clave'); return; }
     est.cargandoIA = true;
     render();
-    IA.afinarPrograma(est.prog)
+    IA.afinarPrograma(est.prog, rehacer)
       .then(function (r) { est.ia = r; })
       .catch(function (e) { UI.toast(e.message); })
       .then(function () { est.cargandoIA = false; guardarEstado(); render(); });

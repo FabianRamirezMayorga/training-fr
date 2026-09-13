@@ -1493,18 +1493,31 @@
       });
     });
 
+    /* Los mismos fallos calculados que en el programa entero, pero solo con las
+       reglas que valen para una sesión suelta. */
+    const rev = Revisar.revisar({
+      gear: Store.settings().gear,
+      sesiones: [{ nombre: r.name || 'esta rutina', ejercicios: r.exercises || [] }]
+    }, { sesionSuelta: true });
+
     const prompt = contexto({ progreso: true, cargas: true, favoritos: true,
       gear: Store.settings().gear }) + '\n\n' +
       'RUTINA A AUDITAR — "' + (r.name || 'sin nombre') + '", ' + dias + ':\n' + lista + '\n' +
       menuEjercicios(suyos) +
       (r.note ? 'NOTAS QUE LE PUSO: ' + r.note + '\n' : '') +
+      Revisar.comoTexto(rev) +
       '\nAudita esta rutina concreta. No me cuentes lo que ya está bien.\n' +
+      '- Los fallos vienen calculados arriba: explícalos tú, con su consecuencia, ' +
+      'pero no busques otros ni te calles ninguno. Si la lista viene vacía, dilo.\n' +
+      '- Ojo: una rutina suelta es un día, no una semana. No le reproches que le ' +
+      'falte un grupo muscular o un patrón: eso se reparte entre todos los días.\n' +
       (sinHistorial()
         ? 'Ojo: acaba de empezar con la app y no tiene nada registrado. Audítale la ' +
           'rutina por lo que es —los ejercicios, el orden, las series— y no por lo que ' +
           'no ha apuntado todavía.\n'
         : '') +
-      BAREMO +
+      '- La nota NO la pones tú: la calcula la app con esos fallos. Devuelve el ' +
+      'número ' + rev.nota + ' en "nota", tal cual.\n' +
       '- De dos a cuatro puntos, y al menos dos tienen que ser fallos con su ' +
       'consecuencia: orden de los ejercicios, series o repeticiones que no ' +
       'cuadran con mi objetivo, músculos repetidos, patrones que faltan, ' +
@@ -1535,7 +1548,22 @@
 
     /* Un dictamen no es un texto creativo: con temperatura alta el mismo plan
        sacaba una nota distinta en cada consulta. */
-    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.15 });
+    const claveCache = 'rutina:' + rev.huella;
+    const guardado = leerCache(claveCache, 24 * 30);
+    if (guardado) {
+      guardado.nota = rev.nota;
+      guardado.revision = rev;
+      guardado.deCache = true;
+      return Promise.resolve(guardado);
+    }
+
+    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.15 })
+      .then(function (res) {
+        res.nota = rev.nota;
+        res.revision = rev;
+        escribirCache(claveCache, res);
+        return res;
+      });
   }
 
   /* ---------- afinar el programa ----------
@@ -1545,7 +1573,7 @@
      nota, se le prohíbe adular y se le exige que proponga cambios concretos
      —quitar, meter o sustituir un ejercicio— que la app valida después contra el
      catálogo, el material y las lesiones. */
-  function afinarPrograma(prog) {
+  function afinarPrograma(prog, rehacer) {
     const dias = prog.sesiones.map(function (s, i) {
       return (i + 1) + ') ' + s.nombre + ' [' + s.minutos + ' min]: ' +
         s.ejercicios.map(function (e) {
@@ -1602,6 +1630,27 @@
       }
     }
 
+    /* Los fallos se calculan aquí, no se le preguntan. Pedírselos era una búsqueda
+       con docenas de respuestas defendibles: cuatro consultas idénticas decían doce
+       cosas distintas y alguna falsa —añadir un ejercicio que ya estaba—. */
+    const rev = Revisar.revisar(prog);
+
+    /* El mismo plan merece el mismo dictamen. Aunque los fallos ya salen
+       calculados y estables, la redacción cambiaba en cada consulta y desde
+       fuera eso se lee igual de mal: parece que cambia de opinión. Se guarda
+       contra la huella del plan, así que volver a pulsar enseña lo mismo y solo
+       se vuelve a preguntar si el plan ha cambiado —o si se pide a propósito. */
+    const claveCache = 'dictamen:' + rev.huella;
+    if (!rehacer) {
+      const guardado = leerCache(claveCache, 24 * 30);
+      if (guardado) {
+        guardado.nota = rev.nota;
+        guardado.revision = rev;
+        guardado.deCache = true;
+        return Promise.resolve(guardado);
+      }
+    }
+
     const prompt = contexto({ progreso: true, cargas: true, comida: true }) + '\n\n' +
       (prog.deRutinas
         ? 'ESTE ES EL PLAN QUE YA ENTRENA, guardado en sus rutinas como «' +
@@ -1623,8 +1672,19 @@
       'que pase de 10.\n' + historial + comida +
       (prog.lesiones.length ? 'LIMITACIONES YA APLICADAS: ' + prog.lesiones.join(', ') + '\n' : '') +
       menuEjercicios(Object.keys(prog.volumen || {})) +
+      Revisar.comoTexto(rev) +
       '\nTe han contratado para auditar este programa, no para animar a nadie.\n\n' +
       'REGLAS INNEGOCIABLES:\n' +
+      '- Los fallos ya están encontrados y vienen arriba: son cuentas hechas sobre ' +
+      'el plan, no opiniones. Tu trabajo es explicarlos y arreglarlos, NO buscar otros. ' +
+      'Un punto por cada fallo de la lista, en ese mismo orden, sin añadir ninguno de ' +
+      'tu cosecha y sin callarte ninguno. Si la lista viene vacía, dilo claramente y ' +
+      'no te inventes defectos para rellenar.\n' +
+      '- En cada punto, escribe el título con tus palabras y explica la CONSECUENCIA: ' +
+      'qué le pasa si lo deja así. Cita el número que viene en el fallo.\n' +
+      '- Antes de proponer añadir un ejercicio, mira la lista de arriba: si ya está en ' +
+      'el plan, NO lo propongas. Y un recambio tiene que entrenar lo mismo que lo que ' +
+      'sustituye: no cambies un ejercicio de pierna por uno de brazo.\n' +
       (sinHistorial()
         ? '- Acaba de instalar la app y todavía no ha registrado ni un entrenamiento ni ' +
           'una comida. Eso NO es un defecto y no puede aparecer entre los puntos ni ' +
@@ -1637,7 +1697,9 @@
       '- Habla de ESTE plan y de ESTA persona: cita ejercicios por su nombre, ' +
       'músculos por sus series y días por su número. Si un consejo se lo podrías ' +
       'dar a otro cualquiera, bórralo y busca otro.\n' +
-      BAREMO +
+      '- La nota NO la pones tú: la calcula la app a partir de esos fallos y de su ' +
+      'gravedad. Devuelve el número ' + rev.nota + ' en "nota", tal cual, y que tu ' +
+      'veredicto no diga una cosa distinta de lo que dice ese número.\n' +
       '- Si hay riesgo para sus limitaciones o para su edad, eso va primero.\n\n' +
       'CAMBIOS: propon de dos a cuatro, y que sean ejecutables. Cada uno lleva ' +
       'una accion:\n' +
@@ -1662,7 +1724,30 @@
 
     /* Un dictamen no es un texto creativo: con temperatura alta el mismo plan
        sacaba una nota distinta en cada consulta. */
-    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.15 });
+    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.15 })
+      .then(function (r) {
+        /* La nota es de la app. Que el modelo la copie bien es lo normal, pero si
+           se despista no puede quedar un 7 encima de una lista de cinco fallos. */
+        r.nota = rev.nota;
+        r.revision = rev;
+
+        /* Y un último filtro: proponer meter algo que ya está en el plan es el
+           error que más desconfianza genera, porque se ve a simple vista. */
+        const dentro = {};
+        (prog.sesiones || []).forEach(function (ses) {
+          (ses.ejercicios || []).forEach(function (e) {
+            const ex = Data.get(e.exId);
+            if (ex) dentro[I18N.norm(ex.nameEs)] = true;
+          });
+        });
+        r.cambios = (r.cambios || []).filter(function (c) {
+          if (c.accion !== 'anadir') return true;
+          return !dentro[I18N.norm(String(c.poner || ''))];
+        });
+
+        escribirCache(claveCache, r);
+        return r;
+      });
   }
 
   /* Mira una foto de comida y estima lo que hay. Es una aproximación y se dice
