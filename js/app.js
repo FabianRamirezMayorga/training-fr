@@ -481,7 +481,7 @@
 
       <div class="list-head">
         <span class="list-title" style="margin:0">Hoy, ${UI.diaLargo(hoy).toLowerCase()}</span>
-        <button class="btn sm ghost" data-a="verdia">Ver el día entero</button>
+        <button class="btn sm primary" data-a="verdia">${raw(icon('lista'))} Ver el día entero</button>
       </div>
       ${raw(deHoy.length
         ? '<div class="stack">' + deHoy.map(function (r) { return routineCard(r); }).join('') + '</div>'
