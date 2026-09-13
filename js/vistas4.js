@@ -100,6 +100,18 @@
   /* El sitio donde va a entrenar ESTE plan. Por defecto el de los ajustes, pero
      se puede cambiar aquí sin tocar el global: montar un plan para las vacaciones
      no debería cambiarle el catálogo de toda la app. */
+  /* Al irse de la pantalla, el plan abierto deja de estar «abierto»: sigue
+     guardado, pero al volver se ve otra vez la lista y no lo que se tocó hace
+     media hora. Lo que aún no está en rutinas se respeta, que si no se pierde. */
+  window.addEventListener('hashchange', function () {
+    if (location.hash.indexOf('programa') !== -1) return;
+    if (!est.prog || est.recuperado) return;
+    if (!vivas().length) return;
+    est.recuperado = true;
+    est.creando = false;
+    guardarEstado();
+  });
+
   function gearActual() {
     return est.gear || Store.settings().gear || 'gym';
   }
@@ -743,13 +755,27 @@
       delante, el dictamen cambia. Cada pulsación es una llamada a la IA.</p>`;
   }
 
+  /* Un plan abierto tiene que poder cerrarse. Sin esto, tocar uno por error
+     dejaba la pantalla ocupada y volver a entrar la encontraba igual, porque el
+     plan se guarda entre sesiones. */
+  function cabeceraPlan(prog) {
+    const nombre = prog.deRutinas || prog.nombreIA || 'Plan sin guardar';
+    return html`
+      <div class="list-head" style="margin-top:18px">
+        <span class="list-title" style="margin:0">Viendo: ${nombre}</span>
+        <button class="btn sm ghost" data-a="cerrarplan">${raw(icon('close'))} Cerrar</button>
+      </div>`;
+  }
+
   function resultado(prog) {
     const series = prog.sesiones.reduce(function (n, s) {
       return n + s.ejercicios.reduce(function (m, e) { return m + e.sets; }, 0);
     }, 0);
 
     return html`
-      <div class="stats" style="margin-top:16px">
+      ${raw(cabeceraPlan(prog))}
+
+      <div class="stats" style="margin-top:12px">
         <div class="stat"><b>${prog.sesiones.length}</b><span>Días</span></div>
         <div class="stat"><b>${series}</b><span>Series semana</span></div>
         <div class="stat"><b>RPE ${prog.rpe}</b><span>Esfuerzo tope</span></div>
@@ -960,6 +986,24 @@
     }
 
     /* Arrepentirse de crear tiene que costar un toque, no salir de la pantalla */
+    /* Cerrar lo que se está mirando y volver a la lista de planes */
+    bind(root, '[data-a=cerrarplan]', function () {
+      const cerrar = function () {
+        est.prog = null; est.ia = null; est.aplicados = []; est.guardadas = [];
+        est.recuperado = false; est.creando = false; est.abierto = {};
+        guardarEstado();
+        render();
+        window.scrollTo(0, 0);
+      };
+      if (est.prog && !vivas().length) {
+        UI.confirm('Cerrar sin guardar',
+          'Este plan no está en tus rutinas. Si lo cierras, se pierde.',
+          'Cerrar igual', true).then(function (ok) { if (ok) cerrar(); });
+        return;
+      }
+      cerrar();
+    });
+
     bind(root, '[data-a=cancelarnuevo]', function () {
       const cerrar = function () {
         est.creando = false;
