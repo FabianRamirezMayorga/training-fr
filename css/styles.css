@@ -989,3 +989,15 @@ body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
 .desliza:has(>.desliza-cara>.dia-grupo){margin-top:14px}
 /* Mientras está abierta, la esquina de la cara marca dónde acaba */
 .desliza.abierta .desliza-cara{box-shadow:-6px 0 14px rgba(0,0,0,.28)}
+
+/* ---------- mientras se escribe ----------
+   Lo que está fijo abajo —la barra de pestañas, el HUD del entrenamiento, el
+   aviso flotante— queda debajo del teclado o encima del campo, según el
+   sistema. Con el teclado abierto no sirve para nada: se aparta, y vuelve al
+   salir del campo. */
+body.escribiendo .tabbar,
+body.escribiendo .hud { opacity: 0; pointer-events: none; transform: translateY(12px);
+  transition: opacity .16s, transform .16s; }
+/* el aviso flotante se centra con un transform propio, así que a ese solo se
+   le baja la opacidad: tocarle el transform lo descoloca */
+body.escribiendo .toast { opacity: 0; pointer-events: none; }

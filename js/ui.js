@@ -97,6 +97,11 @@
   function ajustarAlTeclado() {
     const box = document.getElementById('modal');
     const vv = window.visualViewport;
+    if (vv) {
+      /* para que el CSS pueda apartar lo que esté fijo abajo sin adivinar
+         cuánto ocupa el teclado */
+      document.documentElement.style.setProperty('--vv-alto', vv.height + 'px');
+    }
     if (!box || box.hidden) return;
     if (!vv) { box.style.height = ''; box.style.top = ''; box.style.bottom = ''; return; }
     box.style.height = vv.height + 'px';
@@ -115,6 +120,67 @@
       vv.removeEventListener('scroll', ajustarAlTeclado);
     }
   }
+
+  /* ---------- escribir en cualquier sitio ----------
+     Lo de la hoja vale para las hojas, pero hay campos sueltos por toda la app
+     —el editor de una rutina, el perfil, el buscador, los kilos de una serie—
+     y ahí pasa lo mismo: el teclado se pone encima y tapa justo lo que estás
+     escribiendo, o lo tapa la barra de pestañas, que también está fija abajo.
+
+     Al enfocar un campo se aparta lo que estorba y se sube el campo a la zona
+     que queda libre de verdad, la que dice visualViewport y no la ventana. */
+  const ESCRIBIBLE = 'input, textarea, select, [contenteditable="true"]';
+  const SIN_TECLADO = ['checkbox', 'radio', 'range', 'color', 'file', 'button', 'submit'];
+
+  function pideTeclado(el) {
+    if (!el || !el.matches || !el.matches(ESCRIBIBLE)) return false;
+    if (el.tagName === 'INPUT' && SIN_TECLADO.indexOf(el.type) !== -1) return false;
+    return !el.disabled && !el.readOnly;
+  }
+
+  function aLaVista(el) {
+    if (!el || !el.getBoundingClientRect) return;
+    const vv = window.visualViewport;
+    const alto = vv ? vv.height : window.innerHeight;
+    const arriba = vv ? vv.offsetTop : 0;
+    const r = el.getBoundingClientRect();
+    const margen = 20;
+
+    /* dentro de una hoja o de cualquier caja con scroll propio */
+    const caja = el.closest('.modal-box, .tabla-scroll');
+    if (caja) el.scrollIntoView({ block: 'nearest' });
+
+    const abajo = arriba + alto - margen;
+    if (r.bottom > abajo) window.scrollBy({ top: r.bottom - abajo, behavior: 'smooth' });
+    else if (r.top < arriba + margen) {
+      window.scrollBy({ top: r.top - arriba - margen, behavior: 'smooth' });
+    }
+  }
+
+  let campoActivo = null;
+
+  document.addEventListener('focusin', function (e) {
+    if (!pideTeclado(e.target)) return;
+    campoActivo = e.target;
+    document.body.classList.add('escribiendo');
+    ajustarAlTeclado();
+    vigilarTeclado(true);
+    /* el teclado tarda en subir; sin esperar, la cuenta sale con la pantalla
+       todavía entera y el campo se queda debajo igual */
+    setTimeout(function () { aLaVista(campoActivo); }, 120);
+    setTimeout(function () { aLaVista(campoActivo); }, 400);
+  });
+
+  document.addEventListener('focusout', function (e) {
+    if (!pideTeclado(e.target)) return;
+    campoActivo = null;
+    setTimeout(function () {
+      /* si el foco ha saltado a otro campo, esto no es el final de nada */
+      if (campoActivo) return;
+      document.body.classList.remove('escribiendo');
+      if (document.getElementById('modal').hidden) vigilarTeclado(false);
+    }, 60);
+  });
 
   function modal(contentHTML, onMount) {
     /* Si se abre una hoja desde una fila deslizada, esa fila se queda abierta
