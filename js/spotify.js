@@ -318,6 +318,11 @@
           access_token: j.access_token,
           refresh_token: j.refresh_token || previo.refresh_token,
           expires_at: Date.now() + (j.expires_in || 3600) * 1000,
+          /* El día que se AUTORIZÓ, que no es el día que se renovó el token.
+             Hace falta para saber si un cambio en el panel de Spotify es
+             posterior a la conexión: si lo es, el token no lo ha visto y no
+             tiene sentido sacar conclusiones de lo que falle. */
+          dado_en: esRenovacion ? (previo.dado_en || 0) : Date.now(),
           scopes_v: esRenovacion ? (previo.scopes_v || 1) : SCOPES_V,
           /* Lo que Spotify ha concedido de verdad, que no siempre es lo que se
              pidió: si falta alguno, las llamadas fallan con un 403 seco y sin
@@ -762,6 +767,18 @@
       });
   }
 
+  /* Cuánto hace que se autorizó, dicho como se dice. Sirve para saber si un
+     cambio en el panel de Spotify es más nuevo que la conexión. */
+  function edadDeLaConexion() {
+    const s = sesion() || {};
+    if (!s.dado_en) return 'de antes de que esto se apuntara (reconecta para saberlo)';
+    const min = Math.round((Date.now() - s.dado_en) / 60000);
+    if (min < 60) return 'autorizada hace ' + min + ' min';
+    const h = Math.round(min / 60);
+    if (h < 48) return 'autorizada hace ' + h + (h === 1 ? ' hora' : ' horas');
+    return 'autorizada hace ' + Math.round(h / 24) + ' días';
+  }
+
   /* Prueba de las llamadas que fallan, para ver el motivo en crudo en vez de
      seguir deduciéndolo desde fuera. */
   function diagnostico() {
@@ -790,14 +807,26 @@
       }).catch(function (e) { partes.push(nombre + ': sin red (' + e.message + ')'); });
     }
 
+    let miId = '';
     return pedir('/me').then(function (yo) {
-      partes.push('cuenta: ' + (yo && yo.id) + ' · ' + (yo && yo.product));
+      miId = (yo && yo.id) || '';
+      partes.push('cuenta: ' + miId + ' · ' + (yo && yo.product));
       partes.push('app: ' + String(c.clientId || '').slice(0, 8) + '…');
-      return pedir('/me/playlists?limit=1');
+      partes.push('conexión: ' + edadDeLaConexion());
+      return pedir('/me/playlists?limit=50');
     }).then(function (r) {
-      const uno = r && r.items && r.items[0];
+      const items = (r && r.items) || [];
+      /* Una lista SUYA, no la primera que venga: las que genera Spotify
+         —«My top tracks playlist» y compañía— devuelven 403 por su cuenta desde
+         que restringieron el acceso a lo editorial, y eso ensuciaba la prueba
+         haciendo parecer que el problema era del token. */
+      const mia = items.filter(function (x) {
+        return x && x.owner && x.owner.id === miId;
+      })[0];
+      const uno = mia || items[0];
       pl = uno ? uno.id : '';
-      partes.push('tus listas: bien' + (uno ? ' (' + (uno.name || '') + ')' : ''));
+      partes.push('tus listas: bien' + (uno
+        ? ' (' + (uno.name || '') + (mia ? ', tuya' : ', de Spotify') + ')' : ''));
     }).catch(function (e) {
       partes.push('fallo antes de empezar: ' + e.message);
     }).then(function () {
@@ -1211,7 +1240,11 @@
   const PUBLICO = {
     SCOPES_V: SCOPES_V, permisosCaducados: permisosCaducados, volumen: volumen,
     permisosQueFaltan: permisosQueFaltan, diagnostico: diagnostico,
-    sesionSinApuntar: sesionSinApuntar,
+    sesionSinApuntar: sesionSinApuntar, edadDeLaConexion: edadDeLaConexion,
+    conexionReciente: function (minutos) {
+      const x = sesion();
+      return !!(x && x.dado_en && (Date.now() - x.dado_en) < (minutos || 10) * 60000);
+    },
     puedeGuardar: puedeGuardar,
     nombreDeContexto: nombreDeContexto, apuntarContexto: apuntarContexto,
     ponerUri: ponerUri,

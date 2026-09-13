@@ -1206,17 +1206,27 @@
                falla, el problema es la app del panel y no la cuenta. */
             const publicoFalla = /público hondo: (401|403)/.test(t);
             const crearVa = /crear lista: 20\d/.test(t);
+            /* Un cambio en el panel de Spotify no toca un token ya dado. Si la
+               conexión es vieja, lo que falle aquí no dice nada todavía: es la
+               foto de antes del cambio. */
+            const reciente = Spotify.conexionReciente && Spotify.conexionReciente(20);
+
             res.textContent = t + BAJA + BAJA + (crearVa
               ? 'CONCLUSIÓN: ahora sí deja crear listas. Cierra esto y dale otra vez a '
                 + 'guardar.'
-              : publicoFalla
-                ? 'CONCLUSIÓN: falla hasta el catálogo público, que no pide ningún '
-                  + 'permiso. El problema está en la app del panel de Spotify, no en tu '
-                  + 'cuenta: mira si sigue en modo desarrollo y si tu cuenta está en '
-                  + 'User Management.'
-                : 'CONCLUSIÓN: el catálogo público responde, así que la app del panel '
-                  + 'está bien. Lo que Spotify no deja es escribir en tu cuenta. '
-                  + 'Mándame estas líneas.');
+              : !reciente
+                ? 'CONCLUSIÓN: esta conexión es anterior a cualquier cambio que hayas '
+                  + 'hecho hoy en el panel de Spotify, y un cambio en el panel no toca un '
+                  + 'token ya dado. Reconecta aquí abajo y vuelve a probar: hasta '
+                  + 'entonces esto es la foto de antes.'
+                : publicoFalla
+                  ? 'CONCLUSIÓN: falla hasta el catálogo público, que no pide ningún '
+                    + 'permiso. El problema está en la app del panel de Spotify, no en tu '
+                    + 'cuenta: mira si sigue en modo desarrollo y si tu cuenta está en '
+                    + 'User Management.'
+                  : 'CONCLUSIÓN: conexión recién hecha, el catálogo público responde y '
+                    + 'aun así Spotify no deja escribir en tu cuenta. Esto ya no es ni el '
+                    + 'token ni el panel. Mándame estas líneas.');
             espera.hidden = true;
             res.hidden = false;
             fin.hidden = false;
