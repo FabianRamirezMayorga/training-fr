@@ -415,9 +415,64 @@
         </div>
 
         <input type="file" id="foto-inicio" accept="image/*" capture="environment" hidden>
+
+        ${raw(menuHoyHTML())}
       </div>
 
       <div id="comida-pensando" class="si-vacio-fuera"></div>`;
+  }
+
+  /* El menu de hoy, plegado.
+     Lo que toca comer es tan de hoy como la rutina, y estaba dos pantallas
+     adentro: se generaba el plan de la semana y luego no se miraba. Va plegado
+     y con lo minimo en la linea —la siguiente comida— porque la portada es un
+     tablero, no un documento: la semana entera sigue en Alimentacion, que es
+     donde se lee de arriba abajo.
+
+     Si no hay menu hecho, aqui no sale nada: una seccion vacia invitando a
+     generar algo es justo lo que sobra en una portada. */
+  function menuHoyHTML() {
+    if (!g.VISTAS || !VISTAS.menuDeHoy) return '';
+    const menu = VISTAS.menuDeHoy();
+    const comidas = (menu && menu.comidas) || [];
+    if (!comidas.length) return '';
+
+    /* Cual toca ahora: la primera cuya hora no haya pasado. Sin horas, la
+       primera de la lista. */
+    const ahora = new Date().getHours() * 60 + new Date().getMinutes();
+    const minutosDe = function (c) {
+      const m = String(c.hora || '').match(/(\d{1,2})[:h.](\d{2})?/);
+      return m ? Number(m[1]) * 60 + Number(m[2] || 0) : -1;
+    };
+    let toca = comidas.filter(function (c) { return minutosDe(c) >= ahora; })[0] || null;
+    if (!toca && comidas.every(function (c) { return minutosDe(c) === -1; })) toca = comidas[0];
+
+    const kcal = comidas.reduce(function (n, c) { return n + (Number(c.kcal) || 0); }, 0);
+
+    return html`
+      <details class="menu-hoy" data-sec="menu"${raw(seccionesAbiertas.menu ? ' open' : '')}>
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="grow">Menú de hoy</span>
+          <span class="tiny nowrap">${toca
+            ? 'Ahora: ' + (toca.nombre || 'comer') : UI.num(kcal) + ' kcal'}</span>
+        </summary>
+        <div class="menu-cuerpo">
+          ${raw(comidas.map(function (c) {
+            const esAhora = c === toca;
+            return '<div class="menu-fila' + (esAhora ? ' ahora' : '') + '">' +
+              '<div class="row between" style="gap:10px">' +
+              '<b style="font-size:.86rem">' + esc(c.nombre || 'Comida') +
+              (c.hora ? ' <span class="tiny">' + esc(c.hora) + '</span>' : '') + '</b>' +
+              '<span class="tiny nowrap">' + UI.num(c.kcal || 0) + ' kcal · ' +
+              (c.prot || 0) + ' g</span></div>' +
+              '<p style="margin:2px 0 0;font-size:.85rem">' + esc(c.plato || '') + '</p>' +
+              '</div>';
+          }).join(''))}
+          <button class="btn sm block" data-a="irnutricion" style="margin-top:9px">
+            Ver la semana entera</button>
+        </div>
+      </details>`;
   }
 
   /* Cómo llamar en un botón a lo que toca hoy: la zona que más se trabaja,
@@ -2194,7 +2249,7 @@
      recuerda lo abierto tiene que ir en todas o la que falte se cierra sola al
      repintar. */
   function recordarSecciones(root) {
-    root.querySelectorAll('details.seccion').forEach(function (d) {
+    root.querySelectorAll('details.seccion, details.menu-hoy').forEach(function (d) {
       d.addEventListener('toggle', function () {
         if (d.open) seccionesAbiertas[d.dataset.sec] = true;
         else delete seccionesAbiertas[d.dataset.sec];
@@ -2202,7 +2257,7 @@
     });
   }
 
-  function seccionPlegable(id, titulo, cuantas, sub, cuerpo) {
+  function seccionPlegable(id, titulo, cuantas, sub, cuerpo, coletilla) {
     return html`
       <details class="seccion" data-sec="${id}"${raw(seccionesAbiertas[id] ? ' open' : '')}>
         <summary>
@@ -2210,6 +2265,8 @@
           <span class="list-title" style="margin:0">${titulo}</span>
           ${raw(cuantas || cuantas === 0
             ? '<span class="tiny sec-num">' + esc(String(cuantas)) + '</span>' : '')}
+          ${raw(coletilla
+            ? '<span class="tiny sec-cola">' + esc(coletilla) + '</span>' : '')}
         </summary>
         <div class="sec-cuerpo">
           ${raw(sub ? '<p class="muted" style="margin:0 0 10px">' + esc(sub) + '</p>' : '')}

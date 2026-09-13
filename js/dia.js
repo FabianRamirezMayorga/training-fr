@@ -45,6 +45,10 @@
     return plan.dias[i] || null;
   }
 
+  /* La portada tambien pinta el menu de hoy, y una segunda copia de este
+     calculo acabaria diciendo un dia distinto que esta. */
+  V.menuDeHoy = menuDeHoy;
+
   /* La misma barra de la portada, que ya existe: dos barras distintas para lo
      mismo acaban separándose con el tiempo. */
   function barra(hecho, meta, clase) {

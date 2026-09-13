@@ -1442,7 +1442,7 @@ img[src^="data/img/"] {
 
 /* El muelle: su base es el hueco de siempre, crece con lo que sobre y tiene
    un tope para que en una pantalla medio vacia no queden zanjas. */
-.muelle { flex: .55 0 clamp(10px, 1.23svh, 19px); max-height: clamp(18px, 2.6svh, 27px); }
+.muelle { flex: .55 0 clamp(7px, .95svh, 19px); max-height: clamp(18px, 2.6svh, 27px); }
 
 .vista-inicio .hola { margin-bottom: clamp(1px, .25svh, 4px); }
 .vista-inicio .hola-sub { margin: 0; }
@@ -1480,3 +1480,38 @@ img[src^="data/img/"] {
 
 .vista-inicio .comida-caja { flex: 2 0 auto; max-height: clamp(200px, 21svh, 215px);
   display: flex; flex-direction: column; justify-content: space-between; }
+
+/* Lo que cabe a la derecha del titulo de una seccion plegada: sirve para que
+   plegada siga diciendo algo —cual es la siguiente comida— y no haya que
+   abrirla para saber si interesa. */
+.sec-cola { margin-left: auto; color: var(--dim); text-align: right;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* El menu del dia vive DENTRO de la tarjeta de comida, no como una seccion
+   suelta: una fila mas en la portada cuesta 38px y en un movil corto eso es
+   justo lo que sobra. Ademas es donde toca —comida con comida— y plegado solo
+   dice cual es la siguiente. */
+.menu-hoy > summary {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  list-style: none; margin-top: 9px; padding-top: 9px;
+  border-top: 1px solid var(--line);
+  font-size: .78rem; font-weight: 800; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--dim);
+}
+.menu-hoy > summary::-webkit-details-marker { display: none; }
+.menu-hoy > summary::marker { content: ''; }
+.menu-hoy > summary .tiny { text-transform: none; letter-spacing: 0; font-weight: 600; }
+.menu-hoy[open] > summary .sec-flecha { transform: rotate(180deg); }
+.menu-hoy:not([open]) > .menu-cuerpo { display: none; }
+.menu-cuerpo { padding-top: 4px; }
+
+/* Abierto el menu, la tarjeta deja de tener tope: el max-height que la hace
+   crecer con la pantalla le cortaria la lista por la mitad. */
+.vista-inicio .comida-caja:has(.menu-hoy[open]) { max-height: none; }
+
+/* Cada comida del menu del dia. La que toca ahora se marca con la raya: en una
+   lista de cinco platos iguales no se ve cual es el de dentro de un rato. */
+.menu-fila { padding: 6px 0 6px 9px; border-left: 2px solid transparent; }
+.menu-fila + .menu-fila { border-top: 1px solid var(--line); }
+.menu-fila.ahora { border-left-color: var(--acc); }
+.menu-fila.ahora b { color: var(--acc); }
