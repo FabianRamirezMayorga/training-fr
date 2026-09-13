@@ -235,11 +235,35 @@
     let todo = raw;
 
     if (enEspanol.length) {
-      const suyos = {};
-      enEspanol.forEach(function (e) { suyos[I18N.norm(e.nameEs)] = true; });
-      todo = todo.filter(function (e) {
-        return !suyos[I18N.norm(e.nameEs || I18N.name(e.name))];
-      }).concat(enEspanol);
+      /* MEJORAR EN EL SITIO, NUNCA SUSTITUIR.
+         La primera versión de esto quitaba del catálogo el ejercicio de fuera
+         cuando el español tenía el mismo, y metía el suyo en su lugar. Pero las
+         rutinas guardan el IDENTIFICADOR del ejercicio, no su nombre: al
+         desaparecer el id, sesenta ejercicios dejaron de resolverse y en mitad
+         de un entrenamiento aparecían como «Romanian_Deadlift», sin foto y sin
+         técnica.
+
+         Así que el id de fuera se conserva siempre y solo se le cambia lo que
+         mejora: el nombre escrito en español, la ilustración y las
+         instrucciones. Los del catálogo español que no casan con ninguno se
+         añaden aparte. */
+      const porNombre = {};
+      enEspanol.forEach(function (e) { porNombre[I18N.norm(e.nameEs)] = e; });
+
+      const aprovechados = {};
+      todo = todo.map(function (e) {
+        const mejor = porNombre[I18N.norm(e.nameEs || I18N.name(e.name))];
+        if (!mejor) return e;
+        aprovechados[mejor.id] = true;
+        const copia = Object.assign({}, e);
+        copia.nameEs = mejor.nameEs;
+        copia.images = mejor.images;
+        copia.instructions = mejor.instructions;
+        copia.yaEnEspanol = true;
+        return copia;
+      });
+
+      todo = todo.concat(enEspanol.filter(function (e) { return !aprovechados[e.id]; }));
     }
 
     if (g.Yoga) todo = todo.concat(Yoga.crudos());
