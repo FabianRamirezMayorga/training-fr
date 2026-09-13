@@ -774,7 +774,10 @@
 
       <label class="tiny">TEXTO</label>
       <input id="al-tit" value="${a.titulo}" placeholder="Título" style="margin:5px 0 8px">
-      <input id="al-msg" value="${a.mensaje}" placeholder="Mensaje (opcional)" style="margin:0 0 12px">
+      <input id="al-msg" value="${a.mensaje}" placeholder="Mensaje (opcional)" style="margin:0 0 6px">
+      <p class="tiny" id="al-nota-ia" style="margin:0 0 12px">El texto lo escribe tu
+      entrenador cada día con lo que llevas hecho, así que el de aquí arriba solo sale
+      si la IA no está disponible a esa hora.</p>
 
       <label class="tiny">HORAS</label>
       <div class="row wrap" style="gap:6px;margin:6px 0 8px" id="al-horas"></div>
@@ -821,8 +824,17 @@
             b.classList.add('on');
             el.querySelector('#al-tit').value = t.titulo;
             el.querySelector('#al-msg').value = t.mensaje;
+            notaIA();
           };
         });
+
+        /* La advertencia de que el texto lo pone la IA solo tiene sentido en el
+           tipo que lo hace; en los demás estorba. */
+        const notaIA = function () {
+          const nota = el.querySelector('#al-nota-ia');
+          if (nota) nota.hidden = !(Alertas.esDeIA && Alertas.esDeIA(a.tipo));
+        };
+        notaIA();
 
         /* las horas se pintan como fichas que se quitan al tocarlas */
         const pintarHoras = function () {

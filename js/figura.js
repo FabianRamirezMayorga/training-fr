@@ -131,10 +131,13 @@
     return s;
   }
 
-  function svg(pose, escena) {
+  function svg(pose, escena, color) {
     const fondo = (ESCENAS[escena] || ESCENAS.nada)();
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + ANCHO + ' ' + ALTO + '">' +
+    const s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + ANCHO + ' ' + ALTO + '">' +
       fondo + cuerpo(pose) + '</svg>';
+    /* El mismo muñeco en blanco para las cabeceras, donde va sobre un degradado
+       de color y el verde de la marca no se leería. */
+    return color ? s.split(VERDE).join(color) : s;
   }
 
   function uri(pose, escena) {
@@ -151,5 +154,25 @@
     return fig.b ? [uri(fig.a, e), uri(fig.b, e)] : [uri(fig.a, e)];
   }
 
-  g.Figura = { svg: svg, uri: uri, fotogramas: fotogramas, ANCHO: ANCHO, ALTO: ALTO };
+  /* Posturas para las cabeceras. No son ejercicios concretos: son la silueta
+     que dice de qué va la sección de un vistazo, como los pictogramas blancos
+     de la app de Fitness. */
+  const POSES = {
+    sentadilla: { cadera: [50, 44], tronco: 285, cabeza: 285, brazo1: [10, 10], brazo2: [6, 6],
+      pierna1: [115, 65, 135], pierna2: [110, 70, 140] },
+    zancada: { cadera: [50, 40], tronco: 275, cabeza: 275, brazo1: [120, 95], brazo2: [60, 85],
+      pierna1: [55, 90, 160], pierna2: [140, 90, 160] },
+    correr: { cadera: [50, 38], tronco: 280, cabeza: 280, brazo1: [130, 60], brazo2: [50, 120],
+      pierna1: [50, 110, 180], pierna2: [140, 95, 30] },
+    estirar: { cadera: [50, 48], tronco: 300, cabeza: 300, brazo1: [330, 300], brazo2: [325, 295],
+      pierna1: [20, 20, 90], pierna2: [150, 100, 170] },
+    plancha: { cadera: [44, 48], tronco: 350, cabeza: 340, brazo1: [80, 80], brazo2: [76, 76],
+      pierna1: [160, 160, 60], pierna2: [156, 164, 60] },
+    equilibrio: { cadera: [50, 40], tronco: 280, cabeza: 280, brazo1: [355, 350], brazo2: [185, 190],
+      pierna1: [90, 90, 160], pierna2: [155, 155, 225] }
+  };
+
+  g.Figura = {
+    svg: svg, uri: uri, fotogramas: fotogramas, POSES: POSES, ANCHO: ANCHO, ALTO: ALTO
+  };
 })(window);

@@ -21,8 +21,17 @@
       mensaje: 'Registra tu peso para seguir la evolución.' },
     suplemento: { label: 'Suplemento', icono: 'nutricion', titulo: 'Suplemento',
       mensaje: 'Toca tu suplemento.' },
+    /* La frase del entrenador, pero por escrito y a una hora. La app ya la
+       escribe cada día y la dejaba dentro de la pantalla de inicio, donde solo
+       la ves si entras: justo cuando menos falta hace. El mensaje se rellena al
+       lanzarla, no al crearla, porque se escribe cada día con tus datos. */
+    motivacion: { label: 'Mensaje del entrenador', icono: 'chispa',
+      titulo: 'Tu entrenador', mensaje: 'Hoy toca. Abre y dale.', deIA: true },
     libre: { label: 'Personalizada', icono: 'campana', titulo: 'Recordatorio', mensaje: '' }
   };
+
+  /* Los tipos cuyo texto lo escribe la IA en el momento de lanzarlo */
+  function esDeIA(tipo) { return !!(TIPOS[tipo] && TIPOS[tipo].deIA); }
 
   /* Un recordatorio puede sonar varias veces al día: el agua no se bebe de una
      sentada. Por eso las horas son una lista y lo ya lanzado se recuerda hora a
@@ -237,6 +246,7 @@
 
   function soportado() { return 'Notification' in window; }
 
+
   function permiso() { return soportado() ? Notification.permission : 'unsupported'; }
 
   function pedirPermiso() {
@@ -300,6 +310,20 @@
     guardarLista(arr);
   }
 
+  /* El texto que va en el aviso. Casi siempre es el que escribiste al crearlo;
+     en el del entrenador se pide en ese momento, para que hable de cómo vas hoy
+     y no de cómo ibas el día que lo creaste. Si la IA no está o falla, sale el
+     de reserva: más vale un aviso genérico que ninguno. */
+  function textoDe(x) {
+    if (!esDeIA(x.alerta.tipo)) return Promise.resolve(x.mensaje);
+    if (!g.IA || !IA.activa || !IA.activa() || !IA.pildora) {
+      return Promise.resolve(x.mensaje || TIPOS.motivacion.mensaje);
+    }
+    return IA.pildora()
+      .then(function (p) { return (p && p.frase) || x.mensaje || TIPOS.motivacion.mensaje; })
+      .catch(function () { return x.mensaje || TIPOS.motivacion.mensaje; });
+  }
+
   let temporizador = null;
 
   /* Revisa cada minuto mientras la app esté abierta. onAviso recibe lo que toca. */
@@ -309,8 +333,13 @@
       const p = pendientes();
       if (!p.length) return;
       p.forEach(function (x) {
-        avisar(x.titulo, x.mensaje);
+        /* se marca ya, no cuando vuelva el texto: si la IA tarda, el minuto
+           siguiente lo lanzaría otra vez */
         marcarLanzada(x.alerta.id, x.hora);
+        textoDe(x).then(function (cuerpo) {
+          x.mensaje = cuerpo;
+          avisar(x.titulo, cuerpo);
+        });
       });
       if (onAviso) onAviso(p);
     };
@@ -399,6 +428,7 @@
   }
 
   g.Alertas = {
+    esDeIA: esDeIA, textoDe: textoDe,
     TIPOS: TIPOS, DIAS: DIAS,
     lista: lista, nueva: nueva, guardar: guardar, borrar: borrar, desdeRutinas: desdeRutinas,
     soportado: soportado, permiso: permiso, pedirPermiso: pedirPermiso, avisar: avisar,
