@@ -694,8 +694,13 @@
         </button>
         ${raw(abierto ? '<div class="stack">' +
           suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' +
+          '<button class="btn block sm" data-iaplan="' + esc(k) + '" ' +
+          'style="margin-top:10px">' + icon('chispa') + ' Revisar el plan con IA</button>' +
+          '<p class="tiny center" style="margin:6px 4px 0">Lee los ' + suyas.length +
+          ' d\u00edas juntos: el reparto entre m\u00fasculos, lo que se repite y lo que falta. ' +
+          'Lo que proponga se aplica sobre estas mismas rutinas.</p>' +
           '<button class="btn ghost block sm danger" data-borrarplan="' + esc(k) + '" ' +
-          'style="margin-top:8px">' + icon('trash') + ' Borrar el plan entero (' +
+          'style="margin-top:10px">' + icon('trash') + ' Borrar el plan entero (' +
           suyas.length + (suyas.length === 1 ? ' rutina' : ' rutinas') + ')</button>' : '')}`;
     }).join('');
 
@@ -1804,6 +1809,9 @@
     bind(root, '[data-a=correr]', correrPlanSheet);
     bind(root, '[data-a=limpiardup]', limpiarDuplicadosSheet);
     bindAll(root, '[data-borrarplan]', function (el) { borrarPlanSheet(el.dataset.borrarplan); });
+    bindAll(root, '[data-iaplan]', function (el) {
+      if (g.VISTAS && VISTAS.auditarPlan) VISTAS.auditarPlan(el.dataset.iaplan);
+    });
 
     bindAll(root, '[data-ver]', function (el) {
       const ex = Data.get(el.dataset.ver);

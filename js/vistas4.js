@@ -209,6 +209,15 @@
     return prog;
   }
 
+  /* Lo que pide Rutinas cuando tocas «Revisar el plan con IA»: se abre aquí y
+     la auditoría arranca sola, sin que haya que buscar el botón al final. */
+  let planPendiente = null;
+
+  V.auditarPlan = function (nombre) {
+    planPendiente = nombre;
+    go('programa');
+  };
+
   function abrirPlan(nombre) {
     const prog = planDesdeRutinas(nombre);
     if (!prog) { UI.toast('Ese plan ya no está'); return; }
@@ -808,6 +817,27 @@
   };
 
   V.programa.mount = function (root) {
+    /* viene de Rutinas pidiendo la auditoría de un plan concreto */
+    if (planPendiente) {
+      const quien = planPendiente;
+      planPendiente = null;
+      const prog = planDesdeRutinas(quien);
+      if (prog) {
+        est.prog = prog;
+        guardarEstado();
+        if (IA.activa()) {
+          setTimeout(function () { afinar(); }, 40);
+        } else {
+          render();
+          UI.toast('Elige proveedor de IA y pon su clave');
+          go('claves');
+          return;
+        }
+      } else {
+        UI.toast('Ese plan ya no está');
+      }
+    }
+
     bind(root, '[data-a=editarperfil]', function () { go('datos'); });
     bind(root, '[data-a=plangenerico]', function () { go('plan'); });
 
