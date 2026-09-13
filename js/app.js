@@ -560,6 +560,14 @@
     return listaDias(dias) + ' · ' + que;
   }
 
+  /* «Lunes · Fabian»: el día delante y el plan detrás. Ese nombre completo es el
+     que sale en el banner de «entrenamiento en curso» y el que se queda escrito
+     en el historial, así que una rutina nueva tiene que nacer ya con él puesto. */
+  function nombreConDia(base, dias) {
+    const largos = (dias || []).map(UI.diaLargo);
+    return largos.length ? listaDias(largos) + ' · ' + base : base;
+  }
+
   /* El nombre guardado lleva el día delante desde que lo generó el programa
      («Lunes · Fabián»). Al mover la rutina de día ese prefijo se quedaba
      mintiendo: la lista lo esconde, pero el nombre entero sale en el banner del
@@ -569,8 +577,7 @@
   function renombrarPorDia(r) {
     const base = nombreRutina(r);
     if (!r.name || base === r.name) return r;
-    const dias = (r.days || []).map(UI.diaLargo);
-    r.name = dias.length ? listaDias(dias) + ' · ' + base : base;
+    r.name = nombreConDia(base, r.days);
     return r;
   }
 
@@ -699,6 +706,8 @@
           '<p class="tiny center" style="margin:6px 4px 0">Lee los ' + suyas.length +
           ' d\u00edas juntos: el reparto entre m\u00fasculos, lo que se repite y lo que falta. ' +
           'Lo que proponga se aplica sobre estas mismas rutinas.</p>' +
+          '<button class="btn block sm" data-duplicarplan="' + esc(k) + '" ' +
+          'style="margin-top:8px">' + icon('copiar') + ' Duplicar el plan entero</button>' +
           '<button class="btn ghost block sm danger" data-borrarplan="' + esc(k) + '" ' +
           'style="margin-top:10px">' + icon('trash') + ' Borrar el plan entero (' +
           suyas.length + (suyas.length === 1 ? ' rutina' : ' rutinas') + ')</button>' : '')}`;
@@ -777,7 +786,9 @@
                 ${raw(icon('play'))} Entrenar</button>
             </div>
             <div style="padding:8px 13px 13px">
-              <button class="btn sm block" data-iarutina="${r.id}">
+              <button class="btn sm block" data-duplicar="${r.id}">
+                ${raw(icon('copiar'))} Duplicar esta rutina</button>
+              <button class="btn sm block" data-iarutina="${r.id}" style="margin-top:8px">
                 ${raw(icon('chispa'))} Revisar esta rutina con IA</button>
             </div>
           </div>` : '')}
@@ -1808,6 +1819,8 @@
     bind(root, '[data-a=actividad]', apuntarActividad);
     bind(root, '[data-a=correr]', correrPlanSheet);
     bind(root, '[data-a=limpiardup]', limpiarDuplicadosSheet);
+    bindAll(root, '[data-duplicar]', function (el) { duplicarRutinaSheet(el.dataset.duplicar); });
+    bindAll(root, '[data-duplicarplan]', function (el) { duplicarPlanSheet(el.dataset.duplicarplan); });
     bindAll(root, '[data-borrarplan]', function (el) { borrarPlanSheet(el.dataset.borrarplan); });
     bindAll(root, '[data-iaplan]', function (el) {
       if (g.VISTAS && VISTAS.auditarPlan) VISTAS.auditarPlan(el.dataset.iaplan);
@@ -1874,6 +1887,177 @@
   /* Borrar un plan de cinco días era borrar cinco rutinas de una en una desde
      «Editar lista». Aquí se ve qué se va antes de irse, que es lo que evita el
      arrepentimiento. */
+  /* ---------- duplicar ----------
+     Copiar una rutina a mano es abrirla, apuntar los seis ejercicios y volver a
+     meterlos uno a uno. Y lo que casi siempre se quiere es una variante: el
+     mismo día con otro material, o el plan entero para probar un cambio sin
+     tocar el que ya funciona.
+
+     Al duplicar se pregunta lo único que no se puede adivinar: a qué plan va y
+     qué día le toca. El día no se hereda por defecto a propósito: dos rutinas
+     el mismo día se pisan en la portada y en el banner de «entrenamiento en
+     curso», y eso se nota tarde y mal. */
+  function copiaDe(r) {
+    return {
+      name: r.name,
+      days: [],
+      note: r.note || '',
+      mixta: !!r.mixta,
+      exercises: (r.exercises || []).map(function (e) {
+        return { exId: e.exId, sets: e.sets, reps: e.reps, rest: e.rest, nota: e.nota || '' };
+      })
+    };
+  }
+
+  function duplicarRutinaSheet(id) {
+    const r = Store.routine(id);
+    if (!r) { UI.toast('Esa rutina ya no está'); return; }
+
+    const planes = [];
+    Store.routines().forEach(function (x) {
+      const n = nombreRutina(x);
+      if (n && planes.indexOf(n) === -1) planes.push(n);
+    });
+    const suyo = nombreRutina(r);
+
+    let plan = suyo;
+    let dias = [];
+
+    UI.modal(html`
+      <h2>Duplicar rutina</h2>
+      <p class="muted">Copias ${tituloRutina(r)} con sus
+        ${r.exercises.length} ${r.exercises.length === 1 ? 'ejercicio' : 'ejercicios'},
+        series y descansos. La original no se toca.</p>
+
+      <div class="tiny" style="margin:14px 0 6px">A QUÉ PLAN VA</div>
+      <div class="row wrap" id="dr-planes" style="gap:6px">
+        ${raw(planes.map(function (n) {
+          return '<button class="chip ' + (n === suyo ? 'on' : '') + '" data-dplan="' +
+            esc(n) + '">' + esc(n) + '</button>';
+        }).join(''))}
+        <button class="chip" data-dplan="__nuevo">+ Plan nuevo</button>
+      </div>
+      <input id="dr-nombre" class="input" placeholder="Nombre del plan nuevo"
+             style="margin-top:8px;display:none" maxlength="40">
+
+      <div class="tiny" style="margin:14px 0 6px">QUÉ DÍA LA HAGO</div>
+      <div class="row wrap" id="dr-dias" style="gap:6px">
+        ${raw(DIAS.map(function (d) {
+          return '<button class="chip" data-ddia="' + d + '">' + d + '</button>';
+        }).join(''))}
+      </div>
+      <p class="tiny" style="margin:7px 0 0">Puedes dejarla sin día y ponérselo
+        luego. Si le das un día que ya tiene otra rutina, tendrás dos para ese
+        día y la portada solo puede enseñar una.</p>
+
+      <button class="btn primary block" id="dr-ok" style="margin-top:16px">Duplicar</button>
+      <button class="btn ghost block" id="dr-no" style="margin-top:8px">Cancelar</button>`,
+      function (el) {
+        const campo = el.querySelector('#dr-nombre');
+
+        el.querySelectorAll('[data-dplan]').forEach(function (b) {
+          b.onclick = function () {
+            el.querySelectorAll('[data-dplan]').forEach(function (x) { x.classList.remove('on'); });
+            b.classList.add('on');
+            plan = b.dataset.dplan;
+            campo.style.display = plan === '__nuevo' ? '' : 'none';
+            if (plan === '__nuevo') campo.focus();
+          };
+        });
+
+        el.querySelectorAll('[data-ddia]').forEach(function (b) {
+          b.onclick = function () {
+            const d = b.dataset.ddia;
+            const i = dias.indexOf(d);
+            if (i === -1) dias.push(d); else dias.splice(i, 1);
+            b.classList.toggle('on');
+          };
+        });
+
+        el.querySelector('#dr-no').onclick = function () { UI.closeModal(); };
+        el.querySelector('#dr-ok').onclick = function () {
+          let destino = plan;
+          if (destino === '__nuevo') {
+            destino = String(campo.value || '').trim();
+            if (!destino) { UI.toast('Ponle nombre al plan nuevo'); campo.focus(); return; }
+          }
+
+          const copia = copiaDe(r);
+          copia.days = DIAS.filter(function (d) { return dias.indexOf(d) !== -1; });
+          copia.name = nombreConDia(destino, copia.days);
+          const nueva = Store.saveRoutine(copia);
+
+          UI.closeModal();
+          rutinaAbierta = nueva.id;
+          gruposAbiertos[destino] = true;
+          render();
+          UI.toast('Duplicada en «' + destino + '»');
+        };
+      });
+  }
+
+  /* El plan entero. Para probar un cambio sin arriesgar el que ya entrenas:
+     se copian sus rutinas con sus días tal cual, porque un plan duplicado sin
+     días no es un plan, es una lista suelta. */
+  function duplicarPlanSheet(nombre) {
+    const suyas = Store.routines().filter(function (r) {
+      return (r.days || []).length && nombreRutina(r) === nombre;
+    });
+    if (!suyas.length) { UI.toast('Ese plan ya no está'); return; }
+
+    suyas.sort(function (a, b) {
+      return DIAS.indexOf((a.days || [])[0]) - DIAS.indexOf((b.days || [])[0]);
+    });
+
+    let propuesto = nombre + ' 2';
+    for (let i = 2; Store.routines().some(function (r) { return nombreRutina(r) === propuesto; }); i++) {
+      propuesto = nombre + ' ' + (i + 1);
+    }
+
+    UI.modal(html`
+      <h2>Duplicar «${nombre}»</h2>
+      <p class="muted">Se copian las ${suyas.length}
+        ${suyas.length === 1 ? 'rutina' : 'rutinas'} con sus mismos días. El plan
+        original se queda como está.</p>
+      <div class="card">
+        ${raw(suyas.map(function (r) {
+          return '<div class="row between" style="padding:4px 0;gap:10px">' +
+            '<span style="font-size:.86rem">' + esc(tituloRutina(r)) + '</span>' +
+            '<span class="tiny">' + r.exercises.length + ' ejercicios</span></div>';
+        }).join(''))}
+      </div>
+
+      <div class="tiny" style="margin:14px 0 6px">CÓMO SE LLAMA LA COPIA</div>
+      <input id="dp-nombre" class="input" value="${propuesto}" maxlength="40">
+      <p class="tiny" style="margin:7px 0 0">Tendrás dos rutinas para cada día
+        —la del plan viejo y la del nuevo—. Borra el que no uses cuando decidas,
+        o quítale los días al que dejes aparcado.</p>
+
+      <button class="btn primary block" id="dp-ok" style="margin-top:16px">
+        Duplicar las ${suyas.length}</button>
+      <button class="btn ghost block" id="dp-no" style="margin-top:8px">Cancelar</button>`,
+      function (el) {
+        el.querySelector('#dp-no').onclick = function () { UI.closeModal(); };
+        el.querySelector('#dp-ok').onclick = function () {
+          const destino = String(el.querySelector('#dp-nombre').value || '').trim();
+          if (!destino) { UI.toast('Ponle un nombre'); return; }
+          if (destino === nombre) { UI.toast('Ponle un nombre distinto al original'); return; }
+
+          suyas.forEach(function (r) {
+            const copia = copiaDe(r);
+            copia.days = (r.days || []).slice();
+            copia.name = nombreConDia(destino, copia.days);
+            Store.saveRoutine(copia);
+          });
+
+          UI.closeModal();
+          gruposAbiertos[destino] = true;
+          render();
+          UI.toast('Plan «' + destino + '» creado');
+        };
+      });
+  }
+
   function borrarPlanSheet(nombre) {
     const suyas = Store.routines().filter(function (r) {
       return (r.days || []).length && nombreRutina(r) === nombre;
