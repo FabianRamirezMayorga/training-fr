@@ -18,58 +18,58 @@
   /* Cada zona con su color y sus siluetas. El tono no es decoración: es lo que
      te dice de un vistazo que has cambiado de sección. */
   const ZONAS = {
-    chest: { tono: 'naranja', poses: ['plancha', 'sentadilla'],
+    chest: { foto: 'es_bench_press', tono: 'naranja', poses: ['plancha', 'sentadilla'],
       texto: 'El pecho empuja. Trabaja bien con press y flexiones, y crece cuando ' +
         'el recorrido es completo: abajo hasta tocar, arriba sin bloquear de golpe.' },
-    lats: { tono: 'azul', poses: ['equilibrio', 'estirar'],
+    lats: { foto: 'es_close_grip_pull_ups', tono: 'azul', poses: ['equilibrio', 'estirar'],
       texto: 'Los dorsales son lo que da espalda ancha, y lo que más se descuida ' +
         'frente al pecho. Tirón vertical —dominadas, jalón— y horizontal —remo—, ' +
         'las dos cosas cada semana.' },
-    'middle back': { tono: 'azul', poses: ['equilibrio', 'estirar'],
+    'middle back': { foto: 'es_barbell_row', tono: 'azul', poses: ['equilibrio', 'estirar'],
       texto: 'La espalda media sostiene la postura y aguanta lo que el dorsal tira. ' +
         'Se entrena con remo y con todo lo que junte los omóplatos.' },
-    'lower back': { tono: 'azul', poses: ['estirar', 'plancha'],
+    'lower back': { foto: 'es_deadlift', tono: 'azul', poses: ['estirar', 'plancha'],
       texto: 'La zona lumbar no se entrena a repeticiones sueltas: se refuerza ' +
         'aguantando posición en peso muerto, puentes y extensiones.' },
-    traps: { tono: 'azul', poses: ['equilibrio', 'zancada'],
+    traps: { foto: 'es_db_shrug', tono: 'azul', poses: ['equilibrio', 'zancada'],
       texto: 'Los trapecios trabajan en casi todo lo que levantas del suelo. ' +
         'Encogimientos y remos altos si quieres darles algo suyo.' },
-    quadriceps: { tono: 'verde', poses: ['sentadilla', 'zancada'],
+    quadriceps: { foto: 'es_bodyweight_squat', tono: 'verde', poses: ['sentadilla', 'zancada'],
       texto: 'El cuádriceps es la pierna que se ve de frente y el motor de la ' +
         'sentadilla. Profundidad antes que peso: media sentadilla con mucho disco ' +
         'no entrena lo mismo.' },
-    hamstrings: { tono: 'verde', poses: ['zancada', 'estirar'],
+    hamstrings: { foto: 'es_dumbbell_romanian_deadlift', tono: 'verde', poses: ['zancada', 'estirar'],
       texto: 'Los isquiotibiales frenan la pierna al correr y son los que más se ' +
         'rompen cuando están débiles. Peso muerto rumano, curl y nórdico.' },
-    glutes: { tono: 'verde', poses: ['sentadilla', 'zancada'],
+    glutes: { foto: 'es_hip_thrust', tono: 'verde', poses: ['sentadilla', 'zancada'],
       texto: 'El glúteo es el músculo más fuerte que tienes y el que más rinde en ' +
         'sentadilla, peso muerto y puente de cadera.' },
-    calves: { tono: 'verde', poses: ['zancada', 'correr'],
+    calves: { foto: 'es_bodyweight_calf_raise', tono: 'verde', poses: ['zancada', 'correr'],
       texto: 'Los gemelos aguantan tu peso todo el día, así que con poco no notan ' +
         'nada: recorrido completo, arriba del todo y abajo del todo.' },
-    shoulders: { tono: 'naranja', poses: ['equilibrio', 'plancha'],
+    shoulders: { foto: 'es_lateral_raise', tono: 'naranja', poses: ['equilibrio', 'plancha'],
       texto: 'El hombro tiene tres cabezas y casi todo el mundo entrena solo la de ' +
         'delante. Press para la frontal, elevaciones laterales para la media y ' +
         'pájaro para la posterior.' },
-    biceps: { tono: 'morado', poses: ['equilibrio', 'zancada'],
+    biceps: { foto: 'es_barbell_curl', tono: 'morado', poses: ['equilibrio', 'zancada'],
       texto: 'El bíceps ya trabaja en cada tirón de espalda. El curl añade lo que ' +
         'falta; no hace falta mucho más volumen del que crees.' },
-    triceps: { tono: 'morado', poses: ['plancha', 'equilibrio'],
+    triceps: { foto: 'es_tricep_pushdown', tono: 'morado', poses: ['plancha', 'equilibrio'],
       texto: 'El tríceps son dos tercios del brazo. Fondos, press cerrado y ' +
         'extensiones: con el codo quieto, que es donde se pierde el ejercicio.' },
-    forearms: { tono: 'morado', poses: ['equilibrio', 'zancada'],
+    forearms: { foto: 'es_dead_hang', tono: 'morado', poses: ['equilibrio', 'zancada'],
       texto: 'El antebrazo es lo que se agota antes en dominadas y peso muerto. ' +
         'Colgarse de la barra es el ejercicio más simple y el que más da.' },
-    abdominals: { tono: 'naranja', poses: ['plancha', 'equilibrio'],
+    abdominals: { foto: 'es_plank', tono: 'naranja', poses: ['plancha', 'equilibrio'],
       texto: 'El abdomen se entrena aguantando, no solo encogiendo. Plancha, hollow ' +
         'y elevaciones de piernas valen más que doscientos abdominales.' },
-    abductors: { tono: 'verde', poses: ['zancada', 'estirar'],
+    abductors: { foto: 'es_clamshells', tono: 'verde', poses: ['zancada', 'estirar'],
       texto: 'Los abductores estabilizan la cadera en cada paso y en cada ' +
         'sentadilla a una pierna.' },
-    adductors: { tono: 'verde', poses: ['zancada', 'estirar'],
+    adductors: { foto: 'es_cossack_squat', tono: 'verde', poses: ['zancada', 'estirar'],
       texto: 'Los aductores cierran la pierna y sujetan la rodilla. Suelen estar ' +
         'cortos y débiles a la vez.' },
-    neck: { tono: 'morado', poses: ['equilibrio', 'estirar'],
+    neck: { foto: 'es_cat_cow', tono: 'morado', poses: ['equilibrio', 'estirar'],
       texto: 'El cuello se entrena con muy poco y con mucho cuidado: rango corto y ' +
         'sin tirones.' }
   };
@@ -78,13 +78,17 @@
     return ZONAS[m] || { tono: 'verde', poses: ['sentadilla', 'zancada'], texto: '' };
   }
 
-  /* Los muñecos de la cabecera, en blanco sobre el degradado */
-  function figurasHTML(poses) {
-    if (!g.Figura) return '';
-    return poses.map(function (k) {
-      const p = Figura.POSES[k];
-      return p ? '<div class="hero-fig">' + Figura.svg(p, 'nada', '#ffffff') + '</div>' : '';
-    }).join('');
+  /* La cabecera lleva la ilustración del movimiento que mejor representa la
+     zona —press de banca para el pecho, peso muerto para la lumbar— sobre su
+     propio fondo claro, que es como lo hace la app de Fitness. Antes iban unos
+     muñecos blancos sobre un degradado de color y cantaban al lado de las
+     ilustraciones de la lista de abajo. */
+  function heroHTML(z) {
+    const ex = z.foto && Data.get(z.foto);
+    if (!ex) return '';
+    const url = esc(Data.img(ex, 0));
+    return '<div class="hero-fondo" style="background-image:url(' + url + ')"></div>' +
+      '<div class="hero-foto" style="background-image:url(' + url + ')"></div>';
   }
 
   /* Una fila al estilo de las listas de Fitness: miniatura grande a la
@@ -118,10 +122,10 @@
     const lista = Data.search({ muscle: m, gear: gear });
 
     return html`
-      <div class="hero ${z.tono}">
+      <div class="hero">
+        ${raw(heroHTML(z))}
         <button class="hero-atras" data-a="atras" aria-label="Volver">
           ${raw(icon('back'))}</button>
-        <div class="hero-figs">${raw(figurasHTML(z.poses))}</div>
       </div>
 
       <h1 class="prog-tit">${I18N.muscle(m)}</h1>

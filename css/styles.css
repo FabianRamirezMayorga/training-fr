@@ -1124,32 +1124,41 @@ body.escribiendo .toast { opacity: 0; pointer-events: none; }
    para lo que esta, y no de adorno de 40 pixeles. */
 .hero {
   margin: -16px -16px 0;
-  padding: 18px 16px 22px;
   position: relative;
-  min-height: 168px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  height: 230px;
   overflow: hidden;
+  background: var(--card2);
 }
-.hero.verde   { background: linear-gradient(150deg, #1d7a4c, #3ddc84 130%); }
-.hero.azul    { background: linear-gradient(150deg, #1b3f8f, #4f8cf5 130%); }
-.hero.naranja { background: linear-gradient(150deg, #b03612, #ff8a2b 130%); }
-.hero.morado  { background: linear-gradient(150deg, #4a2a8f, #a06bf0 130%); }
+/* Dos capas de la MISMA imagen: detras ampliada y desenfocada para rellenar el
+   ancho, delante entera y nitida. Asi el fondo casa siempre con la ilustracion
+   sea cual sea su color, en vez de dejar dos juntas verticales donde el
+   recuadro de la imagen se encuentra con el de la pagina. */
+.hero-foto, .hero-fondo {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+}
+.hero-fondo {
+  background-size: cover;
+  background-position: center;
+  filter: blur(26px) saturate(1.15);
+  transform: scale(1.25);
+}
+.hero-foto {
+  background-size: contain;
+  background-position: center 46%;
+}
 
 .hero-atras {
   position: absolute; top: 14px; left: 14px;
-  width: 34px; height: 34px; border-radius: 50%;
+  width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,.28); backdrop-filter: blur(8px);
-  color: #fff; border: 0;
+  background: rgba(255,255,255,.9); backdrop-filter: blur(8px);
+  color: #141922; border: 0;
+  box-shadow: 0 1px 6px rgba(0,0,0,.16);
 }
 .hero-atras svg { width: 17px; height: 17px; fill: none; stroke: currentColor;
   stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-
-.hero-figs { display: flex; gap: 0; align-items: flex-end; }
-.hero-fig { width: 148px; max-width: 40vw; margin: 0 -10px; }
-.hero-fig svg { width: 100%; height: auto; display: block; }
 
 .prog-tit {
   font-size: 2.05rem; font-weight: 800; letter-spacing: -.035em;
