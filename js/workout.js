@@ -843,54 +843,113 @@
     if (Spotify.alCambiar) Spotify.alCambiar(function (s) { if (s) pintar(s); });
   }
 
-  function doFinish() {
+  /* Volver a empezar la misma rutina: las series sin marcar, el cronómetro a
+     cero y otra vez por el primer ejercicio. Los pesos que hubiera escritos se
+     quedan, que es lo que uno quiere al repetir. */
+  function reiniciar() {
     const a = Store.active();
     if (!a) return;
+    a.entries.forEach(function (e) {
+      e.sets.forEach(function (x) { x.done = false; });
+    });
+    a.idx = 0;
+    a.start = Date.now();
+    Store.setActive(a);
+    /* el descanso que estuviera corriendo no tiene sentido al empezar de cero */
+    skipRest();
+    pintarBanner();
+  }
+
+  /* Qué se pierde si se descarta, dicho con números y no con «se perderán los
+     datos»: es lo que hace que uno sepa si de verdad quiere. */
+  function loQueHay() {
+    const a = Store.active();
+    if (!a) return null;
     const done = a.entries.reduce(function (n, e) {
       return n + e.sets.filter(function (s) { return s.done; }).length;
     }, 0);
+    return { done: done, segundos: (Date.now() - a.start) / 1000 };
+  }
 
-    const segundos = (Date.now() - a.start) / 1000;
-
-    /* Ni series ni tiempo: no hay nada que guardar */
-    if (!done && segundos < 60) {
-      UI.confirm('Terminar entrenamiento',
-        'No has marcado ninguna serie y llevas menos de un minuto. ¿Lo descarto?',
-        'Descartar', true).then(function (ok) {
-        if (ok) { discard(); g.App.go('inicio'); UI.toast('Entrenamiento descartado'); }
-      });
-      return;
+  function resumen(h) {
+    if (!h.done) {
+      return 'Llevas ' + UI.mmss(h.segundos) + ' entrenando y no has anotado ninguna serie.';
     }
+    return h.done + (h.done === 1 ? ' serie completada' : ' series completadas') +
+      ' y ' + UI.mmss(h.segundos) + ' de entrenamiento.';
+  }
 
-    /* Sin series pero con tiempo: el entrenamiento cuenta igual */
-    if (!done) {
-      UI.confirm('Terminar entrenamiento',
-        'Llevas ' + UI.mmss(segundos) + ' entrenando sin anotar series. Guardo el tiempo igualmente.',
-        'Guardar el tiempo').then(function (ok) {
-        if (!ok) return;
-        finish();
-        g.App.go('inicio');
-        UI.toast('Entrenamiento guardado: ' + UI.mmss(segundos));
+  /* Las cuatro salidas de un entrenamiento en curso. Antes solo había guardar o
+     volver atrás: descartar estaba en la pantalla, abajo del todo, y reiniciar
+     no existía —había que descartar y montar la rutina otra vez—. Las dos que
+     borran algo piden confirmación aparte, con lo que se pierde delante. */
+  function doFinish() {
+    const h = loQueHay();
+    if (!h) return;
+
+    UI.modal(UI.html`
+      <h2>Terminar entrenamiento</h2>
+      <p class="muted">${resumen(h)}</p>
+
+      <button class="btn primary block" data-f="guardar" style="margin-top:18px">
+        ${UI.raw(icon('check'))} ${h.done ? 'Guardar el entrenamiento' : 'Guardar el tiempo'}</button>
+
+      <button class="btn block" data-f="reiniciar" style="margin-top:8px">
+        ${UI.raw(icon('cambiar'))} Reiniciar y empezar de cero</button>
+
+      <button class="btn danger block" data-f="descartar" style="margin-top:8px">
+        ${UI.raw(icon('trash'))} Descartar, no guardar nada</button>
+
+      <button class="btn ghost block" data-f="cancelar" style="margin-top:8px">Cancelar</button>`,
+      function (el) {
+        el.querySelector('[data-f=cancelar]').onclick = function () { UI.closeModal(); };
+
+        el.querySelector('[data-f=guardar]').onclick = function () {
+          UI.closeModal();
+          const s = finish();
+          g.App.go('inicio');
+          UI.toast(s && s.volume
+            ? '¡Entrenamiento guardado! Volumen: ' + UI.kg(s.volume)
+            : '¡Entrenamiento guardado! ' + UI.mmss(h.segundos));
+        };
+
+        el.querySelector('[data-f=reiniciar]').onclick = function () {
+          UI.closeModal();
+          UI.confirm('¿Reiniciar el entrenamiento?',
+            h.done
+              ? 'Se borran las ' + h.done + (h.done === 1 ? ' serie que llevas marcada' :
+                ' series que llevas marcadas') + ' y el cronómetro vuelve a cero. ' +
+                'La rutina se queda igual y los pesos que hayas escrito también.'
+              : 'El cronómetro vuelve a cero y empiezas otra vez por el primer ejercicio.',
+            'Reiniciar', true).then(function (ok) {
+            if (!ok) return;
+            reiniciar();
+            g.App.render();
+            UI.toast('Entrenamiento reiniciado');
+          });
+        };
+
+        el.querySelector('[data-f=descartar]').onclick = function () {
+          UI.closeModal();
+          UI.confirm('¿Descartar el entrenamiento?',
+            h.done
+              ? 'No se guarda nada: ni las ' + h.done + (h.done === 1 ? ' serie' : ' series') +
+                ' que llevas ni los ' + UI.mmss(h.segundos) + ' de entrenamiento. ' +
+                'Esto no se puede deshacer.'
+              : 'No se guarda nada, ni el tiempo. Esto no se puede deshacer.',
+            'Descartar', true).then(function (ok) {
+            if (!ok) return;
+            discard();
+            g.App.go('inicio');
+            UI.toast('Entrenamiento descartado');
+          });
+        };
       });
-      return;
-    }
-
-    UI.confirm('Terminar entrenamiento',
-      'Se guardarán ' + done + (done === 1 ? ' serie completada' : ' series completadas') +
-      ' y ' + UI.mmss(segundos) + ' de entrenamiento.',
-      'Guardar').then(function (ok) {
-      if (!ok) return;
-      const s = finish();
-      g.App.go('inicio');
-      UI.toast(s.volume
-        ? '¡Entrenamiento guardado! Volumen: ' + UI.kg(s.volume)
-        : '¡Entrenamiento guardado! ' + done + ' series en ' + UI.mmss(segundos));
-    });
   }
 
   g.Workout = {
     start: start, startLibre: startLibre, cargar: cargar, view: view, mount: mount,
-    isActive: isActive, finish: finish, discard: discard, stopTimers: stopTimers,
+    isActive: isActive, finish: finish, discard: discard, reiniciar: reiniciar, stopTimers: stopTimers,
     pintarBanner: pintarBanner
   };
 })(window);
