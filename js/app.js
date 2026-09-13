@@ -705,9 +705,9 @@
 
       return html`
         ${raw(deslizable(cabecera, [
-          { icono: 'chispa', texto: 'Auditar', attr: 'data-iaplan="' + esc(k) + '"' },
-          { icono: 'copiar', texto: 'Copiar', attr: 'data-duplicarplan="' + esc(k) + '"' },
-          { icono: 'compartir', texto: 'Enviar', attr: 'data-compartirplan="' + esc(k) + '"' },
+          { icono: 'chispa', texto: 'Analizar con IA', attr: 'data-iaplan="' + esc(k) + '"' },
+          { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicarplan="' + esc(k) + '"' },
+          { icono: 'compartir', texto: 'Compartir', attr: 'data-compartirplan="' + esc(k) + '"' },
           { icono: 'trash', texto: 'Borrar', tono: 'malo',
             attr: 'data-borrarplan="' + esc(k) + '"' }
         ], [
@@ -839,9 +839,9 @@
     if (!total && !sinPlan) return tarjeta;
 
     return deslizable(tarjeta, [
-      { icono: 'chispa', texto: 'Auditar', attr: 'data-iarutina="' + r.id + '"' },
-      { icono: 'copiar', texto: 'Copiar', attr: 'data-duplicar="' + r.id + '"' },
-      { icono: 'compartir', texto: 'Enviar', attr: 'data-compartir="' + r.id + '"' },
+      { icono: 'chispa', texto: 'Analizar con IA', attr: 'data-iarutina="' + r.id + '"' },
+      { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicar="' + r.id + '"' },
+      { icono: 'compartir', texto: 'Compartir', attr: 'data-compartir="' + r.id + '"' },
       { icono: 'trash', texto: 'Borrar', tono: 'malo', attr: 'data-borrar="' + r.id + '"' }
     ], [
       { icono: 'edit', texto: 'Renombrar', tono: 'suave',
