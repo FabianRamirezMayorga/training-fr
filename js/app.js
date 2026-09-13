@@ -805,6 +805,13 @@
           { icono: 'trash', texto: 'Borrar', tono: 'malo',
             attr: 'data-borrarplan="' + esc(k) + '"' }
         ], [
+          /* Marcar el plan principal estaba solo dentro del plan abierto, o sea
+             a dos toques y después de desplegar cinco rutinas. Aquí se hace
+             empujando la cabecera a la derecha, sin abrir nada. */
+          { icono: k === activo ? 'close' : 'check',
+            texto: k === activo ? 'Quitar' + BAJA + 'principal' : 'Marcar' + BAJA + 'principal',
+            tono: k === activo ? '' : 'suave',
+            attr: 'data-planactivo="' + (k === activo ? '' : esc(k)) + '"' },
           { icono: 'edit', texto: 'Renombrar', tono: 'suave',
             attr: 'data-renombrarplan="' + esc(k) + '"' },
           { icono: 'lista', texto: 'Abrir', tono: 'suave',

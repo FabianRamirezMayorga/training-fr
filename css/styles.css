@@ -985,9 +985,9 @@ body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
    Solo se pinta el panel del lado al que se está tirando, que si no los dos
    asoman a la vez en cuanto la cara se mueve un píxel. */
 .desliza-acciones.izq{left:0}
-/* Un solo botón a ese lado, y «Renombrar» no cabe en el ancho de los otros:
-   se parte por la mitad. Aquí hay sitio de sobra. */
-.desliza-acciones.izq .desliza-btn{min-width:86px}
+/* «Renombrar» y «Marcar principal» no caben en el ancho de los otros botones:
+   se parten por la mitad. A este lado hay sitio, pero con tres ya no tanto. */
+.desliza-acciones.izq .desliza-btn{min-width:66px}
 .desliza .desliza-acciones.izq{visibility:hidden}
 .desliza.mirando-izq .desliza-acciones.izq{visibility:visible}
 .desliza.mirando-izq .desliza-acciones.der{visibility:hidden}
