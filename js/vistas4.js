@@ -426,93 +426,65 @@
      accesorio ni se puede hacer nada con el día. Ahora la semana se lee de un
      vistazo —cada día dice qué trabaja y cuánto cuesta— y se abre el que
      interese, con el primero abierto para que no parezca vacío. */
-  /* ---------- el reparto de la semana ----------
-     El gráfico de antes pintaba once barras verdes casi iguales y dejaba la
-     pregunta de verdad —¿dónde me paso y dónde me quedo corto?— para que la
-     dedujera el ojo. Ahora el objetivo es el centro: cada barra sale de ahí y
-     se mide por su desvío, con el color diciendo si sobra, falta o está en
-     rango. Y lo que más se aleja va primero, que es lo que hay que arreglar. */
+  /* ---------- de qué está hecha la semana ----------
+     Aquí lo que interesa es la composición del plan: qué vas a entrenar y en
+     qué proporción. La comparación entre lo que el plan pide y lo que de verdad
+     haces es otra pregunta —y otra pantalla—: vive en Progreso, que es donde uno
+     va a ver si cumple. */
   function barraVolumen(prog) {
-    const meta = prog.objetivoSeries || 15;
-    const musculos = Object.keys(prog.volumen).filter(function (m) {
-      return prog.volumen[m] > 0;
-    });
-    if (!musculos.length) return '';
+    const zonas = {};
+    let total = 0;
 
-    const real = prog.real && prog.real.porMusculo ? prog.real : null;
-    const conHistorial = real && Object.keys(real.porMusculo || {}).some(function (m) {
-      return real.porMusculo[m] > 0;
-    });
-
-    /* cuánto se separa cada músculo de su objetivo, en tanto por uno */
-    const desvio = function (m) { return (prog.volumen[m] - meta) / meta; };
-
-    const filas = musculos.slice().sort(function (a, b) {
-      return Math.abs(desvio(b)) - Math.abs(desvio(a));
+    prog.sesiones.forEach(function (ses) {
+      ses.ejercicios.forEach(function (e) {
+        const ex = Data.get(e.exId);
+        const grupos = (ex && ex.groups && ex.groups.length) ? ex.groups : null;
+        if (!grupos) return;
+        /* una serie se reparte entre las zonas que toca, sin inflar el total */
+        grupos.forEach(function (gr) {
+          zonas[gr] = (zonas[gr] || 0) + e.sets / grupos.length;
+        });
+        total += e.sets;
+      });
     });
 
-    /* el ancho máximo que hay que representar a cada lado del objetivo */
-    const mayor = Math.max(0.35, Math.max.apply(null, filas.map(function (m) {
-      return Math.abs(desvio(m));
-    })));
+    const filas = Object.keys(zonas)
+      .map(function (id) {
+        const r = I18N.REGIONES.find(function (x) { return x.id === id; });
+        return { id: id, label: r ? r.label : id, series: Math.round(zonas[id] * 10) / 10 };
+      })
+      .filter(function (f) { return f.series > 0; })
+      .sort(function (a, b) { return b.series - a.series; });
 
-    const pasan = filas.filter(function (m) { return desvio(m) > 0.34; });
-    const cortos = filas.filter(function (m) { return prog.volumen[m] < 8; });
+    if (!filas.length || !total) return '';
+
+    const mayor = filas[0].series;
 
     return html`
-      <div class="list-title">Reparto de la semana</div>
-      <p class="tiny" style="margin:-4px 4px 10px">La línea del centro es tu objetivo:
-      <b>${meta} series</b> por músculo y semana. A la derecha, lo que se pasa; a la
-      izquierda, lo que se queda corto. Ordenado por lo que más se aleja.</p>
+      <div class="list-title">De qué está hecha tu semana</div>
+      <p class="tiny" style="margin:-4px 4px 10px">Cómo se reparten las
+      <b>${Math.round(total)} series</b> del plan entre las zonas del cuerpo. Es la
+      composición de lo que vas a hacer; si cumples o no con ello se ve en Progreso.</p>
 
       <div class="card">
-        <div class="vol2">
-          ${raw(filas.map(function (m) {
-            const v = prog.volumen[m];
-            const d = desvio(m);
-            const ancho = Math.min(50, Math.abs(d) / mayor * 50);
-            const estado = v < 8 ? 'corto' : d > 0.34 ? 'pasa' : 'bien';
-            const hecho = real ? (real.porMusculo[m] || 0) : null;
+        <div class="comp">
+          ${raw(filas.map(function (f) {
+            const pct = Math.round(f.series / total * 100);
             return html`
-              <div class="vol2-fila">
-                <span class="vol2-nom">${I18N.muscle(m)}</span>
-                <span class="vol2-pista">
-                  <i class="vol2-barra ${estado}" style="${raw(d >= 0
-                    ? 'left:50%;width:' + ancho + '%'
-                    : 'right:50%;width:' + ancho + '%')}"></i>
-                  <u class="vol2-meta"></u>
+              <div class="comp-fila">
+                <span class="comp-nom">${f.label}</span>
+                <span class="comp-pista">
+                  <i style="width:${Math.round(f.series / mayor * 100)}%"></i>
                 </span>
-                <span class="vol2-num ${estado}">${String(v).replace('.', ',')}
-                  ${raw(conHistorial
-                    ? '<span class="vol2-real">' + String(hecho).replace('.', ',') + ' real</span>'
-                    : '')}</span>
+                <span class="comp-num">${String(f.series).replace('.', ',')}
+                  <span class="comp-pct">${pct}%</span></span>
               </div>`;
           }).join(''))}
         </div>
-
-        <div class="vol2-leyenda">
-          <span><i class="pt corto"></i> corto</span>
-          <span><i class="pt bien"></i> en rango</span>
-          <span><i class="pt pasa"></i> se pasa</span>
-        </div>
-
-        ${raw(pasan.length || cortos.length ? html`
-          <p class="tiny" style="margin:11px 0 0">${raw(
-            (cortos.length ? '<b>Se queda corto:</b> ' + cortos.map(I18N.muscle).join(', ') +
-              '. Por debajo de 8 series apenas hay est\u00edmulo. ' : '') +
-            (pasan.length ? '<b>Se pasa:</b> ' + pasan.map(I18N.muscle).join(', ') +
-              '. M\u00e1s volumen del que se recupera no construye m\u00e1s.' : ''))}</p>` : html`
-          <p class="tiny" style="margin:11px 0 0">Todo dentro de rango. Este reparto no tiene
-          nada que arreglar.</p>`)}
-
-        ${raw(conHistorial ? html`
-          <p class="tiny" style="margin:7px 0 0">El número pequeño es lo que has hecho de
-          verdad de media en las últimas ${real.semanas} semanas
-          (${real.sesiones} ${real.sesiones === 1 ? 'entrenamiento' : 'entrenamientos'}).</p>`
-        : html`
-          <p class="tiny" style="margin:7px 0 0">Cuando lleves unas semanas registrando
-          entrenamientos, aquí saldrá también lo que haces de verdad, al lado de lo que
-          dice el plan.</p>`)}
+        <p class="tiny" style="margin:11px 0 0">${filas.length === 1
+          ? 'Todo el plan cae en una sola zona. Para una semana completa conviene repartir más.'
+          : 'La cifra grande son series por semana; el porcentaje, qué parte del total se lleva ' +
+            'esa zona.'}</p>
       </div>`;
   }
 
@@ -854,7 +826,7 @@
             : 'Todavía no lo has pasado a tus rutinas.'} Toca <b>Rehacer el programa</b>
           aquí arriba si quieres montar otro desde cero.</p>
         </div>` : '')}
-      ${raw(controles())}
+      ${raw(est.prog && est.prog.deRutinas ? '' : controles())}
       ${raw(est.prog ? resultado(est.prog) : '')}`;
   };
 

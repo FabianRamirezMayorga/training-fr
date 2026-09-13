@@ -84,6 +84,29 @@
   }
 
   /* Qué músculos has trabajado en los últimos días, por series hechas */
+  /* Lo que tus rutinas con día asignado piden cada semana, por zona. Enfrentarlo
+     a lo que de verdad haces es la pregunta que se viene a responder aquí: en la
+     pantalla del plan solo se ve su composición, que es otra cosa. */
+  function planPorZona() {
+    const zonas = {};
+    let total = 0;
+    Store.routines().forEach(function (r) {
+      if (!(r.days || []).length) return;
+      /* una rutina asignada a dos días se entrena dos veces por semana */
+      const veces = r.days.length;
+      (r.exercises || []).forEach(function (e) {
+        const ex = Data.get(e.exId);
+        const grupos = (ex && ex.groups && ex.groups.length) ? ex.groups : null;
+        if (!grupos) return;
+        grupos.forEach(function (gr) {
+          zonas[gr] = (zonas[gr] || 0) + (e.sets * veces) / grupos.length;
+        });
+        total += e.sets * veces;
+      });
+    });
+    return { zonas: zonas, total: total };
+  }
+
   function repartoMuscular(dias) {
     const desde = Date.now() - dias * DIA;
     const cuenta = {};
@@ -306,7 +329,7 @@
         parte del plan.</p>
       </div>
 
-      ${raw(reparto.total ? html`
+      ${raw(reparto.total || planPorZona().total ? html`
         <div class="list-title">Reparto por zona (${Math.min(r.dias, 90)} días)</div>
         <div class="card">
           ${raw(reparto.filas.map(function (f) {
@@ -319,7 +342,12 @@
                 <span class="zona-num">${share}%</span>
               </div>`;
           }).join(''))}
-          <p class="tiny" style="margin:11px 0 0">${raw(pistaReparto(reparto))}</p>
+          ${raw(reparto.total
+            ? '<p class="tiny" style="margin:11px 0 0">' + pistaReparto(reparto) + '</p>'
+            : '<p class="tiny" style="margin:0">Todavía no has completado series, así que ' +
+              'aquí no hay nada tuyo que repartir. Abajo sí está lo que tu plan pide cada ' +
+              'semana.</p>')}
+          ${raw(planVsRealHTML(reparto, r))}
         </div>` : '')}
 
       ${raw(metasHTML())}
@@ -440,6 +468,67 @@
   }
 
   /* Una frase que diga algo del reparto, no solo los porcentajes */
+  /* Plan contra realidad, zona por zona. Es lo que dice si el plan que tienes
+     montado se parece en algo a las semanas que entrenas de verdad. */
+  function planVsRealHTML(reparto, rango) {
+    const plan = planPorZona();
+    if (!plan.total) return '';
+
+    const semanas = Math.max(1, Math.round(Math.min(rango.dias, 90) / 7));
+    const hechoPorSemana = {};
+    reparto.filas.forEach(function (f) {
+      hechoPorSemana[f.id] = Math.round(f.series / semanas * 10) / 10;
+    });
+
+    const ids = Object.keys(plan.zonas).filter(function (id) { return plan.zonas[id] > 0; });
+    if (!ids.length) return '';
+    ids.sort(function (a, b) { return plan.zonas[b] - plan.zonas[a]; });
+
+    const mayor = Math.max.apply(null, ids.map(function (id) {
+      return Math.max(plan.zonas[id], hechoPorSemana[id] || 0);
+    }));
+
+    /* dónde más se separa lo que haces de lo que tu plan pide */
+    let peor = null;
+    ids.forEach(function (id) {
+      const falta = plan.zonas[id] - (hechoPorSemana[id] || 0);
+      if (!peor || falta > peor.falta) peor = { id: id, falta: falta };
+    });
+    const etiqueta = function (id) {
+      const r = I18N.REGIONES.find(function (x) { return x.id === id; });
+      return r ? r.label : id;
+    };
+
+    return html`
+      <div class="hr"></div>
+      <div class="tiny" style="margin-bottom:9px">TU PLAN CONTRA LO QUE HACES, POR SEMANA</div>
+      <div class="pvr">
+        ${raw(ids.map(function (id) {
+          const pide = Math.round(plan.zonas[id] * 10) / 10;
+          const hace = hechoPorSemana[id] || 0;
+          return html`
+            <div class="pvr-fila">
+              <span class="pvr-nom">${etiqueta(id)}</span>
+              <span class="pvr-pista">
+                <i class="pvr-plan" style="width:${Math.round(pide / mayor * 100)}%"></i>
+                <i class="pvr-real" style="width:${Math.round(hace / mayor * 100)}%"></i>
+              </span>
+              <span class="pvr-num">${String(pide).replace('.', ',')}
+                <span class="pvr-hecho">${String(hace).replace('.', ',')}</span></span>
+            </div>`;
+        }).join(''))}
+      </div>
+      <div class="pvr-leyenda">
+        <span><i class="pt plan"></i> lo que pide tu plan</span>
+        <span><i class="pt real"></i> lo que haces</span>
+      </div>
+      ${raw(peor && peor.falta > 2 ? '<p class="tiny" style="margin:9px 0 0">Donde más te ' +
+        'separas es <b>' + esc(etiqueta(peor.id)) + '</b>: tu plan pide ' +
+        String(Math.round(plan.zonas[peor.id] * 10) / 10).replace('.', ',') +
+        ' series por semana y estás haciendo ' +
+        String(hechoPorSemana[peor.id] || 0).replace('.', ',') + '.</p>' : '')}`;
+  }
+
   function pistaReparto(r) {
     const nombres = r.filas.map(function (f) { return f.id; });
     const falta = I18N.GROUPS.filter(function (gr) { return nombres.indexOf(gr.id) === -1; });

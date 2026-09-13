@@ -614,6 +614,33 @@ body.con-crono{padding-bottom:calc(142px + var(--safe-b))}
 .dia-pie{display:flex;gap:8px;padding:11px 14px;border-top:1px solid var(--line);
   background:var(--bg2)}
 
+/* Plan contra realidad, en Progreso: dos barras sobre el mismo carril */
+.pvr{display:flex;flex-direction:column;gap:3px}
+.pvr-fila{display:flex;align-items:center;gap:10px;padding:3px 0}
+.pvr-nom{flex:none;width:88px;font-size:.76rem;color:var(--dim)}
+.pvr-pista{position:relative;flex:1;height:16px}
+.pvr-plan{position:absolute;left:0;top:2px;height:12px;border-radius:6px;
+  background:var(--line)}
+.pvr-real{position:absolute;left:0;top:5px;height:6px;border-radius:3px;
+  background:var(--acc);transition:width .45s cubic-bezier(.2,.9,.3,1)}
+.pvr-num{flex:none;width:56px;text-align:right;font-size:.8rem;font-weight:700;color:var(--dim)}
+.pvr-hecho{display:block;font-size:.72rem;font-weight:700;color:var(--acc)}
+.pvr-leyenda{display:flex;gap:14px;justify-content:center;margin-top:10px}
+.pvr-leyenda span{font-size:.7rem;color:var(--dim2);display:flex;align-items:center;gap:5px}
+.pvr-leyenda .pt{width:9px;height:9px;border-radius:3px;display:inline-block}
+.pvr-leyenda .pt.plan{background:var(--line)}
+.pvr-leyenda .pt.real{background:var(--acc)}
+
+/* Composición del plan: qué zonas y en qué proporción */
+.comp{display:flex;flex-direction:column;gap:3px}
+.comp-fila{display:flex;align-items:center;gap:10px;padding:4px 0}
+.comp-nom{flex:none;width:88px;font-size:.79rem;color:var(--txt)}
+.comp-pista{flex:1;height:10px;border-radius:5px;background:var(--card2);overflow:hidden}
+.comp-pista i{display:block;height:100%;border-radius:5px;background:var(--acc);
+  transition:width .45s cubic-bezier(.2,.9,.3,1)}
+.comp-num{flex:none;width:62px;text-align:right;font-size:.82rem;font-weight:700}
+.comp-pct{display:block;font-size:.68rem;font-weight:600;color:var(--dim2)}
+
 /* ---------- reparto de la semana ----------
    El objetivo es el centro y cada barra sale de ahí: a la derecha lo que sobra,
    a la izquierda lo que falta. Once barras iguales no dicen nada; una barra que
