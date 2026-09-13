@@ -3901,7 +3901,10 @@
       <p class="tiny center" style="margin-top:22px">
         Training FR · Catálogo de ejercicios de
         <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener noreferrer">free-exercise-db</a>
-        (dominio público).<br>Tus datos se quedan en tu dispositivo salvo que
+        (dominio público) y
+        <a href="https://repdb.co" target="_blank" rel="noopener noreferrer">RepDB (repdb.co)</a>,
+        que es de donde salen los nombres y las instrucciones escritos en
+        español.<br>Tus datos se quedan en tu dispositivo salvo que
         actives la sincronización con tu correo.
       </p>`;
   }

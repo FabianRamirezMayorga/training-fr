@@ -6,6 +6,11 @@
   'use strict';
 
   const CDN = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/';
+  /* El catálogo en español vive en este repo, no en un CDN de fuera: sus
+     nombres e instrucciones están ESCRITOS en español, no traducidos palabra a
+     palabra, y trae la calistenia con fotos de verdad. Lo trae
+     tools-traer-catalogo.js; la atribución está en Ajustes y es obligatoria. */
+  const ES_PATH = 'data/catalogo-es.json';
   const MIRROR = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/';
   const JSON_PATH = 'dist/exercises.json';
   const CACHE_KEY = 'trainingfr.catalog.v1';
@@ -139,9 +144,10 @@
   /* URL del fotograma i de un ejercicio (0 = inicio, 1 = final del movimiento) */
   /* Las del yoga vienen de otra fuente y ya traen la direccion entera */
   function rutaImagen(p) {
-    /* Las del yoga vienen con la dirección entera y las de calistenia son
-       dibujos en un data: URI; solo las del catálogo llevan el CDN delante. */
-    return /^(https?:|data:)/i.test(p) ? p : CDN + 'exercises/' + p;
+    /* Las del yoga vienen con la dirección entera, las de calistenia son
+       dibujos en un data: URI y las del catálogo en español viven en este
+       repo; solo las del catálogo de fuera llevan el CDN delante. */
+    return /^(https?:|data:|data\/)/i.test(p) ? p : CDN + 'exercises/' + p;
   }
 
   function img(ex, i) {
@@ -216,8 +222,26 @@
      catálogo descargado. Van fuera de la copia guardada a propósito: así una
      versión nueva de la app trae ejercicios nuevos sin esperar a que caduque
      lo guardado. */
+  /* El catálogo en español manda sobre el de fuera cuando hablan del mismo
+     ejercicio. El de fuera viene en inglés y su nombre en español sale de un
+     diccionario palabra a palabra —de ahí «Around del mundo»—, así que donde
+     los dos tienen el mismo ejercicio se queda el que está bien escrito.
+
+     No se borra nada más: el de fuera son 876 ejercicios y el español 467, o
+     sea que la mayoría del catálogo sigue viniendo de ahí. */
+  let enEspanol = [];
+
   function conExtras(raw) {
     let todo = raw;
+
+    if (enEspanol.length) {
+      const suyos = {};
+      enEspanol.forEach(function (e) { suyos[I18N.norm(e.nameEs)] = true; });
+      todo = todo.filter(function (e) {
+        return !suyos[I18N.norm(e.nameEs || I18N.name(e.name))];
+      }).concat(enEspanol);
+    }
+
     if (g.Yoga) todo = todo.concat(Yoga.crudos());
     if (g.Calistenia) todo = todo.concat(Calistenia.crudos());
     return todo;
@@ -232,6 +256,16 @@
 
   /* Carga el catálogo: CDN -> espejo en GitHub -> copia local guardada antes. */
   function load() {
+    /* El de casa primero y sin bloquear: si falla, la app sigue con el de
+       fuera, que es lo que tenía hasta ahora. */
+    const esp = fetchJSON(ES_PATH)
+      .then(function (l) { enEspanol = Array.isArray(l) ? l : []; })
+      .catch(function () { enEspanol = []; });
+
+    return esp.then(function () { return cargarDeFuera(); });
+  }
+
+  function cargarDeFuera() {
     return fetchJSON(CDN + JSON_PATH)
       .catch(function () { return fetchJSON(MIRROR + JSON_PATH); })
       .then(function (raw) {

@@ -1,7 +1,7 @@
 /* sw.js — service worker.
    Deja la app usable sin conexión: los archivos propios se precargan y las
    imágenes del catálogo se guardan la primera vez que se ven. */
-const VERSION = 'trainingfr-v163';
+const VERSION = 'trainingfr-v164';
 const SHELL = VERSION + '-shell';
 const MEDIA = VERSION + '-media';
 const MAX_MEDIA = 4000;         // imágenes guardadas como máximo (~200 MB)
@@ -10,7 +10,7 @@ const FILES = [
   './', './index.html',
   './css/styles.css',
   './js/i18n.js', './js/tecnica.js', './js/store.js', './js/ui.js',
-  './js/yoga.js', './js/figura.js', './js/calistenia.js', './js/zona.js', './js/data.js', './js/comidas.js',
+  './js/yoga.js', './js/figura.js', './js/calistenia.js', './js/zona.js', './data/catalogo-es.json', './js/data.js', './js/comidas.js',
   './js/templates.js', './js/planner.js', './js/alternativas.js', './js/programa.js',
   './js/offline.js', './js/sync.js',
   './js/perfil.js', './js/objetivos.js', './js/alertas.js', './js/saludo.js', './js/ia.js',
@@ -76,8 +76,13 @@ self.addEventListener('fetch', function (e) {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
+  /* Las imágenes del catálogo en español viven en este repo pero van por el
+     mismo camino que las de fuera: a la caché de medios y bajo su límite, no al
+     armazón. Son veinte megas: precargarlas en la instalación dejaría la app
+     sin arrancar hasta que terminase. */
   const esCatalogo = url.hostname.indexOf('jsdelivr') !== -1 ||
-                     url.hostname.indexOf('githubusercontent') !== -1;
+                     url.hostname.indexOf('githubusercontent') !== -1 ||
+                     url.pathname.indexOf('/data/img/') !== -1;
 
   /* Catálogo e imágenes: primero la caché, y se refresca en segundo plano */
   if (esCatalogo) {
