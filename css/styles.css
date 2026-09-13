@@ -935,3 +935,43 @@ body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
 .comparativa tr.gana td { color: var(--acc); }
 .comparativa tr.gana td:first-child { font-weight: 700; }
 .comparativa td.flojo { color: var(--bad); }
+
+/* ---------- deslizar una fila para ver sus acciones ----------
+   La cara tapa los botones y se empuja hacia la izquierda. touch-action:pan-y
+   deja el desplazamiento vertical al navegador, que es el que no se puede
+   romper, y nos deja a nosotros el horizontal. */
+/* Sin esquinas redondeadas en la caja ni en la cara: con radio, la curva de la
+   cara dejaba ver el panel que hay justo debajo y asomaba el rojo del botón de
+   borrar aunque la fila estuviera cerrada. El redondeo lo pone el contenido
+   —la tarjeta de la rutina ya lo trae—, no el envoltorio. */
+.desliza{position:relative;overflow:hidden}
+.desliza+.desliza{margin-top:11px}
+/* Un píxel por dentro, arriba y abajo. Con el panel pegado al borde exacto, el
+   redondeo a píxel entero de la cara y del panel no siempre coincide y el rojo
+   del botón de borrar asomaba como una raya fina con la fila cerrada. El hueco
+   no se ve al abrir porque la caja lleva el mismo color detrás. */
+.desliza.abierta{background:var(--card2)}
+.desliza-acciones{position:absolute;top:1px;right:0;bottom:1px;display:flex;
+  align-items:stretch;z-index:0;visibility:hidden}
+/* Con la fila quieta el panel no existe. Jugar con el tamaño exacto no basta:
+   la cara y el panel se redondean a píxel entero por separado y el rojo del
+   botón de borrar asomaba como una raya fina. Si no está pintado, no asoma. */
+.desliza.abierta .desliza-acciones,
+.desliza.moviendo .desliza-acciones{visibility:visible}
+.desliza-btn{display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:4px;width:60px;border:0;padding:0 3px;
+  background:var(--card2);color:var(--txt);font-size:.66rem;font-weight:600;
+  letter-spacing:.02em}
+.desliza-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.desliza-btn.malo{background:var(--bad);color:#fff}
+.desliza-btn:active{filter:brightness(.88)}
+.desliza-cara{position:relative;background:var(--bg);touch-action:pan-y;
+  transition:transform .22s cubic-bezier(.22,.61,.36,1);will-change:transform;
+  z-index:1}
+/* La cabecera de un plan no tiene fondo propio: sin esto se verían los botones
+   por debajo del texto mientras la fila está cerrada. */
+.desliza-cara>.dia-grupo{margin-top:0;padding:12px 10px;background:var(--bg)}
+.desliza:has(>.desliza-cara>.dia-grupo){margin-top:14px}
+/* Mientras está abierta, la esquina de la cara marca dónde acaba */
+.desliza.abierta .desliza-cara{box-shadow:-6px 0 14px rgba(0,0,0,.28)}

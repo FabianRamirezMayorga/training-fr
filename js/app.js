@@ -59,6 +59,8 @@
 
     if (fn.mount) fn.mount(viewEl);
     UI.mountDemos(viewEl);
+    UI.cerrarDeslizadas();
+    UI.deslizables(viewEl);
     pintarAvisos();
     /* el cronómetro y la música acompañan al usuario por toda la app */
     Workout.pintarBanner();
@@ -687,7 +689,7 @@
 
       const ejercicios = suyas.reduce(function (n, r) { return n + r.exercises.length; }, 0);
 
-      return html`
+      const cabecera = html`
         <button class="dia-grupo" data-grupo="${k}">
           <div class="grow">
             <div class="rt-titulo">${k}
@@ -699,7 +701,15 @@
           <span class="plegador ${abierto ? 'abierto' : ''}">
             <span class="plegador-txt">${abierto ? 'Ocultar' : 'Ver'}</span>
             ${raw(icon('chevron'))}</span>
-        </button>
+        </button>`;
+
+      return html`
+        ${raw(deslizable(cabecera, [
+          { icono: 'chispa', texto: 'Auditar', attr: 'data-iaplan="' + esc(k) + '"' },
+          { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicarplan="' + esc(k) + '"' },
+          { icono: 'trash', texto: 'Borrar', tono: 'malo',
+            attr: 'data-borrarplan="' + esc(k) + '"' }
+        ]))}
         ${raw(abierto ? '<div class="stack">' +
           suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' +
           '<button class="btn block sm" data-iaplan="' + esc(k) + '" ' +
@@ -719,6 +729,22 @@
     return arriba + html`<div class="list-title">Tus planes</div>` + bloques;
   }
 
+  /* Fila que se desliza para descubrir sus acciones. El contenido va delante y
+     los botones detrás; lo de iOS de toda la vida. Evita tener que desplegar un
+     plan entero solo para duplicarlo o borrarlo. */
+  function deslizable(contenido, acciones) {
+    return '<div class="desliza">' +
+      '<div class="desliza-acciones">' +
+      acciones.map(function (a) {
+        return '<button class="desliza-btn' + (a.tono ? ' ' + a.tono : '') + '" ' +
+          a.attr + ' aria-label="' + esc(a.texto) + '">' +
+          icon(a.icono) + '<span>' + esc(a.texto) + '</span></button>';
+      }).join('') +
+      '</div>' +
+      '<div class="desliza-cara">' + contenido + '</div>' +
+      '</div>';
+  }
+
   /* i y total solo llegan desde la lista de Rutinas, que es donde se puede
      reordenar y borrar. En la portada se usa la tarjeta sin más. */
   function routineCard(r, i, total, sinPlan) {
@@ -730,7 +756,7 @@
     const musculos = musculosDeRutina(r);
     const abierta = rutinaAbierta === r.id;
 
-    return html`
+    const tarjeta = html`
       <div class="card ${esDeHoy && !ordenando ? 'card-hoy' : ''}" style="padding:0;overflow:hidden">
         <div class="row between" style="align-items:flex-start;padding:13px">
           ${raw(editando && total > 1 ? html`
@@ -798,6 +824,15 @@
             </div>
           </div>` : '')}
       </div>`;
+
+    /* En la portada la tarjeta va suelta: ahí no se borra ni se duplica nada */
+    if (!total && !sinPlan) return tarjeta;
+
+    return deslizable(tarjeta, [
+      { icono: 'chispa', texto: 'Auditar', attr: 'data-iarutina="' + r.id + '"' },
+      { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicar="' + r.id + '"' },
+      { icono: 'trash', texto: 'Borrar', tono: 'malo', attr: 'data-borrar="' + r.id + '"' }
+    ]);
   }
 
   viewInicio.mount = function (root) {

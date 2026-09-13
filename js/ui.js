@@ -90,6 +90,9 @@
      cabecera se queda fija arriba, arrastra de verdad y lleva una X, que es lo
      que busca quien no conoce el gesto. */
   function modal(contentHTML, onMount) {
+    /* Si se abre una hoja desde una fila deslizada, esa fila se queda abierta
+       detrás y al cerrar la hoja sigue ahí, con los botones al aire. */
+    cerrarDeslizadas();
     const box = document.getElementById('modal');
     box.innerHTML = '<div class="modal-box"><div class="modal-cab">' +
       '<span class="modal-grab"></span>' +
@@ -282,6 +285,113 @@
   }
 
   /* Arranca todas las animaciones presentes dentro de root */
+  /* ---------- deslizar para descubrir acciones ----------
+     Lo de iOS: se empuja la fila hacia la izquierda y detrás aparecen los
+     botones. Sirve para no tener que desplegar un plan entero solo para
+     borrarlo o duplicarlo.
+
+     Se usa el puntero, no el táctil, para que funcione igual con el ratón, y
+     la cara lleva touch-action:pan-y: así el navegador sigue encargándose del
+     desplazamiento vertical —que es el que no hay que romper— y a nosotros nos
+     llega el horizontal. Hasta que el dedo no deja claro que va de lado no se
+     mueve nada, porque si no cualquier scroll con un poco de inclinación abría
+     filas sin querer. */
+  const UMBRAL = 10;
+  let abierta = null;
+
+  function cerrarDeslizada(fila) {
+    if (!fila) return;
+    const cara = fila.querySelector(':scope > .desliza-cara');
+    if (cara) cara.style.transform = '';
+    fila.classList.remove('abierta');
+    if (abierta === fila) abierta = null;
+  }
+
+  function cerrarDeslizadas() { cerrarDeslizada(abierta); }
+
+  function deslizables(root) {
+    (root || document).querySelectorAll('.desliza').forEach(function (fila) {
+      if (fila._listo) return;
+      fila._listo = true;
+
+      const cara = fila.querySelector(':scope > .desliza-cara');
+      const panel = fila.querySelector(':scope > .desliza-acciones');
+      if (!cara || !panel) return;
+
+      let x0 = 0, y0 = 0, dx = 0, eje = '', activo = false, movido = false;
+
+      /* Nunca se empuja tanto como para que la fila deje de decir qué es: con
+         los botones ocupando casi todo el ancho, al abrir un plan solo se veía
+         el final de su texto y no se sabía cuál se estaba tocando. */
+      const ancho = function () {
+        return Math.min(panel.offsetWidth || 0, Math.max(0, fila.offsetWidth - 130));
+      };
+
+      cara.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        activo = true; movido = false; eje = '';
+        x0 = e.clientX; y0 = e.clientY; dx = 0;
+        cara.style.transition = 'none';
+      });
+
+      cara.addEventListener('pointermove', function (e) {
+        if (!activo) return;
+        const ex = e.clientX - x0;
+        const ey = e.clientY - y0;
+
+        if (!eje) {
+          if (Math.abs(ex) < UMBRAL && Math.abs(ey) < UMBRAL) return;
+          eje = Math.abs(ex) > Math.abs(ey) ? 'x' : 'y';
+          /* si va en vertical, esto no es asunto nuestro */
+          if (eje === 'y') { activo = false; cara.style.transition = ''; return; }
+          /* al empezar a deslizar una, cualquier otra abierta se cierra */
+          if (abierta && abierta !== fila) cerrarDeslizada(abierta);
+        }
+
+        movido = true;
+        fila.classList.add('moviendo');
+        const base = fila.classList.contains('abierta') ? -ancho() : 0;
+        /* de cero a -ancho, con un poco de resistencia si se pasa */
+        dx = Math.max(-ancho() - 20, Math.min(0, base + ex));
+        cara.style.transform = 'translateX(' + dx + 'px)';
+      });
+
+      const soltar = function () {
+        if (!activo) return;
+        activo = false;
+        cara.style.transition = '';
+        fila.classList.remove('moviendo');
+        if (!movido) return;
+        const abrir = dx < -ancho() / 2;
+        cara.style.transform = abrir ? 'translateX(' + (-ancho()) + 'px)' : '';
+        fila.classList.toggle('abierta', abrir);
+        abierta = abrir ? fila : (abierta === fila ? null : abierta);
+      };
+
+      cara.addEventListener('pointerup', soltar);
+      cara.addEventListener('pointercancel', soltar);
+      cara.addEventListener('pointerleave', soltar);
+
+      /* Un deslizamiento no es un toque: sin esto, abrir la fila abría también
+         el plan que hay debajo. */
+      cara.addEventListener('click', function (e) {
+        if (!movido) return;
+        e.preventDefault();
+        e.stopPropagation();
+        movido = false;
+      }, true);
+
+      /* Al usar una acción, la fila se cierra: lo que hay debajo va a repintarse */
+      panel.addEventListener('click', function () { cerrarDeslizada(fila); });
+    });
+  }
+
+  /* Tocar en cualquier otro sitio, o desplazar, cierra la que esté abierta */
+  document.addEventListener('pointerdown', function (e) {
+    if (abierta && !abierta.contains(e.target)) cerrarDeslizadas();
+  }, true);
+  window.addEventListener('scroll', function () { cerrarDeslizadas(); }, { passive: true });
+
   function mountDemos(root) {
     (root || document).querySelectorAll('[data-demo]').forEach(function (box) {
       if (box.dataset.mounted) return;
@@ -343,6 +453,7 @@
   g.UI = {
     esc: esc, html: html, raw: raw, icon: icon,
     demoHTML: demoHTML, mountDemos: mountDemos, clearDemos: clearDemos,
+    deslizables: deslizables, cerrarDeslizadas: cerrarDeslizadas,
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,
     num: num, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
     beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos
