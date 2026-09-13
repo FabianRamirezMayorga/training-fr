@@ -1518,18 +1518,28 @@
       }
 
       const modelo = destino.ejercicios[destino.ejercicios.length - 1] || {};
+      const compuesto = nuevo.mechanic === 'compound';
       const entra = {
         exId: nuevo.id,
         patron: Alt.patron(nuevo),
         musculo: (nuevo.primaryMuscles || [])[0] || modelo.musculo || 'abdominals',
-        rol: 'accesorio',
+        rol: compuesto ? 'principal' : 'accesorio',
         sets: Math.min(6, Number(c.series) || modelo.sets || 3),
         reps: Math.min(60, Number(c.reps) || modelo.reps || 12),
         weight: 0,
-        rest: modelo.rest || 75,
+        /* El descanso viene con el cambio cuando lo calcula la app; el del último
+           ejercicio del día es de un aislamiento y deja corto a un básico. */
+        rest: Number(c.rest) || modelo.rest || 75,
         note: 'Lo mete el entrenador: ' + (c.porque || '')
       };
-      destino.ejercicios.push(entra);
+      /* Un compuesto al final queda detrás de los aislamientos y se hace cansado:
+         entra delante del primer ejercicio de aislamiento que haya. */
+      const corte = c.alPrincipio === false ? -1 : destino.ejercicios.findIndex(function (e) {
+        const x = Data.get(e.exId);
+        return x && x.mechanic === 'isolation';
+      });
+      if (compuesto && corte !== -1) destino.ejercicios.splice(corte, 0, entra);
+      else destino.ejercicios.push(entra);
       destino.minutos += minutosDe(entra);
       est.ia.cambios.splice(i, 1);
       apuntarAplicado(nuevo.nameEs + ': entra en ' + destino.nombre);

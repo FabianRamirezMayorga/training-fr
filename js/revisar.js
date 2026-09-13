@@ -352,6 +352,300 @@
     }).join('|');
   }
 
+  /* ---------- de fallo a cambio ----------
+     Dejar que el modelo propusiera los cambios era la otra mitad del problema:
+     cuatro consultas del mismo plan proponen cuatro cosas distintas, y alguna
+     imposible —meter un ejercicio que ya estaba, o cambiar una extensión de
+     cuádriceps por un curl de muñeca—. Los cambios se deducen del fallo, se
+     validan contra el catálogo, el material y las limitaciones, y salen en el
+     mismo formato que ya sabía aplicar la pantalla. */
+
+  function vetadoPorLesion(ex) {
+    const claves = Programa.lesionesDe((Perfil.datos() || {}).lesiones);
+    if (!claves || !claves.length) return false;
+    const pt = Alt.patron(ex);
+    return claves.some(function (k) {
+      const L = Programa.LESIONES[k];
+      if (!L) return false;
+      if ((L.patronesFuera || []).indexOf(pt) !== -1) return true;
+      const eq = (L.equipoFuera || {})[pt];
+      return !!(eq && eq.indexOf(ex.equipment) !== -1);
+    });
+  }
+
+  function sirve(ex, gear, yaPuestos) {
+    if (!ex || yaPuestos[ex.id]) return false;
+    if (FUERA.indexOf(ex.category) !== -1) return false;
+    if (OLIMPICO.test(I18N.norm(ex.nameEs || '')) ||
+        OLIMPICO.test(I18N.norm(ex.name || ''))) return false;
+    if (gear && gear !== 'todo' && !Data.permiteNombre(gear, ex.nameEs)) return false;
+    return !vetadoPorLesion(ex);
+  }
+
+  /* Con qué se puntua un candidato. Ordenar solo por «compuesto y luego
+     alfabético» metía un «A cajón shuffle lateral» como recambio de cuádriceps y
+     una apertura con bandas para hombros en alguien que entrena en gimnasio: son
+     compuestos y empiezan por A, y con eso ganaban. Lo que decide es que sea
+     trabajo de fuerza, con material de carga y del músculo que toca. */
+  /* Para rellenar un hueco vale el trabajo de fuerza normal. La halterofilia
+     olímpica —arrancada, cargada y press— puntuaba altísimo por ser compuesta y
+     con barra, y acababa propuesta como accesorio de hombro: es un gesto
+     técnico que no se aprende leyendo una tarjeta, y como recambio automático no
+     tiene sentido aunque en el papel encaje. */
+  const FUERZA = ['strength', 'powerlifting'];
+  const FUERA = ['olympic weightlifting', 'plyometrics', 'stretching', 'cardio'];
+
+  /* La categoría del catálogo no basta: «Cargada y press» viene marcado como
+     strength, y con barra y compuesto puntuaba como el mejor accesorio de
+     hombro que existe. Los gestos olímpicos se reconocen por el nombre. */
+  const OLIMPICO = /\b(cargada|arrancada|envion|envión|clean|snatch|jerk|swing|thruster|muscle up|dominada rocky)\b/;
+  const CARGA = { barbell: 16, dumbbell: 15, cable: 13, machine: 12, kettlebell: 10,
+    'e-z curl bar': 12, 'body only': 5, bands: 2, 'medicine ball': 2, other: 4 };
+
+  function puntuar(ex, favs) {
+    let s = 0;
+    if (FUERZA.indexOf(ex.category) !== -1) s += 30; else s -= 25;
+    s += ex.mechanic === 'compound' ? 12 : 6;
+    s += CARGA[ex.equipment] === undefined ? 4 : CARGA[ex.equipment];
+    if (favs.indexOf(ex.id) !== -1) s += 8;
+    if (ex.level === 'beginner' || ex.level === 'intermediate') s += 4;
+    return s;
+  }
+
+  /* A igualdad de puntos manda el nombre, que no depende de en qué orden venga
+     el catálogo: así dos ejecuciones eligen siempre lo mismo. */
+  function elMejor(cand, favs) {
+    if (!cand.length) return null;
+    cand.sort(function (a, b) {
+      const d = puntuar(b, favs) - puntuar(a, favs);
+      return d !== 0 ? d : a.nameEs.localeCompare(b.nameEs, 'es');
+    });
+    return cand[0];
+  }
+
+  /* Con qué movimiento se entrena cada músculo. Pedir «algo de tríceps» sin
+     decir el patrón deja al generador sin criterio y devuelve lo primero que
+     toque ese músculo —salió un «Car drivers» y un tríceps con banda elástica—,
+     porque la preferencia curada y la puntuación cuelgan del patrón. */
+  const PATRON_DE = {
+    chest: 'empuje horizontal',
+    lats: 'traccion vertical',
+    'middle back': 'traccion horizontal',
+    shoulders: 'elevacion lateral',
+    traps: 'elevacion lateral',
+    quadriceps: 'extension de cuadriceps',
+    hamstrings: 'curl femoral',
+    glutes: 'empuje de cadera',
+    biceps: 'curl de biceps',
+    triceps: 'extension de triceps',
+    calves: 'gemelo',
+    abdominals: 'abdominal por elevacion',
+    'lower back': 'bisagra de cadera'
+  };
+
+  /* Se le pregunta al generador, que es quien sabe elegir; lo de aquí queda de
+     red por si para ese hueco no encuentra nada. */
+  function mejorPara(musculo, gear, yaPuestos) {
+    const suyo = Programa.sugerir({
+      patron: PATRON_DE[musculo] || '', musculo: musculo,
+      gear: gear, excluir: yaPuestos
+    });
+    if (suyo && sirve(suyo, gear, yaPuestos)) return suyo;
+    return elMejor(Data.search({ muscle: musculo, gear: gear === 'todo' ? '' : gear })
+      .filter(function (ex) { return sirve(ex, gear, yaPuestos); }), Store.favorites() || []);
+  }
+
+  function mejorDePatron(patron, gear, yaPuestos) {
+    const suyo = Programa.sugerir({ patron: patron, rol: 'principal',
+      gear: gear, excluir: yaPuestos });
+    if (suyo && sirve(suyo, gear, yaPuestos)) return suyo;
+    return elMejor(Data.all().filter(function (ex) {
+      return Alt.patron(ex) === patron && sirve(ex, gear, yaPuestos);
+    }), Store.favorites() || []);
+  }
+
+  /* El día con menos series de ese músculo: si falta glúteo, el ejercicio nuevo
+     va donde menos glúteo hay, no en el primero que pille. */
+  /* Un básico que sobra de un día no va al día más vacío: va al día que ya
+     trabaja eso mismo y que no tenga otro básico pesado. Mandar el peso muerto
+     rumano al día de pecho lo deja tan mal colocado como estaba. */
+  function diaParaMover(sesiones, ex, origen) {
+    return diaAfin(sesiones, ex, origen, true);
+  }
+
+  /* A qué día va un ejercicio: al que ya trabaja lo mismo. Buscar «el día con
+     menos series de ese músculo» metía el puente de glúteos en el día de pecho,
+     porque ahí había cero: cero es lo que tiene cualquier día que no sea el
+     suyo. Lo que importa es la afinidad, no el hueco. */
+  function diaAfin(sesiones, ex, origen, vetarAxial) {
+    /* Primarios y secundarios de los dos lados: mirando solo los primarios, un
+       peso muerto rumano no encontraba afinidad en ningún día —ninguno tenía
+       isquios como objetivo— y acababa en el primero de la lista, que era el de
+       pecho. Por los secundarios sí encuentra el día de glúteo, que es el suyo. */
+    const mios = (ex.primaryMuscles || []).concat(ex.secondaryMuscles || []);
+    let mejor = -1, mas = -1, cortos = Infinity;
+    sesiones.forEach(function (s, i) {
+      if (i === origen) return;
+      const lista = ejerciciosDe(s);
+      if (vetarAxial) {
+        const yaTieneAxial = lista.some(function (e) {
+          const x = Data.get(e.exId);
+          return x && x.mechanic === 'compound' && AXIALES.indexOf(Alt.patron(x)) !== -1;
+        });
+        if (yaTieneAxial) return;
+      }
+      const afin = lista.reduce(function (a, e) {
+        const x = Data.get(e.exId);
+        if (!x) return a;
+        const suyos = (x.primaryMuscles || []).concat(x.secondaryMuscles || []);
+        const comunes = suyos.filter(function (m) { return mios.indexOf(m) !== -1; }).length;
+        return a + comunes * e.sets;
+      }, 0);
+      /* Si ningún día tiene nada que ver, al menos al que menos cargado esté */
+      if (afin > mas || (afin === mas && lista.length < cortos)) {
+        mas = afin; cortos = lista.length; mejor = i;
+      }
+    });
+    return mejor;
+  }
+
+  /* Un añadido tiene que entrar bien puesto, o el arreglo crea dos fallos
+     nuevos: metido al final queda detrás de los aislamientos, y con el descanso
+     por defecto se queda corto si es un básico. */
+  function comoEntra(ex) {
+    const pt = Alt.patron(ex);
+    const pesado = ex.mechanic === 'compound' && AXIALES.indexOf(pt) !== -1;
+    const compuesto = ex.mechanic === 'compound';
+    return {
+      series: pesado ? 4 : 3,
+      reps: pesado ? 8 : compuesto ? 10 : 12,
+      rest: pesado ? 150 : compuesto ? 120 : 60,
+      /* delante de los aislamientos si mueve peso de verdad */
+      alPrincipio: compuesto
+    };
+  }
+
+  function arreglos(prog, rev) {
+    const sesiones = prog.sesiones || [];
+    const gear = prog.gear || Store.settings().gear || 'gym';
+    const cambios = [];
+
+    const dentro = {};
+    sesiones.forEach(function (s) {
+      ejerciciosDe(s).forEach(function (e) { dentro[e.exId] = true; });
+    });
+
+    rev.hallazgos.forEach(function (h) {
+      const a = h.arreglo;
+      if (!a) return;
+
+      if (a.tipo === 'quitar' && a.exId) {
+        const ex = Data.get(a.exId);
+        if (!ex) return;
+        cambios.push({ accion: 'quitar', quitar: ex.nameEs, poner: '', dia: a.dia + 1,
+          series: 0, reps: 0, porque: h.titulo.toLowerCase() });
+        return;
+      }
+
+      if (a.tipo === 'mover' && a.exId) {
+        /* Mover no existe como acción: se quita de donde estorba y se mete en el
+           día que menos carga esa zona. */
+        const ex = Data.get(a.exId);
+        if (!ex) return;
+        const destino = diaParaMover(sesiones, ex, a.dia);
+        if (destino === -1) {
+          /* No hay ningún día libre de básicos donde meterlo: entonces el arreglo
+             no es moverlo, es quitarlo, y se dice así. */
+          cambios.push({ accion: 'quitar', quitar: ex.nameEs, poner: '', dia: a.dia + 1,
+            series: 0, reps: 0,
+            porque: 'dos básicos pesados el mismo día; no hay otro día libre donde ' +
+              'colocarlo, así que sale' });
+          return;
+        }
+        cambios.push({ accion: 'quitar', quitar: ex.nameEs, poner: '', dia: a.dia + 1,
+          series: 0, reps: 0,
+          porque: 'sacarlo del día en que choca con el otro básico pesado' });
+        cambios.push(Object.assign({ accion: 'anadir', quitar: '', poner: ex.nameEs,
+          dia: destino + 1,
+          porque: 'llevarlo a un día que ya trabaja esa zona y llegas descansado' },
+          comoEntra(ex)));
+        return;
+      }
+
+      if (a.tipo === 'cambiar' && a.exId) {
+        const ex = Data.get(a.exId);
+        if (!ex) return;
+        const alt = (Alt.para(ex, { gear: gear === 'todo' ? '' : gear, soloDisponible: true }) || [])
+          .map(function (x) { return x.ex; })
+          .filter(function (x) { return sirve(x, gear, dentro); })[0];
+        if (!alt) return;
+        cambios.push({ accion: 'cambiar', quitar: ex.nameEs, poner: alt.nameEs, dia: a.dia + 1,
+          series: 0, reps: 0, porque: h.titulo.toLowerCase() });
+        dentro[alt.id] = true;
+        return;
+      }
+
+      if (a.tipo === 'anadir' && a.patron) {
+        const ex = mejorDePatron(a.patron, gear, dentro);
+        if (!ex) return;
+        const dia = diaAfin(sesiones, ex, -1, AXIALES.indexOf(a.patron) !== -1);
+        if (dia === -1) return;
+        cambios.push(Object.assign({ accion: 'anadir', quitar: '', poner: ex.nameEs,
+          dia: dia + 1, porque: 'cubrir el patrón que falta en toda la semana' },
+          comoEntra(ex)));
+        dentro[ex.id] = true;
+        return;
+      }
+
+      if (a.tipo === 'anadir' && (a.musculos || a.musculo)) {
+        /* Solo los dos más cortos: siete cambios de golpe no los aplica nadie y
+           encima alargan todas las sesiones. */
+        const lista = (a.musculos || [a.musculo]).slice()
+          .sort(function (x, y) { return (rev.directas[x] || 0) - (rev.directas[y] || 0); })
+          .slice(0, 2);
+        lista.forEach(function (m) {
+          const ex = mejorPara(m, gear, dentro);
+          if (!ex) return;
+          const dia = diaAfin(sesiones, ex, -1, false);
+          if (dia === -1) return;
+          /* Las que falten para llegar al mínimo, no tres fijas: añadir tres a un
+             músculo que está en cuatro lo deja en siete y el fallo sigue ahí. */
+          const faltan = Math.max(1, Math.min(5, MINIMO - (rev.directas[m] || 0)));
+          cambios.push(Object.assign({ accion: 'anadir', quitar: '', poner: ex.nameEs,
+            dia: dia + 1,
+            porque: 'subir las series de ' + I18N.muscle(m).toLowerCase() +
+              ', que está en ' + (rev.directas[m] || 0) + ' y el mínimo es ' + MINIMO },
+            comoEntra(ex), { series: faltan }));
+          dentro[ex.id] = true;
+        });
+        return;
+      }
+
+      if (a.tipo === 'quitar' && a.musculos) {
+        const m = a.musculos.slice().sort(function (x, y) {
+          return (rev.directas[y] || 0) - (rev.directas[x] || 0);
+        })[0];
+        /* El aislamiento más tardío de ese músculo: el que menos aporta */
+        let cand = null;
+        sesiones.forEach(function (s, i) {
+          ejerciciosDe(s).forEach(function (e) {
+            const ex = Data.get(e.exId);
+            if (!ex || ex.mechanic !== 'isolation') return;
+            if ((ex.primaryMuscles || []).indexOf(m) === -1) return;
+            cand = { ex: ex, dia: i };
+          });
+        });
+        if (!cand) return;
+        cambios.push({ accion: 'quitar', quitar: cand.ex.nameEs, poner: '', dia: cand.dia + 1,
+          series: 0, reps: 0,
+          porque: 'bajar las series de ' + I18N.muscle(m).toLowerCase() +
+            ', que está en ' + (rev.directas[m] || 0) });
+      }
+    });
+
+    return cambios;
+  }
+
   /* Para meterlo en el prompt: los fallos ya encontrados, numerados. */
   function comoTexto(rev) {
     if (!rev.hallazgos.length) {
@@ -368,6 +662,7 @@
 
   g.Revisar = {
     revisar: revisar,
+    arreglos: arreglos,
     comoTexto: comoTexto,
     huellaDe: huellaDe,
     seriesDirectas: seriesDirectas,

@@ -1300,12 +1300,29 @@
 
   /* Revisión de las rutinas actuales frente al perfil y el progreso */
   function revisarRutinas() {
+    /* El conjunto es una semana entera, así que aquí sí valen las reglas de
+       reparto: patrones que faltan y series por músculo. Solo entran las rutinas
+       con día puesto, que son las que se entrenan de verdad. */
+    const conDia = Store.routines().filter(function (r) {
+      return (r.days || []).length && (r.exercises || []).length;
+    });
+    const todo = {
+      gear: Store.settings().gear,
+      sesiones: conDia.map(function (r) {
+        return { nombre: r.name, ejercicios: r.exercises };
+      })
+    };
+    const rev = Revisar.revisar(todo);
+
     const prompt = contexto({ rutinas: true, progreso: true, cargas: true, favoritos: true }) +
-      '\n\n' + 'Audita mis rutinas tal y como están. No las reescribas enteras ni me ' +
+      '\n\n' + Revisar.comoTexto(rev) +
+      '\nAudita mis rutinas tal y como están. No las reescribas enteras ni me ' +
       'cuentes lo que ya está bien.\n\n' +
-      BAREMO +
-      '- De tres a cinco puntos, y al menos tres tienen que ser fallos concretos ' +
-      'con su consecuencia. Cita las rutinas y los ejercicios por su nombre.\n' +
+      '- Los fallos vienen calculados arriba sobre mis rutinas: un punto por cada ' +
+      'uno, en ese orden, explicando la consecuencia y citando el número. No ' +
+      'busques otros ni te calles ninguno; si la lista viene vacía, dilo.\n' +
+      '- La nota NO la pones tú: devuelve el número ' + rev.nota + ' en "nota".\n' +
+      '- Cita las rutinas y los ejercicios por su nombre.\n' +
       '- Mira el reparto de volumen entre músculos, los patrones que falten y la ' +
       'frecuencia semanal' +
       (sinHistorial()
@@ -1319,7 +1336,23 @@
       'Devuelve JSON: {"nota":número del 0 al 10,' +
       '"veredicto":"2 frases sin rodeos","puntos":[{"titulo":"3-5 palabras",' +
       '"detalle":"1-2 frases con la consecuencia"}]}';
-    return llamarJSON(prompt, { maxTokens: 6144, temperatura: 0.15 });
+
+    const claveCache = 'conjunto:' + rev.huella;
+    const guardado = leerCache(claveCache, 24 * 30);
+    if (guardado) {
+      guardado.nota = rev.nota;
+      guardado.revision = rev;
+      guardado.deCache = true;
+      return Promise.resolve(guardado);
+    }
+
+    return llamarJSON(prompt, { maxTokens: 6144, temperatura: 0.15 })
+      .then(function (res) {
+        res.nota = rev.nota;
+        res.revision = rev;
+        escribirCache(claveCache, res);
+        return res;
+      });
   }
 
   /* El catálogo que se le enseña, con la advertencia de que es lo único que
@@ -1447,10 +1480,11 @@
     return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.6 });
   }
 
-  /* El baremo. Sin él la nota salía a ojo y el mismo plan sacaba un 4 una vez y
-     un 5,5 la siguiente, que es justo lo que hace desconfiar de un dictamen.
-     Con los tramos escritos, la nota se deduce de los fallos encontrados en
-     lugar de improvisarse. */
+  /* El baremo con el que se le pedía la nota al modelo. Ya no se usa: la nota
+     la calcula revisar.js con los fallos que encuentra, que es lo único que la
+     hace repetible. Se queda por si alguna vez hay que volver a pedir un juicio
+     libre en algún sitio nuevo.
+     eslint-disable-next-line no-unused-vars */
   const BAREMO =
     'CÓMO SE PONE LA NOTA —ciñete a esto, no la pongas a ojo:\n' +
     '- 9 o 10: no tocarías nada.\n' +
@@ -1495,10 +1529,12 @@
 
     /* Los mismos fallos calculados que en el programa entero, pero solo con las
        reglas que valen para una sesión suelta. */
-    const rev = Revisar.revisar({
+    const suelta = {
       gear: Store.settings().gear,
       sesiones: [{ nombre: r.name || 'esta rutina', ejercicios: r.exercises || [] }]
-    }, { sesionSuelta: true });
+    };
+    const rev = Revisar.revisar(suelta, { sesionSuelta: true });
+    const arreglos = Revisar.arreglos(suelta, rev);
 
     const prompt = contexto({ progreso: true, cargas: true, favoritos: true,
       gear: Store.settings().gear }) + '\n\n' +
@@ -1522,13 +1558,18 @@
       'consecuencia: orden de los ejercicios, series o repeticiones que no ' +
       'cuadran con mi objetivo, músculos repetidos, patrones que faltan, ' +
       'descansos mal puestos o riesgo para mis limitaciones.\n' +
-      '- Propon de uno a tres cambios ejecutables, con su acción:\n' +
-      '  "cambiar": sustituir un ejercicio. Rellena "quitar" con el nombre EXACTO ' +
-      'de la rutina y "poner" con el nombre EXACTO de un ejercicio del catálogo.\n' +
-      '  "quitar": sobra. Rellena "quitar" con el nombre exacto.\n' +
-      '  "anadir": falta. Rellena "poner" con el nombre EXACTO de un ejercicio ' +
-      'del catálogo, y "series" y "reps".\n' +
-      'Si un cambio no la mejora de verdad, no lo propongas.\n' +
+      (arreglos.length
+        ? '- CAMBIOS YA DECIDIDOS por la app a partir de esos fallos, comprobados ' +
+          'contra el catálogo y su material:\n' +
+          arreglos.map(function (c, i) {
+            return '  ' + (i + 1) + ') ' + c.accion + ': ' +
+              (c.quitar ? 'quitar ' + c.quitar : '') +
+              (c.quitar && c.poner ? ' y ' : '') +
+              (c.poner ? 'poner ' + c.poner : '');
+          }).join('\n') + '\n' +
+          '  Devuelve EXACTAMENTE estos en "cambios", en el mismo orden y con los ' +
+          'mismos nombres; tú solo escribes el "porque".\n'
+        : '- No hay cambios que proponer: "cambios" vacío, y no te inventes ninguno.\n') +
       '- Y aparte de los cambios sueltos, escribe en "rutina" cómo quedaría la ' +
       'sesión entera ya corregida: todos los ejercicios en el orden en que hay que ' +
       'hacerlos, con sus series, repeticiones y descanso. Es la rutina que tú ' +
@@ -1561,6 +1602,14 @@
       .then(function (res) {
         res.nota = rev.nota;
         res.revision = rev;
+        const suyos = res.cambios || [];
+        res.cambios = arreglos.map(function (c, i) {
+          const suyo = suyos[i];
+          const porque = suyo && suyo.porque &&
+            I18N.norm(String(suyo.poner || '')) === I18N.norm(String(c.poner || ''))
+            ? suyo.porque : c.porque;
+          return Object.assign({}, c, { porque: porque });
+        });
         escribirCache(claveCache, res);
         return res;
       });
@@ -1635,6 +1684,12 @@
        cosas distintas y alguna falsa —añadir un ejercicio que ya estaba—. */
     const rev = Revisar.revisar(prog);
 
+    /* Y los cambios también se deducen del fallo en vez de pedirlos: cuatro
+       consultas proponían cuatro cosas distintas y alguna imposible. Aquí salen
+       ya validados contra el catálogo, el material y las limitaciones; a la IA
+       se le pide solo que explique por qué merecen la pena. */
+    const arreglos = Revisar.arreglos(prog, rev);
+
     /* El mismo plan merece el mismo dictamen. Aunque los fallos ya salen
        calculados y estables, la redacción cambiaba en cada consulta y desde
        fuera eso se lee igual de mal: parece que cambia de opinión. Se guarda
@@ -1701,17 +1756,21 @@
       'gravedad. Devuelve el número ' + rev.nota + ' en "nota", tal cual, y que tu ' +
       'veredicto no diga una cosa distinta de lo que dice ese número.\n' +
       '- Si hay riesgo para sus limitaciones o para su edad, eso va primero.\n\n' +
-      'CAMBIOS: propon de dos a cuatro, y que sean ejecutables. Cada uno lleva ' +
-      'una accion:\n' +
-      '- "cambiar": sustituir un ejercicio por otro. Rellena "quitar" con el ' +
-      'nombre EXACTO tal y como aparece en el programa y "poner" con el nombre ' +
-      'EXACTO de un ejercicio del catálogo de arriba.\n' +
-      '- "quitar": sobra un ejercicio (repite estímulo, alarga la sesión sin ' +
-      'aportar, o es un riesgo). Rellena "quitar" con el nombre exacto.\n' +
-      '- "anadir": falta un ejercicio. Rellena "poner" con el nombre EXACTO de un ' +
-      'ejercicio del catálogo, "dia" con el número de la sesión donde va, y ' +
-      '"series" y "reps".\n' +
-      'Si un cambio no mejora el plan de verdad, no lo propongas.\n\n' +
+      (arreglos.length
+        ? 'CAMBIOS YA DECIDIDOS —la app los ha calculado a partir de esos fallos y ' +
+          'los ha comprobado contra el catálogo, el material y sus limitaciones:\n' +
+          arreglos.map(function (c, i) {
+            return (i + 1) + ') ' + c.accion + ': ' +
+              (c.quitar ? 'quitar ' + c.quitar : '') +
+              (c.quitar && c.poner ? ' y ' : '') +
+              (c.poner ? 'poner ' + c.poner : '') +
+              (c.dia ? ' (día ' + c.dia + ')' : '');
+          }).join('\n') + '\n' +
+          'NO propongas cambios tú ni toques estos. En "cambios" devuelve EXACTAMENTE ' +
+          'estos, en el mismo orden, con los mismos nombres, y escribe solo el ' +
+          '"porque": una frase que diga qué gana con ese cambio.\n\n'
+        : 'No hay cambios que proponer: devuelve "cambios" vacío y no te inventes ' +
+          'ninguno para rellenar.\n\n') +
       'Devuelve JSON: {"nota":número del 0 al 10,' +
       '"veredicto":"2-3 frases sin rodeos sobre qué le pasa a este plan",' +
       '"puntos":[{"titulo":"3-5 palabras","detalle":"1-2 frases con la consecuencia"}],' +
@@ -1731,18 +1790,15 @@
         r.nota = rev.nota;
         r.revision = rev;
 
-        /* Y un último filtro: proponer meter algo que ya está en el plan es el
-           error que más desconfianza genera, porque se ve a simple vista. */
-        const dentro = {};
-        (prog.sesiones || []).forEach(function (ses) {
-          (ses.ejercicios || []).forEach(function (e) {
-            const ex = Data.get(e.exId);
-            if (ex) dentro[I18N.norm(ex.nameEs)] = true;
-          });
-        });
-        r.cambios = (r.cambios || []).filter(function (c) {
-          if (c.accion !== 'anadir') return true;
-          return !dentro[I18N.norm(String(c.poner || ''))];
+        /* Los cambios son los calculados, pase lo que pase: del modelo solo se
+           aprovecha el «porque», y solo si lo ha escrito para ese mismo cambio. */
+        const suyos = r.cambios || [];
+        r.cambios = arreglos.map(function (c, i) {
+          const suyo = suyos[i];
+          const porque = suyo && suyo.porque &&
+            I18N.norm(String(suyo.poner || '')) === I18N.norm(String(c.poner || ''))
+            ? suyo.porque : c.porque;
+          return Object.assign({}, c, { porque: porque });
         });
 
         escribirCache(claveCache, r);

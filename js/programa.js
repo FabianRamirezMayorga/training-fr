@@ -769,6 +769,30 @@
      estén ahora. Hace falta desde que se pueden añadir y quitar ejercicios a
      mano: si no, la barra de volumen seguía enseñando el plan recién nacido y
      no el que se va a entrenar. */
+  /* El mismo criterio con el que se monta un plan, para quien necesite UN
+     ejercicio suelto. El auditor proponía recambios con una heurística propia y
+     elegía cosas como «Curl arrastrado» en lugar de «Curl con barra»: dos
+     criterios distintos para la misma decisión acaban siempre discrepando, y el
+     bueno es este, que lleva la preferencia curada por músculo. */
+  function sugerir(o) {
+    o = o || {};
+    const p = Perfil.datos() || {};
+    const experiencia = o.experiencia || p.experiencia || 'intermediate';
+    const gear = Data.GEAR[o.gear] ? o.gear : (Store.settings().gear || 'gym');
+    const r = restricciones(lesionesDe(p.lesiones));
+    const edad = porEdad(p.edad);
+    if (!edad.impacto) r.fuera['salto'] = true;
+
+    const fuera = o.excluir || {};
+    const ctx = {
+      gear: gear === 'todo' ? 'gym' : gear,
+      r: r,
+      maxNivel: (NIVELES[experiencia] || 2) + (experiencia === 'beginner' ? 1 : 0),
+      usados: fuera, delDia: fuera, variante: 0, hueco: 0
+    };
+    return elegir(h(o.patron || '', o.musculo || '', o.rol || 'accesorio'), ctx);
+  }
+
   function revolumen(prog) {
     const volumen = {};
     const directas = {};
@@ -788,6 +812,7 @@
 
   g.Programa = {
     volumenReal: volumenReal, olvidados: olvidados, revolumen: revolumen,
+    sugerir: sugerir,
     crear: crear, aRutinas: aRutinas, lesionesDe: lesionesDe,
     OBJETIVOS: OBJETIVOS, LESIONES: LESIONES
   };
