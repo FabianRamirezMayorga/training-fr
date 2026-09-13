@@ -1278,8 +1278,7 @@
     const prompt = contexto({ rutinas: true, progreso: true, cargas: true, favoritos: true }) +
       '\n\n' + 'Audita mis rutinas tal y como están. No las reescribas enteras ni me ' +
       'cuentes lo que ya está bien.\n\n' +
-      '- Ponles nota del 0 al 10. Un conjunto correcto pero mejorable es un 6 o ' +
-      'un 7; el 9 y el 10 son para lo que no tocarías.\n' +
+      BAREMO +
       '- De tres a cinco puntos, y al menos tres tienen que ser fallos concretos ' +
       'con su consecuencia. Cita las rutinas y los ejercicios por su nombre.\n' +
       '- Mira el reparto de volumen entre músculos, los patrones que falten, la ' +
@@ -1291,7 +1290,7 @@
       'Devuelve JSON: {"nota":número del 0 al 10,' +
       '"veredicto":"2 frases sin rodeos","puntos":[{"titulo":"3-5 palabras",' +
       '"detalle":"1-2 frases con la consecuencia"}]}';
-    return llamarJSON(prompt, { maxTokens: 6144 });
+    return llamarJSON(prompt, { maxTokens: 6144, temperatura: 0.15 });
   }
 
   /* El catálogo que se le enseña, con la advertencia de que es lo único que
@@ -1419,6 +1418,22 @@
     return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.6 });
   }
 
+  /* El baremo. Sin él la nota salía a ojo y el mismo plan sacaba un 4 una vez y
+     un 5,5 la siguiente, que es justo lo que hace desconfiar de un dictamen.
+     Con los tramos escritos, la nota se deduce de los fallos encontrados en
+     lugar de improvisarse. */
+  const BAREMO =
+    'CÓMO SE PONE LA NOTA —ciñete a esto, no la pongas a ojo:\n' +
+    '- 9 o 10: no tocarías nada.\n' +
+    '- 7 u 8: correcto; como mucho detalles menores.\n' +
+    '- 5 o 6: funciona, pero tiene UN fallo claro que frena el progreso.\n' +
+    '- 3 o 4: DOS o más fallos claros, o uno grave.\n' +
+    '- 0 a 2: hay riesgo de lesión o el plan es incoherente.\n' +
+    'La nota sale de los fallos que encuentres en el propio plan y de su ' +
+    'gravedad. Números enteros. Lo que haga o deje de hacer fuera del plan ' +
+    '—no registrar entrenamientos, no apuntar la comida— se comenta, pero NO ' +
+    'baja la nota del plan: el plan no tiene la culpa de que no se cumpla.\n';
+
   /* ---------- auditar UNA rutina ----------
      Lo mismo que se le hace al programa entero, pero sobre una rutina suelta:
      la que uno ya tiene montada y quiere pasar por otro par de ojos. Los
@@ -1452,7 +1467,7 @@
       menuEjercicios(suyos) +
       (r.note ? 'NOTAS QUE LE PUSO: ' + r.note + '\n' : '') +
       '\nAudita esta rutina concreta. No me cuentes lo que ya está bien.\n' +
-      '- Ponle nota del 0 al 10. Correcta pero mejorable es un 6 o un 7.\n' +
+      BAREMO +
       '- De dos a cuatro puntos, y al menos dos tienen que ser fallos con su ' +
       'consecuencia: orden de los ejercicios, series o repeticiones que no ' +
       'cuadran con mi objetivo, músculos repetidos, patrones que faltan, ' +
@@ -1481,7 +1496,9 @@
       '"reps":número,"descanso":segundos,"porque":"media frase"}],' +
       '"consejo":"lo que más cambiaría el resultado de esta rutina, 1 frase"}';
 
-    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.55 });
+    /* Un dictamen no es un texto creativo: con temperatura alta el mismo plan
+       sacaba una nota distinta en cada consulta. */
+    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.15 });
   }
 
   /* ---------- afinar el programa ----------
@@ -1557,8 +1574,7 @@
       '- Habla de ESTE plan y de ESTA persona: cita ejercicios por su nombre, ' +
       'músculos por sus series y días por su número. Si un consejo se lo podrías ' +
       'dar a otro cualquiera, bórralo y busca otro.\n' +
-      '- Ponle nota del 0 al 10. Un plan correcto pero mejorable es un 6 o un 7. ' +
-      'Reserva el 9 y el 10 para lo que no tocarías.\n' +
+      BAREMO +
       '- Si hay riesgo para sus limitaciones o para su edad, eso va primero.\n\n' +
       'CAMBIOS: propon de dos a cuatro, y que sean ejecutables. Cada uno lleva ' +
       'una accion:\n' +
@@ -1581,7 +1597,9 @@
       'que este entrenamiento sirva de algo, con números",' +
       '"consejo":"la única cosa que más le cambiaría el resultado, 1 frase"}';
 
-    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.55 });
+    /* Un dictamen no es un texto creativo: con temperatura alta el mismo plan
+       sacaba una nota distinta en cada consulta. */
+    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.15 });
   }
 
   /* Mira una foto de comida y estima lo que hay. Es una aproximación y se dice
@@ -1655,7 +1673,7 @@
       'igual. Aquí no te cortes.\n' +
       '- "accion": una sola cosa, concreta y hacedera esta semana.\n\n' +
       'Devuelve JSON: {"bien":"1 frase","flojo":"2 frases","accion":"1 frase"}';
-    return llamarJSON(prompt, { maxTokens: 4096 });
+    return llamarJSON(prompt, { maxTokens: 4096, temperatura: 0.15 });
   }
 
   /* Pregunta libre al entrenador */

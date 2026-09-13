@@ -707,6 +707,14 @@
           <p style="margin:0">${r.nutricion}</p>
         </div>` : '')}
 
+      ${raw(!pendientes && est.aplicados.length === 0 ? html`
+        <div class="card">
+          <b>No propone tocar ningún ejercicio</b>
+          <p class="tiny" style="margin:6px 0 0">Sus avisos son sobre hábitos —registrar
+          entrenamientos, apuntar la comida— o sobre el reparto general, no sobre qué
+          ejercicio cambiar. El plan, como lista de ejercicios, le parece defendible.</p>
+        </div>` : '')}
+
       ${raw(pendientes ? html`
         <div class="card">
           <b>Cambios que propone</b>
