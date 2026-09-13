@@ -198,7 +198,6 @@
      pantalla entera a cada cambio —al borrar un plato, por ejemplo— y sin esto
      el día que acabas de abrir se te cierra en la cara. */
   const diasAbiertos = {};
-  let arranque = true;
 
   /* Lo comido, por días y plegado.
      Registrando de verdad son cinco o seis platos diarios: en una semana la
@@ -208,10 +207,10 @@
     const dias = Comidas.porDias(60);
     if (!dias.length) return '';
 
-    /* La primera vez, hoy abierto y el resto plegado: es el día que estás
-       llenando. A partir de ahí manda lo que hayas abierto tú. */
+    /* Todo plegado, hoy incluido: los totales del día ya están arriba, en la
+       tarjeta grande, así que abrir hoy solo alargaba la pantalla repitiendo lo
+       que ya se ve. Se abre lo que se quiera mirar. */
     const hoyClave = Comidas.claveDia();
-    if (arranque) { diasAbiertos[hoyClave] = true; arranque = false; }
 
     return html`
       <div class="list-title" style="margin-top:18px">Lo que has comido</div>

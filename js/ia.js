@@ -1299,7 +1299,17 @@
       '- Enfocado de verdad a su objetivo y sus datos, no un menú genérico.\n' +
       '- Flexible, no un régimen: cada comida lleva una o dos alternativas equivalentes ' +
       'para cuando no apetezca o no haya de eso, y las cantidades son orientativas.\n' +
-      '- Platos que se repitan de un día a otro, para no complicar la compra.\n' +
+      /* Aquí ponía «platos que se repitan de un día a otro, para no complicar la
+         compra» y el modelo hacía exactamente eso: el mismo desayuno los siete
+         días. La compra corta sale de repetir INGREDIENTES, no platos. */
+      '- Variado de verdad. Los 7 desayunos no pueden ser el mismo: ningún plato ' +
+      'se repite dos días seguidos, y ninguno aparece más de dos veces en la semana. ' +
+      'Cada comida del día (desayuno, almuerzo, cena…) tiene que tener al menos 4 ' +
+      'platos distintos a lo largo de los 7 días.\n' +
+      '- Esa variedad sale de cambiar la preparación y las combinaciones, no de ' +
+      'comprar veinte cosas: con los mismos huevos, avena, pan, yogur, fruta, pollo ' +
+      'y arroz salen platos que no se parecen. La lista de la compra sigue siendo ' +
+      'corta, lo que cambia es lo que se hace con ella.\n' +
       '- En los días de entrenamiento, la comida de antes con hidratos y la de después ' +
       'con proteína, cuadradas con su hora de entrenar.\n' +
       '- Cantidades en gramos o medidas caseras (un vaso, una cucharada).\n' +
@@ -1317,7 +1327,9 @@
       '"flexibilidad":"1 o 2 frases sobre hasta dónde se puede salir del plan sin romperlo",' +
       '"consejos":["consejo breve"]}';
 
-    return llamarJSON(prompt, { maxTokens: 8192 }).then(function (r) {
+    /* Suelto de temperatura a propósito: con la de por defecto el menú sale
+       correcto y clavado al anterior, que es justo de lo que se quejaba. */
+    return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.8 }).then(function (r) {
       escribirCache(clave, r);
       return r;
     });
