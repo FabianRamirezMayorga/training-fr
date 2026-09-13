@@ -712,7 +712,9 @@
             attr: 'data-borrarplan="' + esc(k) + '"' }
         ], [
           { icono: 'edit', texto: 'Renombrar', tono: 'suave',
-            attr: 'data-renombrarplan="' + esc(k) + '"' }
+            attr: 'data-renombrarplan="' + esc(k) + '"' },
+          { icono: 'lista', texto: 'Abrir', tono: 'suave',
+            attr: 'data-verplan="' + esc(k) + '"' }
         ]))}
         ${raw(abierto ? '<div class="stack">' +
           suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' +
@@ -843,7 +845,9 @@
       { icono: 'trash', texto: 'Borrar', tono: 'malo', attr: 'data-borrar="' + r.id + '"' }
     ], [
       { icono: 'edit', texto: 'Renombrar', tono: 'suave',
-        attr: 'data-renombrarrutina="' + r.id + '"' }
+        attr: 'data-renombrarrutina="' + r.id + '"' },
+      { icono: 'lista', texto: 'Editar', tono: 'suave',
+        attr: 'data-open="' + r.id + '"' }
     ]);
   }
 
@@ -1872,6 +1876,9 @@
     bind(root, '[data-a=correr]', correrPlanSheet);
     bind(root, '[data-a=limpiardup]', limpiarDuplicadosSheet);
     bindAll(root, '[data-duplicar]', function (el) { duplicarRutinaSheet(el.dataset.duplicar); });
+    bindAll(root, '[data-verplan]', function (el) {
+      if (g.VISTAS && VISTAS.verPlan) VISTAS.verPlan(el.dataset.verplan);
+    });
     bindAll(root, '[data-renombrarplan]', function (el) { renombrarPlanSheet(el.dataset.renombrarplan); });
     bindAll(root, '[data-renombrarrutina]', function (el) { renombrarRutinaSheet(el.dataset.renombrarrutina); });
     bindAll(root, '[data-compartir]', function (el) {

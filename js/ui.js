@@ -89,6 +89,33 @@
      vídeo y su guía— tampoco se veía fondo que tocar para salir. Ahora la
      cabecera se queda fija arriba, arrastra de verdad y lleva una X, que es lo
      que busca quien no conoce el gesto. */
+  /* ---------- la hoja y el teclado ----------
+     En iOS el teclado no encoge la ventana: la hoja está fija al fondo de la
+     pantalla y el teclado se le pone encima, así que al escribir el nombre no
+     se veía ni el campo ni los botones. visualViewport sí sabe cuánto queda
+     libre de verdad, y la hoja se apoya ahí. */
+  function ajustarAlTeclado() {
+    const box = document.getElementById('modal');
+    const vv = window.visualViewport;
+    if (!box || box.hidden) return;
+    if (!vv) { box.style.height = ''; box.style.top = ''; box.style.bottom = ''; return; }
+    box.style.height = vv.height + 'px';
+    box.style.top = vv.offsetTop + 'px';
+    box.style.bottom = 'auto';
+  }
+
+  function vigilarTeclado(encender) {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    if (encender) {
+      vv.addEventListener('resize', ajustarAlTeclado);
+      vv.addEventListener('scroll', ajustarAlTeclado);
+    } else {
+      vv.removeEventListener('resize', ajustarAlTeclado);
+      vv.removeEventListener('scroll', ajustarAlTeclado);
+    }
+  }
+
   function modal(contentHTML, onMount) {
     /* Si se abre una hoja desde una fila deslizada, esa fila se queda abierta
        detrás y al cerrar la hoja sigue ahí, con los botones al aire. */
@@ -99,6 +126,8 @@
       '<button class="modal-x" data-cerrar aria-label="Cerrar">' + ICON.close + '</button>' +
       '</div>' + contentHTML + '</div>';
     box.hidden = false;
+    ajustarAlTeclado();
+    vigilarTeclado(true);
     box.onclick = function (e) { if (e.target === box) closeModal(); };
 
     const inner = box.querySelector('.modal-box');
@@ -158,6 +187,10 @@
     const box = document.getElementById('modal');
     box.hidden = true;
     box.innerHTML = '';
+    vigilarTeclado(false);
+    box.style.height = '';
+    box.style.top = '';
+    box.style.bottom = '';
   }
 
   /* Confirmación con botones; devuelve una promesa */

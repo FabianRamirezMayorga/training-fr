@@ -361,6 +361,14 @@
     go('programa');
   };
 
+  /* Lo mismo pero sin pedir nada a la IA: abrir el plan para verlo y tocarlo. */
+  let planParaVer = null;
+
+  V.verPlan = function (nombre) {
+    planParaVer = nombre;
+    go('programa');
+  };
+
   function abrirPlan(nombre) {
     const prog = planDesdeRutinas(nombre);
     if (!prog) { UI.toast('Ese plan ya no está'); return; }
@@ -1059,6 +1067,14 @@
   };
 
   V.programa.mount = function (root) {
+    /* viene de Rutinas pidiendo solo verlo, sin gastar una llamada a la IA */
+    if (planParaVer) {
+      const cual = planParaVer;
+      planParaVer = null;
+      abrirPlan(cual);
+      return;
+    }
+
     /* viene de Rutinas pidiendo la auditoría de un plan concreto */
     if (planPendiente) {
       const quien = planPendiente;
