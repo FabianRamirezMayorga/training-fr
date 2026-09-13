@@ -354,14 +354,14 @@
       : (cumplidos + sueltos) + ' días entrenados';
 
     return html`
-      <div class="list-title">Tu semana</div>
-      <div class="card">
-        <div class="semana">${raw(celdas)}</div>
-        <div class="row between" style="margin-top:11px">
-          <div class="tiny">${frase}</div>
-          <button class="btn sm ghost" data-a="verprogreso">Ver progreso</button>
-        </div>
-      </div>`;
+      ${raw(seccionPlegable('semana', 'Tu semana', frase, '', html`
+        <div class="card inicio-compacta">
+          <div class="semana">${raw(celdas)}</div>
+          <div class="row between" style="margin-top:8px">
+            <div class="tiny">${frase}</div>
+            <button class="btn sm ghost" data-a="verprogreso">Ver progreso</button>
+          </div>
+        </div>`))}`;
   }
 
   /* Lo que llevas comido hoy contra lo que te toca. En la portada porque es un
@@ -379,8 +379,8 @@
     const faltaProt = Math.max(0, m.prot - h.prot);
 
     return html`
-      <div class="list-title">Lo que llevas comido</div>
-      <div class="card">
+      <div class="list-title portada-titulo">Lo que llevas comido</div>
+      <div class="card inicio-compacta">
         <div class="row" style="gap:16px;align-items:flex-start">
           <div class="grow">
             <div class="tiny">CALORÍAS</div>
@@ -396,15 +396,15 @@
               <i style="width:${pp}%;background:var(--brand-1)"></i></div>
           </div>
         </div>
-        <p class="tiny" style="margin:11px 0 0">${h.kcal === 0
+        <p class="tiny" style="margin:6px 0 0">${h.kcal === 0
           ? 'Hoy no has apuntado nada. Una foto del plato basta.'
           : faltaProt > 0 ? 'Te faltan ' + faltaProt + ' g de proteína para el objetivo del día.'
           : 'Proteína del día cubierta.'}</p>
 
-        <div class="row" style="margin-top:12px">
-          <label class="btn primary grow" for="foto-inicio" style="cursor:pointer">
+        <div class="row" style="margin-top:7px">
+          <label class="btn primary grow sm" for="foto-inicio" style="cursor:pointer">
             ${raw(icon('nutricion'))} Foto</label>
-          <button class="btn grow" data-a="comidamano">${raw(icon('plus'))} A mano</button>
+          <button class="btn grow sm" data-a="comidamano">${raw(icon('plus'))} A mano</button>
         </div>
 
         <input type="file" id="foto-inicio" accept="image/*" capture="environment" hidden>
@@ -451,7 +451,7 @@
       : html`
         <div class="hola entra">Hola${raw(nombre
           ? ', <span class="nombre">' + esc(nombre) + '</span>' : '')}</div>
-        <p class="muted entra entra-2" style="font-size:.92rem">${st.week === 0
+        <p class="muted entra entra-2" style="font-size:.92rem;margin:0 0 4px">${st.week === 0
           ? 'Aún no has entrenado esta semana. Buen momento para empezar.'
           : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
           : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.'}</p>`)}
@@ -467,22 +467,22 @@
           </div>
         </div>`
       : deHoy.length ? html`
-        <button class="btn primary block grande" data-a="entrenarhoy" style="margin-top:14px">
+        <button class="btn primary block grande" data-a="entrenarhoy" style="margin-top:12px">
           ${raw(icon('play'))} Entrenar ${queEsHoy(deHoy)}
         </button>
-        <p class="tiny" style="margin:7px 0 0">${deHoy.length === 1
-          ? 'Es lo que tienes puesto para hoy. Empieza con sus ejercicios ya cargados.'
-          : 'Tienes ' + deHoy.length + ' rutinas para hoy: te dejo elegir.'}</p>
+        ${raw(deHoy.length === 1 ? ''
+        : '<p class="tiny" style="margin:7px 0 0">Tienes ' + deHoy.length +
+          ' rutinas para hoy: te dejo elegir.</p>')}
         <button class="btn ghost block sm" data-a="empezarlibre" style="margin-top:8px">
           O un entrenamiento libre</button>`
       : html`
-        <button class="btn primary block grande" data-a="empezarlibre" style="margin-top:14px">
+        <button class="btn primary block grande" data-a="empezarlibre" style="margin-top:12px">
           ${raw(icon('play'))} Iniciar entrenamiento
         </button>
         <p class="tiny" style="margin:7px 0 0">Arranca el cronómetro ahora y añade los
         ejercicios sobre la marcha. El tiempo se ve desde cualquier pantalla.</p>`)}
 
-      <div class="stats" style="margin-top:14px">
+      <div class="stats" style="margin-top:12px">
         <div class="stat"><b>${st.streak}</b><span>Días seguidos</span></div>
         <div class="stat"><b>${st.total}</b><span>Entrenos</span></div>
         <div class="stat"><b>${UI.num(Store.settings().registro !== 'detallado' || st.totalVolume === 0
@@ -492,7 +492,7 @@
 
       ${raw(Modo.franjaInvitado())}
 
-      <div class="list-head">
+      <div class="list-head portada-titulo">
         <span class="list-title" style="margin:0">Hoy, ${UI.diaLargo(hoy).toLowerCase()}</span>
         <button class="btn sm primary" data-a="verdia">${raw(icon('lista'))} Ver el día entero</button>
       </div>
@@ -515,9 +515,9 @@
       ${raw(semanaHTML())}
       ${raw(comidaHoyHTML())}
 
-      ${raw(olvido.length ? html`
-        <div class="list-title">Lo que llevas abandonado</div>
-        <div class="card">
+      ${raw(olvido.length ? seccionPlegable('olvido', 'Lo que llevas abandonado',
+        olvido.length, '', html`
+        <div class="card inicio-compacta">
           <div class="stack" style="gap:7px">
             ${raw(olvido.map(function (f) {
               return '<div class="row between"><span style="font-size:.9rem">' +
@@ -529,7 +529,7 @@
           se estanca. Toca la zona en Ejercicios y te monto la sesión.</p>
           <button class="btn sm block" data-a="programa" style="margin-top:9px">
             Rehacer mi programa con esto en cuenta</button>
-        </div>` : '')}
+        </div>`) : '')}
 
       <div class="pie-version" id="pie-version"></div>
 
@@ -905,9 +905,9 @@
               ${raw(esDeHoy && !ordenando ? '<span class="chip solid tiny-chip">HOY</span>' : '')}
               ${raw(r.mixta ? '<span class="chip tiny-chip">MIXTA</span>' : '')}</div>
             ${raw(sinPlan ? '' : '<div class="rt-nombre">' + esc(nombreRutina(r)) + '</div>')}
-            <div class="tiny" style="margin-top:3px">${n} ${n === 1 ? 'ejercicio' : 'ejercicios'}${raw(
-              musculos.length ? ' · ' + esc(musculos.slice(0, 3).join(', ').toLowerCase()) +
-                (musculos.length > 3 ? ' y ' + (musculos.length - 3) + ' más' : '') : '')}</div>
+            <div class="tiny rt-meta" style="margin-top:3px">${n} ${n === 1 ? 'ejercicio' : 'ejercicios'}${raw(
+              musculos.length ? ' · ' + esc(musculos.slice(0, 2).join(', ').toLowerCase()) +
+                (musculos.length > 2 ? ' +' + (musculos.length - 2) : '') : '')}</div>
           </div>
           ${raw(editando
             ? html`<button class="btn sm danger" data-borrar="${r.id}"
@@ -976,6 +976,7 @@
   }
 
   viewInicio.mount = function (root) {
+    recordarSecciones(root);
     bind(root, '[data-a=cerrarSaludo]', function () { Saludo.descartar(); render(); });
     bind(root, '[data-a=irCuenta]', function () { go('cuenta'); });
     bind(root, '[data-a=resume]', function () { go('entrenar'); });
@@ -2126,16 +2127,29 @@
      separado no bastaba: catorce fichas cerradas siguen siendo catorce fichas
      entre uno y el final de la pantalla. Aquí se pliega el bloque completo y el
      título dice cuántas hay dentro. */
+  /* Las secciones plegables aparecen en varias pantallas; el listener que
+     recuerda lo abierto tiene que ir en todas o la que falte se cierra sola al
+     repintar. */
+  function recordarSecciones(root) {
+    root.querySelectorAll('details.seccion').forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (d.open) seccionesAbiertas[d.dataset.sec] = true;
+        else delete seccionesAbiertas[d.dataset.sec];
+      });
+    });
+  }
+
   function seccionPlegable(id, titulo, cuantas, sub, cuerpo) {
     return html`
       <details class="seccion" data-sec="${id}"${raw(seccionesAbiertas[id] ? ' open' : '')}>
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="list-title" style="margin:0">${titulo}</span>
-          <span class="tiny sec-num">${cuantas}</span>
+          ${raw(cuantas || cuantas === 0
+            ? '<span class="tiny sec-num">' + esc(String(cuantas)) + '</span>' : '')}
         </summary>
         <div class="sec-cuerpo">
-          <p class="muted" style="margin:0 0 10px">${sub}</p>
+          ${raw(sub ? '<p class="muted" style="margin:0 0 10px">' + esc(sub) + '</p>' : '')}
           <div class="stack">${raw(cuerpo)}</div>
         </div>
       </details>`;
@@ -2280,12 +2294,7 @@
 
     /* Recordar qué plantillas quedan abiertas, y que «Usar» no pliegue la ficha:
        va dentro del <summary>, donde un clic despliega por defecto. */
-    root.querySelectorAll('details.seccion').forEach(function (d) {
-      d.addEventListener('toggle', function () {
-        if (d.open) seccionesAbiertas[d.dataset.sec] = true;
-        else delete seccionesAbiertas[d.dataset.sec];
-      });
-    });
+    recordarSecciones(root);
 
     root.querySelectorAll('details.plantilla').forEach(function (d) {
       d.addEventListener('toggle', function () {

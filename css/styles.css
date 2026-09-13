@@ -243,9 +243,9 @@ a{color:var(--blue)}
    tienen la misma altura y el contenido va centrado en los dos ejes. */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:9px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
-  padding:13px 8px;text-align:center;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:3px;min-height:76px}
-.stat b{display:block;font-size:1.3rem;line-height:1.05;font-weight:800;
+  padding:9px 8px;text-align:center;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1px;min-height:58px}
+.stat b{display:block;font-size:1.15rem;line-height:1.05;font-weight:800;
   font-variant-numeric:tabular-nums}
 .stat span{display:block;font-size:.63rem;color:var(--dim2);text-transform:uppercase;
   letter-spacing:.3px;font-weight:700;line-height:1.25;max-width:100%;
@@ -1367,3 +1367,31 @@ img[src^="data/img/"] {
   background: var(--card2); font-weight: 700;
 }
 .seccion:not([open]) > .sec-cuerpo { display: none; }
+
+/* ---------- la portada, mas apretada ----------
+   La idea es verla entera sin bajar. Las cajas de aqui no llevan texto largo
+   —son numeros, una tira de dias y dos barras— asi que el relleno de tarjeta
+   normal les sobra por todos lados. */
+.inicio-compacta { padding: 11px 13px; }
+.inicio-compacta .semana { gap: 5px; }
+.inicio-compacta .sem-dia i { height: 20px; }
+.inicio-compacta .sem-dia b { margin-bottom: 1px; }
+.inicio-compacta .prog { margin-top: 4px !important; }
+
+/* Los bloques de la portada, mas juntos. Los 22px de aire entre secciones estan
+   pensados para pantallas por las que se baja; aqui la gracia es verla entera de
+   una vez, asi que se recortan solo en la portada. */
+.portada-titulo { margin-top: 12px !important; }
+
+/* El resumen de la rutina en una sola linea. Con tres musculos se iba a dos
+   renglones y la tarjeta crecia 18px por nada: lo que no cabe se corta. */
+.rt-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Las dos secciones plegables de la portada juegan de titulo de seccion, asi
+   que llevan el mismo aire recortado que los demas titulos de ahi. */
+.seccion[data-sec="semana"] > summary,
+.seccion[data-sec="olvido"] > summary { margin-top: 12px; }
+
+/* Plegada, el hueco de debajo del titulo no separa nada: no hay cuerpo que
+   separar. */
+.seccion:not([open]) > summary { margin-bottom: 4px; }
