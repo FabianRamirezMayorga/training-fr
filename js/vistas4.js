@@ -247,10 +247,14 @@
      desplegado debajo de la lista de planes, así que la pantalla parecía estar a
      medio camino de generar uno sin que nadie lo hubiera pedido. Si no hay
      ningún plan todavía sí se abre solo: no habría nada más que hacer. */
+  function hayPlanes() {
+    return Store.routines().some(function (r) { return (r.days || []).length; });
+  }
+
   function mostrarAsistente() {
     if (mostrandoPlan()) return !est.prog.deRutinas;
     if (est.creando) return true;
-    return !Store.routines().some(function (r) { return (r.days || []).length; });
+    return !hayPlanes();
   }
 
   function mostrandoPlan() {
@@ -416,7 +420,11 @@
       <textarea id="pg-notas" rows="3" placeholder="Ej. quiero mejorar en dominadas; odio las sentadillas; los viernes voy con prisa; tengo una carrera en dos meses">${est.notas || ''}</textarea>`;
 
     return html`
-      <div class="list-title" id="generar">Generar uno nuevo</div>
+      <div class="list-head" id="generar">
+        <span class="list-title">Generar uno nuevo</span>
+        ${raw(hayPlanes() ? '<button class="btn sm ghost" data-a="cancelarnuevo">' +
+          icon('close') + ' Cancelar</button>' : '')}
+      </div>
 
       ${raw(paso(1, 'Tus datos', datos,
         'Son los que usa el plan para el volumen, las repeticiones y el esfuerzo. ' +
@@ -950,6 +958,26 @@
           <span class="grow">${p.frase}</span>`;
       }).catch(function () { /* sin frase hoy, no pasa nada */ });
     }
+
+    /* Arrepentirse de crear tiene que costar un toque, no salir de la pantalla */
+    bind(root, '[data-a=cancelarnuevo]', function () {
+      const cerrar = function () {
+        est.creando = false;
+        est.prog = null; est.ia = null; est.aplicados = []; est.guardadas = [];
+        est.recuperado = false; est.abierto = {};
+        guardarEstado();
+        render();
+        window.scrollTo(0, 0);
+      };
+      /* si hay un plan montado y sin guardar, se avisa antes de tirarlo */
+      if (est.prog && !vivas().length) {
+        UI.confirm('Descartar lo generado',
+          'El plan que hay en pantalla no está en tus rutinas. Si cancelas, se pierde.',
+          'Descartar', true).then(function (ok) { if (ok) cerrar(); });
+        return;
+      }
+      cerrar();
+    });
 
     bind(root, '[data-a=irgenerar]', function () {
       const bajar = function () {

@@ -4360,9 +4360,33 @@
       el.onclick = function () { go(el.dataset.nav); };
     });
 
+    /* ---------- dónde estabas en cada pantalla ----------
+       render() no tocaba el scroll: al abrir una rutina aterrizabas a media
+       página, y al volver atrás con el gesto tampoco recuperabas el sitio, así
+       que parecía que te devolvía al principio. Se guarda la posición de la
+       pantalla que dejas y se repone al volver a ella; una pantalla nueva
+       empieza arriba, que es lo que se espera. */
+    const posiciones = {};
+    let hashPrevio = location.hash;
+    let pendiente = 0;
+
+    window.addEventListener('scroll', function () {
+      if (pendiente) return;
+      pendiente = requestAnimationFrame(function () {
+        pendiente = 0;
+        posiciones[hashPrevio] = window.scrollY;
+      });
+    }, { passive: true });
+
     /* Al volver atrás la página cambiaba debajo y la hoja abierta se quedaba
        flotando encima. Cualquier navegación la cierra. */
-    window.addEventListener('hashchange', function () { UI.closeModal(); render(); });
+    window.addEventListener('hashchange', function () {
+      UI.closeModal();
+      render();
+      const donde = posiciones[location.hash];
+      hashPrevio = location.hash;
+      window.scrollTo(0, donde || 0);
+    });
     window.addEventListener('popstate', function () { UI.closeModal(); });
 
     /* Si venimos del enlace del correo o de autorizar Spotify, se resuelve antes
