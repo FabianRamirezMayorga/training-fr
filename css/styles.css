@@ -101,7 +101,12 @@ a{color:var(--blue)}
 
 /* lista agrupada: filas separadas por una línea de un píxel, como en Ajustes de iOS */
 .list{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.list-row{display:flex;align-items:center;gap:12px;padding:12px 15px;position:relative}
+/* text-align:left porque muchas de estas filas son <button>, y un boton
+   centra su texto por defecto: el titulo y el subtitulo salian centrados
+   entre el icono y el chevron, que es justo lo que hace que una lista
+   parezca desordenada. */
+.list-row{display:flex;align-items:center;gap:12px;padding:12px 15px;position:relative;
+  text-align:left}
 .list-row+.list-row::before{content:"";position:absolute;top:0;left:15px;right:0;
   height:1px;background:var(--line);transform:scaleY(.5)}
 .list-row .grow{min-width:0}
