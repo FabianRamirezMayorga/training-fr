@@ -28,8 +28,11 @@ body{
   background:var(--bg); color:var(--txt);
   font:400 17px/1.47 var(--sans);
   letter-spacing:-.01em;
-  /* deja hueco a la barra de pestañas y, si entrena, al cronómetro */
-  padding-bottom:calc(78px + var(--safe-b));
+  /* deja hueco a la barra de pestañas y, si entrena, al cronómetro. Se dice
+     en una variable porque la portada la necesita para saber cuánta pantalla
+     tiene de verdad. */
+  --pad-abajo:78px;
+  padding-bottom:calc(var(--pad-abajo) + var(--safe-b));
   overflow-wrap:anywhere;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
@@ -521,7 +524,7 @@ code{font-family:var(--mono);
 .crono-fin{flex:none;font-weight:700;font-size:.8rem;background:rgba(0,0,0,.16);color:inherit;
   padding:.5em .85em;border-radius:9px}
 .crono-fin:active{transform:scale(.95)}
-body.con-crono{padding-bottom:calc(134px + var(--safe-b))}
+body.con-crono{--pad-abajo:134px}
 
 /* ---------- programa personal ---------- */
 /* Cabecera plegable de cada día del programa */
@@ -850,8 +853,8 @@ body.con-crono{padding-bottom:calc(134px + var(--safe-b))}
   justify-content:center;background:none;color:var(--txt);padding:0}
 .bm-b svg{width:21px;height:21px;fill:currentColor;stroke:none}
 .bm-b:active{transform:scale(.9)}
-body.con-musica{padding-bottom:calc(120px + var(--safe-b))}
-body.con-musica.con-crono{padding-bottom:calc(196px + var(--safe-b))}
+body.con-musica{--pad-abajo:120px}
+body.con-musica.con-crono{--pad-abajo:196px}
 /* Aleatorio y corazón: más pequeños, que son secundarios */
 .player-b.chico{width:38px;height:38px;color:var(--dim2)}
 .player-b.chico svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;
@@ -1410,3 +1413,55 @@ img[src^="data/img/"] {
   color: var(--dim); font-size: .82rem; font-weight: 600; font-family: inherit;
 }
 .enlace-flojo:active { color: var(--acc); }
+
+/* ---------- la portada se mide con la pantalla ----------
+   Un iPhone 11 y un 17 Pro Max no dan el mismo alto util, y la portada esta
+   pensada para verse entera de una vez en los dos. Con medidas fijas, o sobra
+   pantalla abajo en el grande o no cabe en el pequeno.
+
+   Van dos cosas a la vez:
+   1. Lo que rellena y separa se dice en clamp(minimo, parte del alto, maximo).
+      Los coeficientes estan puestos para que en una pantalla de 812 salga
+      exactamente lo de siempre —que es la medida en la que la portada cabe
+      justa— y crezcan a partir de ahi.
+   2. Entre bloque y bloque hay un muelle: un hueco con su medida minima que
+      ademas se reparte lo que sobre de pantalla. Asi el sobrante no se queda
+      todo abajo en un hueco muerto.
+
+   svh y no vh: en Safari sin instalar, vh mide como si la barra de direcciones
+   no estuviera y la cuenta sale larga. */
+.si-vacio-fuera:empty { display: none; }
+
+.vista-inicio {
+  display: flex; flex-direction: column;
+  min-height: calc(100svh - 57px - var(--pad-abajo) - var(--safe-t) - var(--safe-b));
+  /* El relleno de abajo de una pantalla por la que se baja aqui no hace falta:
+     debajo del ultimo bloque ya estan las pestanas. */
+  padding-bottom: 8px;
+}
+
+/* El muelle: su base es el hueco de siempre, crece con lo que sobre y tiene
+   un tope para que en una pantalla medio vacia no queden zanjas. */
+.muelle { flex: 1 0 clamp(10px, 1.23svh, 19px); max-height: clamp(19px, 3.2svh, 38px); }
+
+.vista-inicio .hola { margin-bottom: clamp(1px, .25svh, 4px); }
+.vista-inicio .hola-sub { margin: 0; }
+
+.vista-inicio .portada-hueco { margin-top: 0; }
+.vista-inicio .portada-titulo { margin-top: 0 !important; }
+.vista-inicio .seccion[data-sec="olvido"] > summary { margin-top: 0; }
+
+.vista-inicio .btn.grande { padding: clamp(.78em, 2.03svh, 1.05em) 1.2em; }
+.vista-inicio .enlace-flojo { margin-top: clamp(4px, .6svh, 9px);
+  padding: clamp(3px, .5svh, 8px) 0; }
+
+.vista-inicio .stat { min-height: clamp(50px, 6.15svh, 70px);
+  padding: clamp(7px, .86svh, 13px) 8px; }
+.vista-inicio .stat b { font-size: clamp(1.15rem, 2.4svh, 1.45rem); }
+
+.vista-inicio .portada-titulo.list-head,
+.vista-inicio .portada-titulo.list-title { margin-bottom: clamp(6px, .74svh, 11px) !important; }
+
+.vista-inicio .inicio-compacta { padding: clamp(9px, 1.11svh, 15px) 13px; }
+.vista-inicio .inicio-compacta .sem-dia i { height: clamp(16px, 1.97svh, 28px); }
+.vista-inicio .pie-version { margin-top: clamp(8px, 1.1svh, 22px); }

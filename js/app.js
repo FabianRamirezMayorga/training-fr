@@ -68,6 +68,7 @@
     const alturaPrevia = window.scrollY;
     pantallaPintada = donde;
 
+    viewEl.className = 'view vista-' + route.name;
     viewEl.innerHTML = fn();
     window.scrollTo(0, mismaPantalla ? alturaPrevia : 0);
 
@@ -354,6 +355,7 @@
       : (cumplidos + sueltos) + ' días entrenados';
 
     return html`
+      <div class="muelle"></div>
       <div class="card inicio-compacta semana-caja portada-titulo" data-a="verprogreso"
            role="button" tabindex="0">
         <div class="row between" style="margin-bottom:5px">
@@ -379,6 +381,7 @@
     const faltaProt = Math.max(0, m.prot - h.prot);
 
     return html`
+      <div class="muelle"></div>
       <div class="list-title portada-titulo">Lo que llevas comido</div>
       <div class="card inicio-compacta">
         <div class="row" style="gap:16px;align-items:flex-start">
@@ -410,7 +413,7 @@
         <input type="file" id="foto-inicio" accept="image/*" capture="environment" hidden>
       </div>
 
-      <div id="comida-pensando"></div>`;
+      <div id="comida-pensando" class="si-vacio-fuera"></div>`;
   }
 
   /* Cómo llamar en un botón a lo que toca hoy: la zona que más se trabaja,
@@ -451,11 +454,12 @@
       : html`
         <div class="hola entra">Hola${raw(nombre
           ? ', <span class="nombre">' + esc(nombre) + '</span>' : '')}</div>
-        <p class="muted entra entra-2" style="font-size:.92rem;margin:0 0 4px">${st.week === 0
+        <p class="muted entra entra-2 hola-sub" style="font-size:.92rem">${st.week === 0
           ? 'Semana en blanco. Buen momento para empezar.'
           : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
           : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.'}</p>`)}
 
+      <div class="muelle"></div>
       ${raw(activa ? html`
         <div class="card" style="border-color:var(--acc);background:var(--acc-d)">
           <div class="row between">
@@ -467,7 +471,7 @@
           </div>
         </div>`
       : deHoy.length ? html`
-        <button class="btn primary block grande" data-a="entrenarhoy" style="margin-top:12px">
+        <button class="btn primary block grande portada-hueco" data-a="entrenarhoy">
           ${raw(icon('play'))} Entrenar ${queEsHoy(deHoy)}
         </button>
         ${raw(deHoy.length === 1 ? ''
@@ -476,13 +480,14 @@
         <button class="enlace-flojo" data-a="empezarlibre">
           O un entrenamiento libre</button>`
       : html`
-        <button class="btn primary block grande" data-a="empezarlibre" style="margin-top:12px">
+        <button class="btn primary block grande portada-hueco" data-a="empezarlibre">
           ${raw(icon('play'))} Iniciar entrenamiento
         </button>
         <p class="tiny" style="margin:7px 0 0">Arranca el cronómetro ahora y añade los
         ejercicios sobre la marcha. El tiempo se ve desde cualquier pantalla.</p>`)}
 
-      <div class="stats" style="margin-top:12px">
+      <div class="muelle"></div>
+      <div class="stats portada-hueco">
         <div class="stat"><b>${st.streak}</b><span>Días seguidos</span></div>
         <div class="stat"><b>${st.total}</b><span>Entrenos</span></div>
         <div class="stat"><b>${UI.num(Store.settings().registro !== 'detallado' || st.totalVolume === 0
@@ -492,6 +497,7 @@
 
       ${raw(Modo.franjaInvitado())}
 
+      <div class="muelle"></div>
       <div class="list-head portada-titulo">
         <span class="list-title" style="margin:0">Hoy, ${UI.diaLargo(hoy).toLowerCase()}</span>
         <button class="btn sm primary" data-a="verdia">${raw(icon('lista'))} Ver el día entero</button>
@@ -517,7 +523,8 @@
       ${raw(semanaHTML())}
       ${raw(comidaHoyHTML())}
 
-      ${raw(olvido.length ? seccionPlegable('olvido', 'Lo que llevas abandonado',
+      ${raw(olvido.length ? '<div class="muelle"></div>' +
+        seccionPlegable('olvido', 'Lo que llevas abandonado',
         olvido.length, '', html`
         <div class="card inicio-compacta">
           <div class="stack" style="gap:7px">
