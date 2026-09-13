@@ -303,12 +303,47 @@
   /* Lo que se está haciendo cuando no son series: un partido, una subida, la
      ciclovía. Las calorías se pintan con el reloj en marcha —salen del MET, del
      peso y del tiempo que lleve— así que suben solas mientras dura. */
-  function kcalActividad(a, hasta) {
-    if (!a || !a.actividad || !a.actividad.met) return 0;
+  function pesoDelPerfil() {
     const datos = g.Perfil ? Perfil.datos() : null;
-    const peso = Number(datos && datos.peso) || 75;
-    const horas = Math.max(0, (hasta || Date.now()) - a.start) / 3600000;
-    return Math.round(a.actividad.met * peso * horas);
+    return Number(datos && datos.peso) || 75;
+  }
+
+  function kcalDe(act, minutos) {
+    if (!act || !act.met) return 0;
+    return Math.round(act.met * pesoDelPerfil() * Math.max(0, minutos) / 60);
+  }
+
+  function kcalActividad(a, hasta) {
+    if (!a || !a.actividad) return 0;
+    return kcalDe(a.actividad, ((hasta || Date.now()) - a.start) / 60000);
+  }
+
+  /* Lo que ya se hizo: no hay cronómetro que valga, se apunta con los minutos
+     que diga y se cierra. La sesión se coloca terminando ahora y empezando los
+     minutos antes, que es como se cuenta cualquier otra. */
+  function apuntarHecha(act, minutos) {
+    const fin = Date.now();
+    const sesion = {
+      routineId: null,
+      routineName: act.nombre,
+      start: fin - minutos * 60000,
+      end: fin,
+      entries: [],
+      setsDone: 0,
+      volume: 0,
+      actividad: 'otro',
+      minutos: minutos,
+      kcal: kcalDe(act, minutos),
+      musculos: act.musculos || [],
+      nota: act.nota || ''
+    };
+
+    if (Store.active()) {
+      stopTimers();
+      Store.clearActive();
+      pintarBanner();
+    }
+    return Store.addSession(sesion);
   }
 
   function tarjetaActividad(a) {
@@ -783,6 +818,12 @@
     const conIA = g.IA && IA.activa() && IA.estimarActividad;
     const yaHay = a.actividad || null;
 
+    /* Dos salidas, porque hay dos momentos: se abre la app al empezar el
+       partido, o se abre al volver a casa. Con solo cronómetro, lo segundo
+       obligaba a inventarse un tiempo mirando el reloj. */
+    let cuando = 'ahora';
+    let minutos = 60;
+
     UI.modal(html`
       <h2>¿Qué estás haciendo?</h2>
       <p class="muted">Escríbelo como lo dirías: «partido de fútbol», «subí a
@@ -793,16 +834,71 @@
       <input id="ac-que" placeholder="Partido de fútbol" autocomplete="off"
              value="${yaHay ? yaHay.nombre : ''}">
 
+      <label class="tiny" style="display:block;margin-top:14px">CUÁNDO</label>
+      <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-cuando">
+        <button class="chip on" data-cuando="ahora">Lo estoy haciendo</button>
+        <button class="chip" data-cuando="hecho">Ya lo hice</button>
+      </div>
+
+      <div id="ac-tiempo" hidden>
+        <label class="tiny" style="display:block;margin-top:14px">CUÁNTO DURÓ</label>
+        <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-mins">
+          ${raw([20, 30, 45, 60, 90, 120].map(function (m) {
+            return '<button class="chip ' + (m === 60 ? 'on' : '') + '" data-min="' + m +
+              '">' + m + ' min</button>';
+          }).join(''))}
+        </div>
+        <input id="ac-otro" type="number" inputmode="numeric" min="1" max="600"
+               placeholder="u otro número de minutos" style="margin-top:8px">
+      </div>
+
       <div id="ac-visto" class="tiny" style="margin-top:10px"></div>
 
-      <button class="btn primary block" id="ac-listo" style="margin-top:14px">
-        ${raw(conIA ? 'Calcular y empezar' : 'Empezar')}</button>`,
+      <button class="btn primary block" id="ac-listo" style="margin-top:14px"></button>`,
       function (el) {
         const campo = el.querySelector('#ac-que');
         const visto = el.querySelector('#ac-visto');
         const btn = el.querySelector('#ac-listo');
+        const caja = el.querySelector('#ac-tiempo');
 
-        const guardar = function (act) {
+        const textoBoton = function () {
+          return cuando === 'ahora'
+            ? (conIA ? 'Calcular y empezar' : 'Empezar')
+            : (conIA ? 'Calcular y apuntar' : 'Apuntar');
+        };
+        const pintarBoton = function () { btn.textContent = textoBoton(); };
+        pintarBoton();
+
+        const marcar = function (sel, uno) {
+          el.querySelectorAll(sel + ' .chip').forEach(function (c) {
+            c.classList.toggle('on', c === uno);
+          });
+        };
+
+        el.querySelectorAll('#ac-cuando .chip').forEach(function (c) {
+          c.onclick = function () {
+            cuando = c.dataset.cuando;
+            marcar('#ac-cuando', c);
+            caja.hidden = cuando !== 'hecho';
+            pintarBoton();
+          };
+        });
+
+        el.querySelectorAll('#ac-mins .chip').forEach(function (c) {
+          c.onclick = function () {
+            minutos = Number(c.dataset.min);
+            el.querySelector('#ac-otro').value = '';
+            marcar('#ac-mins', c);
+          };
+        });
+
+        el.querySelector('#ac-otro').oninput = function (ev) {
+          const v = Number(ev.target.value);
+          if (v > 0) { minutos = Math.min(600, v); marcar('#ac-mins', null); }
+        };
+
+        /* Ponerlo en marcha: el cronómetro sigue y las calorías suben solas. */
+        const enMarcha = function (act) {
           const viva = Store.active();
           if (!viva) return;
           viva.actividad = act;
@@ -814,12 +910,25 @@
           UI.toast(act.nombre + ' en marcha');
         };
 
+        /* Ya hecho: se apunta con sus minutos y se cierra el entrenamiento. */
+        const yaHecho = function (act) {
+          apuntarHecha(act, minutos);
+          UI.closeModal();
+          if (g.App) g.App.go('inicio');
+          UI.toast(act.nombre + ': ' + minutos + ' min, ~' +
+            UI.num(kcalDe(act, minutos)) + ' kcal');
+        };
+
+        const rematar = function (act) {
+          if (cuando === 'hecho') yaHecho(act); else enMarcha(act);
+        };
+
         btn.onclick = function () {
           const t = campo.value.trim();
-          if (!t) { UI.toast('Escribe qué estás haciendo'); campo.focus(); return; }
+          if (!t) { UI.toast('Escribe qué has hecho'); campo.focus(); return; }
 
           if (!conIA) {
-            guardar({ nombre: t, met: 4, musculos: [], nota: '', intensidad: '' });
+            rematar({ nombre: t, met: 4, musculos: [], nota: '', intensidad: '' });
             return;
           }
 
@@ -832,15 +941,15 @@
               visto.innerHTML = '<span style="color:var(--warn)">' +
                 UI.esc(r && r.nota ? r.nota : 'Eso no me suena a actividad física.') + '</span>';
               btn.disabled = false;
-              btn.textContent = 'Calcular y empezar';
+              pintarBoton();
               return;
             }
-            guardar(r);
+            rematar(r);
           }).catch(function (e) {
             visto.innerHTML = '<span style="color:var(--bad)">' +
               UI.esc(e.message || 'No he podido calcularlo.') + '</span>';
             btn.disabled = false;
-            btn.textContent = 'Calcular y empezar';
+            pintarBoton();
           });
         };
 
