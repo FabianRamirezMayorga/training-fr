@@ -44,6 +44,7 @@
     guardadas: [],
     cargandoIA: false,
     cargandoPlan: false,
+    creando: false,
     falloIA: '',
     todoAbierto: false,
     molestias: '',
@@ -203,6 +204,7 @@
     est.nombre = nombre;
     est.guardadas = suyas.map(function (r) { return r.id; });
     est.recuperado = false;
+    est.creando = false;
     est.ia = null;
     est.aplicados = [];
     est.abierto = {};
@@ -233,6 +235,16 @@
      guardado— pero no se despliega solo; se abre tocándolo. Lo único que sí se
      enseña sin pedirlo es un plan recién generado que aún no está en rutinas,
      porque si no se perdería. */
+  /* El asistente solo aparece cuando se ha pedido crear algo. Estaba siempre
+     desplegado debajo de la lista de planes, así que la pantalla parecía estar a
+     medio camino de generar uno sin que nadie lo hubiera pedido. Si no hay
+     ningún plan todavía sí se abre solo: no habría nada más que hacer. */
+  function mostrarAsistente() {
+    if (mostrandoPlan()) return !est.prog.deRutinas;
+    if (est.creando) return true;
+    return !Store.routines().some(function (r) { return (r.days || []).length; });
+  }
+
   function mostrandoPlan() {
     if (!est.prog) return false;
     if (!est.recuperado) return true;
@@ -830,7 +842,7 @@
 
       ${raw(!mostrandoPlan() ? '<div id="pildora" class="pildora-hueco"></div>' : '')}
 
-      ${raw(mostrandoPlan() && est.prog.deRutinas ? '' : controles())}
+      ${raw(mostrarAsistente() ? controles() : '')}
       ${raw(mostrandoPlan() ? resultado(est.prog) : '')}`;
   };
 
@@ -918,12 +930,13 @@
         const caja = document.querySelector('#generar');
         if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
-      if (!est.prog) { bajar(); return; }
+      est.creando = true;
+      if (!est.prog) { render(); setTimeout(bajar, 60); return; }
 
       const sinGuardar = !vivas().length;
       const limpiar = function () {
         est.prog = null; est.ia = null; est.aplicados = []; est.guardadas = [];
-        est.recuperado = false; est.abierto = {};
+        est.recuperado = false; est.abierto = {}; est.creando = true;
         guardarEstado();
         render();
         setTimeout(bajar, 60);

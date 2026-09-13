@@ -1312,14 +1312,20 @@
     if (guardado) return Promise.resolve(guardado);
 
     const prompt = contexto({ progreso: true, cargas: true, comida: true }) + '\n\n' +
-      'Esc\u00edbele UNA sola frase para la pantalla de su programa. Puede ser un empuj\u00f3n o ' +
-      'un apunte t\u00e9cnico, lo que m\u00e1s le sirva hoy seg\u00fan sus datos de arriba.\n' +
-      '- M\u00e1ximo 22 palabras. Una frase, no dos.\n' +
-      '- Sobre \u00c9L: cita algo suyo \u2014lo que lleva abandonado, los d\u00edas que cumple, una ' +
-      'carga concreta, lo que come\u2014. Si vale para cualquiera, no vale.\n' +
-      '- Ni halagos ni \u00abt\u00fa puedes\u00bb. Ni signos de exclamaci\u00f3n.\n' +
-      '- Si no tiene datos suficientes, dile en una frase qu\u00e9 le conviene empezar a ' +
-      'registrar y por qu\u00e9.\n\n' +
+      'EXCEPCIÓN A TUS NORMAS, solo para esto: aquí SÍ quiero que animes. Es la frase ' +
+      'que ve al abrir su programa y tiene que dejarle con ganas de entrenar, no ' +
+      'regañado. Sigues sin adular en hueco y sin prometer nada, pero el tono es de ' +
+      'alguien que está de su lado.\n\n' +
+      'Escríbele UNA frase, la que más le empuje hoy.\n' +
+      '- Máximo 20 palabras. Una frase, no dos.\n' +
+      '- Engánchala a algo suyo de los datos de arriba: lo que levanta, lo que ya ha ' +
+      'conseguido, lo que tiene a tiro, su meta. Una frase que le valga a cualquiera no ' +
+      'sirve.\n' +
+      '- Si va bien, díselo y dile qué viene ahora. Si lleva tiempo parado, que sea una ' +
+      'invitación a volver, no un reproche.\n' +
+      '- Si apenas tiene datos, empújale a entrenar hoy: el primer registro es el que ' +
+      'pone todo lo demás en marcha.\n' +
+      '- Nada de signos de exclamación, emojis, ni «tú puedes» de calendario.\n\n' +
       'Devuelve JSON: {"frase":"la frase","tipo":"empujon|tecnica|aviso"}';
 
     return llamarJSON(prompt, { maxTokens: 3072, temperatura: 0.8 }).then(function (r) {
