@@ -364,12 +364,25 @@
   }
 
   function elegir(hueco, ctx) {
-    const candidatos = porPatron(hueco.patron)
+    let candidatos = porPatron(hueco.patron)
       .concat(Data.search({ muscle: hueco.musculo, gear: ctx.gear }))
       .filter(function (ex, i, arr) { return arr.indexOf(ex) === i; })
       .filter(function (ex) { return permitido(ex, hueco, ctx.r, ctx.gear, ctx.maxNivel); });
 
     if (!candidatos.length) return null;
+
+    /* Dentro del mismo día no se repite jamás: un ejercicio dos veces en la
+       misma sesión no es un plan, es un error. Esto es un veto, no una
+       penalización. */
+    candidatos = candidatos.filter(function (ex) { return !ctx.delDia[ex.id]; });
+    if (!candidatos.length) return null;
+
+    /* En el resto de la semana se evita repetir, pero si el catálogo da de sí
+       poco —peso corporal, bandas— vale más repetir un ejercicio otro día que
+       dejar el hueco vacío. */
+    const libres = candidatos.filter(function (ex) { return !ctx.usados[ex.id]; });
+    if (libres.length) candidatos = libres;
+
     candidatos.sort(function (a, b) {
       return puntuar(b, hueco, ctx.usados) - puntuar(a, hueco, ctx.usados);
     });
@@ -423,7 +436,7 @@
 
     const usados = {};
     const ctx = { gear: gear, r: r, maxNivel: maxNivel, usados: usados,
-      variante: Number(opts.variante) || 0, hueco: 0 };
+      variante: Number(opts.variante) || 0, hueco: 0, delDia: {} };
     const volumen = {};
     const sinCubrir = [];
 
@@ -451,10 +464,12 @@
       huecos = principales.concat(accesorios);
 
       const ejercicios = [];
+      ctx.delDia = {};
       huecos.forEach(function (hueco) {
         const ex = elegir(hueco, ctx);
         if (!ex) { sinCubrir.push(hueco.patron); return; }
         usados[ex.id] = true;
+        ctx.delDia[ex.id] = true;
 
         const cfg = obj[hueco.rol];
         const estatico = ex.force === 'static';

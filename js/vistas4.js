@@ -113,7 +113,11 @@
   });
 
   function gearActual() {
-    return est.gear || Store.settings().gear || 'gym';
+    const g = est.gear || Store.settings().gear || 'gym';
+    /* «Ver todo» es un filtro para curiosear el catálogo, no un sitio donde se
+       entrena: con ese ajuste no se marcaba ninguna opción y el plan salía con
+       el catálogo entero sin que nadie lo hubiera pedido. */
+    return (g === 'todo' || !Data.GEAR[g]) ? 'gym' : g;
   }
 
   function objetivoActual() {
@@ -1225,11 +1229,11 @@
          choca con una lesión— se completa con los de la calculadora para ese
          mismo día. Perder un día entero de entrenamiento porque sobraba un
          nombre es peor que cualquier plan. */
-      if (ejercicios.length < Store.MINIMO_EJERCICIOS) {
+      if (ejercicios.length < 5) {
         const deLaBase = (base.sesiones.find(function (x) { return x.dia === dia; }) ||
           base.sesiones[i] || {}).ejercicios || [];
         deLaBase.forEach(function (e) {
-          if (ejercicios.length >= Store.MINIMO_EJERCICIOS) return;
+          if (ejercicios.length >= 5) return;
           if (vistos[e.exId]) return;
           const ex = Data.get(e.exId);
           if (!ex || prohibido(ex)) return;
@@ -1239,7 +1243,10 @@
           }));
         });
       }
-      if (ejercicios.length < Store.MINIMO_EJERCICIOS) return null;
+      /* El mínimo de la app son 6 ejercicios, pero la calculadora monta días de
+         5 con sesiones de una hora: exigir 6 aquí podía tirar un día entero que
+         la propia app habría dado por bueno. Con cuatro ya es una sesión. */
+      if (ejercicios.length < 4) return null;
 
       const minutos = ejercicios.reduce(function (n, e) {
         return n + Math.round(e.sets * (e.rest + 35) / 60);
