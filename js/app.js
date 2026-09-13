@@ -684,6 +684,17 @@
      Fabián» con sus días dentro. El nombre del plan es el de la rutina sin el
      día delante, que es justo como se guardan al generarlas.
      Arriba, y aparte, lo que toca hoy: eso se mira sin abrir nada. */
+  /* Un color por plan. No es decoración: el filo de color es lo que deja ver de
+     un vistazo dónde acaba un plan y empieza el otro.
+
+     Va por posición en la lista y no por un hash del nombre. Con el hash dos
+     planes vecinos podían salir del mismo color —pasó a la primera, con tres
+     planes de prueba— y entonces el color no distingue nada. Por posición,
+     dos seguidos nunca coinciden.
+
+     Los cinco tonos se leen sobre fondo claro y oscuro. */
+  const TONOS_PLAN = ['#8bc34a', '#4f8cf5', '#f0a23c', '#c06bf0', '#2fc4b2'];
+
   function porPlanes(rutinas) {
     const hoy = UI.DAY_NAMES[new Date().getDay()];
     const deHoy = rutinas.filter(function (r) { return (r.days || []).indexOf(hoy) !== -1; });
@@ -713,7 +724,7 @@
       <p class="tiny" style="margin:-4px 0 4px">No tienes nada asignado a hoy. Abre un plan
       y toca los días de una rutina para moverla aquí.</p>`;
 
-    const bloques = orden.map(function (k) {
+    const bloques = orden.map(function (k, i) {
       const suyas = planes[k];
       /* Siempre plegado de entrada, también cuando solo hay un plan. Abierto por
          defecto, el plan se comía la pantalla entera y las rutinas de abajo no se
@@ -744,8 +755,11 @@
       /* El plan, dentro de su cajón. Suelto sobre el fondo de la página no se
          veía dónde empieza uno y acaba el otro; con su borde y su filo verde a
          la izquierda se lee como una unidad. */
+      const tono = TONOS_PLAN[i % TONOS_PLAN.length];
+
       return html`
-        <div class="plan-caja${raw(abierto ? ' abierta' : '')}">
+        <div class="plan-caja${raw(abierto ? ' abierta' : '')}"
+             style="border-left-color:${tono}">
         ${raw(deslizable(cabecera, [
           { icono: 'chispa', texto: 'Analizar' + BAJA + 'con IA', attr: 'data-iaplan="' + esc(k) + '"' },
           { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicarplan="' + esc(k) + '"' },
