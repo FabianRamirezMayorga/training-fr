@@ -31,8 +31,19 @@
     return null;
   }
 
+  /* Con qué se hizo el menú. Si luego cambian los ingredientes o lo que pide,
+     el menú guardado sigue en pantalla como si nada y vuelve a proponer cosas
+     que no tiene: más vale decirlo que dejarlo pasar. */
+  function huellaMenu() {
+    const p = Perfil.datos();
+    const m = Perfil.macros(p);
+    return [p.despensa, p.ordenesComida, p.dieta, p.alergias, p.condiciones,
+      p.comidas, m ? m.kcal : 0, m ? m.prot : 0].join('|');
+  }
+
   function guardarPlan(p) {
-    Store.setSetting('menu', p === null ? null : { t: Date.now(), plan: p });
+    Store.setSetting('menu', p === null ? null
+      : { t: Date.now(), plan: p, huella: huellaMenu() });
     try { localStorage.removeItem(PLAN_KEY); } catch (e) { /* nada */ }
   }
 
@@ -89,11 +100,45 @@
         ${raw(filaSimple('Comidas al día', String(p.comidas)))}
       </div>
 
+      <div class="list-title">Con qué cocinas</div>
+      <div class="card">
+        <p class="muted" style="margin:0 0 10px">Un menú con ingredientes que no tienes
+        —o que ni conoces— no lo sigue nadie. Dime con qué sueles cocinar y el menú
+        sale de ahí.</p>
+
+        <label class="tiny">LO QUE SUELES TENER O COMPRAR</label>
+        <textarea id="nu-despensa" rows="4" placeholder="Ej. arroz, pasta, lentejas, huevos, pollo, atún en lata, yogur griego, plátano, avena, aceite de oliva, tomate, cebolla, pan integral">${p.despensa || ''}</textarea>
+        <p class="tiny" style="margin:6px 0 0">Ponlo a tu manera, separado por comas. Si
+        para cuadrar tus números hiciera falta algo que no esté aquí, te lo dirá aparte
+        en vez de colártelo en un plato.</p>
+
+        <div class="hr"></div>
+        <label class="tiny">¿LE PIDES ALGO CONCRETO AL ENTRENADOR?</label>
+        <div class="tiny" style="margin:2px 0 6px">Lo de arriba es con qué cuentas; esto
+        son órdenes. Manda sobre lo demás, menos sobre tus alergias y tus condiciones
+        de salud.</div>
+        <textarea id="nu-ordenes" rows="3" placeholder="Ej. nada de pescado; la cena siempre ligera; el desayuno que se prepare en cinco minutos; los domingos cocino para toda la semana">${p.ordenesComida || ''}</textarea>
+      </div>
+
       <div class="list-title">Plan de comidas</div>
+      ${raw(plan && (guardado.huella
+        ? guardado.huella !== huellaMenu()
+        /* Un menú de antes de que existiera esto no lleva huella, y desde luego
+           no tuvo en cuenta unos ingredientes que entonces no se podían poner. */
+        : !!(p.despensa || p.ordenesComida)) ? html`
+        <div class="card" style="border-color:var(--warn)">
+          <b>Este menú es de antes</b>
+          <p class="tiny" style="margin:6px 0 0">Has cambiado algo desde que se hizo —los
+          ingredientes, lo que le pides o tus números—, así que puede llevar cosas que ya
+          no encajan. Vuelve a pedirlo y se rehace con lo de ahora.</p>
+          ${raw(IA.activa() ? '<button class="btn block sm" data-a="regenerar" ' +
+            'style="margin-top:10px">' + icon('chispa') + ' Rehacer el menú</button>' : '')}
+        </div>` : '')}
       ${raw(plan ? planHTML(plan, guardado.t) : html`
         <div class="card">
           <p class="muted">Puedo prepararte un menú semanal que cuadre con esas calorías,
-          con tu tipo de dieta y lo que no puedes comer, más la lista de la compra.</p>
+          con tu tipo de dieta, lo que no puedes comer y lo que tienes en casa, más la
+          lista de la compra.</p>
           ${raw(IA.activa()
             ? '<button class="btn primary block" data-a="generar">' + icon('chispa') +
               ' Crear mi plan semanal</button>'
@@ -395,6 +440,23 @@
     });
 
     bind(root, '[data-a=comidaMano]', function () { comidaAMano(); });
+
+    /* Se guardan mientras se escribe, como en el perfil: esperar a salir del
+       campo se traga lo escrito cuando uno cambia de pantalla sin más. */
+    [['#nu-despensa', 'despensa'], ['#nu-ordenes', 'ordenesComida']].forEach(function (par) {
+      const campo = root.querySelector(par[0]);
+      if (!campo) return;
+      const guardar = function () {
+        const cambio = {};
+        cambio[par[1]] = campo.value.trim();
+        Perfil.guardar(cambio);
+      };
+      campo.addEventListener('input', function () {
+        clearTimeout(campo._espera);
+        campo._espera = setTimeout(guardar, 500);
+      });
+      campo.onchange = guardar;
+    });
 
     const campoFoto = root.querySelector('#foto-comida');
     if (campoFoto) campoFoto.onchange = function () {

@@ -393,8 +393,7 @@
             ${raw(icon('nutricion'))} Foto</label>
           <button class="btn grow" data-a="comidamano">${raw(icon('plus'))} A mano</button>
         </div>
-        <button class="btn block sm" data-a="verdia" style="margin-top:8px">
-          Ver mi día entero</button>
+
         <input type="file" id="foto-inicio" accept="image/*" capture="environment" hidden>
       </div>
 
@@ -480,7 +479,10 @@
 
       ${raw(Modo.franjaInvitado())}
 
-      <div class="list-title">Hoy, ${UI.diaLargo(hoy).toLowerCase()}</div>
+      <div class="list-head">
+        <span class="list-title" style="margin:0">Hoy, ${UI.diaLargo(hoy).toLowerCase()}</span>
+        <button class="btn sm ghost" data-a="verdia">Ver el día entero</button>
+      </div>
       ${raw(deHoy.length
         ? '<div class="stack">' + deHoy.map(function (r) { return routineCard(r); }).join('') + '</div>'
         : html`

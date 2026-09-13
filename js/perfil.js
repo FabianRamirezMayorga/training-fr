@@ -18,6 +18,10 @@
     alergias: '', lesiones: '', notas: '',
     /* Lo que condiciona qué se puede comer: diabetes, tensión, colesterol… */
     condiciones: '',
+    /* Con qué cocina de verdad. Un menú con ingredientes que no tiene a mano —o
+       que ni conoce— no lo sigue nadie: es la diferencia entre un plan y una
+       lista de deseos. Y lo de al lado son órdenes suyas para el menú. */
+    despensa: '', ordenesComida: '',
     pesajes: []          // [{fecha, peso}]
   };
 

@@ -1206,6 +1206,18 @@
     if (incluir.comida) {
       const c = comidaReal();
       if (c) trozos.push(c);
+      /* Con qué cocina de verdad. Vale para todo, no solo para el menú: un
+         consejo con ingredientes que no tiene es un consejo que no va a seguir.
+         Aquí arriba «p» es el resumen en texto, no los datos. */
+      const suyo = Perfil.datos();
+      if (suyo.despensa) {
+        trozos.push('CON LO QUE COCINA: ' + suyo.despensa + '. Lo que le propongas de comer ' +
+          'sale de ahí; si hace falta algo más, que sea de supermercado corriente y díselo.');
+      }
+      if (suyo.ordenesComida) {
+        trozos.push('LO QUE TE HA PEDIDO PARA SU COMIDA: ' + suyo.ordenesComida + '. Son ' +
+          'órdenes suyas: se respetan salvo que choquen con sus alergias o su salud.');
+      }
     }
 
     if (incluir.favoritos) {
@@ -1237,7 +1249,8 @@
 
     const p = Perfil.datos();
     const clave = 'nutricion:' + JSON.stringify(m) + ':' + p.dieta + ':' + p.comidas +
-      ':' + p.alergias + ':' + p.condiciones + ':' + (opciones.variante || 0);
+      ':' + p.alergias + ':' + p.condiciones + ':' + p.despensa + ':' + p.ordenesComida +
+      ':' + (opciones.variante || 0);
     const guardado = leerCache(clave, 72);
     if (guardado && !opciones.forzar) return Promise.resolve(guardado);
 
@@ -1265,6 +1278,18 @@
       (p.condiciones ? 'CONDICIONES DE SALUD: ' + p.condiciones + '. Adapta el menú a ' +
         'ellas (sal, azúcares, grasas saturadas, lo que corresponda) y dilo en el resumen, ' +
         'recordando que lo confirme con su médico o un dietista.\n' : '') +
+      (p.despensa ? 'CON LO QUE COCINA DE VERDAD: "' + p.despensa + '".\n' +
+        'Monta el menú con esto como base. Un plato con un ingrediente que no tiene a ' +
+        'mano —o que no conoce— no lo va a hacer, así que no lo pongas. Si para cuadrar ' +
+        'sus números hace falta algo que no está en la lista, puedes meterlo, pero que ' +
+        'sea de supermercado corriente, que sea poco, y díselo aparte en "consejos" para ' +
+        'que sepa qué tiene que comprar.\n' : '') +
+      (p.ordenesComida ? 'INSTRUCCIONES QUE TE DA ÉL PARA EL MENÚ: "' + p.ordenesComida +
+        '".\nEsto no es contexto, son órdenes, y van por delante de cualquier norma ' +
+        'general: si te dice que no quiere algo, no aparece; si te dice cómo quiere ' +
+        'repartir las comidas, lo repartes así. Solo mandan más sus alergias y sus ' +
+        'condiciones de salud. Si lo que pide le aleja de sus números, se lo das igual ' +
+        'y le dices el coste en el resumen.\n' : '') +
       '\nPrepara su menú semanal de 7 días. Es un plan de nutricionista, no una ' +
       'lista de deseos: si con sus horarios o su objetivo hay algo que no cuadra, ' +
       'dilo en el resumen en lugar de maquillarlo.\n\n' +
