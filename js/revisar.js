@@ -232,6 +232,69 @@
     });
   }
 
+  /* En cuántos días distintos aparece cada músculo. Dos planes pueden llevar las
+     mismas series semanales y no valer lo mismo: doce series de pecho en un
+     solo día rinden menos que seis y seis en dos días, porque el estímulo de una
+     sesión dura unas 48 horas y el resto de la semana no pasa nada. Sin esta
+     regla, un plan con todo apelotonado en un día sacaba la misma nota que uno
+     bien repartido y no había forma de saber a cuál hacer caso. */
+  function frecuenciaDe(sesiones) {
+    const f = {};
+    sesiones.forEach(function (s) {
+      const vistos = {};
+      ejerciciosDe(s).forEach(function (e) {
+        const ex = Data.get(e.exId);
+        if (!ex) return;
+        (ex.primaryMuscles || []).forEach(function (m) {
+          if (vistos[m]) return;
+          vistos[m] = true;
+          f[m] = (f[m] || 0) + 1;
+        });
+      });
+    });
+    return f;
+  }
+
+  function reglaFrecuencia(sesiones, directas, frecuencia, hallazgos) {
+    if (sesiones.length < 3) return;
+    const solos = GRANDES.filter(function (m) {
+      return (directas[m] || 0) >= MINIMO && (frecuencia[m] || 0) === 1;
+    });
+    if (!solos.length) return;
+    hallazgos.push({
+      id: 'frec', gravedad: solos.length >= 3 ? 2 : 1,
+      peso: Math.min(2, 0.5 + solos.length * 0.4),
+      titulo: solos.length === 1
+        ? I18N.muscle(solos[0]) + ', un solo día a la semana'
+        : solos.length + ' músculos entrenados un solo día',
+      dato: solos.map(function (m) {
+        return I18N.muscle(m).toLowerCase() + ' ' + (directas[m] || 0) + ' series en 1 día';
+      }).join(', ') + '; repartidas en dos días rinden más, porque el estímulo de ' +
+        'una sesión dura unas 48 horas',
+      arreglo: { tipo: 'repartir', musculos: solos }
+    });
+  }
+
+  /* Sesiones de cuatro ejercicios junto a sesiones de ocho: el día corto se
+     queda sin estímulo suficiente y el largo se hace eterno y se abandona. */
+  function reglaEquilibrio(sesiones, hallazgos) {
+    if (sesiones.length < 3) return;
+    const tam = sesiones.map(function (s) { return ejerciciosDe(s).length; });
+    const max = Math.max.apply(null, tam);
+    const min = Math.min.apply(null, tam);
+    if (max - min < 3) return;
+    const iMax = tam.indexOf(max), iMin = tam.indexOf(min);
+    hallazgos.push({
+      id: 'equilibrio', gravedad: 1,
+      peso: Math.min(1.5, 0.4 + (max - min) * 0.25),
+      titulo: 'Los días están muy desiguales',
+      dato: tituloSesion(sesiones[iMin], iMin) + ' lleva ' + min + ' ejercicios y ' +
+        tituloSesion(sesiones[iMax], iMax) + ' lleva ' + max + ': el corto se queda ' +
+        'flojo y el largo se hace eterno',
+      arreglo: { tipo: 'equilibrar', de: iMax, a: iMin }
+    });
+  }
+
   function reglaDescansos(sesiones, hallazgos) {
     const cortos = [];
     sesiones.forEach(function (s, i) {
@@ -330,6 +393,7 @@
     const sesiones = prog.sesiones || [];
     const directas = seriesDirectas(sesiones);
     const patrones = patronesDe(sesiones);
+    const frecuencia = frecuenciaDe(sesiones);
     const hallazgos = [];
 
     reglaRepetidos(sesiones, hallazgos);
@@ -339,6 +403,8 @@
     if (!opciones.sesionSuelta) {
       reglaPatrones(sesiones, patrones, hallazgos);
       reglaVolumen(sesiones, directas, hallazgos);
+      reglaFrecuencia(sesiones, directas, frecuencia, hallazgos);
+      reglaEquilibrio(sesiones, hallazgos);
     }
     reglaOrden(sesiones, hallazgos);
     reglaDescansos(sesiones, hallazgos);
@@ -353,6 +419,7 @@
       hallazgos: hallazgos,
       directas: directas,
       patrones: patrones,
+      frecuencia: frecuencia,
       /* Huella del plan: si no cambia, no hay por qué volver a preguntar nada */
       huella: huellaDe(prog)
     };
@@ -602,6 +669,34 @@
         return;
       }
 
+      /* Repartir: se coge el músculo apelotonado y se le mete un ejercicio suyo
+         en otro día, el más afín de los que no lo tocan. */
+      if (a.tipo === 'repartir' && a.musculos) {
+        const m = a.musculos[0];
+        const ex = mejorPara(m, gear, dentro);
+        if (!ex) return;
+        const suyo = [];
+        sesiones.forEach(function (ses, i) {
+          const tiene = ejerciciosDe(ses).some(function (e) {
+            const x = Data.get(e.exId);
+            return x && (x.primaryMuscles || []).indexOf(m) !== -1;
+          });
+          if (tiene) suyo.push(i);
+        });
+        const libres = sesiones.filter(function (_, i) { return suyo.indexOf(i) === -1; });
+        if (!libres.length) return;
+        const dia = diaAfin(sesiones.map(function (ses, i) {
+          return suyo.indexOf(i) === -1 ? ses : { nombre: '', ejercicios: [] };
+        }), ex, -1, false);
+        if (dia === -1 || suyo.indexOf(dia) !== -1) return;
+        cambios.push(Object.assign({ accion: 'anadir', quitar: '', poner: ex.nameEs,
+          dia: dia + 1,
+          porque: 'un segundo día de ' + I18N.muscle(m).toLowerCase() +
+            ', que ahora solo entrenas uno' }, comoEntra(ex)));
+        dentro[ex.id] = true;
+        return;
+      }
+
       if (a.tipo === 'quitar' && a.exId) {
         const ex = Data.get(a.exId);
         if (!ex) return;
@@ -732,6 +827,96 @@
     return cambios;
   }
 
+  /* ---------- comparar planes ----------
+     Con varios planes guardados, saber que todos «están bien» no ayuda a elegir:
+     la revisión busca defectos, y no tener defectos no es lo mismo que ser el
+     mejor. Aquí se ponen en la misma tabla los números que de verdad los
+     separan, para poder decir cuál seguir y por qué. */
+  function medir(prog) {
+    const rev = revisar(prog);
+    const sesiones = prog.sesiones || [];
+    const tam = sesiones.map(function (s) { return ejerciciosDe(s).length; });
+
+    const servidos = GRANDES.filter(function (m) {
+      return (rev.directas[m] || 0) >= MINIMO;
+    });
+    const cortos = GRANDES.filter(function (m) {
+      const n = rev.directas[m] || 0;
+      return n > 0 && n < MINIMO;
+    });
+    const dosDias = servidos.filter(function (m) {
+      return (rev.frecuencia[m] || 0) >= 2;
+    });
+
+    return {
+      nombre: prog.nombre || prog.deRutinas || 'Plan',
+      nota: rev.nota,
+      hallazgos: rev.hallazgos,
+      dias: sesiones.length,
+      ejercicios: tam.reduce(function (a, b) { return a + b; }, 0),
+      series: sesiones.reduce(function (a, s) {
+        return a + ejerciciosDe(s).reduce(function (x, e) { return x + (e.sets || 0); }, 0);
+      }, 0),
+      minEjercicios: tam.length ? Math.min.apply(null, tam) : 0,
+      maxEjercicios: tam.length ? Math.max.apply(null, tam) : 0,
+      servidos: servidos.length,
+      cortos: cortos.length,
+      dosDias: dosDias.length,
+      directas: rev.directas,
+      frecuencia: rev.frecuencia
+    };
+  }
+
+  /* El orden: manda la nota, porque ya recoge los fallos y su gravedad. A
+     igualdad, gana el que reparte cada músculo en más días, y luego el que
+     tiene los días más parejos. */
+  function comparar(progs) {
+    const filas = (progs || []).map(medir);
+    filas.sort(function (a, b) {
+      if (b.nota !== a.nota) return b.nota - a.nota;
+      if (b.dosDias !== a.dosDias) return b.dosDias - a.dosDias;
+      const da = a.maxEjercicios - a.minEjercicios;
+      const db = b.maxEjercicios - b.minEjercicios;
+      if (da !== db) return da - db;
+      return b.servidos - a.servidos;
+    });
+    return filas;
+  }
+
+  /* Por qué gana el que gana, dicho en una frase y con números. */
+  function porQueGana(filas) {
+    if (!filas.length) return '';
+    const g = filas[0];
+    if (filas.length === 1) return 'Es el único que tienes.';
+
+    const otro = filas[1];
+    const razones = [];
+    if (g.nota > otro.nota) {
+      razones.push('saca ' + g.nota + ' frente a ' + otro.nota + ', y la nota sale de ' +
+        'los fallos encontrados');
+    }
+    if (g.dosDias > otro.dosDias) {
+      razones.push('reparte ' + g.dosDias + ' músculos en dos o más días, frente a ' +
+        otro.dosDias);
+    }
+    if (!g.cortos && otro.cortos) {
+      razones.push('no deja ningún músculo por debajo del mínimo y el otro deja ' +
+        otro.cortos);
+    }
+    const dg = g.maxEjercicios - g.minEjercicios;
+    const dOtro = otro.maxEjercicios - otro.minEjercicios;
+    if (dg < dOtro) {
+      razones.push('tiene los días más parejos (de ' + g.minEjercicios + ' a ' +
+        g.maxEjercicios + ' ejercicios, frente a ' + otro.minEjercicios + ' a ' +
+        otro.maxEjercicios + ')');
+    }
+    if (!razones.length) {
+      return 'Van muy igualados: quédate con el que te apetezca más entrenar, que ' +
+        'es el que acabarás cumpliendo.';
+    }
+    return 'Frente a «' + otro.nombre + '», ' + razones.join('; ') + '.';
+  }
+
   /* Para meterlo en el prompt: los fallos ya encontrados, numerados. */
   function comoTexto(rev) {
     if (!rev.hallazgos.length) {
@@ -749,6 +934,10 @@
   g.Revisar = {
     revisar: revisar,
     arreglos: arreglos,
+    medir: medir,
+    comparar: comparar,
+    porQueGana: porQueGana,
+    GRANDES: GRANDES,
     comoTexto: comoTexto,
     huellaDe: huellaDe,
     seriesDirectas: seriesDirectas,

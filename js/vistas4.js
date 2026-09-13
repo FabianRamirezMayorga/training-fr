@@ -168,6 +168,123 @@
      días, su reparto de volumen— y se le puede pedir la auditoría y aplicar
      lo que proponga. Antes tocarlo te echaba a la pantalla de Rutinas, que es
      justo donde no querías ir. */
+  /* ---------- comparar los planes ----------
+     Con varios guardados y todos aprobando la revisión, no hay forma de elegir:
+     la revisión busca defectos, y no tener defectos no es lo mismo que ser el
+     mejor. Aquí se ven los números que de verdad los separan —series por
+     músculo, en cuántos días se reparte cada uno, cómo de parejas son las
+     sesiones— y se dice cuál seguir. */
+  function compararSheet() {
+    const planes = {};
+    const orden = [];
+    Store.routines().forEach(function (r) {
+      if (!(r.days || []).length || !(r.exercises || []).length) return;
+      const k = App.nombreRutina(r);
+      if (!planes[k]) { planes[k] = []; orden.push(k); }
+      planes[k].push(r);
+    });
+    if (orden.length < 2) { UI.toast('Necesitas al menos dos planes para comparar'); return; }
+
+    const progs = orden.map(function (k) {
+      const suyas = planes[k].slice().sort(function (a, b) {
+        return DIAS.indexOf((a.days || [])[0]) - DIAS.indexOf((b.days || [])[0]);
+      });
+      return {
+        nombre: k, gear: Store.settings().gear,
+        sesiones: suyas.map(function (r) {
+          return { nombre: App.tituloRutina(r), ejercicios: r.exercises };
+        })
+      };
+    });
+
+    const filas = Revisar.comparar(progs);
+    const ganador = filas[0];
+
+    /* Los músculos que se enseñan: los que algún plan entrena de verdad */
+    const musculos = Revisar.GRANDES.filter(function (m) {
+      return filas.some(function (f) { return (f.directas[m] || 0) > 0; });
+    });
+
+    UI.modal(html`
+      <h2>Cuál seguir</h2>
+      <p class="muted">Los cuatro pueden pasar la revisión y no valer lo mismo: la
+        revisión busca fallos, y no tener fallos no es lo mismo que ser el mejor.
+        Estos son los números que los separan.</p>
+
+      <div class="card" style="border-color:var(--acc)">
+        <div class="row" style="gap:11px;align-items:center">
+          <div style="flex:none;font-size:1.7rem;font-weight:700;line-height:1;
+                      color:var(--acc)">${ganador.nota}<span
+               style="font-size:.8rem;color:var(--dim2)">/10</span></div>
+          <div class="grow">
+            <b>${ganador.nombre}</b>
+            <div class="tiny" style="margin-top:2px">Es el que yo seguiría</div>
+          </div>
+        </div>
+        <p class="tiny" style="margin:9px 0 0">${Revisar.porQueGana(filas)}</p>
+      </div>
+
+      <div class="tiny" style="margin:15px 0 6px">CÓMO QUEDAN</div>
+      <div class="tabla-scroll">
+        <table class="comparativa">
+          <thead><tr><th>Plan</th><th>Nota</th><th>Días</th><th>Ejer.</th>
+            <th>Series</th><th>Repartidos</th><th>Cortos</th></tr></thead>
+          <tbody>
+            ${raw(filas.map(function (f, i) {
+              return '<tr' + (i === 0 ? ' class="gana"' : '') + '>' +
+                '<td>' + esc(f.nombre) + '</td>' +
+                '<td><b>' + f.nota + '</b></td>' +
+                '<td>' + f.dias + '</td>' +
+                '<td>' + f.minEjercicios + '-' + f.maxEjercicios + '</td>' +
+                '<td>' + f.series + '</td>' +
+                '<td>' + f.dosDias + '</td>' +
+                '<td>' + (f.cortos || '—') + '</td></tr>';
+            }).join(''))}
+          </tbody>
+        </table>
+      </div>
+      <p class="tiny" style="margin:7px 0 0"><b>Ejer.</b>: del día más corto al más
+        largo. <b>Repartidos</b>: músculos que entrenas dos días o más a la semana,
+        que rinden más que los de un solo día. <b>Cortos</b>: músculos por debajo de
+        ocho series semanales.</p>
+
+      <div class="tiny" style="margin:15px 0 6px">SERIES POR MÚSCULO A LA SEMANA</div>
+      <div class="tabla-scroll">
+        <table class="comparativa">
+          <thead><tr><th>Músculo</th>
+            ${raw(filas.map(function (f) {
+              return '<th>' + esc(f.nombre.replace(/^Fabian ?/, '') || f.nombre) + '</th>';
+            }).join(''))}</tr></thead>
+          <tbody>
+            ${raw(musculos.map(function (m) {
+              return '<tr><td>' + esc(I18N.muscle(m)) + '</td>' +
+                filas.map(function (f) {
+                  const n = f.directas[m] || 0;
+                  const veces = f.frecuencia[m] || 0;
+                  const flojo = n > 0 && n < 8;
+                  return '<td' + (flojo ? ' class="flojo"' : '') + '>' +
+                    (n || '—') + (veces ? '<span class="tiny"> · x' + veces + '</span>' : '') +
+                    '</td>';
+                }).join('') + '</tr>';
+            }).join(''))}
+          </tbody>
+        </table>
+      </div>
+      <p class="tiny" style="margin:7px 0 0">El <b>x2</b> es en cuántos días distintos
+        entrenas ese músculo. En rojo, lo que se queda por debajo de ocho series.</p>
+
+      <button class="btn primary block" id="cmp-abrir" style="margin-top:16px">
+        Abrir «${ganador.nombre}»</button>
+      <button class="btn ghost block" id="cmp-no" style="margin-top:8px">Cerrar</button>`,
+      function (el) {
+        el.querySelector('#cmp-no').onclick = function () { UI.closeModal(); };
+        el.querySelector('#cmp-abrir').onclick = function () {
+          UI.closeModal();
+          abrirPlan(ganador.nombre);
+        };
+      });
+  }
+
   function planDesdeRutinas(nombre) {
     const suyas = Store.routines().filter(function (r) {
       return (r.days || []).length && App.nombreRutina(r) === nombre;
@@ -337,6 +454,9 @@
               '<span class="chevron">' + icon('chevron') + '</span></div>';
           }).join(''))}
         </div>
+        ${raw(orden.length > 1 ? '<button class="btn block sm" data-a="comparar" ' +
+          'style="margin-top:10px">' + icon('grafica') + ' Comparar mis ' + orden.length +
+          ' planes</button>' : '')}
         <p class="tiny" style="margin:8px 4px 0">Toca uno para abrirlo aquí: verás sus días
         y su reparto, podrás pedirle al entrenador que lo audite y aplicar lo que
         proponga sobre estas mismas rutinas.</p>` : '')}`;
@@ -1061,6 +1181,8 @@
       }
       cerrar();
     });
+
+    bind(root, '[data-a=comparar]', compararSheet);
 
     bind(root, '[data-a=irgenerar]', function () {
       const bajar = function () {

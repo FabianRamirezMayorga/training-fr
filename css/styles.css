@@ -916,3 +916,22 @@ body.con-musica.con-crono{padding-bottom:calc(200px + var(--safe-b))}
 .anillo-txt{fill:var(--txt);font-size:13px;font-weight:800;text-anchor:middle;
   dominant-baseline:central;font-variant-numeric:tabular-nums}
 .anillo-pc{font-size:8px;font-weight:700;fill:var(--dim2)}
+
+/* ---------- comparar planes ----------
+   Una tabla con seis columnas no cabe en un móvil, y encogerla la vuelve
+   ilegible. Se deja scrollar sola dentro de su caja: la página nunca se mueve
+   en horizontal, que es lo que estorba de verdad. */
+.tabla-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.comparativa { border-collapse: collapse; width: 100%; font-size: .8rem; }
+.comparativa th,
+.comparativa td { padding: 7px 9px; text-align: right; white-space: nowrap; }
+.comparativa th:first-child,
+.comparativa td:first-child { text-align: left; position: sticky; left: 0;
+  background: var(--card); }
+.comparativa thead th { font-size: .68rem; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--dim2); font-weight: 600;
+  border-bottom: 1px solid var(--line); }
+.comparativa tbody tr + tr td { border-top: 1px solid var(--line); }
+.comparativa tr.gana td { color: var(--acc); }
+.comparativa tr.gana td:first-child { font-weight: 700; }
+.comparativa td.flojo { color: var(--bad); }
