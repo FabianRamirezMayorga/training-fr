@@ -73,7 +73,7 @@ a{color:var(--blue)}
 .brand{display:flex;align-items:center;gap:9px;cursor:pointer;padding:0;color:var(--txt)}
 .brand-logo{width:21px;height:27px;object-fit:contain;flex:none}
 .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
-.view{max-width:900px;margin:0 auto;padding:16px 16px 24px;animation:fade .22s ease}
+.view{max-width:900px;margin:0 auto;padding:10px 16px 24px;animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}}
 
 .tabbar{position:fixed;bottom:0;left:0;right:0;z-index:60;display:flex;
@@ -243,8 +243,8 @@ a{color:var(--blue)}
    tienen la misma altura y el contenido va centrado en los dos ejes. */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:9px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
-  padding:9px 8px;text-align:center;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:1px;min-height:58px}
+  padding:7px 8px;text-align:center;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1px;min-height:50px}
 .stat b{display:block;font-size:1.15rem;line-height:1.05;font-weight:800;
   font-variant-numeric:tabular-nums}
 .stat span{display:block;font-size:.63rem;color:var(--dim2);text-transform:uppercase;
@@ -1372,16 +1372,18 @@ img[src^="data/img/"] {
    La idea es verla entera sin bajar. Las cajas de aqui no llevan texto largo
    —son numeros, una tira de dias y dos barras— asi que el relleno de tarjeta
    normal les sobra por todos lados. */
-.inicio-compacta { padding: 11px 13px; }
+.inicio-compacta { padding: 9px 13px; }
 .inicio-compacta .semana { gap: 5px; }
-.inicio-compacta .sem-dia i { height: 20px; }
+.inicio-compacta .sem-dia i { height: 16px; }
+.inicio-compacta .sem-dia b { font-size: .74rem; margin-bottom: 1px; }
 .inicio-compacta .sem-dia b { margin-bottom: 1px; }
 .inicio-compacta .prog { margin-top: 4px !important; }
 
 /* Los bloques de la portada, mas juntos. Los 22px de aire entre secciones estan
    pensados para pantallas por las que se baja; aqui la gracia es verla entera de
    una vez, asi que se recortan solo en la portada. */
-.portada-titulo { margin-top: 12px !important; }
+.portada-titulo { margin-top: 10px !important; }
+.portada-titulo.list-head, .portada-titulo.list-title { margin-bottom: 6px !important; }
 
 /* El resumen de la rutina en una sola linea. Con tres musculos se iba a dos
    renglones y la tarjeta crecia 18px por nada: lo que no cabe se corta. */
@@ -1389,9 +1391,22 @@ img[src^="data/img/"] {
 
 /* Las dos secciones plegables de la portada juegan de titulo de seccion, asi
    que llevan el mismo aire recortado que los demas titulos de ahi. */
-.seccion[data-sec="semana"] > summary,
-.seccion[data-sec="olvido"] > summary { margin-top: 12px; }
+.seccion[data-sec="olvido"] > summary { margin-top: 10px; }
 
 /* Plegada, el hueco de debajo del titulo no separa nada: no hay cuerpo que
    separar. */
 .seccion:not([open]) > summary { margin-bottom: 4px; }
+
+/* La semana se toca entera para ir a Progreso: el boton de antes ocupaba un
+   renglon para decir lo mismo que la propia tira de dias. */
+.semana-caja { cursor: pointer; text-align: left; }
+.semana-caja:active { border-color: var(--acc); }
+
+/* La segunda salida de la portada —entrenar sin rutina— es secundaria: con
+   cuerpo de boton pesaba lo mismo que la principal y se comia un renglon. */
+.enlace-flojo {
+  display: block; width: 100%; padding: 4px 0; margin-top: 5px;
+  background: none; border: 0; cursor: pointer;
+  color: var(--dim); font-size: .82rem; font-weight: 600; font-family: inherit;
+}
+.enlace-flojo:active { color: var(--acc); }

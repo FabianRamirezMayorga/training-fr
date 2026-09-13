@@ -354,14 +354,14 @@
       : (cumplidos + sueltos) + ' días entrenados';
 
     return html`
-      ${raw(seccionPlegable('semana', 'Tu semana', frase, '', html`
-        <div class="card inicio-compacta">
-          <div class="semana">${raw(celdas)}</div>
-          <div class="row between" style="margin-top:8px">
-            <div class="tiny">${frase}</div>
-            <button class="btn sm ghost" data-a="verprogreso">Ver progreso</button>
-          </div>
-        </div>`))}`;
+      <div class="card inicio-compacta semana-caja portada-titulo" data-a="verprogreso"
+           role="button" tabindex="0">
+        <div class="row between" style="margin-bottom:5px">
+          <span class="list-title" style="margin:0">Tu semana</span>
+          <span class="tiny nowrap">${frase}</span>
+        </div>
+        <div class="semana">${raw(celdas)}</div>
+      </div>`;
   }
 
   /* Lo que llevas comido hoy contra lo que te toca. En la portada porque es un
@@ -396,12 +396,12 @@
               <i style="width:${pp}%;background:var(--brand-1)"></i></div>
           </div>
         </div>
-        <p class="tiny" style="margin:6px 0 0">${h.kcal === 0
+        <p class="tiny" style="margin:4px 0 0">${h.kcal === 0
           ? 'Hoy no has apuntado nada. Una foto del plato basta.'
           : faltaProt > 0 ? 'Te faltan ' + faltaProt + ' g de proteína para el objetivo del día.'
           : 'Proteína del día cubierta.'}</p>
 
-        <div class="row" style="margin-top:7px">
+        <div class="row" style="margin-top:5px">
           <label class="btn primary grow sm" for="foto-inicio" style="cursor:pointer">
             ${raw(icon('nutricion'))} Foto</label>
           <button class="btn grow sm" data-a="comidamano">${raw(icon('plus'))} A mano</button>
@@ -452,7 +452,7 @@
         <div class="hola entra">Hola${raw(nombre
           ? ', <span class="nombre">' + esc(nombre) + '</span>' : '')}</div>
         <p class="muted entra entra-2" style="font-size:.92rem;margin:0 0 4px">${st.week === 0
-          ? 'Aún no has entrenado esta semana. Buen momento para empezar.'
+          ? 'Semana en blanco. Buen momento para empezar.'
           : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
           : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.'}</p>`)}
 
@@ -473,7 +473,7 @@
         ${raw(deHoy.length === 1 ? ''
         : '<p class="tiny" style="margin:7px 0 0">Tienes ' + deHoy.length +
           ' rutinas para hoy: te dejo elegir.</p>')}
-        <button class="btn ghost block sm" data-a="empezarlibre" style="margin-top:8px">
+        <button class="enlace-flojo" data-a="empezarlibre">
           O un entrenamiento libre</button>`
       : html`
         <button class="btn primary block grande" data-a="empezarlibre" style="margin-top:12px">
@@ -497,7 +497,9 @@
         <button class="btn sm primary" data-a="verdia">${raw(icon('lista'))} Ver el día entero</button>
       </div>
       ${raw(deHoy.length
-        ? '<div class="stack">' + deHoy.map(function (r) { return routineCard(r); }).join('') + '</div>'
+        ? '<div class="stack">' + deHoy.map(function (r) {
+            return routineCard(r, 0, 0, false, 'inicio');
+          }).join('') + '</div>'
         : html`
           <div class="card">
             <p class="muted" style="margin:0 0 12px">${rutinas.length
@@ -704,8 +706,11 @@
     return soloDias ? resto : n;
   }
 
-  /* qué rutina está desplegada en la lista */
-  let rutinaAbierta = null;
+  /* Qué rutina está desplegada, y en qué pantalla. Es por pantalla a propósito:
+     con una sola variable, abrir una rutina en Rutinas la abría también en la
+     portada, y la portada se llena de golpe cuando lo que uno quiere ahí es ver
+     el día de un vistazo. */
+  let rutinaAbierta = { rutinas: null, inicio: null, dia: null };
 
   /* Qué planes están desplegados. Sin esto la pantalla de Rutinas era todo lo
      que uno tiene, abierto de golpe. */
@@ -752,7 +757,9 @@
 
     const arriba = deHoy.length ? html`
       <div class="list-title">Hoy es ${UI.diaLargo(hoy).toLowerCase()}, y esto es lo que toca</div>
-      <div class="stack">${raw(deHoy.map(function (r) { return routineCard(r); }).join(''))}</div>`
+      <div class="stack">${raw(deHoy.map(function (r) {
+        return routineCard(r, 0, 0, false, 'dia');
+      }).join(''))}</div>`
       : html`
       <div class="list-title">Hoy es ${UI.diaLargo(hoy).toLowerCase()}</div>
       <p class="tiny" style="margin:-4px 0 4px">${raw(activo
@@ -881,14 +888,15 @@
 
   /* i y total solo llegan desde la lista de Rutinas, que es donde se puede
      reordenar y borrar. En la portada se usa la tarjeta sin más. */
-  function routineCard(r, i, total, sinPlan) {
+  function routineCard(r, i, total, sinPlan, ambito) {
+    ambito = ambito || 'rutinas';
     const n = r.exercises.length;
     const hoy = UI.DAY_NAMES[new Date().getDay()];
     const esDeHoy = (r.days || []).indexOf(hoy) !== -1;
     const editando = ordenando && total;
 
     const musculos = musculosDeRutina(r);
-    const abierta = rutinaAbierta === r.id;
+    const abierta = rutinaAbierta[ambito] === r.id;
 
     const tarjeta = html`
       <div class="card ${esDeHoy && !ordenando ? 'card-hoy' : ''}" style="padding:0;overflow:hidden">
@@ -900,7 +908,8 @@
               <button class="btn sm" data-baja="${r.id}" ${i === total - 1 ? 'disabled' : ''}
                       aria-label="Bajar">${raw(icon('down'))}</button>
             </div>` : '')}
-          <div class="grow" style="cursor:pointer;min-width:0" data-desplegar="${r.id}">
+          <div class="grow" style="cursor:pointer;min-width:0" data-desplegar="${r.id}"
+               data-ambito="${ambito}">
             <div class="rt-titulo">${tituloRutina(r)}
               ${raw(esDeHoy && !ordenando ? '<span class="chip solid tiny-chip">HOY</span>' : '')}
               ${raw(r.mixta ? '<span class="chip tiny-chip">MIXTA</span>' : '')}</div>
@@ -948,6 +957,7 @@
               <button class="btn sm primary grow" data-train="${r.id}">
                 ${raw(icon('play'))} Entrenar</button>
             </div>
+            ${raw(ambito === 'inicio' ? '' : html`
             <div style="padding:8px 13px 13px">
               <button class="btn sm block" data-duplicar="${r.id}">
                 ${raw(icon('copiar'))} Duplicar esta rutina</button>
@@ -955,7 +965,7 @@
                 ${raw(icon('compartir'))} Compartir esta rutina</button>
               <button class="btn sm block" data-iarutina="${r.id}" style="margin-top:8px">
                 ${raw(icon('chispa'))} Revisar esta rutina con IA</button>
-            </div>
+            </div>`)}
           </div>` : '')}
       </div>`;
 
@@ -973,6 +983,47 @@
       { icono: 'lista', texto: 'Editar', tono: 'suave',
         attr: 'data-open="' + r.id + '"' }
     ]);
+  }
+
+  /* Lo que hace falta para que una tarjeta de rutina funcione: abrirla, cerrarla,
+     entrar a un ejercicio y moverla de dia. Lo ataba solo la pantalla de Rutinas,
+     asi que la de la portada no se podia ni abrir ni cerrar ahi: se quedaba con
+     lo que hubiera abierto en la otra pantalla. */
+  function bindTarjetaRutina(root) {
+    bindAll(root, '[data-desplegar]', function (el) {
+      const id = el.dataset.desplegar;
+      const amb = el.dataset.ambito || 'rutinas';
+      rutinaAbierta[amb] = rutinaAbierta[amb] === id ? null : id;
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+    });
+
+    bindAll(root, '[data-ver]', function (el) {
+      const ex = Data.get(el.dataset.ver);
+      if (ex) exerciseSheet(ex);
+    });
+
+    /* Mover una rutina de dia sin entrar a editarla: es el cambio que mas se
+       hace y estaba tres pantallas adentro. */
+    bindAll(root, '[data-rdia]', function (el) {
+      const r = Store.routine(el.dataset.rid);
+      if (!r) return;
+      const d = el.dataset.rdia;
+      const dias = (r.days || []).slice();
+      const i = dias.indexOf(d);
+      if (i === -1) dias.push(d); else dias.splice(i, 1);
+      dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
+      r.days = dias;
+      renombrarPorDia(r);
+      Store.saveRoutine(r);
+      refrescarActiva(r);
+      const pos = window.scrollY;
+      render();
+      window.scrollTo(0, pos);
+      UI.toast(dias.length ? nombreRutina(r) + ': ' + UI.diasLargos(dias)
+        : nombreRutina(r) + ' se queda sin dia');
+    });
   }
 
   viewInicio.mount = function (root) {
@@ -1032,6 +1083,7 @@
     };
     bind(root, '[data-a=irperfil]', function () { go('perfil'); });
     bind(root, '[data-a=apuntar]', apuntarActividad);
+    bindTarjetaRutina(root);
 
     /* La versión, abajo del todo y sin ruido cuando no hay nada que hacer. Si
        hay una nueva publicada, esta línea es el botón para cogerla: el aviso
@@ -2218,14 +2270,7 @@
     bindAll(root, '[data-open]', function (el) { go('rutina', el.dataset.open); });
     bindAll(root, '[data-train]', function (el) { empezar(el.dataset.train); });
     bindAll(root, '[data-iarutina]', function (el) { auditarDesdeLista(el.dataset.iarutina); });
-
-    bindAll(root, '[data-desplegar]', function (el) {
-      const id = el.dataset.desplegar;
-      rutinaAbierta = rutinaAbierta === id ? null : id;
-      const pos = window.scrollY;
-      render();
-      window.scrollTo(0, pos);
-    });
+    bindTarjetaRutina(root);
 
     bindAll(root, '[data-planactivo]', function (el) {
       const n = el.dataset.planactivo;
@@ -2242,27 +2287,6 @@
       const pos = window.scrollY;
       render();
       window.scrollTo(0, pos);
-    });
-
-    /* Mover una rutina de día sin entrar a editarla: es el cambio que más se
-       hace y estaba tres pantallas adentro. */
-    bindAll(root, '[data-rdia]', function (el) {
-      const r = Store.routine(el.dataset.rid);
-      if (!r) return;
-      const d = el.dataset.rdia;
-      const dias = (r.days || []).slice();
-      const i = dias.indexOf(d);
-      if (i === -1) dias.push(d); else dias.splice(i, 1);
-      dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
-      r.days = dias;
-      renombrarPorDia(r);
-      Store.saveRoutine(r);
-      refrescarActiva(r);
-      const pos = window.scrollY;
-      render();
-      window.scrollTo(0, pos);
-      UI.toast(dias.length ? nombreRutina(r) + ': ' + UI.diasLargos(dias)
-        : nombreRutina(r) + ' se queda sin día');
     });
 
     bind(root, '[data-a=actividad]', apuntarActividad);
@@ -2285,11 +2309,6 @@
     bindAll(root, '[data-borrarplan]', function (el) { borrarPlanSheet(el.dataset.borrarplan); });
     bindAll(root, '[data-iaplan]', function (el) {
       if (g.VISTAS && VISTAS.auditarPlan) VISTAS.auditarPlan(el.dataset.iaplan);
-    });
-
-    bindAll(root, '[data-ver]', function (el) {
-      const ex = Data.get(el.dataset.ver);
-      if (ex) exerciseSheet(ex);
     });
 
     /* Recordar qué plantillas quedan abiertas, y que «Usar» no pliegue la ficha:
@@ -2464,7 +2483,7 @@
           const nueva = Store.saveRoutine(copia);
 
           UI.closeModal();
-          rutinaAbierta = nueva.id;
+          rutinaAbierta.rutinas = nueva.id;
           gruposAbiertos[destino] = true;
           render();
           UI.toast('Duplicada en «' + destino + '»');
@@ -2617,7 +2636,7 @@
           refrescarActiva(r);
           UI.closeModal();
           gruposAbiertos[nuevo] = true;
-          rutinaAbierta = r.id;
+          rutinaAbierta.rutinas = r.id;
           render();
           UI.toast('Ahora está en «' + nuevo + '»');
         };
