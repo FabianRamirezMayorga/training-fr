@@ -48,7 +48,7 @@
     }
 
     /* Lo primero de todo es saber dónde entrena: sin eso no se puede filtrar nada */
-    if (!Store.settings().gear && route.name !== 'bienvenida') {
+    if (!Store.settings().gear && route.name !== 'bienvenida' && route.name !== 'ver') {
       route = { name: 'bienvenida', arg: null };
     }
     const fn = views[route.name] || viewInicio;
@@ -75,7 +75,8 @@
     };
 
     document.querySelectorAll('.tabbar').forEach(function (t) {
-      t.hidden = route.name === 'bienvenida';
+      t.hidden = route.name === 'bienvenida' ||
+        (route.name === 'ver' && !Store.settings().gear);
     });
 
     document.querySelectorAll('.tab').forEach(function (t) {
@@ -708,6 +709,8 @@
           'Lo que proponga se aplica sobre estas mismas rutinas.</p>' +
           '<button class="btn block sm" data-duplicarplan="' + esc(k) + '" ' +
           'style="margin-top:8px">' + icon('copiar') + ' Duplicar el plan entero</button>' +
+          '<button class="btn block sm" data-compartirplan="' + esc(k) + '" ' +
+          'style="margin-top:8px">' + icon('compartir') + ' Compartir el plan</button>' +
           '<button class="btn ghost block sm danger" data-borrarplan="' + esc(k) + '" ' +
           'style="margin-top:10px">' + icon('trash') + ' Borrar el plan entero (' +
           suyas.length + (suyas.length === 1 ? ' rutina' : ' rutinas') + ')</button>' : '')}`;
@@ -788,6 +791,8 @@
             <div style="padding:8px 13px 13px">
               <button class="btn sm block" data-duplicar="${r.id}">
                 ${raw(icon('copiar'))} Duplicar esta rutina</button>
+              <button class="btn sm block" data-compartir="${r.id}" style="margin-top:8px">
+                ${raw(icon('compartir'))} Compartir esta rutina</button>
               <button class="btn sm block" data-iarutina="${r.id}" style="margin-top:8px">
                 ${raw(icon('chispa'))} Revisar esta rutina con IA</button>
             </div>
@@ -1820,6 +1825,12 @@
     bind(root, '[data-a=correr]', correrPlanSheet);
     bind(root, '[data-a=limpiardup]', limpiarDuplicadosSheet);
     bindAll(root, '[data-duplicar]', function (el) { duplicarRutinaSheet(el.dataset.duplicar); });
+    bindAll(root, '[data-compartir]', function (el) {
+      if (g.Compartir) Compartir.compartirRutina(el.dataset.compartir);
+    });
+    bindAll(root, '[data-compartirplan]', function (el) {
+      if (g.Compartir) Compartir.compartirPlan(el.dataset.compartirplan);
+    });
     bindAll(root, '[data-duplicarplan]', function (el) { duplicarPlanSheet(el.dataset.duplicarplan); });
     bindAll(root, '[data-borrarplan]', function (el) { borrarPlanSheet(el.dataset.borrarplan); });
     bindAll(root, '[data-iaplan]', function (el) {
@@ -4752,7 +4763,9 @@
     alternativasHTML: alternativasHTML, guiaHTML: guiaHTML,
     /* el nombre del plan sin el día delante, que la pantalla de Programa
        necesita para agrupar igual que la de Rutinas */
-    nombreRutina: nombreRutina, tituloRutina: tituloRutina
+    nombreRutina: nombreRutina, tituloRutina: tituloRutina,
+    /* compartir.js pinta según el trozo de hash que trae el plan dentro */
+    ruta: function () { return route; }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
