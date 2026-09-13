@@ -1442,7 +1442,7 @@ img[src^="data/img/"] {
 
 /* El muelle: su base es el hueco de siempre, crece con lo que sobre y tiene
    un tope para que en una pantalla medio vacia no queden zanjas. */
-.muelle { flex: 1 0 clamp(10px, 1.23svh, 19px); max-height: clamp(19px, 3.2svh, 38px); }
+.muelle { flex: .55 0 clamp(10px, 1.23svh, 19px); max-height: clamp(18px, 2.6svh, 27px); }
 
 .vista-inicio .hola { margin-bottom: clamp(1px, .25svh, 4px); }
 .vista-inicio .hola-sub { margin: 0; }
@@ -1465,3 +1465,18 @@ img[src^="data/img/"] {
 .vista-inicio .inicio-compacta { padding: clamp(9px, 1.11svh, 15px) 13px; }
 .vista-inicio .inicio-compacta .sem-dia i { height: clamp(16px, 1.97svh, 28px); }
 .vista-inicio .pie-version { margin-top: clamp(8px, 1.1svh, 22px); }
+
+/* ---------- lo que sobra se lo quedan las tarjetas ----------
+   Repartir el sobrante solo entre los huecos deja la pantalla con aire por
+   todas partes y las tarjetas igual de pequenas que en un movil chico. Estas
+   dos crecen: la semana estira sus barras —que asi se leen mejor— y la de
+   comida separa sus botones del recuento. El tope esta para que en una
+   pantalla muy larga no se conviertan en dos pancartas. */
+.vista-inicio .semana-caja { flex: 2 0 auto; max-height: clamp(118px, 12.4svh, 126px);
+  display: flex; flex-direction: column; }
+.vista-inicio .semana-caja .semana { flex: 1; align-items: stretch; min-height: 0; }
+.vista-inicio .semana-caja .sem-dia { justify-content: flex-end; }
+.vista-inicio .semana-caja .sem-dia i { flex: 1; height: auto; min-height: 16px; }
+
+.vista-inicio .comida-caja { flex: 2 0 auto; max-height: clamp(200px, 21svh, 215px);
+  display: flex; flex-direction: column; justify-content: space-between; }

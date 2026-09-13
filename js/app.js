@@ -383,7 +383,7 @@
     return html`
       <div class="muelle"></div>
       <div class="list-title portada-titulo">Lo que llevas comido</div>
-      <div class="card inicio-compacta">
+      <div class="card inicio-compacta comida-caja">
         <div class="row" style="gap:16px;align-items:flex-start">
           <div class="grow">
             <div class="tiny">CALORÍAS</div>
