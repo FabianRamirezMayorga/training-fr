@@ -1225,3 +1225,15 @@ img[src^="data/img/"] {
   object-fit: contain;
   background: #eaf2f9;
 }
+
+/* Las siluetas en mitad del entrenamiento: pequenas, pegadas al nombre del
+   ejercicio. Ahi los musculos ya estan escritos al lado; lo que aportan es
+   ver DONDE, sin tener que salir de la pantalla. */
+.mapa-figuras.compacto {
+  flex: none; gap: 2px; align-self: flex-start;
+  margin: 2px 4px 0 0;
+}
+.mapa-figuras.compacto .cuerpo { width: 46px; }
+@media (max-width: 400px) {
+  .mapa-figuras.compacto .cuerpo { width: 42px; }
+}

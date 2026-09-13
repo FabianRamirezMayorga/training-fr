@@ -358,6 +358,8 @@
         ${raw(ex ? UI.demoHTML(ex, { speed: 800 }) : '')}
         <div style="padding:13px">
           <div class="row between">
+            ${raw(ex && g.Musculos && Musculos.siluetas
+              ? Musculos.siluetas(ex.primaryMuscles, ex.secondaryMuscles) : '')}
             <div class="grow">
               <h2 style="margin:0 0 2px">${entry.name}</h2>
               <div class="tiny">${raw(ex ? UI.esc(ex.name) : '')}</div>

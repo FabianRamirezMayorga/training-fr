@@ -116,6 +116,19 @@
     });
   }
 
+  /* Solo las dos siluetas, sin la leyenda. Es lo que cabe en mitad de un
+     entrenamiento: ahí los nombres de los músculos ya están escritos al lado y
+     lo que falta es ver DÓNDE. */
+  function siluetas(principales, secundarios) {
+    principales = principales || [];
+    secundarios = secundarios || [];
+    if (!hayAlgo(principales, secundarios)) return '';
+    return '<div class="mapa-figuras compacto">' +
+      figura('f', principales, secundarios, 'Músculos que trabajan, de frente') +
+      figura('d', principales, secundarios, 'Músculos que trabajan, de espaldas') +
+      '</div>';
+  }
+
   function mapa(principales, secundarios) {
     principales = principales || [];
     secundarios = secundarios || [];
@@ -141,5 +154,5 @@
       '</div></div>';
   }
 
-  g.Musculos = { mapa: mapa, PIEZAS: PIEZAS };
+  g.Musculos = { mapa: mapa, siluetas: siluetas, PIEZAS: PIEZAS };
 })(window);
