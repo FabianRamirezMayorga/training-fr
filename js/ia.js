@@ -1436,18 +1436,51 @@
 
   /* De qué va la de este bloque. Una frase de ánimo cuatro veces al día cansa;
      rotando el tipo, cada una trae algo distinto y alguna enseña algo. */
-  const CLASES_PILDORA = [
-    { id: 'empujon', que: 'un empujón para hoy, enganchado a algo suyo de los datos ' +
-      'de arriba: lo que levanta, lo que ya ha conseguido, lo que tiene a tiro' },
-    { id: 'dato', que: 'un dato que no sepa y que le sirva, de fisiología del ' +
-      'entrenamiento o de nutrición; algo concreto, no una obviedad de revista' },
-    { id: 'tecnica', que: 'un detalle de técnica de alguno de los ejercicios que hace, ' +
-      'de los que cambian el ejercicio cuando los corriges' },
-    { id: 'comida', que: 'algo útil sobre su alimentación, mirando lo que lleva comido ' +
-      'y lo que le falta' },
-    { id: 'descanso', que: 'algo sobre el descanso, el sueño o la recuperación, que es ' +
-      'donde se hace el músculo y lo que todo el mundo descuida' }
-  ];
+  /* De qué le habla la frase. El gimnasio es una parte, no el tema: quien
+     abre esto por la mañana no siempre viene a que le corrijan el press de
+     banca. Así que hay tips de entrenamiento, sí, pero también empujones,
+     consejos de vida e ideas para pensar el día, y esos pesan más.
+
+     El peso es cuántas veces entra cada clase en la rueda. Sin él, con nueve
+     clases a una vuelta, ocho de cada nueve mañanas te hablarían de otra cosa
+     menos de lo que has venido a buscar. */
+  const CLASES_PILDORA = (function () {
+    const clases = [
+      { id: 'animo', peso: 3, que: 'un empujón de verdad para el día que empieza. ' +
+        'No de gimnasio: de seguir, de no dejarlo, de que lo que está construyendo se ' +
+        've en meses y no en días' },
+      { id: 'vida', peso: 3, que: 'un consejo para la vida, no para el gimnasio. Algo ' +
+        'de disciplina, de constancia, de cómo se sostienen las cosas que cuestan; ' +
+        'que sirva igual para el trabajo o para cualquier otra cosa suya' },
+      { id: 'cabeza', peso: 2, que: 'algo sobre la cabeza: la paciencia, compararse con ' +
+        'uno mismo y no con nadie, qué hacer con un mal día, por qué el que sigue ' +
+        'apareciendo gana al que empieza fuerte' },
+      { id: 'idea', peso: 2, que: 'una idea para pensar en el día, corta y que se quede. ' +
+        'Si es de alguien, dices de quién; si no estás completamente seguro de quién lo ' +
+        'dijo, la escribes como tuya y sin atribuirla a nadie' },
+      { id: 'empujon', peso: 2, que: 'un empujón para hoy, enganchado a algo suyo de los ' +
+        'datos de arriba: lo que levanta, lo que ya ha conseguido, lo que tiene a tiro' },
+      { id: 'dato', peso: 1, que: 'un dato que no sepa y que le sirva, de fisiología del ' +
+        'entrenamiento o de nutrición; algo concreto, no una obviedad de revista' },
+      { id: 'tecnica', peso: 1, que: 'un detalle de técnica de alguno de los ejercicios ' +
+        'que hace, de los que cambian el ejercicio cuando los corriges' },
+      { id: 'comida', peso: 1, que: 'algo útil sobre su alimentación, mirando lo que ' +
+        'lleva comido y lo que le falta' },
+      { id: 'descanso', peso: 1, que: 'algo sobre el descanso, el sueño o la ' +
+        'recuperación, que es donde se hace el músculo y lo que todo el mundo descuida' }
+    ];
+    /* La rueda, con cada clase repetida su peso. Barajada por un orden fijo y no
+       al azar: así dos mañanas seguidas no caen en la misma y la vuelta entera
+       tarda días en repetirse. */
+    const rueda = [];
+    clases.forEach(function (c) {
+      for (let i = 0; i < c.peso; i++) rueda.push(c);
+    });
+    const salto = 7;   // primo con la longitud de la rueda: la recorre entera
+    const orden = [];
+    for (let i = 0; i < rueda.length; i++) orden.push(rueda[(i * salto) % rueda.length]);
+    return orden;
+  })();
 
   /* Una frase, la que toque ahora.
      Va donde antes no había nada. Tiene que ser corta y suya: un «tú puedes»
@@ -1479,7 +1512,9 @@
       'registro es el que pone todo lo demás en marcha.\n' +
       '- Si va bien, díselo y dile qué viene ahora. Si lleva tiempo parado, que sea una ' +
       'invitación a volver, no un reproche.\n' +
-      '- Nada de signos de exclamación, emojis, ni «tú puedes» de calendario.\n\n' +
+      '- Nada de signos de exclamación, emojis, ni «tú puedes» de calendario.\n' +
+      '- No te inventes citas ni se las cuelgues a nadie. Si no estás seguro de quién ' +
+      'dijo algo, dilo con tus palabras y sin firma.\n\n' +
       'Devuelve JSON: {"frase":"la frase","tipo":"' + clase.id + '"}';
 
     return llamarJSON(prompt, { maxTokens: 3072, temperatura: 0.8 }).then(function (r) {
