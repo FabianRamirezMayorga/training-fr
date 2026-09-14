@@ -34,7 +34,7 @@
     const views = {
       inicio: viewInicio, ejercicios: viewEjercicios, ejercicio: viewEjercicio,
       rutinas: viewRutinas, rutina: viewRutina, entrenar: viewEntrenar,
-      ajustes: viewAjustes, plan: viewPlan,
+      ajustes: viewAjustes, plan: viewPlan, version: viewVersion,
       bienvenida: viewBienvenida, cuenta: viewCuenta
     };
     Object.assign(views, g.VISTAS || {});
@@ -4526,59 +4526,6 @@
       </div>
       <input type="file" id="s-file" accept="application/json,.json" hidden>
 
-      <div class="list-title">Uso sin conexión</div>
-      <div class="card">
-        <p class="muted" style="margin-top:0;font-size:.88rem">Descarga las imágenes de los
-        ejercicios y la app funciona entera sin internet: en el gimnasio sin cobertura, en
-        el metro o sin datos.</p>
-        <div class="tiny" id="dl-estado">Comprobando lo que ya tienes guardado…</div>
-        <div class="dl" id="dl-barra" hidden><i></i></div>
-      </div>
-      <div class="plan-acciones" style="margin:10px 0 0">
-        <button class="fila-plan" data-dl="rutinas" style="--fp:var(--acc)">
-          <span class="fp-ico">${raw(icon('dumbbell'))}</span>
-          <span class="grow"><span class="fp-tit">Mis rutinas</span>
-            <span class="fp-sub">Solo los ejercicios que usas. Lo más rápido.</span></span>
-          <span class="chevron">${raw(icon('chevron'))}</span>
-        </button>
-        <button class="fila-plan" data-dl="esenciales" style="--fp:#4f8cf5">
-          <span class="fp-ico">${raw(icon('star'))}</span>
-          <span class="grow"><span class="fp-tit">Los ejercicios principales</span>
-            <span class="fp-sub">Los más usados del catálogo</span></span>
-          <span class="chevron">${raw(icon('chevron'))}</span>
-        </button>
-        <button class="fila-plan" data-dl="todos" style="--fp:#c06bf0">
-          <span class="fp-ico">${raw(icon('catalogo'))}</span>
-          <span class="grow"><span class="fp-tit">El catálogo completo</span>
-            <span class="fp-sub">Todo. Ocupa bastante y tarda un rato.</span></span>
-          <span class="chevron">${raw(icon('chevron'))}</span>
-        </button>
-        <button class="fila-plan es-peligro" data-dl="vaciar" style="--fp:var(--bad)">
-          <span class="fp-ico">${raw(icon('trash'))}</span>
-          <span class="grow"><span class="fp-tit">Liberar espacio</span>
-            <span class="fp-sub">Borra las imágenes guardadas. Se vuelven a bajar solas
-            con internet.</span></span>
-          <span class="chevron">${raw(icon('chevron'))}</span>
-        </button>
-      </div>
-
-      <div class="list-title">Versión de la app</div>
-      <div class="card">
-        <p class="muted" style="margin-top:0;font-size:.88rem">Si algo se comporta raro
-        después de una actualización, casi siempre es que el móvil se ha quedado con
-        archivos de dos versiones distintas. Esto lo borra todo y vuelve a bajar la última.
-        Tus datos no se tocan.</p>
-        <div class="tiny" id="sw-version">Comprobando la versión…</div>
-      </div>
-      <div class="plan-acciones" style="margin:10px 0 0">
-        <button class="fila-plan" data-a="actualizarApp" style="--fp:#4f8cf5">
-          <span class="fp-ico">${raw(icon('down'))}</span>
-          <span class="grow"><span class="fp-tit">Forzar actualización</span>
-            <span class="fp-sub">Borra los archivos viejos y baja la última versión</span></span>
-          <span class="chevron">${raw(icon('chevron'))}</span>
-        </button>
-      </div>
-
       <div class="list-title">Instalar en el móvil</div>
       <div class="card">
         <p class="muted" style="margin-top:0;font-size:.88rem">Training FR funciona como una
@@ -4611,12 +4558,9 @@
       </p>`;
   }
 
-  viewAjustes.mount = function (root) {
-    bind(root, '[data-a=atras]', function () { go('perfil'); });
-    bind(root, '[data-a=lugar2]', lugarSheet);
-    bind(root, '[data-a=claves]', function () { go('claves'); });
-    bind(root, '[data-a=ircuenta]', function () { go('cuenta'); });
-
+  /* Las descargas para uso sin conexión. Vivían dentro del mount de Ajustes;
+     ahora la pantalla es otra, así que el trozo se saca tal cual. */
+  function montarDescargas(root) {
     /* --- descarga para uso sin conexión --- */
     const estadoEl = root.querySelector('#dl-estado');
     const barra = root.querySelector('#dl-barra');
@@ -4685,17 +4629,126 @@
       });
     });
 
-    /* qué versión sirve el service worker ahora mismo */
-    const cajaVer = root.querySelector('#sw-version');
-    if (cajaVer) {
-      estadoVersion().then(function (v) {
-        if (!v) { cajaVer.textContent = 'Sin conexión para comprobarlo.'; return; }
-        cajaVer.textContent = v.alDia
-          ? 'Estás en la última versión (' + v.local + ').'
-          : 'Tienes ' + (v.local || 'sin caché') + ' y la última es ' +
-            (v.servidor || '?') + '. Pulsa el botón.';
-      });
-    }
+  }
+
+  /* ---------- versión y espacio ----------
+     Estaba al fondo de Ajustes, que va de cómo se comporta la app contigo:
+     comprobar si estás al día no es una preferencia, es mantenimiento. Y solo
+     con la versión no daba para pantalla —se mira dos veces al año—, así que
+     va con lo que también ocupa sitio en el móvil: lo que tienes descargado
+     para entrenar sin internet. Las dos preguntas son la misma: qué hay
+     guardado aquí dentro y si está al día. */
+  function viewVersion() {
+    return html`
+      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+        ${raw(icon('back'))} Perfil</button>
+      <h1>Versión y espacio</h1>
+      <p class="muted">Qué versión tienes, si hay una nueva y qué llevas descargado para
+      entrenar sin internet.</p>
+
+      <div class="card tarjeta-premium ver-caja" id="ver-caja">
+        <div class="pre-encima">Tu versión</div>
+        <div class="ver-fila">
+          <span class="ver-disco" id="ver-disco">${raw(icon('nube'))}</span>
+          <span class="grow">
+            <span class="ver-num" id="ver-num">Comprobando…</span>
+            <span class="tiny" id="ver-sub">Preguntando al servidor qué hay publicado.</span>
+          </span>
+        </div>
+        <button class="btn vidrio block sm" data-a="mirarVersion" style="margin-top:13px">
+          ${raw(icon('cambiar'))} Comprobar ahora</button>
+      </div>
+
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan" data-a="actualizarApp" style="--fp:#4f8cf5">
+          <span class="fp-ico">${raw(icon('down'))}</span>
+          <span class="grow"><span class="fp-tit">Forzar actualización</span>
+            <span class="fp-sub">Si algo se comporta raro después de una actualización,
+            casi siempre es que el móvil se ha quedado con archivos de dos versiones. Esto
+            los borra y baja la última. Tus datos no se tocan.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+      </div>
+
+      <div class="list-title">Entrenar sin internet</div>
+      <div class="card">
+        <p class="muted" style="margin-top:0;font-size:.88rem">Descarga las imágenes de los
+        ejercicios y la app funciona entera sin conexión: en el gimnasio sin cobertura, en
+        el metro o sin datos.</p>
+        <div class="tiny" id="dl-estado">Comprobando lo que ya tienes guardado…</div>
+        <div class="dl" id="dl-barra" hidden><i></i></div>
+      </div>
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan" data-dl="rutinas" style="--fp:var(--acc)">
+          <span class="fp-ico">${raw(icon('dumbbell'))}</span>
+          <span class="grow"><span class="fp-tit">Mis rutinas</span>
+            <span class="fp-sub">Solo los ejercicios que usas. Lo más rápido.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="fila-plan" data-dl="esenciales" style="--fp:#4f8cf5">
+          <span class="fp-ico">${raw(icon('star'))}</span>
+          <span class="grow"><span class="fp-tit">Los ejercicios principales</span>
+            <span class="fp-sub">Los más usados del catálogo</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="fila-plan" data-dl="todos" style="--fp:#c06bf0">
+          <span class="fp-ico">${raw(icon('catalogo'))}</span>
+          <span class="grow"><span class="fp-tit">El catálogo completo</span>
+            <span class="fp-sub">Todo. Ocupa bastante y tarda un rato.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="fila-plan es-peligro" data-dl="vaciar" style="--fp:var(--bad)">
+          <span class="fp-ico">${raw(icon('trash'))}</span>
+          <span class="grow"><span class="fp-tit">Liberar espacio</span>
+            <span class="fp-sub">Borra las imágenes guardadas. Se vuelven a bajar solas
+            con internet.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+      </div>`;
+  }
+
+  viewVersion.mount = function (root) {
+    bind(root, '[data-a=atras]', function () { go('perfil'); });
+    montarDescargas(root);
+
+    const caja = root.querySelector('#ver-caja');
+    const num = root.querySelector('#ver-num');
+    const sub = root.querySelector('#ver-sub');
+    const disco = root.querySelector('#ver-disco');
+    const corto = function (x) { return String(x || '').replace('trainingfr-', ''); };
+
+    const pintar = function (v) {
+      /* «al-dia» ya existía: es el cuadrito de cada día en Alertas, que mide
+         46 px y es cuadrado. La tarjeta se encogía a un círculo. */
+      caja.classList.remove('ver-ok', 'ver-nueva', 'ver-sinred');
+      if (!v || !v.local) {
+        caja.classList.add('ver-sinred');
+        disco.innerHTML = icon('aviso');
+        num.textContent = 'Sin poder comprobarlo';
+        sub.textContent = 'Hace falta conexión para preguntar qué hay publicado.';
+        return;
+      }
+      if (v.alDia) {
+        caja.classList.add('ver-ok');
+        disco.innerHTML = icon('check');
+        num.textContent = corto(v.local);
+        sub.textContent = 'Estás en la última versión.';
+        return;
+      }
+      caja.classList.add('ver-nueva');
+      disco.innerHTML = icon('down');
+      num.textContent = corto(v.servidor) + ' disponible';
+      sub.textContent = 'Tú tienes la ' + corto(v.local) + '. Toca «Forzar actualización» '
+        + 'para cogerla ahora; si no, entrará sola.';
+    };
+
+    estadoVersion().then(pintar);
+
+    bind(root, '[data-a=mirarVersion]', function (b) {
+      b.disabled = true;
+      num.textContent = 'Comprobando…';
+      estadoVersion().then(function (v) { pintar(v); b.disabled = false; });
+    });
 
     bind(root, '[data-a=actualizarApp]', function (el) {
       el.disabled = true;
@@ -4703,34 +4756,14 @@
       if (tit) tit.textContent = 'Actualizando…';
       forzarActualizacion();
     });
+  };
 
-    root.querySelector('#s-name').onchange = function (e) {
-      Store.setSetting('name', e.target.value.trim());
-    };
-    /* Los dos contadores comparten el mismo mando: menos, la cifra y más. La
-       casilla de número obligaba a abrir el teclado para pasar de 90 a 120. */
-    const guardarCont = {
-      's-rest': function (n) { Store.setSetting('rest', n); },
-      's-pildora': function (n) {
-        Store.setSetting('pildoraHoras', n);
-        UI.toast('La frase cambiará cada ' + n + (n === 1 ? ' hora' : ' horas'));
-      }
-    };
-    root.querySelectorAll('.contador').forEach(function (c) {
-      const cifra = c.querySelector('b');
-      const paso = Number(c.dataset.paso);
-      const min = Number(c.dataset.min);
-      const max = Number(c.dataset.max);
-      c.querySelectorAll('[data-mas]').forEach(function (b) {
-        b.onclick = function () {
-          const n = Math.min(max, Math.max(min, Number(cifra.textContent) +
-            paso * Number(b.dataset.mas)));
-          cifra.textContent = n;
-          const guardar = guardarCont[c.dataset.cont];
-          if (guardar) guardar(n);
-        };
-      });
-    });
+  viewAjustes.mount = function (root) {
+    bind(root, '[data-a=atras]', function () { go('perfil'); });
+    bind(root, '[data-a=lugar2]', lugarSheet);
+    bind(root, '[data-a=claves]', function () { go('claves'); });
+    bind(root, '[data-a=ircuenta]', function () { go('cuenta'); });
+
     bindAll(root, '[data-reg]', function (el) {
       Store.setSetting('registro', el.dataset.reg);
       render();
@@ -5617,6 +5650,11 @@
      del nombre de la caché, que es lo único que no miente aunque el service
      worker se haya quedado a medias; la publicada, del propio sw.js pedido sin
      pasar por ninguna caché. */
+  /* Lo último que se supo, para que Perfil pueda enseñar el punto de «hay una
+     nueva» sin volver a preguntar en cada repintado. */
+  let ultimaVersion = null;
+  function versionSabida() { return ultimaVersion; }
+
   function estadoVersion() {
     if (!window.caches) return Promise.resolve(null);
     return fetch('sw.js?v=' + Date.now(), { cache: 'no-store' })
@@ -5627,7 +5665,9 @@
         return caches.keys().then(function (ks) {
           const local = ks.filter(function (k) { return k.indexOf('-shell') !== -1; })
             .map(function (k) { return k.replace('-shell', ''); })[0] || '';
-          return { local: local, servidor: servidor, alDia: !!local && local === servidor };
+          ultimaVersion = { local: local, servidor: servidor,
+            alDia: !!local && local === servidor };
+          return ultimaVersion;
         });
       })
       .catch(function () { return null; });
@@ -6043,6 +6083,7 @@
     go: go, render: render, exerciseSheet: exerciseSheet, pickExercise: pickExerciseSheet,
     bind: bind, bindAll: bindAll, aplicarTema: aplicarTema,
     lugarSheet: lugarSheet, cuantosEn: cuantosEn, CARAS_LUGAR: CARAS_LUGAR,
+    estadoVersion: estadoVersion, versionSabida: versionSabida,
     temaEfectivo: temaEfectivo,
     /* La ficha del ejercicio ya sabía pintar los recambios y la guía de
        técnica; el entrenamiento las necesita igual y no tiene sentido tener

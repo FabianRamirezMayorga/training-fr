@@ -117,6 +117,10 @@
 
     /* El sitio donde entrenas, con la misma cara que lleva en Ajustes y en la
        cabecera: si en un sitio es una casa azul, en todos es una casa azul. */
+    /* Si estás al día o no, sin ir a mirarlo. Lo pregunta el mount la primera
+       vez y repinta; a partir de ahí sale de lo que ya se sabe. */
+    const ver = App.versionSabida ? App.versionSabida() : null;
+
     const sitio = Data.GEAR[Store.settings().gear];
     const cara = (App.CARAS_LUGAR && App.CARAS_LUGAR[Store.settings().gear]) ||
       { icono: 'dumbbell', tono: 'var(--acc)' };
@@ -179,7 +183,14 @@
           sub: Sync.activa() ? Sync.email() : 'Sin sincronizar' }))}
         ${raw(filaPerfil({ icono: 'timer', titulo: 'Ajustes', accion: 'ajustes',
           tono: '#c06bf0',
-          sub: 'Unidades, tema, descanso, copias y sin conexión' }))}
+          sub: 'Unidades, tema, descanso y copias de seguridad' }))}
+        ${raw(filaPerfil({ icono: 'down', titulo: 'Versión y espacio', accion: 'version',
+          tono: '#4f8cf5', pendiente: !!(ver && ver.local && !ver.alDia),
+          sub: !ver || !ver.local ? 'Comprobando si estás al día…'
+            : ver.alDia ? 'Al día · ' + String(ver.local).replace('trainingfr-', '') +
+              ' · lo descargado para entrenar sin internet'
+            : 'Hay una versión nueva: ' +
+              String(ver.servidor).replace('trainingfr-', '') }))}
         ${raw(g.Admin && Admin.administra()
           ? filaPerfil({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
               tono: '#f0a23c', sub: 'Crear, desactivar y borrar cuentas del proyecto' })
@@ -196,7 +207,14 @@
   V.perfil.mount = function (root) {
     const ir = { datos: 'datos', objetivos: 'objetivos', nutricion: 'nutricion',
       alertas: 'alertas', entrenador: 'entrenador', musica: 'musica',
-      cuenta: 'cuenta', ajustes: 'ajustes', usuarios: 'usuarios' };
+      cuenta: 'cuenta', ajustes: 'ajustes', usuarios: 'usuarios', version: 'version' };
+
+    /* La primera vez que se entra en Perfil se pregunta si hay versión nueva y
+       se repinta con la respuesta. Después ya está sabida y no se vuelve a
+       preguntar en cada repintado. */
+    if (App.versionSabida && !App.versionSabida() && App.estadoVersion) {
+      App.estadoVersion().then(function (v) { if (v) render(); });
+    }
 
     /* Se pregunta al servidor si esta cuenta administra; mientras no conteste,
        la entrada no está. Enseñarla o no es comodidad: el permiso lo decide la

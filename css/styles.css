@@ -5168,3 +5168,37 @@ html[data-theme="light"] .fp-ico.pendiente::after {
 .indice .fp-ico svg { width: 17px; height: 17px; }
 .indice .fp-tit { font-size: .95rem; font-weight: 650; }
 .indice .fp-sub { font-size: .77rem; margin-top: 2px; }
+
+/* ---------- version y espacio ----------
+   El disco dice el veredicto antes que ninguna palabra: verde si estas al dia,
+   azul con la flecha si hay una nueva, ambar si no se ha podido preguntar. */
+.ver-fila { display: flex; align-items: center; gap: 13px; margin-top: 9px; }
+.ver-disco {
+  flex: none; width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dim2);
+  background: color-mix(in srgb, var(--card2) 75%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 13%, transparent);
+  transition: color .2s ease, background .2s ease;
+}
+.ver-disco svg { width: 20px; height: 20px; fill: none; stroke: currentColor;
+  stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+.ver-num { display: block; font-size: 1.14rem; font-weight: 800; letter-spacing: -.024em;
+  font-variant-numeric: tabular-nums; }
+.ver-fila .tiny { display: block; margin-top: 2px; line-height: 1.4; }
+
+.ver-caja.ver-ok .ver-disco { color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 15%, transparent); }
+.ver-caja.ver-sinred .ver-disco { color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 15%, transparent); }
+.ver-caja.ver-nueva .ver-disco {
+  color: #4f8cf5; background: color-mix(in srgb, #4f8cf5 16%, transparent);
+}
+.ver-caja.ver-nueva .ver-num { color: #4f8cf5; }
+@media (prefers-reduced-motion: no-preference) {
+  .ver-caja.ver-nueva .ver-disco svg { animation: ver-baja 1.9s ease-in-out infinite; }
+}
+@keyframes ver-baja {
+  0%, 100% { transform: translateY(-1.5px); }
+  50% { transform: translateY(1.5px); }
+}
