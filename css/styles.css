@@ -1289,12 +1289,19 @@ img[src^="data/img/"] {
    el borde, y el filo de la izquierda lleva el color del plan para
    distinguirlos de un vistazo. */
 .plan-caja {
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--acc);
+  --tono: var(--acc);
+  border: 1px solid color-mix(in srgb, var(--tono) 22%, var(--line));
+  border-left: 4px solid var(--tono);
   border-radius: var(--r);
   padding: 0 9px 9px;
   margin-top: 10px;
-  transition: border-color .18s, box-shadow .18s;
+  /* El mismo degradado tenue que las tarjetas, pero del color de este plan:
+     asi el filo de la izquierda deja de ser una raya suelta y se entiende que
+     todo el cajon es de ese plan. */
+  background:
+    linear-gradient(152deg, color-mix(in srgb, var(--tono) 11%, var(--card)) 0%,
+                    var(--card) 58%);
+  transition: border-color .18s, box-shadow .18s, background .25s;
 }
 .plan-caja.abierta {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 70%, transparent);

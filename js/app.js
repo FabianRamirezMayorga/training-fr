@@ -888,7 +888,7 @@
 
       return html`
         <div class="plan-caja${raw(abierto ? ' abierta' : '')}"
-             style="border-left-color:${tono}">
+             style="--tono:${tono}">
         ${raw(deslizable(cabecera, [
           { icono: 'chispa', texto: 'Analizar' + BAJA + 'con IA', attr: 'data-iaplan="' + esc(k) + '"' },
           { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicarplan="' + esc(k) + '"' },
@@ -2382,7 +2382,7 @@
            seguidos en los que no se distingue lo que se puede tocar de lo que
            solo se lee. En una fila, el titulo dice que hace y el renglon de
            debajo por que, y toda ella se toca. -->
-      <div class="card lista-acciones">
+      <div class="card lista-acciones tarjeta-premium">
         ${raw(filaAccion('actividad', 'plus', 'Apuntar algo que ya hice',
           'Caminar una hora el domingo o la pachanga del sábado cuentan igual, ' +
           'aunque no salgan de una rutina.'))}
