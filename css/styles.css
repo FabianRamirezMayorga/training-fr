@@ -5358,3 +5358,44 @@ html[data-theme="light"] .sec-barra {
   .sec-marcada > summary .sec-cola { order: 2; }
   .sec-marcada > summary .sec-flecha { order: 2; }
 }
+
+/* ---------- el cruce de la foto con el menu ----------
+   Lo previsto contra lo que hay en el plato, y la resta hecha. La resta la hace
+   la app y no la IA: los dos numeros estan aqui y restarlos es exacto. */
+.conf-disco.cambio {
+  color: #4f8cf5;
+  background: color-mix(in srgb, #4f8cf5 14%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent),
+              0 4px 16px color-mix(in srgb, #4f8cf5 18%, transparent);
+}
+.cr-plato {
+  margin-top: 15px; text-align: center;
+  font-size: 1.14rem; font-weight: 800; letter-spacing: -.024em; line-height: 1.2;
+}
+.cr-nota { text-align: center; margin: 5px auto 0; max-width: 34ch; }
+
+.cr-tabla { display: flex; gap: 9px; margin-top: 14px; }
+.cr-dato {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+  padding: 11px 12px; border-radius: 15px;
+  background: color-mix(in srgb, var(--card2) 60%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
+}
+.cr-lab { font-size: .68rem; font-weight: 800; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--dim2); }
+.cr-cifra { font-size: 1.3rem; font-weight: 800; letter-spacing: -.026em;
+  font-variant-numeric: tabular-nums; line-height: 1.1; }
+.cr-cifra i { font-style: normal; font-size: .7rem; font-weight: 600;
+  color: var(--dim2); margin-left: 3px; }
+/* La diferencia contra lo previsto: mas no es malo ni menos es bueno —depende
+   de si es proteina o son calorias—, asi que se dice el signo y ya. */
+.cr-dif { font-size: .74rem; font-weight: 700; color: var(--dim2);
+  font-variant-numeric: tabular-nums; }
+.cr-dif.mas { color: var(--warn); }
+.cr-dif.menos { color: #4f8cf5; }
+.cr-pie { text-align: center; margin: 8px auto 0; max-width: 36ch; }
+
+html[data-theme="light"] .cr-dato {
+  background: color-mix(in srgb, #141922 4%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+}

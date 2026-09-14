@@ -553,9 +553,23 @@
             <div class="spinner" style="flex:none"></div>
           </div>`;
       }
-      return IA.analizarComida({ mime: f.mime, datos: f.datos });
+      /* Antes de mirarla a secas: si el menú dice que a esta hora toca el
+         desayuno, esta foto ES el desayuno. Cruzarla evita que el día cuente
+         dos cosas —lo que comió por un lado, lo que tenía previsto por otro—
+         sin saber nunca si lo cumplió. Si no hay con qué cruzar, sigue por el
+         camino de siempre. */
+      const img = { mime: f.mime, datos: f.datos };
+      if (g.Marcar && Marcar.cruzarFoto) {
+        return Marcar.cruzarFoto(img).then(function (x) {
+          if (x && x.cruzado) return null;
+          return IA.analizarComida(img);
+        });
+      }
+      return IA.analizarComida(img);
     }).then(function (r) {
       soltar();
+      /* null = ya lo ha resuelto el cruce con el menú */
+      if (r === null) return;
       if (!r || !(Number(r.kcal) > 0)) {
         UI.toast('No he visto comida en esa foto. Prueba con más luz o más cerca.');
         return;

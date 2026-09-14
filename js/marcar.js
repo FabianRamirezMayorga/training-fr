@@ -417,6 +417,151 @@
       });
   }
 
+  /* ---------- el cruce por la hora ----------
+     Si el menú dice que a las 8:00 toca avena y a las 8:05 le hace una foto a
+     un plato, ese plato es el desayuno. Hasta ahora la foto se apuntaba suelta
+     y el desayuno se quedaba sin marcar, así que el día contaba dos veces lo
+     mismo: lo que comió por un lado y lo que tenía previsto por otro, sin
+     saber nunca si lo cumplió.
+
+     La ventana es de dos horas y media a cada lado. Más corta se pierde a
+     quien desayuna tarde; más larga empieza a cruzar el desayuno con la
+     comida, y equivocarse de comida es peor que no cruzar nada. */
+  const VENTANA = 150;
+
+  function comidaDeLaHora(cuando) {
+    if (!g.Menus || !g.Comidas) return null;
+    const d = Menus.hoyConRef ? Menus.hoyConRef() : null;
+    if (!d || !d.dia) return null;
+
+    const t = new Date(cuando || Date.now());
+    const min = t.getHours() * 60 + t.getMinutes();
+    let mejor = null;
+
+    (d.dia.comidas || []).forEach(function (c, j) {
+      const r = ref(d.menu.id, d.i, j);
+      /* Una comida ya marcada no se vuelve a cruzar: si ya dijo que se comió
+         el desayuno, la foto de las 8:30 es otra cosa. */
+      if (Comidas.marcada && Comidas.marcada(r)) return;
+      const h = String(c.hora || '').match(/^(\d{1,2}):(\d{2})/);
+      if (!h) return;
+      const suyo = Number(h[1]) * 60 + Number(h[2]);
+      const dif = Math.abs(suyo - min);
+      if (dif > VENTANA) return;
+      if (!mejor || dif < mejor.dif) {
+        mejor = { ref: r, comida: c, dif: dif, hora: c.hora };
+      }
+    });
+
+    return mejor;
+  }
+
+  /* La foto, cruzada con el menú. Devuelve una promesa que se resuelve cuando
+     ya está apuntado —de una forma o de otra— o cuando no había con qué
+     cruzar, y entonces lo dice para que quien llamó siga por su camino. */
+  function cruzarFoto(imagen, cuando) {
+    const cand = comidaDeLaHora(cuando);
+    if (!cand || !g.IA || !IA.activa() || !IA.revisarCambioComida) {
+      return Promise.resolve({ cruzado: false });
+    }
+    return IA.revisarCambioComida('', cand.comida, imagen).then(function (r) {
+      if (!r || !(Number(r.kcal) > 0)) return { cruzado: false, nota: r && r.nota };
+      cruceSheet(cand, r);
+      return { cruzado: true };
+    });
+  }
+
+  /* Lo previsto contra lo que hay en el plato, y la resta hecha. La resta la
+     hace la app y no la IA: los dos números están aquí y restarlos es exacto.
+     El juicio sí es suyo, que para eso hace falta saber de comida. */
+  function difHTML(etiqueta, previsto, real, unidad) {
+    const d = Math.round(real - previsto);
+    /* El menos tiene que estar: «1 g» a secas se lee como «un gramo más»
+       cuando es uno menos, y ahí el signo es todo el dato. */
+    const signo = d > 0 ? '+' : '−';
+    const clase = d === 0 ? '' : (d > 0 ? ' mas' : ' menos');
+    return '<div class="cr-dato"><span class="cr-lab">' + esc(etiqueta) + '</span>' +
+      '<span class="cr-cifra">' + UI.num(Math.round(real)) +
+      '<i>' + esc(unidad) + '</i></span>' +
+      '<span class="cr-dif' + clase + '">' + (d === 0 ? 'clavado'
+        : signo + UI.num(Math.abs(d)) + ' ' + esc(unidad)) + '</span></div>';
+  }
+
+  function cruceSheet(cand, r) {
+    const c = cand.comida;
+    const nombre = c.nombre || 'esa comida';
+    const previsto = c.plato || c.nombre || 'lo del menú';
+    const igual = r.esLoPrevisto;
+
+    UI.modal(html`
+      <div class="conf-disco ${raw(igual ? '' : 'cambio')}">
+        ${raw(icon(igual ? 'check' : 'cambiar'))}</div>
+      <h2 class="conf-tit">${raw(igual
+        ? 'Eso es tu ' + esc(nombre.toLowerCase())
+        : '¿Esto es tu ' + esc(nombre.toLowerCase()) + '?')}</h2>
+      <p class="muted conf-txt">${raw(igual
+        ? 'A las ' + esc(UI.hora ? UI.hora(cand.hora) : cand.hora) + ' tocaba «' +
+          esc(previsto) + '» y eso es lo que veo en la foto.'
+        : 'A las ' + esc(UI.hora ? UI.hora(cand.hora) : cand.hora) + ' tocaba «' +
+          esc(previsto) + '», y en la foto veo otra cosa.')}</p>
+
+      <div class="cr-plato">${r.plato}</div>
+      ${raw(r.nota ? '<p class="tiny cr-nota">' + esc(r.nota) +
+        (r.confianza ? ' · ' + esc(r.confianza) : '') + '</p>' : '')}
+
+      <div class="cr-tabla">
+        ${raw(difHTML('Calorías', Number(c.kcal) || 0, r.kcal, 'kcal'))}
+        ${raw(difHTML('Proteína', Number(c.prot) || 0, r.prot, 'g'))}
+      </div>
+      <p class="tiny cr-pie">Frente a las ${UI.num(Number(c.kcal) || 0)} kcal y
+      ${UI.num(Number(c.prot) || 0)} g que tenía el menú.</p>
+
+      ${raw(r.consejo ? '<div class="sc-dictamen ' + esc(r.veredicto || 'regular') + '">' +
+        '<p class="sd-txt">' + esc(r.consejo) + '</p></div>' : '')}
+
+      <div class="cb-acciones" style="margin-top:16px">
+        <button class="btn primary grow btn-arranque" data-x="si">
+          ${raw(icon('check'))} ${raw(igual ? 'Marcar como hecho' : 'Sí, es esa comida')}</button>
+        <button class="btn vidrio" data-x="no">Es aparte</button>
+      </div>
+      <p class="tiny" style="margin:10px 0 0;text-align:center">«Es aparte» lo apunta
+      como un extra del día y deja tu ${esc(nombre.toLowerCase())} sin marcar.</p>`,
+      function (el) {
+        el.querySelector('[data-x=si]').onclick = function () {
+          UI.closeModal();
+          /* Si es lo previsto, valen los números del menú: son los que él
+             mismo aceptó y los que cuadran con el resto del plan. Si es otra
+             cosa, valen los de la foto, que es lo que se ha comido de verdad. */
+          if (igual) {
+            comerLoPrevisto(cand.ref);
+            return;
+          }
+          Comidas.anotar({
+            plato: r.plato, kcal: r.kcal, prot: r.prot,
+            carbo: r.carbo, grasa: r.grasa,
+            detalle: r.nota || '', confianza: r.confianza || '',
+            fuente: 'cambio', ref: cand.ref,
+            sustituye: previsto,
+            consejo: r.consejo || '', veredicto: r.veredicto || ''
+          });
+          render();
+          UI.toast('Apuntado en tu ' + nombre.toLowerCase());
+        };
+
+        el.querySelector('[data-x=no]').onclick = function () {
+          UI.closeModal();
+          Comidas.anotar({
+            plato: r.plato, kcal: r.kcal, prot: r.prot,
+            carbo: r.carbo, grasa: r.grasa,
+            detalle: r.nota || '', confianza: r.confianza || '',
+            fuente: 'foto'
+          });
+          render();
+          UI.toast('Apuntado aparte: ' + UI.num(Math.round(r.kcal)) + ' kcal');
+        };
+      });
+  }
+
   /* ---------- los oyentes ----------
      Una sola llamada por pantalla. Quien pinte cualquiera de estos trozos
      llama a esto en su mount y ya funciona todo. */
@@ -460,6 +605,7 @@
     ref: ref, comidaDeRef: comidaDeRef, comidaHTML: comidaHTML, platoHTML: platoHTML,
     macrosHTML: macrosHTML, hoyHTML: hoyHTML, aguaHTML: aguaHTML,
     aguaDeHoyHTML: aguaDeHoyHTML, comerLoPrevisto: comerLoPrevisto,
+    comidaDeLaHora: comidaDeLaHora, cruzarFoto: cruzarFoto,
     sustituirComidaSheet: sustituirComidaSheet, bind: bind
   };
 })(window);

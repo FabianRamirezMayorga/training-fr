@@ -2210,8 +2210,17 @@
       'tratarlo como un pecado es la forma m\u00e1s r\u00e1pida de que deje de apuntar lo que ' +
       'come. Dile lo que hay y sigue.');
     partes.push('');
+    /* Hace falta saber si lo que ha comido ES lo que tenía previsto o es otra
+       cosa. Cuando la foto la manda él sin decir nada —desayuna y hace la foto—
+       la app no puede adivinarlo: el único que sabe si ese plato es la avena
+       del menú o unos huevos con tocino es quien mira la foto. */
+    partes.push('Adem\u00e1s: \u00bflo que ha comido es lo que ten\u00eda previsto, o es otra ' +
+      'cosa? "esLoPrevisto" es true solo si en esencia es el mismo plato \u2014vale ' +
+      'que cambie la guarnici\u00f3n o la cantidad\u2014; si es otra comida distinta, false.');
+    partes.push('');
     partes.push('Devuelve JSON: {"plato":"c\u00f3mo llamarlo, corto","kcal":n\u00famero,' +
       '"prot":gramos,"carbo":gramos,"grasa":gramos,' +
+      '"esLoPrevisto":true|false,' +
       '"confianza":"alta|media|baja","nota":"una frase, lo que has supuesto",' +
       '"veredicto":"bien|regular|mal","consejo":"una o dos frases",' +
       '"alternativas":["cambio con su cantidad"]}');
@@ -2236,6 +2245,10 @@
           grasa: Math.max(0, Math.round(Number(r.grasa) || 0)),
           confianza: String(r.confianza || ''),
           nota: String(r.nota || ''),
+          /* Solo true de verdad: ante la duda, que sea un cambio. Marcar como
+             «comiste lo previsto» algo que no lo era mete números falsos en el
+             recuento del día sin que nadie lo vea. */
+          esLoPrevisto: r.esLoPrevisto === true,
           /* Si vuelve con cualquier otra cosa se queda en «regular»: es lo que
              menos afirma de las tres, y afirmar de más sobre lo que come
              alguien es peor que no decir nada. */
