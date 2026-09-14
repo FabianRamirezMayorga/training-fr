@@ -645,21 +645,8 @@ body.con-crono{--pad-abajo:134px}
   background:var(--bg2)}
 
 /* Plan contra realidad, en Progreso: dos barras sobre el mismo carril */
-.pvr{display:flex;flex-direction:column;gap:3px}
-.pvr-fila{display:flex;align-items:center;gap:10px;padding:3px 0}
-.pvr-nom{flex:none;width:88px;font-size:.76rem;color:var(--dim)}
-.pvr-pista{position:relative;flex:1;height:16px}
-.pvr-plan{position:absolute;left:0;top:2px;height:12px;border-radius:6px;
   background:var(--line)}
-.pvr-real{position:absolute;left:0;top:5px;height:6px;border-radius:3px;
   background:var(--acc);transition:width .45s cubic-bezier(.2,.9,.3,1)}
-.pvr-num{flex:none;width:56px;text-align:right;font-size:.8rem;font-weight:700;color:var(--dim)}
-.pvr-hecho{display:block;font-size:.72rem;font-weight:700;color:var(--acc)}
-.pvr-leyenda{display:flex;gap:14px;justify-content:center;margin-top:10px}
-.pvr-leyenda span{font-size:.7rem;color:var(--dim2);display:flex;align-items:center;gap:5px}
-.pvr-leyenda .pt{width:9px;height:9px;border-radius:3px;display:inline-block}
-.pvr-leyenda .pt.plan{background:var(--line)}
-.pvr-leyenda .pt.real{background:var(--acc)}
 
 /* La frase del día, donde antes había un hueco */
 .pildora-hueco{min-height:0}
@@ -2440,6 +2427,13 @@ html[data-theme="light"] .sem-caja.es-ahora {
    en una linea: mas no cabe y menos no dice nada. */
 .lista-ejs { padding: 0; overflow: hidden; }
 
+/* La cabecera de una tarjeta que por dentro es una lista: el rotulo y su cifra
+   llevan el relleno que las filas no tienen. */
+.ejs-cab { padding: 12px 12px 10px; gap: 10px; align-items: flex-end; }
+.ejs-cab .pre-num { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ejs-cab .chip { flex: none; max-width: 45%; overflow: hidden; text-overflow: ellipsis; }
+.ejs-cab + .fila-ej, .ejs-cab + .fila-pr { border-top: 1px solid var(--line); }
+
 .fila-ej {
   display: flex; align-items: center; gap: 10px; width: 100%;
   padding: 9px 12px; background: none; border: 0; color: inherit;
@@ -2490,3 +2484,41 @@ html[data-theme="light"] .sem-caja.es-ahora {
 @media (prefers-reduced-motion: no-preference) {
   .cp-linea { animation: mg-trazo .9s cubic-bezier(.3, .9, .3, 1) both; }
 }
+
+/* ---------- las zonas, en una sola tabla ----------
+   Tu barra y una muesca donde esta lo que pide el plan: si la barra no llega a
+   la muesca, vas corto. Dos preguntas en un solo dibujo. */
+.zonas { display: flex; flex-direction: column; gap: 9px; }
+.zona-fila { display: flex; align-items: center; gap: 10px; }
+.zona-nom { flex: none; width: 66px; font-size: .82rem; color: var(--dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.zona-pista {
+  position: relative; flex: 1; height: 10px; border-radius: 999px;
+  background: var(--card2); overflow: visible;
+}
+.zona-hago {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg,
+              color-mix(in srgb, var(--acc) 72%, var(--brand-1)), var(--acc));
+  transition: width .5s cubic-bezier(.2, .8, .3, 1);
+}
+.zona-hago.corto { background: var(--warn); opacity: .85; }
+
+/* La muesca del plan: una raya vertical que cruza la barra. */
+.zona-pide {
+  position: absolute; top: -3px; bottom: -3px; width: 2px;
+  background: var(--txt); opacity: .55; border-radius: 2px;
+  transform: translateX(-1px);
+}
+
+.zona-num { flex: none; min-width: 58px; text-align: right;
+  font-size: .82rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.zona-de { color: var(--dim2); font-weight: 600; }
+
+.zona-leyenda { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 11px; }
+.zona-leyenda span { display: inline-flex; align-items: center; gap: 5px; }
+.zona-leyenda i { width: 12px; height: 8px; border-radius: 999px; flex: none; }
+.zl-hago { background: var(--acc); }
+.zl-pide { width: 2px !important; height: 12px !important; border-radius: 2px !important;
+  background: var(--txt); opacity: .55; }

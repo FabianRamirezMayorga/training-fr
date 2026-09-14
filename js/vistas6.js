@@ -96,7 +96,15 @@
   function planPorZona() {
     const zonas = {};
     let total = 0;
+
+    /* Solo el plan que manda. Sumando todas las rutinas que uno tiene guardadas
+       —las de dos o tres planes distintos— salian barbaridades como «tu plan
+       pide 110 series de pierna por semana»: eran las de todos los planes
+       juntos, incluidos los que no estas siguiendo. */
+    const activo = g.App && App.planActivo ? App.planActivo() : '';
+
     Store.routines().forEach(function (r) {
+      if (activo && g.App.nombreRutina && App.nombreRutina(r) !== activo) return;
       if (!(r.days || []).length) return;
       /* una rutina asignada a dos días se entrena dos veces por semana */
       const veces = r.days.length;
@@ -243,9 +251,36 @@
   function ejerciciosHTML(lista) {
     if (!lista.length) return '';
 
+    /* El titular de la tarjeta: el que mas ha subido si hay pesos, y si no, el
+       que mas repites. Es el dato que uno buscaria leyendo la lista entera. */
+    const conPeso = lista.filter(function (m) { return m.conPeso; }).map(function (m) {
+      const p = m.puntos.map(function (q) { return q.peso; })
+        .filter(function (v) { return v > 0; });
+      const ini = p[0], fin = p[p.length - 1];
+      return { nombre: m.exId, dif: ini ? Math.round((fin - ini) / ini * 100) : 0, m: m };
+    }).sort(function (a, b) { return b.dif - a.dif; });
+
+    const cabeza = conPeso.length && conPeso[0].dif > 0
+      ? { rotulo: 'El que más sube',
+          nombre: (Data.get(conPeso[0].m.exId) || {}).nameEs || conPeso[0].m.name,
+          dato: '+' + conPeso[0].dif + '%' }
+      : { rotulo: 'El que más repites',
+          nombre: (Data.get(lista[0].exId) || {}).nameEs || lista[0].name,
+          dato: lista[0].veces + ' veces' };
+
     return html`
       <div class="list-title">Tus ejercicios</div>
-      <div class="card lista-ejs">
+      <div class="card lista-ejs tarjeta-premium">
+        <div class="ejs-cab row between">
+          <div class="grow" style="min-width:0">
+            <div class="pre-encima">${raw(cabeza.rotulo)}</div>
+            <!-- El nombre de un ejercicio puede ser largo: en una linea y con
+                 puntos suspensivos, que si no empuja la cifra al renglon de
+                 abajo y la cabecera crece el doble. -->
+            <div class="pre-num">${cabeza.nombre}</div>
+          </div>
+          <span class="chip nowrap">${cabeza.dato}</span>
+        </div>
         ${raw(lista.slice(0, 5).map(function (m, i) {
           const ex = Data.get(m.exId);
           const nombre = ex ? ex.nameEs : m.name;
@@ -566,22 +601,7 @@
             ' <span class="tiny" style="font-weight:600">' +
             Math.round(reparto.filas[0].series / reparto.total * 100) + '% de las series</span></div>'
             : '')}
-          ${raw(reparto.filas.map(function (f) {
-            const pct = Math.round(f.series / maxMusculo * 100);
-            const share = Math.round(f.series / reparto.total * 100);
-            return html`
-              <div class="zona-fila">
-                <span class="zona-nom">${f.label}</span>
-                <span class="zona-barra"><i style="width:${pct}%"></i></span>
-                <span class="zona-num">${share}%</span>
-              </div>`;
-          }).join(''))}
-          ${raw(reparto.total
-            ? '<p class="tiny" style="margin:11px 0 0">' + pistaReparto(reparto) + '</p>'
-            : '<p class="tiny" style="margin:0">Todavía no has completado series, así que ' +
-              'aquí no hay nada tuyo que repartir. Abajo sí está lo que tu plan pide cada ' +
-              'semana.</p>')}
-          ${raw(planVsRealHTML(reparto, r))}
+          ${raw(zonasHTML(reparto, r))}
         </div>` : '')}
 
       ${raw(pesoHTML(r.dias))}
@@ -599,7 +619,14 @@
           return nuevos ? ' <span class="chip solid tiny-chip">' + nuevos +
             (nuevos === 1 ? ' nuevo' : ' nuevos') + '</span>' : '';
         })())}</div>
-        <div class="card lista-prs">
+        <div class="card lista-prs tarjeta-premium">
+          <div class="ejs-cab row between">
+            <div class="grow" style="min-width:0">
+              <div class="pre-encima">Tu marca más alta</div>
+              <div class="pre-num">${UI.kg(prs[0].pr.weight)}</div>
+            </div>
+            <span class="chip nowrap">${prs[0].name}</span>
+          </div>
           ${raw(prs.slice(0, 12).map(function (p, i) {
             return html`
               <button class="fila-pr" data-ex="${p.exId}" style="--turno:${i}">
@@ -690,65 +717,91 @@
   }
 
   /* Una frase que diga algo del reparto, no solo los porcentajes */
-  /* Plan contra realidad, zona por zona. Es lo que dice si el plan que tienes
-     montado se parece en algo a las semanas que entrenas de verdad. */
-  function planVsRealHTML(reparto, rango) {
+  /* planVsRealHTML se fue: lo que contaba vive ahora en zonasHTML, en la misma
+     tabla que el reparto. Eran dos graficas de barras iguales, una debajo de
+     la otra. */
+
+  /* ---------- una sola tabla de zonas ----------
+     Eran dos graficas de barras por zona, una debajo de la otra y con la misma
+     pinta: el reparto de lo que haces y lo que pide el plan. Dos dibujos casi
+     identicos para dos preguntas que en realidad son una sola —de lo que
+     entreno, cuanto va a cada zona, y cuadra con lo que deberia—.
+
+     Ahora es una fila por zona: tu barra, una muesca donde esta lo que pide el
+     plan y, a la derecha, las dos cifras. Donde la barra no llega a la muesca,
+     vas corto. Se lee de un vistazo y ocupa la mitad. */
+  function zonasHTML(reparto, rango) {
     const plan = planPorZona();
-    if (!plan.total) return '';
-
     const semanas = Math.max(1, Math.round(Math.min(rango.dias, 90) / 7));
-    const hechoPorSemana = {};
+
+    const hecho = {};
     reparto.filas.forEach(function (f) {
-      hechoPorSemana[f.id] = Math.round(f.series / semanas * 10) / 10;
+      hecho[f.id] = Math.round(f.series / semanas * 10) / 10;
     });
 
-    const ids = Object.keys(plan.zonas).filter(function (id) { return plan.zonas[id] > 0; });
-    if (!ids.length) return '';
-    ids.sort(function (a, b) { return plan.zonas[b] - plan.zonas[a]; });
-
-    const mayor = Math.max.apply(null, ids.map(function (id) {
-      return Math.max(plan.zonas[id], hechoPorSemana[id] || 0);
-    }));
-
-    /* dónde más se separa lo que haces de lo que tu plan pide */
-    let peor = null;
-    ids.forEach(function (id) {
-      const falta = plan.zonas[id] - (hechoPorSemana[id] || 0);
-      if (!peor || falta > peor.falta) peor = { id: id, falta: falta };
-    });
     const etiqueta = function (id) {
-      const r = I18N.REGIONES.find(function (x) { return x.id === id; });
-      return r ? r.label : id;
+      const r2 = I18N.REGIONES.find(function (x) { return x.id === id; });
+      return r2 ? r2.label : id;
     };
+    /* Aqui se escribe en espanol: 2,2 y no 2.2 */
+    const coma = function (n2) { return String(n2).replace('.', ','); };
+
+    const ids = [];
+    reparto.filas.forEach(function (f) { if (ids.indexOf(f.id) === -1) ids.push(f.id); });
+    Object.keys(plan.zonas).forEach(function (id) {
+      if (plan.zonas[id] > 0 && ids.indexOf(id) === -1) ids.push(id);
+    });
+    if (!ids.length) return '';
+
+    ids.sort(function (a, b) { return (plan.zonas[b] || 0) - (plan.zonas[a] || 0); });
+
+    const tope = Math.max.apply(null, ids.map(function (id) {
+      return Math.max(plan.zonas[id] || 0, hecho[id] || 0);
+    }).concat([1]));
+
+    let peor = null;
+    if (plan.total) {
+      ids.forEach(function (id) {
+        const falta = (plan.zonas[id] || 0) - (hecho[id] || 0);
+        if (!peor || falta > peor.falta) peor = { id: id, falta: falta };
+      });
+    }
 
     return html`
-      <div class="hr"></div>
-      <div class="tiny" style="margin-bottom:9px">TU PLAN CONTRA LO QUE HACES, POR SEMANA</div>
-      <div class="pvr">
+      <div class="zonas">
         ${raw(ids.map(function (id) {
-          const pide = Math.round(plan.zonas[id] * 10) / 10;
-          const hace = hechoPorSemana[id] || 0;
+          const pide = Math.round((plan.zonas[id] || 0) * 10) / 10;
+          const hace = hecho[id] || 0;
+          const corto = plan.total && pide > 0 && hace < pide * 0.8;
           return html`
-            <div class="pvr-fila">
-              <span class="pvr-nom">${etiqueta(id)}</span>
-              <span class="pvr-pista">
-                <i class="pvr-plan" style="width:${Math.round(pide / mayor * 100)}%"></i>
-                <i class="pvr-real" style="width:${Math.round(hace / mayor * 100)}%"></i>
+            <div class="zona-fila">
+              <span class="zona-nom">${etiqueta(id)}</span>
+              <span class="zona-pista">
+                <i class="zona-hago ${corto ? 'corto' : ''}"
+                   style="width:${Math.round(hace / tope * 100)}%"></i>
+                ${raw(pide > 0 ? '<b class="zona-pide" style="left:' +
+                  Math.round(pide / tope * 100) + '%"></b>' : '')}
               </span>
-              <span class="pvr-num">${String(pide).replace('.', ',')}
-                <span class="pvr-hecho">${String(hace).replace('.', ',')}</span></span>
+              <span class="zona-num">${coma(hace)}${raw(pide > 0
+                ? '<span class="zona-de"> / ' + coma(pide) + '</span>' : '')}</span>
             </div>`;
         }).join(''))}
       </div>
-      <div class="pvr-leyenda">
-        <span><i class="pt plan"></i> lo que pide tu plan</span>
-        <span><i class="pt real"></i> lo que haces</span>
+
+      <div class="zona-leyenda tiny">
+        <span><i class="zl-hago"></i> series por semana que haces</span>
+        ${raw(plan.total ? '<span><i class="zl-pide"></i> lo que pide tu plan</span>' : '')}
       </div>
-      ${raw(peor && peor.falta > 2 ? '<p class="tiny" style="margin:9px 0 0">Donde más te ' +
-        'separas es <b>' + esc(etiqueta(peor.id)) + '</b>: tu plan pide ' +
-        String(Math.round(plan.zonas[peor.id] * 10) / 10).replace('.', ',') +
-        ' series por semana y estás haciendo ' +
-        String(hechoPorSemana[peor.id] || 0).replace('.', ',') + '.</p>' : '')}`;
+
+      ${raw(peor && peor.falta > 0.5
+        ? '<p class="tiny" style="margin:9px 0 0">Donde más te separas es <b>' +
+          esc(etiqueta(peor.id)) + '</b>: tu plan pide ' +
+          coma(Math.round((plan.zonas[peor.id] || 0) * 10) / 10) + ' series por semana y ' +
+          'estás haciendo ' + coma(hecho[peor.id] || 0) + '.</p>'
+        : reparto.total
+        ? '<p class="tiny" style="margin:9px 0 0">' + pistaReparto(reparto) + '</p>'
+        : '<p class="tiny" style="margin:9px 0 0">Todavía no has completado series en ' +
+          'este periodo.</p>')}`;
   }
 
   function pistaReparto(r) {
