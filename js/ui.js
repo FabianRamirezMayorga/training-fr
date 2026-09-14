@@ -81,6 +81,14 @@
     camara: '<svg viewBox="0 0 24 24"><path d="M9 8l1.2-2.4h3.6L15 8h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2z"/><circle cx="12" cy="14" r="3.4"/></svg>',
     chevron: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
     filtro: '<svg viewBox="0 0 24 24"><path d="M3 7h18M6 12h12M10 17h4"/></svg>',
+    casa: '<svg viewBox="0 0 24 24"><path d="M3.6 10.6L12 4l8.4 6.6V19a1.6 1.6 0 01-1.6 1.6H5.2A1.6 1.6 0 013.6 19z"/>'
+      + '<path d="M9.4 20.6V14h5.2v6.6"/></svg>',
+    banda: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9.2" ry="5.2" transform="rotate(-28 12 12)"/>'
+      + '<ellipse cx="12" cy="12" rx="5" ry="1.9" transform="rotate(-28 12 12)"/></svg>',
+    catalogo: '<svg viewBox="0 0 24 24"><rect x="3.4" y="3.4" width="7.2" height="7.2" rx="1.8"/>'
+      + '<rect x="13.4" y="3.4" width="7.2" height="7.2" rx="1.8"/>'
+      + '<rect x="3.4" y="13.4" width="7.2" height="7.2" rx="1.8"/>'
+      + '<rect x="13.4" y="13.4" width="7.2" height="7.2" rx="1.8"/></svg>',
     llave: '<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4.2"/><path d="M11 11l9 9M17 17l2-2M14 14l2-2"/></svg>',
     ojo: '<svg viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></svg>',
     cambiar: '<svg viewBox="0 0 24 24"><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>',

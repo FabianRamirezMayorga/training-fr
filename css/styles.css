@@ -4209,3 +4209,157 @@ html[data-theme="light"] .sp-salida {
   background: color-mix(in srgb, #141922 5%, transparent);
   box-shadow: inset 0 0 0 1px var(--line);
 }
+
+/* ---------- donde entrenas ----------
+   Eran cinco tarjetas grises iguales, con el mismo texto en tres lineas y una
+   cifra suelta en verde. Para elegir habia que leerlas de arriba abajo y
+   comparar cinco numeros de memoria; y «876 disponibles» sin nada al lado no
+   dice nada, porque lo que importa no es la cifra sino que parte del catalogo
+   te deja fuera. */
+.lugar-caja {
+  position: relative; overflow: hidden; isolation: isolate;
+  display: block; width: 100%; text-align: left; cursor: pointer; font: inherit;
+  color: var(--txt); padding: 13px 14px; border-radius: 18px;
+  border: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 7%, transparent), transparent 55%),
+    color-mix(in srgb, var(--card) 72%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(155%);
+  backdrop-filter: blur(16px) saturate(155%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 13%, transparent),
+              inset 0 -12px 22px -16px rgba(0, 0, 0, .6),
+              0 3px 10px rgba(0, 0, 0, .2);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .14s ease;
+}
+.lugar-caja:active { transform: scale(.99); }
+
+/* La silueta al fondo, sangrada por el canto: da caracter a cada sitio sin
+   competir con el nombre, que es lo que se lee. */
+.lg-silueta {
+  position: absolute; right: -18px; top: -16px; width: 108px; height: 108px;
+  z-index: -1; pointer-events: none; color: var(--tono); opacity: .08;
+}
+.lg-silueta svg { width: 100%; height: 100%; fill: none; stroke: currentColor;
+  stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+
+.lg-cab { display: flex; align-items: center; gap: 11px; }
+.lg-ico {
+  flex: none; width: 38px; height: 38px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center; color: var(--dim2);
+  background: color-mix(in srgb, var(--card2) 72%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 11%, transparent);
+  transition: color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.lg-ico svg { width: 19px; height: 19px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.lg-nom { display: block; font-weight: 700; font-size: .96rem; letter-spacing: -.014em; }
+.lg-note { display: block; font-size: .75rem; color: var(--dim2); margin-top: 2px;
+  line-height: 1.35; }
+
+.lg-marca {
+  flex: none; width: 23px; height: 23px; border-radius: 50%; opacity: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--on-acc); background: var(--tono); transform: scale(.5);
+  transition: opacity .2s ease, transform .24s cubic-bezier(.3, 1.4, .5, 1);
+}
+.lg-marca svg { width: 13px; height: 13px; fill: none; stroke: currentColor;
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Cuanto abarca cada sitio, en una barra. Cinco cifras sueltas hay que
+   compararlas de memoria; cinco barras se comparan de un vistazo. */
+.lg-barra {
+  display: block; height: 5px; border-radius: 3px; margin: 11px 0 7px;
+  background: color-mix(in srgb, #000 22%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3);
+  overflow: hidden;
+}
+.lg-barra i {
+  display: block; height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tono) 55%, transparent),
+              var(--tono));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--tono) 45%, transparent);
+  transition: width .5s cubic-bezier(.2, .9, .3, 1);
+}
+.lg-pie { display: flex; align-items: baseline; gap: 7px; font-size: .78rem;
+  color: var(--dim2); }
+.lg-pie b { color: var(--txt); font-size: .92rem; font-weight: 800;
+  font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.lg-pct { margin-left: auto; color: var(--tono); font-weight: 700; font-size: .72rem; }
+.lg-aviso { display: block; margin-top: 8px; font-size: .72rem; color: var(--dim2);
+  line-height: 1.4; }
+
+.lugar-caja.on {
+  border-color: color-mix(in srgb, var(--tono) 52%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent),
+              0 5px 18px color-mix(in srgb, var(--tono) 20%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 8%, transparent), transparent 55%),
+    linear-gradient(150deg, color-mix(in srgb, var(--tono) 15%, transparent),
+                    color-mix(in srgb, var(--tono) 4%, transparent));
+}
+.lugar-caja.on .lg-ico {
+  color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tono) 28%, transparent);
+}
+.lugar-caja.on .lg-silueta { opacity: .14; }
+.lugar-caja.on .lg-marca { opacity: 1; transform: scale(1); }
+
+/* «Ver todo» no es un sitio donde se entrena: es quitar el filtro */
+.lg-o { display: flex; align-items: center; gap: 10px; margin: 4px 0 2px; }
+.lg-o::before, .lg-o::after {
+  content: ''; flex: 1; height: 1px;
+  background: color-mix(in srgb, #fff 9%, transparent);
+}
+.lg-o span { font-size: .68rem; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--dim2); }
+
+/* Que se lleva por delante el cambio: se toca una vez y afecta a tres
+   pantallas, y hasta ahora eso no se decia en ninguna parte. */
+.lg-efecto {
+  display: flex; align-items: flex-start; gap: 11px; margin-top: 16px;
+  padding: 11px 12px; border-radius: 15px;
+  background: color-mix(in srgb, var(--card2) 55%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
+}
+.lg-e-ico {
+  flex: none; width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 13%, transparent);
+}
+.lg-e-ico svg { width: 16px; height: 16px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lg-efecto b { display: block; font-size: .86rem; }
+.lg-efecto .tiny { display: block; margin-top: 2px; }
+
+/* Entran escalonadas al abrir la hoja */
+@media (prefers-reduced-motion: no-preference) {
+  .lugar-caja { animation: pista-entra .36s cubic-bezier(.2, .9, .3, 1) both; }
+  .lugar-caja:nth-child(2) { animation-delay: 40ms; }
+  .lugar-caja:nth-child(3) { animation-delay: 80ms; }
+  .lugar-caja:nth-child(4) { animation-delay: 120ms; }
+  .lugar-caja:nth-child(6) { animation-delay: 190ms; }
+}
+
+html[data-theme="light"] .lugar-caja {
+  background: #fff;
+  border-color: color-mix(in srgb, #141922 9%, transparent);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, .07);
+}
+html[data-theme="light"] .lugar-caja.on {
+  background: linear-gradient(150deg, color-mix(in srgb, var(--tono) 12%, #fff), #fff);
+  border-color: color-mix(in srgb, var(--tono) 46%, transparent);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--tono) 16%, transparent);
+}
+html[data-theme="light"] .lg-ico { background: color-mix(in srgb, #141922 5%, transparent);
+  box-shadow: none; }
+html[data-theme="light"] .lg-barra { background: color-mix(in srgb, #141922 9%, transparent);
+  box-shadow: none; }
+html[data-theme="light"] .lg-o::before, html[data-theme="light"] .lg-o::after {
+  background: var(--line);
+}
+html[data-theme="light"] .lg-efecto {
+  background: color-mix(in srgb, #141922 4%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+}

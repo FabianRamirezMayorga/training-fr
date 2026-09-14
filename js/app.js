@@ -118,34 +118,66 @@
     return html`<button class="chip" data-a="lugar">${raw(icon('dumbbell'))} ${gset.label}</button>`;
   }
 
-  function tarjetasLugar(actual) {
+  /* Cada sitio con su cara. Los cinco eran la misma tarjeta gris con el mismo
+     texto en tres líneas y una cifra suelta en verde: para elegir había que
+     leerlas de arriba abajo y comparar cinco números de memoria. Y «disponibles»
+     sin nada al lado no dice nada —¿muchos?, ¿pocos?—, porque lo que importa no
+     es la cifra sino qué parte del catálogo te deja fuera.
+
+     Así que cada sitio tiene su icono, su color y su silueta al fondo, y la
+     cifra va sobre una barra que enseña de un vistazo cuánto abarca cada uno.
+     Elegir pasa de leer a mirar. */
+  const CARAS_LUGAR = {
+    gym: { icono: 'dumbbell', tono: 'var(--acc)' },
+    dumbbell: { icono: 'casa', tono: '#4f8cf5' },
+    bands: { icono: 'banda', tono: '#c06bf0' },
+    home: { icono: 'perfil', tono: '#2fc4b2' },
+    todo: { icono: 'catalogo', tono: '#f0a23c' }
+  };
+
+  function tarjetaLugar(k, actual, total, enGym) {
+    const gset = Data.GEAR[k];
+    const cara = CARAS_LUGAR[k] || { icono: 'dumbbell', tono: 'var(--acc)' };
+    const cuantos = cuantosEn(k);
+    const parte = total ? Math.round(cuantos / total * 100) : 0;
     /* «Ver todo» y «En el gimnasio» dan el mismo número, y eso desconcierta con
        razón: parece que uno de los dos miente. No miente ninguno —el gimnasio
        permite los doce materiales que existen en el catálogo, así que quitar el
        filtro no puede añadir nada— pero repetir la cifra como si fuera
        información distinta es lo que confunde. Se dice. */
+    const igualQueGym = k === 'todo' && cuantos === enGym;
+
+    return html`
+      <button class="lugar-caja${raw(actual === k ? ' on' : '')}" data-lugar="${k}"
+              style="--tono:${raw(cara.tono)}">
+        <span class="lg-silueta" aria-hidden="true">${raw(icon(cara.icono))}</span>
+        <span class="lg-cab">
+          <span class="lg-ico">${raw(icon(cara.icono))}</span>
+          <span class="grow">
+            <span class="lg-nom">${gset.label}</span>
+            <span class="lg-note">${gset.note}</span>
+          </span>
+          <span class="lg-marca">${raw(icon('check'))}</span>
+        </span>
+        <span class="lg-barra"><i style="width:${parte}%"></i></span>
+        <span class="lg-pie"><b>${UI.num(cuantos)}</b> ejercicios
+          <span class="lg-pct">${parte}% del catálogo</span></span>
+        ${raw(igualQueGym ? '<span class="lg-aviso">Los mismos que en el gimnasio: el ' +
+          'catálogo no tiene nada que el gimnasio no permita.</span>' : '')}
+      </button>`;
+  }
+
+  function tarjetasLugar(actual) {
+    const total = cuantosEn('todo');
     const enGym = cuantosEn('gym');
+    const sitios = Object.keys(Data.GEAR).filter(function (k) { return k !== 'todo'; });
 
-    return Object.keys(Data.GEAR).map(function (k) {
-      const gset = Data.GEAR[k];
-      const cuantos = cuantosEn(k);
-      const igualQueGym = k === 'todo' && cuantos === enGym;
-
-      return html`
-        <button class="rt-item" data-lugar="${k}" style="width:100%;text-align:left;padding:13px;
-                ${actual === k ? 'border-color:var(--acc);background:var(--acc-d)' : ''}">
-          <div class="grow">
-            <div style="font-weight:700;font-size:.95rem">${gset.label}</div>
-            <div class="tiny">${gset.note}</div>
-            <div class="tiny" style="color:var(--acc);margin-top:2px">
-              ${UI.num(cuantos)} ejercicios disponibles</div>
-            ${raw(igualQueGym ? '<div class="tiny" style="margin-top:3px;white-space:normal">' +
-              'Los mismos que en el gimnasio: el catálogo no tiene nada que el gimnasio ' +
-              'no permita.</div>' : '')}
-          </div>
-          ${raw(actual === k ? '<span class="chip solid">Actual</span>' : '')}
-        </button>`;
-    }).join('');
+    /* «Ver todo» no es un sitio donde se entrena: es quitar el filtro. Mezclado
+       con los otros cuatro se elige por error, y separado con su rótulo se
+       entiende de qué va sin tener que leerlo. */
+    return sitios.map(function (k) { return tarjetaLugar(k, actual, total, enGym); }).join('') +
+      '<div class="lg-o"><span>o mira el catálogo entero</span></div>' +
+      tarjetaLugar('todo', actual, total, enGym);
   }
 
   /* La bienvenida son dos preguntas: dónde entrenas y cómo quieres usar la app */
@@ -249,7 +281,17 @@
     UI.modal(html`
       <h2>¿Dónde entrenas?</h2>
       <p class="muted">Cambia el sitio y el catálogo se ajusta al momento.</p>
-      <div class="stack">${raw(tarjetasLugar(Store.settings().gear))}</div>`,
+      <div class="stack" style="margin-top:14px">${raw(tarjetasLugar(Store.settings().gear))}</div>
+
+      <!-- Qué se lleva por delante el cambio. Se toca una vez y afecta a tres
+           pantallas, y hasta ahora eso no se decía en ninguna parte. -->
+      <div class="lg-efecto">
+        <span class="lg-e-ico">${raw(icon('filtro'))}</span>
+        <span class="grow"><b>Qué cambia al elegir</b>
+          <span class="tiny">El catálogo, el buscador de ejercicios y las rutinas que te
+          genere la IA: solo te ofrecerán lo que puedas hacer ahí. Lo que ya tengas
+          guardado no se toca.</span></span>
+      </div>`,
       function (el) {
         el.querySelectorAll('[data-lugar]').forEach(function (b) {
           b.onclick = function () {
