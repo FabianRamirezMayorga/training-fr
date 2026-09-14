@@ -566,16 +566,23 @@
             return routineCard(r, 0, 0, false, 'inicio');
           }).join('') + '</div>'
         : html`
-          <div class="card">
-            <p class="muted" style="margin:0 0 12px">${rutinas.length
-              ? 'Hoy no toca nada en tu plan. Si has hecho algo por tu cuenta, apúntalo; y si te apetece entrenar, elige una rutina.'
-              : 'Todavía no tienes rutinas. Copia una plantilla probada y edítala a tu gusto, o móntate el programa con tus datos.'}</p>
-            <div class="row">
+          <!-- El día sin nada que hacer merece la misma tarjeta que el día con
+               algo: era la única caja lisa de la portada, y es la que ve quien
+               acaba de entrar en la app. -->
+          <div class="card tarjeta-premium tarjeta-libre">
+            <div class="hoy-encima">Hoy · ${rutinas.length ? 'Día libre' : 'Empieza aquí'}</div>
+            <div class="hoy-tit">${rutinas.length
+              ? 'No toca nada en tu plan'
+              : 'Todavía no tienes rutinas'}</div>
+            <p class="hoy-meta">${rutinas.length
+              ? 'Si has hecho algo por tu cuenta, apúntalo. Y si te apetece entrenar, elige una rutina.'
+              : 'Copia una plantilla probada y edítala a tu gusto, o móntate el programa con tus datos.'}</p>
+            <div class="row" style="margin-top:12px">
               ${raw(rutinas.length
-                ? '<button class="btn grow" data-a="apuntar">Apuntar lo que hice</button>' +
-                  '<button class="btn primary grow" data-a="plantillas">Elegir rutina</button>'
-                : '<button class="btn grow" data-a="plantillas">Ver plantillas</button>' +
-                  '<button class="btn primary grow" data-a="programa">Crear mi programa</button>')}
+                ? '<button class="btn grow sm" data-a="apuntar">Apuntar algo</button>' +
+                  '<button class="btn primary grow sm" data-a="plantillas">Elegir rutina</button>'
+                : '<button class="btn grow sm" data-a="plantillas">Ver plantillas</button>' +
+                  '<button class="btn primary grow sm" data-a="programa">Crear mi programa</button>')}
             </div>
           </div>`)}
 

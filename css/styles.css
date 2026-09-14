@@ -1650,3 +1650,39 @@ img[src^="data/img/"] {
    nada— pero comparten la esquina, que si no parecian de otra pantalla. */
 .vista-inicio .stat { border-radius: 20px; }
 .vista-inicio .stat b { font-variant-numeric: tabular-nums; }
+
+/* El dia libre: misma tarjeta, pero su texto si respira en varias lineas. */
+.tarjeta-libre { padding: 14px 15px; }
+.tarjeta-libre .hoy-tit { white-space: normal; }
+.tarjeta-libre .hoy-meta { white-space: normal; margin: 5px 0 0; line-height: 1.35; }
+
+/* ---------- lo mismo, pero de dia ----------
+   En una interfaz oscura la profundidad la da el degradado; en una clara, la
+   sombra. Con las mismas reglas para los dos, de dia las tarjetas quedaban
+   planas y el tinte no se veía: aqui sube un punto el verde y se apoyan sobre
+   una sombra corta y otra larga, que es como flota una tarjeta en iOS. */
+html[data-theme="light"] .tarjeta-premium,
+html[data-theme="light"] .tarjeta-hoy {
+  background:
+    linear-gradient(152deg, color-mix(in srgb, var(--acc) 14%, #fff) 0%, #fff 60%);
+  border-color: color-mix(in srgb, var(--acc) 26%, var(--line));
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 10px 26px rgba(16, 24, 40, .07);
+}
+
+/* La de hoy manda tambien de dia: sombra algo mas larga y teñida de verde. */
+html[data-theme="light"] .tarjeta-hoy {
+  background:
+    linear-gradient(152deg, color-mix(in srgb, var(--acc) 20%, #fff) 0%, #fff 62%);
+  box-shadow: 0 2px 4px rgba(16, 24, 40, .06),
+              0 14px 34px color-mix(in srgb, var(--acc) 20%, transparent);
+}
+
+/* Las cifras de arriba, sin tinte pero con la misma sombra corta: si no,
+   flotaban las tarjetas y ellas se quedaban pegadas al fondo. */
+html[data-theme="light"] .vista-inicio .stat {
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+}
+
+/* De dia la silueta del fondo tiene que ser mas suave: el texto es negro y a la
+   misma opacidad se leia como una mancha. */
+html[data-theme="light"] .hoy-marca { opacity: .06; }
