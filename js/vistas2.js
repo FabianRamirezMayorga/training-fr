@@ -1471,7 +1471,7 @@
           <div class="pre-encima">Un toque</div>
           <p class="muted" style="margin:6px 0 12px;font-size:.88rem">Conecta tu cuenta para
           reproducir aquí y generar listas.</p>
-          <button class="btn primary block btn-arranque" data-a="conectar">
+          <button class="btn block btn-arranque btn-spotify" data-a="conectar">
             ${raw(icon('musica'))} Conectar Spotify</button>
         </div>
         ${raw(falloSpotifyHTML())}
@@ -1490,7 +1490,10 @@
         ${raw(icon('back'))} Perfil</button>
       <div class="row between">
         <h1 style="margin:0">Música</h1>
-        <button class="btn sm" data-a="desconectar">Desconectar</button>
+        <!-- Vidrio neutro y no verde: desconectar no es lo que se viene a hacer
+             aquí, y un botón del color de la marca al lado del título pide que lo
+             pulses. -->
+        <button class="btn sm vidrio" data-a="desconectar">Desconectar</button>
       </div>
 
       ${raw(falloSpotifyHTML())}
@@ -1507,7 +1510,8 @@
           ${raw(faltantes.length
             ? '<p class="tiny" style="margin:0 0 10px">Falta: ' + esc(faltantes.join(', ')) + '</p>'
             : '')}
-          <button class="btn primary block" data-a="conectar">Reconectar Spotify</button>
+          <button class="btn block btn-arranque btn-spotify" data-a="conectar">
+            ${raw(icon('musica'))} Reconectar Spotify</button>
         </div>` : '')}
 
       <div id="sp-player" style="margin-top:12px"></div>
@@ -1604,7 +1608,8 @@
           hace falta tocar nada allí. Pulsa Conectar <b>desde esta misma pantalla</b> y deja
           que vuelva sin abrir otras pestañas ni cambiar entre la app instalada y el
           navegador.</p>`)}
-        <button class="btn primary block sm" data-a="conectar" style="margin-top:10px">
+        <button class="btn block sm btn-arranque btn-spotify" data-a="conectar"
+                style="margin-top:10px">
           ${raw(icon('musica'))} Reintentar aquí</button>
       </div>`;
   }

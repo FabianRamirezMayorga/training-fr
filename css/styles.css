@@ -3011,6 +3011,26 @@ html[data-theme="light"] .barra-edicion .btn {
 }
 .btn.icon-vidrio:active { transform: scale(.96); }
 
+/* Un boton secundario de vidrio: el mismo material que el de icono pero con su
+   texto. Lo usa «Desconectar», que no es lo que se viene a hacer en esa
+   pantalla y no tiene por que pesar como el de conectar. */
+.btn.vidrio {
+  background: linear-gradient(180deg, var(--vidrio-luz), transparent 60%), var(--card2);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+  border-color: transparent;
+}
+.btn.vidrio:active { transform: scale(.97); }
+html[data-theme="light"] .btn.vidrio { box-shadow: inset 0 0 0 1px var(--line); }
+
+/* Conectar Spotify, en el verde de Spotify y no en el de la app. Es su boton:
+   lleva a su pantalla, pide permiso a su cuenta y lo que sale despues es suyo.
+   El verde de la marca aqui diria que el que manda es Training FR. */
+.btn.btn-spotify {
+  --acc: #1db954;
+  color: #fff;
+}
+.btn.btn-spotify svg { color: #fff; }
+
 /* Los campos de «con que cocino»: hundidos en la tarjeta, con su canto de luz
    arriba. Un rectangulo gris plano dentro de una lamina de vidrio se lee como
    un parche de otra pantalla. */
