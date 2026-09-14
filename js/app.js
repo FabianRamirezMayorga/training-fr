@@ -573,20 +573,59 @@
     /* setsDone y volume los apunta la propia sesión al cerrarse: es lo mismo
        que cuentan las cifras de la portada y el historial, así que aquí no se
        vuelve a calcular por otro camino. */
+    /* setsDone y volume los apunta la propia sesión al cerrarse: es lo mismo
+       que cuentan las cifras de la portada y el historial. */
     let series = 0;
     let volumen = 0;
     let minutos = 0;
     const nombres = [];
+    const musculos = [];
+
+    /* Qué tocaste, sacado de los ejercicios que apuntaste, no de la rutina:
+       si te saltaste la mitad, la rutina seguiría diciendo que hiciste pecho y
+       hombros cuando solo hiciste pecho. Lo que cuenta es lo que hiciste. */
+    const apunta = function (m) {
+      /* El catálogo los devuelve con mayúscula porque ahí encabezan su fila.
+         Dentro de una frase —«hiciste cuádriceps y glúteos»— no son nombres
+         propios y la mayúscula chirría. */
+      let n = g.I18N ? I18N.muscle(m) : m;
+      n = String(n || '');
+      if (n) n = n.charAt(0).toLowerCase() + n.slice(1);
+      if (n && musculos.indexOf(n) === -1) musculos.push(n);
+    };
+
     ses.forEach(function (x) {
       series += x.setsDone || 0;
       volumen += x.volume || 0;
       minutos += Math.round(((x.end || x.start) - x.start) / 60000);
       const n = (x.routineName || '').trim();
       if (n && nombres.indexOf(n) === -1) nombres.push(n);
+
+      (x.entries || []).forEach(function (e) {
+        const ex = Data.get(e.exId);
+        ((ex && ex.primaryMuscles) || []).forEach(apunta);
+      });
+      /* Lo apuntado a mano —un partido, una carrera— no trae ejercicios pero
+         sí dice qué movió. */
+      (x.musculos || []).forEach(apunta);
     });
 
     return { n: ses.length, series: series, volumen: volumen,
-      minutos: minutos, nombres: nombres };
+      minutos: minutos, nombres: nombres, musculos: musculos };
+  }
+
+  /* De qué plan es y cuánto es, en una línea. Es lo que decía el cajón de
+     «Hoy, lunes» y lo que ahora va dentro del botón. */
+  function resumenRutina(r) {
+    const n = (r.exercises || []).length;
+    const series = (r.exercises || []).reduce(function (a, e) {
+      return a + (Number(e.sets) || 0);
+    }, 0);
+    const partes = [];
+    if (r.name) partes.push(r.name);
+    partes.push(n + (n === 1 ? ' ejercicio' : ' ejercicios'));
+    if (series) partes.push(series + (series === 1 ? ' serie' : ' series'));
+    return partes.join(' · ');
   }
 
   function viewInicio() {
@@ -641,28 +680,45 @@
         <!-- Ya está hecho. Un botón verde de «Entrenar pecho» aquí es la app
              pidiéndote que hagas lo que acabas de hacer: lo que toca es decir
              que está hecho y dejar a mano lo único que tiene sentido después,
-             que es apuntar algo más si lo haces. -->
-        <div class="card tarjeta-premium hecho-hoy portada-hueco">
+             que es apuntar algo más si lo haces.
+
+             Ocupa el mismo hueco y tiene la misma forma que el botón: el disco
+             a la izquierda, el rótulo, el titular y la línea de debajo. Nunca
+             están los dos a la vez, así que la pantalla no da un salto. -->
+        <div class="card tarjeta-premium dia-cabeza hecha portada-hueco">
           <span class="hh-silueta" aria-hidden="true">${raw(icon('check'))}</span>
-          <div class="hh-fila">
-            <span class="hh-disco">${raw(icon('check'))}</span>
-            <span class="grow">
-              <span class="pre-encima">Hoy · hecho</span>
-              <span class="hh-tit">${hecho.n > 1 ? 'Ya has entrenado dos veces hoy'
-                : 'Ya entrenaste hoy'}</span>
-              <span class="hh-sub">${raw(resumenHechoHTML(hecho))}</span>
-            </span>
-          </div>
+          <span class="dc-disco">${raw(icon('check'))}</span>
+          <span class="grow">
+            <span class="dc-rotulo">Hoy, ${UI.diaLargo(hoy).toLowerCase()} · hecho</span>
+            <span class="dc-tit">${hecho.n > 1 ? 'Ya entrenaste dos veces'
+              : 'Ya entrenaste'}</span>
+            ${raw(musculosHechos(hecho)
+              ? '<span class="dc-que">Hiciste ' + esc(musculosHechos(hecho)) + '</span>'
+              : '')}
+            <span class="dc-sub">${raw(resumenHechoHTML(hecho))}</span>
+          </span>
         </div>
         <button class="enlace-flojo" data-a="empezarlibre">
           Apuntar otro entrenamiento</button>`
       : deHoy.length ? html`
-        <button class="btn primary block grande portada-hueco btn-arranque" data-a="entrenarhoy">
-          ${raw(icon('play'))} Entrenar ${queEsHoy(deHoy)}
+        <!-- El cajón de «Hoy, lunes» decía de qué plan es la rutina y cuántos
+             ejercicios tiene, y justo encima había un botón verde que solo
+             decía «Entrenar pecho». Eran la misma cosa contada en dos sitios, y
+             ese cajón no se pulsaba para nada que el botón no hiciera ya. Así
+             que lo que decía se escribe dentro del botón. -->
+        <button class="card tarjeta-premium dia-cabeza portada-hueco btn-arranque"
+                data-a="entrenarhoy">
+          <span class="dc-play">${raw(icon('play'))}</span>
+          <span class="grow">
+            <span class="dc-rotulo">Hoy, ${UI.diaLargo(hoy).toLowerCase()}${raw(
+              deHoy.length === 1 && queEsHoy(deHoy) !== 'lo de hoy'
+                ? ' · ' + esc(queEsHoy(deHoy)) : '')}</span>
+            <span class="dc-tit">Entrenar</span>
+            <span class="dc-sub">${deHoy.length === 1
+              ? resumenRutina(deHoy[0])
+              : deHoy.length + ' rutinas para hoy: te dejo elegir'}</span>
+          </span>
         </button>
-        ${raw(deHoy.length === 1 ? ''
-        : '<p class="tiny" style="margin:7px 0 0">Tienes ' + deHoy.length +
-          ' rutinas para hoy: te dejo elegir.</p>')}
         <button class="enlace-flojo" data-a="empezarlibre">
           O un entrenamiento libre</button>`
       : html`
@@ -683,15 +739,20 @@
 
       ${raw(Modo.franjaInvitado())}
 
+      <!-- El botón de arriba ya dice qué toca hoy, de qué plan es y cuánto
+           es, así que la tarjeta de la rutina sobra: era lo mismo dicho dos
+           veces a media pantalla de distancia. El día sin rutina sí mantiene
+           la suya, que ahí no hay botón que la repita. -->
       <div class="muelle"></div>
+      <!-- El rótulo se queda aunque la tarjeta se vaya: «Ver el día entero» no
+           lo dice nadie más, y lo que viene debajo —la semana y lo comido— sigue
+           siendo lo de hoy. -->
       <div class="list-head portada-titulo">
         <span class="list-title" style="margin:0">Hoy, ${UI.diaLargo(hoy).toLowerCase()}</span>
         <button class="btn sm primary" data-a="verdia">${raw(icon('lista'))} Ver el día entero</button>
       </div>
       ${raw(deHoy.length
-        ? '<div class="stack">' + deHoy.map(function (r) {
-            return routineCard(r, 0, 0, false, 'inicio');
-          }).join('') + '</div>'
+        ? ''
         : html`
           <!-- El día sin nada que hacer merece la misma tarjeta que el día con
                algo: era la única caja lisa de la portada, y es la que ve quien
@@ -746,9 +807,22 @@
         </div>` : '')}`;
   }
 
-  /* Qué hiciste, en una línea. Sin cifras inventadas: si no se apuntó nada de
-     eso —un entrenamiento libre sin series, o un día importado— se dice lo que
-     hay y no se rellena el hueco. */
+  /* «Pecho, hombros y tríceps». Lo primero que uno quiere leer no es cuántas
+     series hizo, es qué tocó: es lo que contesta a «¿qué entrené hoy?» sin
+     tener que abrir nada. Tres y hasta ahí; con ocho músculos la frase deja de
+     ser una frase. */
+  function musculosHechos(h) {
+    const m = h.musculos || [];
+    if (!m.length) return '';
+    if (m.length === 1) return m[0];
+    if (m.length === 2) return m[0] + ' y ' + m[1];
+    if (m.length === 3) return m[0] + ', ' + m[1] + ' y ' + m[2];
+    return m[0] + ', ' + m[1] + ', ' + m[2] + ' y ' + (m.length - 3) + ' más';
+  }
+
+  /* Y debajo, de dónde salió y cuánto fue. Sin cifras inventadas: si no se
+     apuntó nada de eso —un entrenamiento libre sin series, o un día
+     importado— se dice lo que hay y no se rellena el hueco. */
   function resumenHechoHTML(h) {
     const partes = [];
     if (h.nombres.length) partes.push(esc(h.nombres.join(' · ')));

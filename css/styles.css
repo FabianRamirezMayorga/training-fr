@@ -5444,3 +5444,68 @@ html[data-theme="light"] .fr-fila {
 .cruzar-aviso .tiny { display: block; margin-top: 2px; line-height: 1.4; }
 .list-row [data-cruzar] { flex: none; margin-right: 4px; }
 .list-row [data-cruzar] svg { width: 13px; height: 13px; }
+
+/* ---------- el encabezado del dia ----------
+   El cajon de «Hoy, lunes» decia de que plan es la rutina y cuantos ejercicios
+   tiene, y justo encima habia un boton verde que solo decia «Entrenar pecho».
+   Eran la misma cosa contada en dos sitios, y el cajon no se pulsaba para nada
+   que el boton no hiciera ya. Asi que lo que decia el cajon se escribe dentro
+   del boton, y el boton y el parte de lo hecho comparten forma y hueco: nunca
+   estan los dos a la vez y la pantalla no da un salto al terminar. */
+.dia-cabeza {
+  display: flex; align-items: center; gap: 15px; width: 100%; text-align: left;
+  padding: 15px 17px; border-radius: 20px; cursor: pointer; font: inherit;
+  position: relative; overflow: hidden; isolation: isolate;
+}
+.dia-cabeza .grow { min-width: 0; }
+
+/* Sin entrenar: el boton, verde y con su play. Es la accion de la pantalla y
+   la unica que se pulsa ahi, asi que puede permitirse tres lineas. */
+button.dia-cabeza {
+  border: 0; color: var(--on-acc);
+  background: linear-gradient(168deg, color-mix(in srgb, var(--acc) 92%, #fff), var(--acc));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 34%, transparent),
+              0 8px 26px color-mix(in srgb, var(--acc) 32%, transparent);
+  transition: transform .14s cubic-bezier(.2, .9, .3, 1);
+}
+button.dia-cabeza:active { transform: scale(.985); }
+.dc-play {
+  flex: none; width: 50px; height: 50px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .14);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 22%, transparent);
+}
+.dc-play svg { width: 20px; height: 20px; fill: currentColor; margin-left: 3px; }
+
+/* Ya entrenado: la misma pieza apagada, con el disco del tic */
+.dia-cabeza.hecha { cursor: default; }
+.dc-disco {
+  flex: none; width: 50px; height: 50px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--on-acc);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--acc) 88%, #fff), var(--acc));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 32%, transparent),
+              0 5px 16px color-mix(in srgb, var(--acc) 30%, transparent);
+}
+.dc-disco svg { width: 24px; height: 24px; fill: none; stroke: currentColor;
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+.dc-rotulo {
+  display: block; font-size: .66rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; opacity: .62;
+}
+.dia-cabeza.hecha .dc-rotulo { color: var(--acc); opacity: 1; }
+.dc-tit { display: block; font-size: 1.3rem; font-weight: 800; letter-spacing: -.028em;
+  line-height: 1.1; margin-top: 2px; }
+/* Que tocaste hoy. Lo primero que uno quiere leer no es cuantas series hizo,
+   es que toco: es lo que contesta a «¿que entrene hoy?» sin abrir nada. */
+.dc-que { display: block; font-size: .88rem; font-weight: 600; margin-top: 4px; }
+.dia-cabeza.hecha .dc-que { color: var(--txt); }
+.dc-sub { display: block; font-size: .78rem; margin-top: 3px; opacity: .72; }
+.dia-cabeza.hecha .dc-sub { color: var(--dim); opacity: 1; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .dia-cabeza.hecha .dc-disco svg path { stroke-dasharray: 26; stroke-dashoffset: 26;
+    animation: hh-traza .5s cubic-bezier(.4, 0, .2, 1) .12s forwards; }
+  .dia-cabeza.hecha .dc-disco { animation: hh-entra .45s cubic-bezier(.3, 1.4, .5, 1) both; }
+}
