@@ -1668,10 +1668,14 @@ html[data-theme="light"] .zona-tile .pri { opacity: .45; }
    dia es (grande), de que plan y cuanto (al pie). El boton va a media altura,
    que es donde cae el pulgar, y no pegado arriba. */
 .tarjeta-hoy {
+  /* El color de la tarjeta es el del sitio donde esta: dentro de un plan, el
+     tono de ese plan; en cualquier otro lado, el verde de la marca. --tono solo
+     existe dentro de un cajon de plan, asi que fuera cae en el de reserva. */
+  --col: var(--tono, var(--acc));
   background:
-    linear-gradient(152deg, color-mix(in srgb, var(--acc) 14%, var(--card)) 0%,
+    linear-gradient(152deg, color-mix(in srgb, var(--col) 14%, var(--card)) 0%,
                     var(--card) 58%);
-  border-color: color-mix(in srgb, var(--acc) 34%, var(--line));
+  border-color: color-mix(in srgb, var(--col) 34%, var(--line));
   border-radius: 20px;
 }
 .hoy-fila { display: flex; align-items: center; gap: 11px; padding: 14px 15px;
@@ -1683,12 +1687,12 @@ html[data-theme="light"] .zona-tile .pri { opacity: .45; }
   pointer-events: none; opacity: .085; }
 .hoy-marca .cuerpo { width: 112px; }
 .hoy-marca .silueta { fill: var(--txt); }
-.hoy-marca .pri { fill: var(--acc); }
+.hoy-marca .pri { fill: var(--col, var(--acc)); }
 
 .hoy-info { flex: 1; min-width: 0; background: none; border: 0; padding: 0;
   text-align: left; color: inherit; cursor: pointer; position: relative; }
 .hoy-encima { font-size: .68rem; font-weight: 800; letter-spacing: .09em;
-  text-transform: uppercase; color: var(--acc); }
+  text-transform: uppercase; color: var(--col, var(--acc)); }
 .hoy-tit { font-size: 1.12rem; font-weight: 800; letter-spacing: -.022em;
   line-height: 1.15; margin-top: 3px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1697,9 +1701,9 @@ html[data-theme="light"] .zona-tile .pri { opacity: .45; }
 
 .hoy-play { flex: none; display: inline-flex; align-items: center; gap: 7px;
   border: 0; border-radius: 999px; padding: .7em 1.1em;
-  background: var(--acc); color: var(--on-acc);
+  background: var(--col, var(--acc)); color: var(--on-acc);
   font-weight: 700; font-size: .92rem; letter-spacing: -.01em;
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--acc) 32%, transparent);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--col, var(--acc)) 32%, transparent);
   transition: transform .14s cubic-bezier(.2,.9,.3,1), filter .15s;
 }
 .hoy-play svg { width: 17px; height: 17px; }
@@ -1760,9 +1764,10 @@ html[data-theme="light"] .tarjeta-hoy {
 /* La de hoy manda tambien de dia: sombra algo mas larga y teñida de verde. */
 html[data-theme="light"] .tarjeta-hoy {
   background:
-    linear-gradient(152deg, color-mix(in srgb, var(--acc) 20%, #fff) 0%, #fff 62%);
+    linear-gradient(152deg, color-mix(in srgb, var(--col, var(--acc)) 20%, #fff) 0%,
+                    #fff 62%);
   box-shadow: 0 2px 4px rgba(16, 24, 40, .06),
-              0 14px 34px color-mix(in srgb, var(--acc) 20%, transparent);
+              0 14px 34px color-mix(in srgb, var(--col, var(--acc)) 20%, transparent);
 }
 
 /* Las cifras de arriba, sin tinte pero con la misma sombra corta: si no,
@@ -1911,20 +1916,22 @@ html[data-theme="light"] {
    pantallas: aqui solo se sombrea un poco de arriba abajo para darle cuerpo,
    sin irse de tono. */
 .vista-inicio .btn.primary,
-.vista-inicio .hoy-play {
+.vista-inicio .hoy-play,
+.vista-rutinas .hoy-play {
   background:
     linear-gradient(180deg, var(--vidrio-luz-color) 0%, transparent 56%),
     linear-gradient(135deg,
-      color-mix(in srgb, var(--acc) 97%, #fff) 0%,
-      var(--acc) 52%,
-      color-mix(in srgb, var(--acc) 96%, #000) 100%);
+      color-mix(in srgb, var(--col, var(--acc)) 97%, #fff) 0%,
+      var(--col, var(--acc)) 52%,
+      color-mix(in srgb, var(--col, var(--acc)) 96%, #000) 100%);
   border: 1px solid color-mix(in srgb, #fff 12%, transparent);
 }
 
-.vista-inicio .hoy-play {
+.vista-inicio .hoy-play,
+.vista-rutinas .hoy-play {
   box-shadow:
     inset 0 1px 0 var(--vidrio-rim),
-    0 5px 14px color-mix(in srgb, var(--acc) 24%, transparent);
+    0 5px 14px color-mix(in srgb, var(--col, var(--acc)) 24%, transparent);
 }
 
 /* El galon y los plegables de la portada no llevan material: son texto. */
@@ -2167,7 +2174,7 @@ html[data-theme="light"] .plan-caja .desliza-cara > .dia-grupo {
 .tarjeta-hoy.compacta .hoy-meta { font-size: .74rem; margin-top: 1px; }
 .tarjeta-hoy.compacta .hoy-play {
   padding: .5em .85em; font-size: .85rem; gap: 5px;
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--acc) 22%, transparent);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--col, var(--acc)) 22%, transparent);
 }
 .tarjeta-hoy.compacta .hoy-play svg { width: 15px; height: 15px; }
 .tarjeta-hoy.compacta .hoy-marca .cuerpo { width: 86px; }
