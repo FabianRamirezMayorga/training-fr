@@ -229,6 +229,36 @@
         frase: 'Cumplido' };
     }
 
+    /* SIN HISTORIAL TODAVIA.
+       Que no haya pesajes no quiere decir que no se pueda estimar nada: si el
+       perfil esta completo, el plan ya dice a que ritmo deberia moverse la
+       bascula —el deficit o el superavit salen de tu gasto y del ritmo que
+       elegiste—. Eso no es lo que esta pasando, es lo que deberia pasar si
+       sigues el plan, y la pantalla lo dice con esas palabras.
+
+       Cuando haya dos pesajes manda la realidad: este apaño solo cubre el
+       hueco del principio, que es justo cuando uno se pone la meta. */
+    if ((ritmo === null || Math.abs(ritmo) < 1e-9) && m.tipo === 'peso' && g.Perfil) {
+      const datos = Perfil.datos();
+      const plan = Perfil.previsión(datos, meta);
+      const quiere = datos.objetivo === 'perder' ? -1 : datos.objetivo === 'ganar' ? 1 : 0;
+      const vaBien = (falta < 0 && quiere < 0) || (falta > 0 && quiere > 0);
+
+      if (plan && plan.semanas > 0 && vaBien && Perfil.completo(datos)) {
+        const r = Perfil.RITMO[datos.ritmo] || Perfil.RITMO.moderado;
+        const dias = plan.semanas * 7;
+        return {
+          clase: 'meta', segunPlan: true, puntos: puntos, cumplido: false,
+          falta: falta, ritmo: quiere * r.kgSemana, haciaMeta: true,
+          bajando: quiere < 0, semanas: plan.semanas, dias: dias,
+          fecha: Date.now() + dias * 864e5,
+          frase: 'Según tu plan: ritmo ' + (r.label || '').toLowerCase() + ', ' +
+            (quiere < 0 ? '-' : '+') + String(r.kgSemana).replace('.', ',') +
+            ' kg por semana'
+        };
+      }
+    }
+
     if (ritmo === null || Math.abs(ritmo) < 1e-9) {
       return { clase: 'meta', puntos: puntos, cumplido: false, falta: falta,
         ritmo: ritmo, haciaMeta: false,

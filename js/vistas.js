@@ -520,7 +520,7 @@
         ${raw(llega ? html`
           <div class="mp-cab">
             <div>
-              <div class="pre-encima">Si sigues así</div>
+              <div class="pre-encima">${pre.segunPlan ? 'Según tu plan' : 'Si sigues así'}</div>
               <div class="mp-cuanto">${Objetivos.cuanto(pre.dias)}</div>
             </div>
             <div class="mp-fecha">${UI.fechaCorta(pre.fecha)}</div>
@@ -528,14 +528,21 @@
 
         ${raw(graficaMeta(m, pre))}
 
-        <p class="tiny mp-nota">${pre.frase}${raw(llega ? '. ' + salvedad(m) : '')}</p>
+        <p class="tiny mp-nota">${pre.frase}${raw(llega ? '. ' + salvedad(m, pre) : '')}</p>
       </div>`;
   }
 
   /* Por que el numero puede no cumplirse, dicho para cada meta. Antes salia la
      coletilla del peso —«los ultimos kilos cuestan mas»— tambien en la meta de
      sesiones totales, donde no significa nada. */
-  function salvedad(m) {
+  function salvedad(m, pre) {
+    /* Cuando el numero sale del plan y no de la bascula hay que decirlo: es una
+       intencion, no una medida. */
+    if (pre && pre.segunPlan) {
+      return 'Sale de tu plan —tu gasto, tus calorías y el ritmo que elegiste—, ' +
+        'no de la báscula. Apunta tu peso una vez por semana y paso a medir lo ' +
+        'que pasa de verdad.';
+    }
     if (m.tipo === 'peso') {
       return 'Es una recta sobre lo que llevas: cuenta con que los últimos kilos ' +
         'cuesten más que los primeros.';
@@ -550,8 +557,17 @@
   /* El dibujo: linea de lo hecho, punteada de lo que falta y la meta como raya
      horizontal. Sin ejes ni rejilla, que en 60px de alto solo estorban. */
   function graficaMeta(m, pre) {
-    const pts = (pre.puntos || []).slice(-24);
-    if (pts.length < 2) return '';
+    let pts = (pre.puntos || []).slice(-24);
+
+    /* Sin historial pero con plan, el dibujo es la linea de lo que deberia
+       pasar: de donde estas hoy a la meta. Toda punteada, que aqui no hay ni un
+       dato medido. */
+    if (pts.length < 2 && pre.segunPlan) {
+      const p = Objetivos.progreso(m);
+      pts = [{ t: Date.now(), v: p.actual }];
+    }
+    if (!pts.length) return '';
+    if (pts.length < 2 && !pre.segunPlan) return '';
 
     const W = 280, H = 64, P = 3;
     const meta = Number(m.meta) || 0;
@@ -569,9 +585,9 @@
     const x = function (t) { return P + (t - tIni) / anchoT * (W - 2 * P); };
     const y = function (v) { return H - P - (v - min) / alto * (H - 2 * P); };
 
-    const linea = pts.map(function (q, i) {
+    const linea = pts.length > 1 ? pts.map(function (q, i) {
       return (i ? 'L' : 'M') + x(q.t).toFixed(1) + ' ' + y(q.v).toFixed(1);
-    }).join(' ');
+    }).join(' ') : '';
 
     const ultimo = pts[pts.length - 1];
     const proyeccion = pre.fecha && pre.haciaMeta
@@ -582,7 +598,7 @@
     return '<svg class="meta-graf" viewBox="0 0 ' + W + ' ' + H + '" ' +
       'preserveAspectRatio="none" aria-label="Tu evolución y lo que falta">' +
       '<path class="mg-meta" d="M0 ' + y(meta).toFixed(1) + ' H' + W + '"/>' +
-      '<path class="mg-linea" d="' + linea + '"/>' +
+      (linea ? '<path class="mg-linea" d="' + linea + '"/>' : '') +
       proyeccion +
       '<circle class="mg-hoy" cx="' + x(ultimo.t).toFixed(1) + '" cy="' +
       y(ultimo.v).toFixed(1) + '" r="3.2"/>' +
