@@ -112,6 +112,22 @@
     escribir(todas().filter(function (x) { return x.id !== id; }));
   }
 
+  /* Cambiar algo de lo ya apuntado sin volver a apuntarlo. Hace falta para
+     cruzar a posteriori una foto que se subió suelta: lo comido es lo mismo
+     —los números no cambian—, lo que cambia es a qué comida del menú
+     corresponde, y borrarlo y volver a crearlo le cambiaría la hora. */
+  function actualizar(id, cambios) {
+    const l = todas();
+    const x = l.filter(function (y) { return y.id === id; })[0];
+    if (!x) return null;
+    Object.keys(cambios || {}).forEach(function (k) {
+      if (k === 'id' || k === 't') return;
+      x[k] = cambios[k];
+    });
+    escribir(l);
+    return x;
+  }
+
   /* ¿Está ya apuntado hoy este plato del menú? */
   function marcada(ref) {
     if (!ref) return null;
@@ -220,7 +236,7 @@
   g.Comidas = {
     hoy: hoy, todas: todas, del: del, anotar: anotar, borrar: borrar,
     ultimos: ultimos, porDias: porDias, vaciar: vaciar, claveDia: claveDia,
-    marcada: marcada, seLleva: seLleva,
+    marcada: marcada, seLleva: seLleva, actualizar: actualizar,
     prepararFoto: prepararFoto
   };
 })(window);

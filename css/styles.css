@@ -5423,3 +5423,24 @@ html[data-theme="light"] .fr-fila {
   background: color-mix(in srgb, #141922 4%, transparent);
   box-shadow: inset 0 0 0 1px var(--line);
 }
+
+/* Lo que se apunto suelto y encaja con una comida del menu. La foto ya no esta
+   —se suelta en cuanto la IA la mira— pero para cruzar no hace falta la foto:
+   hace falta saber que comiste y a que hora, y las dos cosas estan apuntadas. */
+.cruzar-aviso {
+  display: flex; align-items: flex-start; gap: 11px; margin-bottom: 10px;
+  padding: 11px 12px; border-radius: 15px;
+  background: color-mix(in srgb, #4f8cf5 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #4f8cf5 24%, transparent);
+}
+.ca-ico {
+  flex: none; width: 30px; height: 30px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; color: #4f8cf5;
+  background: color-mix(in srgb, #4f8cf5 16%, transparent);
+}
+.ca-ico svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cruzar-aviso b { display: block; font-size: .88rem; }
+.cruzar-aviso .tiny { display: block; margin-top: 2px; line-height: 1.4; }
+.list-row [data-cruzar] { flex: none; margin-right: 4px; }
+.list-row [data-cruzar] svg { width: 13px; height: 13px; }

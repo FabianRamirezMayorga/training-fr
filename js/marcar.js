@@ -493,6 +493,65 @@
     });
   }
 
+  /* ---------- cruzar algo que ya está apuntado ----------
+     Lo que se subió suelto antes de que existiera el cruce —o lo que se apuntó
+     a mano— se puede cruzar después. La foto ya no está: se suelta en cuanto la
+     IA la mira, y eso no va a cambiar. Pero para cruzar no hace falta la foto,
+     hace falta saber qué comiste y a qué hora, y las dos cosas están apuntadas.
+
+     Así que se le pregunta a la IA con el texto, que es el mismo camino que
+     cuando escribes lo que comiste en vez de fotografiarlo. Los números no se
+     tocan: ya están contados en tu día y reescribirlos a posteriori te cambiaría
+     el recuento por detrás. Lo que se añade es a qué comida del menú
+     corresponde, que es justo lo que faltaba. */
+  function apuntesSinCruzar(cuando) {
+    if (!g.Comidas || !g.Menus) return [];
+    const hoy = Comidas.hoy ? Comidas.del() : [];
+    return (hoy || []).filter(function (x) {
+      if (x.ref) return false;                 // ya está cruzado
+      return !!comidaDeLaHora(x.t);            // y hay con qué cruzarlo
+    });
+  }
+
+  function cruzarApunte(id) {
+    const x = (g.Comidas ? Comidas.del() : []).filter(function (y) {
+      return y.id === id;
+    })[0];
+    if (!x) { UI.toast('Ese apunte ya no está'); return; }
+
+    const cand = comidaDeLaHora(x.t);
+    if (!cand) { UI.toast('A esa hora no tenías nada en el menú'); return; }
+
+    if (!g.IA || !IA.activa() || !IA.revisarCambioComida) {
+      /* Sin IA no hay dictamen, pero cruzar sí se puede: la resta la hace la
+         app y saber si es el mismo plato lo puede decir él. */
+      cruceSheet(cand, {
+        plato: x.plato, kcal: x.kcal, prot: x.prot, carbo: x.carbo, grasa: x.grasa,
+        esLoPrevisto: false, nota: x.detalle || '', confianza: x.confianza || '',
+        veredicto: '', consejo: ''
+      }, { apunte: x });
+      return;
+    }
+
+    UI.toast('Mirándolo…');
+    const texto = x.plato + (x.detalle ? '. ' + x.detalle : '');
+    IA.revisarCambioComida(texto, cand.comida, null).then(function (r) {
+      cruceSheet(cand, {
+        /* Los números apuntados mandan sobre los que vuelva a estimar la IA:
+           los primeros salieron de mirar la foto de verdad y estos de leer una
+           descripción. */
+        plato: x.plato, kcal: x.kcal, prot: x.prot, carbo: x.carbo, grasa: x.grasa,
+        esLoPrevisto: !!(r && r.esLoPrevisto),
+        nota: x.detalle || (r && r.nota) || '',
+        confianza: x.confianza || '',
+        veredicto: (r && r.veredicto) || '',
+        consejo: (r && r.consejo) || ''
+      }, { apunte: x });
+    }).catch(function (e) {
+      UI.toast(e.message || 'No he podido mirarlo');
+    });
+  }
+
   /* Lo previsto contra lo que hay en el plato, y la resta hecha. La resta la
      hace la app y no la IA: los dos números están aquí y restarlos es exacto.
      El juicio sí es suyo, que para eso hace falta saber de comida. */
@@ -509,7 +568,9 @@
         : signo + UI.num(Math.abs(d)) + ' ' + esc(unidad)) + '</span></div>';
   }
 
-  function cruceSheet(cand, r) {
+  function cruceSheet(cand, r, opciones) {
+    const o = opciones || {};
+    const yaApuntado = o.apunte || null;
     const c = cand.comida;
     /* El nombre que usa el menú manda; si no trae ninguno, el de la franja en
        la que cae, que es como lo llama él. */
@@ -546,13 +607,32 @@
       <div class="cb-acciones" style="margin-top:16px">
         <button class="btn primary grow btn-arranque" data-x="si">
           ${raw(icon('check'))} ${raw(igual ? 'Marcar como hecho' : 'Sí, es esa comida')}</button>
-        <button class="btn vidrio" data-x="no">Es aparte</button>
+        <button class="btn vidrio" data-x="no">${raw(yaApuntado ? 'Dejarlo' : 'Es aparte')}</button>
       </div>
-      <p class="tiny" style="margin:10px 0 0;text-align:center">«Es aparte» lo apunta
-      como un extra del día y deja tu ${esc(nombre.toLowerCase())} sin marcar.</p>`,
+      <p class="tiny" style="margin:10px 0 0;text-align:center">${raw(yaApuntado
+        ? 'Los números no cambian: ya están contados en tu día. Lo que se añade es a qué '
+          + 'comida del menú corresponde.'
+        : '«Es aparte» lo apunta como un extra del día y deja tu ' +
+          esc(nombre.toLowerCase()) + ' sin marcar.')}</p>`,
       function (el) {
         el.querySelector('[data-x=si]').onclick = function () {
           UI.closeModal();
+
+          /* Ya estaba apuntado: no se crea nada, se le pone el sitio que le
+             faltaba. Borrarlo y volver a crearlo le cambiaría la hora. */
+          if (yaApuntado) {
+            Comidas.actualizar(yaApuntado.id, {
+              ref: cand.ref,
+              fuente: igual ? 'menu' : 'cambio',
+              sustituye: igual ? '' : previsto,
+              consejo: r.consejo || yaApuntado.consejo || '',
+              veredicto: r.veredicto || yaApuntado.veredicto || ''
+            });
+            render();
+            UI.toast('Cruzado con tu ' + nombre.toLowerCase());
+            return;
+          }
+
           /* Si es lo previsto, valen los números del menú: son los que él
              mismo aceptó y los que cuadran con el resto del plan. Si es otra
              cosa, valen los de la foto, que es lo que se ha comido de verdad. */
@@ -574,6 +654,7 @@
 
         el.querySelector('[data-x=no]').onclick = function () {
           UI.closeModal();
+          if (yaApuntado) return;   // se queda como estaba
           Comidas.anotar({
             plato: r.plato, kcal: r.kcal, prot: r.prot,
             carbo: r.carbo, grasa: r.grasa,
@@ -594,6 +675,7 @@
 
     bindAll(root, '[data-comi]', function (el) { comerLoPrevisto(el.dataset.comi); });
     bindAll(root, '[data-cambie]', function (el) { sustituirComidaSheet(el.dataset.cambie); });
+    bindAll(root, '[data-cruzar]', function (el) { cruzarApunte(el.dataset.cruzar); });
     bindAll(root, '[data-descomer]', function (el) {
       Comidas.borrar(el.dataset.descomer);
       render();
@@ -630,6 +712,7 @@
     macrosHTML: macrosHTML, hoyHTML: hoyHTML, aguaHTML: aguaHTML,
     aguaDeHoyHTML: aguaDeHoyHTML, comerLoPrevisto: comerLoPrevisto,
     comidaDeLaHora: comidaDeLaHora, cruzarFoto: cruzarFoto,
+    cruzarApunte: cruzarApunte, apuntesSinCruzar: apuntesSinCruzar,
     sustituirComidaSheet: sustituirComidaSheet, bind: bind
   };
 })(window);

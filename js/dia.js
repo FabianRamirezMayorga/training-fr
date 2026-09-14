@@ -338,14 +338,35 @@
             Completar mis datos</button>
         </div>`;
 
+    /* Lo que se apuntó suelto y encaja con una comida del menú. La foto ya no
+       está —se suelta en cuanto la IA la mira— pero para cruzar no hace falta la
+       foto: hace falta saber qué comiste y a qué hora, y las dos cosas están
+       apuntadas. */
+    const sueltos = g.Marcar && Marcar.apuntesSinCruzar ? Marcar.apuntesSinCruzar() : [];
+    const aviso = sueltos.length ? html`
+      <div class="cruzar-aviso">
+        <span class="ca-ico">${raw(icon('cambiar'))}</span>
+        <span class="grow"><b>${sueltos.length}
+          ${raw(sueltos.length === 1 ? 'apunte de hoy va suelto' : 'apuntes de hoy van sueltos')}</b>
+          <span class="tiny">Encajan con una comida de tu menú. Crúzalos y quedará
+          marcada, con la diferencia contra lo que tenías previsto.</span></span>
+      </div>` : '';
+
     const lista = comidas.length ? html`
+      ${raw(aviso)}
       <div class="list">
         ${raw(comidas.map(function (c) {
+          const cruzable = !c.ref && g.Marcar && Marcar.comidaDeLaHora &&
+            Marcar.comidaDeLaHora(c.t);
           return '<div class="list-row"><div class="grow">' +
             '<div class="list-row-title">' + esc(c.plato) + '</div>' +
             '<div class="list-row-sub">' + UI.num(c.kcal) + ' kcal · ' + c.prot + ' g' +
             (c.fuente === 'foto' ? ' · de una foto' : '') +
             (c.sustituye ? ' · en vez de ' + esc(c.sustituye) : '') + '</div></div>' +
+            (cruzable
+              ? '<button class="btn sm vidrio" data-cruzar="' + esc(c.id) + '">' +
+                icon('cambiar') + ' Cruzar</button>'
+              : '') +
             '<button class="btn sm ghost danger" data-quitar="' + esc(c.id) +
             '" aria-label="Quitar">' + icon('trash') + '</button></div>';
         }).join(''))}
