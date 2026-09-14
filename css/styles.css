@@ -1315,7 +1315,9 @@ img[src^="data/img/"] {
    cajon se queda con una franja del fondo entre su borde y el degradado. */
 .plan-caja .desliza,
 .plan-caja .desliza:has(> .desliza-cara > .dia-grupo) { margin-top: 0; }
-.plan-caja .stack { margin-top: 0; padding: 0 9px 9px; }
+/* Un respiro entre la cabecera y la primera rutina: sin el, la tarjeta empieza
+   justo donde acaba el degradado del plan y las dos se leen montadas. */
+.plan-caja .stack { margin-top: 0; padding: 9px; }
 
 /* La cabecera ES el plan: ocupa el cajon entero y lleva el degradado de su
    color, el mismo que la tarjeta de la rutina de hoy. */
