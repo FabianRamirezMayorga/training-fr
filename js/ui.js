@@ -316,6 +316,28 @@
 
   const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
+  /* ---------- la hora, como la escribe su teléfono ----------
+     Dentro se guarda siempre «HH:MM» de 24 h: es lo que entiende el campo de
+     hora del navegador, lo que se ordena bien alfabéticamente y lo que no
+     depende de dónde esté nadie. Pero enseñarlo así obliga a media España —y a
+     toda América— a traducir «18:00» mentalmente cada vez.
+
+     Así que se guarda en 24 h y se enseña como lo enseñe el sistema: quien
+     tenga el móvil en a. m./p. m. lo ve así, y quien lo tenga en 24 h lo sigue
+     viendo igual que antes. No hace falta preguntárselo a nadie. */
+  function hora(hhmm) {
+    const m = String(hhmm || '').match(/^(\d{1,2}):(\d{2})/);
+    if (!m) return String(hhmm || '');
+    const d = new Date();
+    d.setHours(Number(m[1]), Number(m[2]), 0, 0);
+    try {
+      return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+        /* El espacio fino que meten algunos navegadores entre la cifra y el
+           a. m. parte la hora en dos renglones donde no cabe. */
+        .replace(/ /g, ' ');
+    } catch (e) { return String(hhmm); }
+  }
+
   /* Los días se guardan abreviados desde la primera versión, pero al leerlos
      "Jue" suena a nota de la compra. Se muestran enteros. */
   const DIA_LARGO = {
@@ -593,6 +615,7 @@
     deslizables: deslizables, cerrarDeslizadas: cerrarDeslizadas,
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,
     num: num, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
-    beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos
+    beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos,
+    hora: hora
   };
 })(window);

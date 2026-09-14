@@ -3360,7 +3360,14 @@ html[data-theme="light"] .rec-h.sig {
 
 /* La vista previa: la misma tarjeta que va a salir en la lista, no un dibujo
    parecido. Se rehace con cada cosa que se toca. */
-.al-vista { margin: 12px 0 18px; }
+/* El rotulo de la vista previa: sin el, un recordatorio nuevo con los valores
+   por defecto se lee como si hubieras abierto el que ya tenias. */
+.al-previo {
+  font-size: .68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--dim2); margin: 14px 0 6px;
+}
+.al-vista { margin: 0 0 4px; }
+.al-repe { margin: 0 0 16px; color: var(--warn); }
 .al-vista .rec { animation: none; }
 .al-vista .rec:active { transform: none; }
 

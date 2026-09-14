@@ -1024,7 +1024,7 @@
     });
 
     if (!mejor) return 'Hoy ya no queda ninguno.';
-    return 'El siguiente, «' + mejor.titulo + '» a las ' + mejor.hora + '.';
+    return 'El siguiente, «' + mejor.titulo + '» a las ' + UI.hora(mejor.hora) + '.';
   }
 
   /* ---------- sugerencias calculadas con tus datos ---------- */
@@ -1111,7 +1111,7 @@
       ? '<div class="rec-tira"' + editable + '>' +
         horas.map(function (h, i) {
           return '<span class="rec-h' + (i === iSig ? ' sig' : '') +
-            (i < iSig ? ' ida' : '') + '">' + esc(h) + '</span>';
+            (i < iSig ? ' ida' : '') + '">' + esc(UI.hora(h)) + '</span>';
         }).join('') + '</div>'
       : '';
 
@@ -1123,7 +1123,7 @@
       '<div class="rec-cab">' +
       '<span class="rec-ico">' + icon(t.icono) + '</span>' +
       '<div class="grow" style="min-width:0"' + editable + '>' +
-      '<div class="rec-hora">' + esc(grande) +
+      '<div class="rec-hora">' + esc(UI.hora(grande)) +
       (horas.length > 1
         ? '<i>+' + (horas.length - 1) + '</i>' : '') + '</div>' +
       '<div class="rec-que">' + esc(a.titulo) + '</div>' +
@@ -1232,7 +1232,13 @@
     UI.modal(html`
       <h2>${existente ? 'Editar recordatorio' : 'Nuevo recordatorio'}</h2>
 
+      <!-- Con su rotulo. Uno nuevo nace con los valores por defecto del tipo
+           —«Toca entrenar», 18:00, de lunes a viernes— que son justo los del
+           que ya suele tener creado, asi que la vista previa se lee como si
+           hubieras abierto ese. Decir que es una vista previa lo desambigua. -->
+      <div class="al-previo">${existente ? 'Así queda' : 'Así va a quedar'}</div>
       <div id="al-vista" class="al-vista"></div>
+      <p class="tiny al-repe" id="al-repe" hidden></p>
 
       <label class="tiny">QUÉ ES</label>
       <div class="al-tipos">
@@ -1309,7 +1315,25 @@
         /* La vista previa: la misma tarjeta que va a salir en la lista, rehecha
            cada vez que cambia algo. Es lo que convierte el formulario en algo
            que se entiende sin leer las etiquetas. */
+        /* Y si ya tiene uno igual, se dice. Dos recordatorios del mismo tipo a
+           la misma hora suenan dos veces por nada, y con los valores por
+           defecto es facil crearlo sin darse cuenta. */
+        const avisarRepetido = function () {
+          const aviso = el.querySelector('#al-repe');
+          if (!aviso) return;
+          const choca = Alertas.lista().filter(function (x) {
+            return x.id !== a.id && x.tipo === a.tipo &&
+              (x.horas || []).some(function (h) { return a.horas.indexOf(h) !== -1; });
+          })[0];
+          aviso.hidden = !choca;
+          if (choca) {
+            aviso.textContent = 'Ya tienes «' + choca.titulo + '» a esa hora. Si lo ' +
+              'guardas, sonarán los dos.';
+          }
+        };
+
         const pintarVista = function () {
+          avisarRepetido();
           el.querySelector('#al-vista').innerHTML = cajaAlerta({
             tipo: a.tipo,
             titulo: el.querySelector('#al-tit').value.trim() ||
@@ -1347,8 +1371,8 @@
           const caja = el.querySelector('#al-horas');
           a.horas = a.horas.slice().sort();
           caja.innerHTML = a.horas.map(function (h) {
-            return '<button class="al-h" data-quitar="' + esc(h) + '">' + esc(h) +
-              icon('close') + '</button>';
+            return '<button class="al-h" data-quitar="' + esc(h) + '">' +
+              esc(UI.hora(h)) + icon('close') + '</button>';
           }).join('') || '<span class="tiny">Sin horas: añade al menos una.</span>';
           caja.querySelectorAll('[data-quitar]').forEach(function (b) {
             b.onclick = function () {

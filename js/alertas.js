@@ -439,9 +439,11 @@
 
   /* "8 avisos, de 07:30 a 21:00 cada 1 h 55" o la lista corta si son pocos */
   function resumenHoras(a) {
-    const h = a.horas || [];
+    /* Se guarda en 24 h y se enseña como lo escriba su teléfono */
+    const h = (a.horas || []).map(UI.hora);
     if (h.length <= 3) return h.join(' · ');
-    const paso = (enMinutos(h[h.length - 1]) - enMinutos(h[0])) / (h.length - 1);
+    const bruto = a.horas;
+    const paso = (enMinutos(bruto[bruto.length - 1]) - enMinutos(bruto[0])) / (bruto.length - 1);
     const hh = Math.floor(paso / 60), mm = Math.round(paso % 60);
     const cada = hh ? hh + ' h' + (mm ? ' ' + mm : '') : mm + ' min';
     return h.length + ' avisos · de ' + h[0] + ' a ' + h[h.length - 1] + ' cada ' + cada;
