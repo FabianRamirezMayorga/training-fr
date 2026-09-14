@@ -1518,8 +1518,11 @@
     const clase = CLASES_PILDORA[(Number(Store.dayKey(Date.now()).replace(/\D/g, '')) + bloque) %
       CLASES_PILDORA.length];
 
-    const clave = 'pildora:' + Store.dayKey(Date.now()) + ':' + bloque + ':' + clase.id + ':' +
-      Store.routines().length + ':' + ses.length;
+    /* El «2» es la versión de las instrucciones. Al cambiarlas, lo guardado con
+       las viejas deja de valer: si no, la frase que ya no quieres se te queda
+       en pantalla hasta que pase el bloque. */
+    const clave = 'pildora2:' + Store.dayKey(Date.now()) + ':' + bloque + ':' + clase.id +
+      ':' + Store.routines().length + ':' + ses.length;
     const guardado = leerCache(clave, horasPildora());
     if (guardado) return Promise.resolve(guardado);
 
@@ -1542,6 +1545,18 @@
       '- Nada de signos de exclamación, emojis, ni «tú puedes» de calendario.\n' +
       '- No te inventes citas ni se las cuelgues a nadie. Si no estás seguro de quién ' +
       'dijo algo, dilo con tus palabras y sin firma.\n' +
+      /* Tu norma de «lo que sea un riesgo para la salud va primero» es buena en
+         una auditoría o en un menú, y aquí lo rompe todo: con una condición de
+         salud en el perfil, cada mañana concluye que lo más importante que
+         decirle es que consulte al médico. Y se lo dice. Todos los días. */
+      '- ESTO NO ES UN AVISO MÉDICO ni el sitio de las advertencias. Sus condiciones ' +
+      'de salud ya se las dice la app donde tocan —en el plan de comidas y al revisar ' +
+      'lo que come—, y repetírselo cada mañana no es cuidarle: es ruido que deja de ' +
+      'leer. No las menciones, salvo que la frase de hoy sea de comida Y además le ' +
+      'aporte algo que no sepa; ni siquiera entonces en forma de advertencia.\n' +
+      '- Tampoco le recites sus propios números —sus kilos, sus calorías objetivo, su ' +
+      'IMC—: los tiene en la pantalla. Te sirven para acertar con lo que le dices, no ' +
+      'para devolvérselos.\n' +
       (dichas.length
         ? '\nYA LE HAS DICHO ESTO, y lo tiene leído. Ni estas ni una versión suya con ' +
           'otras palabras: busca otro ángulo, otro ejemplo, otra manera de entrarle.\n' +
