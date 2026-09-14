@@ -530,7 +530,7 @@
           </div>
         </div>`
       : deHoy.length ? html`
-        <button class="btn primary block grande portada-hueco" data-a="entrenarhoy">
+        <button class="btn primary block grande portada-hueco btn-arranque" data-a="entrenarhoy">
           ${raw(icon('play'))} Entrenar ${queEsHoy(deHoy)}
         </button>
         ${raw(deHoy.length === 1 ? ''
@@ -539,7 +539,7 @@
         <button class="enlace-flojo" data-a="empezarlibre">
           O un entrenamiento libre</button>`
       : html`
-        <button class="btn primary block grande portada-hueco" data-a="empezarlibre">
+        <button class="btn primary block grande portada-hueco btn-arranque" data-a="empezarlibre">
           ${raw(icon('play'))} Iniciar entrenamiento
         </button>
         <p class="tiny" style="margin:7px 0 0">Arranca el cronómetro ahora y añade los

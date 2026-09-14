@@ -1686,3 +1686,53 @@ html[data-theme="light"] .vista-inicio .stat {
 /* De dia la silueta del fondo tiene que ser mas suave: el texto es negro y a la
    misma opacidad se leia como una mancha. */
 html[data-theme="light"] .hoy-marca { opacity: .06; }
+
+/* ---------- el boton de arrancar ----------
+   Es el unico boton de la app que no compite con nada: lo que uno viene a
+   hacer. Un verde plano lo dejaba al nivel de un boton de guardar, asi que
+   lleva volumen —degradado en diagonal, una linea de luz arriba y una sombra
+   larga del color de la marca— y un destello que lo cruza cada pocos segundos.
+
+   El destello es rapido y luego descansa cuatro segundos: un brillo continuo
+   es un anuncio, uno de vez en cuando es un boton que pide que lo toques. Con
+   el movimiento reducido del sistema, no se mueve nada. */
+/* .btn.primary ya pinta el fondo: hace falta la misma fuerza para cambiarlo. */
+.btn.btn-arranque {
+  position: relative; overflow: hidden; border: 0;
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--acc) 86%, #fff) 0%,
+      var(--acc) 46%,
+      color-mix(in srgb, var(--acc) 84%, #000) 100%);
+  box-shadow:
+    0 8px 22px color-mix(in srgb, var(--acc) 38%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent);
+  transition: transform .16s cubic-bezier(.2, .9, .3, 1), box-shadow .2s ease,
+              filter .15s ease;
+}
+
+.btn.btn-arranque::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 42%;
+  background: linear-gradient(100deg, transparent,
+              color-mix(in srgb, #fff 52%, transparent), transparent);
+  transform: skewX(-18deg); pointer-events: none;
+  animation: destello 5.4s cubic-bezier(.25, .6, .3, 1) 1.4s infinite;
+}
+
+@keyframes destello {
+  0% { left: -60%; }
+  17% { left: 125%; }
+  100% { left: 125%; }
+}
+
+.btn.btn-arranque:active {
+  transform: scale(.975);
+  box-shadow:
+    0 3px 10px color-mix(in srgb, var(--acc) 30%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent);
+  filter: brightness(.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn.btn-arranque::after { animation: none; opacity: 0; }
+}
