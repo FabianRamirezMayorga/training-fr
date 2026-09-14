@@ -1834,3 +1834,58 @@ html[data-theme="light"] {
 /* El galon y los plegables de la portada no llevan material: son texto. */
 .vista-inicio .seccion > summary,
 .vista-inicio .menu-hoy > summary { box-shadow: none; backdrop-filter: none; }
+
+/* ---------- los iconos de las macros ----------
+   Trazo y nada mas: sin caja, sin circulito de fondo, del color de su rotulo.
+   A 13px un icono relleno se convierte en una mancha; uno de trazo sigue
+   diciendo que es. */
+.pre-encima { display: flex; align-items: center; gap: 5px; }
+.pre-encima svg {
+  width: 13px; height: 13px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  overflow: visible;
+}
+
+/* La llama tiembla como una llama: la de fuera casi no se mueve y la de dentro
+   sube y baja. Si las dos se movieran igual pareceria un globo hinchandose. */
+.pre-encima .llama-fuera {
+  transform-origin: 12px 20px;
+  animation: llama-fuera 3.4s ease-in-out infinite;
+}
+.pre-encima .llama-dentro {
+  transform-origin: 12px 20px;
+  animation: llama-dentro 1.7s ease-in-out infinite;
+}
+@keyframes llama-fuera {
+  0%, 100% { transform: scale(1) }
+  50% { transform: scale(1.05, 1.02) }
+}
+@keyframes llama-dentro {
+  0%, 100% { transform: scaleY(1); opacity: .95 }
+  35% { transform: scaleY(.82); opacity: .6 }
+  70% { transform: scaleY(1.12); opacity: 1 }
+}
+
+/* El muslo late despacio, como un pulso. */
+.pre-encima.prot svg {
+  transform-origin: center;
+  animation: late 4.2s ease-in-out infinite;
+}
+@keyframes late {
+  0%, 100% { transform: scale(1) rotate(0deg) }
+  50% { transform: scale(1.08) rotate(-4deg) }
+}
+
+/* Las barras se llenan al entrar, en vez de aparecer llenas: es medio segundo
+   y cuenta lo mismo que el numero, pero se ve subir. */
+.vista-inicio .comida-caja .prog i {
+  transform-origin: left center;
+  animation: llenar .75s cubic-bezier(.2, .8, .3, 1) both;
+}
+@keyframes llenar { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pre-encima svg, .pre-encima .llama-fuera, .pre-encima .llama-dentro,
+  .vista-inicio .comida-caja .prog i { animation: none; }
+}

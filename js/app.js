@@ -390,13 +390,13 @@
       <div class="card inicio-compacta comida-caja tarjeta-premium">
         <div class="row" style="gap:16px;align-items:flex-start">
           <div class="grow">
-            <div class="pre-encima">CALORÍAS</div>
+            <div class="pre-encima">${raw(icon('llama'))}Calorías</div>
             <div><b class="pre-num">${UI.num(h.kcal)}</b>
               <span class="tiny"> / ${UI.num(m.kcal)}</span></div>
             <div class="prog" style="margin-top:5px"><i style="width:${pk}%"></i></div>
           </div>
           <div class="grow">
-            <div class="pre-encima prot">PROTEÍNA</div>
+            <div class="pre-encima prot">${raw(icon('proteina'))}Proteína</div>
             <div><b class="pre-num" style="color:var(--brand-1)">${h.prot}</b>
               <span class="tiny"> / ${m.prot} g</span></div>
             <div class="prog" style="margin-top:5px">
