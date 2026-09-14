@@ -11,6 +11,28 @@
   const go = function (n, a) { return App.go(n, a); };
   const render = function () { return App.render(); };
 
+  /* ---------- la fila del índice de Perfil ----------
+     Eran diez filas idénticas con el mismo icono gris: para llegar a Música
+     había que leer la lista entera de arriba abajo, porque nada distinguía una
+     de otra más que la palabra. Cada sitio lleva ahora su color, que es lo que
+     se reconoce antes de leer.
+
+     Y lo que está sin montar lo dice un punto ámbar en la esquina del icono, en
+     vez de esconderlo en el renglón gris de debajo: lo que falta por hacer se
+     ve de un vistazo sin repasar diez subtítulos. */
+  function filaPerfil(o) {
+    return html`
+      <button class="fila-plan" data-fila="${o.accion}" style="--fp:${raw(o.tono)}">
+        <span class="fp-ico${raw(o.pendiente ? ' pendiente' : '')}">${raw(icon(o.icono))}</span>
+        <span class="grow">
+          <span class="fp-tit">${o.titulo}</span>
+          ${raw(o.sub ? '<span class="fp-sub">' + esc(o.sub) + '</span>' : '')}
+        </span>
+        ${raw(o.valor ? '<span class="fp-val">' + esc(o.valor) + '</span>' : '')}
+        <span class="chevron">${raw(icon('chevron'))}</span>
+      </button>`;
+  }
+
   /* Fila de lista agrupada, al estilo de Ajustes de iOS */
   function fila(opciones) {
     const o = opciones || {};
@@ -93,6 +115,12 @@
     const cumplidas = metas.filter(function (x) { return x.logrado; }).length;
     const alertas = Alertas.lista().filter(function (a) { return a.activa; }).length;
 
+    /* El sitio donde entrenas, con la misma cara que lleva en Ajustes y en la
+       cabecera: si en un sitio es una casa azul, en todos es una casa azul. */
+    const sitio = Data.GEAR[Store.settings().gear];
+    const cara = (App.CARAS_LUGAR && App.CARAS_LUGAR[Store.settings().gear]) ||
+      { icono: 'dumbbell', tono: 'var(--acc)' };
+
     return html`
       <h1>Perfil</h1>
 
@@ -109,49 +137,60 @@
       ${raw(Modo.franjaInvitado())}
 
       <div class="list-title">Tú</div>
-      <div class="list">
-        ${raw(fila({ icono: 'perfil', titulo: 'Datos y hábitos', accion: 'datos',
+      <div class="plan-acciones indice" style="margin:10px 0 0">
+        ${raw(filaPerfil({ icono: 'perfil', titulo: 'Datos y hábitos', accion: 'datos',
+          tono: 'var(--acc)', pendiente: !listo,
           sub: !Store.settings().name ? 'Dime tu nombre para empezar'
             : listo ? Store.settings().name + ' · ' + p.edad + ' años · ' +
               Perfil.ACTIVIDAD[p.actividad].label
             : 'Sin completar' }))}
-        ${raw(fila({ icono: 'trofeo', titulo: 'Objetivos', accion: 'objetivos',
+        ${raw(filaPerfil({ icono: 'trofeo', titulo: 'Objetivos', accion: 'objetivos',
+          tono: '#f0a23c',
           sub: metas.length ? metas.length + ' en marcha · ' + cumplidas + ' cumplidos'
             : 'Ninguno todavía' }))}
-        ${raw(fila({ icono: 'nutricion', titulo: 'Alimentación', accion: 'nutricion',
+        ${raw(filaPerfil({ icono: 'nutricion', titulo: 'Alimentación', accion: 'nutricion',
+          tono: '#2fc4b2', pendiente: !m,
           sub: m ? m.kcal + ' kcal · ' + m.prot + ' g de proteína' : 'Necesita tus datos' }))}
-        ${raw(fila({ icono: 'campana', titulo: 'Alertas', accion: 'alertas',
+        ${raw(filaPerfil({ icono: 'campana', titulo: 'Alertas', accion: 'alertas',
+          tono: '#e0679a',
           sub: alertas ? alertas + (alertas === 1 ? ' recordatorio activo' : ' recordatorios activos')
             : 'Sin recordatorios' }))}
       </div>
 
       <div class="list-title">Entrenamiento</div>
-      <div class="list">
-        ${raw(fila({ icono: 'chispa', titulo: 'Entrenador con IA', accion: 'entrenador',
+      <div class="plan-acciones indice" style="margin:10px 0 0">
+        ${raw(filaPerfil({ icono: 'chispa', titulo: 'Entrenador con IA', accion: 'entrenador',
+          tono: 'var(--acc)', pendiente: !IA.activa(),
           sub: IA.activa() ? 'Listo para usar' : 'Sin configurar' }))}
-        ${raw(fila({ icono: 'musica', titulo: 'Música', accion: 'musica',
+        ${raw(filaPerfil({ icono: 'musica', titulo: 'Música', accion: 'musica',
+          tono: '#1db954', pendiente: !Spotify.activa(),
           sub: Spotify.activa() ? 'Spotify conectado'
             : Spotify.configurado() ? 'Sin conectar' : 'Sin configurar' }))}
-        ${raw(fila({ icono: 'dumbbell', titulo: 'Dónde entrenas', accion: 'lugar',
-          valor: (Data.GEAR[Store.settings().gear] || {}).label }))}
+        ${raw(filaPerfil({ icono: cara.icono, titulo: 'Dónde entrenas', accion: 'lugar',
+          tono: cara.tono,
+          sub: sitio ? sitio.label + ' · ' + UI.num(App.cuantosEn(Store.settings().gear)) +
+            ' ejercicios a tu alcance' : 'Sin elegir' }))}
       </div>
 
       <div class="list-title">Aplicación</div>
-      <div class="list">
-        ${raw(fila({ icono: 'nube', titulo: 'Mi cuenta', accion: 'cuenta',
+      <div class="plan-acciones indice" style="margin:10px 0 0">
+        ${raw(filaPerfil({ icono: 'nube', titulo: 'Mi cuenta', accion: 'cuenta',
+          tono: '#4f8cf5', pendiente: !Sync.activa(),
           sub: Sync.activa() ? Sync.email() : 'Sin sincronizar' }))}
-        ${raw(fila({ icono: 'timer', titulo: 'Ajustes', accion: 'ajustes',
+        ${raw(filaPerfil({ icono: 'timer', titulo: 'Ajustes', accion: 'ajustes',
+          tono: '#c06bf0',
           sub: 'Unidades, tema, descanso, copias y sin conexión' }))}
         ${raw(g.Admin && Admin.administra()
-          ? fila({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
-              sub: 'Crear, desactivar y borrar cuentas del proyecto' })
+          ? filaPerfil({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
+              tono: '#f0a23c', sub: 'Crear, desactivar y borrar cuentas del proyecto' })
           : g.Admin && Admin.sinRespuesta()
-            ? fila({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
+            ? filaPerfil({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
+                tono: '#f0a23c', pendiente: true,
                 sub: 'No he podido comprobar si administras' })
             : '')}
       </div>
 
-      <p class="tiny" style="margin:22px 0 0">Training FR</p>`;
+      <p class="tiny pie-marca">Training FR</p>`;
   };
 
   V.perfil.mount = function (root) {
