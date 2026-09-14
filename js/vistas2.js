@@ -1118,7 +1118,16 @@
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Perfil</button>
-      <h1>Entrenador</h1>
+      <!-- Su marca al lado del título: es el único sitio de la app donde
+           contesta alguien, y conviene que se note de quién es la voz. -->
+      <div class="ia-cab">
+        <span class="ia-marca">${raw(icon('chispa'))}</span>
+        <div class="grow" style="min-width:0">
+          <h1 style="margin:0">Entrenador</h1>
+          <div class="tiny ia-estado">${IA.proveedorActual().label}${raw(
+            IA.config().modelo ? ' · ' + esc(IA.config().modelo) : '')}</div>
+        </div>
+      </div>
       <p class="muted">Conoce tu perfil, tus rutinas y tu progreso. No está aquí para
       darte la razón: si algo lo estás haciendo mal, te lo dice.</p>
 
@@ -1306,6 +1315,27 @@
       sobra para uso personal. Si lo superas, la app te avisa y sigue funcionando.</p>`;
   }
 
+  /* La nota, en un aro. Un número grande y suelto es un número; el aro dice
+     además cuánto le falta para el diez, que es lo que se mira al ver una nota. */
+  function aroNota(n) {
+    const p = Math.max(0, Math.min(1, n / 10));
+    const R = 26, C = 2 * Math.PI * R;
+    const tono = n >= 8 ? 'var(--acc)' : n >= 6 ? 'var(--warn)' : 'var(--bad)';
+
+    return '<div class="ia-nota" style="--tn:' + tono + '">' +
+      '<div class="ia-aro">' +
+      '<svg viewBox="0 0 62 62" aria-hidden="true">' +
+      '<circle class="in-pista" cx="31" cy="31" r="' + R + '"/>' +
+      '<circle class="in-hecho" cx="31" cy="31" r="' + R + '" ' +
+      'stroke-dasharray="' + C.toFixed(1) + '" ' +
+      'stroke-dashoffset="' + (C * (1 - p)).toFixed(1) + '"/>' +
+      '</svg><span class="in-cifra">' + n + '</span></div>' +
+      '<div class="grow"><div class="in-tit">' +
+      (n >= 8 ? 'Van bien' : n >= 6 ? 'Se sostienen, con peros' : 'Hay que tocarlas') +
+      '</div><div class="tiny">Nota que les pone a tus rutinas tal y como están.</div></div>' +
+      '</div>';
+  }
+
   function filaEstadoIA(si, titulo, sub) {
     return '<div class="list-row"><span class="fe-marca ' + (si ? 'si' : 'no') + '">' +
       icon(si ? 'check' : 'close') + '</span>' +
@@ -1319,9 +1349,16 @@
     bind(root, '[data-a=boveda]', function () { go('claves'); });
 
     const caja = root.querySelector('#ia-respuesta');
+    /* Mientras piensa, el hueco de la respuesta con su forma. Una rueda
+       centrada no dice cuánto falta ni qué va a aparecer; unos renglones que
+       laten donde van a ir las frases, sí. */
     const cargando = function (texto) {
-      caja.innerHTML = '<div class="card center"><div class="spinner" ' +
-        'style="margin:6px auto 10px"></div><div class="tiny">' + esc(texto) + '</div></div>';
+      caja.innerHTML = '<div class="card tarjeta-premium ia-resp ia-pensando">' +
+        '<div class="ia-firma">' + icon('chispa') + '<span>' + esc(texto) + '</span></div>' +
+        '<div class="ia-fantasma"></div>' +
+        '<div class="ia-fantasma"></div>' +
+        '<div class="ia-fantasma corto"></div>' +
+        '</div>';
     };
 
     /* Tocar una sugerencia la escribe en la caja y deja el cursor al final: es
@@ -1338,9 +1375,12 @@
       if (!q) { UI.toast('Escribe tu pregunta'); return; }
       cargando('Pensando…');
       IA.preguntar(q).then(function (r) {
-        caja.innerHTML = '<div class="card ia-resp">' + parrafos(r) + '</div>';
+        caja.innerHTML = '<div class="card tarjeta-premium ia-resp">' +
+          '<div class="ia-firma">' + icon('chispa') + '<span>Tu entrenador</span></div>' +
+          parrafos(r) + '</div>';
       }).catch(function (e) {
-        caja.innerHTML = '<div class="card"><div class="muted">' + esc(e.message) + '</div></div>';
+        caja.innerHTML = '<div class="card tarjeta-premium"><div class="muted">' +
+          esc(e.message) + '</div></div>';
       });
     });
 
@@ -1355,20 +1395,14 @@
       const peticion = a === 'analizar' ? IA.analizarProgreso() : IA.revisarRutinas();
       peticion.then(function (r) {
         caja.innerHTML = a === 'analizar'
-          ? html`<div class="card ia-resp">
+          ? html`<div class="card tarjeta-premium ia-resp">
+              <div class="ia-firma">${raw(icon('chispa'))}<span>Tu entrenador</span></div>
               <div class="ia-bloque"><b>Lo que se sostiene</b><p>${r.bien}</p></div>
               <div class="ia-bloque"><b>Lo que hay que arreglar</b><p>${r.flojo}</p></div>
               <div class="ia-bloque destacado"><b>Esta semana</b><p>${r.accion}</p></div>
             </div>`
-          : html`<div class="card ia-resp">
-              ${raw(Number(r.nota) > 0 ? html`
-                <div class="row" style="gap:12px;align-items:center;margin-bottom:10px">
-                  <div style="flex:none;font-size:1.9rem;font-weight:700;line-height:1;color:${raw(
-                    Number(r.nota) >= 8 ? 'var(--acc)'
-                      : Number(r.nota) >= 6 ? 'var(--warn)' : 'var(--bad)')}">${Number(r.nota)}<span
-                       style="font-size:.9rem;color:var(--dim2)">/10</span></div>
-                  <div class="tiny grow">Nota que les pone a tus rutinas tal y como están.</div>
-                </div>` : '')}
+          : html`<div class="card tarjeta-premium ia-resp">
+              ${raw(Number(r.nota) > 0 ? aroNota(Number(r.nota)) : '')}
               <p class="muted">${r.veredicto}</p>
               ${raw((r.puntos || []).map(function (x) {
                 return '<div class="ia-bloque"><b>' + esc(x.titulo) + '</b><p>' +
