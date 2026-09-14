@@ -1689,28 +1689,60 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
 
 /* ---------- el boton de arrancar ----------
    Es el unico boton de la app que no compite con nada: lo que uno viene a
-   hacer. Un verde plano lo dejaba al nivel de un boton de guardar, asi que
-   lleva volumen —degradado en diagonal, una linea de luz arriba y una sombra
-   larga del color de la marca— y un destello que lo cruza cada pocos segundos.
+   hacer. En verde plano quedaba al nivel de un boton de guardar.
 
-   El destello es rapido y luego descansa cuatro segundos: un brillo continuo
-   es un anuncio, uno de vez en cuando es un boton que pide que lo toques. Con
-   el movimiento reducido del sistema, no se mueve nada. */
-/* .btn.primary ya pinta el fondo: hace falta la misma fuerza para cambiarlo. */
+   Va con el material de iOS 26: una lamina de vidrio teñida del verde de la
+   marca. Lo que hace que se lea como vidrio y no como un boton con brillos son
+   cuatro cosas a la vez, y ninguna sirve sola:
+
+   - el relleno es translucido y desenfoca lo que tiene detras, asi que el
+     fondo de la pagina se cuela un poco y el boton no es una pegatina;
+   - el borde de arriba lleva una linea de luz y el de abajo una sombra por
+     dentro: es como se dobla la luz al entrar y salir de un canto de cristal;
+   - encima flota un reflejo grande y suave que se desplaza muy despacio, que
+     es lo que hace que parezca liquido y no un cristal muerto;
+   - y cada pocos segundos lo cruza un destello rapido.
+
+   Al pulsarlo el vidrio se comprime: baja de escala, la sombra se recoge y el
+   reflejo se apaga. Con «reducir movimiento» del sistema no se mueve nada. */
 .btn.btn-arranque {
-  position: relative; overflow: hidden; border: 0;
+  position: relative; overflow: hidden; isolation: isolate;
+  border: 1px solid color-mix(in srgb, #fff 26%, transparent);
   background:
+    linear-gradient(180deg,
+      color-mix(in srgb, #fff 26%, transparent) 0%,
+      color-mix(in srgb, #fff 6%, transparent) 40%,
+      transparent 62%),
     linear-gradient(135deg,
-      color-mix(in srgb, var(--acc) 86%, #fff) 0%,
-      var(--acc) 46%,
-      color-mix(in srgb, var(--acc) 84%, #000) 100%);
+      color-mix(in srgb, var(--acc) 94%, #fff) 0%,
+      color-mix(in srgb, var(--acc) 88%, transparent) 52%,
+      color-mix(in srgb, var(--acc) 92%, #000) 100%);
+  backdrop-filter: blur(18px) saturate(175%);
+  -webkit-backdrop-filter: blur(18px) saturate(175%);
   box-shadow:
-    0 8px 22px color-mix(in srgb, var(--acc) 38%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent);
+    inset 0 1px 0 color-mix(in srgb, #fff 45%, transparent),
+    inset 0 -12px 24px -16px rgba(0, 0, 0, .55),
+    0 10px 26px color-mix(in srgb, var(--acc) 38%, transparent),
+    0 2px 6px rgba(0, 0, 0, .16);
   transition: transform .16s cubic-bezier(.2, .9, .3, 1), box-shadow .2s ease,
               filter .15s ease;
 }
 
+/* El reflejo que se mueve: grande, suave y lentisimo. Es el que da lo de
+   «liquido»; sin el, el vidrio parece una foto de vidrio. */
+.btn.btn-arranque::before {
+  content: ''; position: absolute; inset: -60% -15%; pointer-events: none;
+  background: radial-gradient(52% 120% at 32% -10%,
+              color-mix(in srgb, #fff 34%, transparent) 0%, transparent 68%);
+  animation: vidrio 11s ease-in-out infinite alternate;
+}
+
+@keyframes vidrio {
+  from { transform: translateX(-9%) rotate(-1deg); }
+  to   { transform: translateX(9%) rotate(1deg); }
+}
+
+/* Y el destello corto que lo cruza de vez en cuando. */
 .btn.btn-arranque::after {
   content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 42%;
   background: linear-gradient(100deg, transparent,
@@ -1728,11 +1760,14 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
 .btn.btn-arranque:active {
   transform: scale(.975);
   box-shadow:
-    0 3px 10px color-mix(in srgb, var(--acc) 30%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent);
-  filter: brightness(.97);
+    inset 0 1px 0 color-mix(in srgb, #fff 28%, transparent),
+    inset 0 -8px 18px -14px rgba(0, 0, 0, .5),
+    0 3px 10px color-mix(in srgb, var(--acc) 28%, transparent);
+  filter: brightness(.97) saturate(1.05);
 }
+.btn.btn-arranque:active::before { opacity: .4; }
 
 @media (prefers-reduced-motion: reduce) {
   .btn.btn-arranque::after { animation: none; opacity: 0; }
+  .btn.btn-arranque::before { animation: none; }
 }
