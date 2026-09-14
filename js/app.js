@@ -4727,27 +4727,25 @@
       if (altaModo === 'nueva') return altaNuevaHTML();
 
       return html`
-        <div class="card">
-          <p class="muted">Entra con tu correo y tus rutinas, tu historial y tus marcas
-          estarán en todos tus dispositivos. Sin contraseñas: recibes un enlace y ya está.</p>
+        <div class="card tarjeta-premium">
+          <div class="pre-encima">Se hace una vez</div>
+          <p class="muted" style="margin:6px 0 0;font-size:.88rem">Entra con tu correo y tus
+          rutinas, tu historial y tus marcas estarán en todos tus dispositivos. Sin
+          contraseñas: recibes un enlace y ya está.</p>
         </div>
 
         <div class="list-title">¿Por dónde empezamos?</div>
-        <div class="list">
-          <button class="list-row tap" data-alta="tengo">
-            <span class="row-icon">${raw(icon('correo'))}</span>
-            <div class="grow">
-              <div class="list-row-title">Ya tengo cuenta</div>
-              <div class="list-row-sub">Uso la app en otro dispositivo. Conecto este y listo.</div>
-            </div>
+        <div class="plan-acciones" style="margin:10px 0 0">
+          <button class="fila-plan" data-alta="tengo" style="--fp:var(--acc)">
+            <span class="fp-ico">${raw(icon('correo'))}</span>
+            <span class="grow"><span class="fp-tit">Ya tengo cuenta</span>
+              <span class="fp-sub">Uso la app en otro dispositivo. Conecto este y listo.</span></span>
             <span class="chevron">${raw(icon('chevron'))}</span>
           </button>
-          <button class="list-row tap" data-alta="nueva">
-            <span class="row-icon">${raw(icon('nube'))}</span>
-            <div class="grow">
-              <div class="list-row-title">Es mi primera vez</div>
-              <div class="list-row-sub">Creo la base de datos gratuita. Una vez, cinco minutos.</div>
-            </div>
+          <button class="fila-plan" data-alta="nueva" style="--fp:#4f8cf5">
+            <span class="fp-ico">${raw(icon('nube'))}</span>
+            <span class="grow"><span class="fp-tit">Es mi primera vez</span>
+              <span class="fp-sub">Creo la base de datos gratuita. Una vez, cinco minutos.</span></span>
             <span class="chevron">${raw(icon('chevron'))}</span>
           </button>
         </div>`;
@@ -4756,13 +4754,20 @@
     /* 2. configurado pero sin sesión: entrar o crear la cuenta */
     if (!Sync.activa()) {
       return html`
-        <div class="card">
-          <div class="row" style="gap:6px;margin-bottom:14px">
-            <button class="chip ${accesoModo === 'entrar' ? 'on' : ''}" data-acceso="entrar">Entrar</button>
-            <button class="chip ${accesoModo === 'crear' ? 'on' : ''}" data-acceso="crear">Crear cuenta</button>
+        <div class="card tarjeta-premium">
+          <!-- Dos pastillas sueltas no dicen que sean las dos caras de lo mismo.
+               Un mando de dos posiciones con la marca corriéndose de una a otra
+               sí: se ve que elegir una es dejar la otra. -->
+          <div class="mando">
+            <span class="mando-marca"${raw(accesoModo === 'crear'
+              ? ' style="transform:translateX(100%)"' : '')}></span>
+            <button class="mando-op${raw(accesoModo === 'entrar' ? ' on' : '')}"
+                    data-acceso="entrar">Entrar</button>
+            <button class="mando-op${raw(accesoModo === 'crear' ? ' on' : '')}"
+                    data-acceso="crear">Crear cuenta</button>
           </div>
 
-          <label class="tiny">CORREO</label>
+          <label class="tiny" style="display:block;margin-top:15px">CORREO</label>
           <input id="sync-mail" type="email" inputmode="email" autocomplete="email"
                  placeholder="tucorreo@ejemplo.com" style="margin:5px 0 10px">
 
@@ -4812,35 +4817,60 @@
 
     /* 3. sesión abierta */
     const tieneClave = Store.settings().tieneClave === true;
-    const ultimo = Sync.ultimoSync();
+    const correo = Sync.email() || '';
+    const inicial = (correo.trim()[0] || '').toUpperCase();
+
+    /* La cuenta y su estado eran dos tarjetas separadas por media pantalla: la
+       de arriba decía quién eres y la de abajo, tras dos listas, si de verdad
+       había subido algo. Son la misma pregunta —¿esto está a salvo?— y ahora van
+       en la misma tarjeta, con el punto vivo justo debajo del correo. */
     return html`
-      <div class="card">
-        <div class="row between">
-          <div class="grow">
-            <div style="font-weight:700">${Sync.email()}</div>
-            <div class="tiny">${ultimo ? 'Última sincronización: ' + UI.fecha(ultimo)
-              : 'Todavía sin sincronizar'}</div>
-          </div>
-          <span class="chip solid">Conectado</span>
+      <div class="card tarjeta-premium cuenta-cab">
+        <div class="pre-encima">Tu cuenta</div>
+        <div class="cc-quien">
+          <span class="pc-avatar">${raw(inicial || icon('perfil'))}</span>
+          <span class="grow">
+            <span class="pc-nombre">${correo}</span>
+            <span class="pc-sub">Sesión abierta en este dispositivo</span>
+          </span>
         </div>
-        <div class="row" style="margin-top:11px">
-          <button class="btn grow" data-a="sincronizar">${raw(icon('nube'))} Sincronizar ahora</button>
-          <button class="btn icon" data-a="salir" aria-label="Cerrar sesión">${raw(icon('salir'))}</button>
-        </div>
-        <p class="tiny" style="margin-top:9px">Los cambios se suben solos. En otro dispositivo,
-        entra con este mismo correo y lo tendrás todo.</p>
+        <div id="sync-estado" class="cc-estado"></div>
       </div>
 
-      <div class="list-title">Cuenta</div>
-      <div class="list">
-        <button class="list-row tap" data-a="verClave">
-          <span class="row-icon">${raw(icon('llave'))}</span>
-          <div class="grow">
-            <div class="list-row-title">${tieneClave ? 'Cambiar contraseña' : 'Poner contraseña'}</div>
-            <div class="list-row-sub">${raw(tieneClave
+      <div class="list-title">Qué se sincroniza</div>
+      <div class="sync-rejilla">
+        ${raw(fichaSync('dumbbell', 'Rutinas', Store.routines().length))}
+        ${raw(fichaSync('grafica', 'Entrenamientos', Store.sessions().length))}
+        ${raw(fichaSync('trofeo', 'Objetivos', Objetivos.lista().length))}
+        ${raw(fichaSync('campana', 'Alertas', Alertas.lista().length))}
+        ${raw(fichaSync('nutricion', 'Menús de comida',
+          (g.Menus && Menus.lista().length) || 0))}
+        ${raw(fichaSync('perfil', 'Perfil y hábitos',
+          Perfil.completo() ? 'Completo' : 'A medias', true))}
+      </div>
+      ${raw(filaSync('llave', 'Claves de IA y Spotify',
+        Sync.sincronizaClaves() ? 'Incluidas' : 'Solo en este dispositivo'))}
+      <p class="tiny" style="margin-top:10px">No hay que pulsar nada: lo que cambies sube
+      solo unos segundos después, y lo que cambies en otro dispositivo baja al abrir la app,
+      al volver a ella y cada minuto y medio mientras la tengas delante. Si falla, se
+      reintenta solo.</p>
+
+      <div class="list-title">Tu cuenta</div>
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan" data-a="verClave" style="--fp:var(--acc)">
+          <span class="fp-ico">${raw(icon('llave'))}</span>
+          <span class="grow">
+            <span class="fp-tit">${tieneClave ? 'Cambiar contraseña' : 'Poner contraseña'}</span>
+            <span class="fp-sub">${raw(tieneClave
               ? 'Ya tienes una: con ella entras en cualquier dispositivo'
-              : 'Sin contraseña solo puedes entrar con enlaces por correo')}</div>
-          </div>
+              : 'Sin contraseña solo puedes entrar con enlaces por correo')}</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="fila-plan es-peligro" data-a="salir" style="--fp:var(--bad)">
+          <span class="fp-ico">${raw(icon('salir'))}</span>
+          <span class="grow"><span class="fp-tit">Cerrar sesión aquí</span>
+            <span class="fp-sub">Lo que ya subió se queda en la nube. Este dispositivo deja
+            de sincronizar.</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
@@ -4868,23 +4898,19 @@
         guarda cifrada.</p>
       </div>
 
-      <div class="card" id="sync-estado"></div>
-
       <div class="list-title">Si algo no cuadra</div>
-      <div class="list">
-        <button class="list-row tap" data-a="forzarBajar">
-          <span class="row-icon">${raw(icon('down'))}</span>
-          <div class="grow">
-            <div class="list-row-title">Traer lo de la nube</div>
-            <div class="list-row-sub">Reemplaza lo de este dispositivo por lo guardado</div>
-          </div>
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan" data-a="forzarBajar" style="--fp:#4f8cf5">
+          <span class="fp-ico">${raw(icon('down'))}</span>
+          <span class="grow"><span class="fp-tit">Traer lo de la nube</span>
+            <span class="fp-sub">Reemplaza lo de este dispositivo por lo guardado</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
-        <button class="list-row tap" data-a="forzarSubir">
-          <span class="row-icon">${raw(icon('up'))}</span>
-          <div class="grow">
-            <div class="list-row-title">Subir lo de este dispositivo</div>
-            <div class="list-row-sub">Reemplaza lo de la nube por lo de aquí</div>
-          </div>
+        <button class="fila-plan" data-a="forzarSubir" style="--fp:#f0a23c">
+          <span class="fp-ico">${raw(icon('up'))}</span>
+          <span class="grow"><span class="fp-tit">Subir lo de este dispositivo</span>
+            <span class="fp-sub">Reemplaza lo de la nube por lo de aquí</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
       <p class="tiny" style="margin-top:8px">Úsalos solo si la sincronización automática se
@@ -4900,24 +4926,6 @@
       rutinas, historial, perfil, objetivos, alertas y ajustes.</p>
 
       ${raw(vistaCuenta())}
-
-      ${raw(Sync.activa() ? html`
-        <div class="list-title">Qué se sincroniza</div>
-        <div class="list">
-          ${raw(filaSync('dumbbell', 'Rutinas', Store.routines().length))}
-          ${raw(filaSync('grafica', 'Entrenamientos', Store.sessions().length))}
-          ${raw(filaSync('trofeo', 'Objetivos', Objetivos.lista().length))}
-          ${raw(filaSync('campana', 'Alertas', Alertas.lista().length))}
-          ${raw(filaSync('nutricion', 'Menús de comida',
-            (g.Menus && Menus.lista().length) || 'Sin generar'))}
-          ${raw(filaSync('perfil', 'Perfil y hábitos', Perfil.completo() ? 'Completo' : 'Sin completar'))}
-          ${raw(filaSync('llave', 'Claves de IA y Spotify',
-            Sync.sincronizaClaves() ? 'Incluidas' : 'Solo en este dispositivo'))}
-        </div>
-        <p class="tiny" style="margin-top:10px">No hay que pulsar nada: lo que cambies sube
-        solo unos segundos después, y lo que cambies en otro dispositivo baja al abrir la app,
-        al volver a ella y cada minuto y medio mientras la tengas delante. Si falla, se
-        reintenta solo.</p>` : '')}
 
       ${raw(Sync.configurado() && !Sync.activa() ? html`
         <div id="aviso-alta"></div>
@@ -4947,10 +4955,14 @@
       return UI.fecha(t);
     };
 
+    /* El estado era un punto de color y una frase. El color lo dice todo de
+       golpe, pero un punto quieto no distingue «está subiendo ahora mismo» de
+       «terminó hace media hora»: los dos eran un punto verde. Los dos estados
+       que están pasando ahora laten; los que ya terminaron, no. */
     const mapa = {
-      subiendo: { txt: 'Subiendo tus cambios…', tono: 'var(--acc)' },
-      bajando: { txt: 'Buscando cambios de otros dispositivos…', tono: 'var(--acc)' },
-      pendiente: { txt: 'Cambios pendientes de subir', tono: 'var(--warn)' },
+      subiendo: { txt: 'Subiendo tus cambios…', tono: 'var(--acc)', vivo: true },
+      bajando: { txt: 'Buscando cambios de otros dispositivos…', tono: 'var(--acc)', vivo: true },
+      pendiente: { txt: 'Cambios pendientes de subir', tono: 'var(--warn)', vivo: true },
       error: { txt: 'No se pudo sincronizar', tono: 'var(--bad)' },
       ok: { txt: 'Todo al día', tono: 'var(--acc)' },
       inactivo: { txt: 'Esperando el primer cambio', tono: 'var(--dim2)' }
@@ -4958,24 +4970,35 @@
     const m = mapa[e.fase] || mapa.inactivo;
 
     return html`
-      <div class="row between">
-        <div class="row" style="gap:9px;align-items:center">
-          <span class="punto-sync" style="background:${raw(m.tono)}"></span>
-          <b>${m.txt}</b>
-        </div>
-        <button class="btn sm" data-a="sincronizarYa">Comprobar</button>
+      <div class="cce-fila" style="--tono:${raw(m.tono)}">
+        <span class="cce-punto${raw(m.vivo ? ' vivo' : '')}"></span>
+        <span class="grow">
+          <b class="cce-txt">${m.txt}</b>
+          <span class="tiny">Última sincronización completa ${hace(e.ultimo)}.</span>
+        </span>
+        <button class="btn sm vidrio" data-a="sincronizarYa">Comprobar</button>
       </div>
-      <div class="tiny" style="margin-top:6px">Última sincronización completa ${hace(e.ultimo)}.</div>
-      ${raw(e.error ? '<div class="tiny" style="margin-top:4px;color:var(--bad)">' +
-        esc(e.error) + '</div>' : '')}
-      ${raw(e.pendiente ? '<div class="tiny" style="margin-top:4px">Hay cambios de este ' +
-        'dispositivo esperando a subir. Se reintenta solo.</div>' : '')}`;
+      ${raw(e.error ? '<p class="cce-nota mal">' + esc(e.error) + '</p>' : '')}
+      ${raw(e.pendiente ? '<p class="cce-nota">Hay cambios de este dispositivo esperando ' +
+        'a subir. Se reintenta solo.</p>' : '')}`;
   }
 
+  /* Siete filas idénticas con la cifra al final: para saber cuánto hay guardado
+     había que recorrerlas de arriba abajo leyendo el canto derecho. En fichas la
+     cifra manda y se ven las seis a la vez. */
+  function fichaSync(ico, titulo, valor, texto) {
+    return '<div class="sy-ficha">' +
+      '<span class="sy-ico">' + icon(ico) + '</span>' +
+      '<b class="sy-val' + (texto ? ' sy-txt' : '') + '">' + esc(String(valor)) + '</b>' +
+      '<span class="sy-lab">' + esc(titulo) + '</span></div>';
+  }
+
+  /* Las claves no son una cantidad, son un sí o un no: van en fila aparte para
+     no enseñar un número donde no hay ninguno. */
   function filaSync(ico, titulo, valor) {
-    return '<div class="list-row"><span class="row-icon">' + icon(ico) + '</span>' +
-      '<div class="grow"><div class="list-row-title">' + esc(titulo) + '</div></div>' +
-      '<span class="list-row-val">' + esc(String(valor)) + '</span></div>';
+    return '<div class="sy-fila"><span class="sy-ico">' + icon(ico) + '</span>' +
+      '<span class="grow"><span class="sy-f-tit">' + esc(titulo) + '</span></span>' +
+      '<span class="sy-f-val">' + esc(String(valor)) + '</span></div>';
   }
 
   /* Lo que más tiempo ha hecho perder a la gente: la conexión que trae la app
@@ -5227,7 +5250,19 @@
 
     bindAll(root, '[data-acceso]', function (el) {
       accesoModo = el.dataset.acceso;
-      render();
+
+      /* La marca se corre primero y la pantalla se rehace despues. Si se
+         repintara de golpe, la marca aparecería ya puesta en el otro lado y el
+         movimiento —que es lo que dice que una cosa deja paso a la otra— no se
+         llegaría a ver nunca. */
+      const mando = root.querySelector('.mando');
+      if (!mando) { render(); return; }
+      const marca = mando.querySelector('.mando-marca');
+      if (marca) marca.style.transform = accesoModo === 'crear' ? 'translateX(100%)' : 'translateX(0)';
+      mando.querySelectorAll('.mando-op').forEach(function (b) {
+        b.classList.toggle('on', b.dataset.acceso === accesoModo);
+      });
+      setTimeout(render, 220);
     });
 
     bindAll(root, '[data-ver]', function (el) {

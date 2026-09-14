@@ -4483,3 +4483,137 @@ html[data-theme="light"] .lugar-chip::after {
 .topbar-actions { min-width: 0; }
 .lugar-chip { min-width: 0; }
 .lc-txt { overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- mi cuenta ----------
+   Quien eres y si tus datos estan a salvo eran dos tarjetas separadas por media
+   pantalla: la de arriba decia el correo y la de abajo, despues de dos listas,
+   si de verdad habia subido algo. Son la misma pregunta —¿esto esta a salvo?—
+   asi que van juntas, con el punto vivo debajo del correo. */
+.cuenta-cab { padding-bottom: 11px; }
+.cc-quien { display: flex; align-items: center; gap: 12px; margin: 9px 0 0; }
+.cc-quien .pc-nombre { font-size: 1rem; }
+
+.cc-estado {
+  margin-top: 13px; padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, #fff 8%, transparent);
+}
+.cce-fila { display: flex; align-items: center; gap: 10px; }
+.cce-txt { display: block; font-size: .88rem; font-weight: 700; color: var(--tono);
+  letter-spacing: -.012em; }
+.cce-fila .tiny { display: block; margin-top: 1px; }
+.cce-fila .grow { min-width: 0; }
+.cce-fila .btn { flex: none; }
+.cce-nota { margin: 8px 0 0; font-size: .74rem; color: var(--dim2); line-height: 1.4; }
+.cce-nota.mal { color: var(--bad); }
+
+/* El punto. El color lo dice todo de golpe, pero un punto quieto no distingue
+   «esta subiendo ahora mismo» de «termino hace media hora»: los dos eran un
+   punto verde. Los que estan pasando ahora laten. */
+.cce-punto {
+  position: relative; flex: none; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--tono);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--tono) 65%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cce-punto.vivo::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    background: var(--tono); animation: punto-onda 1.8s ease-out infinite;
+  }
+}
+@keyframes punto-onda {
+  from { transform: scale(1); opacity: .55; }
+  to { transform: scale(2.8); opacity: 0; }
+}
+
+/* ---------- que se sincroniza ----------
+   Eran siete filas identicas con la cifra pegada al canto derecho: para saber
+   cuanto hay guardado habia que recorrerlas de arriba abajo leyendo una columna
+   de numeros. En fichas manda la cifra y se ven las seis a la vez. */
+.sync-rejilla {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px;
+}
+@media (max-width: 400px) { .sync-rejilla { grid-template-columns: repeat(2, 1fr); } }
+
+.sy-ficha {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 11px 10px 10px; border-radius: 15px;
+  border: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 58%),
+    color-mix(in srgb, var(--card) 66%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent),
+              inset 0 -9px 18px -14px rgba(0, 0, 0, .55),
+              0 2px 7px rgba(0, 0, 0, .18);
+}
+.sy-ico {
+  width: 26px; height: 26px; border-radius: 9px; margin-bottom: 5px;
+  display: flex; align-items: center; justify-content: center; color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 13%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent);
+}
+.sy-ico svg { width: 14px; height: 14px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sy-val { font-size: 1.32rem; font-weight: 800; letter-spacing: -.024em; line-height: 1.05;
+  font-variant-numeric: tabular-nums; }
+.sy-val.sy-txt { font-size: .92rem; font-weight: 700; letter-spacing: -.014em;
+  padding-top: 5px; }
+.sy-lab { font-size: .7rem; color: var(--dim2); line-height: 1.3; }
+
+/* Las claves no son una cantidad, son un si o un no: en fila aparte, para no
+   enseñar un numero donde no hay ninguno. */
+.sy-fila {
+  display: flex; align-items: center; gap: 10px; margin-top: 8px;
+  padding: 10px 12px; border-radius: 14px;
+  background: color-mix(in srgb, var(--card2) 55%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
+}
+.sy-fila .sy-ico { margin-bottom: 0; }
+.sy-f-tit { font-size: .86rem; font-weight: 600; }
+.sy-f-val { flex: none; font-size: .78rem; color: var(--dim2); }
+
+/* ---------- el mando de dos posiciones ----------
+   Dos pastillas sueltas no dicen que sean las dos caras de lo mismo. Un mando
+   con la marca corriendose de una a otra si: se ve que elegir una es dejar la
+   otra, que es justo lo que pasa entre entrar y crear cuenta. */
+.mando {
+  position: relative; display: flex; padding: 3px; border-radius: 12px;
+  background: color-mix(in srgb, #000 20%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .28),
+              inset 0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
+}
+.mando-marca {
+  position: absolute; left: 3px; top: 3px; bottom: 3px; width: calc(50% - 3px);
+  border-radius: 9px; pointer-events: none;
+  background: linear-gradient(180deg, color-mix(in srgb, #fff 14%, transparent), transparent 60%),
+              var(--card);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent),
+              0 2px 6px rgba(0, 0, 0, .28);
+  transition: transform .3s cubic-bezier(.3, 1.1, .4, 1);
+}
+.mando-op {
+  position: relative; flex: 1; padding: 8px 6px; border: 0; background: none;
+  cursor: pointer; font: inherit; font-size: .86rem; font-weight: 650;
+  color: var(--dim2); border-radius: 9px;
+  transition: color .22s ease;
+}
+.mando-op.on { color: var(--txt); }
+
+html[data-theme="light"] .sy-ficha {
+  background: #fff; border-color: color-mix(in srgb, #141922 9%, transparent);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
+}
+html[data-theme="light"] .sy-fila {
+  background: color-mix(in srgb, #141922 4%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+html[data-theme="light"] .cc-estado { border-top-color: var(--line); }
+html[data-theme="light"] .mando {
+  background: color-mix(in srgb, #141922 6%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+html[data-theme="light"] .mando-marca {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, .16);
+}
