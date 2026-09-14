@@ -2922,6 +2922,7 @@ html[data-theme="light"] .vista-nutricion textarea {
 }
 .ml-acciones .btn { flex: 1; min-width: 0; font-size: .76rem; padding: 7px 6px; }
 .ml-acciones .btn svg { width: 15px; height: 15px; }
+.ml-aviso { margin: 6px 0 0; text-align: center; }
 .ml-si {
   color: var(--acc);
   background: color-mix(in srgb, var(--acc) 13%, transparent);

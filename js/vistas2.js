@@ -634,11 +634,17 @@
      recuento con sus propios números y deja dicho de qué te desviaste, que es
      la diferencia entre un registro y un diario.
 
-     Solo el día de hoy. Marcar el jueves un lunes apuntaría la comida del jueves
-     en el recuento del lunes, y un registro que miente no sirve para nada. */
+     Se puede marcar desde cualquier día del menú, y siempre cuenta en el día de
+     hoy. Primero solo salía en el día de hoy y en los demás no había nada: si
+     tu menú empieza en lunes y hoy es domingo, abres el menú, ves los platos y
+     no hay ningún botón por ninguna parte —ni una palabra de por qué—. Una
+     función escondida sin decir que existe es una función que no existe.
+
+     El plato es el plato: que viva en el lunes no significa que no te lo hayas
+     comido hoy. Lo que no puede pasar es que se apunte en otro día, así que en
+     los días que no son hoy se dice a las claras dónde va. */
   function marcarComidaHTML(ref, c, hecha, esHoy) {
     if (!g.Comidas || !Comidas.seLleva()) return '';
-    if (!esHoy) return '';
 
     if (hecha) {
       const cambiada = !!hecha.sustituye;
@@ -657,7 +663,22 @@
       icon('check') + ' Me lo comí</button>' +
       '<button class="btn sm" data-cambie="' + esc(ref) + '">' +
       icon('cambiar') + ' Comí otra cosa</button>' +
-      '</div>';
+      '</div>' +
+      (esHoy ? '' : '<p class="tiny ml-aviso">Se apunta en el día de hoy.</p>');
+  }
+
+  /* Despliega el día de hoy de un menú, si no se ha tocado ya ninguno suyo. */
+  function abrirHoyDe(id) {
+    const m = g.Menus ? Menus.porId(id) : null;
+    const dias = (m && m.plan && m.plan.dias) || [];
+    if (!dias.length) return;
+    if (Object.keys(diasAbiertosPlan).some(function (k) {
+      return k.indexOf(id + '-') === 0;
+    })) return;
+
+    for (let i = 0; i < dias.length; i++) {
+      if (esHoy(dias[i], i, dias.length)) { diasAbiertosPlan[id + '-' + i] = true; return; }
+    }
   }
 
   /* De la referencia al plato: la pantalla guarda «menú|día|comida» y aquí se
@@ -1109,7 +1130,14 @@
 
     bindAll(root, '[data-menu]', function (el) {
       const id = el.dataset.menu;
-      if (menusAbiertos[id]) delete menusAbiertos[id]; else menusAbiertos[id] = true;
+      if (menusAbiertos[id]) { delete menusAbiertos[id]; render(); return; }
+
+      menusAbiertos[id] = true;
+      /* Y con el menú, el día de hoy abierto. Es el que se viene a mirar, y
+         dejarlo cerrado obliga a buscarlo entre siete iguales antes de poder
+         hacer nada con él. Solo la primera vez: si lo cerraste a mano, se
+         respeta. */
+      abrirHoyDe(id);
       render();
     });
 
