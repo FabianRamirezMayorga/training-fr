@@ -285,7 +285,17 @@ a{color:var(--blue)}
 
 /* ---------- modal / toast ---------- */
 .modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:0;animation:fade .2s}
-.modal-box{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-width:560px;
+/* El vidrio lo estreno la hoja del filtro y se quedo alli: el resto de las
+   emergentes seguian siendo una lamina maciza. Son la misma cosa —algo que se
+   levanta por encima de la pantalla— y tienen que estar hechas del mismo
+   material. */
+.modal-box{
+  background:color-mix(in srgb,var(--bg2) 80%,transparent);
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border-top:1px solid var(--vidrio-rim);
+  box-shadow:0 -12px 40px rgba(0,0,0,.35);
+  border-radius:22px 22px 0 0;width:100%;max-width:560px;
   /* del alto del contenedor, no de la ventana: con el teclado abierto el
      contenedor vale lo que queda libre y la hoja cabe entera ahí */
   max-height:92%;overflow-y:auto;padding:0 17px calc(26px + var(--safe-b));
@@ -294,9 +304,11 @@ a{color:var(--blue)}
 
 /* Cabecera de la hoja: se queda arriba aunque el contenido sea largo, se puede
    arrastrar para cerrar y lleva la X para quien no vaya a adivinar el gesto. */
+/* La cabecera, transparente: con su propio fondo eran dos laminas pegadas en
+   vez de un solo material. */
 .modal-cab{position:sticky;top:0;z-index:3;display:flex;align-items:center;
   justify-content:center;margin:0 -17px 12px;padding:13px 17px 11px;
-  background:var(--bg2);border-radius:22px 22px 0 0;touch-action:none;cursor:pointer}
+  background:transparent;border-radius:22px 22px 0 0;touch-action:none;cursor:pointer}
 .modal-grab{width:38px;height:5px;background:var(--line);border-radius:99px;margin:0}
 .modal-x{position:absolute;right:11px;top:7px;width:32px;height:32px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;border:0;padding:0;
@@ -2097,13 +2109,8 @@ html[data-theme="light"] {
    catalogo que estas filtrando— asi que aqui el desenfoque no es decoracion:
    deja ver de donde sale. La cabecera se queda transparente para que el
    material sea uno solo y no dos laminas pegadas. */
-.modal-box.hoja-vidrio {
-  background: color-mix(in srgb, var(--bg2) 78%, transparent);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border-top: 1px solid var(--vidrio-rim);
-}
-.hoja-vidrio .modal-cab { background: transparent; }
+/* Ya no hace falta: el vidrio lo lleva .modal-box. Se deja el nombre por si
+   algo lo sigue poniendo, pero no anade nada. */
 
 /* Lo de dentro tambien: las filas plegables y las de conmutador dejan de ser
    cajas macizas. */
@@ -2153,8 +2160,10 @@ html[data-theme="light"] {
    La solucion es la de iOS con las listas agrupadas: la hoja se tine del gris
    del fondo de la app y las piezas de encima se quedan blancas, con su hilo de
    borde y su sombra. Asi vuelve a haber dos planos. */
-html[data-theme="light"] .modal-box.hoja-vidrio {
-  background: color-mix(in srgb, var(--bg) 84%, transparent);
+html[data-theme="light"] .modal-box {
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  border-top: 1px solid rgba(16, 24, 40, .06);
+  box-shadow: 0 -10px 34px rgba(16, 24, 40, .12);
 }
 
 html[data-theme="light"] .zona-tile {
@@ -3747,3 +3756,55 @@ html[data-theme="light"] .sp-lista {
   box-shadow: inset 0 0 0 1px var(--line), var(--vidrio-sombra-corta);
 }
 html[data-theme="light"] .sp-portada { box-shadow: inset 0 0 0 1px var(--line); }
+
+/* ---------- lo de dentro de una emergente ----------
+   Los volcados de diagnostico eran dos rectangulos grises macizos dentro de una
+   hoja de vidrio: se leian como un parche de otra pantalla. Hundidos, con su
+   canto de luz, pasan a ser parte de la hoja. */
+.modal-box pre,
+.modal-box .volcado {
+  padding: 12px 13px; border-radius: 14px; margin: 0;
+  font-size: .76rem; line-height: 1.5;
+  background: color-mix(in srgb, var(--card2) 62%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .22), inset 0 0 0 1px var(--vidrio-rim);
+}
+html[data-theme="light"] .modal-box pre,
+html[data-theme="light"] .modal-box .volcado {
+  background: var(--card2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* ---------- las canciones, del mismo material que las listas ----------
+   Eran filas con borde de hilo y fondo macizo, y las listas de Spotify de al
+   lado ya eran de vidrio: dos cosas que se hacen igual —mirar una fila y darle
+   al play— no pueden estar hechas de materiales distintos. */
+.pista {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  padding: 9px 10px 9px 9px; border: 0; border-radius: 16px; cursor: pointer;
+  background: linear-gradient(180deg, var(--vidrio-luz), transparent 55%), var(--card);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+  transition: box-shadow .18s ease, transform .14s ease;
+}
+.pista:active { transform: scale(.994); }
+.pista:hover { background: linear-gradient(180deg, var(--vidrio-luz), transparent 55%),
+  var(--card); }
+
+/* El play, redondo y del color, como en las listas */
+.pista > svg {
+  flex: none; width: 34px; height: 34px; padding: 10px; border-radius: 50%;
+  box-sizing: border-box; fill: var(--on-acc); color: var(--on-acc);
+  background: var(--acc);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 24%, transparent),
+              0 3px 9px color-mix(in srgb, var(--acc) 28%, transparent);
+  transition: box-shadow .18s ease;
+}
+.pista:hover > svg {
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent),
+              0 4px 13px color-mix(in srgb, var(--acc) 42%, transparent);
+}
+.pista .player-t { font-weight: 700; font-size: .92rem; letter-spacing: -.012em; }
+
+html[data-theme="light"] .pista {
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line), var(--vidrio-sombra-corta);
+}
