@@ -1710,9 +1710,9 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
   border: 1px solid color-mix(in srgb, #fff 26%, transparent);
   background:
     linear-gradient(180deg,
-      color-mix(in srgb, #fff 26%, transparent) 0%,
-      color-mix(in srgb, #fff 6%, transparent) 40%,
-      transparent 62%),
+      color-mix(in srgb, #fff 13%, transparent) 0%,
+      color-mix(in srgb, #fff 3%, transparent) 38%,
+      transparent 60%),
     linear-gradient(135deg,
       color-mix(in srgb, var(--acc) 94%, #fff) 0%,
       color-mix(in srgb, var(--acc) 88%, transparent) 52%,
@@ -1720,10 +1720,10 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
   backdrop-filter: blur(18px) saturate(175%);
   -webkit-backdrop-filter: blur(18px) saturate(175%);
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #fff 45%, transparent),
-    inset 0 -12px 24px -16px rgba(0, 0, 0, .55),
-    0 10px 26px color-mix(in srgb, var(--acc) 38%, transparent),
-    0 2px 6px rgba(0, 0, 0, .16);
+    inset 0 1px 0 color-mix(in srgb, #fff 24%, transparent),
+    inset 0 -12px 24px -16px rgba(0, 0, 0, .42),
+    0 8px 22px color-mix(in srgb, var(--acc) 26%, transparent),
+    0 2px 6px rgba(0, 0, 0, .14);
   transition: transform .16s cubic-bezier(.2, .9, .3, 1), box-shadow .2s ease,
               filter .15s ease;
 }
@@ -1733,8 +1733,8 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
 .btn.btn-arranque::before {
   content: ''; position: absolute; inset: -60% -15%; pointer-events: none;
   background: radial-gradient(52% 120% at 32% -10%,
-              color-mix(in srgb, #fff 34%, transparent) 0%, transparent 68%);
-  animation: vidrio 11s ease-in-out infinite alternate;
+              color-mix(in srgb, #fff 16%, transparent) 0%, transparent 68%);
+  animation: vidrio 13s ease-in-out infinite alternate;
 }
 
 @keyframes vidrio {
@@ -1746,9 +1746,9 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
 .btn.btn-arranque::after {
   content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 42%;
   background: linear-gradient(100deg, transparent,
-              color-mix(in srgb, #fff 52%, transparent), transparent);
+              color-mix(in srgb, #fff 26%, transparent), transparent);
   transform: skewX(-18deg); pointer-events: none;
-  animation: destello 5.4s cubic-bezier(.25, .6, .3, 1) 1.4s infinite;
+  animation: destello 7.5s cubic-bezier(.25, .6, .3, 1) 2s infinite;
 }
 
 @keyframes destello {
@@ -1760,9 +1760,9 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
 .btn.btn-arranque:active {
   transform: scale(.975);
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #fff 28%, transparent),
-    inset 0 -8px 18px -14px rgba(0, 0, 0, .5),
-    0 3px 10px color-mix(in srgb, var(--acc) 28%, transparent);
+    inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent),
+    inset 0 -8px 18px -14px rgba(0, 0, 0, .4),
+    0 3px 10px color-mix(in srgb, var(--acc) 20%, transparent);
   filter: brightness(.97) saturate(1.05);
 }
 .btn.btn-arranque:active::before { opacity: .4; }
@@ -1771,3 +1771,66 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
   .btn.btn-arranque::after { animation: none; opacity: 0; }
   .btn.btn-arranque::before { animation: none; }
 }
+
+/* ---------- el mismo vidrio, en toda la portada ----------
+   El material no es un adorno de un boton suelto: o lo lleva la pantalla
+   entera o el boton parece de otra app. Aqui van los tres ingredientes en
+   variables, porque de noche y de dia el vidrio no se hace igual: a oscuras la
+   luz se ve como un reflejo blanco tenue sobre el canto; de dia el canto casi
+   no se ve y lo que da el relieve es la sombra de debajo.
+
+   Y todo mucho mas flojo que en el boton grande: ahi el brillo llama, aqui
+   solo tiene que dar cuerpo. */
+:root {
+  --vidrio-rim: color-mix(in srgb, #fff 7%, transparent);
+  --vidrio-luz: color-mix(in srgb, #fff 4%, transparent);
+  --vidrio-sombra: 0 6px 18px rgba(0, 0, 0, .28);
+  --vidrio-sombra-corta: 0 2px 6px rgba(0, 0, 0, .2);
+}
+html[data-theme="light"] {
+  --vidrio-rim: color-mix(in srgb, #fff 85%, transparent);
+  --vidrio-luz: color-mix(in srgb, #fff 55%, transparent);
+  --vidrio-sombra: 0 1px 2px rgba(16, 24, 40, .05), 0 10px 26px rgba(16, 24, 40, .07);
+  --vidrio-sombra-corta: 0 1px 2px rgba(16, 24, 40, .06);
+}
+
+/* Las cajas: la linea de luz en el canto de arriba y su sombra debajo.
+   Sin desenfoque: el relleno de estas es opaco, asi que desenfocar lo de detras
+   no cambiaria un pixel y solo gastaria bateria. El desenfoque de verdad se
+   queda donde hay algo translucido, que es el boton grande. */
+.vista-inicio .card,
+.vista-inicio .stat {
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra);
+}
+.vista-inicio .stat { box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta); }
+
+/* Los botones de la portada, del mismo material. Los secundarios en vidrio
+   neutro; los de accion, en vidrio tenido de verde. Ninguno lleva reflejo que
+   se mueva: eso se queda para el boton grande, que es el que manda. */
+.vista-inicio .btn:not(.btn-arranque):not(.ghost),
+.vista-inicio .hoy-play,
+.vista-inicio label.btn {
+  position: relative;
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+}
+
+.vista-inicio .btn.primary,
+.vista-inicio .hoy-play {
+  background:
+    linear-gradient(180deg, var(--vidrio-luz) 0%, transparent 58%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--acc) 96%, #fff) 0%,
+      var(--acc) 55%,
+      color-mix(in srgb, var(--acc) 94%, #000) 100%);
+  border: 1px solid color-mix(in srgb, #fff 14%, transparent);
+}
+
+.vista-inicio .hoy-play {
+  box-shadow:
+    inset 0 1px 0 var(--vidrio-rim),
+    0 5px 14px color-mix(in srgb, var(--acc) 24%, transparent);
+}
+
+/* El galon y los plegables de la portada no llevan material: son texto. */
+.vista-inicio .seccion > summary,
+.vista-inicio .menu-hoy > summary { box-shadow: none; backdrop-filter: none; }
