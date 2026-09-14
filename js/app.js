@@ -4645,6 +4645,17 @@
           'role="switch" aria-checked="' + (s.sound ? 'true' : 'false') +
           '" aria-label="Aviso sonoro"></button>', false, 'altavoz'))}
       </div>
+      ${raw((function () {
+        /* Un modelo no se acuerda de ayer: sin esto vuelve a caer en la misma
+           frase cada pocas semanas. Se le pasan las últimas cuarenta para que
+           busque otra cosa, y aquí se puede borrar esa memoria. */
+        const n = g.IA && IA.frasesDichas ? IA.frasesDichas().length : 0;
+        if (!n) return '';
+        return '<p class="tiny" style="margin:8px 0 0">El entrenador recuerda las ' +
+          (n === 1 ? 'frase que ya te ha dicho' : n + ' frases que ya te ha dicho') +
+          ' para no repetirse. ' +
+          '<button class="btn sm ghost" data-a="olvidarfrases">Que empiece de cero</button></p>';
+      })())}
 
       <div class="list-title">Claves y conexiones</div>
       <div class="plan-acciones" style="margin:10px 0 0">
@@ -4955,6 +4966,12 @@
         render();
       });
     });
+    bind(root, '[data-a=olvidarfrases]', function () {
+      if (g.IA && IA.olvidarFrases) IA.olvidarFrases();
+      render();
+      UI.toast('Memoria de frases borrada');
+    });
+
     bind(root, '[data-a=sound]', function () {
       Store.setSetting('sound', !Store.settings().sound);
       render();

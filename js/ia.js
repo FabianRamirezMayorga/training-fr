@@ -1486,6 +1486,32 @@
      Va donde antes no había nada. Tiene que ser corta y suya: un «tú puedes»
      genérico no lo lee nadie dos veces. Se guarda lo que dura el bloque para no
      gastar una llamada por cada vez que se entra en la pantalla. */
+  /* ---------- lo que ya le has dicho ----------
+     Un modelo no se acuerda de ayer: cada frase la escribe desde cero, así que
+     tarde o temprano vuelve a caer en la misma. Con música ya pasaba lo mismo
+     y se arregló igual —guardando lo propuesto y pidiéndole otra cosa—, solo
+     que aquí lo que se repite es la frase entera.
+
+     Se guardan las últimas cuarenta. Más no hace falta: si algo se dijo hace
+     dos meses, volver a decirlo no es repetirse. */
+  const MEM_FRASES = 'trainingfr.ia.frases';
+
+  function frasesDichas() {
+    try { return JSON.parse(localStorage.getItem(MEM_FRASES) || '[]') || []; }
+    catch (e) { return []; }
+  }
+
+  function recordarFrase(f) {
+    const t = String(f || '').trim();
+    if (!t) return;
+    const l = frasesDichas().filter(function (x) { return x !== t; });
+    l.push(t);
+    try { localStorage.setItem(MEM_FRASES, JSON.stringify(l.slice(-40))); }
+    catch (e) { /* si no cabe, se repetirá alguna: no es grave */ }
+  }
+
+  function olvidarFrases() { localStorage.removeItem(MEM_FRASES); }
+
   function pildora() {
     const ses = Store.sessions();
     const bloque = bloqueDelDia();
@@ -1498,6 +1524,7 @@
     if (guardado) return Promise.resolve(guardado);
 
     const nombre = String(Store.settings().name || '').trim();
+    const dichas = frasesDichas();
 
     const prompt = contexto({ progreso: true, cargas: true, comida: true }) + '\n\n' +
       'EXCEPCIÓN A TUS NORMAS, solo para esto: aquí SÍ quiero que animes. Es lo ' +
@@ -1514,13 +1541,21 @@
       'invitación a volver, no un reproche.\n' +
       '- Nada de signos de exclamación, emojis, ni «tú puedes» de calendario.\n' +
       '- No te inventes citas ni se las cuelgues a nadie. Si no estás seguro de quién ' +
-      'dijo algo, dilo con tus palabras y sin firma.\n\n' +
-      'Devuelve JSON: {"frase":"la frase","tipo":"' + clase.id + '"}';
+      'dijo algo, dilo con tus palabras y sin firma.\n' +
+      (dichas.length
+        ? '\nYA LE HAS DICHO ESTO, y lo tiene leído. Ni estas ni una versión suya con ' +
+          'otras palabras: busca otro ángulo, otro ejemplo, otra manera de entrarle.\n' +
+          dichas.map(function (x) { return '- ' + x; }).join('\n') + '\n'
+        : '') +
+      '\nDevuelve JSON: {"frase":"la frase","tipo":"' + clase.id + '"}';
 
-    return llamarJSON(prompt, { maxTokens: 3072, temperatura: 0.8 }).then(function (r) {
+    /* Más temperatura que el resto de la app a propósito: aquí no hay una
+       respuesta correcta que clavar, hay que no repetirse. */
+    return llamarJSON(prompt, { maxTokens: 3072, temperatura: 0.95 }).then(function (r) {
       const limpio = { frase: String((r && r.frase) || '').trim(), tipo: (r && r.tipo) || clase.id };
       if (!limpio.frase) throw new Error('sin frase');
       escribirCache(clave, limpio);
+      recordarFrase(limpio.frase);
       return limpio;
     });
   }
@@ -2557,6 +2592,7 @@
     leerRutina: leerRutina,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,
+    frasesDichas: frasesDichas, olvidarFrases: olvidarFrases,
     analizarProgreso: analizarProgreso, preguntar: preguntar, explicarEjercicio: explicarEjercicio,
     MODELOS: MODELOS
   };
