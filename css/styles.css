@@ -3202,29 +3202,20 @@ html[data-theme="light"] .vista-nutricion textarea {
 
 /* ---------- los recordatorios ----------
    Un recordatorio es una hora. Todo lo demas —como se llama, que dias, de que
-   tipo es— explica esa hora, pero el dato es la hora, y estaba en letra pequena
-   dentro de un renglon mientras el titulo se llevaba el tamano grande. Aqui
-   manda la hora, como en el reloj del telefono.
+   tipo es— explica esa hora, pero el dato es la hora. Aqui manda la hora, como
+   en el reloj del telefono.
 
-   El material es el de la app: vidrio tenido del color de su tipo, con su canto
-   de luz arriba, su sombra debajo y un reflejo grande que se desplaza muy
-   despacio —eso es lo que lo hace liquido y no una foto de vidrio—. */
+   El color de cada tipo esta, pero de acento y no de fondo. Tenido entero, con
+   su degradado y su sombra de color, cinco recordatorios seguidos eran cinco
+   manchas distintas una debajo de otra y la pantalla cansaba antes de decir
+   nada. El tono se queda donde sirve para distinguirlos —el icono y la hora
+   siguiente— y la tarjeta vuelve a ser vidrio neutro, como todas las demas de
+   la app. */
 .rec {
   position: relative; overflow: hidden; isolation: isolate;
   padding: 14px 15px 13px; border-radius: 20px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, #fff 7%, transparent), transparent 46%),
-    linear-gradient(148deg,
-      color-mix(in srgb, var(--tono) 20%, var(--card)) 0%,
-      color-mix(in srgb, var(--tono) 6%, var(--card)) 46%,
-      var(--card) 100%);
-  backdrop-filter: blur(14px) saturate(150%);
-  -webkit-backdrop-filter: blur(14px) saturate(150%);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #fff 13%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--tono) 17%, transparent),
-    0 8px 22px color-mix(in srgb, var(--tono) 13%, transparent),
-    0 2px 6px rgba(0, 0, 0, .2);
+  background: linear-gradient(180deg, var(--vidrio-luz), transparent 55%), var(--card);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra);
   transition: transform .16s cubic-bezier(.2, .9, .3, 1), box-shadow .22s ease,
               filter .22s ease;
 }
@@ -3234,7 +3225,7 @@ html[data-theme="light"] .vista-nutricion textarea {
 .rec::before {
   content: ''; position: absolute; inset: -70% -25%; pointer-events: none; z-index: -1;
   background: radial-gradient(48% 120% at 28% -10%,
-              color-mix(in srgb, #fff 11%, transparent) 0%, transparent 70%);
+              color-mix(in srgb, #fff 8%, transparent) 0%, transparent 70%);
 }
 @media (prefers-reduced-motion: no-preference) {
   .rec::before { animation: vidrio 17s ease-in-out infinite alternate; }
@@ -3242,17 +3233,15 @@ html[data-theme="light"] .vista-nutricion textarea {
 
 .rec-cab { display: flex; align-items: center; gap: 12px; }
 
-/* La baldosa del icono, con su propio vidrio */
+/* El icono lleva el color del tipo, sobre una baldosa neutra. Es la mancha de
+   color mas grande de la tarjeta y ocupa 42 px: suficiente para distinguir de
+   un vistazo cual es el del agua, sin tenir la pantalla entera. */
 .rec-ico {
   flex: none; width: 42px; height: 42px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   color: var(--tono);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, #fff 14%, transparent), transparent 60%),
-    color-mix(in srgb, var(--tono) 17%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent),
-              inset 0 0 0 1px color-mix(in srgb, var(--tono) 26%, transparent),
-              0 3px 10px color-mix(in srgb, var(--tono) 20%, transparent);
+  background: linear-gradient(180deg, var(--vidrio-luz), transparent 60%), var(--card2);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
 }
 .rec-ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor;
   stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -3264,9 +3253,9 @@ html[data-theme="light"] .vista-nutricion textarea {
 }
 .rec-hora i {
   font-style: normal; font-size: .7rem; font-weight: 700; letter-spacing: 0;
-  color: var(--tono); margin-left: 6px; vertical-align: 5px;
+  color: var(--dim); margin-left: 6px; vertical-align: 5px;
   padding: 2px 6px; border-radius: 999px;
-  background: color-mix(in srgb, var(--tono) 15%, transparent);
+  background: color-mix(in srgb, var(--card2) 80%, transparent);
 }
 .rec-que { font-size: .9rem; font-weight: 600; margin-top: 3px; letter-spacing: -.01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -3277,8 +3266,7 @@ html[data-theme="light"] .vista-nutricion textarea {
    apagan: una fila de diez horas iguales no dice en cual vas. */
 .rec-tira {
   display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; padding-top: 11px;
-  border-top: 1px solid color-mix(in srgb, var(--tono) 14%, transparent);
-  cursor: pointer;
+  border-top: 1px solid var(--line); cursor: pointer;
 }
 .rec-h {
   font-size: .72rem; font-weight: 700; padding: 4px 8px; border-radius: 9px;
@@ -3287,26 +3275,24 @@ html[data-theme="light"] .vista-nutricion textarea {
   box-shadow: inset 0 1px 0 var(--vidrio-rim);
 }
 .rec-h.ida { opacity: .4; }
+/* La siguiente, con el tono puesto pero de tinta y no de fondo: un relleno
+   solido aqui volvia a ser una mancha de color por tarjeta. */
 .rec-h.sig {
-  color: var(--on-acc); background: var(--tono);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--tono) 40%, transparent);
+  color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tono) 30%, transparent);
 }
 
 .rec-crear { flex: none; }
-.rec-porque { margin: 11px 0 0; padding-top: 10px;
-  border-top: 1px solid color-mix(in srgb, var(--tono) 14%, transparent); }
+.rec-porque { margin: 11px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
 
 /* ---------- apagado ----------
-   Se va el color, se va el brillo y se para el reflejo. Un recordatorio que no
-   va a sonar no tiene por que verse igual que uno que si. */
-.rec.apagada {
-  background: linear-gradient(180deg, var(--vidrio-luz), transparent 50%), var(--card);
-  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
-  filter: saturate(.25);
-}
+   Se va el color, se para el reflejo y la tarjeta se hunde. Un recordatorio que
+   no va a sonar no tiene por que verse igual que uno que si. */
+.rec.apagada { box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+  filter: saturate(.2); }
 .rec.apagada::before { animation: none; opacity: 0; }
 .rec.apagada .rec-hora, .rec.apagada .rec-que { color: var(--dim); }
-.rec.apagada .rec-ico { box-shadow: inset 0 0 0 1px var(--line); }
 
 /* Entran escalonadas, como las casillas del filtro */
 @media (prefers-reduced-motion: no-preference) {
@@ -3322,28 +3308,19 @@ html[data-theme="light"] .vista-nutricion textarea {
   to { opacity: 1; }
 }
 
-/* En claro el vidrio se hace con la sombra y no con el degradado: una lamina
+/* En claro el relieve lo hace la sombra y no el degradado: una lamina
    translucida blanca sobre blanco no se ve. */
 html[data-theme="light"] .rec {
-  background:
-    linear-gradient(148deg, color-mix(in srgb, var(--tono) 13%, var(--card)) 0%,
-                    var(--card) 55%);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--tono) 16%, transparent),
-    0 6px 18px color-mix(in srgb, var(--tono) 14%, transparent),
-    0 1px 2px rgba(16, 24, 40, .06);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line), var(--vidrio-sombra);
 }
 html[data-theme="light"] .rec.apagada {
-  background: var(--card);
   box-shadow: inset 0 0 0 1px var(--line), var(--vidrio-sombra-corta);
 }
 html[data-theme="light"] .rec-h { background: var(--card2); box-shadow: none; }
-/* En claro el texto de la pastilla es blanco, y blanco sobre el ambar de la
-   comida no se lee. Se oscurece el fondo lo justo para que cualquier tono
-   aguante el blanco encima. */
 html[data-theme="light"] .rec-h.sig {
-  background: color-mix(in srgb, var(--tono) 74%, #000); color: #fff;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--tono) 32%, transparent);
+  background: color-mix(in srgb, var(--tono) 11%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tono) 32%, transparent);
 }
 
 /* ---------- el interruptor ----------
@@ -3363,10 +3340,14 @@ html[data-theme="light"] .rec-h.sig {
   box-shadow: 0 2px 5px rgba(0, 0, 0, .32), 0 0 0 .5px rgba(0, 0, 0, .06);
   transition: transform .26s cubic-bezier(.3, 1.4, .5, 1);
 }
+/* Verde, siempre, sea del tipo que sea: en iOS todos los interruptores son del
+   mismo color, y es lo que deja que el color del icono signifique algo. Cinco
+   interruptores de cinco colores distintos no distinguen nada, solo pintan. */
 .rec .sw.on {
-  background: var(--tono);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 25%, transparent),
-              0 2px 8px color-mix(in srgb, var(--tono) 40%, transparent);
+  background: var(--acc);
+  /* Sin halo: en iOS un interruptor encendido no brilla, y cinco halos verdes
+     en una lista son cinco manchas que compiten con la hora, que es el dato. */
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent);
 }
 .rec .sw.on::after { transform: translateX(20px); }
 @media (prefers-reduced-motion: reduce) {
