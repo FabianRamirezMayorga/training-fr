@@ -193,6 +193,7 @@
     Comidas.anotar({
       plato: d.comida.plato || d.comida.nombre || 'Comida',
       kcal: d.comida.kcal, prot: d.comida.prot,
+      carbo: d.comida.carbo, grasa: d.comida.grasa,
       detalle: d.comida.nombre || '',
       fuente: 'menu', ref: r
     });
@@ -273,6 +274,8 @@
         let confianza = '';
         let consejo = '';
         let veredicto = '';
+        let carbo = 0;
+        let grasa = 0;
 
         /* La resta, que es de la app. Se repinta cada vez que cambian los
            números —también si los corriges a mano—, porque lo que importa es lo
@@ -350,6 +353,8 @@
             confianza = r2.confianza || '';
             consejo = r2.consejo || '';
             veredicto = r2.veredicto || '';
+            carbo = r2.carbo || 0;
+            grasa = r2.grasa || 0;
             visto.innerHTML = esc(r2.nota || '') +
               (r2.confianza ? ' <span class="chip tiny-chip">' + esc(r2.confianza) + '</span>' : '');
             pintarDiag();
@@ -395,6 +400,7 @@
           UI.closeModal();
           Comidas.anotar({
             plato: plato, kcal: kcal, prot: Number(campoProt.value) || 0,
+            carbo: carbo, grasa: grasa,
             detalle: detalle, confianza: confianza,
             fuente: 'cambio', ref: r,
             sustituye: c.plato || c.nombre || '',

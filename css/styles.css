@@ -1526,6 +1526,95 @@ img[src^="data/img/"] {
 .sec-boton { margin-left: auto; flex: none; }
 .sec-cola + .sec-boton { margin-left: 10px; }
 
+/* ---------- los cajones del dia ----------
+   Cada uno dice para que sirve y lleva al fondo la silueta de lo que es. La
+   silueta no es adorno: cuatro cajones con el mismo gris se distinguen por el
+   texto, y con su dibujo detras se distinguen antes de leer. Muy flojo —si se
+   nota, molesta— y sin tocar nada: vive detras de todo y no recibe toques. */
+.sec-marcada > summary {
+  position: relative; overflow: hidden; align-items: flex-start;
+}
+
+/* Dentro del summary: un details oculta todos sus hijos menos el summary
+   mientras esta plegado, y ahi fuera la silueta no se veia nunca —justo cuando
+   mas falta hace—. Ademas asi se queda con la cabecera al abrir el cajon, en
+   vez de irse al centro de una lista de mil pixeles. */
+.sec-silueta {
+  position: absolute; right: -26px; top: 50%; transform: translateY(-50%);
+  width: 86px; height: 86px; pointer-events: none; z-index: 0;
+  color: var(--txt); opacity: .055;
+}
+.sec-silueta svg { width: 100%; height: 100%; fill: none; stroke: currentColor;
+  stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+/* Sangrada por el canto y muy floja: las cifras del cajon caen justo encima, y
+   una silueta que se pelea con el numero que tapa es peor que ninguna. */
+html[data-theme="light"] .sec-silueta { opacity: .05; }
+
+/* Y el contenido del summary por encima de ella */
+.sec-marcada > summary > *:not(.sec-silueta) { position: relative; z-index: 1; }
+.sec-tit {
+  display: block; font-size: .78rem; font-weight: 800; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--dim);
+}
+/* La frase que dice para que sirve el cajon. Plegado, «HIDRATACION · 2,5 L hoy»
+   dice cuanto llevas pero no que ahi dentro se marca cada vaso. */
+.sec-sub {
+  display: block; margin-top: 3px; font-size: .76rem; line-height: 1.35;
+  color: var(--dim2); text-transform: none; letter-spacing: 0; font-weight: 500;
+}
+.sec-marcada > summary .sec-cola { align-self: center; }
+.sec-marcada > summary .sec-boton { align-self: center; }
+.sec-marcada > summary .sec-flecha { margin-top: 1px; }
+
+/* ---------- de donde salen las calorias ----------
+   Las dos barras dicen cuanto llevas; esto dice de que. Se puede ir bien de
+   kcal y estar comiendo solo pan. */
+.rep-tira { display: flex; margin-top: 11px; }
+.rep-dato { flex: 1; min-width: 0; text-align: center; }
+.rep-dato + .rep-dato { border-left: 1px solid var(--line); }
+.rd-punto { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  margin-bottom: 3px; }
+.rep-dato b { display: block; font-size: 1.05rem; font-weight: 800;
+  letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.rep-dato b i { font-style: normal; font-size: .66rem; font-weight: 700;
+  color: var(--dim); margin-left: 1px; }
+.rep-dato .tiny { display: block; margin-top: 1px; }
+
+/* ---------- como voy con el plan ----------
+   Siete dias y, en cada uno, las tres cosas que el plan pide. Sin nota ni
+   porcentaje: tres marcas por dia y la semana se lee de un vistazo. Un numero
+   sobre esto solo serviria para sentirse mal un dia malo. */
+.plan-sem { display: flex; gap: 5px; }
+.ps-dia {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center;
+  gap: 2px; padding: 7px 2px 8px; border-radius: 12px;
+}
+.ps-dia.es-hoy {
+  background: color-mix(in srgb, var(--acc) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 24%, transparent);
+}
+.ps-letra { font-size: .63rem; font-weight: 700; color: var(--dim2);
+  text-transform: uppercase; }
+.ps-dia.es-hoy .ps-letra { color: var(--acc); }
+.ps-num { font-size: .82rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ps-marcas { display: flex; gap: 3px; margin-top: 4px; }
+
+.ps-punto {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--card2);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dim2) 40%, transparent);
+}
+.ps-punto.entreno.si { background: var(--acc); box-shadow: none; }
+.ps-punto.prote.si { background: var(--brand-1); box-shadow: none; }
+.ps-punto.agua.si { background: var(--blue); box-shadow: none; }
+
+.plan-leyenda {
+  display: flex; gap: 14px; justify-content: center; margin-top: 11px;
+  padding-top: 10px; border-top: 1px solid var(--line);
+  font-size: .7rem; color: var(--dim2);
+}
+.plan-leyenda span { display: flex; align-items: center; gap: 5px; }
+
 /* El titulo de un cajon no se parte: con un boton al lado, «Lo que voy a
    entrenar» se iba a dos renglones y el cajon crecia el doble por nada. Lo que
    cede es la cola, que para eso lleva puntos suspensivos. */

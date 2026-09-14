@@ -2097,6 +2097,7 @@
       '- Comida de casa, cocinada como se cocina en casa: con su aceite.\n' +
       '- Si lo que ha escrito no es comida, devuelve kcal 0 y dilo en "nota".\n\n' +
       'Devuelve JSON: {"plato":"cómo llamarlo, corto","kcal":número,"prot":gramos,' +
+      '"carbo":gramos,"grasa":gramos,' +
       '"alimentos":[{"que":"alimento","cuanto":"cantidad que has supuesto"}],' +
       '"confianza":"alta|media|baja","nota":"una frase, lo que has supuesto"}';
 
@@ -2280,7 +2281,7 @@
       'confianza. Si en la foto no hay comida, dilo con kcal 0.\n\n' +
       'Devuelve JSON: {"plato":"cómo llamarías a esto en 2-5 palabras",' +
       '"alimentos":[{"que":"nombre","cuanto":"ración estimada","kcal":número,' +
-      '"prot":número}],"kcal":número,"prot":número,' +
+      '"prot":número}],"kcal":número,"prot":número,"carbo":número,"grasa":número,' +
       '"confianza":"alta|media|baja","nota":"una frase con lo que no has podido ' +
       'ver bien o lo que has dado por supuesto"}\n\n' +
       'Estima sin miedo pero sin adornar: si el plato lleva más aceite o más ' +

@@ -84,6 +84,7 @@
       ${raw(seccionComer(menu))}
       ${raw(seccionEntrenar(rutina))}
       ${raw(seccionComido(m, h, comidas, faltanKcal, faltanProt))}
+      ${raw(seccionPlan(m))}
 
       <div style="height:10px"></div>`;
   };
@@ -100,26 +101,62 @@
      para hacer. Cada uno se abre tocándolo y se queda como lo dejes. */
   const seccionesDia = {};
 
-  function plegable(id, titulo, cola, cuerpo, extra) {
-    if (!cuerpo) return '';
+  /* Un cajón. Lleva su título, lo que dice plegado, una frase que explica para
+     qué sirve y, al fondo, la silueta de lo que es.
+
+     La frase no es adorno: plegado, «HIDRATACIÓN · 2,5 L hoy» dice cuánto has
+     bebido pero no que ahí dentro se marca cada vaso. Quien no lo abra no se
+     entera de que existe, y quien lo abra tendrá que deducirlo. */
+  function plegable(o) {
+    if (!o.cuerpo) return '';
     return html`
-      <details class="seccion" data-sec="${id}"${raw(seccionesDia[id] ? ' open' : '')}>
+      <details class="seccion sec-marcada" data-sec="${o.id}"${raw(
+        seccionesDia[o.id] ? ' open' : '')}>
         <summary>
+          <!-- La silueta va DENTRO del summary y no suelta en el details: un
+               details oculta todos sus hijos menos el summary mientras está
+               plegado, así que ahí fuera no se veía nunca —que es justo cuando
+               más falta hace, para distinguir un cajón de otro sin leerlos—. -->
+          ${raw(o.marca ? '<span class="sec-silueta">' + icon(o.marca) + '</span>' : '')}
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
-          <span class="list-title" style="margin:0">${titulo}</span>
-          ${raw(cola ? '<span class="tiny sec-cola">' + esc(cola) + '</span>' : '')}
-          ${raw(extra || '')}
+          <span class="grow" style="min-width:0">
+            <span class="sec-tit">${o.titulo}</span>
+            ${raw(o.sub ? '<span class="sec-sub">' + esc(o.sub) + '</span>' : '')}
+          </span>
+          ${raw(o.cola ? '<span class="tiny sec-cola">' + esc(o.cola) + '</span>' : '')}
+          ${raw(o.extra || '')}
         </summary>
-        <div class="sec-cuerpo"><div class="stack">${raw(cuerpo)}</div></div>
+        <div class="sec-cuerpo"><div class="stack">${raw(o.cuerpo)}</div></div>
       </details>`;
   }
 
   function seccionAgua() {
     const cuerpo = g.Marcar ? Marcar.aguaDeHoyHTML() : '';
     if (!cuerpo) return '';
+
+    const m = g.Menus ? Menus.activo() : null;
+    const h = m && m.plan && m.plan.hidratacion;
+    const tomas = (h && h.pauta || []).length;
     const llevo = g.Agua && Agua.seLleva() ? Agua.hoy() : null;
-    return plegable('agua', 'Hidratación',
-      llevo ? String(llevo.litros).replace('.', ',') + ' L hoy' : '', cuerpo);
+    const hechas = llevo
+      ? (h && h.pauta || []).filter(function (x, i) {
+          return Agua.marcada(m.id + '#' + i);
+        }).length
+      : 0;
+
+    return plegable({
+      id: 'agua', titulo: 'Hidratación', marca: 'vaso',
+      cola: llevo ? String(llevo.litros).replace('.', ',') + ' L hoy' : '',
+      /* «Llevas 0» a secas contradecía al «2,5 L hoy» de al lado cuando el agua
+         venía de vasos sueltos: lo que cuenta la frase son las tomas de la
+         pauta marcadas, y hay que decirlo. */
+      sub: !llevo ? 'Tu pauta de agua del día.'
+        : tomas
+          ? 'Tu pauta son ' + tomas + ' tomas y llevas ' + hechas +
+            ' marcadas. Marca cada vez que bebas.'
+          : 'Marca cada vaso y aquí verás cuánto llevas.',
+      cuerpo: cuerpo
+    });
   }
 
   function seccionComer(menu) {
@@ -140,20 +177,44 @@
             ${raw(icon('chispa'))} Prepararme el menú</button>
         </div>`;
 
-    return plegable('comer', 'Lo que debo comer',
-      total ? UI.num(total) + ' kcal' : '', cuerpo);
+    const cuantas = (menu && menu.comidas || []).length;
+    const hechas = cuantas && g.Menus && g.Comidas && Comidas.seLleva()
+      ? (function () {
+          const d = Menus.hoyConRef();
+          if (!d) return 0;
+          return (d.dia.comidas || []).filter(function (c, j) {
+            return Comidas.marcada(Marcar.ref(d.menu.id, d.i, j));
+          }).length;
+        })()
+      : 0;
+
+    return plegable({
+      id: 'comer', titulo: 'Lo que debo comer', marca: 'nutricion',
+      cola: total ? UI.num(total) + ' kcal' : '',
+      sub: !cuantas ? 'Todavía no tienes menú para hoy.'
+        : hechas >= cuantas
+          ? 'Las ' + cuantas + ' comidas de hoy, resueltas.'
+          : 'Son ' + cuantas + ' comidas y llevas ' + hechas +
+            '. Marca la que te comas, o dime si comiste otra cosa.',
+      cuerpo: cuerpo
+    });
   }
 
   function seccionEntrenar(rutina) {
     if (!rutina) {
-      return plegable('entrenar', 'Lo que voy a entrenar', 'Hoy descansas', html`
+      return plegable({
+        id: 'entrenar', titulo: 'Lo que voy a entrenar', marca: 'dumbbell',
+        cola: 'Hoy descansas',
+        sub: 'Hoy no toca nada. Descansar también es parte del plan.',
+        cuerpo: html`
         <div class="card">
           <b>Hoy descansas</b>
           <p class="tiny" style="margin:6px 0 0">No hay ninguna rutina puesta para hoy.
           Descansar es parte del plan; si te apetece moverte, camina o apunta lo que hagas.</p>
           <button class="btn block sm" data-a="rutinas" style="margin-top:10px">
             Elegir una rutina igualmente</button>
-        </div>`);
+        </div>`
+      });
     }
 
     const series = rutina.exercises.reduce(function (n, e) { return n + e.sets; }, 0);
@@ -182,13 +243,36 @@
 
     /* El botón de entrenar va en la cabecera y no dentro: si estuviera dentro
        habría que desplegar la rutina entera para poder empezarla. */
+    /* Qué músculos se llevan el trabajo de hoy. Es lo que uno tiene en la
+       cabeza —«hoy toca pierna»— y lo que hace que la frase diga algo en vez
+       de repetir el número de ejercicios que ya está a la derecha. */
+    const zonas = [];
+    rutina.exercises.forEach(function (re) {
+      const ex = Data.get(re.exId);
+      ((ex && ex.primaryMuscles) || []).forEach(function (mu) {
+        const n = I18N.muscle(mu);
+        if (n && zonas.indexOf(n) === -1) zonas.push(n);
+      });
+    });
+
+    const listaZonas = zonas.length > 3
+      ? zonas.slice(0, 3).join(', ') + ' y ' + (zonas.length - 3) + ' más'
+      : zonas.length > 1
+        ? zonas.slice(0, -1).join(', ') + ' y ' + zonas[zonas.length - 1]
+        : zonas[0] || '';
+
     /* Solo los ejercicios en la cola: con el botón de entrenar al lado no cabe
        «5 ejercicios · 20 series» sin partir el título en dos renglones, y las
        series ya salen dentro. */
-    return plegable('entrenar', 'Lo que voy a entrenar',
-      rutina.exercises.length + ' ejercicios', cuerpo,
-      '<button class="btn primary sm sec-boton" data-a="entrenar">' +
-      icon('play') + ' Entrenar</button>');
+    return plegable({
+      id: 'entrenar', titulo: 'Lo que voy a entrenar', marca: 'dumbbell',
+      cola: rutina.exercises.length + ' ejercicios',
+      sub: (listaZonas ? 'Hoy le das a ' + listaZonas + '. ' : '') +
+        rutina.exercises.length + ' ejercicios y ' + series + ' series.',
+      cuerpo: cuerpo,
+      extra: '<button class="btn primary sm sec-boton" data-a="entrenar">' +
+        icon('play') + ' Entrenar</button>'
+    });
   }
 
   function seccionComido(m, h, comidas, faltanKcal, faltanProt) {
@@ -241,8 +325,134 @@
         }).join(''))}
       </div>` : '';
 
-    return plegable('comido', 'Lo que llevo comido',
-      m ? UI.num(h.kcal) + ' / ' + UI.num(m.kcal) + ' kcal' : '', cuerpo + lista);
+    return plegable({
+      id: 'comido', titulo: 'Lo que llevo comido', marca: 'proteina',
+      cola: m ? UI.num(h.kcal) + ' / ' + UI.num(m.kcal) + ' kcal' : '',
+      sub: !m ? 'Sin tus datos no puedo calcular nada.'
+        : !h.cuantas ? 'Todavía no has apuntado nada hoy.'
+        : faltanProt
+          ? 'Te faltan ' + faltanProt + ' g de proteína y ' + UI.num(faltanKcal) + ' kcal.'
+          : 'Proteína del día cubierta.',
+      cuerpo: cuerpo + repartoHTML(h, m) + lista
+    });
+  }
+
+  /* ---------- el reparto del día ----------
+     Las dos barras dicen cuánto llevas de calorías y de proteína. Esto dice de
+     dónde salen esas calorías, que es otra pregunta: se puede ir bien de kcal y
+     estar comiendo solo pan.
+
+     Lo apuntado antes de que se guardaran hidratos y grasa no los lleva. En vez
+     de rellenarlos con ceros —que dibujaría una dieta sin hidratos, que es
+     mentira— se dice cuántos apuntes se están contando. */
+  function repartoHTML(h, m) {
+    if (!h || !h.conMacros) return '';
+
+    const total = h.prot * 4 + h.carbo * 4 + h.grasa * 9;
+    if (!total) return '';
+    const pct = function (gr, cal) { return Math.round(gr * cal / total * 100); };
+
+    const trozo = function (color, gramos, nombre) {
+      return '<div class="rep-dato"><span class="rd-punto" style="background:' + color +
+        '"></span><b>' + gramos + '<i>g</i></b><span class="tiny">' + esc(nombre) +
+        '</span></div>';
+    };
+
+    return html`
+      <div class="card tarjeta-premium">
+        <div class="pre-encima">De dónde salen esas calorías</div>
+        <div class="macro-bar nu-bar" style="margin-top:9px">
+          <i style="width:${pct(h.prot, 4)}%;background:var(--brand-1)"></i>
+          <i style="width:${pct(h.carbo, 4)}%;background:var(--acc)"></i>
+          <i style="width:${pct(h.grasa, 9)}%;background:var(--warn)"></i>
+        </div>
+        <div class="rep-tira">
+          ${raw(trozo('var(--brand-1)', h.prot, 'proteína'))}
+          ${raw(trozo('var(--acc)', h.carbo, 'hidratos'))}
+          ${raw(trozo('var(--warn)', h.grasa, 'grasa'))}
+        </div>
+        ${raw(h.conMacros < h.cuantas ? '<p class="tiny" style="margin:9px 0 0">' +
+          'De ' + h.conMacros + ' de los ' + h.cuantas + ' apuntes de hoy; los demás ' +
+          'se anotaron cuando solo se guardaban calorías y proteína.</p>' : '')}
+      </div>`;
+  }
+
+  /* ---------- cómo voy con el plan ----------
+     Un día suelto no dice nada: se puede fallar un martes y llevar una semana
+     impecable. Esto son los últimos siete días, y en cada uno las tres cosas
+     que el plan pide —entrenar, llegar a la proteína y beber el agua—.
+
+     Sin nota ni porcentaje: tres marcas por día y la semana se lee de un
+     vistazo. Un número sobre esto solo serviría para sentirse mal un día malo. */
+  function seccionPlan(m) {
+    if (!m || !g.Comidas) return '';
+
+    const dias = [];
+    const sesiones = Store.sessions();
+    const aguaMeta = (Number(Perfil.agua()) || 0) * 1000;
+
+    for (let i = 6; i >= 0; i--) {
+      const t = Date.now() - i * 86400000;
+      const clave = Comidas.claveDia(t);
+      const lista = Comidas.del(clave);
+      const kcal = lista.reduce(function (n, x) { return n + (Number(x.kcal) || 0); }, 0);
+      const prot = lista.reduce(function (n, x) { return n + (Number(x.prot) || 0); }, 0);
+      const ml = g.Agua ? Agua.del(clave).reduce(function (n, x) {
+        return n + (Number(x.ml) || 0);
+      }, 0) : 0;
+
+      dias.push({
+        t: t,
+        letra: ['D', 'L', 'M', 'X', 'J', 'V', 'S'][new Date(t).getDay()],
+        num: new Date(t).getDate(),
+        esHoy: i === 0,
+        entreno: sesiones.some(function (x) {
+          return Comidas.claveDia(x.start) === clave;
+        }),
+        /* «Llegar» es el 90 %: exigir el 100 % de una estimación es exigir
+           suerte, no constancia. */
+        proteina: m.prot > 0 && prot >= m.prot * 0.9,
+        agua: aguaMeta > 0 && ml >= aguaMeta * 0.9,
+        sinNada: !lista.length && !ml
+      });
+    }
+
+    const cumplidos = dias.reduce(function (n, d) {
+      return n + (d.entreno ? 1 : 0) + (d.proteina ? 1 : 0) + (d.agua ? 1 : 0);
+    }, 0);
+
+    const cuerpo = html`
+      <div class="card tarjeta-premium">
+        <div class="plan-sem">
+          ${raw(dias.map(function (d) {
+            const punto = function (ok, clase, titulo) {
+              return '<span class="ps-punto ' + clase + (ok ? ' si' : '') + '" ' +
+                'title="' + esc(titulo) + '"></span>';
+            };
+            return '<div class="ps-dia' + (d.esHoy ? ' es-hoy' : '') + '">' +
+              '<span class="ps-letra">' + d.letra + '</span>' +
+              '<span class="ps-num">' + d.num + '</span>' +
+              '<span class="ps-marcas">' +
+              punto(d.entreno, 'entreno', 'Entrenaste') +
+              punto(d.proteina, 'prote', 'Llegaste a la proteína') +
+              punto(d.agua, 'agua', 'Bebiste el agua') +
+              '</span></div>';
+          }).join(''))}
+        </div>
+        <div class="plan-leyenda">
+          <span><i class="ps-punto entreno si"></i> Entreno</span>
+          <span><i class="ps-punto prote si"></i> Proteína</span>
+          <span><i class="ps-punto agua si"></i> Agua</span>
+        </div>
+      </div>`;
+
+    return plegable({
+      id: 'plan', titulo: 'Cómo voy con el plan', marca: 'grafica',
+      cola: cumplidos + ' de 21',
+      sub: 'Los últimos siete días: si entrenaste, si llegaste a la proteína y ' +
+        'si bebiste el agua.',
+      cuerpo: cuerpo
+    });
   }
 
   V.dia.mount = function (root) {

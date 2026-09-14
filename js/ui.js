@@ -75,6 +75,9 @@
        de nutricion —una pera— porque era el de la pantalla donde nacio el
        primero, y desde entonces habia que adivinar que ese boton abria la
        camara. Un icono que no dice lo que hace su boton es peor que ninguno. */
+    /* Un vaso con su linea de agua. La gota valia para un icono pequeno, pero
+       de silueta al fondo de una tarjeta de hidratacion un vaso se lee antes. */
+    vaso: '<svg viewBox="0 0 24 24"><path d="M6 3h12l-1.3 17a1 1 0 01-1 .9H8.3a1 1 0 01-1-.9L6 3z"/><path d="M6.6 10.5h10.8"/></svg>',
     camara: '<svg viewBox="0 0 24 24"><path d="M9 8l1.2-2.4h3.6L15 8h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2z"/><circle cx="12" cy="14" r="3.4"/></svg>',
     chevron: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
     filtro: '<svg viewBox="0 0 24 24"><path d="M3 7h18M6 12h12M10 17h4"/></svg>',

@@ -51,14 +51,24 @@
     return (lista || []).reduce(function (a, x) {
       a.kcal += Number(x.kcal) || 0;
       a.prot += Number(x.prot) || 0;
+      a.carbo += Number(x.carbo) || 0;
+      a.grasa += Number(x.grasa) || 0;
+      /* Cuántos de los apuntes saben de hidratos y grasa: con esto la pantalla
+         puede decir «esto es de lo que hay dato» en vez de dar un reparto por
+         completo cuando la mitad son ceros. */
+      if (x.carbo != null && x.grasa != null && (x.carbo || x.grasa)) a.conMacros++;
       return a;
-    }, { kcal: 0, prot: 0 });
+    }, { kcal: 0, prot: 0, carbo: 0, grasa: 0, conMacros: 0 });
   }
 
   function hoy() {
     const l = del();
     const s = suma(l);
-    return { lista: l, kcal: Math.round(s.kcal), prot: Math.round(s.prot) };
+    return {
+      lista: l, kcal: Math.round(s.kcal), prot: Math.round(s.prot),
+      carbo: Math.round(s.carbo), grasa: Math.round(s.grasa),
+      conMacros: s.conMacros, cuantas: l.length
+    };
   }
 
   function anotar(c) {
@@ -69,6 +79,13 @@
       plato: String(c.plato || 'Comida').slice(0, 80),
       kcal: Math.max(0, Math.round(Number(c.kcal) || 0)),
       prot: Math.max(0, Math.round(Number(c.prot) || 0)),
+      /* Hidratos y grasa: sin ellos el recuento del día solo sabía decir
+         calorías y proteína, y el reparto del día —que es lo que dice si estás
+         comiendo bien o solo comiendo poco— no se podía dibujar. Lo apuntado
+         antes de esto no los lleva, y se nota en el dibujo en vez de rellenarlo
+         con ceros como si fueran un dato. */
+      carbo: Math.max(0, Math.round(Number(c.carbo) || 0)),
+      grasa: Math.max(0, Math.round(Number(c.grasa) || 0)),
       detalle: String(c.detalle || '').slice(0, 300),
       confianza: c.confianza || '',
       fuente: c.fuente || 'mano',
@@ -144,7 +161,8 @@
       const t = Date.now() - i * 86400000;
       const d = claveDia(t);
       const s = suma(del(d));
-      fuera.push({ dia: d, t: t, kcal: Math.round(s.kcal), prot: Math.round(s.prot) });
+      fuera.push({ dia: d, t: t, kcal: Math.round(s.kcal), prot: Math.round(s.prot),
+        carbo: Math.round(s.carbo), grasa: Math.round(s.grasa) });
     }
     return fuera;
   }

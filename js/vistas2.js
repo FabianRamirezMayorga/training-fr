@@ -568,7 +568,7 @@
 
       Comidas.anotar({
         plato: r.plato || 'Comida',
-        kcal: r.kcal, prot: r.prot,
+        kcal: r.kcal, prot: r.prot, carbo: r.carbo, grasa: r.grasa,
         detalle: detalle || r.nota || '',
         confianza: r.confianza || '',
         fuente: 'foto'
@@ -623,6 +623,12 @@
         const btnOk = el.querySelector('#cm-ok');
         let detalle = '';
         let confianza = '';
+        /* El formulario solo pide calorías y proteína —son las que se saben de
+           memoria—, pero si ha pasado por la IA también hay hidratos y grasa, y
+           tirarlos sería quedarse sin el reparto del día por no guardar dos
+           números que ya están calculados. */
+        let carbo = 0;
+        let grasa = 0;
 
         /* Rellena los números con lo que calcule la IA, pero SIN guardar: lo que
            sale de una estimación se mira antes, y si algo no cuadra se corrige
@@ -642,6 +648,8 @@
             campoKcal.value = Math.round(r.kcal);
             campoProt.value = Math.round(r.prot || 0);
             if (r.plato) campoPlato.value = r.plato;
+            carbo = Math.round(r.carbo || 0);
+            grasa = Math.round(r.grasa || 0);
 
             detalle = (r.alimentos || []).map(function (a) {
               return a.que + (a.cuanto ? ' (' + a.cuanto + ')' : '');
@@ -688,6 +696,7 @@
 
           Comidas.anotar({
             plato: plato || 'Comida', kcal: kcal, prot: prot,
+            carbo: carbo, grasa: grasa,
             detalle: detalle, confianza: confianza,
             fuente: detalle ? 'texto' : 'mano'
           });
