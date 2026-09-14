@@ -2638,8 +2638,9 @@ html[data-theme="light"] .campo-largo { background: #fff; border-color: var(--li
 .campo-leido { margin-top: 7px; font-size: .92rem; color: var(--txt); }
 .campo-val .campo-fijo { text-align: right; }
 
-/* El nombre es texto, no un numero: se lee mejor empezando por la izquierda. */
-#p-nombre { text-align: left; }
+/* El nombre, centrado como los demas valores: en su pastilla, pegado a un
+   lado se lee como si se hubiera escapado de la caja. */
+#p-nombre { text-align: center; }
 
 /* ---------- las opciones, en filas ----------
    Cinco niveles de actividad con su matiz no son cinco etiquetas sueltas: cada
