@@ -101,29 +101,27 @@
 
       <div class="row between" style="margin-top:20px;align-items:center">
         <span class="list-title" style="margin:0">Mis menús</span>
-        ${raw(!menus.length ? ''
-          : IA.activa()
-            ? '<button class="btn primary sm btn-arranque" data-a="generar">' +
-              icon('plus') + ' Nuevo</button>'
-            /* Sin la IA configurada no se puede pedir otro, pero esconder el
-               boton deja la pantalla sin decir por que: mejor que lleve a
-               donde se arregla. */
-            : '<button class="btn sm ghost" data-a="configIA">' +
-              icon('plus') + ' Nuevo</button>')}
+        <!-- Siempre el mismo botón, con IA o sin ella: desde que se puede crear
+             un menú genérico, mandar a configurar el entrenador era negarle a
+             quien no lo tiene la única forma que sí podía usar. La hoja ya
+             ofrece las dos, y la de IA lleva a configurarla si hace falta. -->
+        ${raw(menus.length
+          ? '<button class="btn primary sm btn-arranque" data-a="generar">' +
+            icon('plus') + ' Nuevo</button>'
+          : '')}
       </div>
 
       ${raw(menus.length
         ? menus.map(function (x, i) { return menuCaja(x, i, x.id === activo, p); }).join('')
         : html`
         <div class="card tarjeta-premium">
-          <p class="muted" style="margin:0 0 12px;font-size:.9rem">Puedo prepararte un menú
-          semanal que cuadre con esas calorías, con tu tipo de dieta, lo que no puedes comer
-          y lo que tienes en casa, más la lista de la compra. Puedes guardar los que quieras
-          —el de la semana fuerte, el de cuando viajas— y marcar cuál manda.</p>
-          ${raw(IA.activa()
-            ? '<button class="btn primary block btn-arranque" data-a="generar">' +
-              icon('chispa') + ' Crear mi primer menú</button>'
-            : '<button class="btn block" data-a="configIA">Necesita el entrenador con IA</button>')}
+          <p class="muted" style="margin:0 0 12px;font-size:.9rem">Un menú semanal que
+          cuadre con tus calorías, tu dieta, lo que no puedes comer y lo que tienes en casa.
+          Lo prepara el entrenador con IA, o se hace uno genérico con tus números si
+          prefieres poner tú los platos. Puedes guardar los que quieras —el de la semana
+          fuerte, el de cuando viajas— y marcar cuál manda.</p>
+          <button class="btn primary block btn-arranque" data-a="generar">
+            ${raw(icon('plus'))} Crear mi primer menú</button>
         </div>`)}
 
       ${raw(menus.length > 1 ? html`
@@ -829,35 +827,26 @@
         });
     });
 
-    /* Pedirle uno a la IA. `sobre` es el menú que se rehace: si viene, la
-       respuesta ocupa su sitio y conserva su nombre; si no, se guarda uno nuevo
-       y los de antes se quedan donde estaban. Antes solo existía lo segundo y
-       además machacaba al anterior, que no es ni una cosa ni la otra. */
-    const pedirMenu = function (opciones) {
-      opciones = opciones || {};
-      const sobre = opciones.sobre || null;
-      const btn = root.querySelector('[data-a=generar]') ||
-        root.querySelector('[data-a=regenerar]') || root.querySelector('[data-a=otroMenu]');
-      if (btn) { btn.disabled = true; btn.textContent = 'Preparando el menú…'; }
+    /* Rehacer un menú que ya existe: la respuesta ocupa su sitio y conserva su
+       nombre. Crear uno nuevo NO pasa por aquí —tiene su hoja, con sus
+       preferencias y su paso de mirarlo antes de guardarlo—, porque pedir y
+       guardar a ciegas era justo el problema. */
+    const rehacerMenu = function (sobre) {
+      if (!sobre) { UI.toast('Abre el menú que quieres rehacer'); return; }
+      const btn = root.querySelector('[data-a=regenerar]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Rehaciendo el menú…'; }
 
-      IA.planNutricion({ forzar: !!opciones.forzar,
-        variante: opciones.forzar ? Date.now() % 1000 : 0 })
+      IA.planNutricion({ forzar: true, variante: Date.now() % 1000 })
         .then(function (plan) {
-          if (sobre) {
-            Menus.actualizar(sobre.id, { plan: plan, t: Date.now(), huella: huellaMenu() });
-            menusAbiertos[sobre.id] = true;
-            UI.toast('«' + sobre.nombre + '» rehecho');
-          } else {
-            const nuevo = Menus.crear(plan, Menus.nombreLibre('Mi menú'), huellaMenu());
-            menusAbiertos[nuevo.id] = true;
-            UI.toast('«' + nuevo.nombre + '» guardado');
-          }
+          Menus.actualizar(sobre.id, { plan: plan, t: Date.now(), huella: huellaMenu() });
+          menusAbiertos[sobre.id] = true;
           render();
+          UI.toast('«' + sobre.nombre + '» rehecho');
         })
         .catch(function (e) {
           if (btn) { btn.disabled = false; }
           render();
-          UI.toast(e.message || 'No se pudo crear el menú');
+          UI.toast(e.message || 'No se pudo rehacer el menú');
         });
     };
 
@@ -869,11 +858,11 @@
       return abiertos.filter(function (x) { return x.id === act; })[0] || abiertos[0];
     };
 
-    bind(root, '[data-a=generar]', function () { pedirMenu({}); });
+    bind(root, '[data-a=generar]', function () { nuevoMenuSheet(); });
     bind(root, '[data-a=regenerar]', function () {
-      pedirMenu({ forzar: true, sobre: menuALaVista() });
+      rehacerMenu(menuALaVista());
     });
-    bind(root, '[data-a=otroMenu]', function () { pedirMenu({ forzar: true }); });
+    bind(root, '[data-a=otroMenu]', function () { nuevoMenuSheet(); });
 
     /* Reformular es rehacer, pero guardando antes lo que pide: así no hay que
        ir a buscar el campo de órdenes y vale también para los menús siguientes. */
@@ -883,10 +872,197 @@
       if (!texto) { UI.toast('Escribe qué quieres cambiar'); if (campo) campo.focus(); return; }
       const antes = String(Perfil.datos().ordenesComida || '').trim();
       Perfil.guardar({ ordenesComida: antes ? antes + '; ' + texto : texto });
-      pedirMenu({ forzar: true, sobre: menuALaVista() });
+      rehacerMenu(menuALaVista());
     });
 
   };
+
+  /* ---------- un menú nuevo ----------
+     Antes «Nuevo» llamaba al entrenador y guardaba lo que saliera, sin
+     preguntar nada y sin enseñarlo: pulsabas un botón y te aparecía un menú
+     guardado con un nombre puesto por la app.
+
+     Eso está mal por tres sitios. No te pregunta con qué cuentas ni qué quieres
+     de ESTE menú —que es justo lo que hace que un menú te sirva o no—; no te
+     deja elegir cómo hacerlo, y quien no tenga la IA configurada no podía
+     crear ninguno; y guarda antes de que lo hayas visto, así que un menú que no
+     te gusta ya está en tu lista y hay que ir a borrarlo.
+
+     Ahora son tres pasos: dices lo tuyo, eliges cómo se hace, y lo miras antes
+     de guardarlo. Y sin nombre no se guarda: «Mi menú 4» dentro de un mes no
+     dice nada, y el nombre es lo único que no puede poner la app por ti. */
+  function nuevoMenuSheet(alGuardar) {
+    const p = Perfil.datos();
+    if (!Perfil.completo(p)) {
+      UI.toast('Completa tus datos para calcular el menú');
+      go('datos');
+      return;
+    }
+
+    let plan = null;      // lo generado, todavía sin guardar
+    let comoSeHizo = '';
+
+    UI.modal(html`
+      <h2>Nuevo menú</h2>
+      <p class="muted">Primero lo tuyo, y después decides cómo se hace.</p>
+
+      <div id="nm-paso1">
+        <label class="tiny" style="margin-top:12px;display:block">CÓMO SE LLAMA</label>
+        <input id="nm-nombre" class="input" autocomplete="off"
+               placeholder="Semana fuerte, Cuando viajo, Sin lactosa…">
+        <p class="tiny" style="margin:5px 0 0">Hace falta para guardarlo. Dentro de un mes,
+        «Mi menú 4» no te va a decir cuál es.</p>
+
+        <label class="tiny" style="margin-top:14px;display:block">CON QUÉ CUENTAS</label>
+        <textarea id="nm-despensa" rows="3"
+          placeholder="Ej. arroz, lentejas, huevos, pollo, atún, yogur griego, avena">${p.despensa || ''}</textarea>
+        <p class="tiny" style="margin:5px 0 0">Se guarda con tus preferencias: vale también
+        para los menús siguientes.</p>
+
+        <label class="tiny" style="margin-top:14px;display:block">QUÉ LE PIDES SIEMPRE</label>
+        <textarea id="nm-ordenes" rows="2"
+          placeholder="Ej. nada de pescado; la cena siempre ligera">${p.ordenesComida || ''}</textarea>
+
+        <label class="tiny" style="margin-top:14px;display:block">Y PARA ESTE MENÚ EN CONCRETO</label>
+        <textarea id="nm-extra" rows="2"
+          placeholder="Ej. esta semana viajo y como fuera; cocino solo los domingos"></textarea>
+        <p class="tiny" style="margin:5px 0 0">Esto no se guarda: vale solo para el menú
+        que vas a crear ahora.</p>
+
+        <div class="list-title" style="margin-top:18px">Cómo lo hago</div>
+        <div class="stack">
+          ${raw(IA.activa() ? html`
+            <button class="btn primary block btn-arranque" data-x="ia">
+              ${raw(icon('chispa'))} Crearlo con el entrenador</button>
+            <p class="tiny" style="margin:0">Platos concretos con tus ingredientes, tus
+            horarios y tus condiciones. Tarda unos segundos.</p>` : html`
+            <button class="btn block" data-x="configIA">
+              ${raw(icon('chispa'))} Crearlo con el entrenador (necesita configurarse)</button>`)}
+
+          <button class="btn block" data-x="generico" style="margin-top:6px">
+            ${raw(icon('lista'))} Crear uno genérico, sin IA</button>
+          <p class="tiny" style="margin:0">Reparte tus calorías y tu proteína entre tus
+          comidas y dice qué debe llevar cada una. Los platos los pones tú.</p>
+        </div>
+      </div>
+
+      <div id="nm-paso2" hidden></div>
+
+      <button class="btn ghost block sm" data-x="cerrar" style="margin-top:12px">Cancelar</button>`,
+      function (el) {
+        const campoNombre = el.querySelector('#nm-nombre');
+        const paso1 = el.querySelector('#nm-paso1');
+        const paso2 = el.querySelector('#nm-paso2');
+
+        /* Lo que vale para siempre se guarda en el perfil; lo de este menú, no */
+        const guardarPreferencias = function () {
+          Perfil.guardar({
+            despensa: el.querySelector('#nm-despensa').value.trim(),
+            ordenesComida: el.querySelector('#nm-ordenes').value.trim()
+          });
+        };
+
+        const pintarPaso2 = function () {
+          const dias = (plan.dias || []).length;
+          const comidas = (plan.dias || []).reduce(function (n, d) {
+            return n + ((d.comidas || []).length);
+          }, 0);
+          const primero = (plan.dias || [])[0];
+
+          paso1.hidden = true;
+          paso2.hidden = false;
+          paso2.innerHTML =
+            '<div class="card tarjeta-premium" style="margin-top:12px">' +
+            '<div class="pre-encima">' + esc(comoSeHizo) + '</div>' +
+            '<div class="pre-num" style="margin:2px 0 6px">' + dias +
+            (dias === 1 ? ' día' : ' días') + ' · ' + comidas + ' comidas</div>' +
+            (plan.resumen ? '<p class="muted" style="margin:0;font-size:.88rem">' +
+              esc(plan.resumen) + '</p>' : '') +
+            '</div>' +
+            (primero ? '<div class="list-title">Un día de ejemplo</div>' +
+              '<div class="stack">' + (primero.comidas || []).map(function (c) {
+                return '<div class="meal"><div class="row between">' +
+                  '<b style="font-size:.88rem">' + esc(c.nombre || '') +
+                  (c.hora ? ' <span class="tiny">· ' + esc(c.hora) + '</span>' : '') + '</b>' +
+                  '<span class="tiny">' + UI.num(c.kcal || 0) + ' kcal</span></div>' +
+                  '<div class="muted" style="font-size:.86rem;margin-top:3px">' +
+                  esc(c.plato || '') + '</div></div>';
+              }).join('') + '</div>' : '') +
+            '<button class="btn primary block btn-arranque" data-x="guardar" ' +
+            'style="margin-top:14px">' + icon('check') + ' Guardar este menú</button>' +
+            '<button class="btn block sm" data-x="otra" style="margin-top:8px">' +
+            'Volver y probar de otra forma</button>';
+
+          paso2.querySelector('[data-x=guardar]').onclick = guardar;
+          paso2.querySelector('[data-x=otra]').onclick = function () {
+            plan = null;
+            paso2.hidden = true;
+            paso2.innerHTML = '';
+            paso1.hidden = false;
+          };
+        };
+
+        /* Aquí y solo aquí se guarda. Sin nombre no hay menú: es lo único que
+           no puede poner la app por ti. */
+        const guardar = function () {
+          const nombre = campoNombre.value.trim();
+          if (!nombre) {
+            UI.toast('Ponle un nombre antes de guardarlo');
+            paso2.hidden = true;
+            paso1.hidden = false;
+            campoNombre.focus();
+            return;
+          }
+          UI.closeModal();
+          const m = Menus.crear(plan, nombre, huellaMenu());
+          menusAbiertos[m.id] = true;
+          abrirHoyDe(m.id);
+          render();
+          UI.toast('«' + m.nombre + '» guardado');
+          if (alGuardar) alGuardar(m);
+        };
+
+        el.querySelector('[data-x=cerrar]').onclick = UI.closeModal;
+
+        const botonIA = el.querySelector('[data-x=ia]');
+        if (botonIA) botonIA.onclick = function () {
+          guardarPreferencias();
+          botonIA.disabled = true;
+          botonIA.textContent = 'Preparando el menú…';
+
+          IA.planNutricion({
+            forzar: true,
+            extra: el.querySelector('#nm-extra').value.trim(),
+            variante: Date.now() % 1000
+          }).then(function (r) {
+            plan = r;
+            comoSeHizo = 'Hecho por el entrenador';
+            pintarPaso2();
+          }).catch(function (e) {
+            botonIA.disabled = false;
+            botonIA.innerHTML = icon('chispa') + ' Crearlo con el entrenador';
+            UI.toast(e.message || 'No se pudo crear el menú');
+          });
+        };
+
+        const botonConf = el.querySelector('[data-x=configIA]');
+        if (botonConf) botonConf.onclick = function () {
+          UI.closeModal();
+          go('entrenador');
+        };
+
+        el.querySelector('[data-x=generico]').onclick = function () {
+          guardarPreferencias();
+          const r = Menus.generico();
+          if (!r) { UI.toast('Completa tus datos para calcular el menú'); return; }
+          plan = r;
+          comoSeHizo = 'Genérico, con tus números';
+          pintarPaso2();
+        };
+
+        setTimeout(function () { campoNombre.focus(); }, 60);
+      });
+  }
 
   /* Despliega el día de hoy de un menú, si no se ha tocado ya ninguno suyo.
      Es el que se viene a mirar, y dejarlo cerrado obliga a buscarlo entre siete

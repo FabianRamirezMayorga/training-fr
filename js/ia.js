@@ -1264,7 +1264,15 @@
 
     const litros = Perfil.agua(p);
 
+    /* Lo que pide para ESTE menu y no para todos. Va aparte de las ordenes
+       del perfil —que valen para siempre— porque «esta semana cocino poco» no
+       es una preferencia suya, es una circunstancia de esta semana. */
+    const extra = String(opciones.extra || '').trim();
+
     const prompt = contexto({ progreso: true, comida: true }) + '\n\n' +
+      (extra ? 'PARA ESTE MENÚ EN CONCRETO PIDE: ' + extra + '. Manda sobre lo ' +
+        'demás salvo sus alergias y sus condiciones de salud.' +
+        String.fromCharCode(10) : '') +
       'OBJETIVO DIARIO: ' + m.kcal + ' kcal, ' + m.prot + ' g de proteína, ' +
       m.carbo + ' g de hidratos y ' + m.grasa + ' g de grasa, en ' + p.comidas + ' comidas.\n' +
       'HORARIO: se levanta a las ' + (p.despertar || '07:00') + ' y se acuesta a las ' +
