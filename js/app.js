@@ -872,7 +872,9 @@
             <div class="rt-titulo">${k}
               ${raw(k === activo ? '<span class="chip tiny-chip plan-marca">EN CURSO</span>' : '')}
               ${raw(dias.indexOf(hoy) !== -1 ? '<span class="chip solid tiny-chip">HOY</span>' : '')}</div>
-            <div class="tiny" style="margin-top:2px">${suyas.length}
+            <!-- En una linea: los seis dias de un plan completo se iban a dos
+                 renglones y el cajon crecia veinte pixeles por nada. -->
+            <div class="tiny plan-meta">${suyas.length}
               ${suyas.length === 1 ? 'rutina' : 'rutinas'} · ${ejercicios} ejercicios
               · ${dias.length ? dias.join(', ') : 'sin día'}</div>
           </div>

@@ -1295,22 +1295,38 @@ img[src^="data/img/"] {
   border-radius: var(--r);
   padding: 0 9px 9px;
   margin-top: 10px;
-  /* El mismo degradado tenue que las tarjetas, pero del color de este plan:
-     asi el filo de la izquierda deja de ser una raya suelta y se entiende que
-     todo el cajon es de ese plan. */
-  background:
-    linear-gradient(152deg, color-mix(in srgb, var(--tono) 11%, var(--card)) 0%,
-                    var(--card) 58%);
-  transition: border-color .18s, box-shadow .18s, background .25s;
+  /* El cajon no lleva fondo: el color va en su cabecera, que es lo que se
+     toca. Ponerlo aqui dejaba dentro un rectangulo negro —la cabecera necesita
+     fondo propio para tapar los botones de deslizar— y se veian dos cajas, una
+     dentro de otra. */
+  background: none;
+  transition: border-color .18s, box-shadow .18s;
 }
 .plan-caja.abierta {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 70%, transparent);
 }
 /* La cabecera trae su propio margen y su relleno de fila suelta; dentro del
    cajon sobran los dos y es lo que lo hacia tan alto. */
+.plan-caja { padding: 4px 4px 4px 5px; }
 .plan-caja .desliza { margin-top: 0; }
-.plan-caja .desliza-cara > .dia-grupo { padding: 10px 6px; }
-.plan-caja .stack { margin-top: 4px; }
+.plan-caja .stack { margin-top: 4px; padding: 0 5px 5px; }
+
+/* La cabecera es el boton del plan: el degradado va aqui, del color del plan y
+   de esquina a esquina. */
+.plan-caja .desliza-cara > .dia-grupo {
+  padding: 9px 11px;
+  border-radius: 13px;
+  background:
+    linear-gradient(140deg, color-mix(in srgb, var(--tono) 22%, var(--card)) 0%,
+                    color-mix(in srgb, var(--tono) 6%, var(--card)) 100%);
+}
+.plan-caja .desliza-cara { background: none; }
+
+/* Los datos del plan, en un renglon */
+.plan-meta {
+  margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* El plan que manda. Con varios planes que compartan dia, este es el unico que
    cuenta para «hoy»; la insignia lo dice sin tener que abrirlo. */
