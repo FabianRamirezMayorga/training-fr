@@ -29,6 +29,60 @@
 
   /* ================= perfil (índice) ================= */
 
+  /* ---------- la cabecera del perfil ----------
+     Eran tres cajas con tres numeros sueltos, y en la pantalla que se llama
+     «Perfil» no salia por ninguna parte quien eres: ni tu nombre ni tus datos,
+     solo kilos, IMC y calorias.
+
+     Ahora es una tarjeta de identidad: la inicial, el nombre y la linea de
+     siempre —edad, sexo, altura—, y debajo las tres cifras en una tira con sus
+     separadores, que es como se leen tres datos de la misma persona y no tres
+     cosas distintas. El IMC va con su categoria del color que le toca: en
+     naranja si estas fuera de rango, que para eso se calcula.
+
+     Toda la tarjeta lleva a tus datos: es lo que uno quiere tocar al verla. */
+  function cabeceraPerfil(p, m, v, cat) {
+    const nombre = String(Store.settings().name || '').trim();
+    const inicial = nombre ? nombre.charAt(0).toUpperCase() : '';
+    const t = Perfil.tendencia(30);
+    const sexo = p.sexo === 'mujer' ? 'Mujer' : p.sexo === 'hombre' ? 'Hombre' : '';
+
+    const partes = [];
+    if (p.edad) partes.push(p.edad + ' años');
+    if (sexo) partes.push(sexo);
+    if (p.altura) partes.push(p.altura + ' cm');
+
+    return html`
+      <div class="card tarjeta-premium perfil-cab" data-a="datos" role="button" tabindex="0">
+        <div class="row" style="gap:12px;align-items:center">
+          <span class="pc-avatar">${raw(inicial || icon('perfil'))}</span>
+          <span class="grow" style="min-width:0">
+            <span class="pc-nombre">${nombre || 'Sin nombre'}</span>
+            <span class="pc-sub">${partes.join(' · ') || 'Completa tus datos'}</span>
+          </span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </div>
+
+        <div class="pc-tira">
+          <div class="pc-dato">
+            <b>${UI.num(p.peso)}<span class="pc-u">${Store.settings().unit || 'kg'}</span></b>
+            <span class="tiny">${raw(t
+              ? (t.dif > 0 ? '+' : '') + String(Math.round(t.dif * 10) / 10).replace('.', ',') +
+                ' en 30 d\u00edas'
+              : 'peso de hoy')}</span>
+          </div>
+          <div class="pc-dato">
+            <b>${String(v.toFixed(1)).replace('.', ',')}</b>
+            <span class="tiny pc-imc ${esc(cat.tono)}">${esc(cat.label)}</span>
+          </div>
+          <div class="pc-dato">
+            <b>${m ? UI.num(m.kcal) : '—'}</b>
+            <span class="tiny">kcal al día</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
   V.perfil = function () {
     const p = Perfil.datos();
     const listo = Perfil.completo(p);
@@ -42,17 +96,13 @@
     return html`
       <h1>Perfil</h1>
 
-      ${raw(listo ? html`
-        <div class="stats" style="margin-bottom:6px">
-          <div class="stat"><b>${UI.num(p.peso)}</b><span>kg</span></div>
-          <div class="stat"><b>${v.toFixed(1)}</b><span>IMC · ${esc(cat.label)}</span></div>
-          <div class="stat"><b>${m ? UI.num(m.kcal) : '—'}</b><span>kcal objetivo</span></div>
-        </div>`
-      : html`
-        <div class="card" style="border-color:var(--acc)">
-          <div style="font-weight:600;margin-bottom:4px">Completa tus datos</div>
-          <p class="muted" style="margin-bottom:12px">Con tu peso, altura, edad y hábitos
-          puedo calcular tus calorías, ajustar las rutinas y prepararte el plan de comidas.</p>
+      ${raw(listo ? cabeceraPerfil(p, m, v, cat) : html`
+        <div class="card tarjeta-premium">
+          <div class="pre-encima">Falta lo principal</div>
+          <div class="pre-num" style="margin:2px 0 8px">Completa tus datos</div>
+          <p class="muted" style="margin-bottom:12px;font-size:.88rem">Con tu peso, altura,
+          edad y hábitos puedo calcular tus calorías, ajustar las rutinas y prepararte el
+          plan de comidas.</p>
           <button class="btn primary block" data-a="datos">Empezar</button>
         </div>`)}
 
