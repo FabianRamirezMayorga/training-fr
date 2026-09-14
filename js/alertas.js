@@ -10,24 +10,35 @@
 
   const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
+  /* Cada tipo con su color. Una lista de ocho recordatorios con el mismo icono
+     gris se lee uno por uno; con el color de cada cosa se lee de un vistazo cuál
+     es de agua y cuál de entrenar, igual que los planes de entrenamiento se
+     distinguen por su tono. */
   const TIPOS = {
     entreno: { label: 'Entrenamiento', icono: 'dumbbell', titulo: 'Toca entrenar',
+      tono: 'var(--acc)',
       mensaje: 'Tu rutina de hoy te está esperando.' },
-    agua: { label: 'Beber agua', icono: 'gota', titulo: 'Hidrátate',
+    agua: { label: 'Beber agua', icono: 'vaso', titulo: 'Hidrátate',
+      tono: 'var(--agua)',
       mensaje: 'Un vaso de agua ahora.' },
     comida: { label: 'Comida', icono: 'nutricion', titulo: 'Hora de comer',
+      tono: '#f0a23c',
       mensaje: 'Toca comida según tu plan.' },
     peso: { label: 'Pesarte', icono: 'perfil', titulo: 'Pésate',
+      tono: '#2fc4b2',
       mensaje: 'Registra tu peso para seguir la evolución.' },
-    suplemento: { label: 'Suplemento', icono: 'nutricion', titulo: 'Suplemento',
+    suplemento: { label: 'Suplemento', icono: 'proteina', titulo: 'Suplemento',
+      tono: '#e0679a',
       mensaje: 'Toca tu suplemento.' },
     /* La frase del entrenador, pero por escrito y a una hora. La app ya la
        escribe cada día y la dejaba dentro de la pantalla de inicio, donde solo
        la ves si entras: justo cuando menos falta hace. El mensaje se rellena al
        lanzarla, no al crearla, porque se escribe cada día con tus datos. */
     motivacion: { label: 'Mensaje del entrenador', icono: 'chispa',
+      tono: '#c06bf0',
       titulo: 'Tu entrenador', mensaje: 'Hoy toca. Abre y dale.', deIA: true },
-    libre: { label: 'Personalizada', icono: 'campana', titulo: 'Recordatorio', mensaje: '' }
+    libre: { label: 'Personalizada', icono: 'campana', titulo: 'Recordatorio',
+      tono: 'var(--dim2)', mensaje: '' }
   };
 
   /* Los tipos cuyo texto lo escribe la IA en el momento de lanzarlo */

@@ -3199,3 +3199,68 @@ html[data-theme="light"] .vista-nutricion textarea {
 /* La caja de un menu es la de un plan de entrenamiento, pero sus filas de
    numeros van dentro de tarjetas y no de la lista gris: sin esto, el primer
    dia se monta sobre el titulo igual que pasaba en los planes. */
+
+/* ---------- los recordatorios ----------
+   Eran ocho tarjetas iguales con el mismo icono gris y tres renglones de texto
+   debajo: para saber cual era el del agua habia que leerlos uno a uno. Ahora
+   cada tipo lleva su color en el icono y en el filo de la tarjeta, y sus horas
+   van en pastillas —una hora es un dato que se busca, no una frase que se lee—. */
+.alerta-caja {
+  position: relative; overflow: hidden;
+  background:
+    linear-gradient(180deg, var(--vidrio-luz), transparent 58%),
+    linear-gradient(150deg, color-mix(in srgb, var(--tono) 11%, var(--card)) 0%,
+                    var(--card) 58%);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim),
+              inset 3px 0 0 var(--tono),
+              var(--vidrio-sombra);
+}
+
+/* El icono en su baldosa del color del tipo: es lo primero que se mira al
+   buscar uno concreto en una lista larga. */
+.al-ico {
+  flex: none; width: 38px; height: 38px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 15%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim),
+              inset 0 0 0 1px color-mix(in srgb, var(--tono) 22%, transparent);
+}
+.al-ico svg { width: 19px; height: 19px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.al-tit { font-weight: 700; font-size: .96rem; letter-spacing: -.012em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.al-meta { margin-top: 2px; }
+
+/* Las horas, en pastillas. Tabulares para que las cifras no bailen de una a
+   otra, que es lo que hace que una fila de horas se lea como una fila. */
+.al-horas { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.al-hora {
+  font-size: .73rem; font-weight: 700; padding: 4px 9px; border-radius: 999px;
+  font-variant-numeric: tabular-nums; color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 13%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim);
+}
+
+/* Apagado, la tarjeta se apaga con el: no tiene sentido que un recordatorio
+   que no va a sonar se vea igual que uno que si. */
+.alerta-caja.apagada { box-shadow: inset 0 1px 0 var(--vidrio-rim),
+  inset 3px 0 0 color-mix(in srgb, var(--tono) 35%, transparent),
+  var(--vidrio-sombra-corta); }
+.alerta-caja.apagada .al-ico,
+.alerta-caja.apagada .al-horas { opacity: .45; }
+.alerta-caja.apagada .al-tit { color: var(--dim); }
+
+/* En claro la tarjeta premium repone su propia sombra y se llevaba por delante
+   el filo de color, que es lo que dice de un vistazo de que tipo es cada una. */
+html[data-theme="light"] .alerta-caja {
+  background:
+    linear-gradient(150deg, color-mix(in srgb, var(--tono) 9%, var(--card)) 0%,
+                    var(--card) 58%);
+  box-shadow: inset 3px 0 0 var(--tono), var(--vidrio-sombra);
+}
+html[data-theme="light"] .alerta-caja.apagada {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--tono) 35%, transparent),
+              var(--vidrio-sombra-corta);
+}

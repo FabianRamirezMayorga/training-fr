@@ -947,21 +947,31 @@
   V.alertas = function () {
     const lista = Alertas.lista();
     const permiso = Alertas.permiso();
+    const activas = lista.filter(function (a) { return a.activa; }).length;
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Perfil</button>
       <div class="row between">
         <h1 style="margin:0">Alertas</h1>
-        <button class="btn primary sm" data-a="nueva">${raw(icon('plus'))} Nueva</button>
+        <button class="btn primary sm btn-arranque" data-a="nueva">
+          ${raw(icon('plus'))} Nueva</button>
       </div>
+      <p class="muted" style="margin-top:8px">${raw(lista.length
+        ? 'Tienes ' + lista.length + (lista.length === 1 ? ' recordatorio' : ' recordatorios') +
+          (activas < lista.length
+            ? ', ' + activas + ' encendidos.'
+            : ', todos encendidos.') +
+          ' ' + esc(proximoTexto(lista))
+        : 'Las horas salen de tus datos: tu peso, a qué hora te levantas y cuándo entrenas.')}</p>
 
       ${raw(permiso === 'granted' ? '' : html`
-        <div class="card" style="margin-top:12px;border-color:var(--acc)">
-          <div style="font-weight:600;margin-bottom:4px">Permite los avisos</div>
-          <p class="muted" style="margin-bottom:10px">Sin permiso solo verás los
+        <div class="card tarjeta-premium" style="margin-top:12px">
+          <div class="pre-encima">${permiso === 'denied' ? 'Bloqueados' : 'Falta un paso'}</div>
+          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">Permite los avisos</div>
+          <p class="muted" style="margin:0 0 12px;font-size:.88rem">Sin permiso solo verás los
           recordatorios dentro de la app.</p>
-          <button class="btn primary block" data-a="permiso"
+          <button class="btn primary block btn-arranque" data-a="permiso"
             ${permiso === 'denied' ? 'disabled' : ''}>
             ${permiso === 'denied' ? 'Bloqueados en el navegador' : 'Activar los avisos'}</button>
           ${raw(permiso === 'denied'
@@ -969,8 +979,8 @@
               'ajustes del navegador para este sitio.</p>' : '')}
         </div>`)}
 
-      ${raw(lista.length ? '<div class="stack" style="margin-top:12px">' +
-        lista.map(tarjetaAlerta).join('') + '</div>'
+      ${raw(lista.length ? '<div class="list-title">Mis recordatorios</div>' +
+        '<div class="stack">' + lista.map(tarjetaAlerta).join('') + '</div>'
         : html`<div class="empty" style="padding-top:28px">${raw(icon('campana'))}
             <p>Sin recordatorios todavía. Abajo tienes los que te propongo con tus datos,
             con las horas ya calculadas.</p>
@@ -978,15 +988,15 @@
 
       ${raw(sugerenciasHTML())}
 
-      <div class="row" style="margin-top:14px">
-        <button class="btn grow" data-a="desdeRutinas">${raw(icon('dumbbell'))} Crear desde mis rutinas</button>
-      </div>
+      <button class="btn block" data-a="desdeRutinas" style="margin-top:14px">
+        ${raw(icon('dumbbell'))} Crear desde mis rutinas</button>
 
       <div class="list-title">Que suenen con la app cerrada</div>
-      <div class="card">
-        <p class="muted">Una página web no puede avisarte sola si está cerrada, salvo
-        pagando un servidor de notificaciones. La vía que sí funciona y no cuesta nada
-        es llevarlos al calendario del móvil, que sí avisa siempre.</p>
+      <div class="card tarjeta-premium">
+        <p class="muted" style="margin:0 0 12px;font-size:.88rem">Una página web no puede
+        avisarte sola si está cerrada, salvo pagando un servidor de notificaciones. La vía
+        que sí funciona y no cuesta nada es llevarlos al calendario del móvil, que sí avisa
+        siempre.</p>
         <button class="btn block" data-a="calendario" ${lista.length ? '' : 'disabled'}>
           ${raw(icon('down'))} Descargar para el calendario</button>
         <p class="tiny" style="margin-top:8px">Abre el archivo en el móvil y acepta
@@ -994,53 +1004,77 @@
       </div>`;
   };
 
+  /* Cuál es el siguiente que va a sonar hoy. Una lista de recordatorios dice a
+     qué horas suenan, pero no cuál toca ahora, que es lo que se mira al entrar. */
+  function proximoTexto(lista) {
+    const ahora = new Date().getHours() * 60 + new Date().getMinutes();
+    const hoy = (UI.DAY_NAMES || [])[new Date().getDay()];
+
+    let mejor = null;
+    lista.forEach(function (a) {
+      if (!a.activa) return;
+      if ((a.dias || []).length && a.dias.indexOf(hoy) === -1) return;
+      (a.horas || []).forEach(function (h) {
+        const m = String(h).match(/^(\d{1,2}):(\d{2})$/);
+        if (!m) return;
+        const min = Number(m[1]) * 60 + Number(m[2]);
+        if (min < ahora) return;
+        if (!mejor || min < mejor.min) mejor = { min: min, hora: h, titulo: a.titulo };
+      });
+    });
+
+    if (!mejor) return 'Hoy ya no queda ninguno.';
+    return 'El siguiente, «' + mejor.titulo + '» a las ' + mejor.hora + '.';
+  }
+
   /* ---------- sugerencias calculadas con tus datos ---------- */
   function sugerenciasHTML() {
     if (!Perfil.completo()) {
       return html`
-        <div class="card" style="margin-top:14px">
-          <div style="font-weight:600;margin-bottom:4px">Puedo proponerte las horas</div>
-          <p class="muted" style="margin-bottom:10px">Con tu peso, tu actividad y a qué hora
-          te levantas calculo cuántos vasos de agua te tocan y a qué horas, cuándo comer y
-          cuándo entrenar. Necesito el perfil completo.</p>
-          <button class="btn primary block" data-a="irperfil">Completar mi perfil</button>
+        <div class="card tarjeta-premium" style="margin-top:14px">
+          <div class="pre-encima">Puedo proponerte las horas</div>
+          <p class="muted" style="margin:6px 0 12px;font-size:.88rem">Con tu peso, tu
+          actividad y a qué hora te levantas calculo cuántos vasos de agua te tocan y a qué
+          horas, cuándo comer y cuándo entrenar. Necesito el perfil completo.</p>
+          <button class="btn primary block btn-arranque" data-a="irperfil">
+            Completar mi perfil</button>
         </div>`;
     }
 
     const sug = Alertas.sugerencias().filter(function (x) { return !Alertas.yaExiste(x); });
     if (!sug.length) {
       return html`
-        <div class="card" style="margin-top:14px">
-          <p class="muted" style="margin:0">Ya tienes creados todos los recordatorios que te
-          propondría con tus datos. Si cambias de peso, de horarios o de rutinas, vuelve por
-          aquí y recalculo.</p>
+        <div class="card tarjeta-premium" style="margin-top:14px">
+          <p class="muted" style="margin:0;font-size:.88rem">Ya tienes creados todos los
+          recordatorios que te propondría con tus datos. Si cambias de peso, de horarios o
+          de rutinas, vuelve por aquí y recalculo.</p>
         </div>`;
     }
 
     return html`
-      <div class="list-head" style="margin-top:20px">
-        <span class="list-title">Lo que te propongo</span>
+      <div class="row between" style="margin-top:20px;align-items:center">
+        <span class="list-title" style="margin:0">Lo que te propongo</span>
         <button class="btn sm ghost" data-a="crearTodas">Crear todas</button>
       </div>
-      <p class="tiny" style="margin:-4px 0 10px">Calculado con tus datos, no son horas por
+      <p class="tiny" style="margin:-2px 0 10px">Calculado con tus datos, no son horas por
       defecto. Puedes cambiarlas después.</p>
+
       <div class="stack">
         ${raw(sug.map(function (x, i) {
           const t = Alertas.TIPOS[x.tipo] || Alertas.TIPOS.libre;
           return html`
-            <div class="card">
-              <div class="row" style="align-items:flex-start">
-                <span class="row-icon">${raw(icon(t.icono))}</span>
-                <div class="grow">
-                  <div style="font-weight:600">${x.titulo}</div>
-                  <div class="tiny">${Alertas.resumenHoras({ horas: x.horas })}</div>
-                  <div class="tiny">${Alertas.resumenDias({ dias: x.dias })}</div>
+            <div class="card tarjeta-premium alerta-caja" style="--tono:${raw(t.tono || 'var(--acc)')}">
+              <div class="row" style="align-items:flex-start;gap:11px">
+                <span class="al-ico">${raw(icon(t.icono))}</span>
+                <div class="grow" style="min-width:0">
+                  <div class="al-tit">${x.titulo}</div>
+                  <div class="tiny al-meta">${Alertas.resumenDias({ dias: x.dias })}</div>
                 </div>
                 <button class="btn sm primary" data-sug="${i}">Crear</button>
               </div>
-              <div class="row wrap" style="gap:5px;margin-top:9px">
+              <div class="al-horas">
                 ${raw(x.horas.map(function (h) {
-                  return '<span class="chip">' + esc(h) + '</span>';
+                  return '<span class="al-hora">' + esc(h) + '</span>';
                 }).join(''))}
               </div>
               <p class="tiny" style="margin:9px 0 0">${x.porque}</p>
@@ -1049,19 +1083,34 @@
       </div>`;
   }
 
+  /* ---------- un recordatorio ----------
+     Eran ocho tarjetas iguales con el mismo icono gris y tres renglones de texto
+     debajo, y para saber cuál era el del agua había que leerlos uno a uno. Ahora
+     cada tipo lleva su color en el icono y en el filo de la tarjeta, y sus horas
+     van en pastillas en vez de en un renglón de texto: una hora es un dato que
+     se busca, no una frase que se lee.
+
+     Apagado, la tarjeta se apaga con él: no tiene sentido que un recordatorio
+     que no va a sonar se vea igual que uno que sí. */
   function tarjetaAlerta(a) {
     const t = Alertas.TIPOS[a.tipo] || Alertas.TIPOS.libre;
     return html`
-      <div class="card">
-        <div class="row" style="align-items:flex-start">
-          <span class="row-icon">${raw(icon(t.icono))}</span>
-          <div class="grow" data-edit="${a.id}" style="cursor:pointer">
-            <div style="font-weight:600">${a.titulo}</div>
-            <div class="tiny">${Alertas.resumenHoras(a)}</div>
-            <div class="tiny">${Alertas.resumenDias(a)}</div>
+      <div class="card tarjeta-premium alerta-caja${raw(a.activa ? '' : ' apagada')}"
+           style="--tono:${raw(t.tono || 'var(--acc)')}">
+        <div class="row" style="align-items:flex-start;gap:11px">
+          <span class="al-ico">${raw(icon(t.icono))}</span>
+          <div class="grow" data-edit="${a.id}" style="cursor:pointer;min-width:0">
+            <div class="al-tit">${a.titulo}</div>
+            <div class="tiny al-meta">${Alertas.resumenDias(a)}</div>
           </div>
           <button class="sw ${a.activa ? 'on' : ''}" data-tog="${a.id}"
-                  role="switch" aria-checked="${a.activa}" aria-label="Activar"></button>
+                  role="switch" aria-checked="${a.activa}"
+                  aria-label="Activar ${esc(a.titulo)}"></button>
+        </div>
+        <div class="al-horas" data-edit="${a.id}" style="cursor:pointer">
+          ${raw((a.horas || []).map(function (h) {
+            return '<span class="al-hora">' + esc(h) + '</span>';
+          }).join(''))}
         </div>
       </div>`;
   }
