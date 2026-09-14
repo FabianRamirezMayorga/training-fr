@@ -628,6 +628,19 @@
     return partes.join(' · ');
   }
 
+  /* ---------- la frase del entrenador, en la portada ----------
+     Existía desde hace tiempo —un empujón, un dato de fisiología, un detalle
+     de técnica, algo de comida o de descanso, rotando— pero vivía en «ver el
+     día entero», que es una pantalla en la que hay que entrar. Lo primero que
+     se lee al abrir la app era «llevas 13 entrenamientos esta semana», que es
+     un dato que ya está tres centímetros más abajo en las tres cifras.
+
+     Se pide una vez y se queda: la píldora ya se guarda por bloques de horas,
+     así que no gasta una llamada por repintado. Mientras no llega —o si no hay
+     entrenador configurado— se dice lo de siempre, que es mejor que un hueco. */
+  let frasePortada = '';
+  let pidiendoFrasePortada = false;
+
   function viewInicio() {
     const st = Store.stats();
     const rutinas = Store.routines();
@@ -655,13 +668,17 @@
       : html`
         <div class="hola entra">Hola${raw(nombre
           ? ', <span class="nombre">' + esc(nombre) + '</span>' : '')}</div>
-        <p class="muted entra entra-2 hola-sub" style="font-size:.92rem">${raw(hecho
-          ? 'Muy bien. Llevas ' + st.week +
-            (st.week === 1 ? ' entrenamiento' : ' entrenamientos') + ' esta semana.'
-          : st.week === 0
-            ? 'Semana en blanco. Buen momento para empezar.'
-            : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
-            : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.')}</p>`)}
+        ${raw(frasePortada ? html`
+          <p class="hola-frase entra entra-2">
+            <span class="hf-ico">${raw(icon('chispa'))}</span>${frasePortada}</p>`
+        : html`
+          <p class="muted entra entra-2 hola-sub" style="font-size:.92rem">${raw(hecho
+            ? 'Muy bien. Llevas ' + st.week +
+              (st.week === 1 ? ' entrenamiento' : ' entrenamientos') + ' esta semana.'
+            : st.week === 0
+              ? 'Semana en blanco. Buen momento para empezar.'
+              : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
+              : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.')}</p>`)}`)}
 
       <div class="muelle"></div>
       ${raw(activa ? html`
@@ -1449,6 +1466,17 @@
     bind(root, '[data-a=irperfil]', function () { go('perfil'); });
     bind(root, '[data-a=apuntar]', apuntarActividad);
     bindTarjetaRutina(root);
+
+    /* La frase se pide una vez por sesión de la app y se queda. Si falla o no
+       hay entrenador, la portada vale igual: se queda la línea de siempre. */
+    if (!frasePortada && !pidiendoFrasePortada && g.IA && IA.activa() && IA.pildora) {
+      pidiendoFrasePortada = true;
+      IA.pildora().then(function (t) {
+        frasePortada = String((t && t.frase) || '').trim();
+        pidiendoFrasePortada = false;
+        if (frasePortada && route.name === 'inicio') render();
+      }).catch(function () { pidiendoFrasePortada = false; });
+    }
 
     /* La versión solo habla cuando hay algo que hacer. «Training FR v273 · al
        día» ocupaba un renglón de la portada para no decir nada: quien quiera
