@@ -1212,64 +1212,113 @@
     });
   };
 
+  /* ---------- el formulario ----------
+     Era una pila de campos sueltos: siete pastillas grises iguales para el tipo,
+     dos cajas de texto sin decir cuál era cuál, las horas, un desplegable
+     escondido y siete pastillas más para los días. Se rellenaba a ciegas: no
+     sabías qué ibas a crear hasta crearlo.
+
+     Ahora lo primero es lo que vas a crear. Arriba del todo va el recordatorio
+     tal y como va a quedar en la lista —la misma tarjeta, no un dibujo
+     parecido— y se rehace con cada cosa que tocas. Debajo, lo que se elige:
+     el tipo con su icono y su color, los textos con su nombre, las horas y los
+     días.
+
+     Un formulario que enseña el resultado mientras lo rellenas no necesita
+     explicar casi nada. */
   function alertaSheet(existente) {
     const a = existente ? JSON.parse(JSON.stringify(existente)) : Alertas.nueva('entreno');
 
     UI.modal(html`
       <h2>${existente ? 'Editar recordatorio' : 'Nuevo recordatorio'}</h2>
 
-      <label class="tiny">TIPO</label>
-      <div class="row wrap" style="gap:6px;margin:6px 0 12px">
+      <div id="al-vista" class="al-vista"></div>
+
+      <label class="tiny">QUÉ ES</label>
+      <div class="al-tipos">
         ${raw(Object.keys(Alertas.TIPOS).map(function (k) {
-          return '<button class="chip ' + (a.tipo === k ? 'on' : '') + '" data-tipo="' + k + '">' +
-            esc(Alertas.TIPOS[k].label) + '</button>';
+          const t = Alertas.TIPOS[k];
+          return '<button class="al-tipo' + (a.tipo === k ? ' on' : '') + '" data-tipo="' + k +
+            '" style="--tono:' + (t.tono || 'var(--acc)') + '">' +
+            '<span class="alt-ico">' + icon(t.icono) + '</span>' +
+            '<span class="alt-nom">' + esc(t.label) + '</span></button>';
         }).join(''))}
       </div>
 
-      <label class="tiny">TEXTO</label>
-      <input id="al-tit" value="${a.titulo}" placeholder="Título" style="margin:5px 0 8px">
-      <input id="al-msg" value="${a.mensaje}" placeholder="Mensaje (opcional)" style="margin:0 0 6px">
-      <p class="tiny" id="al-nota-ia" style="margin:0 0 12px">El texto lo escribe tu
+      <label class="tiny">QUÉ DICE</label>
+      <div class="al-campos">
+        <div class="al-campo">
+          <span class="alc-et">Título</span>
+          <input id="al-tit" value="${a.titulo}" placeholder="Toca entrenar">
+        </div>
+        <div class="al-campo">
+          <span class="alc-et">Debajo</span>
+          <input id="al-msg" value="${a.mensaje}" placeholder="Opcional">
+        </div>
+      </div>
+      <p class="tiny" id="al-nota-ia" style="margin:7px 0 0">El texto lo escribe tu
       entrenador cada día con lo que llevas hecho, así que el de aquí arriba solo sale
       si la IA no está disponible a esa hora.</p>
 
-      <label class="tiny">HORAS</label>
-      <div class="row wrap" style="gap:6px;margin:6px 0 8px" id="al-horas"></div>
-      <div class="row" style="gap:8px;margin-bottom:8px">
+      <label class="tiny" style="margin-top:16px;display:block">A QUÉ HORA</label>
+      <div class="al-horas" id="al-horas"></div>
+      <div class="row" style="gap:8px;margin-top:9px">
         <input id="al-hora" type="time" value="${a.horas[0]}" class="grow">
         <button class="btn sm" data-x="addhora">${raw(icon('plus'))} Añadir</button>
       </div>
-      <button class="guia-tit" data-x="verRepartir">${raw(icon('chevron'))}
-        Repartir varias veces al día</button>
-      <div class="guia" id="al-repartir" hidden>
-        <div class="card">
-          <p class="tiny" style="margin:0 0 9px">Para el agua o las comidas: dime cuántas
-          veces y entre qué horas, y las coloco repartidas.</p>
-          <div class="row" style="gap:8px">
-            <div class="grow"><div class="tiny">VECES</div>
-              <input id="rep-n" type="number" inputmode="numeric" min="2" max="12" value="8"
-                     style="text-align:center;margin-top:4px"></div>
-            <div class="grow"><div class="tiny">DESDE</div>
-              <input id="rep-a" type="time" value="08:00" style="margin-top:4px"></div>
-            <div class="grow"><div class="tiny">HASTA</div>
-              <input id="rep-b" type="time" value="21:00" style="margin-top:4px"></div>
-          </div>
-          <button class="btn block sm" data-x="repartir" style="margin-top:10px">Repartir</button>
-        </div>
-      </div>
 
-      <label class="tiny">DÍAS</label>
-      <div class="row wrap" style="gap:6px;margin:6px 0 16px">
+      <details class="al-repartir" id="al-repartir">
+        <summary>${raw(icon('chevron'))} Repartir varias veces al día</summary>
+        <p class="tiny" style="margin:9px 0">Para el agua o las comidas: dime cuántas veces
+        y entre qué horas, y las coloco repartidas.</p>
+        <div class="row" style="gap:8px">
+          <div class="grow"><div class="tiny">VECES</div>
+            <input id="rep-n" type="number" inputmode="numeric" min="2" max="12" value="8"
+                   style="text-align:center;margin-top:4px"></div>
+          <div class="grow"><div class="tiny">DESDE</div>
+            <input id="rep-a" type="time" value="08:00" style="margin-top:4px"></div>
+          <div class="grow"><div class="tiny">HASTA</div>
+            <input id="rep-b" type="time" value="21:00" style="margin-top:4px"></div>
+        </div>
+        <button class="btn block sm" data-x="repartir" style="margin-top:10px">Repartir</button>
+      </details>
+
+      <div class="row between" style="margin-top:16px;align-items:baseline">
+        <label class="tiny" style="margin:0">QUÉ DÍAS</label>
+        <span class="row" style="gap:6px">
+          <button class="btn sm ghost" data-dias="todos">Todos</button>
+          <button class="btn sm ghost" data-dias="semana">L-V</button>
+        </span>
+      </div>
+      <!-- Siete circulos y no siete pastillas con el nombre entero: los dias de
+           la semana se reconocen por su inicial, y en una fila entran de un
+           vistazo en vez de en dos renglones. -->
+      <div class="al-dias">
         ${raw([1, 2, 3, 4, 5, 6, 0].map(function (d) {
-          return '<button class="chip ' + (a.dias.indexOf(d) !== -1 ? 'on' : '') +
-            '" data-dia="' + d + '">' + UI.diaLargo(Alertas.DIAS[d]) + '</button>';
+          return '<button class="al-dia' + (a.dias.indexOf(d) !== -1 ? ' on' : '') +
+            '" data-dia="' + d + '" aria-label="' + esc(UI.diaLargo(Alertas.DIAS[d])) + '">' +
+            esc(['D', 'L', 'M', 'X', 'J', 'V', 'S'][d]) + '</button>';
         }).join(''))}
       </div>
 
-      <button class="btn primary block" data-x="guardar">Guardar</button>
+      <button class="btn primary block btn-arranque" data-x="guardar"
+              style="margin-top:18px">Guardar</button>
       ${raw(existente ? '<button class="btn danger block sm" data-x="borrar" ' +
         'style="margin-top:8px">Borrar recordatorio</button>' : '')}`,
       function (el) {
+        /* La vista previa: la misma tarjeta que va a salir en la lista, rehecha
+           cada vez que cambia algo. Es lo que convierte el formulario en algo
+           que se entiende sin leer las etiquetas. */
+        const pintarVista = function () {
+          el.querySelector('#al-vista').innerHTML = cajaAlerta({
+            tipo: a.tipo,
+            titulo: el.querySelector('#al-tit').value.trim() ||
+              (Alertas.TIPOS[a.tipo] || {}).titulo || 'Recordatorio',
+            horas: a.horas.slice().sort(),
+            dias: a.dias.slice()
+          }, { activa: true, control: '' });
+        };
+
         el.querySelectorAll('[data-tipo]').forEach(function (b) {
           b.onclick = function () {
             a.tipo = b.dataset.tipo;
@@ -1279,6 +1328,7 @@
             el.querySelector('#al-tit').value = t.titulo;
             el.querySelector('#al-msg').value = t.mensaje;
             notaIA();
+            pintarVista();
           };
         });
 
@@ -1290,12 +1340,15 @@
         };
         notaIA();
 
+        el.querySelector('#al-tit').oninput = pintarVista;
+
         /* las horas se pintan como fichas que se quitan al tocarlas */
         const pintarHoras = function () {
           const caja = el.querySelector('#al-horas');
           a.horas = a.horas.slice().sort();
           caja.innerHTML = a.horas.map(function (h) {
-            return '<button class="chip on" data-quitar="' + esc(h) + '">' + esc(h) + ' ×</button>';
+            return '<button class="al-h" data-quitar="' + esc(h) + '">' + esc(h) +
+              icon('close') + '</button>';
           }).join('') || '<span class="tiny">Sin horas: añade al menos una.</span>';
           caja.querySelectorAll('[data-quitar]').forEach(function (b) {
             b.onclick = function () {
@@ -1303,6 +1356,7 @@
               pintarHoras();
             };
           });
+          pintarVista();
         };
         pintarHoras();
 
@@ -1311,12 +1365,6 @@
           if (!v) return;
           if (a.horas.indexOf(v) === -1) a.horas.push(v);
           pintarHoras();
-        };
-
-        el.querySelector('[data-x=verRepartir]').onclick = function () {
-          const c = el.querySelector('#al-repartir');
-          c.hidden = !c.hidden;
-          this.classList.toggle('abierta', !c.hidden);
         };
 
         el.querySelector('[data-x=repartir]').onclick = function () {
@@ -1329,7 +1377,15 @@
           }
           a.horas = Alertas.repartir(desde, hasta, Math.max(2, Math.min(12, n)));
           pintarHoras();
+          el.querySelector('#al-repartir').open = false;
           UI.toast(a.horas.length + ' avisos repartidos');
+        };
+
+        const pintarDias = function () {
+          el.querySelectorAll('[data-dia]').forEach(function (b) {
+            b.classList.toggle('on', a.dias.indexOf(Number(b.dataset.dia)) !== -1);
+          });
+          pintarVista();
         };
 
         el.querySelectorAll('[data-dia]').forEach(function (b) {
@@ -1337,7 +1393,14 @@
             const d = Number(b.dataset.dia);
             const i = a.dias.indexOf(d);
             if (i === -1) a.dias.push(d); else a.dias.splice(i, 1);
-            b.classList.toggle('on', i === -1);
+            pintarDias();
+          };
+        });
+
+        el.querySelectorAll('[data-dias]').forEach(function (b) {
+          b.onclick = function () {
+            a.dias = b.dataset.dias === 'todos' ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5];
+            pintarDias();
           };
         });
 
