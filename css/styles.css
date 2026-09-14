@@ -4777,3 +4777,121 @@ html[data-theme="light"] .cont-b:active { background: color-mix(in srgb, #141922
 html[data-theme="light"] .mu-serie:not(.hecha) {
   background: color-mix(in srgb, #141922 10%, transparent); box-shadow: none;
 }
+
+/* ---------- la boveda ----------
+   Eran cinco cajas grises iguales con un galon pequeno a la izquierda, y para
+   saber cual era la de Spotify habia que leer el titulo. Cada servicio lleva ya
+   su icono, su color y su silueta al fondo: el dibujo y el color se reconocen
+   antes que la palabra. El galon se va al canto derecho, que es donde lo busca
+   la mano. */
+.bov {
+  position: relative; overflow: hidden; isolation: isolate;
+  border: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 55%),
+    color-mix(in srgb, var(--card) 72%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(155%);
+  backdrop-filter: blur(16px) saturate(155%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent),
+              inset 0 -12px 22px -18px rgba(0, 0, 0, .55),
+              0 3px 10px rgba(0, 0, 0, .18);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.bov[open] {
+  border-color: color-mix(in srgb, var(--tono) 38%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent),
+              0 5px 18px color-mix(in srgb, var(--tono) 16%, transparent);
+}
+
+.bov-silueta {
+  position: absolute; right: -20px; top: -18px; width: 104px; height: 104px;
+  z-index: -1; pointer-events: none; color: var(--tono); opacity: .07;
+}
+.bov-silueta svg { width: 100%; height: 100%; fill: none; stroke: currentColor;
+  stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+.bov[open] .bov-silueta { opacity: .12; }
+
+.bov-ico {
+  flex: none; width: 36px; height: 36px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 15%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tono) 24%, transparent),
+              inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent);
+}
+.bov-ico svg { width: 17px; height: 17px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.bov-tit { font-weight: 700; letter-spacing: -.014em; }
+.bov-flecha { color: var(--dim2); }
+.bov-flecha svg { transition: transform .2s ease; }
+.bov[open] > summary .bov-flecha svg { transform: rotate(90deg); }
+
+/* El estado, un punto y una palabra. Lo unico que uno quiere saber de un
+   vistazo es si esta puesto; una pastilla mas solo anade ruido. */
+.bov-estado {
+  flex: none; display: inline-flex; align-items: center; gap: 6px;
+  font-size: .74rem; font-weight: 700; letter-spacing: -.01em; white-space: nowrap;
+  color: var(--dim2);
+}
+.bov-estado i {
+  width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .5;
+}
+.bov-estado.ok { color: var(--acc); }
+.bov-estado.ok i { opacity: 1; box-shadow: 0 0 7px color-mix(in srgb, var(--acc) 65%, transparent); }
+.bov-estado.avisa { color: var(--warn); }
+.bov-estado.avisa i { opacity: 1; box-shadow: 0 0 7px color-mix(in srgb, var(--warn) 65%, transparent); }
+
+/* El paso a paso plegado: una fila de vidrio y no un renglon de texto suelto */
+.guia-tit {
+  padding: 9px 11px; border-radius: 12px; margin-top: 10px;
+  background: color-mix(in srgb, var(--card2) 55%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 9%, transparent);
+  font-size: .82rem; font-weight: 600;
+  transition: background .18s ease;
+}
+.guia-tit:active { background: color-mix(in srgb, var(--card2) 85%, transparent); }
+.guia { padding: 10px 2px 2px; }
+
+/* ---------- el disco de las emergentes ----------
+   La pregunta de «¿seguro?» era un titulo, un parrafo y dos botones. El disco
+   con el icono dice de que va antes de leer nada: rojo si algo se va a perder,
+   verde si no. */
+.conf-disco {
+  width: 52px; height: 52px; border-radius: 50%; margin: 2px auto 13px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 14%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent),
+              0 4px 16px color-mix(in srgb, var(--acc) 18%, transparent);
+}
+.conf-disco.mal {
+  color: var(--bad);
+  background: color-mix(in srgb, var(--bad) 14%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent),
+              0 4px 16px color-mix(in srgb, var(--bad) 18%, transparent);
+}
+.conf-disco svg { width: 24px; height: 24px; fill: none; stroke: currentColor;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+@media (prefers-reduced-motion: no-preference) {
+  .conf-disco { animation: conf-entra .4s cubic-bezier(.3, 1.4, .5, 1) both; }
+}
+@keyframes conf-entra {
+  from { opacity: 0; transform: scale(.5); }
+  to { opacity: 1; transform: none; }
+}
+.conf-tit { text-align: center; }
+.conf-txt { text-align: center; margin: 7px auto 0; max-width: 33ch; }
+
+html[data-theme="light"] .bov {
+  background: var(--card);
+  border-color: color-mix(in srgb, #141922 9%, transparent);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, .07);
+}
+html[data-theme="light"] .bov[open] {
+  border-color: color-mix(in srgb, var(--tono) 38%, transparent);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--tono) 14%, transparent);
+}
+html[data-theme="light"] .guia-tit {
+  background: color-mix(in srgb, #141922 4%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+}

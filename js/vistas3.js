@@ -39,27 +39,42 @@
      El botón de probar va EN la cabecera, que es lo que se quiere hacer sin
      tener que abrir nada; y al probar se abre la sección sola, porque la
      respuesta entera se pinta dentro. */
+  /* Cada servicio con su cara: su icono, su color y su silueta al fondo. Eran
+     cinco cajas grises iguales con un galón pequeño a la izquierda, y para
+     saber cuál era la de Spotify había que leer el título. El dibujo y el color
+     se reconocen antes que la palabra.
+
+     El galón se va al canto derecho, que es donde lo busca la mano, y el estado
+     deja de ser una pastilla más para ser un punto de color con su palabra: lo
+     único que uno quiere saber de un vistazo es si está puesto. */
   function plegable(o) {
     return html`
-      <details class="bov" data-bov="${o.id}"${raw(abiertas[o.id] ? ' open' : '')}>
+      <details class="bov" data-bov="${o.id}" style="--tono:${raw(o.tono || 'var(--acc)')}"
+               ${raw(abiertas[o.id] ? ' open' : '')}>
         <summary>
-          <span class="chevron down bov-flecha">${raw(icon('chevron'))}</span>
+          <span class="bov-silueta" aria-hidden="true">${raw(icon(o.ico || 'llave'))}</span>
+          <span class="bov-ico">${raw(icon(o.ico || 'llave'))}</span>
           <span class="grow">
             <span class="bov-tit">${o.titulo}</span>
             <span class="tiny bov-sub">${o.resumen}</span>
           </span>
-          ${raw(o.probar ? '<button class="btn sm bov-probar" data-probar="' +
+          ${raw(o.probar ? '<button class="btn sm vidrio bov-probar" data-probar="' +
             esc(o.probar) + '">Probar</button>' : '')}
           ${raw(o.chip || '')}
+          <span class="chevron bov-flecha">${raw(icon('chevron'))}</span>
         </summary>
         <div class="bov-cuerpo">${raw(o.cuerpo)}</div>
       </details>`;
   }
 
+  /* El estado, como un punto y una palabra. Verde puesto, gris sin poner,
+     ámbar cuando hay algo que hacer. */
+  function estadoPunto(clase, texto) {
+    return '<span class="bov-estado ' + clase + '"><i></i>' + esc(texto) + '</span>';
+  }
+
   function estado(ok, textoOk, textoNo) {
-    return ok
-      ? '<span class="chip solid">' + icon('check') + ' ' + esc(textoOk) + '</span>'
-      : '<span class="chip">' + esc(textoNo) + '</span>';
+    return ok ? estadoPunto('ok', textoOk) : estadoPunto('no', textoNo);
   }
 
   /* Campo de clave: siempre oculto de entrada, con un botón para revelarlo.
@@ -202,6 +217,8 @@
       <div class="list-title">Núcleo inteligente</div>
       ${raw(plegable({
         id: 'ia',
+        ico: 'chispa',
+        tono: 'var(--acc)',
         titulo: 'Quién piensa por la app',
         resumen: resumenIA,
         chip: estado(IA.activa(), 'Activo', 'Sin configurar'),
@@ -272,10 +289,12 @@
       <div class="list-title">Música · Spotify</div>
       ${raw(plegable({
         id: 'sp',
+        ico: 'musica',
+        tono: '#1db954',
         titulo: 'Client ID de Spotify',
         resumen: resumenSp,
         chip: Spotify.permisosCaducados()
-          ? '<span class="chip" style="border-color:var(--warn);color:var(--warn)">Reconectar</span>'
+          ? estadoPunto('avisa', 'Reconectar')
           : estado(Spotify.activa(), 'Conectado',
               Spotify.configurado() ? 'Sin conectar' : 'Sin configurar'),
         cuerpo: html`
@@ -328,15 +347,19 @@
       <!-- ============ Supabase ============ -->
       ${raw(!Sync.puedeConfigurar() ? html`
         <div class="list-title">Cuenta y sincronización</div>
-        <div class="card">
-          <div style="font-weight:600;margin-bottom:4px">La lleva quien administra</div>
-          <p class="muted" style="margin:0">Tus datos viajan a la base de datos de quien te
-          dio el acceso, y solo los ves tú: la base no deja que nadie lea lo de otra
-          persona. Aquí no hay nada que configurar.</p>
+        <div class="card tarjeta-premium">
+          <div class="pre-encima">No tienes que tocar nada</div>
+          <div style="font-weight:700;font-size:1rem;margin:5px 0 4px">La lleva quien
+          administra</div>
+          <p class="muted" style="margin:0;font-size:.88rem">Tus datos viajan a la base de
+          datos de quien te dio el acceso, y solo los ves tú: la base no deja que nadie lea
+          lo de otra persona.</p>
         </div>` : html`
       <div class="list-title">Cuenta y sincronización · Supabase</div>
       ${raw(plegable({
         id: 'sb',
+        ico: 'nube',
+        tono: '#4f8cf5',
         titulo: 'Proyecto de Supabase',
         resumen: resumenSb,
         chip: estado(Sync.activa(), 'Conectado',
@@ -394,17 +417,18 @@
       <div class="list-title">Varios dispositivos</div>
       ${raw(plegable({
         id: 'disp',
+        ico: 'compartir',
+        tono: '#c06bf0',
         titulo: 'Sincronizar mis claves',
         resumen: Store.settings().sincronizarClaves !== false
           ? 'Encendido · no hay que repetirlas en cada dispositivo'
           : 'Apagado · cada dispositivo lleva las suyas',
         chip: '',
         cuerpo: html`
-        <div class="row between">
-          <div class="grow">
-            <div class="tiny">Las claves de IA y el Client ID de Spotify viajan con tus
-              datos, para no repetirlos en cada dispositivo</div>
-          </div>
+        <div class="aj-fila" style="padding-top:0">
+          <span class="grow"><span class="aj-tit">Que viajen con mis datos</span>
+            <span class="aj-sub">Las claves de IA y el Client ID de Spotify, para no
+            repetirlos en cada dispositivo</span></span>
           <button class="sw ${Store.settings().sincronizarClaves !== false ? 'on' : ''}"
                   data-a="togglesync" role="switch"
                   aria-checked="${Store.settings().sincronizarClaves !== false}"
@@ -416,15 +440,17 @@
       }))}
 
       ${raw(Sync.configurado() && Sync.puedeConfigurar() ? html`
-        <div class="card">
-          <div style="font-weight:600;margin-bottom:4px">Enlazar un dispositivo nuevo</div>
-          <p class="muted" style="margin:0 0 10px">La configuración de Supabase no puede
-          venir de la nube, porque es justo la que abre la puerta. Abre este enlace en el
-          otro dispositivo y quedará listo para entrar con tu correo.</p>
+        <div class="card tarjeta-premium">
+          <div class="pre-encima">Un enlace y ya</div>
+          <div style="font-weight:700;font-size:1rem;margin:5px 0 4px">Enlazar un
+          dispositivo nuevo</div>
+          <p class="muted" style="margin:0 0 12px;font-size:.88rem">La configuración de
+          Supabase no puede venir de la nube, porque es justo la que abre la puerta. Abre
+          este enlace en el otro dispositivo y quedará listo para entrar con tu correo.</p>
           <div class="row">
-            <button class="btn primary grow" data-a="compartirEnlace">
+            <button class="btn primary grow btn-arranque" data-a="compartirEnlace">
               ${raw(icon('share'))} Compartir enlace</button>
-            <button class="btn" data-a="copiarEnlace" aria-label="Copiar enlace">
+            <button class="btn icon vidrio" data-a="copiarEnlace" aria-label="Copiar enlace">
               ${raw(icon('copy'))}</button>
           </div>
           <p class="tiny" style="margin:10px 0 0">El enlace lleva la URL del proyecto y la
@@ -436,6 +462,8 @@
       <div class="list-title">Seguridad</div>
       ${raw(plegable({
         id: 'seg',
+        ico: 'llave',
+        tono: '#f0a23c',
         titulo: 'Dónde viven las claves',
         resumen: 'Y cómo borrarlas todas de golpe',
         chip: '',

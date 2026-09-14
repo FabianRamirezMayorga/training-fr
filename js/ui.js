@@ -27,6 +27,8 @@
     pause: '<svg viewBox="0 0 24 24"><path d="M7 4h4v16H7zM13 4h4v16h-4z"/></svg>',
     plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
     menos: '<svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>',
+    aviso: '<svg viewBox="0 0 24 24"><path d="M12 3.6L1.8 20.4h20.4z"/>'
+      + '<path d="M12 9.6v4.6M12 17.4v.1"/></svg>',
     check: '<svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>',
     trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>',
     edit: '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM14 5l4 4"/></svg>',
@@ -292,12 +294,19 @@
   }
 
   /* Confirmación con botones; devuelve una promesa */
-  function confirm(title, message, okLabel, danger) {
+  /* La pregunta de «¿seguro?» era un titulo, un parrafo y dos botones iguales.
+     Un disco con el icono arriba dice de que va antes de leer nada —rojo si
+     algo se va a perder, verde si no— y es lo que separa una confirmacion de
+     un aviso cualquiera. */
+  function confirm(title, message, okLabel, danger, ico) {
     return new Promise(function (resolve) {
       modal(
-        html`<h2>${title}</h2><p class="muted">${message}</p>
-             <div class="row" style="margin-top:16px">
-               <button class="btn grow" data-x="no">Cancelar</button>
+        html`<div class="conf-disco ${danger ? 'mal' : ''}">
+               ${raw(ICON[ico] || ICON[danger ? 'aviso' : 'check'])}</div>
+             <h2 class="conf-tit">${title}</h2>
+             <p class="muted conf-txt">${message}</p>
+             <div class="row" style="margin-top:18px">
+               <button class="btn grow vidrio" data-x="no">Cancelar</button>
                <button class="btn grow ${danger ? 'danger' : 'primary'}" data-x="si">${okLabel || 'Aceptar'}</button>
              </div>`,
         function (el) {
