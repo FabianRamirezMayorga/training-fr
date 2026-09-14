@@ -391,6 +391,18 @@
     const sesiones = Store.sessions();
     const aguaMeta = (Number(Perfil.agua()) || 0) * 1000;
 
+    /* Qué días toca entrenar según el plan que manda. Un domingo de descanso no
+       puede contar como día fallado por no haber entrenado: lo que el plan pide
+       ese día es precisamente no entrenar. */
+    const DIAS_CORTOS = UI.DAY_NAMES || [];
+    const tocaEntrenar = {};
+    Store.routines().forEach(function (r) {
+      if (App.planActivo && App.planActivo() && App.nombreRutina &&
+          App.nombreRutina(r) !== App.planActivo()) return;
+      (r.days || []).forEach(function (d) { tocaEntrenar[d] = true; });
+    });
+    const hayPlanDeDias = Object.keys(tocaEntrenar).length > 0;
+
     for (let i = 6; i >= 0; i--) {
       const t = Date.now() - i * 86400000;
       const clave = Comidas.claveDia(t);
@@ -401,25 +413,42 @@
         return n + (Number(x.ml) || 0);
       }, 0) : 0;
 
-      dias.push({
+      const nombreDia = DIAS_CORTOS[new Date(t).getDay()];
+      /* Si no hay ningún plan con días puestos, se le pide entrenar todos: sin
+         plan no hay días de descanso que respetar. */
+      const tocaba = !hayPlanDeDias || !!tocaEntrenar[nombreDia];
+
+      const d = {
         t: t,
         letra: ['D', 'L', 'M', 'X', 'J', 'V', 'S'][new Date(t).getDay()],
         num: new Date(t).getDate(),
         esHoy: i === 0,
+        tocaba: tocaba,
         entreno: sesiones.some(function (x) {
           return Comidas.claveDia(x.start) === clave;
         }),
         /* «Llegar» es el 90 %: exigir el 100 % de una estimación es exigir
            suerte, no constancia. */
         proteina: m.prot > 0 && prot >= m.prot * 0.9,
-        agua: aguaMeta > 0 && ml >= aguaMeta * 0.9,
-        sinNada: !lista.length && !ml
-      });
+        agua: aguaMeta > 0 && ml >= aguaMeta * 0.9
+      };
+
+      /* Un día sale si cumple todo lo que ese día se le pedía. Lo que no se le
+         pedía no cuenta ni a favor ni en contra. */
+      let pedidas = 0, hechas = 0;
+      if (tocaba) { pedidas++; if (d.entreno) hechas++; }
+      if (m.prot > 0) { pedidas++; if (d.proteina) hechas++; }
+      if (aguaMeta > 0) { pedidas++; if (d.agua) hechas++; }
+      d.pedidas = pedidas;
+      d.hechas = hechas;
+      d.cumplido = pedidas > 0 && hechas === pedidas;
+
+      dias.push(d);
     }
 
-    const cumplidos = dias.reduce(function (n, d) {
-      return n + (d.entreno ? 1 : 0) + (d.proteina ? 1 : 0) + (d.agua ? 1 : 0);
-    }, 0);
+    const hechas = dias.reduce(function (n, d) { return n + d.hechas; }, 0);
+    const pedidas = dias.reduce(function (n, d) { return n + d.pedidas; }, 0);
+    const salieron = dias.filter(function (d) { return d.cumplido; }).length;
 
     const cuerpo = html`
       <div class="card tarjeta-premium">
@@ -429,11 +458,15 @@
               return '<span class="ps-punto ' + clase + (ok ? ' si' : '') + '" ' +
                 'title="' + esc(titulo) + '"></span>';
             };
-            return '<div class="ps-dia' + (d.esHoy ? ' es-hoy' : '') + '">' +
+            /* Hoy se queda neutro hasta que salga: el día no ha terminado, y
+               pintarlo en rojo a las once de la mañana por no haber cenado
+               todavía es regañar por algo que aún no ha pasado. */
+            const tono = d.cumplido ? ' cumplido' : d.esHoy ? '' : ' fallado';
+            return '<div class="ps-dia' + (d.esHoy ? ' es-hoy' : '') + tono + '">' +
               '<span class="ps-letra">' + d.letra + '</span>' +
               '<span class="ps-num">' + d.num + '</span>' +
               '<span class="ps-marcas">' +
-              punto(d.entreno, 'entreno', 'Entrenaste') +
+              punto(d.entreno, 'entreno', d.tocaba ? 'Entrenaste' : 'Día de descanso') +
               punto(d.proteina, 'prote', 'Llegaste a la proteína') +
               punto(d.agua, 'agua', 'Bebiste el agua') +
               '</span></div>';
@@ -444,13 +477,16 @@
           <span><i class="ps-punto prote si"></i> Proteína</span>
           <span><i class="ps-punto agua si"></i> Agua</span>
         </div>
+        ${raw(dias.some(function (d) { return !d.tocaba; })
+          ? '<p class="tiny" style="margin:9px 0 0;text-align:center">Los días de ' +
+            'descanso no piden entreno: ahí solo cuentan la proteína y el agua.</p>' : '')}
       </div>`;
 
     return plegable({
       id: 'plan', titulo: 'Cómo voy con el plan', marca: 'grafica',
-      cola: cumplidos + ' de 21',
-      sub: 'Los últimos siete días: si entrenaste, si llegaste a la proteína y ' +
-        'si bebiste el agua.',
+      cola: salieron + ' de 7 días',
+      sub: 'Los últimos siete días: si entrenaste, si llegaste a la proteína y si ' +
+        'bebiste el agua. Llevas ' + hechas + ' de ' + pedidas + '.',
       cuerpo: cuerpo
     });
   }

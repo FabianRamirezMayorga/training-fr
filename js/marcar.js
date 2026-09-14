@@ -129,7 +129,7 @@
          su punto, que es lo que era antes de que se pudiera marcar nada. */
       if (!marcable) {
         return '<div class="tiny" style="display:flex;gap:8px">' +
-          '<span style="color:var(--blue)">•</span><span>' + esc(x) + '</span></div>';
+          '<span style="color:var(--agua)">•</span><span>' + esc(x) + '</span></div>';
       }
 
       return '<button class="agua-toma' + (ya ? ' bebida' : '') +
@@ -144,7 +144,7 @@
         ${raw(conCabecera ? html`
           <div class="row between">
             <div class="row" style="gap:9px;align-items:center">
-              <span class="row-icon" style="color:var(--blue)">${raw(icon('gota'))}</span>
+              <span class="row-icon" style="color:var(--agua)">${raw(icon('vaso'))}</span>
               <b>Hidratación</b>
             </div>
             <span class="chip solid">${h.total || (Perfil.agua() + ' L')}</span>
@@ -158,7 +158,7 @@
                 de ${String(metaL).replace('.', ',')} L</i></span>
             </div>
             <div class="nu-barra"><i style="width:${metaL
-              ? Math.min(100, Math.round(llevo.litros / metaL * 100)) : 0}%;--bc:var(--blue)"></i></div>
+              ? Math.min(100, Math.round(llevo.litros / metaL * 100)) : 0}%;--bc:var(--agua)"></i></div>
           </div>` : '')}
 
         ${raw(pauta ? '<div class="agua-pauta">' + pauta + '</div>' : '')}

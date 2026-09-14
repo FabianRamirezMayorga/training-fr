@@ -4,6 +4,10 @@
   --brand-1:#26c6da; --brand-2:#8bc34a;
   --acc:#8bc34a; --acc-d:#1e2e11; --on-acc:#0d1a04;
   --warn:#ffb020; --bad:#ff5c5c; --blue:#26c6da;
+  /* El agua tenia el mismo color que la proteina —--blue y --brand-1 eran los
+     dos #26c6da—, asi que en cualquier sitio donde salieran juntas no habia
+     forma de distinguirlas. Ahora es un azul de verdad, no un cian. */
+  --agua:#4f8cf5;
   --r:16px; --r-s:12px; --r-xs:9px;
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
@@ -17,7 +21,7 @@
 html[data-theme="light"]{
   --bg:#f4f6fa; --bg2:#ffffff; --card:#ffffff; --card2:#eef1f7;
   --line:#dde3ec; --txt:#141922; --dim:#5c6779; --dim2:#8a94a6;
-  --acc:#5b8f2b; --acc-d:#eaf5db; --on-acc:#ffffff; --blue:#0f8a9c;
+  --acc:#5b8f2b; --acc-d:#eaf5db; --on-acc:#ffffff; --blue:#0f8a9c; --agua:#2f6fd0;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -1597,6 +1601,11 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
   text-transform: uppercase; }
 .ps-dia.es-hoy .ps-letra { color: var(--acc); }
 .ps-num { font-size: .82rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+/* Verde si el dia salio, rojo si no. Hoy se queda neutro hasta que salga: el
+   dia no ha terminado, y pintarlo en rojo a las once de la manana por no haber
+   cenado todavia es reganar por algo que aun no ha pasado. */
+.ps-dia.cumplido .ps-num { color: var(--acc); }
+.ps-dia.fallado .ps-num { color: var(--bad); }
 .ps-marcas { display: flex; gap: 3px; margin-top: 4px; }
 
 .ps-punto {
@@ -1606,7 +1615,7 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 }
 .ps-punto.entreno.si { background: var(--acc); box-shadow: none; }
 .ps-punto.prote.si { background: var(--brand-1); box-shadow: none; }
-.ps-punto.agua.si { background: var(--blue); box-shadow: none; }
+.ps-punto.agua.si { background: var(--agua); box-shadow: none; }
 
 .plan-leyenda {
   display: flex; gap: 14px; justify-content: center; margin-top: 11px;
@@ -3113,7 +3122,7 @@ html[data-theme="light"] .vista-nutricion textarea {
 
 /* ---------- marcar lo que bebes ---------- */
 .agua-hoy { margin-top: 11px; }
-.ah-cif { font-size: 1.05rem; font-weight: 800; color: var(--blue);
+.ah-cif { font-size: 1.05rem; font-weight: 800; color: var(--agua);
   font-variant-numeric: tabular-nums; }
 .ah-cif i { font-style: normal; font-size: .74rem; font-weight: 600; color: var(--dim); }
 
@@ -3133,16 +3142,16 @@ html[data-theme="light"] .vista-nutricion textarea {
 .at-casilla {
   flex: none; width: 21px; height: 21px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--blue) 45%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--agua) 45%, transparent);
   transition: background .16s ease, box-shadow .16s ease;
 }
 .at-casilla svg { width: 13px; height: 13px; }
 .at-txt { font-size: .8rem; min-width: 0; }
 
-.agua-toma.bebida { background: color-mix(in srgb, var(--blue) 13%, transparent); }
+.agua-toma.bebida { background: color-mix(in srgb, var(--agua) 13%, transparent); }
 .agua-toma.bebida .at-casilla {
-  color: #fff; background: var(--blue);
-  box-shadow: 0 2px 6px color-mix(in srgb, var(--blue) 40%, transparent);
+  color: #fff; background: var(--agua);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--agua) 40%, transparent);
 }
 .agua-toma.bebida .at-txt { color: var(--dim); }
 
