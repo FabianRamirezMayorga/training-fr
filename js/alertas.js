@@ -280,6 +280,9 @@
       } else {
         new Notification(titulo, opciones);
       }
+      /* Se apunta la hora del último aviso lanzado: sin esto, «no me avisa» y
+         «me avisó y no lo vi» son indistinguibles. */
+      try { localStorage.setItem('trainingfr.ultimoAviso', String(Date.now())); } catch (e) { }
       return true;
     } catch (e) { return false; }
   }
@@ -369,6 +372,49 @@
 
   function parar() { clearInterval(temporizador); temporizador = null; }
 
+  /* ---------- ¿de verdad va a avisar? ----------
+     Aquí hay varias cosas que tienen que cumplirse a la vez, y basta con que
+     falle una para que no suene nada. Una app que promete avisos y no avisa es
+     peor que una que no los promete, así que en vez de afirmarlo se comprueba
+     cada pieza y se dice cuál falta.
+
+     La última es la incómoda: una página web no ejecuta nada mientras está
+     cerrada. El reloj de aquí arriba solo corre con la app abierta —aunque sea
+     en segundo plano—, y eso no se arregla desde aquí: haría falta un servidor
+     que empuje los avisos. Para lo demás está el calendario. */
+  function diagnostico() {
+    const instalada = !!(g.matchMedia && matchMedia('(display-mode: standalone)').matches) ||
+      g.navigator.standalone === true;
+
+    return {
+      soportado: soportado(),
+      permiso: permiso(),
+      instalada: instalada,
+      /* En iOS los avisos web solo existen si la app está en la pantalla de
+         inicio; en el navegador no hay ni permiso que pedir. */
+      esIOS: /iPad|iPhone|iPod/.test(navigator.userAgent || ''),
+      serviceWorker: !!(navigator.serviceWorker && navigator.serviceWorker.controller),
+      relojEnMarcha: temporizador !== null,
+      activas: lista().filter(function (a) { return a.activa; }).length,
+      ultimoAviso: Number(localStorage.getItem('trainingfr.ultimoAviso')) || 0
+    };
+  }
+
+  /* Un aviso de prueba, ahora mismo. Es la única forma de saber que funciona:
+     lo demás son suposiciones sobre permisos y ajustes del sistema. */
+  function probar() {
+    if (!soportado()) {
+      return Promise.reject(new Error('Este navegador no sabe mostrar avisos.'));
+    }
+    if (Notification.permission !== 'granted') {
+      return Promise.reject(new Error('Primero hay que dar permiso a los avisos.'));
+    }
+    const ok = avisar('Prueba de Training FR',
+      'Si ves esto, los avisos funcionan con la app abierta.');
+    return ok ? Promise.resolve(true)
+      : Promise.reject(new Error('El sistema no ha dejado mostrarlo.'));
+  }
+
   /* ---------- exportar al calendario ---------- */
 
   function dosDigitos(n) { return String(n).padStart(2, '0'); }
@@ -456,6 +502,7 @@
     soportado: soportado, permiso: permiso, pedirPermiso: pedirPermiso, avisar: avisar,
     pendientes: pendientes, arrancar: arrancar, parar: parar, marcarLanzada: marcarLanzada,
     ics: ics, resumenDias: resumenDias, resumenHoras: resumenHoras,
+    diagnostico: diagnostico, probar: probar,
     sugerencias: sugerencias, yaExiste: yaExiste, crearDesdeSugerencia: crearDesdeSugerencia,
     repartir: repartir, enMinutos: enMinutos, aHora: aHora,
     horaHabitualDeEntreno: horaHabitualDeEntreno

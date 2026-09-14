@@ -946,7 +946,6 @@
 
   V.alertas = function () {
     const lista = Alertas.lista();
-    const permiso = Alertas.permiso();
     const activas = lista.filter(function (a) { return a.activa; }).length;
 
     return html`
@@ -965,19 +964,7 @@
           ' ' + esc(proximoTexto(lista))
         : 'Las horas salen de tus datos: tu peso, a qué hora te levantas y cuándo entrenas.')}</p>
 
-      ${raw(permiso === 'granted' ? '' : html`
-        <div class="card tarjeta-premium" style="margin-top:12px">
-          <div class="pre-encima">${permiso === 'denied' ? 'Bloqueados' : 'Falta un paso'}</div>
-          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">Permite los avisos</div>
-          <p class="muted" style="margin:0 0 12px;font-size:.88rem">Sin permiso solo verás los
-          recordatorios dentro de la app.</p>
-          <button class="btn primary block btn-arranque" data-a="permiso"
-            ${permiso === 'denied' ? 'disabled' : ''}>
-            ${permiso === 'denied' ? 'Bloqueados en el navegador' : 'Activar los avisos'}</button>
-          ${raw(permiso === 'denied'
-            ? '<p class="tiny" style="margin-top:8px">Los has bloqueado. Actívalos en los ' +
-              'ajustes del navegador para este sitio.</p>' : '')}
-        </div>`)}
+      ${raw(permisoHTML())}
 
       ${raw(lista.length ? '<div class="list-title">Mis recordatorios</div>' +
         '<div class="stack">' + lista.map(tarjetaAlerta).join('') + '</div>'
@@ -1003,6 +990,99 @@
         añadirlo. Se crean como eventos semanales con aviso.</p>
       </div>`;
   };
+
+  /* ---------- activar los avisos ----------
+     Para quien ya los tiene dados esto no existe. Para quien no, era un botón
+     y una frase: «actívalos en los ajustes del navegador». Si el botón no hacía
+     nada —que en iOS dentro de Safari es lo que pasa, porque ahí no hay ni
+     permiso que pedir— no había forma de saber por qué, y quien instala la app
+     por primera vez se queda sin avisos sin entender qué le falta.
+
+     Ahora se mira en qué situación está y se dice esa y solo esa. Son cuatro, y
+     cada una tiene una salida distinta: instalar la app, pulsar el botón,
+     desbloquear en los ajustes del sistema, o nada porque ya está.
+
+     Y cuando ya está, un botón de probar. Es lo único que demuestra que
+     funciona; lo demás son suposiciones sobre permisos y ajustes. */
+  function permisoHTML() {
+    const d = Alertas.diagnostico();
+
+    if (!d.soportado) {
+      return html`
+        <div class="card tarjeta-premium" style="margin-top:12px">
+          <div class="pre-encima">Sin avisos aquí</div>
+          <p class="muted" style="margin:6px 0 0;font-size:.88rem">Este navegador no sabe
+          mostrar avisos del sistema. Los recordatorios los sigues viendo dentro de la app,
+          y para que suenen con la app cerrada tienes el calendario, más abajo.</p>
+        </div>`;
+    }
+
+    /* En iOS los avisos web solo existen dentro de la app instalada en la
+       pantalla de inicio. En Safari el botón no falla: es que no hay nada que
+       pulsar, y decirle «pulsa aquí» es mandarle a un sitio que no existe. */
+    if (d.esIOS && !d.instalada && d.permiso !== 'granted') {
+      return html`
+        <div class="card tarjeta-premium" style="margin-top:12px">
+          <div class="pre-encima">Falta instalar la app</div>
+          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">Añádela a tu
+          pantalla de inicio</div>
+          <p class="muted" style="margin:0 0 10px;font-size:.88rem">En el iPhone los avisos
+          solo funcionan desde la app instalada, no desde el navegador. Se hace una vez:</p>
+          <ol class="instr" style="margin:0">
+            <li>Toca el botón de compartir de Safari, el cuadrado con la flecha.</li>
+            <li>Baja y elige <b>Añadir a pantalla de inicio</b>.</li>
+            <li>Abre Training FR desde el icono nuevo y vuelve aquí.</li>
+          </ol>
+        </div>`;
+    }
+
+    if (d.permiso === 'denied') {
+      return html`
+        <div class="card tarjeta-premium" style="margin-top:12px;border-color:var(--warn)">
+          <div class="pre-encima">Bloqueados</div>
+          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">Los avisos están
+          bloqueados</div>
+          <p class="muted" style="margin:0 0 10px;font-size:.88rem">Se dijo que no una vez y
+          el sistema no lo vuelve a preguntar. Hay que activarlos a mano:</p>
+          <ol class="instr" style="margin:0">
+            ${raw(d.esIOS
+              ? '<li>Abre los <b>Ajustes</b> del iPhone.</li>' +
+                '<li>Baja hasta <b>Training FR</b> y entra.</li>' +
+                '<li>Entra en <b>Notificaciones</b> y enciende <b>Permitir notificaciones</b>.</li>'
+              : '<li>Toca el candado de la barra de direcciones.</li>' +
+                '<li>Busca <b>Notificaciones</b> y ponlo en <b>Permitir</b>.</li>' +
+                '<li>Recarga esta página.</li>')}
+          </ol>
+        </div>`;
+    }
+
+    if (d.permiso !== 'granted') {
+      return html`
+        <div class="card tarjeta-premium" style="margin-top:12px">
+          <div class="pre-encima">Falta un paso</div>
+          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">Permite los avisos</div>
+          <p class="muted" style="margin:0 0 12px;font-size:.88rem">Sin permiso solo verás los
+          recordatorios dentro de la app. El sistema te lo va a preguntar una vez.</p>
+          <button class="btn primary block btn-arranque" data-a="permiso">
+            ${raw(icon('campana'))} Activar los avisos</button>
+        </div>`;
+    }
+
+    /* Concedidos. Aquí ya no hay nada que arreglar, así que lo único útil es
+       poder comprobarlo y saber qué no va a pasar con la app cerrada. */
+    return html`
+      <div class="card tarjeta-premium" style="margin-top:12px">
+        <div class="row between" style="align-items:center;gap:10px">
+          <div class="grow" style="min-width:0">
+            <div class="pre-encima">Avisos activados</div>
+            <p class="tiny" style="margin:4px 0 0">${raw(d.ultimoAviso
+              ? 'El último salió ' + esc(UI.fechaCorta(d.ultimoAviso)) + '.'
+              : 'Todavía no ha salido ninguno.')}</p>
+          </div>
+          <button class="btn sm" data-a="probarAviso">${raw(icon('campana'))} Probar</button>
+        </div>
+      </div>`;
+  }
 
   /* Cuál es el siguiente que va a sonar hoy. Una lista de recordatorios dice a
      qué horas suenan, pero no cuál toca ahora, que es lo que se mira al entrar. */
@@ -1150,6 +1230,12 @@
   V.alertas.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=nueva]', function () { alertaSheet(null); });
+
+    bind(root, '[data-a=probarAviso]', function () {
+      Alertas.probar()
+        .then(function () { UI.toast('Aviso lanzado: mira la pantalla'); })
+        .catch(function (e) { UI.toast(e.message || 'No se pudo lanzar'); });
+    });
 
     bind(root, '[data-a=permiso]', function () {
       Alertas.pedirPermiso().then(function (r) {
