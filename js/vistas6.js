@@ -304,9 +304,10 @@
         }).join(''))}
       </div>
 
-      <div class="card graf-caja">
+      <div class="card graf-caja tarjeta-premium">
         <div class="row between" style="align-items:flex-end;margin-bottom:6px">
           <div>
+            <div class="pre-encima">${porSeries ? 'Series' : 'Volumen'}</div>
             <div class="graf-dato">${UI.num(total)}</div>
             <div class="tiny">${porSeries ? 'series' : (Store.settings().unit || 'kg')}
               en ${r.frase}</div>
@@ -352,15 +353,22 @@
 
       ${raw(metasHTML())}
 
+      <!-- Los récords, en una sola lista con su medalla: doce tarjetas sueltas
+           eran doce cajas iguales seguidas, y lo que se mira de un récord es el
+           peso, no la caja. -->
       ${raw(prs.length ? html`
         <div class="list-title">Récords personales</div>
-        <div class="stack">
-          ${raw(prs.slice(0, 12).map(function (p) {
-            return html`<button class="card row between" data-ex="${p.exId}" style="width:100%;text-align:left">
-              <div class="grow"><div style="font-weight:600;font-size:.88rem">${p.name}</div>
-                <div class="tiny">${UI.fecha(p.pr.date)}</div></div>
-              <div class="chip solid">${UI.kg(p.pr.weight)} × ${p.pr.reps}</div>
-            </button>`;
+        <div class="card lista-prs">
+          ${raw(prs.slice(0, 12).map(function (p, i) {
+            return html`
+              <button class="fila-pr" data-ex="${p.exId}" style="--turno:${i}">
+                <span class="pr-ico">${raw(icon('trofeo'))}</span>
+                <span class="grow">
+                  <span class="pr-tit">${p.name}</span>
+                  <span class="pr-sub">${UI.fecha(p.pr.date)}</span>
+                </span>
+                <span class="pr-marca">${UI.kg(p.pr.weight)} × ${p.pr.reps}</span>
+              </button>`;
           }).join(''))}
         </div>` : '')}
 
