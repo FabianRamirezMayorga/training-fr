@@ -794,7 +794,7 @@
      con una sola variable, abrir una rutina en Rutinas la abría también en la
      portada, y la portada se llena de golpe cuando lo que uno quiere ahí es ver
      el día de un vistazo. */
-  let rutinaAbierta = { rutinas: null, inicio: null, dia: null };
+  let rutinaAbierta = { rutinas: null, inicio: null, dia: null, plan: null };
 
   /* Qué planes están desplegados. Sin esto la pantalla de Rutinas era todo lo
      que uno tiene, abierto de golpe. */
@@ -911,7 +911,7 @@
             attr: 'data-verplan="' + esc(k) + '"' }
         ]))}
         ${raw(abierto ? '<div class="stack">' +
-          suyas.map(function (r) { return routineCard(r, 0, 0, true); }).join('') + '</div>' +
+          suyas.map(function (r) { return routineCard(r, 0, 0, true, 'plan'); }).join('') + '</div>' +
           (k === activo
             ? '<p class="tiny" style="margin:10px 0 0">Este es el plan que manda: en ' +
               '«hoy» solo salen sus rutinas.</p>' +
@@ -992,8 +992,11 @@
     const cabeceraHoy = function () {
       const zona = zonaDeRutina(r);
       const dias = (r.days || []).map(UI.diaLargo);
-      const encima = (esDeHoy ? 'Hoy' : listaDias(dias) || 'Sin día') +
-        (r.mixta ? ' · Mixta' : zona ? ' · ' + zona.label : '');
+      /* Arriba, que se trabaja; debajo, que dias. Poner los dias en los dos
+         sitios —que es lo que pasaba cuando la rutina no era de hoy— dejaba la
+         tarjeta diciendo «Lunes y Miércoles» dos veces. */
+      const que = r.mixta ? 'Mixta' : zona ? zona.label : 'Sin ejercicios';
+      const encima = (esDeHoy ? 'Hoy · ' : '') + que;
 
       return html`
         <div class="hoy-fila">
@@ -1013,7 +1016,7 @@
 
     /* La tarjeta grande vale para las dos pantallas donde se pregunta «qué
        toca hoy»: la portada y la cabeza de Rutinas. */
-    const conCara = ambito === 'inicio' || ambito === 'dia';
+    const conCara = ambito === 'inicio' || ambito === 'dia' || ambito === 'plan';
 
     const tarjeta = conCara ? html`
       <div class="card tarjeta-hoy" style="padding:0;overflow:hidden">

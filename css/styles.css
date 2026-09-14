@@ -1360,7 +1360,16 @@ img[src^="data/img/"] {
    para elegir una. Con el nombre, el nivel y los dias ya se decide; el resto
    se lee si interesa. El boton de usar se queda en la cabecera para poder
    copiarla sin abrirla. */
-.plantilla { padding: 0; overflow: hidden; }
+/* Las plantillas, con el mismo material que los planes y la rutina de hoy: una
+   sola pieza con el degradado de la marca, sin caja dentro de caja. */
+.plantilla {
+  padding: 0; overflow: hidden; border-radius: 20px;
+  background:
+    linear-gradient(152deg, color-mix(in srgb, var(--acc) 11%, var(--card)) 0%,
+                    var(--card) 60%);
+  border-color: color-mix(in srgb, var(--acc) 20%, var(--line));
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+}
 .plantilla > summary {
   display: flex;
   align-items: center;
@@ -1740,6 +1749,7 @@ html[data-theme="light"] .zona-tile .pri { opacity: .45; }
    planas y el tinte no se veía: aqui sube un punto el verde y se apoyan sobre
    una sombra corta y otra larga, que es como flota una tarjeta en iOS. */
 html[data-theme="light"] .tarjeta-premium,
+html[data-theme="light"] .plantilla,
 html[data-theme="light"] .tarjeta-hoy {
   background:
     linear-gradient(152deg, color-mix(in srgb, var(--acc) 14%, #fff) 0%, #fff 60%);
@@ -2134,3 +2144,15 @@ html[data-theme="light"] .zona-tile::after {
 .fila-accion .chevron { flex: none; color: var(--dim2); }
 .fila-accion .chevron svg { width: 15px; height: 15px; fill: none;
   stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+
+/* De dia, el plan tambien: su color sobre blanco y la sombra que lo levanta.
+   Va aparte de las demas tarjetas porque cada plan tiene su tono y no el verde
+   de la marca. */
+html[data-theme="light"] .plan-caja {
+  border-color: color-mix(in srgb, var(--tono) 30%, var(--line));
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 8px 20px rgba(16, 24, 40, .06);
+}
+html[data-theme="light"] .plan-caja .desliza-cara > .dia-grupo {
+  background:
+    linear-gradient(152deg, color-mix(in srgb, var(--tono) 20%, #fff) 0%, #fff 62%);
+}
