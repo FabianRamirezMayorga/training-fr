@@ -895,19 +895,6 @@
   /* Una preferencia de sí o no, con su par de botones. Las de arriba son de
      elegir una de tres y se pintan solas; estas son interruptores, y meterlos
      en el mismo molde haría que un «no» pareciese una tercera opción. */
-  /* Un sí o un no es un interruptor. Eran dos botones, «Sí» y «No», y con dos
-     botones hay que leer cuál de los dos está encendido para saber en qué
-     estado estás; con un interruptor el estado es la propia forma. */
-  function filaSiNo(ico, titulo, sub, clave, activo) {
-    return '<div class="aj-fila">' +
-      '<span class="aj-ico">' + icon(ico) + '</span>' +
-      '<span class="grow"><span class="aj-tit">' + esc(titulo) + '</span>' +
-      '<span class="aj-sub">' + esc(sub) + '</span></span>' +
-      '<button class="sw' + (activo ? ' on' : '') + '" data-sino="' + clave +
-      '" data-val="' + (activo ? 'no' : 'si') + '" role="switch" aria-checked="' +
-      (activo ? 'true' : 'false') + '" aria-label="' + esc(titulo) + '"></button></div>';
-  }
-
   function porPlanes(rutinas) {
     const hoy = UI.DAY_NAMES[new Date().getDay()];
     const deHoy = rutinasDeHoy();
@@ -4370,25 +4357,61 @@
   }
 
   /* Una fila de ajuste: lo que se cambia a la izquierda y su mando a la derecha */
-  function filaAjuste(titulo, sub, control, apilada) {
+  function filaAjuste(titulo, sub, control, apilada, ico) {
     /* Un mando de tres no cabe al lado de su nombre en un movil: o se aprieta
        hasta que «Sistema» no se lee, o baja a su propia linea con todo el
        ancho. Baja. */
     return '<div class="aj-fila' + (apilada ? ' apilada' : '') + '">' +
+      (ico ? '<span class="aj-ico">' + icon(ico) + '</span>' : '') +
       '<span class="grow"><span class="aj-tit">' + esc(titulo) + '</span>' +
       (sub ? '<span class="aj-sub">' + esc(sub) + '</span>' : '') +
       '</span>' + control + '</div>';
   }
 
-  /* Una opcion de una lista de la que se elige una sola */
-  function filaOpcion(attr, valor, actual, ico, titulo, sub) {
-    return '<button class="opcion' + (valor === actual ? ' on' : '') + '" ' + attr + '="' +
-      valor + '" style="--tono:var(--acc)">' +
-      '<span class="op-ico">' + icon(ico) + '</span>' +
-      '<span class="grow"><span class="op-nom">' + esc(titulo) + '</span>' +
-      '<span class="op-sub">' + esc(sub) + '</span></span>' +
+  /* Una opcion de una lista de la que se elige una sola. Con su color, su
+     silueta al fondo y una muestra de lo que vas a ver mientras entrenas: leer
+     «anotas cada serie» y ver «60 kg × 12» no cuesta lo mismo. */
+  function filaOpcion(o, actual) {
+    return '<button class="opcion' + (o.v === actual ? ' on' : '') + '" data-reg="' +
+      o.v + '" style="--tono:' + o.tono + '">' +
+      '<span class="op-silueta" aria-hidden="true">' + icon(o.ico) + '</span>' +
+      '<span class="op-ico">' + icon(o.ico) + '</span>' +
+      '<span class="grow"><span class="op-nom">' + esc(o.t) + '</span>' +
+      '<span class="op-sub">' + esc(o.sub) + '</span>' +
+      '<span class="op-muestra">' + o.muestra + '</span></span>' +
       '<span class="op-marca">' + icon('check') + '</span></button>';
   }
+
+  /* Un si o un no con la misma cara que las opciones: color, silueta y el
+     interruptor donde las otras llevan el tic. */
+  function tarjetaSiNo(o, activo) {
+    return '<div class="opcion fijo' + (activo ? ' on' : '') +
+      '" style="--tono:' + o.tono + '">' +
+      '<span class="op-silueta" aria-hidden="true">' + icon(o.ico) + '</span>' +
+      '<span class="op-ico">' + icon(o.ico) + '</span>' +
+      '<span class="grow"><span class="op-nom">' + esc(o.t) + '</span>' +
+      '<span class="op-sub">' + esc(o.sub) + '</span></span>' +
+      '<button class="sw' + (activo ? ' on' : '') + '" data-sino="' + o.clave +
+      '" data-val="' + (activo ? 'no' : 'si') + '" role="switch" aria-checked="' +
+      (activo ? 'true' : 'false') + '" aria-label="' + esc(o.t) + '"></button></div>';
+  }
+
+  /* Las tres formas de apuntar una serie, con la muestra de lo que se ve
+     mientras entrenas. «Anotas cada serie» y «60 kg × 12» dicen lo mismo, pero
+     lo segundo se entiende sin leerlo. */
+  const FORMAS_REGISTRO = [
+    { v: 'detallado', ico: 'grafica', tono: 'var(--acc)', t: 'Peso y repeticiones',
+      sub: 'Anotas cada serie. Necesario para los récords, el volumen y las gráficas.',
+      muestra: '<span class="mu-dato">60 <i>kg</i></span><span class="mu-x">×</span>' +
+        '<span class="mu-dato">12 <i>reps</i></span>' },
+    { v: 'simple', ico: 'check', tono: '#4f8cf5', t: 'Marcar cada serie',
+      sub: 'Te propongo el objetivo (3 × 12) y solo marcas las que vas haciendo.',
+      muestra: '<span class="mu-serie hecha"></span><span class="mu-serie hecha"></span>' +
+        '<span class="mu-serie"></span><span class="mu-txt">2 de 3</span>' },
+    { v: 'ejercicio', ico: 'flag', tono: '#c06bf0', t: 'Marcar el ejercicio y ya',
+      sub: 'Un botón por ejercicio. Ni peso, ni repeticiones, ni series.',
+      muestra: '<span class="mu-hecho">Hecho</span>' }
+  ];
 
   function viewAjustes() {
     const s = Store.settings();
@@ -4402,10 +4425,16 @@
       <p class="muted">Cómo se comporta la app contigo: lo que te pregunta, lo que te
       propone y lo que se guarda.</p>
 
-      <div class="card tarjeta-premium">
-        <div class="pre-encima">Tú</div>
-        <label class="tiny" style="display:block;margin-top:9px">TU NOMBRE</label>
-        <input id="s-name" value="${s.name}" placeholder="¿Cómo te llamas?" style="margin-top:5px">
+      <!-- El nombre ocupaba una tarjeta entera para una palabra: rótulo arriba,
+           etiqueta debajo y una caja de ancho completo para escribir «Fabián».
+           En una fila, con el nombre a la derecha, cabe lo mismo en un tercio. -->
+      <div class="aj-caja" style="margin-top:14px">
+        <div class="aj-fila">
+          <span class="aj-ico">${raw(icon('perfil'))}</span>
+          <span class="grow"><span class="aj-tit">Tu nombre</span>
+            <span class="aj-sub">Con el que te saluda la app</span></span>
+          <input class="aj-campo" id="s-name" value="${s.name}" placeholder="¿Cómo te llamas?">
+        </div>
       </div>
 
       <div class="plan-acciones" style="margin:10px 0 0">
@@ -4421,47 +4450,44 @@
 
       <div class="list-title">Cómo registras las series</div>
       <div class="opciones">
-        ${raw(filaOpcion('data-reg', 'detallado', s.registro, 'grafica',
-          'Peso y repeticiones',
-          'Anotas cada serie. Necesario para los récords, el volumen y las gráficas.'))}
-        ${raw(filaOpcion('data-reg', 'simple', s.registro, 'check',
-          'Marcar cada serie',
-          'Te propongo el objetivo (3 × 12) y solo marcas las que vas haciendo.'))}
-        ${raw(filaOpcion('data-reg', 'ejercicio', s.registro, 'flag',
-          'Marcar el ejercicio y ya',
-          'Un botón por ejercicio. Ni peso, ni repeticiones, ni series.'))}
+        ${raw(FORMAS_REGISTRO.map(function (o) {
+          return filaOpcion(o, s.registro);
+        }).join(''))}
       </div>
       ${raw(s.registro !== 'detallado'
         ? '<p class="tiny" style="margin:8px 0 0">Sin peso anotado no hay récords ni ' +
           'volumen; el progreso se mide por series y entrenamientos completados.</p>' : '')}
 
       <div class="list-title">Qué vas marcando</div>
-      <div class="aj-caja">
-        ${raw(filaSiNo('nutricion', 'Registrar cuando como',
-          'Cada plato lleva «me lo comí» y «comí otra cosa», y lo que marques entra en el ' +
-          'recuento del día.', 'registroComida', s.registroComida !== 'no'))}
-        ${raw(filaSiNo('gota', 'Marcar cuando bebo agua',
-          'Cada toma de la pauta es una casilla, y el total del día sale de lo que marcas ' +
-          'en vez de lo que deberías.', 'registroAgua', s.registroAgua !== 'no'))}
+      <div class="opciones">
+        ${raw(tarjetaSiNo({ clave: 'registroComida', ico: 'nutricion', tono: '#f0a23c',
+          t: 'Registrar cuando como',
+          sub: 'Cada plato lleva «me lo comí» y «comí otra cosa», y lo que marques entra ' +
+            'en el recuento del día.' }, s.registroComida !== 'no'))}
+        ${raw(tarjetaSiNo({ clave: 'registroAgua', ico: 'gota', tono: '#4f8cf5',
+          t: 'Marcar cuando bebo agua',
+          sub: 'Cada toma de la pauta es una casilla, y el total del día sale de lo que ' +
+            'marcas en vez de lo que deberías.' }, s.registroAgua !== 'no'))}
       </div>
       <p class="tiny" style="margin:8px 0 0">Apagarlos no borra nada de lo que ya llevas
       apuntado: solo quita las casillas de en medio.</p>
 
       <div class="list-title">La app</div>
       <div class="aj-caja">
-        ${raw(filaAjuste('Unidad de peso', '', mando('data-unit',
-          [{ v: 'kg', t: 'kg' }, { v: 'lb', t: 'lb' }], s.unit)))}
+        ${raw(filaAjuste('Unidad de peso', 'En la que anotas y ves los pesos',
+          mando('data-unit', [{ v: 'kg', t: 'kg' }, { v: 'lb', t: 'lb' }], s.unit), false, 'dumbbell'))}
         ${raw(filaAjuste('Tema', 'Claro, oscuro o lo que diga el móvil', mando('data-theme',
           [{ v: 'light', t: 'Claro', ico: 'sol' }, { v: 'dark', t: 'Oscuro', ico: 'luna' },
-           { v: 'auto', t: 'Sistema', ico: 'cambiar' }], s.theme), true))}
+           { v: 'auto', t: 'Sistema', ico: 'cambiar' }], s.theme), true, 'sol'))}
         ${raw(filaAjuste('Descanso por defecto', 'Entre serie y serie',
-          contador('s-rest', s.rest, 'seg', 15, 0, 600)))}
+          contador('s-rest', s.rest, 'seg', 15, 0, 600), false, 'timer'))}
         ${raw(filaAjuste('La frase del entrenador', 'Cada cuánto cambia',
-          contador('s-pildora', IA.horasPildora ? IA.horasPildora() : 6, 'h', 1, 1, 24)))}
+          contador('s-pildora', IA.horasPildora ? IA.horasPildora() : 6, 'h', 1, 1, 24),
+          false, 'chispa'))}
         ${raw(filaAjuste('Aviso sonoro', 'Un pitido al terminar el descanso',
           '<button class="sw ' + (s.sound ? 'on' : '') + '" data-a="sound" ' +
           'role="switch" aria-checked="' + (s.sound ? 'true' : 'false') +
-          '" aria-label="Aviso sonoro"></button>'))}
+          '" aria-label="Aviso sonoro"></button>', false, 'altavoz'))}
       </div>
 
       <div class="list-title">Claves y conexiones</div>
