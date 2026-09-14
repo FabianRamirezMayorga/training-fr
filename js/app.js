@@ -635,8 +635,6 @@
     const hoy = UI.DAY_NAMES[new Date().getDay()];
     const deHoy = rutinasDeHoy();
     const nombre = Store.settings().name;
-    const olvido = abandonados();
-    const peso = Perfil.tendencia(30);
     const hecho = loDeHoy();
 
     /* Al volver tras un rato, la portada saluda antes que nada */
@@ -777,34 +775,12 @@
       ${raw(semanaHTML())}
       ${raw(comidaHoyHTML())}
 
-      ${raw(olvido.length ? '<div class="muelle"></div>' +
-        seccionPlegable('olvido', 'Lo que llevas abandonado',
-        olvido.length, '', html`
-        <div class="card inicio-compacta">
-          <div class="stack" style="gap:7px">
-            ${raw(olvido.map(function (f) {
-              return '<div class="row between"><span style="font-size:.9rem">' +
-                esc(I18N.muscle(f.m)) + '</span><span class="tiny">' +
-                (f.dias === null ? 'nunca' : 'hace ' + f.dias + ' días') + '</span></div>';
-            }).join(''))}
-          </div>
-          <p class="tiny" style="margin:11px 0 0">Un músculo que no se toca en más de una semana
-          se estanca. Toca la zona en Ejercicios y te monto la sesión.</p>
-          <button class="btn sm block" data-a="programa" style="margin-top:9px">
-            Rehacer mi programa con esto en cuenta</button>
-        </div>`) : '')}
-
-      <div class="pie-version" id="pie-version"></div>
-
-      ${raw(peso ? html`
-        <div class="list-title">Tu peso</div>
-        <div class="card row between">
-          <div class="grow">
-            <div style="font-weight:700;font-size:1.05rem">${peso.dif >= 0 ? '+' : ''}${peso.dif.toFixed(1)} kg</div>
-            <div class="tiny">en los últimos 30 días, con ${peso.n} pesajes</div>
-          </div>
-          <button class="btn sm" data-a="irperfil">Apuntar peso</button>
-        </div>` : '')}`;
+      <!-- Lo que llevas abandonado y tu peso se fueron de aquí. Los dos son
+           lecturas del historial, no cosas de hoy: el músculo que no tocas
+           desde hace un mes vive al lado del reparto por zona, en Progreso, y
+           el peso al lado de tus datos, en Perfil, donde además se apunta. La
+           portada es para lo de hoy. -->
+      <div class="pie-version" id="pie-version"></div>`;
   }
 
   /* «Pecho, hombros y tríceps». Lo primero que uno quiere leer no es cuántas
@@ -6235,6 +6211,7 @@
     go: go, render: render, exerciseSheet: exerciseSheet, pickExercise: pickExerciseSheet,
     bind: bind, bindAll: bindAll, aplicarTema: aplicarTema,
     lugarSheet: lugarSheet, cuantosEn: cuantosEn, CARAS_LUGAR: CARAS_LUGAR,
+    abandonados: abandonados,
     estadoVersion: estadoVersion, versionSabida: versionSabida,
     temaEfectivo: temaEfectivo,
     /* La ficha del ejercicio ya sabía pintar los recambios y la guía de

@@ -474,6 +474,33 @@
 
   /* ---------- vista ---------- */
 
+  /* Qué músculos llevas sin tocar. La cuenta la hace la portada desde
+     siempre —necesita el historial entero, no el periodo elegido aquí—, así
+     que se le pide a ella en vez de repetirla. */
+  function abandonadoHTML() {
+    const olvido = App.abandonados ? App.abandonados() : [];
+    if (!olvido.length) return '';
+    return html`
+      <div class="list-title">Lo que llevas abandonado</div>
+      <div class="card tarjeta-premium">
+        <div class="pre-encima">Sin tocar</div>
+        <div class="pre-num" style="margin:1px 0 12px">${olvido.length}
+          <span class="tiny" style="font-weight:600">${raw(olvido.length === 1
+            ? 'zona' : 'zonas')}</span></div>
+        <div class="stack" style="gap:7px">
+          ${raw(olvido.map(function (f) {
+            return '<div class="row between"><span style="font-size:.9rem">' +
+              esc(I18N.muscle(f.m)) + '</span><span class="tiny">' +
+              (f.dias === null ? 'nunca' : 'hace ' + f.dias + ' días') + '</span></div>';
+          }).join(''))}
+        </div>
+        <p class="tiny" style="margin:11px 0 0">Un músculo que no se toca en más de una
+        semana se estanca. Toca la zona en Ejercicios y te monto la sesión.</p>
+        <button class="btn sm block" data-a="programa" style="margin-top:9px">
+          Rehacer mi programa con esto en cuenta</button>
+      </div>`;
+  }
+
   V.progreso = function () {
     const st = Store.stats();
     const sesiones = Store.sessions();
@@ -603,6 +630,12 @@
             : '')}
           ${raw(zonasHTML(reparto, r))}
         </div>` : '')}
+
+      <!-- Y al lado, lo contrario: lo que no tocas. Estaba plegado al fondo de
+           la portada, y ahí era un dato de historial metido entre cosas de hoy.
+           Aquí va con su pareja: lo que más trabajas, arriba; lo que llevas
+           abandonado, debajo. -->
+      ${raw(abandonadoHTML())}
 
       ${raw(pesoHTML(r.dias))}
 
@@ -944,6 +977,7 @@
     bind(root, '[data-a=ir]', function () { go('rutinas'); });
 
     bind(root, '[data-a=metas]', function () { go('objetivos'); });
+    bind(root, '[data-a=programa]', function () { go('programa'); });
 
     bindAll(root, '[data-rango]', function (el) {
       rango = el.dataset.rango;
