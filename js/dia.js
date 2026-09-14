@@ -28,21 +28,13 @@
     return (App.rutinasDeHoy ? App.rutinasDeHoy(true) : [])[0] || null;
   }
 
-  /* El día de hoy dentro del menú semanal, si es que hay menú generado */
-  function menuDeHoy() {
-    const guardado = Store.settings().menu;
-    const plan = guardado && guardado.plan;
-    if (!plan || !plan.dias || !plan.dias.length) return null;
+  /* El día de hoy dentro del menú semanal, si es que hay menú generado.
 
-    const nombre = DIAS_LARGOS[new Date().getDay()];
-    const suyo = plan.dias.filter(function (d) {
-      return I18N.norm(String(d.dia || '')) === I18N.norm(nombre);
-    })[0];
-    /* Un menú de siete días puede venir sin nombrar los días; entonces se coge
-       por posición, con el lunes primero, que es como se lee un plan semanal. */
-    if (suyo) return suyo;
-    const i = (new Date().getDay() + 6) % 7;
-    return plan.dias[i] || null;
+     Lo elige Menus y no esta pantalla: desde que hay varios menús guardados,
+     «el menú» es el que está marcado, igual que «la rutina de hoy» es la del
+     plan marcado. */
+  function menuDeHoy() {
+    return g.Menus ? Menus.diaDeHoy() : null;
   }
 
   /* La portada tambien pinta el menu de hoy, y una segunda copia de este

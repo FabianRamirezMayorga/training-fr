@@ -12,27 +12,7 @@
   const go = function (n, a) { return App.go(n, a); };
   const render = function () { return App.render(); };
 
-  const PLAN_KEY = 'trainingfr.plan.nutricion';   // dónde vivía antes, solo se migra
-
-  /* El menú vive en los ajustes, no en una clave suelta del navegador: así viaja
-     a los demás dispositivos con el resto de la cuenta. Lo que hubiera guardado
-     a la antigua se sube la primera vez que se abre esta pantalla. */
-  function planGuardado() {
-    const enAjustes = Store.settings().menu;
-    if (enAjustes && enAjustes.plan) return enAjustes;
-
-    try {
-      const viejo = JSON.parse(localStorage.getItem(PLAN_KEY) || 'null');
-      if (viejo && viejo.plan) {
-        Store.setSetting('menu', viejo);
-        localStorage.removeItem(PLAN_KEY);
-        return viejo;
-      }
-    } catch (e) { /* nada que migrar */ }
-    return null;
-  }
-
-  /* Con qué se hizo el menú. Si luego cambian los ingredientes o lo que pide,
+  /* Con qué se hizo un menú. Si luego cambian los ingredientes o lo que pide,
      el menú guardado sigue en pantalla como si nada y vuelve a proponer cosas
      que no tiene: más vale decirlo que dejarlo pasar. */
   function huellaMenu() {
@@ -42,11 +22,19 @@
       p.comidas, m ? m.kcal : 0, m ? m.prot : 0].join('|');
   }
 
-  function guardarPlan(p) {
-    Store.setSetting('menu', p === null ? null
-      : { t: Date.now(), plan: p, huella: huellaMenu() });
-    try { localStorage.removeItem(PLAN_KEY); } catch (e) { /* nada */ }
+  /* ¿Este menú se hizo con lo de ahora? */
+  function estaViejo(m, p) {
+    if (!m) return false;
+    if (m.huella) return m.huella !== huellaMenu();
+    /* Un menú de antes de que existiera la huella no la lleva, y desde luego no
+       tuvo en cuenta unos ingredientes que entonces no se podían poner. */
+    return !!(p.despensa || p.ordenesComida);
   }
+
+  /* Qué menús están desplegados. Vive fuera de la función que pinta porque el
+     repintado rehace la pantalla entera, y si el estado viviera dentro se
+     cerrarían todos cada vez que se toca cualquier cosa. */
+  const menusAbiertos = {};
 
   /* ================= alimentación ================= */
 
@@ -58,14 +46,14 @@
           ${raw(icon('back'))} Perfil</button>
         <h1>Alimentación</h1>
         <div class="empty">${raw(icon('nutricion'))}
-          <p>Necesito tu peso, altura, edad y sexo para calcular las calorías.</p>
+          <p>Necesito tu peso, altura, edad y sexo para calcular tus calorías.</p>
           <button class="btn primary" data-a="datos">Completar mis datos</button>
         </div>`;
     }
 
     const m = Perfil.macros(p);
-    const guardado = planGuardado();
-    const plan = guardado && guardado.plan;
+    const menus = g.Menus ? Menus.lista() : [];
+    const activo = g.Menus ? Menus.activoId() : '';
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
@@ -74,38 +62,22 @@
       <p class="muted">Calculado a partir de tus datos con la fórmula de Mifflin-St Jeor.
       Es una orientación, no una pauta médica.</p>
 
-      <div class="stats">
-        <div class="stat"><b>${UI.num(m.kcal)}</b><span>kcal al día</span></div>
-        <div class="stat"><b>${m.prot}</b><span>g proteína</span></div>
-        <div class="stat"><b>${m.carbo}</b><span>g hidratos</span></div>
-        <div class="stat"><b>${m.grasa}</b><span>g grasa</span></div>
-      </div>
-
-      <div class="macro-bar">
-        <i style="width:${Math.round(m.prot * 4 / m.kcal * 100)}%;background:var(--brand-1)"></i>
-        <i style="width:${Math.round(m.carbo * 4 / m.kcal * 100)}%;background:var(--acc)"></i>
-        <i style="width:${Math.round(m.grasa * 9 / m.kcal * 100)}%;background:var(--warn)"></i>
-      </div>
-      <div class="row" style="gap:14px;margin-top:8px;font-size:.78rem;color:var(--dim2)">
-        <span><i class="dot" style="background:var(--brand-1)"></i> Proteína</span>
-        <span><i class="dot" style="background:var(--acc)"></i> Hidratos</span>
-        <span><i class="dot" style="background:var(--warn)"></i> Grasa</span>
-      </div>
-
+      ${raw(numerosHTML(m))}
       ${raw(comidasHoyHTML(m))}
 
-      <div class="list" style="margin-top:16px">
+      <div class="list-title">Mis números</div>
+      <div class="card tarjeta-premium campos">
         ${raw(filaSimple('Gasto diario estimado', UI.num(Math.round(Perfil.tdee(p))) + ' kcal'))}
         ${raw(filaSimple('Objetivo', (Perfil.OBJETIVO[p.objetivo] || {}).label))}
         ${raw(filaSimple('Agua al día', Perfil.agua(p) + ' L'))}
         ${raw(filaSimple('Comidas al día', String(p.comidas)))}
       </div>
 
-      <div class="list-title">Con qué cocinas</div>
-      <div class="card">
-        <p class="muted" style="margin:0 0 10px">Un menú con ingredientes que no tienes
-        —o que ni conoces— no lo sigue nadie. Dime con qué sueles cocinar y el menú
-        sale de ahí.</p>
+      <div class="list-title">Con qué cocino</div>
+      <div class="card tarjeta-premium">
+        <p class="muted" style="margin:0 0 10px;font-size:.88rem">Un menú con ingredientes
+        que no tienes —o que ni conoces— no lo sigue nadie. Dime con qué sueles cocinar y
+        el menú sale de ahí.</p>
 
         <label class="tiny">LO QUE SUELES TENER O COMPRAR</label>
         <textarea id="nu-despensa" rows="4" placeholder="Ej. arroz, pasta, lentejas, huevos, pollo, atún en lata, yogur griego, plátano, avena, aceite de oliva, tomate, cebolla, pan integral">${p.despensa || ''}</textarea>
@@ -121,31 +93,176 @@
         <textarea id="nu-ordenes" rows="3" placeholder="Ej. nada de pescado; la cena siempre ligera; el desayuno que se prepare en cinco minutos; los domingos cocino para toda la semana">${p.ordenesComida || ''}</textarea>
       </div>
 
-      <div class="list-title">Plan de comidas</div>
-      ${raw(plan && (guardado.huella
-        ? guardado.huella !== huellaMenu()
-        /* Un menú de antes de que existiera esto no lleva huella, y desde luego
-           no tuvo en cuenta unos ingredientes que entonces no se podían poner. */
-        : !!(p.despensa || p.ordenesComida)) ? html`
-        <div class="card" style="border-color:var(--warn)">
-          <b>Este menú es de antes</b>
-          <p class="tiny" style="margin:6px 0 0">Has cambiado algo desde que se hizo —los
-          ingredientes, lo que le pides o tus números—, así que puede llevar cosas que ya
-          no encajan. Vuelve a pedirlo y se rehace con lo de ahora.</p>
-          ${raw(IA.activa() ? '<button class="btn block sm" data-a="regenerar" ' +
-            'style="margin-top:10px">' + icon('chispa') + ' Rehacer el menú</button>' : '')}
-        </div>` : '')}
-      ${raw(plan ? planHTML(plan, guardado.t) : html`
-        <div class="card">
-          <p class="muted">Puedo prepararte un menú semanal que cuadre con esas calorías,
-          con tu tipo de dieta, lo que no puedes comer y lo que tienes en casa, más la
-          lista de la compra.</p>
+      <div class="row between" style="margin-top:20px;align-items:center">
+        <span class="list-title" style="margin:0">Mis menús</span>
+        ${raw(!menus.length ? ''
+          : IA.activa()
+            ? '<button class="btn primary sm btn-arranque" data-a="generar">' +
+              icon('plus') + ' Nuevo</button>'
+            /* Sin la IA configurada no se puede pedir otro, pero esconder el
+               boton deja la pantalla sin decir por que: mejor que lleve a
+               donde se arregla. */
+            : '<button class="btn sm ghost" data-a="configIA">' +
+              icon('plus') + ' Nuevo</button>')}
+      </div>
+
+      ${raw(menus.length
+        ? menus.map(function (x, i) { return menuCaja(x, i, x.id === activo, p); }).join('')
+        : html`
+        <div class="card tarjeta-premium">
+          <p class="muted" style="margin:0 0 12px;font-size:.9rem">Puedo prepararte un menú
+          semanal que cuadre con esas calorías, con tu tipo de dieta, lo que no puedes comer
+          y lo que tienes en casa, más la lista de la compra. Puedes guardar los que quieras
+          —el de la semana fuerte, el de cuando viajas— y marcar cuál manda.</p>
           ${raw(IA.activa()
-            ? '<button class="btn primary block" data-a="generar">' + icon('chispa') +
-              ' Crear mi plan semanal</button>'
+            ? '<button class="btn primary block btn-arranque" data-a="generar">' +
+              icon('chispa') + ' Crear mi primer menú</button>'
             : '<button class="btn block" data-a="configIA">Necesita el entrenador con IA</button>')}
-        </div>`)}`;
+        </div>`)}
+
+      ${raw(menus.length > 1 ? html`
+        <p class="tiny" style="margin-top:12px">El menú marcado como principal es el que
+        sale en «hoy» y en la portada. Los demás siguen aquí.</p>` : '')}`;
   };
+
+  /* ---------- tus números ----------
+     Eran cuatro cajas sueltas, la barra de macros debajo y su leyenda más
+     abajo: tres bloques para una sola cosa. Ahora es una tarjeta con las cuatro
+     cifras arriba y el reparto debajo, que es como se leen —el reparto es de
+     esas cifras, no de otra cosa—. */
+  function numerosHTML(m) {
+    const pct = function (g_, cal) { return Math.round(g_ * cal / m.kcal * 100); };
+    const cifra = function (n, sub, color) {
+      return '<div class="nu-dato">' +
+        '<b' + (color ? ' style="color:' + color + '"' : '') + '>' + n + '</b>' +
+        '<span class="tiny">' + esc(sub) + '</span></div>';
+    };
+
+    return html`
+      <div class="card tarjeta-premium nu-numeros">
+        <div class="pre-encima">Tu objetivo del día</div>
+        <div class="nu-tira">
+          ${raw(cifra(UI.num(m.kcal), 'kcal', ''))}
+          ${raw(cifra(m.prot, 'g proteína', 'var(--brand-1)'))}
+          ${raw(cifra(m.carbo, 'g hidratos', 'var(--acc)'))}
+          ${raw(cifra(m.grasa, 'g grasa', 'var(--warn)'))}
+        </div>
+
+        <div class="macro-bar">
+          <i style="width:${pct(m.prot, 4)}%;background:var(--brand-1)"></i>
+          <i style="width:${pct(m.carbo, 4)}%;background:var(--acc)"></i>
+          <i style="width:${pct(m.grasa, 9)}%;background:var(--warn)"></i>
+        </div>
+        <div class="row wrap" style="gap:12px;margin-top:8px;font-size:.75rem;color:var(--dim2)">
+          <span><i class="dot" style="background:var(--brand-1)"></i> Proteína</span>
+          <span><i class="dot" style="background:var(--acc)"></i> Hidratos</span>
+          <span><i class="dot" style="background:var(--warn)"></i> Grasa</span>
+        </div>
+      </div>`;
+  }
+
+  /* ---------- un menú, en su caja ----------
+     La misma caja que un plan de entrenamiento, y por lo mismo: son lo mismo
+     —una cosa guardada, con nombre, que se abre para verla y que puede ser la
+     que manda—. Plegada de entrada, con su color, su marca de «en curso» y las
+     acciones al deslizar. Abierta, el menú entero y lo que se le puede hacer. */
+  function menuCaja(menu, i, esActivo, p) {
+    const abierto = menusAbiertos[menu.id] === true;
+    const plan = menu.plan || {};
+    const dias = (plan.dias || []).length;
+    const comidas = (plan.dias || []).reduce(function (n, d) {
+      return n + ((d.comidas || []).length);
+    }, 0);
+    const viejo = estaViejo(menu, p);
+
+    const cabecera = html`
+      <button class="dia-grupo" data-menu="${menu.id}">
+        <div class="grow">
+          <div class="rt-titulo">${menu.nombre}
+            ${raw(esActivo ? '<span class="chip tiny-chip plan-marca">EN CURSO</span>' : '')}
+            ${raw(viejo ? '<span class="chip tiny-chip">DE ANTES</span>' : '')}</div>
+          <div class="tiny plan-meta">${dias} ${dias === 1 ? 'día' : 'días'} ·
+            ${comidas} comidas · ${UI.fechaCorta(menu.t)}</div>
+        </div>
+        <span class="plegador ${abierto ? 'abierto' : ''}">
+          <span class="plegador-txt">${abierto ? 'Ocultar' : 'Ver'}</span>
+          ${raw(icon('chevron'))}</span>
+      </button>`;
+
+    const desliza = App.deslizable ? App.deslizable(cabecera, [
+      { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicarmenu="' + esc(menu.id) + '"' },
+      { icono: 'trash', texto: 'Borrar', tono: 'malo',
+        attr: 'data-borrarmenu="' + esc(menu.id) + '"' }
+    ], [
+      { icono: esActivo ? 'close' : 'check',
+        texto: esActivo ? 'Quitar' + BAJA + 'principal' : 'Marcar' + BAJA + 'principal',
+        tono: esActivo ? '' : 'suave',
+        attr: 'data-menuactivo="' + (esActivo ? '' : esc(menu.id)) + '"' },
+      { icono: 'edit', texto: 'Renombrar', tono: 'suave',
+        attr: 'data-renombrarmenu="' + esc(menu.id) + '"' }
+    ]) : cabecera;
+
+    return html`
+      <div class="plan-caja${raw(abierto ? ' abierta' : '')}"
+           style="--tono:${g.Menus ? Menus.tono(i) : 'var(--acc)'}">
+        ${raw(desliza)}
+        ${raw(abierto
+          ? (viejo ? avisoViejoHTML() : '') + planHTML(menu) + accionesMenuHTML(menu, esActivo)
+          : '')}
+      </div>`;
+  }
+
+  function avisoViejoHTML() {
+    return html`
+      <div class="card" style="border-color:var(--warn)">
+        <b>Este menú es de antes</b>
+        <p class="tiny" style="margin:6px 0 0">Has cambiado algo desde que se hizo —los
+        ingredientes, lo que le pides o tus números—, así que puede llevar cosas que ya
+        no encajan. Rehazlo y se vuelve a montar con lo de ahora.</p>
+        ${raw(IA.activa() ? '<button class="btn block sm" data-a="regenerar" ' +
+          'style="margin-top:10px">' + icon('chispa') + ' Rehacer este menú</button>' : '')}
+      </div>`;
+  }
+
+  /* Lo que se le puede hacer a un menú entero, con el mismo patrón que las
+     acciones de un plan: una fila por cosa, cada una con su icono de color, y
+     la de borrar aparte abajo, que es lo único irreversible. */
+  function accionesMenuHTML(menu, esActivo) {
+    const id = esc(menu.id);
+
+    const fila = function (attr, ico, color, titulo, sub, extra) {
+      return '<button class="fila-plan' + (extra || '') + '" ' + attr +
+        ' style="--fp:' + color + '">' +
+        '<span class="fp-ico">' + icon(ico) + '</span>' +
+        '<span class="grow"><span class="fp-tit">' + esc(titulo) + '</span>' +
+        (sub ? '<span class="fp-sub">' + esc(sub) + '</span>' : '') + '</span>' +
+        '<span class="chevron">' + icon('chevron') + '</span></button>';
+    };
+
+    return '<div class="plan-acciones">' +
+      (esActivo
+        ? fila('data-menuactivo=""', 'check', 'var(--tono)',
+            'Dejar de ser el men\ú principal',
+            'Ahora manda este: es el que sale en \«hoy\» y en la portada.', ' es-principal')
+        : fila('data-menuactivo="' + id + '"', 'check', 'var(--tono)',
+            'Usar este como men\ú principal',
+            'Ser\á el que salga en \«hoy\» y en la portada.')) +
+
+      fila('data-renombrarmenu="' + id + '"', 'edit', '#f0a23c', 'Cambiarle el nombre',
+        'Para saber cu\ál es sin abrirlo.') +
+
+      (IA.activa()
+        ? fila('data-a="regenerar"', 'chispa', '#c06bf0', 'Rehacer este men\ú',
+            'Se monta otro con tus n\úmeros y tus ingredientes de ahora.')
+        : '') +
+
+      fila('data-duplicarmenu="' + id + '"', 'copiar', '#4f8cf5', 'Duplicar el men\ú',
+        'Una copia para probar cambios sin tocar este.') +
+
+      fila('data-borrarmenu="' + id + '"', 'trash', 'var(--bad)', 'Borrar el men\ú',
+        'No se puede deshacer.', ' es-peligro') +
+      '</div>';
+  }
 
   /* Lo que llevas hoy contra lo que te toca. Es la pregunta de verdad —¿voy
      corto de proteína?— y hasta ahora la app decía el objetivo y se
@@ -306,26 +423,24 @@
       </div>`;
   }
 
-  function planHTML(plan, cuando) {
+  function planHTML(menu) {
+    const plan = menu.plan || {};
     return html`
-      <div class="card">
-        <div class="row between">
-          <div class="tiny">Creado el ${UI.fecha(cuando)}</div>
-          <div class="row" style="gap:6px">
-            <button class="btn sm" data-a="regenerar">${raw(icon('cambiar'))} Rehacer</button>
-            <button class="btn sm danger" data-a="borrarPlan">${raw(icon('trash'))}</button>
-          </div>
-        </div>
-        ${raw(plan.resumen ? '<p class="muted" style="margin:10px 0 0">' + esc(plan.resumen) + '</p>' : '')}
-      </div>
+      ${raw(plan.resumen ? html`
+        <div class="card tarjeta-premium">
+          <div class="pre-encima">Creado el ${UI.fecha(menu.t)}</div>
+          <p class="muted" style="margin:6px 0 0;font-size:.9rem">${plan.resumen}</p>
+        </div>` : html`
+        <p class="tiny" style="margin:0 0 10px">Creado el ${UI.fecha(menu.t)}</p>`)}
 
       ${raw(hidratacionHTML(plan.hidratacion))}
 
       <div class="stack" style="margin-top:11px">
         ${raw((plan.dias || []).map(function (d, i) {
+          const k = menu.id + '-' + i;
           return html`
             <div class="card">
-              <div class="row between" data-dia="${i}" style="cursor:pointer">
+              <div class="row between" data-dia="${k}" style="cursor:pointer">
                 <div class="grow">
                   <div style="font-weight:600">${d.dia}${raw(d.entreno
                     ? ' <span class="chip solid tiny-chip">ENTRENO</span>' : '')}</div>
@@ -335,7 +450,7 @@
                 </div>
                 <span class="chevron down">${raw(icon('chevron'))}</span>
               </div>
-              <div class="stack" data-cuerpo="${i}" hidden style="margin-top:11px">
+              <div class="stack" data-cuerpo="${k}" hidden style="margin-top:11px">
                 ${raw((d.comidas || []).map(function (c) {
                   return html`
                     <div class="meal">
@@ -379,15 +494,15 @@
         </ol></div>` : '')}
 
       <div class="list-title">¿No te encaja?</div>
-      <div class="card">
-        <p class="muted" style="margin:0 0 10px">Dile qué cambiarías y lo rehace con eso
-        delante. Lo que escribas aquí se guarda con tus preferencias, así que los
-        siguientes menús también lo tendrán en cuenta.</p>
+      <div class="card tarjeta-premium">
+        <p class="muted" style="margin:0 0 10px;font-size:.88rem">Dile qué cambiarías y lo
+        rehace con eso delante. Lo que escribas aquí se guarda con tus preferencias, así
+        que los siguientes menús también lo tendrán en cuenta.</p>
         <textarea id="nu-cambios" rows="3" placeholder="Ej. demasiada merluza, cambia el pescado por carne; el desayuno que sea más rápido; quita el pan"></textarea>
-        <button class="btn primary block" data-a="rehacerCon" style="margin-top:10px">
-          ${raw(icon('chispa'))} Rehacer el menú con esto</button>
-        <button class="btn block sm" data-a="regenerar" style="margin-top:8px">
-          ${raw(icon('cambiar'))} Solo quiero otro distinto</button>
+        <button class="btn primary block btn-arranque" data-a="rehacerCon" style="margin-top:10px">
+          ${raw(icon('chispa'))} Rehacer este menú con esto</button>
+        <button class="btn block sm" data-a="otroMenu" style="margin-top:8px">
+          ${raw(icon('plus'))} Guardar otro distinto, sin tocar este</button>
       </div>
 
       <p class="tiny" style="margin-top:14px">Generado por IA a partir de tus datos.
@@ -643,26 +758,93 @@
       }
     });
 
-    const generar = function (forzar) {
-      const btn = root.querySelector('[data-a=generar]') || root.querySelector('[data-a=regenerar]');
-      if (btn) { btn.disabled = true; btn.textContent = 'Preparando el menú…'; }
-      IA.planNutricion({ forzar: forzar, variante: forzar ? Date.now() % 1000 : 0 })
-        .then(function (plan) {
-          guardarPlan(plan);
+    /* ---- los menús ---- */
+
+    bindAll(root, '[data-menu]', function (el) {
+      const id = el.dataset.menu;
+      if (menusAbiertos[id]) delete menusAbiertos[id]; else menusAbiertos[id] = true;
+      render();
+    });
+
+    bindAll(root, '[data-menuactivo]', function (el) {
+      Menus.marcarActivo(el.dataset.menuactivo || '');
+      render();
+      UI.toast(el.dataset.menuactivo
+        ? 'Ahora manda «' + (Menus.porId(el.dataset.menuactivo) || {}).nombre + '»'
+        : 'Sin menú principal');
+    });
+
+    bindAll(root, '[data-renombrarmenu]', function (el) {
+      const m = Menus.porId(el.dataset.renombrarmenu);
+      if (m) renombrarMenuSheet(m);
+    });
+
+    bindAll(root, '[data-duplicarmenu]', function (el) {
+      const copia = Menus.duplicar(el.dataset.duplicarmenu);
+      if (copia) { menusAbiertos[copia.id] = true; render(); UI.toast('Copiado como «' + copia.nombre + '»'); }
+    });
+
+    bindAll(root, '[data-borrarmenu]', function (el) {
+      const m = Menus.porId(el.dataset.borrarmenu);
+      if (!m) return;
+      UI.confirm('Borrar «' + m.nombre + '»',
+        'Se quita de tus menús. No se puede deshacer.', 'Borrar', true)
+        .then(function (ok) {
+          if (!ok) return;
+          delete menusAbiertos[m.id];
+          Menus.borrar(m.id);
           render();
-          UI.toast('Plan de comidas listo');
+          UI.toast('Menú borrado');
+        });
+    });
+
+    /* Pedirle uno a la IA. `sobre` es el menú que se rehace: si viene, la
+       respuesta ocupa su sitio y conserva su nombre; si no, se guarda uno nuevo
+       y los de antes se quedan donde estaban. Antes solo existía lo segundo y
+       además machacaba al anterior, que no es ni una cosa ni la otra. */
+    const pedirMenu = function (opciones) {
+      opciones = opciones || {};
+      const sobre = opciones.sobre || null;
+      const btn = root.querySelector('[data-a=generar]') ||
+        root.querySelector('[data-a=regenerar]') || root.querySelector('[data-a=otroMenu]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Preparando el menú…'; }
+
+      IA.planNutricion({ forzar: !!opciones.forzar,
+        variante: opciones.forzar ? Date.now() % 1000 : 0 })
+        .then(function (plan) {
+          if (sobre) {
+            Menus.actualizar(sobre.id, { plan: plan, t: Date.now(), huella: huellaMenu() });
+            menusAbiertos[sobre.id] = true;
+            UI.toast('«' + sobre.nombre + '» rehecho');
+          } else {
+            const nuevo = Menus.crear(plan, Menus.nombreLibre('Mi menú'), huellaMenu());
+            menusAbiertos[nuevo.id] = true;
+            UI.toast('«' + nuevo.nombre + '» guardado');
+          }
+          render();
         })
         .catch(function (e) {
           if (btn) { btn.disabled = false; }
           render();
-          UI.toast(e.message || 'No se pudo crear el plan');
+          UI.toast(e.message || 'No se pudo crear el menú');
         });
     };
 
-    bind(root, '[data-a=generar]', function () { generar(false); });
-    bind(root, '[data-a=regenerar]', function () { generar(true); });
+    /* Cuál se está viendo: el desplegado, y si hay varios abiertos, el activo. */
+    const menuALaVista = function () {
+      const abiertos = Menus.lista().filter(function (x) { return menusAbiertos[x.id]; });
+      if (!abiertos.length) return null;
+      const act = Menus.activoId();
+      return abiertos.filter(function (x) { return x.id === act; })[0] || abiertos[0];
+    };
 
-    /* Reformular es regenerar, pero guardando antes lo que pide: así no hay que
+    bind(root, '[data-a=generar]', function () { pedirMenu({}); });
+    bind(root, '[data-a=regenerar]', function () {
+      pedirMenu({ forzar: true, sobre: menuALaVista() });
+    });
+    bind(root, '[data-a=otroMenu]', function () { pedirMenu({ forzar: true }); });
+
+    /* Reformular es rehacer, pero guardando antes lo que pide: así no hay que
        ir a buscar el campo de órdenes y vale también para los menús siguientes. */
     bind(root, '[data-a=rehacerCon]', function () {
       const campo = root.querySelector('#nu-cambios');
@@ -670,11 +852,7 @@
       if (!texto) { UI.toast('Escribe qué quieres cambiar'); if (campo) campo.focus(); return; }
       const antes = String(Perfil.datos().ordenesComida || '').trim();
       Perfil.guardar({ ordenesComida: antes ? antes + '; ' + texto : texto });
-      generar(true);
-    });
-    bind(root, '[data-a=borrarPlan]', function () {
-      UI.confirm('Borrar el plan', 'Podrás generar otro cuando quieras.', 'Borrar', true)
-        .then(function (ok) { if (ok) { guardarPlan(null); render(); } });
+      pedirMenu({ forzar: true, sobre: menuALaVista() });
     });
 
     /* Puente con las alertas: el plan dice cuánta agua y las alertas la recuerdan */
@@ -687,6 +865,33 @@
       UI.toast(sug.horas.length + ' recordatorios de agua creados');
     });
   };
+
+  /* Ponerle nombre a un menú. Con varios guardados, «Mi menú 2» no dice nada
+     dentro de un mes; «Semana fuerte» o «Cuando viajo», sí. */
+  function renombrarMenuSheet(menu) {
+    UI.modal(html`
+      <h2>Cambiar el nombre</h2>
+      <p class="muted">Para saber cuál es sin abrirlo.</p>
+      <input id="mn-nombre" class="input" style="margin-top:12px"
+             value="${menu.nombre}" placeholder="Semana fuerte, Cuando viajo…"
+             autocomplete="off">
+      <button class="btn primary block" data-x="ok" style="margin-top:14px">Guardar</button>
+      <button class="btn ghost block sm" data-x="no" style="margin-top:8px">Cancelar</button>`,
+      function (el) {
+        const campo = el.querySelector('#mn-nombre');
+        const guardar = function () {
+          const n = campo.value.trim();
+          if (!n) { UI.toast('Ponle un nombre'); campo.focus(); return; }
+          UI.closeModal();
+          Menus.renombrar(menu.id, n);
+          render();
+        };
+        el.querySelector('[data-x=ok]').onclick = guardar;
+        el.querySelector('[data-x=no]').onclick = UI.closeModal;
+        campo.onkeydown = function (e) { if (e.key === 'Enter') guardar(); };
+        setTimeout(function () { campo.focus(); campo.select(); }, 60);
+      });
+  }
 
   /* ================= entrenador con IA ================= */
 

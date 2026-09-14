@@ -4795,8 +4795,8 @@
           ${raw(filaSync('grafica', 'Entrenamientos', Store.sessions().length))}
           ${raw(filaSync('trofeo', 'Objetivos', Objetivos.lista().length))}
           ${raw(filaSync('campana', 'Alertas', Alertas.lista().length))}
-          ${raw(filaSync('nutricion', 'Menú de comidas',
-            (Store.settings().menu ? 'Guardado' : 'Sin generar')))}
+          ${raw(filaSync('nutricion', 'Menús de comida',
+            (g.Menus && Menus.lista().length) || 'Sin generar'))}
           ${raw(filaSync('perfil', 'Perfil y hábitos', Perfil.completo() ? 'Completo' : 'Sin completar'))}
           ${raw(filaSync('llave', 'Claves de IA y Spotify',
             Sync.sincronizaClaves() ? 'Incluidas' : 'Solo en este dispositivo'))}
@@ -5775,7 +5775,11 @@
     /* Abrir una rutina y lanzarle la auditoría: lo pide la pantalla que trae
        rutinas de fuera, que es justo donde más falta hace pasarlas por el
        entrenador —no las ha montado la app y nadie las ha mirado. */
-    auditarRutina: auditarDesdeLista
+    auditarRutina: auditarDesdeLista,
+    /* La fila que se desliza y las cajas de plan las estrenaron las rutinas,
+       pero el gesto no es de las rutinas: es el de la app. Los menús de comida
+       lo usan igual, y reescribirlo alli seria tener dos que se separan. */
+    deslizable: deslizable
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

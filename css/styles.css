@@ -2783,3 +2783,24 @@ html[data-theme="light"] .campo-largo { background: #fff; border-color: var(--li
 html[data-theme="light"] .barra-edicion .btn {
   box-shadow: 0 6px 20px rgba(16, 24, 40, .16);
 }
+
+/* ---------- los numeros de alimentacion ----------
+   Eran cuatro cajas sueltas, la barra de macros debajo y su leyenda mas abajo:
+   tres bloques para una sola cosa. Ahora van juntos en una tarjeta, que es como
+   se leen —el reparto es de esas cifras, no de otra cosa—, con la misma tira de
+   separadores que la cabecera del perfil. */
+.nu-numeros { margin-top: 12px; }
+.nu-tira { display: flex; margin: 6px 0 13px; }
+.nu-dato { flex: 1; min-width: 0; text-align: center; padding: 0 3px; }
+.nu-dato + .nu-dato { border-left: 1px solid var(--line); }
+.nu-dato b {
+  display: block; font-size: 1.18rem; font-weight: 800; letter-spacing: -.022em;
+  line-height: 1.1; font-variant-numeric: tabular-nums;
+}
+.nu-dato .tiny { display: block; margin-top: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* La caja de un menu es la de un plan de entrenamiento, pero sus filas de
+   numeros van dentro de tarjetas y no de la lista gris: sin esto, el primer
+   dia se monta sobre el titulo igual que pasaba en los planes. */
+.plan-caja .list-title:first-child { margin-top: 4px; }
