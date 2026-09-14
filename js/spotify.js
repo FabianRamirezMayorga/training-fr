@@ -1060,6 +1060,7 @@
 
         player.addListener('player_state_changed', function (st) {
           estadoActual = st;
+          alSistema(st);
           oyentes.forEach(function (fn) { try { fn(estado()); } catch (e) { /* nada */ } });
         });
 
@@ -1092,6 +1093,62 @@
   }
 
   /* Estado normalizado del reproductor propio */
+  /* ---------- lo que ve el teléfono ----------
+     Con la app en segundo plano o la pantalla bloqueada, quien enseña lo que
+     suena es el sistema, no nosotros: la carátula del centro de control y de la
+     pantalla de bloqueo sale de aquí. Sin esto el iPhone pone el icono de la
+     app y «Training FR» y se queda tan ancho, que es lo que pasaba.
+
+     Las tres medidas de portada no son capricho: cada sitio —bloqueo, centro de
+     control, notificación— coge la que le viene, y dejarle solo la pequeña le
+     obliga a estirarla. */
+  function alSistema(st) {
+    if (!('mediaSession' in navigator)) return;
+
+    const t = st && st.track_window && st.track_window.current_track;
+    if (!t) { navigator.mediaSession.metadata = null; return; }
+
+    try {
+      const imgs = (t.album && t.album.images) || [];
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: t.name || '',
+        artist: (t.artists || []).map(function (a) { return a.name; }).join(', '),
+        album: (t.album && t.album.name) || '',
+        artwork: imgs.map(function (im) {
+          return {
+            src: im.url,
+            sizes: (im.width || 300) + 'x' + (im.height || 300),
+            type: 'image/jpeg'
+          };
+        })
+      });
+      navigator.mediaSession.playbackState = st.paused ? 'paused' : 'playing';
+
+      /* Y que los botones del sistema hagan lo suyo. Un mando que se ve pero no
+         responde es peor que no enseñar nada: el de los auriculares y el del
+         coche pasan por aquí. */
+      const manda = function (accion, fn) {
+        try { navigator.mediaSession.setActionHandler(accion, fn); } catch (e) { /* no lo soporta */ }
+      };
+      manda('play', function () { player && player.resume(); });
+      manda('pause', function () { player && player.pause(); });
+      manda('previoustrack', function () { player && player.previousTrack(); });
+      manda('nexttrack', function () { player && player.nextTrack(); });
+      manda('seekto', function (ev) {
+        if (player && ev && ev.seekTime != null) player.seek(ev.seekTime * 1000);
+      });
+
+      /* La barra de progreso del bloqueo. Si no se le da, sale parada. */
+      if (navigator.mediaSession.setPositionState && st.duration) {
+        navigator.mediaSession.setPositionState({
+          duration: st.duration / 1000,
+          position: Math.min(st.position, st.duration) / 1000,
+          playbackRate: 1
+        });
+      }
+    } catch (e) { /* si el navegador no sabe, se queda como estaba */ }
+  }
+
   function estado() {
     if (!estadoActual || !estadoActual.track_window || !estadoActual.track_window.current_track) return null;
     const t = estadoActual.track_window.current_track;
@@ -1136,6 +1193,10 @@
   function apagarReproductor() {
     if (player) { try { player.disconnect(); } catch (e) { /* nada */ } }
     player = null; deviceId = ''; estadoActual = null;
+    /* Al soltar el reproductor se limpia lo del sistema: si no, el teléfono
+       sigue enseñando en el bloqueo una canción que ya no suena. */
+    try { if ('mediaSession' in navigator) navigator.mediaSession.metadata = null; }
+    catch (e) { /* nada */ }
   }
 
   /* Manda la reproducción a este dispositivo */

@@ -3670,3 +3670,80 @@ html[data-theme="light"] .al-dia.on { box-shadow: none; }
   .pista:active .pi-num { display: none; }
   .pista:active .pi-eq { display: flex; }
 }
+
+/* ---------- lo que trae de Spotify ----------
+   Eran filas con una miniatura apaisada, el nombre en pequeno y un boton verde
+   al lado. Una portada de lista es cuadrada, asi que recortarla a 56x44 le
+   cortaba la cabeza a todas; y con el nombre del mismo tamano que sus datos
+   habia que leer la fila entera para saber cual era cual. */
+.sp-lista {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px 9px 9px; border-radius: 16px;
+  background: linear-gradient(180deg, var(--vidrio-luz), transparent 55%), var(--card);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+  transition: box-shadow .18s ease, transform .14s ease;
+}
+.sp-lista:active { transform: scale(.994); }
+
+.sp-cara {
+  display: flex; align-items: center; gap: 11px; flex: 1; min-width: 0;
+  border: 0; background: none; padding: 0; cursor: pointer;
+  font: inherit; color: inherit; text-align: left;
+}
+
+/* Cuadrada, que es como son las portadas, con su canto de luz encima para que
+   no parezca una imagen pegada sobre la tarjeta. */
+.sp-portada {
+  flex: none; width: 54px; height: 54px; border-radius: 11px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card2);
+  box-shadow: inset 0 0 0 1px var(--vidrio-rim), 0 2px 8px rgba(0, 0, 0, .22);
+}
+.sp-portada img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sp-portada svg { width: 20px; height: 20px; fill: none; stroke: var(--dim2);
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.sp-nom {
+  display: block; font-weight: 700; font-size: .92rem; letter-spacing: -.012em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sp-meta { display: flex; align-items: center; gap: 7px; margin-top: 4px; min-width: 0; }
+.sp-tipo {
+  flex: none; font-style: normal; font-size: .64rem; font-weight: 800;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--acc);
+  padding: 2px 7px; border-radius: 999px;
+  background: color-mix(in srgb, var(--acc) 13%, transparent);
+}
+.sp-datos { font-style: normal; font-size: .74rem; color: var(--dim2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* El boton de darle, redondo y con su sombra del color: es lo unico que se
+   pulsa a proposito en una fila que ya es pulsable entera. */
+.sp-play {
+  flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--on-acc); background: var(--acc);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 24%, transparent),
+              0 3px 10px color-mix(in srgb, var(--acc) 32%, transparent);
+  transition: transform .14s cubic-bezier(.2, .9, .3, 1), box-shadow .18s ease;
+}
+.sp-play svg { width: 15px; height: 15px; fill: currentColor; margin-left: 2px; }
+.sp-play:active { transform: scale(.9); }
+.sp-lista:hover .sp-play {
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent),
+              0 4px 14px color-mix(in srgb, var(--acc) 45%, transparent);
+}
+
+/* Entran escalonadas, como las canciones de la lista de arriba */
+@media (prefers-reduced-motion: no-preference) {
+  .sp-listas .sp-lista {
+    animation: pista-entra .34s cubic-bezier(.2, .9, .3, 1) both;
+    animation-delay: calc(var(--n, 0) * 26ms);
+  }
+}
+
+html[data-theme="light"] .sp-lista {
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line), var(--vidrio-sombra-corta);
+}
+html[data-theme="light"] .sp-portada { box-shadow: inset 0 0 0 1px var(--line); }

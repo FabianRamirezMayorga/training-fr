@@ -1628,38 +1628,48 @@
   const SORPRESA = 'Spotify no deja ver las canciones desde aquí, así que la '
     + 'siguiente siempre es sorpresa. Tú dale al play y déjate sorprender.';
 
+  /* ---------- lo que trae de Spotify ----------
+     Eran filas con una miniatura apaisada, el nombre en pequeno y un boton
+     verde al lado. Una portada de lista es cuadrada, asi que recortarla a 56x44
+     le cortaba la cabeza a todas; y con el nombre del mismo tamano que sus
+     datos habia que leer la fila entera para saber cual era cual.
+
+     Ahora la portada es cuadrada y lleva su canto de luz, el nombre manda, y lo
+     que es —lista, album, artista— va en su pastilla. Entran escalonadas, como
+     las canciones. */
   function tarjetasListas(listas, propias) {
     if (!listas.length) {
       return '<p class="tiny">' + (propias
         ? 'No tienes listas guardadas en Spotify todavía.'
         : 'Ninguna lista con ese nombre.') + '</p>';
     }
+
     return (propias ? '<p class="tiny" style="margin:0 0 10px">' + SORPRESA + '</p>' : '')
-      + '<div class="stack">' + listas.map(function (l) {
+      + '<div class="stack sp-listas">' + listas.map(function (l, i) {
+      const datos = [
+        l.temas != null ? l.temas + ' canciones' : '',
+        l.de ? esc(l.de) : ''
+      ].filter(Boolean).join(' · ');
+
       return html`
-        <div class="card lista-card" style="padding:0;overflow:hidden">
-          <button class="rt-item" data-poner-ya="${l.uri}" data-nombre="${l.nombre}"
-                  style="width:100%;text-align:left;background:none;border:0">
-            ${raw(l.portada
+        <div class="sp-lista" style="--n:${i}">
+          <button class="sp-cara" data-poner-ya="${l.uri}" data-nombre="${l.nombre}">
+            <span class="sp-portada">${raw(l.portada
               ? '<img src="' + esc(l.portada) + '" alt="" loading="lazy">'
-              : '<span class="bm-sin">' + icon('lista') + '</span>')}
-            <div class="grow">
-              <div style="font-weight:600;font-size:.86rem">${l.nombre}</div>
-              <div class="tiny">${raw([
-                l.tipo ? esc(l.tipo) : '',
-                l.temas != null ? l.temas + ' canciones' : '',
-                l.de ? esc(l.de) : ''
-              ].filter(Boolean).join(' · '))}</div>
-            </div>
+              : icon('lista'))}</span>
+            <span class="grow" style="min-width:0">
+              <span class="sp-nom">${l.nombre}</span>
+              <span class="sp-meta">${raw(l.tipo
+                ? '<i class="sp-tipo">' + esc(l.tipo) + '</i>' : '')}${raw(
+                datos ? '<i class="sp-datos">' + datos + '</i>' : '')}</span>
+            </span>
           </button>
-          <button class="lista-play" data-poner-ya="${l.uri}" data-nombre="${l.nombre}"
+          <button class="sp-play" data-poner-ya="${l.uri}" data-nombre="${l.nombre}"
                   aria-label="Reproducir ${l.nombre}">${raw(icon('play'))}</button>
         </div>`;
     }).join('') + '</div>';
   }
 
-  /* La lista que elige él manda: sustituye arriba a la que hizo la IA, que era
-     lo que seguía viendo por mucho que eligiera otra. */
   function subirArriba(l) {
     UI.toast('Poniendo «' + l.nombre + '» arriba…');
     return Spotify.cancionesDeLista(l.id, 100).then(function (temas) {
