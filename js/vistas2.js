@@ -99,6 +99,20 @@
         <textarea id="nu-ordenes" rows="3" placeholder="Ej. nada de pescado; la cena siempre ligera; el desayuno que se prepare en cinco minutos; los domingos cocino para toda la semana">${p.ordenesComida || ''}</textarea>
       </div>
 
+      <div class="list-title">Mis horas de comer</div>
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan" data-a="franjas" style="--fp:#f0a23c">
+          <span class="fp-ico">${raw(icon('reloj'))}</span>
+          <span class="grow"><span class="fp-tit">A qué hora comes cada cosa</span>
+            <span class="fp-sub">${raw(Perfil.franjas().map(function (f) {
+              return esc(f.label.toLowerCase()) + ' ' + esc(UI.hora ? UI.hora(f.desde) : f.desde);
+            }).join(' · '))}</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+      </div>
+      <p class="tiny" style="margin:8px 0 0">Con esto, cuando le hagas una foto a un plato
+      la app sabe con qué comida del menú cruzarlo.</p>
+
       <div class="row between" style="margin-top:20px;align-items:center">
         <span class="list-title" style="margin:0">Mis menús</span>
         <!-- Siempre el mismo botón, con IA o sin ella: desde que se puede crear
@@ -873,6 +887,7 @@
     };
 
     bind(root, '[data-a=generar]', function () { nuevoMenuSheet(); });
+    bind(root, '[data-a=franjas]', franjasSheet);
     bind(root, '[data-a=regenerar]', function () {
       rehacerMenu(menuALaVista());
     });
@@ -890,6 +905,95 @@
     });
 
   };
+
+  /* ---------- a qué hora come cada cosa ----------
+     Sirve para cruzar una foto con la comida que tocaba: a las 9:00 eso es el
+     desayuno y a las 13:00 es el almuerzo, y eso no lo sabe la app si no se lo
+     dices. Lo tenía a ojo —la comida del menú más cercana en minutos— y eso
+     falla justo donde importa: una foto de las 11:30 está a hora y media del
+     desayuno de las 10 y a media hora del almuerzo de las 12, y aun así es el
+     desayuno.
+
+     Solo se pregunta dónde EMPIEZA cada una; la anterior termina donde empieza
+     la siguiente. Pidiendo las dos puntas se puede dejar un hueco entre la una
+     y las dos —y entonces una foto de la una y media no es de ninguna comida—
+     o solaparlas, y entonces es de dos. */
+  function franjasSheet() {
+    const actuales = Perfil.franjas();
+
+    UI.modal(html`
+      <div class="conf-disco cambio">${raw(icon('reloj'))}</div>
+      <h2 class="conf-tit">Tus horas de comer</h2>
+      <p class="muted conf-txt">Dime a qué hora empieza cada comida. Cada una llega hasta
+      que empieza la siguiente, y la cena se estira hasta el desayuno del día siguiente.</p>
+
+      <div class="fr-lista">
+        ${raw(actuales.map(function (f, i) {
+          const sig = actuales[(i + 1) % actuales.length];
+          return '<div class="fr-fila">' +
+            '<span class="grow"><span class="fr-nom">' + esc(f.label) + '</span>' +
+            '<span class="fr-rango" data-rango="' + esc(f.id) + '">desde las ' +
+            esc(UI.hora ? UI.hora(f.desde) : f.desde) + ' hasta las ' +
+            esc(UI.hora ? UI.hora(sig.desde) : sig.desde) + '</span></span>' +
+            '<input type="time" class="fr-hora" data-franja="' + esc(f.id) +
+            '" value="' + esc(f.desde) + '"></div>';
+        }).join(''))}
+      </div>
+
+      <div class="cb-acciones" style="margin-top:16px">
+        <button class="btn primary grow btn-arranque" data-x="ok">
+          ${raw(icon('check'))} Guardar</button>
+        <button class="btn vidrio" data-x="no">Cancelar</button>
+      </div>
+      <button class="btn ghost block sm" data-x="reset" style="margin-top:9px">
+        Volver a las horas de siempre</button>`,
+      function (el) {
+        const pintarRangos = function () {
+          const vals = {};
+          el.querySelectorAll('[data-franja]').forEach(function (c) {
+            vals[c.dataset.franja] = c.value;
+          });
+          actuales.forEach(function (f, i) {
+            const sig = actuales[(i + 1) % actuales.length];
+            const caja = el.querySelector('[data-rango="' + f.id + '"]');
+            if (!caja) return;
+            const a = vals[f.id] || f.desde;
+            const b = vals[sig.id] || sig.desde;
+            caja.textContent = 'desde las ' + (UI.hora ? UI.hora(a) : a) +
+              ' hasta las ' + (UI.hora ? UI.hora(b) : b);
+          });
+        };
+
+        el.querySelectorAll('[data-franja]').forEach(function (c) {
+          c.onchange = pintarRangos;
+          c.oninput = pintarRangos;
+        });
+
+        el.querySelector('[data-x=no]').onclick = function () { UI.closeModal(); };
+
+        el.querySelector('[data-x=reset]').onclick = function () {
+          el.querySelectorAll('[data-franja]').forEach(function (c) {
+            c.value = { desayuno: '06:00', almuerzo: '12:00', merienda: '16:00',
+              cena: '20:00' }[c.dataset.franja];
+          });
+          pintarRangos();
+        };
+
+        el.querySelector('[data-x=ok]').onclick = function () {
+          const f = {};
+          let faltan = false;
+          el.querySelectorAll('[data-franja]').forEach(function (c) {
+            if (!c.value) faltan = true;
+            f[c.dataset.franja] = c.value;
+          });
+          if (faltan) { UI.toast('Dale una hora a cada comida'); return; }
+          Perfil.guardar({ franjas: f });
+          UI.closeModal();
+          render();
+          UI.toast('Guardado');
+        };
+      });
+  }
 
   /* ---------- un menú nuevo ----------
      Antes «Nuevo» llamaba al entrenador y guardaba lo que saliera, sin

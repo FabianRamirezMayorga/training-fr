@@ -23,8 +23,60 @@
        que ni conoce— no lo sigue nadie: es la diferencia entre un plan y una
        lista de deseos. Y lo de al lado son órdenes suyas para el menú. */
     despensa: '', ordenesComida: '',
+    /* A qué hora empieza cada comida del día. Sirve para cruzar una foto con
+       la comida que tocaba: a las 9:00 eso es el desayuno y a las 13:00 es el
+       almuerzo, y eso no lo sabe la app si no se lo dices.
+
+       Solo se guarda dónde EMPIEZA cada una; la anterior termina donde empieza
+       la siguiente. Pidiendo las dos puntas se puede dejar un hueco entre la
+       una y las dos —y entonces una foto de la una y media no es de ninguna
+       comida— o solaparlas, y entonces es de dos. Con un solo número por
+       franja eso no puede pasar. */
+    franjas: { desayuno: '06:00', almuerzo: '12:00', merienda: '16:00', cena: '20:00' },
     pesajes: []          // [{fecha, peso}]
   };
+
+  /* Los nombres, en el orden del día. La cena es la última y se estira hasta
+     que empieza el desayuno del día siguiente: quien cena a las once y pica
+     algo a la una sigue estando en la cena, no en el desayuno de mañana. */
+  const FRANJAS = [
+    { id: 'desayuno', label: 'Desayuno' },
+    { id: 'almuerzo', label: 'Almuerzo' },
+    { id: 'merienda', label: 'Merienda' },
+    { id: 'cena', label: 'Cena' }
+  ];
+
+  function minutosDe(hhmm) {
+    const m = String(hhmm || '').match(/^(\d{1,2}):(\d{2})/);
+    return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+  }
+
+  /* En qué franja cae una hora. El día no empieza a medianoche sino cuando
+     empieza el desayuno, así que todo lo anterior pertenece a la cena de la
+     noche pasada. */
+  function franjaDe(hhmm) {
+    const min = minutosDe(hhmm);
+    if (min == null) return null;
+    const f = datos().franjas || VACIO.franjas;
+    const limites = FRANJAS.map(function (x) {
+      return { id: x.id, label: x.label, desde: minutosDe(f[x.id]) };
+    }).filter(function (x) { return x.desde != null; });
+    if (!limites.length) return null;
+    limites.sort(function (a, b) { return a.desde - b.desde; });
+
+    let elegida = limites[limites.length - 1];   // antes del primero = la última
+    for (let i = 0; i < limites.length; i++) {
+      if (min >= limites[i].desde) elegida = limites[i];
+    }
+    return elegida;
+  }
+
+  function franjas() {
+    const f = datos().franjas || VACIO.franjas;
+    return FRANJAS.map(function (x) {
+      return { id: x.id, label: x.label, desde: f[x.id] || VACIO.franjas[x.id] };
+    });
+  }
 
   /* Multiplicadores de gasto según actividad diaria (Harris-Benedict revisado) */
   const ACTIVIDAD = {
@@ -308,6 +360,7 @@
   }
 
   g.Perfil = {
+    FRANJAS: FRANJAS, franjas: franjas, franjaDe: franjaDe,
     ACTIVIDAD: ACTIVIDAD, OBJETIVO: OBJETIVO, RITMO: RITMO, DIETA: DIETA,
     datos: datos, guardar: guardar, completo: completo, loQueFalta: loQueFalta,
     horasDeSueno: horasDeSueno,

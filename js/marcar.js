@@ -424,9 +424,10 @@
      mismo: lo que comió por un lado y lo que tenía previsto por otro, sin
      saber nunca si lo cumplió.
 
-     La ventana es de dos horas y media a cada lado. Más corta se pierde a
-     quien desayuna tarde; más larga empieza a cruzar el desayuno con la
-     comida, y equivocarse de comida es peor que no cruzar nada. */
+     Lo que decide es la franja del día —desayuno, almuerzo, merienda, cena—,
+     que la pone él en sus preferencias. La ventana de minutos se queda como
+     red por debajo: para menús sin horas claras o comidas a deshora, cruzar
+     con la más cercana es mejor que no cruzar nada. */
   const VENTANA = 150;
 
   function comidaDeLaHora(cuando) {
@@ -436,7 +437,18 @@
 
     const t = new Date(cuando || Date.now());
     const min = t.getHours() * 60 + t.getMinutes();
+    const ahora = String(t.getHours()).padStart(2, '0') + ':' +
+      String(t.getMinutes()).padStart(2, '0');
+
+    /* Primero la franja: a las 9:00 eso es el desayuno y a las 13:00 el
+       almuerzo, lo diga el reloj del menú lo que diga. Es más fiable que la
+       distancia en minutos, porque una foto de las 11:30 está a hora y media
+       del desayuno de las 10 y a media hora del almuerzo de las 12, y aun así
+       es el desayuno. */
+    const franja = g.Perfil && Perfil.franjaDe ? Perfil.franjaDe(ahora) : null;
+
     let mejor = null;
+    let enFranja = null;
 
     (d.dia.comidas || []).forEach(function (c, j) {
       const r = ref(d.menu.id, d.i, j);
@@ -447,13 +459,23 @@
       if (!h) return;
       const suyo = Number(h[1]) * 60 + Number(h[2]);
       const dif = Math.abs(suyo - min);
-      if (dif > VENTANA) return;
-      if (!mejor || dif < mejor.dif) {
-        mejor = { ref: r, comida: c, dif: dif, hora: c.hora };
+      const cand = { ref: r, comida: c, dif: dif, hora: c.hora, franja: franja };
+
+      /* La del menú que cae en la misma franja manda. Si hay dos —media mañana
+         y desayuno, por ejemplo— gana la más cercana en hora. */
+      if (franja && Perfil.franjaDe(c.hora) &&
+          Perfil.franjaDe(c.hora).id === franja.id) {
+        if (!enFranja || dif < enFranja.dif) enFranja = cand;
+        return;
       }
+      /* Y si ninguna cae en la franja —un menú sin horas claras, o una comida
+         a deshora— queda el criterio de antes: la más cercana dentro de una
+         ventana, que es mejor que no cruzar nada. */
+      if (dif > VENTANA) return;
+      if (!mejor || dif < mejor.dif) mejor = cand;
     });
 
-    return mejor;
+    return enFranja || mejor;
   }
 
   /* La foto, cruzada con el menú. Devuelve una promesa que se resuelve cuando
@@ -489,7 +511,9 @@
 
   function cruceSheet(cand, r) {
     const c = cand.comida;
-    const nombre = c.nombre || 'esa comida';
+    /* El nombre que usa el menú manda; si no trae ninguno, el de la franja en
+       la que cae, que es como lo llama él. */
+    const nombre = c.nombre || (cand.franja && cand.franja.label) || 'esa comida';
     const previsto = c.plato || c.nombre || 'lo del menú';
     const igual = r.esLoPrevisto;
 
