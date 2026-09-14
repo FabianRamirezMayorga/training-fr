@@ -987,7 +987,7 @@
        la misma información, ordenada por lo que se pregunta uno al verla —qué
        toca hoy, de qué plan, cuánto es— con la zona arriba en pequeño, el día
        en grande y el botón a media altura, que es donde cae el pulgar. */
-    const cabeceraInicio = function () {
+    const cabeceraHoy = function () {
       const zona = zonaDeRutina(r);
       const dias = (r.days || []).map(UI.diaLargo);
       const encima = (esDeHoy ? 'Hoy' : listaDias(dias) || 'Sin día') +
@@ -1009,9 +1009,13 @@
         </div>`;
     };
 
-    const tarjeta = ambito === 'inicio' ? html`
+    /* La tarjeta grande vale para las dos pantallas donde se pregunta «qué
+       toca hoy»: la portada y la cabeza de Rutinas. */
+    const conCara = ambito === 'inicio' || ambito === 'dia';
+
+    const tarjeta = conCara ? html`
       <div class="card tarjeta-hoy" style="padding:0;overflow:hidden">
-        ${raw(cabeceraInicio())}
+        ${raw(cabeceraHoy())}
         ${raw(abierta && n ? detalleHTML() : '')}
       </div>`
     : html`
@@ -2341,6 +2345,21 @@
     return deHoy.concat(resto);
   }
 
+  /* Una fila de accion: icono, lo que hace, por que, y el galon de que lleva a
+     algun sitio. Es el patron de las listas de Ajustes de iOS, y aqui vale
+     porque las tres son exactamente eso: cosas que abren una hoja. */
+  function filaAccion(accion, ico, titulo, sub) {
+    return html`
+      <button class="fila-accion" data-a="${accion}">
+        <span class="fa-ico">${raw(icon(ico))}</span>
+        <span class="grow">
+          <span class="fa-tit">${titulo}</span>
+          <span class="fa-sub">${sub}</span>
+        </span>
+        <span class="chevron">${raw(icon('chevron'))}</span>
+      </button>`;
+  }
+
   function viewRutinas() {
     const rutinas = rutinasOrdenadas();
     const hoy = UI.DAY_NAMES[new Date().getDay()];
@@ -2355,32 +2374,26 @@
         <button class="btn grow" data-a="programa">
           ${raw(icon('chispa'))} Generar programa</button>
       </div>
-      <p class="tiny"><b>Crear la mía</b>: le pones nombre y eliges tú los ejercicios, las
-      series y los días. <b>Generar programa</b>: te lo monto yo con tu edad, tu nivel, tu
-      objetivo y tus limitaciones, y luego lo editas igual.</p>
+      <p class="tiny" style="margin:4px 0 0"><b>Crear la mía</b>: la montas tú.
+      <b>Generar programa</b>: te lo monto yo con tus datos y lo editas igual.</p>
 
-      <!-- Las tres van juntas y cada una con su descripción debajo. Antes
-           estaban sueltas y desordenadas: el texto de «apuntar algo que ya
-           hice» salía tres bloques más abajo, detrás de otros dos botones, así
-           que parecía la explicación de otra cosa. -->
-      <div class="acciones-sueltas">
-        <button class="btn block sm" data-a="actividad">
-          ${raw(icon('plus'))} Apuntar algo que ya hice</button>
-        <p class="tiny">Caminar una hora el domingo, la pachanga del sábado o la clase de
-        pilates cuentan igual, aunque no salgan de una rutina.</p>
+      <!-- Las tres acciones sueltas, en filas de una sola pieza. Antes eran
+           botón y párrafo, botón y párrafo: cuatro bloques de texto gris
+           seguidos en los que no se distingue lo que se puede tocar de lo que
+           solo se lee. En una fila, el titulo dice que hace y el renglon de
+           debajo por que, y toda ella se toca. -->
+      <div class="card lista-acciones">
+        ${raw(filaAccion('actividad', 'plus', 'Apuntar algo que ya hice',
+          'Caminar una hora el domingo o la pachanga del sábado cuentan igual, ' +
+          'aunque no salgan de una rutina.'))}
 
         ${raw(Store.routines().some(function (r) { return (r.days || []).length; })
-          ? '<button class="btn block sm" data-a="correr">' + icon('cambiar') +
-            ' Hoy no pude: correr el plan de día</button>' +
-            '<p class="tiny">Si te saltas un día, corre el plan entero una jornada ' +
-            'en vez de perder la sesión: lo que tocaba hoy pasa a mañana, y así el ' +
-            'resto.</p>'
+          ? filaAccion('correr', 'cambiar', 'Hoy no pude: correr el plan un día',
+            'Lo que tocaba hoy pasa a mañana, y así el resto, en vez de perder la sesión.')
           : '')}
 
-        <button class="btn block sm" data-a="importar">
-          ${raw(icon('nutricion'))} Traer una rutina que ya tengo en papel</button>
-        <p class="tiny">Una foto de la hoja del gimnasio o el PDF de tu entrenador: la
-        leo, te enseño lo que he entendido y tú decides.</p>
+        ${raw(filaAccion('importar', 'nutricion', 'Traer una rutina que tengo en papel',
+          'Una foto de la hoja del gimnasio o el PDF de tu entrenador: la leo y tú decides.'))}
       </div>
 
       ${raw((function () {
