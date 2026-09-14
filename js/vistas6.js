@@ -293,6 +293,17 @@
     return html`
       <h1>Progreso</h1>
 
+      <!-- El periodo manda sobre toda la pantalla, no solo sobre la grafica:
+           tambien cambia el mapa de constancia y el reparto por zona. Debajo
+           del titulo de la grafica parecia el mando de esa caja, y para cambiar
+           de mes habia que buscarlo a media pantalla. -->
+      <div class="pill-scroll periodo-arriba">
+        ${raw(RANGOS.map(function (x) {
+          return '<button class="chip ' + (x.id === rango ? 'on' : '') +
+            '" data-rango="' + x.id + '">' + esc(x.label) + '</button>';
+        }).join(''))}
+      </div>
+
       <div class="stats">
         <div class="stat"><b>${st.total}</b><span>Entrenos</span></div>
         <div class="stat"><b>${st.streak}</b><span>Racha</span></div>
@@ -303,12 +314,6 @@
       </div>
 
       <div class="list-title">${porSeries ? 'Series completadas' : 'Volumen levantado'}</div>
-      <div class="pill-scroll">
-        ${raw(RANGOS.map(function (x) {
-          return '<button class="chip ' + (x.id === rango ? 'on' : '') +
-            '" data-rango="' + x.id + '">' + esc(x.label) + '</button>';
-        }).join(''))}
-      </div>
 
       <div class="card graf-caja tarjeta-premium">
         <div class="row between" style="align-items:flex-end;margin-bottom:6px">
@@ -318,14 +323,17 @@
             <div class="tiny">${porSeries ? 'series' : (Store.settings().unit || 'kg')}
               en ${r.frase}</div>
           </div>
+          <!-- La diferencia con el periodo anterior, al lado del numero y no
+               en una etiqueta con seis palabras: es la segunda cosa que se mira
+               y con la flecha se lee sin terminar de leerla. -->
           ${raw(delta === null ? '' : html`
-            <span class="chip ${delta >= 0 ? 'solid' : ''}" style="${raw(delta < 0
-              ? 'color:var(--warn);border-color:var(--warn)' : '')}">
-              ${delta >= 0 ? '+' : ''}${delta}% vs. periodo anterior</span>`)}
+            <span class="delta ${delta >= 0 ? 'sube' : 'baja'}">
+              ${delta >= 0 ? '▲' : '▼'} ${Math.abs(delta)}%
+              <span class="tiny">vs. antes</span></span>`)}
         </div>
         ${raw(grafica(puntos, porSeries ? 'series' : 'kg'))}
         <div class="tiny" style="margin-top:8px">${r.paso === 'dia'
-          ? 'Cada punto es un día' : 'Cada punto es una semana'}</div>
+          ? 'Un punto por día' : 'Un punto por semana'}</div>
       </div>
 
       <div class="list-title">Constancia</div>
@@ -336,9 +344,8 @@
         <div class="pre-num" style="margin:1px 0 10px">${diasEntrenados(r.dias)}
           <span class="tiny" style="font-weight:600">de ${r.dias}</span></div>
         ${raw(mapaCalor(porDia(r.dias)))}
-        <p class="tiny" style="margin:12px 0 0">Cada cuadro es un día de ${r.frase};
-        cuanto más oscuro, más series. Los huecos también cuentan: el descanso forma
-        parte del plan.</p>
+        <p class="tiny" style="margin:10px 0 0">Un cuadro por día. Los huecos también
+        cuentan: el descanso forma parte del plan.</p>
       </div>
 
       ${raw(reparto.total || planPorZona().total ? html`

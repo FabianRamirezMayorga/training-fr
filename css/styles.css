@@ -2344,3 +2344,22 @@ html[data-theme="light"] .sem-caja.es-ahora {
 
 /* La meta cumplida ya tenia su verde: el degradado no puede pisarselo. */
 .vista-progreso .meta.lograda { border-color: var(--acc); }
+
+/* El selector de periodo, pegado al titulo de la pantalla: manda sobre toda
+   ella y no solo sobre la grafica. */
+.periodo-arriba { margin-top: 2px; margin-bottom: 2px; padding-bottom: 10px; }
+
+/* La diferencia con el periodo anterior. Verde si sube, ambar si baja —rojo
+   seria un error, y bajar el volumen una semana no lo es—. */
+.delta {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  font-size: .92rem; font-weight: 800; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+  padding: 3px 9px; border-radius: 999px;
+  box-shadow: inset 0 1px 0 var(--vidrio-rim);
+}
+.delta .tiny { font-weight: 600; }
+.delta.sube { color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 14%, transparent); }
+.delta.baja { color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 14%, transparent); }
