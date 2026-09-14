@@ -2156,3 +2156,19 @@ html[data-theme="light"] .plan-caja .desliza-cara > .dia-grupo {
   background:
     linear-gradient(152deg, color-mix(in srgb, var(--tono) 20%, #fff) 0%, #fff 62%);
 }
+
+/* Dentro de un plan hay cinco o seis seguidas, no una: la misma tarjeta pero
+   con la letra y el relleno de una lista, que si no el plan abierto son dos
+   pantallas de scroll. Misma estructura, misma jerarquia, menos aire. */
+.tarjeta-hoy.compacta { border-radius: 15px; }
+.tarjeta-hoy.compacta .hoy-fila { padding: 9px 11px; gap: 9px; }
+.tarjeta-hoy.compacta .hoy-encima { font-size: .63rem; letter-spacing: .08em; }
+.tarjeta-hoy.compacta .hoy-tit { font-size: .99rem; margin-top: 1px; }
+.tarjeta-hoy.compacta .hoy-meta { font-size: .74rem; margin-top: 1px; }
+.tarjeta-hoy.compacta .hoy-play {
+  padding: .5em .85em; font-size: .85rem; gap: 5px;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--acc) 22%, transparent);
+}
+.tarjeta-hoy.compacta .hoy-play svg { width: 15px; height: 15px; }
+.tarjeta-hoy.compacta .hoy-marca .cuerpo { width: 86px; }
+.plan-caja .stack { gap: 7px; }

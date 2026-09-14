@@ -1019,7 +1019,8 @@
     const conCara = ambito === 'inicio' || ambito === 'dia' || ambito === 'plan';
 
     const tarjeta = conCara ? html`
-      <div class="card tarjeta-hoy" style="padding:0;overflow:hidden">
+      <div class="card tarjeta-hoy${raw(ambito === 'plan' ? ' compacta' : '')}"
+           style="padding:0;overflow:hidden">
         ${raw(cabeceraHoy())}
         ${raw(abierta && n ? detalleHTML() : '')}
       </div>`
