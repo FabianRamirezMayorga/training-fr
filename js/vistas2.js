@@ -125,40 +125,70 @@
         sale en «hoy» y en la portada. Los demás siguen aquí.</p>` : '')}`;
   };
 
-  /* ---------- tus números ----------
-     Eran cuatro cajas sueltas, la barra de macros debajo y su leyenda más
-     abajo: tres bloques para una sola cosa. Ahora es una tarjeta con las cuatro
-     cifras arriba y el reparto debajo, que es como se leen —el reparto es de
-     esas cifras, no de otra cosa—. */
+  /* ---------- el objetivo del día ----------
+     Eran cuatro cifras en fila, la barra de macros debajo y su leyenda más
+     abajo repitiendo los mismos tres nombres que ya estaban escritos arriba.
+
+     Ahora manda la cifra que manda —las calorías— y los tres macros van en sus
+     propias láminas, cada una teñida de su color, con los gramos, el nombre y
+     el porcentaje del total. La leyenda sobra: el color ya está en la lámina,
+     al lado de su nombre, que es donde sirve. */
   function numerosHTML(m) {
-    const pct = function (g_, cal) { return Math.round(g_ * cal / m.kcal * 100); };
-    const cifra = function (n, sub, color) {
-      return '<div class="nu-dato">' +
-        '<b' + (color ? ' style="color:' + color + '"' : '') + '>' + n + '</b>' +
-        '<span class="tiny">' + esc(sub) + '</span></div>';
+    const pct = function (gr, cal) { return Math.round(gr * cal / m.kcal * 100); };
+
+    const macro = function (color, gramos, nombre, porciento) {
+      return '<div class="nu-macro" style="--mc:' + color + '">' +
+        '<span class="nm-cif">' + gramos + '<i>g</i></span>' +
+        '<span class="nm-nom">' + esc(nombre) + '</span>' +
+        '<span class="nm-pct">' + porciento + '% de las kcal</span>' +
+        '</div>';
     };
 
     return html`
-      <div class="card tarjeta-premium nu-numeros">
+      <div class="card tarjeta-premium nu-objetivo">
         <div class="pre-encima">Tu objetivo del día</div>
-        <div class="nu-tira">
-          ${raw(cifra(UI.num(m.kcal), 'kcal', ''))}
-          ${raw(cifra(m.prot, 'g proteína', 'var(--brand-1)'))}
-          ${raw(cifra(m.carbo, 'g hidratos', 'var(--acc)'))}
-          ${raw(cifra(m.grasa, 'g grasa', 'var(--warn)'))}
-        </div>
+        <div class="nu-kcal"><b>${UI.num(m.kcal)}</b><span>kcal</span></div>
 
-        <div class="macro-bar">
+        <div class="macro-bar nu-bar">
           <i style="width:${pct(m.prot, 4)}%;background:var(--brand-1)"></i>
           <i style="width:${pct(m.carbo, 4)}%;background:var(--acc)"></i>
           <i style="width:${pct(m.grasa, 9)}%;background:var(--warn)"></i>
         </div>
-        <div class="row wrap" style="gap:12px;margin-top:8px;font-size:.75rem;color:var(--dim2)">
-          <span><i class="dot" style="background:var(--brand-1)"></i> Proteína</span>
-          <span><i class="dot" style="background:var(--acc)"></i> Hidratos</span>
-          <span><i class="dot" style="background:var(--warn)"></i> Grasa</span>
+
+        <div class="nu-macros">
+          ${raw(macro('var(--brand-1)', m.prot, 'Proteína', pct(m.prot, 4)))}
+          ${raw(macro('var(--acc)', m.carbo, 'Hidratos', pct(m.carbo, 4)))}
+          ${raw(macro('var(--warn)', m.grasa, 'Grasa', pct(m.grasa, 9)))}
         </div>
       </div>`;
+  }
+
+  /* El aro de las calorías del día. Una barra dice «vas por aquí»; un aro dice
+     además cuánto falta para cerrarlo, que es la forma en que uno se mira el
+     día: no como un tramo recorrido sino como algo que se completa.
+
+     El hueco del centro lleva lo comido, porque es el número que se busca. */
+  function aroKcal(hechas, meta) {
+    const p = Math.max(0, Math.min(1, meta ? hechas / meta : 0));
+    const R = 31, C = 2 * Math.PI * R;
+
+    return '<div class="nu-aro">' +
+      '<svg viewBox="0 0 72 72" aria-hidden="true">' +
+      '<circle class="ak-pista" cx="36" cy="36" r="' + R + '"/>' +
+      '<circle class="ak-hecho" cx="36" cy="36" r="' + R + '" ' +
+      'stroke-dasharray="' + C.toFixed(1) + '" ' +
+      'stroke-dashoffset="' + (C * (1 - p)).toFixed(1) + '"/>' +
+      '</svg>' +
+      '<span class="ak-centro"><b>' + Math.round(p * 100) + '</b><i>%</i></span>' +
+      '</div>';
+  }
+
+  /* Una barra de las de esta pantalla: raíl hundido, relleno con su degradado y
+     un punto de luz en la punta, que es lo que hace que se lea como algo que
+     avanza y no como un rectángulo pintado. */
+  function barra(porciento, color) {
+    return '<div class="nu-barra"><i style="width:' + porciento + '%;--bc:' + color +
+      '"></i></div>';
   }
 
   /* ---------- un menú, en su caja ----------
@@ -207,7 +237,9 @@
            style="--tono:${g.Menus ? Menus.tono(i) : 'var(--acc)'}">
         ${raw(desliza)}
         ${raw(abierto
-          ? (viejo ? avisoViejoHTML() : '') + planHTML(menu) + accionesMenuHTML(menu, esActivo)
+          ? '<div class="menu-cuerpo">' +
+            (viejo ? avisoViejoHTML() : '') + planHTML(menu) +
+            accionesMenuHTML(menu, esActivo) + '</div>'
           : '')}
       </div>`;
   }
@@ -273,36 +305,40 @@
     const pk = Math.min(100, Math.round(h.kcal / m.kcal * 100));
     const pp = Math.min(100, Math.round(h.prot / m.prot * 100));
     const faltaProt = Math.max(0, m.prot - h.prot);
+    const faltaKcal = Math.max(0, m.kcal - h.kcal);
 
     return html`
       <div class="list-title">Hoy</div>
-      <div class="card">
-        <div class="row between" style="align-items:flex-end">
-          <div><b style="font-size:1.3rem">${UI.num(h.kcal)}</b>
-            <span class="tiny"> de ${UI.num(m.kcal)} kcal</span></div>
-          <div class="tiny">${pk}%</div>
+      <div class="card tarjeta-premium nu-hoy">
+        <div class="nu-hoy-cab">
+          ${raw(aroKcal(h.kcal, m.kcal))}
+          <div class="grow" style="min-width:0">
+            <div class="nu-grande">${UI.num(h.kcal)}<i>de ${UI.num(m.kcal)} kcal</i></div>
+            <div class="nu-falta">${raw(faltaKcal > 0
+              ? 'Te quedan <b>' + UI.num(faltaKcal) + '</b> kcal'
+              : 'Objetivo de calorías cubierto')}</div>
+          </div>
         </div>
-        <div class="prog" style="margin:6px 0 12px"><i style="width:${pk}%"></i></div>
 
-        <div class="row between" style="align-items:flex-end">
-          <div><b style="font-size:1.3rem;color:var(--brand-1)">${h.prot}</b>
-            <span class="tiny"> de ${m.prot} g de proteína</span></div>
-          <div class="tiny">${pp}%</div>
+        <div class="nu-linea">
+          <span class="nl-nom"><i class="dot" style="background:var(--brand-1)"></i>
+            Proteína</span>
+          <span class="nl-cif">${h.prot}<i> de ${m.prot} g</i></span>
         </div>
-        <div class="prog" style="margin:6px 0 0">
-          <i style="width:${pp}%;background:var(--brand-1)"></i></div>
+        ${raw(barra(pp, 'var(--brand-1)'))}
 
-        <p class="tiny" style="margin:11px 0 0">${raw(faltaProt > 0
+        <p class="tiny" style="margin:10px 0 0">${raw(faltaProt > 0
           ? 'Te faltan <b>' + faltaProt + ' g de proteína</b> para llegar al objetivo del día.'
           : 'Proteína del día cubierta.')}</p>
 
-        <div class="row" style="margin-top:12px">
-          <label class="btn primary grow" for="foto-comida" style="cursor:pointer">
+        <div class="row" style="margin-top:13px;gap:9px">
+          <label class="btn primary grow btn-arranque" for="foto-comida" style="cursor:pointer">
             ${raw(icon('nutricion'))} Foto de lo que comes</label>
-          <button class="btn" data-a="comidaMano">${raw(icon('plus'))}</button>
+          <button class="btn icon-vidrio" data-a="comidaMano"
+                  aria-label="Apuntar a mano">${raw(icon('plus'))}</button>
         </div>
         <input type="file" id="foto-comida" accept="image/*" capture="environment" hidden>
-        <p class="tiny" style="margin:8px 0 0">La foto se encoge en el móvil, se manda para
+        <p class="tiny" style="margin:9px 0 0">La foto se encoge en el móvil, se manda para
         que la IA la lea y se suelta: no se guarda ni aquí ni en ningún sitio. Solo quedan
         el nombre del plato y los números.</p>
       </div>
@@ -423,6 +459,20 @@
       </div>`;
   }
 
+  /* Qué día del menú toca hoy. Con siete cajas iguales una detrás de otra, lo
+     primero que hace uno es buscar la suya; marcarla ahorra ese rastreo. Si el
+     menú no nombra los días —los hay que vienen numerados—, se cuenta por
+     posición con el lunes primero, que es como se lee un plan semanal. */
+  function esHoy(d, i, cuantos) {
+    const nombres = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves',
+      'Viernes', 'Sábado'];
+    const hoy = nombres[new Date().getDay()];
+    if (d.dia && g.I18N) {
+      return I18N.norm(String(d.dia)) === I18N.norm(hoy);
+    }
+    return cuantos === 7 && i === (new Date().getDay() + 6) % 7;
+  }
+
   function planHTML(menu) {
     const plan = menu.plan || {};
     return html`
@@ -438,14 +488,16 @@
       <div class="stack" style="margin-top:11px">
         ${raw((plan.dias || []).map(function (d, i) {
           const k = menu.id + '-' + i;
+          const hoy = esHoy(d, i, plan.dias.length);
           return html`
-            <div class="card">
+            <div class="card menu-dia${raw(hoy ? ' es-hoy' : '')}">
               <div class="row between" data-dia="${k}" style="cursor:pointer">
-                <div class="grow">
-                  <div style="font-weight:600">${d.dia}${raw(d.entreno
-                    ? ' <span class="chip solid tiny-chip">ENTRENO</span>' : '')}</div>
-                  <div class="tiny">${raw(d.total
-                    ? esc(d.total.kcal + ' kcal · ' + d.total.prot + ' g proteína')
+                <div class="grow" style="min-width:0">
+                  <div class="md-nom">${d.dia}${raw(hoy
+                    ? ' <span class="chip solid tiny-chip">HOY</span>' : '')}${raw(d.entreno
+                    ? ' <span class="chip tiny-chip">ENTRENO</span>' : '')}</div>
+                  <div class="tiny md-meta">${raw(d.total
+                    ? esc(UI.num(d.total.kcal) + ' kcal · ' + d.total.prot + ' g de proteína')
                     : (d.comidas || []).length + ' comidas')}</div>
                 </div>
                 <span class="chevron down">${raw(icon('chevron'))}</span>
