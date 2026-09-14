@@ -4864,8 +4864,36 @@
             <span class="fp-sub">${raw(tieneClave
               ? 'Ya tienes una: con ella entras en cualquier dispositivo'
               : 'Sin contraseña solo puedes entrar con enlaces por correo')}</span></span>
-          <span class="chevron">${raw(icon('chevron'))}</span>
+          <span class="chevron down">${raw(icon('chevron'))}</span>
         </button>
+
+        <!-- El formulario sale DENTRO de la lista, justo debajo de su fila. Antes
+             era una tarjeta suelta que aparecía después de todo el bloque, y al
+             abrirla parecía que se hubiera colado de otra pantalla: nada decía
+             que fuera de esa fila. -->
+        <div class="clave-panel" id="caja-clave" hidden>
+          <label class="tiny">${tieneClave ? 'NUEVA CONTRASEÑA' : 'CONTRASEÑA'}</label>
+          <div class="secreto">
+            <input id="pass-nueva" type="password" autocomplete="new-password"
+                   placeholder="Al menos 8 caracteres">
+            <button class="btn sm" data-ver="pass-nueva" aria-label="Mostrar u ocultar">
+              ${raw(icon('ojo'))}</button>
+          </div>
+
+          <label class="tiny" style="display:block;margin-top:11px">REPÍTELA</label>
+          <div class="secreto">
+            <input id="pass-repe" type="password" autocomplete="new-password"
+                   placeholder="La misma otra vez">
+            <button class="btn sm" data-ver="pass-repe" aria-label="Mostrar u ocultar">
+              ${raw(icon('ojo'))}</button>
+          </div>
+
+          <button class="btn primary block" data-a="guardarClave" style="margin-top:13px">
+            Guardar contraseña</button>
+          <p class="tiny" style="margin:9px 0 0">Solo viaja a tu proyecto de Supabase, que la
+          guarda cifrada.</p>
+        </div>
+
         <button class="fila-plan es-peligro" data-a="salir" style="--fp:var(--bad)">
           <span class="fp-ico">${raw(icon('salir'))}</span>
           <span class="grow"><span class="fp-tit">Cerrar sesión aquí</span>
@@ -4873,29 +4901,6 @@
             de sincronizar.</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
-      </div>
-
-      <div class="card" id="caja-clave" hidden style="margin-top:11px">
-        <label class="tiny">${tieneClave ? 'NUEVA CONTRASEÑA' : 'CONTRASEÑA'}</label>
-        <div class="secreto">
-          <input id="pass-nueva" type="password" autocomplete="new-password"
-                 placeholder="Al menos 8 caracteres">
-          <button class="btn sm" data-ver="pass-nueva" aria-label="Mostrar u ocultar">
-            ${raw(icon('ojo'))}</button>
-        </div>
-
-        <label class="tiny" style="display:block;margin-top:10px">REPÍTELA</label>
-        <div class="secreto">
-          <input id="pass-repe" type="password" autocomplete="new-password"
-                 placeholder="La misma otra vez">
-          <button class="btn sm" data-ver="pass-repe" aria-label="Mostrar u ocultar">
-            ${raw(icon('ojo'))}</button>
-        </div>
-
-        <button class="btn primary block" data-a="guardarClave" style="margin-top:14px">
-          Guardar contraseña</button>
-        <p class="tiny" style="margin:10px 0 0">Solo viaja a tu proyecto de Supabase, que la
-        guarda cifrada.</p>
       </div>
 
       <div class="list-title">Si algo no cuadra</div>
@@ -5334,10 +5339,11 @@
 
     bind(root, '[data-a=verClave]', function (el) {
       const c = root.querySelector('#caja-clave');
-      if (c) {
-        c.hidden = !c.hidden;
-        if (!c.hidden) c.querySelector('#pass-nueva').focus();
-      }
+      if (!c) return;
+      c.hidden = !c.hidden;
+      const f = el.querySelector('.chevron');
+      if (f) f.classList.toggle('abierto', !c.hidden);
+      if (!c.hidden) c.querySelector('#pass-nueva').focus();
     });
 
     const forzar = function (sentido, titulo, aviso) {

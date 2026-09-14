@@ -522,13 +522,48 @@ code{font-family:var(--mono);
 .pista svg{width:15px;height:15px;fill:currentColor;color:var(--acc);flex:none}
 .pista .grow{min-width:0}
 
-/* ---------- campos de clave ---------- */
-.secreto{display:flex;gap:8px;align-items:center;margin-top:5px}
-.secreto input{flex:1;min-width:0;font-family:var(--mono);font-size:.82rem;
+/* ---------- campos de clave ----------
+   El ojo era un cuadro gris aparte, pegado al canto del campo: dos piezas
+   distintas para una sola cosa, y en un movil el campo se quedaba corto. Va
+   dentro, que es donde esta en cualquier pantalla de contrasena, y el campo
+   recupera todo el ancho.
+
+   Y la letra de maquina es para la clave, no para el hueco: mientras esta vacio
+   «Al menos 8 caracteres» se leia con el espaciado de un codigo. Con la clave
+   escrita vuelve el monoespaciado, que ahi si sirve para contar caracteres. */
+.secreto{position:relative;margin-top:5px}
+.secreto input{width:100%;padding-right:42px;font-family:var(--mono);font-size:.86rem;
   letter-spacing:.02em}
-.secreto .btn{flex:none;padding:.55em .7em}
+.secreto input:placeholder-shown{font-family:inherit;font-size:.95rem;letter-spacing:normal}
+.secreto .btn{
+  position:absolute;right:5px;top:50%;transform:translateY(-50%);
+  width:32px;height:32px;padding:0;border:0;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  background:none;color:var(--dim2);transition:color .18s ease,background .18s ease}
+.secreto .btn:active{background:color-mix(in srgb,#fff 9%,transparent)}
 .secreto .btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9}
-.secreto .btn.on{color:var(--acc);border-color:var(--acc)}
+.secreto .btn.on{color:var(--acc);border-color:transparent;
+  background:color-mix(in srgb,var(--acc) 13%,transparent)}
+
+/* El formulario de la contrasena, dentro de su lista y debajo de su fila. Antes
+   era una tarjeta suelta que salia despues de todo el bloque, y al abrirla
+   parecia colada de otra pantalla: nada decia que fuera de esa fila. */
+.clave-panel{
+  padding:12px 12px 13px;
+  background:color-mix(in srgb,#000 15%,transparent);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.26),
+             inset 0 -1px 0 color-mix(in srgb,#fff 5%,transparent)}
+.clave-panel + .fila-plan{border-top:1px solid var(--line)}
+.clave-panel label.tiny{display:block}
+@media (prefers-reduced-motion: no-preference){
+  .clave-panel:not([hidden]){animation:clave-baja .28s cubic-bezier(.2,.9,.3,1)}
+}
+@keyframes clave-baja{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+html[data-theme="light"] .secreto .btn:active{background:color-mix(in srgb,#141922 7%,transparent)}
+html[data-theme="light"] .clave-panel{
+  background:color-mix(in srgb,#141922 4%,transparent);
+  box-shadow:inset 0 1px 0 var(--line),inset 0 -1px 0 var(--line)}
 
 /* Tarjeta de sesión completa de una zona (pierna, empuje, tren superior…) */
 .zona-card{border-color:var(--acc);background:var(--acc-d);margin-bottom:14px}
