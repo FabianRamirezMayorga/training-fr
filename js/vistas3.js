@@ -90,6 +90,32 @@
       </div>`;
   }
 
+  /* El campo de una clave, entero: el rótulo, la huella de la que ya está
+     guardada en la misma línea —a la derecha, donde no estorba— y el campo
+     debajo. Antes el rótulo iba en una línea, el campo en otra y «Guardada:
+     AQ.Ab8…o01g» en una tercera, con lo que cada clave ocupaba tres renglones
+     para decir dos cosas. */
+  function campoClave(etiqueta, id, valor, marcador) {
+    return html`
+      <div class="clave-bloque">
+        <div class="cb-cab">
+          <span class="cb-lab">${etiqueta}</span>
+          ${raw(valor
+            ? '<span class="cb-huella">' + icon('check') + '<code>' +
+              esc(resumida(valor)) + '</code></span>'
+            : '<span class="cb-huella vacia">sin guardar</span>')}
+        </div>
+        ${raw(campoSecreto(id, valor, marcador))}
+      </div>`;
+  }
+
+  /* La fila de acciones de cada servicio. Guardar es lo que se viene a hacer y
+     pesa; lo de al lado —probar, conectar, desconectar— es vidrio, que es como
+     se dice «esto también se pulsa, pero no es lo principal». */
+  function acciones(principal, resto) {
+    return '<div class="cb-acciones">' + principal + (resto || '') + '</div>';
+  }
+
   /* Muestra solo el principio y el final: suficiente para reconocerla */
   function resumida(clave) {
     const s = String(clave || '');
@@ -103,7 +129,7 @@
     return html`
       <div class="copiable">
         <code>${valor}</code>
-        <button class="btn sm" data-copiar="${valor}"
+        <button class="cop-b" data-copiar="${valor}"
           aria-label="Copiar ${etiqueta || 'valor'}">${raw(icon('copy'))}</button>
       </div>`;
   }
@@ -241,24 +267,26 @@
           }).join(''))}
         </div>
 
-        <div class="card" style="background:var(--bg);margin-bottom:12px">
-          <div class="tiny">${prov.nota}</div>
-          <div class="tiny" style="margin-top:5px">La clave se saca en
-            <a href="${prov.donde}" target="_blank" rel="noopener noreferrer">${prov.dondeTxt}</a>.
-            ${raw(prov.imagen ? '' : '<b>No lee fotos</b>, así que el cálculo de la comida ' +
-              'por foto necesita Gemini o Anthropic.')}</div>
+        <div class="nota-prov">
+          <span class="np-ico">${raw(icon('chispa'))}</span>
+          <span class="grow">
+            <span class="np-txt">${prov.nota}</span>
+            <span class="np-txt">La clave se saca en
+              <a href="${prov.donde}" target="_blank" rel="noopener noreferrer">${prov.dondeTxt}</a>.
+              ${raw(prov.imagen ? '' : '<b>No lee fotos</b>, así que el cálculo de la comida ' +
+                'por foto necesita Gemini o Anthropic.')}</span>
+          </span>
         </div>
 
-        <label class="tiny">CLAVE DE ${esc(prov.label.toUpperCase())}</label>
-        ${raw(campoSecreto('k-ia', claveProv, prov.pista))}
-        ${raw(claveProv ? '<div class="tiny" style="margin:6px 0 10px">Guardada: <code>' +
-          esc(resumida(claveProv)) + '</code></div>' : '<div style="height:10px"></div>')}
+        ${raw(campoClave('Clave de ' + prov.label, 'k-ia', claveProv, prov.pista))}
 
-        <div class="row between" style="margin-bottom:5px">
-          <span class="tiny">MODELO</span>
-          ${raw(claveProv || prov.listaPublica
-            ? '<button class="btn sm ghost" data-a="refrescarModelos">Ver los suyos</button>' : '')}
-        </div>
+        <div class="clave-bloque">
+          <div class="cb-cab">
+            <span class="cb-lab">Modelo</span>
+            ${raw(claveProv || prov.listaPublica
+              ? '<button class="btn sm vidrio cb-mini" data-a="refrescarModelos">' +
+                icon('cambiar') + ' Ver los suyos</button>' : '')}
+          </div>
         <select id="k-ia-modelo" style="margin:0 0 8px">
           ${raw((function () {
             const actual = IA.modeloDe(prov.id);
@@ -271,13 +299,15 @@
           })())}
         </select>
         <input id="k-ia-modelo-libre" placeholder="o escribe otro nombre de modelo"
-               autocomplete="off" spellcheck="false" style="margin:0 0 12px">
-
-        <div class="row">
-          <button class="btn primary grow" data-a="guardarIA">Guardar</button>
-          <button class="btn" data-a="probarIA" ${claveProv ? '' : 'disabled'}>Probar</button>
+               autocomplete="off" spellcheck="false" style="margin:0">
         </div>
-        <div class="tiny" id="ia-estado" style="margin-top:9px"></div>
+
+        ${raw(acciones(
+          '<button class="btn primary grow btn-arranque" data-a="guardarIA">' +
+            icon('check') + ' Guardar</button>',
+          '<button class="btn vidrio" data-a="probarIA"' + (claveProv ? '' : ' disabled') + '>' +
+            icon('beep') + ' Probar</button>'))}
+        <div class="tiny cb-estado" id="ia-estado"></div>
 
         ${raw(guia('ia', 'Cómo consigo la clave de ' + prov.label, PASOS_CLAVE[prov.id]))}
 
@@ -305,22 +335,21 @@
             'reproducir por sí misma y crear listas. Pulsa Conectar para dar los permisos nuevos.</p>'
           : '')}
 
-        <label class="tiny">CLIENT ID</label>
-        ${raw(campoSecreto('k-sp', cfgSp.clientId, '32 caracteres'))}
-        ${raw(cfgSp.clientId ? '<div class="tiny" style="margin:6px 0 12px">Guardado: <code>' +
-          esc(resumida(cfgSp.clientId)) + '</code></div>' : '<div style="height:12px"></div>')}
+        ${raw(campoClave('Client ID', 'k-sp', cfgSp.clientId, '32 caracteres'))}
 
-        <div class="row">
-          <button class="btn primary grow" data-a="guardarSp">Guardar</button>
-          ${raw(Spotify.configurado()
+        ${raw(acciones(
+          '<button class="btn primary grow btn-arranque" data-a="guardarSp">' +
+            icon('check') + ' Guardar</button>',
+          Spotify.configurado()
             ? (Spotify.activa()
-              ? '<button class="btn" data-a="salirSp">Desconectar</button>'
-              : '<button class="btn" data-a="conectarSp">Conectar</button>')
-            : '')}
-        </div>
+              ? '<button class="btn vidrio" data-a="salirSp">Desconectar</button>'
+              : '<button class="btn vidrio" data-a="conectarSp">' + icon('musica') +
+                ' Conectar</button>')
+            : ''))}
 
-        <div style="margin-top:12px">
-          <div class="tiny" style="margin-bottom:5px">DIRECCIÓN DE RETORNO (cópiala en el panel)</div>
+        <div class="clave-bloque" style="margin-top:14px">
+          <div class="cb-cab"><span class="cb-lab">Dirección de retorno</span>
+            <span class="cb-pista">cópiala en el panel</span></div>
           ${raw(copiable(retorno, 'dirección de retorno'))}
         </div>
 
@@ -368,26 +397,29 @@
         <p class="tiny" style="margin:0 0 9px">Entrar con tu correo y sincronizar entre
         dispositivos.</p>
 
-        <label class="tiny">PROJECT URL</label>
-        <input id="k-sb-url" autocomplete="off" spellcheck="false"
-               value="${cfgSync.url || ''}" placeholder="https://xxxxxxxx.supabase.co"
-               style="margin:5px 0 10px">
-        <label class="tiny">CLAVE PUBLISHABLE (O ANON)</label>
-        ${raw(campoSecreto('k-sb-key', cfgSync.key, 'sb_publishable_... o eyJhbGciOi...'))}
-        ${raw(cfgSync.key ? '<div class="tiny" style="margin:6px 0 12px">Guardada: <code>' +
-          esc(resumida(cfgSync.key)) + '</code></div>' : '<div style="height:12px"></div>')}
-        <button class="btn primary block" data-a="guardarSb">Guardar</button>
+        <div class="clave-bloque">
+          <div class="cb-cab"><span class="cb-lab">Project URL</span></div>
+          <input id="k-sb-url" autocomplete="off" spellcheck="false"
+                 value="${cfgSync.url || ''}" placeholder="https://xxxxxxxx.supabase.co">
+        </div>
+        ${raw(campoClave('Clave publishable (o anon)', 'k-sb-key', cfgSync.key,
+          'sb_publishable_... o eyJhbGciOi...'))}
+        ${raw(acciones('<button class="btn primary grow btn-arranque" data-a="guardarSb">' +
+          icon('check') + ' Guardar</button>'))}
 
-        <div style="margin-top:12px">
-          <div class="tiny" style="margin-bottom:5px">DIRECCIÓN DE RETORNO</div>
+        <div class="clave-bloque" style="margin-top:14px">
+          <div class="cb-cab"><span class="cb-lab">Dirección de retorno</span>
+            <span class="cb-pista">cópiala en el panel</span></div>
           ${raw(copiable(retorno, 'dirección de retorno'))}
         </div>
 
-        <button class="btn block sm" data-a="verpasoapaso" style="margin-top:12px">
-          ${raw(icon('chevron'))} Montarla paso a paso, con capturas de cada menú</button>
-        <p class="tiny" style="margin:7px 0 0">Si es tu primera vez, ve por ahí: son ocho
-        pasos y dice exactamente qué botón tocar. Esta pantalla es el atajo para quien ya
-        tiene el proyecto montado y solo viene a pegar los dos datos.</p>
+        <button class="fila-plan fila-suelta" data-a="verpasoapaso" style="--fp:#4f8cf5">
+          <span class="fp-ico">${raw(icon('lista'))}</span>
+          <span class="grow"><span class="fp-tit">Montarla paso a paso</span>
+            <span class="fp-sub">Ocho pasos con capturas de cada menú, diciendo qué botón
+            tocar. Esta pantalla es el atajo para quien ya lo tiene montado.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
 
         ${raw(guia('sb', 'El resumen, si ya te lo sabes', [
           '<li><b>Project Settings &rarr; Data API</b>: copia la <b>Project URL</b>.</li>',
@@ -403,11 +435,12 @@
           '<li>Pega los dos valores aquí y guarda. Luego crea tu cuenta en ' +
           '<b>Perfil &rarr; Mi cuenta</b>.</li>'
         ].join('')) + html`
-          <div class="row between" style="margin:12px 0 6px">
-            <span class="tiny">SQL PARA CREAR LA TABLA</span>
-            <button class="btn sm" data-a="copiarsql">${raw(icon('copy'))} Copiar</button>
+          <div class="cb-cab" style="margin:12px 0 7px">
+            <span class="cb-lab">SQL para crear la tabla</span>
+            <button class="btn sm vidrio cb-mini" data-a="copiarsql">${raw(icon('copy'))}
+              Copiar</button>
           </div>
-          <pre id="sql-box">${Sync.SQL}</pre>`)}
+          <pre class="consola" id="sql-box">${Sync.SQL}</pre>`)}
 
         ${raw(Sync.configurado() ? '<button class="btn danger block sm" data-a="borrarSb" ' +
           'style="margin-top:10px">Borrar la configuración de Supabase</button>' : '')}`
