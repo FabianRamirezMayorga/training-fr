@@ -110,8 +110,11 @@
   /* ---------- el agua ----------
      La pauta decía cuánta tomar y a qué horas, y ahí se acababa. Cada toma es
      una casilla: tocarla la marca y volver a tocarla la quita. */
-  function aguaHTML(h, menuId) {
+  function aguaHTML(h, menuId, opciones) {
     if (!h) return '';
+    /* Dentro de un cajón que ya se titula «Hidratación», repetir el título y
+       los litros dentro de la tarjeta es decir dos veces lo mismo. */
+    const conCabecera = !(opciones && opciones.sinCabecera);
     const marcable = !!(g.Agua && Agua.seLleva());
     const llevo = marcable ? Agua.hoy() : null;
     const metaL = Number(String(h.total || '').replace(',', '.').match(/[\d.]+/) || [0]) ||
@@ -138,16 +141,17 @@
 
     return html`
       <div class="card tarjeta-premium agua-caja">
-        <div class="row between">
-          <div class="row" style="gap:9px;align-items:center">
-            <span class="row-icon" style="color:var(--blue)">${raw(icon('gota'))}</span>
-            <b>Hidratación</b>
-          </div>
-          <span class="chip solid">${h.total || (Perfil.agua() + ' L')}</span>
-        </div>
+        ${raw(conCabecera ? html`
+          <div class="row between">
+            <div class="row" style="gap:9px;align-items:center">
+              <span class="row-icon" style="color:var(--blue)">${raw(icon('gota'))}</span>
+              <b>Hidratación</b>
+            </div>
+            <span class="chip solid">${h.total || (Perfil.agua() + ' L')}</span>
+          </div>` : '')}
 
         ${raw(marcable ? html`
-          <div class="agua-hoy">
+          <div class="agua-hoy"${raw(conCabecera ? '' : ' style="margin-top:0"')}>
             <div class="row between" style="align-items:baseline">
               <span class="tiny">Llevas hoy</span>
               <span class="ah-cif">${String(llevo.litros).replace('.', ',')}<i>
@@ -177,7 +181,7 @@
     const m = g.Menus ? Menus.activo() : null;
     const h = m && m.plan && m.plan.hidratacion;
     if (!h) return '';
-    return aguaHTML(h, m.id);
+    return aguaHTML(h, m.id, { sinCabecera: true });
   }
 
   /* ---------- lo previsto, tal cual ----------

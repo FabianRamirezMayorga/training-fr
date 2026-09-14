@@ -80,43 +80,119 @@
           </div>
         </div>` : '')}
 
-      <!-- ============ entrenamiento ============ -->
-      <div class="list-title">Lo que toca entrenar</div>
-      ${raw(rutina ? html`
-        <div class="card">
-          <div class="row between" style="align-items:flex-start;gap:10px">
-            <div class="grow">
-              <div style="font-weight:700;font-size:1.02rem">${App.tituloRutina(rutina)}</div>
-              <div class="tiny" style="margin-top:3px">${rutina.exercises.length} ejercicios
-                · ${rutina.exercises.reduce(function (n, e) { return n + e.sets; }, 0)} series</div>
-            </div>
-            <button class="btn primary" data-a="entrenar">${raw(icon('play'))} Entrenar</button>
-          </div>
-          <!-- La rutina entera y no los cuatro primeros con un «y 1 más»:
-               esta pantalla es «el día entero», y un resumen recortado del día
-               entero es justo lo que ya da la portada. -->
-          <div class="rt-detalle" style="margin-top:10px">
-            ${raw(rutina.exercises.map(function (e, k) {
-              const ex = Data.get(e.exId);
-              return '<div class="row between" style="padding:5px 0;gap:10px">' +
-                '<span style="font-size:.86rem">' + (k + 1) + '. ' +
-                esc(ex ? ex.nameEs : e.exId) + '</span>' +
-                '<span class="tiny nowrap">' + e.sets + ' × ' + e.reps + '</span></div>';
-            }).join(''))}
-          </div>
-        </div>`
+      ${raw(seccionAgua())}
+      ${raw(seccionComer(menu))}
+      ${raw(seccionEntrenar(rutina))}
+      ${raw(seccionComido(m, h, comidas, faltanKcal, faltanProt))}
+
+      <div style="height:10px"></div>`;
+  };
+
+  /* ---------- las cuatro secciones ----------
+     Antes era una sola tirada: la rutina entera, el recuento, lo apuntado y el
+     menú, uno detrás de otro. En un día con menú de cinco comidas y rutina de
+     cinco ejercicios eso son tres pantallas de scroll para ver si has bebido
+     agua.
+
+     Ahora son cuatro cajones plegados, en el orden en que se usan a lo largo
+     del día: el agua —que se marca a cada rato—, lo que toca comer, lo que toca
+     entrenar y, al final, el recuento de lo que llevas, que es para mirar y no
+     para hacer. Cada uno se abre tocándolo y se queda como lo dejes. */
+  const seccionesDia = {};
+
+  function plegable(id, titulo, cola, cuerpo, extra) {
+    if (!cuerpo) return '';
+    return html`
+      <details class="seccion" data-sec="${id}"${raw(seccionesDia[id] ? ' open' : '')}>
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="list-title" style="margin:0">${titulo}</span>
+          ${raw(cola ? '<span class="tiny sec-cola">' + esc(cola) + '</span>' : '')}
+          ${raw(extra || '')}
+        </summary>
+        <div class="sec-cuerpo"><div class="stack">${raw(cuerpo)}</div></div>
+      </details>`;
+  }
+
+  function seccionAgua() {
+    const cuerpo = g.Marcar ? Marcar.aguaDeHoyHTML() : '';
+    if (!cuerpo) return '';
+    const llevo = g.Agua && Agua.seLleva() ? Agua.hoy() : null;
+    return plegable('agua', 'Hidratación',
+      llevo ? String(llevo.litros).replace('.', ',') + ' L hoy' : '', cuerpo);
+  }
+
+  function seccionComer(menu) {
+    const total = (menu && menu.comidas || []).reduce(function (n, c) {
+      return n + (Number(c.kcal) || 0);
+    }, 0);
+
+    const cuerpo = menu && g.Marcar ? Marcar.hoyHTML() + html`
+        <p class="tiny" style="margin:2px 0 0">Del menú que te preparó el entrenador.
+        <b data-a="menu" style="color:var(--acc)">Ver la semana entera</b></p>`
       : html`
+        <div class="card">
+          <b>Todavía no tienes menú</b>
+          <p class="tiny" style="margin:6px 0 0">El entrenador puede prepararte uno semanal
+          con tus calorías, tu dieta y tus horarios, y entonces aquí verás lo que te toca
+          comer hoy y a qué hora.</p>
+          <button class="btn primary block sm" data-a="menu" style="margin-top:10px">
+            ${raw(icon('chispa'))} Prepararme el menú</button>
+        </div>`;
+
+    return plegable('comer', 'Lo que debo comer',
+      total ? UI.num(total) + ' kcal' : '', cuerpo);
+  }
+
+  function seccionEntrenar(rutina) {
+    if (!rutina) {
+      return plegable('entrenar', 'Lo que voy a entrenar', 'Hoy descansas', html`
         <div class="card">
           <b>Hoy descansas</b>
           <p class="tiny" style="margin:6px 0 0">No hay ninguna rutina puesta para hoy.
           Descansar es parte del plan; si te apetece moverte, camina o apunta lo que hagas.</p>
           <button class="btn block sm" data-a="rutinas" style="margin-top:10px">
             Elegir una rutina igualmente</button>
-        </div>`)}
+        </div>`);
+    }
 
-      <!-- ============ comida ============ -->
-      <div class="list-title">Lo que llevas comido</div>
-      ${raw(m ? html`
+    const series = rutina.exercises.reduce(function (n, e) { return n + e.sets; }, 0);
+
+    /* Con su miniatura y su músculo: una lista de nombres no dice qué vas a
+       hacer, y el dibujo se reconoce antes que el nombre. Tocar uno abre su
+       ficha, igual que en Rutinas. */
+    const cuerpo = html`
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="rt-detalle">
+          ${raw(rutina.exercises.map(function (re, k) {
+            const ex = Data.get(re.exId);
+            return '<button class="rt-item" data-ver="' + esc(re.exId) + '" ' +
+              'style="width:100%;text-align:left">' +
+              '<img src="' + (ex ? Data.img(ex, 0) : Data.PLACEHOLDER) + '" alt="" ' +
+              'loading="lazy">' +
+              '<div class="grow"><div style="font-weight:600;font-size:.85rem">' +
+              (k + 1) + '. ' + esc(ex ? ex.nameEs : re.exId) + '</div>' +
+              '<div class="tiny">' + re.sets + ' × ' + re.reps +
+              (ex && ex.primaryMuscles.length
+                ? ' · ' + esc(ex.primaryMuscles.map(I18N.muscle).join(', ')) : '') +
+              '</div></div></button>';
+          }).join(''))}
+        </div>
+      </div>`;
+
+    /* El botón de entrenar va en la cabecera y no dentro: si estuviera dentro
+       habría que desplegar la rutina entera para poder empezarla. */
+    /* Solo los ejercicios en la cola: con el botón de entrenar al lado no cabe
+       «5 ejercicios · 20 series» sin partir el título en dos renglones, y las
+       series ya salen dentro. */
+    return plegable('entrenar', 'Lo que voy a entrenar',
+      rutina.exercises.length + ' ejercicios', cuerpo,
+      '<button class="btn primary sm sec-boton" data-a="entrenar">' +
+      icon('play') + ' Entrenar</button>');
+  }
+
+  function seccionComido(m, h, comidas, faltanKcal, faltanProt) {
+    const cuerpo = m ? html`
         <div class="card">
           <div class="row" style="gap:14px">
             <div class="grow">
@@ -150,47 +226,50 @@
           calcular tus calorías.</p>
           <button class="btn primary block sm" data-a="datos" style="margin-top:10px">
             Completar mis datos</button>
-        </div>`)}
+        </div>`;
 
-      ${raw(comidas.length ? html`
-        <div class="list">
-          ${raw(comidas.map(function (c) {
-            return '<div class="list-row"><div class="grow">' +
-              '<div class="list-row-title">' + esc(c.plato) + '</div>' +
-              '<div class="list-row-sub">' + UI.num(c.kcal) + ' kcal · ' + c.prot + ' g' +
-              (c.fuente === 'foto' ? ' · de una foto' : '') + '</div></div>' +
-              '<button class="btn sm ghost danger" data-quitar="' + esc(c.id) +
-              '" aria-label="Quitar">' + icon('trash') + '</button></div>';
-          }).join(''))}
-        </div>` : '')}
+    const lista = comidas.length ? html`
+      <div class="list">
+        ${raw(comidas.map(function (c) {
+          return '<div class="list-row"><div class="grow">' +
+            '<div class="list-row-title">' + esc(c.plato) + '</div>' +
+            '<div class="list-row-sub">' + UI.num(c.kcal) + ' kcal · ' + c.prot + ' g' +
+            (c.fuente === 'foto' ? ' · de una foto' : '') +
+            (c.sustituye ? ' · en vez de ' + esc(c.sustituye) : '') + '</div></div>' +
+            '<button class="btn sm ghost danger" data-quitar="' + esc(c.id) +
+            '" aria-label="Quitar">' + icon('trash') + '</button></div>';
+        }).join(''))}
+      </div>` : '';
 
-      <!-- ============ qué comer ============ -->
-      <div class="list-title">Qué te toca comer hoy</div>
-      ${raw(menu ? html`
-        <!-- Con sus marcas: hasta ahora esto era una lista para leer, y para
-             decir que te lo habías comido había que bajar a Alimentación,
-             abrir el menú y buscar el día. Lo tenías delante. -->
-        ${raw(Marcar.hoyHTML())}
-        <p class="tiny" style="margin:8px 0 0">Del menú que te preparó el
-        entrenador. <b data-a="menu" style="color:var(--acc)">Ver la semana entera</b></p>`
-      : html`
-        <div class="card">
-          <b>Todavía no tienes menú</b>
-          <p class="tiny" style="margin:6px 0 0">El entrenador puede prepararte uno semanal
-          con tus calorías, tu dieta y tus horarios, y entonces aquí verás lo que te toca
-          comer hoy y a qué hora.</p>
-          <button class="btn primary block sm" data-a="menu" style="margin-top:10px">
-            ${raw(icon('chispa'))} Prepararme el menú</button>
-        </div>`)}
-
-      ${raw(Marcar.aguaDeHoyHTML())}
-
-      <div style="height:10px"></div>`;
-  };
+    return plegable('comido', 'Lo que llevo comido',
+      m ? UI.num(h.kcal) + ' / ' + UI.num(m.kcal) + ' kcal' : '', cuerpo + lista);
+  }
 
   V.dia.mount = function (root) {
     /* Marcar comidas y agua lo lleva su módulo, el mismo que en Alimentación */
     if (g.Marcar) Marcar.bind(root);
+
+    /* Qué cajones quedan abiertos. Marcar una comida o un vaso repinta la
+       pantalla, y sin esto se te cerraría el cajón en el que estabas justo al
+       marcar algo dentro. */
+    root.querySelectorAll('details.seccion').forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (d.open) seccionesDia[d.dataset.sec] = true;
+        else delete seccionesDia[d.dataset.sec];
+      });
+    });
+
+    /* El botón de entrenar vive en la cabecera del cajón: al pulsarlo no debe
+       abrirse ni cerrarse el cajón, que es lo que hace un clic en un summary. */
+    const btnEntrenar = root.querySelector('.sec-boton[data-a=entrenar]');
+    if (btnEntrenar) {
+      btnEntrenar.addEventListener('click', function (e) { e.preventDefault(); });
+    }
+
+    /* Abrir la ficha de un ejercicio desde la lista de la rutina */
+    App.bindAll(root, '[data-ver]', function (el) {
+      App.exerciseSheet(el.dataset.ver);
+    });
 
     App.bind(root, '[data-a=atras]', function () { App.go('inicio'); });
     App.bind(root, '[data-a=rutinas]', function () { App.go('rutinas'); });

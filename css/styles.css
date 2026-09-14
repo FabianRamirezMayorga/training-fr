@@ -1520,6 +1520,18 @@ img[src^="data/img/"] {
 .sec-cola { margin-left: auto; color: var(--dim); text-align: right;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* Un boton dentro de la cabecera de un cajon. Entrenar es lo que se viene a
+   hacer, y si viviera dentro del cajon habria que desplegar la rutina entera
+   para poder empezarla. Se pega a la derecha y le quita el sitio a la cola. */
+.sec-boton { margin-left: auto; flex: none; }
+.sec-cola + .sec-boton { margin-left: 10px; }
+
+/* El titulo de un cajon no se parte: con un boton al lado, «Lo que voy a
+   entrenar» se iba a dos renglones y el cajon crecia el doble por nada. Lo que
+   cede es la cola, que para eso lleva puntos suspensivos. */
+.seccion > summary .list-title { white-space: nowrap; flex: none; }
+.seccion > summary .sec-cola { flex: 0 1 auto; min-width: 0; }
+
 /* Un plegable fino: una linea en mayusculas con su galon y, a la derecha, lo
    que dice plegado —la siguiente comida, cuantos entrenos tuvo la semana—. Lo
    usan el menu del dia y el historial por semanas. */
