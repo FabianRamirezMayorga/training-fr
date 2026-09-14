@@ -1540,20 +1540,63 @@ img[src^="data/img/"] {
    se decide primero. */
 .filtro-tit { margin: 16px 0 8px; }
 .zona-rejilla { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+/* Las casillas son laminas de vidrio: relleno translucido con lo de detras
+   desenfocado, linea de luz en el canto y su sombra. Al elegir una, el vidrio
+   se tine de verde y se enciende; el cambio va con transicion en todo —fondo,
+   borde, sombra, color del texto y hasta el relleno de la silueta— porque un
+   salto seco delata que son dos estados y no una cosa que reacciona. */
 .zona-tile {
-  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  position: relative; overflow: hidden; border-radius: 14px;
   padding: 8px 3px 7px; display: flex; flex-direction: column; align-items: center;
   gap: 2px; color: var(--dim); font-size: .72rem; font-weight: 600; line-height: 1.1;
-  transition: border-color .15s, background .15s, color .15s;
+  background:
+    linear-gradient(180deg, var(--vidrio-luz) 0%, transparent 54%),
+    color-mix(in srgb, var(--card) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+  backdrop-filter: blur(12px) saturate(165%);
+  -webkit-backdrop-filter: blur(12px) saturate(165%);
+  transition: transform .2s cubic-bezier(.2, .9, .3, 1),
+              background .3s ease, border-color .3s ease,
+              box-shadow .3s ease, color .3s ease;
+  /* entran una detras de otra al abrir la hoja */
+  animation: casilla-entra .42s cubic-bezier(.2, .8, .3, 1) both;
+  animation-delay: calc(var(--turno, 0) * 32ms);
 }
+
+@keyframes casilla-entra {
+  from { opacity: 0; transform: translateY(7px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
 .zona-tile .cuerpo { width: 34px; }
-.zona-tile .silueta { fill: var(--card2); }
+.zona-tile .silueta { fill: var(--card2); transition: fill .3s ease; }
 /* La zona marcada tiene que verse a 34px: con el gris de las notas al pie no
    se distinguia del resto del cuerpo y las siete casillas parecian iguales. */
-.zona-tile .pri { fill: var(--txt); opacity: .62; }
-.zona-tile.on { border-color: var(--acc); background: var(--acc-d); color: var(--txt); }
+.zona-tile .pri {
+  fill: var(--txt); opacity: .62;
+  transition: fill .3s ease, opacity .3s ease;
+}
+
+.zona-tile.on {
+  color: var(--txt);
+  background:
+    linear-gradient(180deg, var(--vidrio-luz-color) 0%, transparent 56%),
+    color-mix(in srgb, var(--acc) 24%, transparent);
+  border-color: color-mix(in srgb, var(--acc) 58%, transparent);
+  box-shadow:
+    inset 0 1px 0 var(--vidrio-rim),
+    0 6px 18px color-mix(in srgb, var(--acc) 24%, transparent);
+}
 .zona-tile.on .pri { fill: var(--acc); opacity: 1; }
-.zona-tile:active { transform: scale(.96); }
+/* De dia el cuerpo entero en tinta se lee como una mancha negra sobre blanco:
+   la zona se marca igual con menos peso. */
+html[data-theme="light"] .zona-tile .pri { opacity: .45; }
+.zona-tile:active { transform: scale(.955); }
+
+@media (prefers-reduced-motion: reduce) {
+  .zona-tile { animation: none; }
+}
 
 /* Material y nivel: trece y cuatro opciones que casi nunca se tocan. Plegadas,
    con su valor a la derecha. */
@@ -1896,4 +1939,41 @@ html[data-theme="light"] {
 @media (prefers-reduced-motion: reduce) {
   .pre-encima svg, .pre-encima .llama-fuera, .pre-encima .llama-dentro,
   .vista-inicio .comida-caja .prog i { animation: none; }
+}
+
+/* ---------- la hoja del filtro, de vidrio ----------
+   Es la unica hoja de la app que se abre encima de algo que importa —el
+   catalogo que estas filtrando— asi que aqui el desenfoque no es decoracion:
+   deja ver de donde sale. La cabecera se queda transparente para que el
+   material sea uno solo y no dos laminas pegadas. */
+.modal-box.hoja-vidrio {
+  background: color-mix(in srgb, var(--bg2) 78%, transparent);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-top: 1px solid var(--vidrio-rim);
+}
+.hoja-vidrio .modal-cab { background: transparent; }
+
+/* Lo de dentro tambien: las filas plegables y las de conmutador dejan de ser
+   cajas macizas. */
+.hoja-vidrio .filtro-mas > summary,
+.hoja-vidrio .filtro-sw > .row {
+  background:
+    linear-gradient(180deg, var(--vidrio-luz) 0%, transparent 60%),
+    color-mix(in srgb, var(--card) 66%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim);
+  transition: background .25s ease, box-shadow .25s ease;
+}
+.hoja-vidrio .filtro-mas > summary:active,
+.hoja-vidrio .filtro-sw > .row:active {
+  background: color-mix(in srgb, var(--card) 85%, transparent);
+}
+
+/* Las pildoras, del mismo material. La elegida se tine, como las casillas. */
+.hoja-vidrio .chip {
+  background: color-mix(in srgb, var(--card2) 70%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim);
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  transition: background .25s ease, color .25s ease, border-color .25s ease;
 }

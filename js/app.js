@@ -1359,10 +1359,14 @@
     /* De frente casi todo; la espalda solo se ve de espaldas. */
     const VISTA_ZONA = { espalda: 'd', hombro: 'd' };
 
+    let turno = 0;
     const casillaZona = function (id, label, musculos) {
       const activa = id ? exFilters.group === id && !exFilters.muscle
         : !exFilters.group && !exFilters.muscle;
-      return '<button class="zona-tile' + (activa ? ' on' : '') + '" data-f-grp="' + id + '">' +
+      /* El turno sirve para que entren una detras de otra, no las siete de
+         golpe: treinta milisegundos entre casilla y casilla. */
+      return '<button class="zona-tile' + (activa ? ' on' : '') +
+        '" style="--turno:' + (turno++) + '" data-f-grp="' + id + '">' +
         (g.Musculos ? Musculos.una(musculos, VISTA_ZONA[id] || 'f') : '') +
         '<span>' + esc(label) + '</span></button>';
     };
@@ -1454,6 +1458,10 @@
       <button class="btn ghost block sm" id="f-limpiar" style="margin-top:8px" hidden>
         Quitar los filtros</button>`,
       function (el) {
+        /* La hoja se apoya sobre la pantalla de ejercicios: si es translucida y
+           desenfoca lo de detras, se ve de donde sale. */
+        el.classList.add('hoja-vidrio');
+
         const btnVer = el.querySelector('#f-ver');
         const btnLimpiar = el.querySelector('#f-limpiar');
 
