@@ -112,10 +112,33 @@
     return Data.all().filter(function (ex) { return Data.gearAllows(gear, ex.equipment); }).length;
   }
 
+  /* El botón de la cabecera. Era una pastilla gris con una mancuerna —la misma
+     mancuerna estuviera donde estuviera— y el nombre largo del sitio, que en un
+     móvil se comía media barra. Ahora lleva el icono y el color del sitio en el
+     que estás, el nombre corto, y el mismo vidrio que el botón del tema, para
+     que los dos de la esquina se lean como una pareja y no como dos cosas
+     distintas que casualmente están juntas. */
+  let lugarPintado = null;
+
   function lugarChip() {
-    const gset = Data.GEAR[Store.settings().gear];
+    const k = Store.settings().gear;
+    const gset = Data.GEAR[k];
     if (!gset) return '';
-    return html`<button class="chip" data-a="lugar">${raw(icon('dumbbell'))} ${gset.label}</button>`;
+    const cara = CARAS_LUGAR[k] || { icono: 'dumbbell', tono: 'var(--acc)', corto: gset.label };
+
+    /* El cambio de sitio es lo único que pasa aquí, y hasta ahora pasaba sin
+       que se notara: la pastilla cambiaba de texto y ya. Cuando cambia —y solo
+       cuando cambia— el icono da un salto y una luz recorre el vidrio. */
+    const cambia = lugarPintado !== null && lugarPintado !== k;
+    lugarPintado = k;
+
+    return html`
+      <button class="lugar-chip${raw(cambia ? ' cambia' : '')}" data-a="lugar"
+              style="--tono:${raw(cara.tono)}"
+              aria-label="Entrenas ${gset.label}. Cambiar de sitio">
+        <span class="lc-ico">${raw(icon(cara.icono))}</span>
+        <span class="lc-txt">${cara.corto || gset.label}</span>
+      </button>`;
   }
 
   /* Cada sitio con su cara. Los cinco eran la misma tarjeta gris con el mismo
@@ -128,11 +151,11 @@
      cifra va sobre una barra que enseña de un vistazo cuánto abarca cada uno.
      Elegir pasa de leer a mirar. */
   const CARAS_LUGAR = {
-    gym: { icono: 'dumbbell', tono: 'var(--acc)' },
-    dumbbell: { icono: 'casa', tono: '#4f8cf5' },
-    bands: { icono: 'banda', tono: '#c06bf0' },
-    home: { icono: 'perfil', tono: '#2fc4b2' },
-    todo: { icono: 'catalogo', tono: '#f0a23c' }
+    gym: { icono: 'dumbbell', tono: 'var(--acc)', corto: 'Gimnasio' },
+    dumbbell: { icono: 'casa', tono: '#4f8cf5', corto: 'Con mancuernas' },
+    bands: { icono: 'banda', tono: '#c06bf0', corto: 'Con bandas' },
+    home: { icono: 'perfil', tono: '#2fc4b2', corto: 'Sin material' },
+    todo: { icono: 'catalogo', tono: '#f0a23c', corto: 'Todo' }
   };
 
   function tarjetaLugar(k, actual, total, enGym) {
@@ -5553,9 +5576,17 @@
   }
 
   /* Botón de la barra superior para alternar claro / oscuro de un toque */
+  let temaPintado = null;
+
   function temaChip() {
     const claro = temaEfectivo() === 'light';
-    return html`<button class="btn icon" data-a="tema"
+    /* Igual que el del sitio: el icono solo gira cuando el tema cambia de
+       verdad. La cabecera se repinta en cada pantalla, y un sol dando vueltas
+       cada vez que se toca una pestaña es un tic, no una animación. */
+    const gira = temaPintado !== null && temaPintado !== claro;
+    temaPintado = claro;
+
+    return html`<button class="btn icon tema-chip${raw(gira ? ' gira' : '')}" data-a="tema"
       aria-label="${claro ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}">
       ${raw(icon(claro ? 'luna' : 'sol'))}</button>`;
   }
