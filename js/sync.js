@@ -481,13 +481,32 @@
     return pedir('/auth/v1/user', { headers: cabeceras(true) });
   }
 
+  /* ---------- renovar el acceso ----------
+     Supabase rota el token de refresco: cada uno sirve una sola vez y al usarlo
+     devuelve el siguiente. Eso convierte en trampa cualquier renovacion
+     simultanea. Aqui salian de cuatro sitios —el latido, volver a primer plano,
+     recuperar la red y guardar algo—, asi que dos podian leer el mismo token y
+     mandarlo a la vez: el primero se lo gastaba y al segundo le respondian
+     «Invalid Refresh Token: Already Used». Y no era solo ese intento el que se
+     perdia; Supabase, al ver un token ya gastado, da por comprometida la cadena
+     entera y revoca tambien el nuevo. De ahi que la app se quedara sin poder
+     sincronizar hasta volver a entrar.
+
+     La renovacion es ahora de uno en uno: quien llega mientras hay otra en
+     marcha espera a esa misma en vez de abrir la suya. */
+  let renovando = null;
+
   function refrescar() {
+    if (renovando) return renovando;
+
     const s = sesion();
     if (!s || !s.refresh_token) return Promise.reject(new Error('No hay sesión.'));
-    return pedir('/auth/v1/token?grant_type=refresh_token', {
+    const usado = s.refresh_token;
+
+    renovando = pedir('/auth/v1/token?grant_type=refresh_token', {
       method: 'POST',
       headers: cabeceras(false),
-      body: JSON.stringify({ refresh_token: s.refresh_token })
+      body: JSON.stringify({ refresh_token: usado })
     }).then(function (r) {
       guardar(SES_KEY, {
         access_token: r.access_token, refresh_token: r.refresh_token,
@@ -496,7 +515,38 @@
         user_id: (r.user && r.user.id) || s.user_id
       });
       return true;
+    }).catch(function (e) {
+      if (!esTokenGastado(e)) throw e;
+
+      /* Que el token estuviera gastado puede querer decir dos cosas. Si en el
+         almacen ya hay otro distinto, es que alguien renovo con exito mientras
+         tanto y este intento sobraba: la sesion esta sana y no hay nada que
+         hacer. */
+      const ahora = sesion();
+      if (ahora && ahora.refresh_token && ahora.refresh_token !== usado) return true;
+
+      /* Si sigue siendo el mismo, la cadena esta revocada y no hay forma de
+         recuperarla desde aqui. Se cierra la sesion —los datos de este
+         dispositivo se quedan donde estan— y se pide entrar otra vez, que es lo
+         unico que la arregla. Antes se quedaba reintentando con un token muerto
+         y repitiendo un error de Supabase que no le dice nada a nadie. */
+      guardar(SES_KEY, null);
+      throw new Error('Tu sesión caducó en este dispositivo. Entra otra vez con tu ' +
+        'correo y contraseña; lo que tienes aquí no se pierde.');
     });
+
+    /* El candado se suelta pase lo que pase, o la primera renovacion fallida
+       dejaria la app sin poder renovar nunca mas. */
+    const soltar = function () { renovando = null; };
+    renovando.then(soltar, soltar);
+
+    return renovando;
+  }
+
+  /* El token de refresco ya no vale: gastado, revocado o inexistente. */
+  function esTokenGastado(e) {
+    return /already used|refresh token not found|invalid refresh token|invalid_grant/i
+      .test(String((e && e.message) || ''));
   }
 
   /* Renueva el token si le queda menos de un minuto */
@@ -846,6 +896,12 @@
      JWT"). Aquí se traduce a lo que hay que hacer. */
   function mensajeClaro(texto) {
     const t = String(texto || '');
+    /* Este ya viene explicado desde refrescar(), y explicado mejor que aqui. */
+    if (/Tu sesión caducó en este dispositivo/.test(t)) return t;
+    if (/already used|refresh token not found|invalid refresh token|invalid_grant/i.test(t)) {
+      return 'Tu sesión caducó en este dispositivo. Entra otra vez con tu correo y ' +
+        'contraseña; lo que tienes aquí no se pierde.';
+    }
     if (/JWT|jwt expired|invalid token|401|no autorizado|unauthorized/i.test(t)) {
       return 'Tu sesión ha caducado. Entra otra vez con tu correo y contraseña.';
     }
@@ -884,13 +940,20 @@
      lo que el otro dispositivo hubiera escrito mientras tanto. Por eso siempre
      se pasa por la fusión, que baja, mezcla y solo entonces escribe. Cuesta una
      petición más y evita perder datos. */
+  /* Una sincronizacion a la vez. Dos en paralelo no solo gastan el doble de
+     peticiones: cada una baja, fusiona y sube por su cuenta, asi que la segunda
+     escribe encima de lo que acaba de escribir la primera. Quien llega mientras
+     hay una en marcha se engancha a esa. */
+  let enMarcha = null;
+
   function subirAhora() {
     clearTimeout(pendiente);
     pendiente = null;
     if (!activa()) return Promise.resolve('inactivo');
+    if (enMarcha) return enMarcha;
 
     fijarEstado(haySubidaPendiente ? 'subiendo' : 'bajando');
-    return sincronizar().then(function (r) {
+    enMarcha = sincronizar().then(function (r) {
       haySubidaPendiente = false;
       reintentos = 0;
       fijarEstado('ok');
@@ -899,7 +962,9 @@
       fijarEstado('error', e.message || 'No se pudo sincronizar');
       /* solo se insiste si hay algo propio esperando; una bajada fallida ya se
          reintenta en el siguiente latido */
-      if (haySubidaPendiente) {
+      /* Con la sesion caida no se reintenta: sin entrar otra vez, insistir
+         solo repite el mismo fallo cada pocos segundos. */
+      if (haySubidaPendiente && activa()) {
         reintentos++;
         const espera = Math.min(5000 * Math.pow(3, reintentos - 1), 300000);
         clearTimeout(pendiente);
@@ -907,6 +972,11 @@
       }
       throw e;
     });
+
+    const soltar = function () { enMarcha = null; };
+    enMarcha.then(soltar, soltar);
+
+    return enMarcha;
   }
 
   /* Igual que subirAhora pero recogiendo el rechazo: lo usan el temporizador y
