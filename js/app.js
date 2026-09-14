@@ -360,10 +360,10 @@
 
     return html`
       <div class="muelle"></div>
-      <div class="card inicio-compacta semana-caja portada-titulo" data-a="verprogreso"
-           role="button" tabindex="0">
-        <div class="row between" style="margin-bottom:5px">
-          <span class="list-title" style="margin:0">Tu semana</span>
+      <div class="card inicio-compacta semana-caja portada-titulo tarjeta-premium"
+           data-a="verprogreso" role="button" tabindex="0">
+        <div class="row between" style="margin-bottom:6px">
+          <span class="pre-encima">Tu semana</span>
           <span class="tiny nowrap">${frase}</span>
         </div>
         <div class="semana">${raw(celdas)}</div>
@@ -387,17 +387,17 @@
     return html`
       <div class="muelle"></div>
       <div class="list-title portada-titulo">Lo que llevas comido</div>
-      <div class="card inicio-compacta comida-caja">
+      <div class="card inicio-compacta comida-caja tarjeta-premium">
         <div class="row" style="gap:16px;align-items:flex-start">
           <div class="grow">
-            <div class="tiny">CALORÍAS</div>
-            <div><b style="font-size:1.15rem">${UI.num(h.kcal)}</b>
+            <div class="pre-encima">CALORÍAS</div>
+            <div><b class="pre-num">${UI.num(h.kcal)}</b>
               <span class="tiny"> / ${UI.num(m.kcal)}</span></div>
             <div class="prog" style="margin-top:5px"><i style="width:${pk}%"></i></div>
           </div>
           <div class="grow">
-            <div class="tiny">PROTEÍNA</div>
-            <div><b style="font-size:1.15rem;color:var(--brand-1)">${h.prot}</b>
+            <div class="pre-encima prot">PROTEÍNA</div>
+            <div><b class="pre-num" style="color:var(--brand-1)">${h.prot}</b>
               <span class="tiny"> / ${m.prot} g</span></div>
             <div class="prog" style="margin-top:5px">
               <i style="width:${pp}%;background:var(--brand-1)"></i></div>

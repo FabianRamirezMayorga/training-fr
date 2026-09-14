@@ -1617,3 +1617,36 @@ img[src^="data/img/"] {
 }
 .hoy-play svg { width: 17px; height: 17px; }
 .hoy-play:active { transform: scale(.95); filter: brightness(.95); }
+
+/* ---------- el mismo trato que la rutina de hoy ----------
+   Las tres cajas de la portada cuentan lo mismo —como va el dia— y antes cada
+   una tenia su propio aspecto. Comparten el degradado tenue de la marca, el
+   borde con una pizca de verde y la esquina mas redonda. El tinte es mas flojo
+   que en la tarjeta de hoy a proposito: esa manda, estas acompanan. */
+.tarjeta-premium {
+  position: relative; overflow: hidden; border-radius: 20px;
+  background:
+    linear-gradient(152deg, color-mix(in srgb, var(--acc) 9%, var(--card)) 0%,
+                    var(--card) 56%);
+  border-color: color-mix(in srgb, var(--acc) 24%, var(--line));
+}
+
+/* El rotulo de encima: pequeno, en versales y en verde, como el HOY de la
+   rutina del dia. Es lo que hace que se lean como una familia. */
+.pre-encima {
+  font-size: .68rem; font-weight: 800; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--acc); display: block;
+}
+.pre-encima.prot { color: var(--brand-1); }
+
+/* La cifra, con la misma voz que el titulo de la rutina de hoy. Tabular para
+   que no bailen los digitos al ir subiendo durante el dia. */
+.pre-num {
+  font-size: 1.32rem; font-weight: 800; letter-spacing: -.022em;
+  font-variant-numeric: tabular-nums; line-height: 1.1;
+}
+
+/* Las tres cifras de arriba se quedan sin tintar —si se tinta todo, no destaca
+   nada— pero comparten la esquina, que si no parecian de otra pantalla. */
+.vista-inicio .stat { border-radius: 20px; }
+.vista-inicio .stat b { font-variant-numeric: tabular-nums; }
