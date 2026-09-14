@@ -2103,6 +2103,143 @@
     return llamarJSON(prompt, { maxTokens: 1024, temperatura: 0.2 });
   }
 
+  /* ---------- comiste otra cosa ----------
+     El cambio de un plato no es una estimación suelta: es una decisión que ya
+     has tomado y sobre la que se puede decir algo. Estimar los números y
+     callarse el resto deja a medias justo la parte que no puede hacer la app
+     —la app sabe restar, pero no sabe si cambiar el salmón por una empanada es
+     razonable un día de entreno con el hígado tocado—.
+
+     Así que aquí se pide todo de una vez, en una sola llamada: los números, el
+     veredicto y qué hacer. Dos llamadas costarían el doble y tardarían el
+     doble para decir lo mismo.
+
+     Lo que NO se le pide es la resta contra lo previsto: los dos números están
+     en la app, restarlos es exacto y gratis, y encargárselo a un modelo es
+     pagar por una cuenta que además puede salir mal. */
+  function revisarCambioComida(texto, previsto, imagen) {
+    const t = String(texto || '').trim();
+    if (!t && !(imagen && imagen.datos)) {
+      return Promise.reject(new Error('Escribe qué has comido o hazle una foto.'));
+    }
+
+    const pre = previsto || {};
+    const p = Perfil.datos ? Perfil.datos() : {};
+    const m = Perfil.macros ? Perfil.macros() : null;
+    const N = String.fromCharCode(10);
+    const PRIMA = String.fromCharCode(237);
+
+    const partes = [contexto({ comida: true })];
+
+    partes.push('SITUACI\u00d3N: ten\u00eda en su men\u00fa "' +
+      (pre.plato || pre.nombre || 'una comida') + '"' +
+      (pre.nombre && pre.plato ? ' como ' + pre.nombre : '') +
+      (pre.kcal ? ' (' + pre.kcal + ' kcal, ' + (pre.prot || 0) + ' g de prote\u00edna' +
+        (pre.carbo ? ', ' + pre.carbo + ' g de hidratos' : '') +
+        (pre.grasa ? ', ' + pre.grasa + ' g de grasa' : '') + ')' : '') +
+      ', y en su lugar ha comido ' +
+      (imagen && imagen.datos
+        ? 'lo que sale en esta foto' + (t ? ', que describe as' + PRIMA + ': "' + t + '"' : '')
+        : ': "' + t + '"') + '.');
+
+    if (m) {
+      partes.push('Al d\u00eda le tocan ' + m.kcal + ' kcal y ' + m.prot +
+        ' g de prote\u00edna.');
+      if (g.Comidas) {
+        const h = Comidas.hoy();
+        partes.push(h.kcal > 0
+          ? 'Hoy lleva ya ' + h.kcal + ' kcal y ' + h.prot + ' g de prote\u00edna ANTES ' +
+            'de este plato.'
+          : 'Este es el primer plato que apunta hoy.');
+      }
+    }
+
+    if (p.despensa) {
+      partes.push('EN CASA SUELE TENER: ' + p.despensa + '. Cualquier alternativa que ' +
+        'propongas sale de ah\u00ed; proponerle algo que no tiene no le sirve de nada.');
+    }
+    if (p.alergias) {
+      partes.push('NO PUEDE COMER: ' + p.alergias + '. Si lo que ha comido lleva algo de ' +
+        'eso, d\u00edselo lo primero y que se note.');
+    }
+    if (p.condiciones) partes.push('CONDICIONES DE SALUD: ' + p.condiciones + '.');
+    if (p.ordenesComida) partes.push('LE HA PEDIDO AL MEN\u00da: ' + p.ordenesComida + '.');
+
+    partes.push('');
+    if (imagen && imagen.datos) {
+      partes.push('Di primero qué alimentos ves y qué ración calculas de cada uno; ' +
+        'eso va en "nota". Nadie acierta los gramos de un plato por una foto, ni ' +
+        'una persona ni tú, así que no finjas precisión: lo que hace falta ' +
+        'es no irte por un factor de dos.');
+      partes.push('Si en la foto no hay comida, devuelve kcal 0 y dilo en "nota".');
+      partes.push('');
+    }
+
+    partes.push('Primero los n\u00fameros de lo que ha comido de verdad. Es una ' +
+      'estimaci\u00f3n y se sabe: no hace falta que claves los gramos, hace falta que no ' +
+      'te vayas por un factor de dos.');
+    partes.push('- Si no dice cantidades, asume una raci\u00f3n normal de una persona ' +
+      'adulta y d\u00edselo en "nota".');
+    partes.push('- Si dice cantidades, respeta las suyas.');
+    partes.push('- Comida de casa, cocinada como se cocina en casa: con su aceite.');
+    partes.push('- Si lo que ha escrito no es comida, devuelve kcal 0 y dilo en "nota".');
+    partes.push('');
+    partes.push('Y despu\u00e9s moja: \u00bffue buen cambio o no? Eso es lo que te est\u00e1 ' +
+      'preguntando, y un "depende" no le sirve para nada.');
+    partes.push('- "veredicto" es una de estas tres: "bien" si el cambio se sostiene, ' +
+      '"regular" si pasa pero le cuesta algo, "mal" si le rompe el d\u00eda o choca con ' +
+      'sus condiciones o sus alergias.');
+    partes.push('- "consejo": una o dos frases, directas, dici\u00e9ndole lo que hay. Si ' +
+      'estuvo bien, d\u00edselo sin adornos. Si estuvo mal, di por qu\u00e9 y qu\u00e9 hacer con ' +
+      'el resto del d\u00eda. Nada de "podr\u00edas considerar": o s\u00ed o no.');
+    partes.push('- "alternativas": hasta tres cambios concretos que habr\u00edan encajado ' +
+      'mejor o que puede usar la pr\u00f3xima vez, con su cantidad. Salen de lo que tiene ' +
+      'en casa. Si lo que ha comido estaba bien, pon variantes para no repetir siempre ' +
+      'lo mismo.');
+    partes.push('');
+    partes.push('No le eches la bronca ni le hables de culpa: un plato no arruina nada y ' +
+      'tratarlo como un pecado es la forma m\u00e1s r\u00e1pida de que deje de apuntar lo que ' +
+      'come. Dile lo que hay y sigue.');
+    partes.push('');
+    partes.push('Devuelve JSON: {"plato":"c\u00f3mo llamarlo, corto","kcal":n\u00famero,' +
+      '"prot":gramos,"carbo":gramos,"grasa":gramos,' +
+      '"confianza":"alta|media|baja","nota":"una frase, lo que has supuesto",' +
+      '"veredicto":"bien|regular|mal","consejo":"una o dos frases",' +
+      '"alternativas":["cambio con su cantidad"]}');
+
+    const arranque = Date.now();
+
+    return llamarJSON(partes.join(N), {
+      maxTokens: 1400, temperatura: 0.3,
+      /* La foto viaja en la misma peticion que la pregunta y se suelta al
+         terminar; no se escribe en disco en ningun momento, igual que en el
+         resto de la app. */
+      imagen: imagen && imagen.datos ? imagen : null
+    })
+      .then(function (r) {
+        r = r || {};
+        const v = String(r.veredicto || '').toLowerCase();
+        return {
+          plato: String(r.plato || t).slice(0, 80),
+          kcal: Math.max(0, Math.round(Number(r.kcal) || 0)),
+          prot: Math.max(0, Math.round(Number(r.prot) || 0)),
+          carbo: Math.max(0, Math.round(Number(r.carbo) || 0)),
+          grasa: Math.max(0, Math.round(Number(r.grasa) || 0)),
+          confianza: String(r.confianza || ''),
+          nota: String(r.nota || ''),
+          /* Si vuelve con cualquier otra cosa se queda en «regular»: es lo que
+             menos afirma de las tres, y afirmar de más sobre lo que come
+             alguien es peor que no decir nada. */
+          veredicto: v === 'bien' || v === 'mal' ? v : 'regular',
+          consejo: String(r.consejo || ''),
+          alternativas: (Array.isArray(r.alternativas) ? r.alternativas : [])
+            .slice(0, 3).map(function (x) { return String(x).slice(0, 120); })
+            .filter(Boolean),
+          tardo: Date.now() - arranque
+        };
+      });
+  }
+
   /* Mira una foto de comida y estima lo que hay. Es una aproximación y se dice
      que lo es: nadie acierta los gramos de un plato por una foto, ni una
      persona ni un modelo. Sirve para saber si el día va corto de proteína, que
@@ -2342,6 +2479,7 @@
     revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
     crearPrograma: crearPrograma, pildora: pildora, horasPildora: horasPildora,
     analizarComida: analizarComida, estimarComida: estimarComida,
+    revisarCambioComida: revisarCambioComida,
     estimarActividad: estimarActividad,
     leerRutina: leerRutina,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,

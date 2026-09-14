@@ -78,7 +78,13 @@
       ref: String(c.ref || ''),
       /* Y qué plato del menú vino a sustituir, cuando comiste otra cosa: sin
          esto, el registro dice lo que comiste pero no de qué te desviaste. */
-      sustituye: String(c.sustituye || '').slice(0, 80)
+      sustituye: String(c.sustituye || '').slice(0, 80),
+      /* Lo que te dijo el entrenador sobre ese cambio, guardado con el
+         registro. Sin esto, mañana el diario dice que cambiaste el salmón por
+         una empanada pero no lo que se te contestó entonces, que es la mitad
+         del valor de haberlo apuntado. */
+      consejo: String(c.consejo || '').slice(0, 400),
+      veredicto: String(c.veredicto || '')
     };
     l.push(x);
     escribir(l);
