@@ -190,6 +190,22 @@
       </div>`;
   }
 
+  /* La semana, dia a dia: inicial, numero y una barra con lo que hiciste. Lo
+     que en un mapa de calor de siete cuadros no se puede poner. */
+  function tiraSemana(dias, max, hoyKey) {
+    const DIAS_SEM = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+    return '<div class="tira-sem">' + dias.map(function (d) {
+      const nivel = !d.series ? 0 : Math.min(4, Math.ceil(d.series / max * 4));
+      const f = new Date(d.t);
+      return '<div class="ts-dia' + (d.k === hoyKey ? ' hoy' : '') + '">' +
+        '<span class="ts-letra">' + DIAS_SEM[(f.getDay() + 6) % 7] + '</span>' +
+        '<span class="ts-num">' + f.getDate() + '</span>' +
+        '<i class="n' + nivel + '"></i>' +
+        '<span class="ts-series">' + (d.series || '·') + '</span>' +
+        '</div>';
+    }).join('') + '</div>';
+  }
+
   /* Mapa de calor del rango elegido. Con pocos días va en una fila, día a día;
      con muchos, en columnas de siete, que es como se lee la constancia. */
   function mapaCalor(dias) {
@@ -197,6 +213,12 @@
     const hoyKey = Store.dayKey(Date.now());
     const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     const DIAS_SEM = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
+    /* Con una semana el mapa de cuadros no aporta: siete cuadrados enormes en
+       los que cabria escribir lo que hiciste. Ahi se cambia por la tira de
+       dias, con su inicial, su numero y cuantas series llevas: la misma
+       informacion, legible. */
+    if (dias.length <= 8) return tiraSemana(dias, max, hoyKey);
 
     /* una sola fila solo en la semana: con un mes salían treinta letras de día
        seguidas y no se leía nada */
@@ -277,6 +299,17 @@
     const reparto = repartoMuscular(Math.min(r.dias, 90));
     const maxMusculo = reparto.filas.length ? reparto.filas[0].series : 1;
 
+    /* Lo del periodo elegido, que es de lo que va esta pantalla. */
+    const desdeT = Date.now() - r.dias * 864e5;
+    const enRango = sesiones.filter(function (x) { return x.start >= desdeT; });
+    const resumen = {
+      sesiones: enRango.length,
+      minutos: enRango.reduce(function (a, x) {
+        return a + Math.round(((x.end || x.start) - x.start) / 60000);
+      }, 0),
+      porSemana: Math.round(enRango.length / Math.max(1, r.dias / 7) * 10) / 10
+    };
+
     /* récords ordenados por peso */
     const prs = [];
     const vistos = {};
@@ -304,13 +337,18 @@
         }).join(''))}
       </div>
 
+      <!-- Las cuatro cifras, del periodo elegido y no de toda la vida. Antes
+           eran totales historicos: no cambiaban al tocar los botones de arriba,
+           y una de ellas repetia el numero de la grafica. Ahora las cuatro
+           contestan a «¿como voy en estos tres meses?», que es la pregunta de
+           esta pantalla. La racha se queda como esta: una racha es de hoy, no
+           de un periodo. -->
       <div class="stats">
-        <div class="stat"><b>${st.total}</b><span>Entrenos</span></div>
+        <div class="stat"><b>${resumen.sesiones}</b><span>Entrenos</span></div>
+        <div class="stat"><b>${resumen.porSemana}</b><span>Por semana</span></div>
         <div class="stat"><b>${st.streak}</b><span>Racha</span></div>
-        <div class="stat"><b>${UI.num(porSeries ? st.totalSets : st.totalVolume)}</b>
-          <span>${porSeries ? 'Series totales' : 'Volumen total'}</span></div>
-        <div class="stat"><b>${st.totalMinutes < 60 ? st.totalMinutes + 'm'
-          : Math.round(st.totalMinutes / 60) + 'h'}</b><span>Tiempo</span></div>
+        <div class="stat"><b>${resumen.minutos < 60 ? resumen.minutos + 'm'
+          : Math.round(resumen.minutos / 60) + 'h'}</b><span>Tiempo</span></div>
       </div>
 
       <div class="list-title">${porSeries ? 'Series completadas' : 'Volumen levantado'}</div>
@@ -344,8 +382,10 @@
         <div class="pre-num" style="margin:1px 0 10px">${diasEntrenados(r.dias)}
           <span class="tiny" style="font-weight:600">de ${r.dias}</span></div>
         ${raw(mapaCalor(porDia(r.dias)))}
-        <p class="tiny" style="margin:10px 0 0">Un cuadro por día. Los huecos también
-        cuentan: el descanso forma parte del plan.</p>
+        <p class="tiny" style="margin:10px 0 0">${r.dias <= 8
+          ? 'El número de abajo son las series de ese día.'
+          : 'Un cuadro por día.'} Los huecos también cuentan: el descanso forma
+        parte del plan.</p>
       </div>
 
       ${raw(reparto.total || planPorZona().total ? html`

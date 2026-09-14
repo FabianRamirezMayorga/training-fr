@@ -478,12 +478,15 @@
   function tarjetaMeta(m) {
     const p = Objetivos.progreso(m);
     const pct = Math.round(p.pct * 100);
+    const pre = Objetivos.prevision(m);
+
     return html`
-      <div class="card ${p.cumplido ? 'meta-ok' : ''}">
+      <div class="card tarjeta-premium ${p.cumplido ? 'meta-ok' : ''}">
         <div class="row between" style="align-items:flex-start">
           <div class="grow">
-            <div style="font-weight:600">${Objetivos.etiqueta(m)}</div>
-            <div class="tiny">${Objetivos.formato(m, p.actual)} de ${Objetivos.formato(m, m.meta)}</div>
+            <div class="pre-encima">${Objetivos.etiqueta(m)}</div>
+            <div class="pre-num" style="margin-top:2px">${Objetivos.formato(m, p.actual)}
+              <span class="tiny" style="font-weight:600">de ${Objetivos.formato(m, m.meta)}</span></div>
           </div>
           ${raw(p.cumplido
             ? '<span class="chip solid">' + icon('check') + ' Cumplido</span>'
@@ -491,9 +494,102 @@
           <button class="btn icon sm danger" data-del="${m.id}"
                   aria-label="Borrar objetivo">${raw(icon('trash'))}</button>
         </div>
+
         <div class="prog" style="margin-top:10px"><i style="width:${pct}%"></i></div>
+
+        ${raw(previsionHTML(m, pre))}
+
         ${raw(m.nota ? '<div class="tiny" style="margin-top:8px">' + esc(m.nota) + '</div>' : '')}
       </div>`;
+  }
+
+  /* ---------- cuando llegas ----------
+     La barra dice donde estas; esto dice cuando llegas, que es lo que se
+     pregunta uno al ponerse una meta. El dibujo lleva lo que ya has hecho en
+     linea continua y lo que queda en linea de puntos hasta cruzar la meta: asi
+     se ve de un vistazo que la parte de la derecha es una estimacion y no un
+     dato. Debajo, el ritmo del que sale, para que el numero no venga de la
+     nada. */
+  function previsionHTML(m, pre) {
+    if (!pre || pre.cumplido) return '';
+
+    const llega = pre.clase === 'meta' && pre.haciaMeta && pre.dias > 0;
+
+    return html`
+      <div class="meta-prevision">
+        ${raw(llega ? html`
+          <div class="mp-cab">
+            <div>
+              <div class="pre-encima">Si sigues así</div>
+              <div class="mp-cuanto">${Objetivos.cuanto(pre.dias)}</div>
+            </div>
+            <div class="mp-fecha">${UI.fechaCorta(pre.fecha)}</div>
+          </div>` : '')}
+
+        ${raw(graficaMeta(m, pre))}
+
+        <p class="tiny mp-nota">${pre.frase}${raw(llega ? '. ' + salvedad(m) : '')}</p>
+      </div>`;
+  }
+
+  /* Por que el numero puede no cumplirse, dicho para cada meta. Antes salia la
+     coletilla del peso —«los ultimos kilos cuestan mas»— tambien en la meta de
+     sesiones totales, donde no significa nada. */
+  function salvedad(m) {
+    if (m.tipo === 'peso') {
+      return 'Es una recta sobre lo que llevas: cuenta con que los últimos kilos ' +
+        'cuesten más que los primeros.';
+    }
+    if (m.tipo === 'marca') {
+      return 'Es una recta sobre lo que llevas: la fuerza sube a tirones, no a ' +
+        'ritmo constante.';
+    }
+    return 'Es una recta sobre lo que llevas, contando con que sigas igual.';
+  }
+
+  /* El dibujo: linea de lo hecho, punteada de lo que falta y la meta como raya
+     horizontal. Sin ejes ni rejilla, que en 60px de alto solo estorban. */
+  function graficaMeta(m, pre) {
+    const pts = (pre.puntos || []).slice(-24);
+    if (pts.length < 2) return '';
+
+    const W = 280, H = 64, P = 3;
+    const meta = Number(m.meta) || 0;
+
+    const tIni = pts[0].t;
+    const tFin = pre.fecha && pre.fecha > pts[pts.length - 1].t
+      ? pre.fecha : pts[pts.length - 1].t;
+    const anchoT = Math.max(1, tFin - tIni);
+
+    const vals = pts.map(function (x) { return x.v; }).concat([meta]);
+    const min = Math.min.apply(null, vals);
+    const max = Math.max.apply(null, vals);
+    const alto = Math.max(1e-6, max - min);
+
+    const x = function (t) { return P + (t - tIni) / anchoT * (W - 2 * P); };
+    const y = function (v) { return H - P - (v - min) / alto * (H - 2 * P); };
+
+    const linea = pts.map(function (q, i) {
+      return (i ? 'L' : 'M') + x(q.t).toFixed(1) + ' ' + y(q.v).toFixed(1);
+    }).join(' ');
+
+    const ultimo = pts[pts.length - 1];
+    const proyeccion = pre.fecha && pre.haciaMeta
+      ? '<path class="mg-futuro" d="M' + x(ultimo.t).toFixed(1) + ' ' + y(ultimo.v).toFixed(1) +
+        ' L' + x(pre.fecha).toFixed(1) + ' ' + y(meta).toFixed(1) + '"/>'
+      : '';
+
+    return '<svg class="meta-graf" viewBox="0 0 ' + W + ' ' + H + '" ' +
+      'preserveAspectRatio="none" aria-label="Tu evolución y lo que falta">' +
+      '<path class="mg-meta" d="M0 ' + y(meta).toFixed(1) + ' H' + W + '"/>' +
+      '<path class="mg-linea" d="' + linea + '"/>' +
+      proyeccion +
+      '<circle class="mg-hoy" cx="' + x(ultimo.t).toFixed(1) + '" cy="' +
+      y(ultimo.v).toFixed(1) + '" r="3.2"/>' +
+      (pre.fecha && pre.haciaMeta
+        ? '<circle class="mg-fin" cx="' + x(pre.fecha).toFixed(1) + '" cy="' +
+          y(meta).toFixed(1) + '" r="3.2"/>' : '') +
+      '</svg>';
   }
 
   V.objetivos.mount = function (root) {

@@ -2363,3 +2363,70 @@ html[data-theme="light"] .sem-caja.es-ahora {
   background: color-mix(in srgb, var(--acc) 14%, transparent); }
 .delta.baja { color: var(--warn);
   background: color-mix(in srgb, var(--warn) 14%, transparent); }
+
+/* ---------- cuando llegas a una meta ----------
+   La barra de progreso dice donde estas. Esto dice cuando llegas, que es lo
+   que uno se pregunta al ponerse la meta. */
+.meta-prevision {
+  margin-top: 12px; padding-top: 11px;
+  border-top: 1px solid var(--line);
+}
+.mp-cab { display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 10px; margin-bottom: 8px; }
+.mp-cuanto {
+  font-size: 1.32rem; font-weight: 800; letter-spacing: -.022em; line-height: 1.1;
+  font-variant-numeric: tabular-nums; margin-top: 1px;
+}
+.mp-fecha { font-size: .78rem; color: var(--dim); white-space: nowrap; }
+.mp-nota { margin: 8px 0 0; }
+
+/* El dibujo: lo hecho en linea llena, lo que falta punteado hasta cruzar la
+   meta. La diferencia de trazo es lo que dice que la derecha es una
+   estimacion. */
+.meta-graf { width: 100%; height: 64px; display: block; overflow: visible; }
+.meta-graf path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.mg-linea { stroke: var(--acc); stroke-width: 2; }
+.mg-futuro {
+  stroke: var(--acc); stroke-width: 2; opacity: .55;
+  stroke-dasharray: 3 4;
+}
+.mg-meta { stroke: var(--dim2); stroke-width: 1; opacity: .5; stroke-dasharray: 2 5; }
+.mg-hoy { fill: var(--acc); }
+.mg-fin { fill: none; stroke: var(--acc); stroke-width: 2; opacity: .7; }
+
+/* La linea se dibuja sola al entrar, como la de Progreso. */
+@media (prefers-reduced-motion: no-preference) {
+  .mg-linea { animation: mg-trazo .9s cubic-bezier(.3, .9, .3, 1) both; }
+  .mg-futuro { animation: mg-aparece .5s ease .7s both; }
+}
+@keyframes mg-trazo {
+  from { stroke-dasharray: 0 600; }
+  to { stroke-dasharray: 600 0; }
+}
+@keyframes mg-aparece { from { opacity: 0 } to { opacity: .55 } }
+
+/* ---------- la semana, dia a dia ----------
+   Siete cuadros de mapa de calor son siete cuadrados enormes en los que cabria
+   escribir lo que hiciste. En una semana se cambian por la tira de dias: la
+   misma informacion y encima legible. */
+.tira-sem { display: flex; gap: 6px; }
+.ts-dia {
+  flex: 1; min-width: 0; display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+}
+.ts-letra { font-size: .66rem; color: var(--dim2); letter-spacing: .03em; }
+.ts-num { font-size: .78rem; font-weight: 600; color: var(--dim);
+  font-variant-numeric: tabular-nums; }
+.ts-dia i {
+  display: block; width: 100%; height: 34px; border-radius: 8px;
+  background: var(--card2);
+  transform: scale(.6); opacity: 0; animation: pop .3s forwards;
+}
+.ts-dia i.n1 { background: color-mix(in srgb, var(--acc) 28%, var(--card2)); }
+.ts-dia i.n2 { background: color-mix(in srgb, var(--acc) 50%, var(--card2)); }
+.ts-dia i.n3 { background: color-mix(in srgb, var(--acc) 74%, var(--card2)); }
+.ts-dia i.n4 { background: var(--acc); }
+.ts-series { font-size: .68rem; color: var(--dim2);
+  font-variant-numeric: tabular-nums; }
+.ts-dia.hoy .ts-letra, .ts-dia.hoy .ts-num { color: var(--txt); font-weight: 700; }
+.ts-dia.hoy i { outline: 2px solid var(--blue); outline-offset: 1px; }
