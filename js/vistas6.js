@@ -39,6 +39,12 @@
   /* ---------- datos ---------- */
 
   /* Total por día de los últimos n días: series y volumen */
+  /* Cuantos dias de los ultimos n se entreno. El mapa de calor lo ensena, pero
+     contarlos cuadro a cuadro no lo hace nadie. */
+  function diasEntrenados(n) {
+    return porDia(n).filter(function (d) { return d.n > 0; }).length;
+  }
+
   function porDia(n) {
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
     const mapa = {};
@@ -323,7 +329,12 @@
       </div>
 
       <div class="list-title">Constancia</div>
-      <div class="card">
+      <div class="card tarjeta-premium">
+        <!-- El rotulo con la cuenta: el mapa dice como se reparten los dias,
+             pero cuantos son hay que contarlos a ojo cuadro a cuadro. -->
+        <div class="pre-encima">Días entrenados</div>
+        <div class="pre-num" style="margin:1px 0 10px">${diasEntrenados(r.dias)}
+          <span class="tiny" style="font-weight:600">de ${r.dias}</span></div>
         ${raw(mapaCalor(porDia(r.dias)))}
         <p class="tiny" style="margin:12px 0 0">Cada cuadro es un día de ${r.frase};
         cuanto más oscuro, más series. Los huecos también cuentan: el descanso forma
@@ -332,7 +343,12 @@
 
       ${raw(reparto.total || planPorZona().total ? html`
         <div class="list-title">Reparto por zona (${Math.min(r.dias, 90)} días)</div>
-        <div class="card">
+        <div class="card tarjeta-premium">
+          ${raw(reparto.filas.length ? '<div class="pre-encima">Lo que m\u00e1s trabajas</div>' +
+            '<div class="pre-num" style="margin:1px 0 12px">' + esc(reparto.filas[0].label) +
+            ' <span class="tiny" style="font-weight:600">' +
+            Math.round(reparto.filas[0].series / reparto.total * 100) + '% de las series</span></div>'
+            : '')}
           ${raw(reparto.filas.map(function (f) {
             const pct = Math.round(f.series / maxMusculo * 100);
             const share = Math.round(f.series / reparto.total * 100);
@@ -385,7 +401,7 @@
     if (!metas.length) {
       return html`
         <div class="list-title">Tus metas</div>
-        <div class="card center">
+        <div class="card center tarjeta-premium">
           <p class="muted" style="margin-bottom:12px">Ponte una meta y la verás avanzar
           aquí sola: llegar a un peso, entrenar x veces por semana, una racha o un récord
           en un ejercicio.</p>
@@ -410,7 +426,7 @@
           const falta = Math.abs((Number(m.meta) || 0) - p.actual);
 
           return html`
-            <div class="card meta ${p.cumplido ? 'lograda' : ''}">
+            <div class="card meta tarjeta-premium ${p.cumplido ? 'lograda' : ''}">
               ${raw(anillo(pct, p.cumplido))}
               <div class="grow" style="min-width:0">
                 <div class="meta-t">${Objetivos.etiqueta(m)}</div>
@@ -630,7 +646,8 @@
       const series = lista.reduce(function (n, s) { return n + (s.setsDone || 0); }, 0);
 
       return html`
-        <details class="card plegable-fino sem-caja" data-sem="${k}"${raw(abierta ? ' open' : '')}>
+        <details class="card plegable-fino sem-caja${raw(k === estaSemana ? ' es-ahora' : '')}"
+                 data-sem="${k}"${raw(abierta ? ' open' : '')}>
           <summary>
             <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
             <span class="grow">${tituloSemana(k)}</span>

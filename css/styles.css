@@ -2324,3 +2324,23 @@ html[data-theme="light"] .plan-acciones {
 @media (prefers-reduced-motion: reduce) {
   .fila-pr { animation: none; }
 }
+
+/* La semana en curso es la que se mira: lleva el degradado, como la rutina de
+   hoy. Las de atras se quedan neutras, que si no la lista entera va tenida y
+   deja de distinguirse cual es cual. */
+.sem-caja.es-ahora {
+  background:
+    linear-gradient(152deg, color-mix(in srgb, var(--acc) 11%, var(--card)) 0%,
+                    var(--card) 58%);
+  border-color: color-mix(in srgb, var(--acc) 26%, var(--line));
+}
+.sem-caja.es-ahora > summary { color: var(--acc); }
+
+html[data-theme="light"] .sem-caja.es-ahora {
+  background:
+    linear-gradient(152deg, color-mix(in srgb, var(--acc) 14%, #fff) 0%, #fff 60%);
+  border-color: color-mix(in srgb, var(--acc) 26%, var(--line));
+}
+
+/* La meta cumplida ya tenia su verde: el degradado no puede pisarselo. */
+.vista-progreso .meta.lograda { border-color: var(--acc); }
