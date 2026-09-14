@@ -1504,7 +1504,17 @@
 
         bindAll(el, '[data-f-grp]', function (b) {
           exFilters.group = b.dataset.fGrp; exFilters.muscle = ''; exFilters.q = '';
-          exFilters.favs = false; refrescar();
+          exFilters.favs = false;
+          refrescar();
+
+          /* El brillo cruza la casilla que se acaba de elegir. Hay que quitar y
+             volver a poner la clase —y forzar un calculo de estilo en medio—
+             porque una animacion no se repite sola si la clase ya estaba. */
+          el.querySelectorAll('.zona-tile').forEach(function (t) {
+            t.classList.remove('brilla');
+          });
+          void b.offsetWidth;
+          b.classList.add('brilla');
         });
         bindAll(el, '[data-f-tipo]', function (b) { exFilters.tipo = b.dataset.fTipo; refrescar(); });
         bindAll(el, '[data-f-eq]', function (b) { exFilters.equipment = b.dataset.fEq; refrescar(); });

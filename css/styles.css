@@ -1977,3 +1977,72 @@ html[data-theme="light"] {
   -webkit-backdrop-filter: blur(8px) saturate(150%);
   transition: background .25s ease, color .25s ease, border-color .25s ease;
 }
+
+/* El brillo que cruza la casilla al elegirla. Una sola pasada de siete decimas:
+   es la confirmacion de que la has tocado, no un adorno permanente. */
+.zona-tile::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -55%; width: 48%;
+  background: linear-gradient(100deg, transparent,
+              color-mix(in srgb, #fff 55%, transparent), transparent);
+  transform: skewX(-16deg); pointer-events: none; opacity: 0;
+}
+.zona-tile.brilla::after {
+  animation: barrido .7s cubic-bezier(.25, .6, .3, 1);
+}
+@keyframes barrido {
+  from { left: -55%; opacity: 1; }
+  to   { left: 130%; opacity: 1; }
+}
+
+/* ---------- el mismo vidrio, pero de dia ----------
+   De noche el vidrio se ve porque la lamina es mas clara que el fondo. De dia
+   todo es claro: una lamina blanca translucida sobre una hoja blanca no se ve,
+   y lo que parecia vidrio se queda en una mancha lechosa.
+
+   La solucion es la de iOS con las listas agrupadas: la hoja se tine del gris
+   del fondo de la app y las piezas de encima se quedan blancas, con su hilo de
+   borde y su sombra. Asi vuelve a haber dos planos. */
+html[data-theme="light"] .modal-box.hoja-vidrio {
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+}
+
+html[data-theme="light"] .zona-tile {
+  background: linear-gradient(180deg, #fff 0%,
+              color-mix(in srgb, #fff 88%, transparent) 100%);
+  border-color: color-mix(in srgb, #141922 9%, transparent);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .07), 0 6px 16px rgba(16, 24, 40, .07);
+}
+html[data-theme="light"] .zona-tile.on {
+  background: linear-gradient(180deg,
+              color-mix(in srgb, var(--acc) 17%, #fff) 0%,
+              color-mix(in srgb, var(--acc) 9%, #fff) 100%);
+  border-color: color-mix(in srgb, var(--acc) 48%, transparent);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .06),
+              0 8px 20px color-mix(in srgb, var(--acc) 24%, transparent);
+}
+
+html[data-theme="light"] .hoja-vidrio .filtro-mas > summary,
+html[data-theme="light"] .hoja-vidrio .filtro-sw > .row {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 12px rgba(16, 24, 40, .05);
+}
+html[data-theme="light"] .hoja-vidrio .chip {
+  background: #fff;
+  border: 1px solid color-mix(in srgb, #141922 8%, transparent);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+}
+html[data-theme="light"] .hoja-vidrio .chip.on {
+  background: var(--acc-d);
+  border-color: color-mix(in srgb, var(--acc) 45%, transparent);
+}
+
+/* De dia el destello blanco sobre blanco no se ve: se marca con una sombra
+   clara en vez de con luz. */
+html[data-theme="light"] .zona-tile::after {
+  background: linear-gradient(100deg, transparent,
+              color-mix(in srgb, var(--acc) 34%, transparent), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zona-tile.brilla::after { animation: none; }
+}
