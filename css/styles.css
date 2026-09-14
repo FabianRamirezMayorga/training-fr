@@ -3597,3 +3597,76 @@ html[data-theme="light"] .al-tipo.on {
   box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tono) 55%, transparent);
 }
 html[data-theme="light"] .al-dia.on { box-shadow: none; }
+
+/* ---------- la lista, como una portada ----------
+   Era una tarjeta gris con el nombre en negrita y cuatro botones apilados
+   debajo. Una lista de musica no se mira como una ficha de datos: se mira como
+   una portada, y lo que se busca en ella es el boton de darle. */
+.mus-portada { position: relative; overflow: hidden; isolation: isolate; margin-top: 12px; }
+
+/* La onda al fondo, sangrada por el canto y flojisima: da a la tarjeta el aire
+   de caratula sin competir con el nombre, que es lo que se lee. */
+.mus-onda {
+  position: absolute; right: -24px; top: -20px; width: 128px; height: 128px;
+  pointer-events: none; z-index: -1; color: var(--acc); opacity: .07;
+}
+.mus-onda svg { width: 100%; height: 100%; fill: none; stroke: currentColor;
+  stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+
+.mus-nom {
+  font-size: 1.42rem; font-weight: 800; letter-spacing: -.026em; line-height: 1.15;
+  margin: 3px 0 7px;
+}
+.mus-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mus-chip {
+  font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+  color: var(--acc); background: color-mix(in srgb, var(--acc) 13%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim);
+}
+.mus-desc { margin: 10px 0 0; font-size: .88rem; }
+
+/* ---------- las canciones ----------
+   Entran escalonadas al desplegarlas, que es lo que hace que una lista de
+   veinte parezca que se despliega y no que aparece de golpe. */
+.mus-temas .pista { position: relative; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .mus-temas .pista {
+    animation: pista-entra .34s cubic-bezier(.2, .9, .3, 1) both;
+    animation-delay: calc(var(--n, 0) * 28ms);
+  }
+}
+@keyframes pista-entra {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; }
+}
+
+/* El numero se cambia por un ecualizador al pasar por encima: dice que eso
+   suena, que es justo lo que va a pasar si lo tocas. */
+.pi-num, .pi-eq {
+  flex: none; width: 22px; display: flex; align-items: center; justify-content: center;
+}
+.pi-num { font-size: .78rem; font-weight: 700; color: var(--dim2);
+  font-variant-numeric: tabular-nums; }
+.pi-eq { display: none; gap: 2px; height: 14px; align-items: flex-end; }
+.pi-eq i { width: 3px; border-radius: 2px; background: var(--acc); height: 40%; }
+
+.pista:hover .pi-num, .pista:focus-visible .pi-num { display: none; }
+.pista:hover .pi-eq, .pista:focus-visible .pi-eq { display: flex; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .pista:hover .pi-eq i { animation: eq 900ms ease-in-out infinite; }
+  .pista:hover .pi-eq i:nth-child(2) { animation-delay: 150ms; }
+  .pista:hover .pi-eq i:nth-child(3) { animation-delay: 300ms; }
+}
+@keyframes eq {
+  0%, 100% { height: 35%; }
+  50% { height: 100%; }
+}
+
+/* En un movil no hay «pasar por encima», asi que ahi el ecualizador sale al
+   pulsar: si se dejara solo en hover, en un telefono no existiria. */
+@media (hover: none) {
+  .pista:active .pi-num { display: none; }
+  .pista:active .pi-eq { display: flex; }
+}

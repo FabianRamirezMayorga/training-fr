@@ -1441,14 +1441,25 @@
         <h1>Música</h1>
         <p class="muted">Reproduce dentro de la app y deja que la IA te prepare listas
         distintas para cada entrenamiento.</p>
-        <div class="card">
-          <p class="muted">Necesita el Client ID de una app de Spotify: se crea en un
-          minuto y es gratis. Tienes el paso a paso en la bóveda.</p>
-          <button class="btn primary block" data-a="boveda">
+        <div class="card tarjeta-premium">
+          <div class="pre-encima">Se hace una vez</div>
+          <p class="muted" style="margin:6px 0 12px;font-size:.88rem">Necesita el Client ID
+          de una app de Spotify: se crea en un minuto y es gratis. Tienes el paso a paso en
+          la bóveda.</p>
+          <button class="btn primary block btn-arranque" data-a="boveda">
             ${raw(icon('llave'))} Ir a la bóveda de claves</button>
         </div>
-        <p class="tiny" style="margin-top:12px">Reproducir dentro de la app requiere
-        Spotify Premium; es condición de su plataforma.</p>`;
+
+        <div class="list-title">Qué hace y qué no</div>
+        <div class="list">
+          ${raw(filaEstadoIA(true, 'Suena dentro de la app',
+            'Sin salir a Spotify y sin perder el cronómetro de vista.'))}
+          ${raw(filaEstadoIA(true, 'Listas a medida del entrenamiento',
+            'La IA propone artistas distintos cada vez, así que descubres algo.'))}
+          ${raw(filaEstadoIA(false, 'Reproducir aquí pide Premium',
+            'Es condición de Spotify, no de la app. Sin Premium puedes crear las listas '
+            + 'y abrirlas en Spotify.'))}
+        </div>`;
     }
 
     if (!Spotify.activa()) {
@@ -1456,9 +1467,11 @@
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
           ${raw(icon('back'))} Perfil</button>
         <h1>Música</h1>
-        <div class="card">
-          <p class="muted">Conecta tu cuenta para reproducir aquí y generar listas.</p>
-          <button class="btn primary block" data-a="conectar">
+        <div class="card tarjeta-premium">
+          <div class="pre-encima">Un toque</div>
+          <p class="muted" style="margin:6px 0 12px;font-size:.88rem">Conecta tu cuenta para
+          reproducir aquí y generar listas.</p>
+          <button class="btn primary block btn-arranque" data-a="conectar">
             ${raw(icon('musica'))} Conectar Spotify</button>
         </div>
         ${raw(falloSpotifyHTML())}
@@ -1549,9 +1562,9 @@
       <div id="sp-listas"><p class="tiny">Cargando tus listas…</p></div>
 
       <div class="list-title">Lista fija</div>
-      <div class="card">
-        <p class="muted">La que quieras tener siempre a mano: pega su enlace y queda
-        guardada para lanzarla de un toque.</p>
+      <div class="card tarjeta-premium">
+        <p class="muted" style="font-size:.88rem;margin-top:0">La que quieras tener siempre
+        a mano: pega su enlace y queda guardada para lanzarla de un toque.</p>
         <input id="sp-pl" value="${Spotify.config().playlist || ''}"
                placeholder="https://open.spotify.com/playlist/..." autocomplete="off" spellcheck="false">
         <div class="row" style="margin-top:10px">
@@ -1749,51 +1762,44 @@
     return temasAbiertos ? 'Ocultar las canciones' : 'Ver las ' + n + ' canciones';
   }
 
+  /* ---------- la lista, como una portada ----------
+     Era una tarjeta gris con el nombre en negrita y cuatro botones apilados
+     debajo. Una lista de música no se mira como una ficha de datos: se mira
+     como una portada, y lo que se busca en ella es el botón de darle.
+
+     Así que manda el nombre, su ambiente va en una pastilla al lado, y
+     reproducir es lo único que pesa. Lo demás —guardarla en Spotify, hacer
+     otra, borrarla— baja a filas con su icono de color, que es donde va lo que
+     se hace de vez en cuando. */
   function listaHTML(l) {
     return html`
-      <div class="card">
-        <div class="row between" style="align-items:flex-start">
-          <div class="grow">
-            <div style="font-weight:700">${l.nombre}</div>
-            <div class="tiny">${l.pistas.length} canciones${raw(l.ambiente
-              ? ' · ' + esc(l.ambiente) : '')} · ${UI.fecha(l.creada)}</div>
-          </div>
-          <button class="btn icon sm danger" data-a="borrarLista"
-                  aria-label="Borrar lista">${raw(icon('trash'))}</button>
+      <div class="card tarjeta-premium mus-portada">
+        <span class="mus-onda">${raw(icon('musica'))}</span>
+        <div class="pre-encima">Tu lista de hoy</div>
+        <div class="mus-nom">${l.nombre}</div>
+        <div class="mus-meta">
+          ${raw(l.ambiente ? '<span class="mus-chip">' + esc(l.ambiente) + '</span>' : '')}
+          <span class="tiny">${l.pistas.length} canciones · ${UI.fecha(l.creada)}</span>
         </div>
-        ${raw(l.descripcion ? '<p class="muted" style="margin:9px 0 0">' +
-          esc(l.descripcion) + '</p>' : '')}
-        <div class="row" style="margin-top:12px">
-          <button class="btn primary grow" data-a="reproducirLista">
-            ${raw(icon('play'))} Reproducir aquí</button>
-        </div>
+        ${raw(l.descripcion ? '<p class="muted mus-desc">' + esc(l.descripcion) + '</p>' : '')}
 
-        ${raw(l.spotify ? html`
-          <a class="btn block sm" href="${l.spotify}" target="_blank" rel="noopener noreferrer"
-             style="margin-top:8px">${raw(icon('musica'))} Abrirla en Spotify</a>
-          <p class="tiny" style="margin:6px 0 0">Ya está en tu cuenta: la tienes en
-          la app de Spotify, en el móvil, en el coche o donde la abras.</p>`
-        : html`
-          <button class="btn block sm" data-a="aSpotify" style="margin-top:8px">
-            ${raw(icon('musica'))} Guardarla en mi Spotify</button>
-          <p class="tiny" style="margin:6px 0 0">Se crea como lista privada en tu
-          cuenta, con estas mismas canciones, para poder oírla desde la app de Spotify.</p>`)}
+        <button class="btn primary block btn-arranque" data-a="reproducirLista"
+                style="margin-top:13px">
+          ${raw(icon('play'))} Reproducir aquí</button>
 
-        <div class="row" style="margin-top:10px">
-          <button class="btn ghost grow sm" data-a="generar">${raw(icon('chispa'))} Crear otra distinta</button>
-        </div>
         <button class="btn ghost block sm plegar ${temasAbiertos ? 'abierta' : ''}"
-                data-a="plegarTemas" style="margin-top:8px"
+                data-a="plegarTemas" style="margin-top:9px"
                 aria-expanded="${temasAbiertos}">
           ${raw(icon('chevron'))} ${raw(etiquetaPlegar(l.pistas.length))}</button>
       </div>
 
-      <div class="stack" data-temas-lista style="margin-top:11px"
+      <div class="stack mus-temas" data-temas-lista style="margin-top:11px"
            ${raw(temasAbiertos ? '' : 'hidden')}>
         ${raw(l.pistas.map(function (p, i) {
           return html`
-            <button class="pista" data-pista="${i}">
-              <span class="rt-idx">${i + 1}</span>
+            <button class="pista" data-pista="${i}" style="--n:${i}">
+              <span class="pi-num">${i + 1}</span>
+              <span class="pi-eq" aria-hidden="true"><i></i><i></i><i></i></span>
               <div class="grow">
                 <div class="player-t">${p.titulo}</div>
                 <div class="tiny">${p.artista}${raw(p.porque ? ' · ' + esc(p.porque) : '')}</div>
@@ -1801,6 +1807,36 @@
               ${raw(icon('play'))}
             </button>`;
         }).join(''))}
+      </div>
+
+      <div class="plan-acciones" style="margin-top:12px">
+        ${raw(l.spotify
+          ? '<a class="fila-plan" href="' + esc(l.spotify) + '" target="_blank" ' +
+            'rel="noopener noreferrer" style="--fp:#1db954">' +
+            '<span class="fp-ico">' + icon('musica') + '</span>' +
+            '<span class="grow"><span class="fp-tit">Abrirla en Spotify</span>' +
+            '<span class="fp-sub">Ya está en tu cuenta: en el móvil, en el coche o donde ' +
+            'la abras.</span></span>' +
+            '<span class="chevron">' + icon('chevron') + '</span></a>'
+          : '<button class="fila-plan" data-a="aSpotify" style="--fp:#1db954">' +
+            '<span class="fp-ico">' + icon('musica') + '</span>' +
+            '<span class="grow"><span class="fp-tit">Guardarla en mi Spotify</span>' +
+            '<span class="fp-sub">Se crea como lista privada con estas mismas canciones.' +
+            '</span></span>' +
+            '<span class="chevron">' + icon('chevron') + '</span></button>')}
+
+        <button class="fila-plan" data-a="generar" style="--fp:#c06bf0">
+          <span class="fp-ico">${raw(icon('chispa'))}</span>
+          <span class="grow"><span class="fp-tit">Crear otra distinta</span>
+            <span class="fp-sub">Con otros artistas: no repite los que ya te ha
+            propuesto.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span></button>
+
+        <button class="fila-plan es-peligro" data-a="borrarLista" style="--fp:var(--bad)">
+          <span class="fp-ico">${raw(icon('trash'))}</span>
+          <span class="grow"><span class="fp-tit">Borrar la lista</span>
+            <span class="fp-sub">Si ya la guardaste en Spotify, allí se queda.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span></button>
       </div>`;
   }
 
