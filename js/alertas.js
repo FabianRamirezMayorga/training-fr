@@ -421,6 +421,47 @@
 
   /* Un archivo .ics con un evento repetido por alerta y su aviso 5 minutos antes.
      Al abrirlo, el móvil crea los recordatorios de verdad, incluso con la app cerrada. */
+  /* Dónde vive la app, para poder volver a ella desde el evento. Se saca de
+     donde esté corriendo y no de una constante: así vale igual en el sitio
+     publicado, en una copia local y en el día que cambie de dominio. */
+  function urlApp(hash) {
+    try {
+      const base = location.origin + location.pathname.replace(/[^/]*$/, '');
+      return base + (hash || '');
+    } catch (e) { return ''; }
+  }
+
+  /* A qué pantalla lleva cada tipo. Un aviso de agua que te deja en la portada
+     te obliga a buscar dónde se marca; «mi día» lo tiene todo delante. */
+  const DESTINO = {
+    peso: '#/progreso',
+    entreno: '#/dia',
+    agua: '#/dia',
+    comida: '#/dia',
+    suplemento: '#/dia'
+  };
+
+  /* El formato parte las líneas a 75 octetos y continúa con un espacio al
+     principio de la siguiente. Con la descripción llevando ahora el enlace de
+     la app, las líneas se pasan de largo, y un cliente estricto se come el
+     resto del evento sin decir nada. */
+  function plegar(linea) {
+    const bytes = function (t) { return unescape(encodeURIComponent(t)).length; };
+    if (bytes(linea) <= 75) return linea;
+
+    const fuera = [];
+    let trozo = '';
+    for (const c of linea) {
+      /* El primer trozo cabe en 75; los siguientes en 74, porque llevan el
+         espacio de continuación delante. */
+      const tope = fuera.length ? 74 : 75;
+      if (bytes(trozo + c) > tope) { fuera.push(trozo); trozo = ''; }
+      trozo += c;
+    }
+    if (trozo) fuera.push(trozo);
+    return fuera.join(String.fromCharCode(13, 10) + ' ');
+  }
+
   function ics() {
     const NOMBRE_DIA = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
     const ahora = new Date();
@@ -450,6 +491,20 @@
           dosDigitos(inicio.getDate()) + 'T' + dosDigitos(inicio.getHours()) +
           dosDigitos(inicio.getMinutes()) + '00';
 
+        const enlace = urlApp(DESTINO[a.tipo] || '#/dia');
+
+        /* Con el nombre de la app delante. Un .ics no puede llevar icono —el
+           formato no tiene ese campo, y el color que se ve en el calendario lo
+           pone la app de calendario, no el archivo—, así que la única forma de
+           que estos eventos se distingan de los demás es que lo digan. */
+        const titulo = 'Training FR · ' + a.titulo;
+
+        /* Y su enlace, para volver a la app desde el propio evento. Va en URL
+           —que es donde lo espera el calendario— y también al final de la
+           descripción, porque hay clientes que no enseñan el campo URL. */
+        const cuerpo = (a.mensaje ? a.mensaje + String.fromCharCode(10) +
+          String.fromCharCode(10) : '') + 'Abrir en Training FR: ' + enlace;
+
         lineas.push(
           'BEGIN:VEVENT',
           'UID:' + a.id + '-' + n + '@trainingfr',
@@ -457,17 +512,18 @@
           'DTSTART:' + fecha,
           'DURATION:PT15M',
           'RRULE:FREQ=WEEKLY;BYDAY=' + a.dias.map(function (d) { return NOMBRE_DIA[d]; }).join(','),
-          'SUMMARY:' + escaparICS(a.titulo),
-          'DESCRIPTION:' + escaparICS(a.mensaje || ''),
+          'SUMMARY:' + escaparICS(titulo),
+          'DESCRIPTION:' + escaparICS(cuerpo),
+          'URL:' + enlace,
           'BEGIN:VALARM', 'TRIGGER:-PT5M', 'ACTION:DISPLAY',
-          'DESCRIPTION:' + escaparICS(a.titulo), 'END:VALARM',
+          'DESCRIPTION:' + escaparICS(titulo), 'END:VALARM',
           'END:VEVENT'
         );
       });
     });
 
     lineas.push('END:VCALENDAR');
-    return lineas.join('\r\n');
+    return lineas.map(plegar).join('\r\n');
   }
 
   function escaparICS(s) {

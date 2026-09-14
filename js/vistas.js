@@ -987,7 +987,9 @@
         <button class="btn block" data-a="calendario" ${lista.length ? '' : 'disabled'}>
           ${raw(icon('down'))} Descargar para el calendario</button>
         <p class="tiny" style="margin-top:8px">Abre el archivo en el móvil y acepta
-        añadirlo. Se crean como eventos semanales con aviso.</p>
+        añadirlo. Se crean como eventos semanales con aviso, llamados «Training FR · …»
+        para que se distingan de lo tuyo, y tocando uno se abre la app en la pantalla
+        que toca.</p>
       </div>`;
   };
 
