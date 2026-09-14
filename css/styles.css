@@ -284,17 +284,28 @@ a{color:var(--blue)}
 .rest-in button{font-weight:700;background:rgba(0,0,0,.14);padding:.4em .8em;border-radius:8px;font-size:.82rem}
 
 /* ---------- modal / toast ---------- */
-.modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:0;animation:fade .2s}
+/* El velo, mas claro de lo que era. Con negro al 60 % detras, una hoja de
+   vidrio no tiene nada que desenfocar: se ve un panel oscuro y plano por mucho
+   backdrop-filter que lleve. El vidrio necesita que se adivine lo de atras. */
+.modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;padding:0;animation:fade .2s}
 /* El vidrio lo estreno la hoja del filtro y se quedo alli: el resto de las
    emergentes seguian siendo una lamina maciza. Son la misma cosa —algo que se
    levanta por encima de la pantalla— y tienen que estar hechas del mismo
    material. */
 .modal-box{
-  background:color-mix(in srgb,var(--bg2) 80%,transparent);
-  backdrop-filter:blur(30px) saturate(180%);
-  -webkit-backdrop-filter:blur(30px) saturate(180%);
-  border-top:1px solid var(--vidrio-rim);
-  box-shadow:0 -12px 40px rgba(0,0,0,.35);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,#fff 8%,transparent) 0%,
+      transparent 120px),
+    color-mix(in srgb,var(--bg2) 76%,transparent);
+  /* El 76 % no es capricho: por debajo, en un movil donde el desenfoque se
+     aplica de verdad, lo de detras se sigue adivinando lo justo para que se lea
+     como cristal; por encima vuelve a ser un panel macizo. Y si un navegador no
+     soporta backdrop-filter, con este relleno el texto se lee igual. */
+  backdrop-filter:blur(34px) saturate(190%);
+  -webkit-backdrop-filter:blur(34px) saturate(190%);
+  border-top:1px solid color-mix(in srgb,#fff 16%,transparent);
+  box-shadow:0 -14px 44px rgba(0,0,0,.45);
   border-radius:22px 22px 0 0;width:100%;max-width:560px;
   /* del alto del contenedor, no de la ventana: con el teclado abierto el
      contenedor vale lo que queda libre y la hoja cabe entera ahí */
@@ -3839,8 +3850,9 @@ html[data-theme="light"] .sp-portada { box-shadow: inset 0 0 0 1px var(--line); 
 .modal-box .volcado {
   padding: 12px 13px; border-radius: 14px; margin: 0;
   font-size: .76rem; line-height: 1.5;
-  background: color-mix(in srgb, var(--card2) 62%, transparent);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .22), inset 0 0 0 1px var(--vidrio-rim);
+  background: color-mix(in srgb, #000 22%, transparent);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, .4),
+              inset 0 0 0 1px color-mix(in srgb, #fff 10%, transparent);
 }
 html[data-theme="light"] .modal-box pre,
 html[data-theme="light"] .modal-box .volcado {
@@ -3904,4 +3916,31 @@ html[data-theme="light"] .sp-lista {
               color-mix(in srgb, #fff 90%, transparent) 100%);
   border-color: color-mix(in srgb, #141922 9%, transparent);
   box-shadow: 0 1px 2px rgba(16, 24, 40, .07), 0 6px 16px rgba(16, 24, 40, .08);
+}
+
+/* Los botones neutros de dentro de una hoja. Sobre un panel de vidrio, una
+   pastilla gris maciza se lee como un recorte de otra pantalla; los de accion
+   —primario, peligro— ya traen su color y se quedan como estan. */
+.modal-box .btn:not(.primary):not(.ghost):not(.danger):not(.chip) {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, #fff 14%, transparent) 0%,
+      color-mix(in srgb, #fff 3%, transparent) 45%,
+      transparent 72%),
+    color-mix(in srgb, var(--card2) 62%, transparent);
+  border: 1px solid color-mix(in srgb, #fff 13%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent),
+    0 2px 8px rgba(0, 0, 0, .24);
+}
+html[data-theme="light"] .modal-box .btn:not(.primary):not(.ghost):not(.danger):not(.chip) {
+  background: linear-gradient(180deg, #fff 0%,
+              color-mix(in srgb, #fff 90%, transparent) 100%);
+  border-color: color-mix(in srgb, #141922 10%, transparent);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .08), 0 4px 12px rgba(16, 24, 40, .07);
+}
+html[data-theme="light"] .modal-box pre,
+html[data-theme="light"] .modal-box .volcado {
+  background: var(--card2);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
