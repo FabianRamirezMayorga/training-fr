@@ -26,6 +26,7 @@
     play: '<svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>',
     pause: '<svg viewBox="0 0 24 24"><path d="M7 4h4v16H7zM13 4h4v16h-4z"/></svg>',
     plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+    menos: '<svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>',
     check: '<svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>',
     trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>',
     edit: '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM14 5l4 4"/></svg>',

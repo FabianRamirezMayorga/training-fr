@@ -335,13 +335,26 @@ a{color:var(--blue)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* conmutador iOS */
-.sw{width:51px;height:31px;border-radius:999px;background:var(--line);position:relative;
-  flex:none;transition:background .22s cubic-bezier(.2,.9,.3,1)}
-.sw::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;
-  border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.28);
-  transition:transform .22s cubic-bezier(.2,.9,.3,1)}
-.sw.on{background:var(--acc)}
+/* El interruptor de iOS: carril hundido, boton con su sombra y un muelle al
+   cambiar. Estaba asi solo en los recordatorios; el resto de la app llevaba un
+   rectangulo plano. Es el mismo trasto en los dos sitios, asi que es el mismo.
+
+   Verde siempre, sea del tipo que sea: en iOS todos los interruptores son del
+   mismo color, y es lo que deja que el color del icono de al lado signifique
+   algo. Cinco interruptores de cinco colores no distinguen nada, solo pintan. */
+.sw{width:51px;height:31px;border-radius:999px;position:relative;border:0;padding:0;
+  flex:none;cursor:pointer;
+  background:color-mix(in srgb,var(--card2) 90%,transparent);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.3),inset 0 0 0 1px var(--vidrio-rim);
+  transition:background .24s cubic-bezier(.2,.9,.3,1),box-shadow .24s ease}
+.sw::after{content:"";position:absolute;top:2.5px;left:2.5px;width:26px;height:26px;
+  border-radius:50%;background:linear-gradient(180deg,#fff,#eceff4);
+  box-shadow:0 2px 5px rgba(0,0,0,.32),0 0 0 .5px rgba(0,0,0,.06);
+  transition:transform .26s cubic-bezier(.3,1.4,.5,1)}
+.sw.on{background:var(--acc);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 22%,transparent)}
 .sw.on::after{transform:translateX(20px)}
+@media (prefers-reduced-motion: reduce){.sw,.sw::after{transition:none}}
 
 .search-wrap{position:relative}
 .search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:17px;height:17px;stroke:var(--dim2);fill:none;stroke-width:2}
@@ -3443,37 +3456,6 @@ html[data-theme="light"] .rec-h.sig {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tono) 32%, transparent);
 }
 
-/* ---------- el interruptor ----------
-   El de iOS: carril hundido, boton con su sombra y un muelle al cambiar. El de
-   antes era un rectangulo plano dentro de una tarjeta de vidrio. */
-.rec .sw {
-  flex: none; width: 51px; height: 31px; border-radius: 999px; border: 0;
-  position: relative; cursor: pointer; padding: 0;
-  background: color-mix(in srgb, var(--card2) 90%, transparent);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .3), inset 0 0 0 1px var(--vidrio-rim);
-  transition: background .24s cubic-bezier(.2, .9, .3, 1), box-shadow .24s ease;
-}
-.rec .sw::after {
-  content: ''; position: absolute; top: 2.5px; left: 2.5px;
-  width: 26px; height: 26px; border-radius: 50%;
-  background: linear-gradient(180deg, #fff, #eceff4);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, .32), 0 0 0 .5px rgba(0, 0, 0, .06);
-  transition: transform .26s cubic-bezier(.3, 1.4, .5, 1);
-}
-/* Verde, siempre, sea del tipo que sea: en iOS todos los interruptores son del
-   mismo color, y es lo que deja que el color del icono signifique algo. Cinco
-   interruptores de cinco colores distintos no distinguen nada, solo pintan. */
-.rec .sw.on {
-  background: var(--acc);
-  /* Sin halo: en iOS un interruptor encendido no brilla, y cinco halos verdes
-     en una lista son cinco manchas que compiten con la hora, que es el dato. */
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent);
-}
-.rec .sw.on::after { transform: translateX(20px); }
-@media (prefers-reduced-motion: reduce) {
-  .rec .sw, .rec .sw::after { transition: none; }
-}
-
 /* ---------- el entrenador ----------
    Preguntar es lo que se viene a hacer aqui, asi que va primero y con el
    material bueno. La caja de antes era un campo de formulario gris con un boton
@@ -3991,11 +3973,13 @@ html[data-theme="light"] .modal-box .volcado {
 .pl-previo { margin: 14px 0 18px; }
 .pl-previo .mus-portada { animation: none; }
 
-/* Cada ambiente en su fila, con su icono, su color y de que va. El dibujo y el
-   color se reconocen antes que la palabra, y la frase es lo unico que explica
-   en que se diferencian dos nombres que suenan parecido. */
-.pl-ambientes { display: flex; flex-direction: column; gap: 7px; margin-top: 7px; }
-.pl-amb {
+/* ---------- elegir una de varias ----------
+   Una fila por opcion, con su icono, su color y de que va. El dibujo y el color
+   se reconocen antes que la palabra, y la frase es lo unico que explica en que
+   se diferencian dos nombres que suenan parecido. Lo usan el ambiente de la
+   lista de musica y la forma de registrar las series. */
+.opciones { display: flex; flex-direction: column; gap: 7px; margin-top: 7px; }
+.opcion {
   display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
   padding: 10px 11px; border-radius: 15px; cursor: pointer; font: inherit;
   color: var(--txt);
@@ -4006,9 +3990,9 @@ html[data-theme="light"] .modal-box .volcado {
   box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 11%, transparent);
   transition: border-color .18s ease, box-shadow .18s ease, transform .14s ease;
 }
-.pl-amb:active { transform: scale(.985); }
+.opcion:active { transform: scale(.985); }
 
-.pa-ico {
+.op-ico {
   flex: none; width: 36px; height: 36px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   color: var(--dim2);
@@ -4016,26 +4000,26 @@ html[data-theme="light"] .modal-box .volcado {
   box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
   transition: color .18s ease, background .18s ease, box-shadow .18s ease;
 }
-.pa-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor;
+.op-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor;
   stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-.pa-nom { display: block; font-weight: 700; font-size: .92rem; letter-spacing: -.012em; }
-.pa-sub { display: block; font-size: .74rem; color: var(--dim2); margin-top: 2px;
+.op-nom { display: block; font-weight: 700; font-size: .92rem; letter-spacing: -.012em; }
+.op-sub { display: block; font-size: .74rem; color: var(--dim2); margin-top: 2px;
   line-height: 1.35; }
 
 /* La marca de elegido: solo se ve en el que lo esta. Un circulo vacio en los
    otros cinco seria pedirles atencion a cinco cosas que no la necesitan. */
-.pa-marca {
+.op-marca {
   flex: none; width: 22px; height: 22px; border-radius: 50%; opacity: 0;
   display: flex; align-items: center; justify-content: center;
   color: var(--on-acc); background: var(--tono);
   transform: scale(.5);
   transition: opacity .2s ease, transform .24s cubic-bezier(.3, 1.4, .5, 1);
 }
-.pa-marca svg { width: 13px; height: 13px; fill: none; stroke: currentColor;
+.op-marca svg { width: 13px; height: 13px; fill: none; stroke: currentColor;
   stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 
-.pl-amb.on {
+.opcion.on {
   border-color: color-mix(in srgb, var(--tono) 50%, transparent);
   box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent),
               0 4px 14px color-mix(in srgb, var(--tono) 18%, transparent);
@@ -4044,12 +4028,12 @@ html[data-theme="light"] .modal-box .volcado {
     linear-gradient(150deg, color-mix(in srgb, var(--tono) 14%, transparent),
                     color-mix(in srgb, var(--tono) 4%, transparent));
 }
-.pl-amb.on .pa-ico {
+.opcion.on .op-ico {
   color: var(--tono);
   background: color-mix(in srgb, var(--tono) 16%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tono) 26%, transparent);
 }
-.pl-amb.on .pa-marca { opacity: 1; transform: scale(1); }
+.opcion.on .op-marca { opacity: 1; transform: scale(1); }
 
 /* Cuanto va a durar. Nadie elige «veinte canciones»: se elige cuanto va a durar
    el entreno, y con el numero a secas hay que hacer la cuenta de cabeza. */
@@ -4090,13 +4074,13 @@ html[data-theme="light"] .modal-box .volcado {
 .pl-hoy b { display: block; font-size: .86rem; }
 .pl-hoy .tiny { display: block; margin-top: 1px; }
 
-html[data-theme="light"] .pl-amb,
+html[data-theme="light"] .opcion,
 html[data-theme="light"] .pl-n {
   background: #fff;
   border-color: color-mix(in srgb, #141922 9%, transparent);
   box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
 }
-html[data-theme="light"] .pl-amb.on {
+html[data-theme="light"] .opcion.on {
   background: linear-gradient(150deg, color-mix(in srgb, var(--tono) 12%, #fff), #fff);
   border-color: color-mix(in srgb, var(--tono) 45%, transparent);
 }
@@ -4652,3 +4636,84 @@ html[data-theme="light"] .mando-marca {
   background: #fff;
   box-shadow: 0 1px 3px rgba(16, 24, 40, .16);
 }
+
+/* ---------- ajustes ----------
+   Una pantalla de ajustes es una lista de cosas que se cambian, y cada cosa
+   necesita el mando que le corresponda: un si o un no es un interruptor, una de
+   dos o tres es un mando con la marca corriendose, y un numero es un contador
+   con sus dos botones. Estaba todo hecho de pastillas y casillas de texto, y
+   una casilla de numero en un movil abre el teclado entero para pasar de 90 a
+   120, que son dos toques con un contador. */
+.aj-caja {
+  margin-top: 10px; padding: 2px 12px; border-radius: 17px;
+  background: color-mix(in srgb, var(--card2) 55%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+}
+.aj-fila {
+  display: flex; align-items: center; gap: 11px; padding: 11px 0; min-height: 52px;
+}
+.aj-fila + .aj-fila { border-top: 1px solid var(--line); }
+.aj-fila .grow { min-width: 0; }
+.aj-tit { display: block; font-size: .9rem; font-weight: 600; letter-spacing: -.012em; }
+.aj-sub { display: block; font-size: .74rem; color: var(--dim2); margin-top: 2px;
+  line-height: 1.35; }
+
+.aj-ico {
+  flex: none; width: 30px; height: 30px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 13%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent);
+}
+.aj-ico svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* El mando, ahora tambien de tres posiciones */
+.mando-op svg { width: 14px; height: 14px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  vertical-align: -2px; margin-right: 4px; }
+.aj-fila .mando { flex: none; min-width: 132px; }
+.aj-fila .mando-op { padding: 7px 4px; font-size: .8rem; }
+
+/* Un mando de tres no cabe al lado de su nombre en un movil: o se aprieta hasta
+   que «Sistema» no se lee, o baja a su propia linea con todo el ancho. */
+.aj-fila.apilada { display: block; }
+.aj-fila.apilada .mando { width: 100%; min-width: 0; margin-top: 9px; }
+
+/* El contador: menos, la cifra y mas */
+.contador {
+  flex: none; display: flex; align-items: center; gap: 2px; padding: 3px;
+  border-radius: 12px;
+  background: color-mix(in srgb, #000 20%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .28),
+              inset 0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
+}
+.cont-b {
+  width: 30px; height: 30px; border-radius: 9px; border: 0; padding: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: var(--dim);
+  background: none; transition: background .16s ease, transform .14s ease, color .16s ease;
+}
+.cont-b svg { width: 14px; height: 14px; fill: none; stroke: currentColor;
+  stroke-width: 2.4; stroke-linecap: round; }
+.cont-b:active { transform: scale(.88); color: var(--acc);
+  background: color-mix(in srgb, #fff 9%, transparent); }
+.cont-v { min-width: 58px; text-align: center; }
+.cont-v b { font-size: .98rem; font-weight: 800; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums; }
+.cont-v i { font-style: normal; font-size: .7rem; color: var(--dim2); margin-left: 3px; }
+
+/* Las opciones de una sola eleccion, sueltas y no dentro de una tarjeta */
+.opciones { margin-top: 10px; }
+
+html[data-theme="light"] .aj-caja {
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line), var(--vidrio-sombra-corta);
+}
+html[data-theme="light"] .aj-ico { background: color-mix(in srgb, var(--acc) 12%, transparent);
+  box-shadow: none; }
+html[data-theme="light"] .contador {
+  background: color-mix(in srgb, #141922 6%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+html[data-theme="light"] .cont-b:active { background: color-mix(in srgb, #141922 8%, transparent); }

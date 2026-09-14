@@ -2293,15 +2293,15 @@
       <div class="pl-previo" id="pl-previo"></div>
 
       <label class="tiny">A QUÉ TIENE QUE SONAR</label>
-      <div class="pl-ambientes">
+      <div class="opciones">
         ${raw(Object.keys(IA.AMBIENTES).map(function (k) {
           const a = IA.AMBIENTES[k];
-          return '<button class="pl-amb' + (k === ambiente ? ' on' : '') + '" data-amb="' + k +
+          return '<button class="opcion' + (k === ambiente ? ' on' : '') + '" data-amb="' + k +
             '" style="--tono:' + (a.tono || 'var(--acc)') + '">' +
-            '<span class="pa-ico">' + icon(a.icono || 'musica') + '</span>' +
-            '<span class="grow"><span class="pa-nom">' + esc(a.label) + '</span>' +
-            '<span class="pa-sub">' + esc(a.corto || '') + '</span></span>' +
-            '<span class="pa-marca">' + icon('check') + '</span></button>';
+            '<span class="op-ico">' + icon(a.icono || 'musica') + '</span>' +
+            '<span class="grow"><span class="op-nom">' + esc(a.label) + '</span>' +
+            '<span class="op-sub">' + esc(a.corto || '') + '</span></span>' +
+            '<span class="op-marca">' + icon('check') + '</span></button>';
         }).join(''))}
       </div>
 

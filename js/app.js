@@ -895,18 +895,17 @@
   /* Una preferencia de sí o no, con su par de botones. Las de arriba son de
      elegir una de tres y se pintan solas; estas son interruptores, y meterlos
      en el mismo molde haría que un «no» pareciese una tercera opción. */
+  /* Un sí o un no es un interruptor. Eran dos botones, «Sí» y «No», y con dos
+     botones hay que leer cuál de los dos está encendido para saber en qué
+     estado estás; con un interruptor el estado es la propia forma. */
   function filaSiNo(ico, titulo, sub, clave, activo) {
-    const boton = function (valor, texto) {
-      const puesto = (valor === 'si') === !!activo;
-      return '<button class="btn sm' + (puesto ? ' primary' : '') + '" data-sino="' +
-        clave + '" data-val="' + valor + '">' + esc(texto) + '</button>';
-    };
-    return '<div class="list-row">' +
-      '<span class="row-icon">' + icon(ico) + '</span>' +
-      '<div class="grow"><div class="list-row-title">' + esc(titulo) + '</div>' +
-      '<div class="list-row-sub">' + esc(sub) + '</div></div>' +
-      '<div class="row sino" style="gap:6px">' + boton('si', 'Sí') + boton('no', 'No') +
-      '</div></div>';
+    return '<div class="aj-fila">' +
+      '<span class="aj-ico">' + icon(ico) + '</span>' +
+      '<span class="grow"><span class="aj-tit">' + esc(titulo) + '</span>' +
+      '<span class="aj-sub">' + esc(sub) + '</span></span>' +
+      '<button class="sw' + (activo ? ' on' : '') + '" data-sino="' + clave +
+      '" data-val="' + (activo ? 'no' : 'si') + '" role="switch" aria-checked="' +
+      (activo ? 'true' : 'false') + '" aria-label="' + esc(titulo) + '"></button></div>';
   }
 
   function porPlanes(rutinas) {
@@ -4335,181 +4334,244 @@
 
   /* ================= ajustes ================= */
 
+  /* ---------- las piezas de Ajustes ----------
+     Una pantalla de ajustes es una lista de cosas que se cambian, y cada cosa
+     necesita el mando que le corresponda: un si o un no es un interruptor, una
+     de dos o tres es un mando con la marca corriendose, y un numero es un
+     contador con sus dos botones. Antes eran todo pastillas y cajas de texto,
+     y una casilla de numero en un movil abre el teclado para cambiar de 90 a
+     120, que son dos toques con un contador. */
+
+  /* Un mando de dos o tres posiciones, con la marca debajo de la elegida */
+  function mando(attr, opciones, actual) {
+    const i = Math.max(0, opciones.map(function (o) { return o.v; }).indexOf(actual));
+    /* El carril lleva 3 px de aire a cada lado, asi que cada hueco mide
+       (100% - 6px) / n. Con el 6 entero la marca se quedaba corta en cuanto
+       habia tres posiciones y pisaba la de al lado. */
+    const ancho = (100 / opciones.length).toFixed(4);
+    return '<div class="mando" data-n="' + opciones.length + '">' +
+      '<span class="mando-marca" style="width:calc(' + ancho + '% - ' +
+        (6 / opciones.length).toFixed(2) + 'px);transform:translateX(' + (i * 100) + '%)"></span>' +
+      opciones.map(function (o) {
+        return '<button class="mando-op' + (o.v === actual ? ' on' : '') + '" ' +
+          attr + '="' + o.v + '">' + (o.ico ? icon(o.ico) : '') + esc(o.t) + '</button>';
+      }).join('') + '</div>';
+  }
+
+  /* Un contador: dos botones y la cifra en medio. La casilla de numero obligaba
+     a abrir el teclado para pasar de 90 a 120. */
+  function contador(id, valor, unidad, paso, min, max) {
+    return '<div class="contador" data-cont="' + id + '" data-paso="' + paso +
+      '" data-min="' + min + '" data-max="' + max + '">' +
+      '<button class="cont-b" data-mas="-1" aria-label="Menos">' + icon('menos') + '</button>' +
+      '<span class="cont-v"><b id="' + id + '">' + valor + '</b>' +
+      '<i>' + esc(unidad) + '</i></span>' +
+      '<button class="cont-b" data-mas="1" aria-label="Mas">' + icon('plus') + '</button></div>';
+  }
+
+  /* Una fila de ajuste: lo que se cambia a la izquierda y su mando a la derecha */
+  function filaAjuste(titulo, sub, control, apilada) {
+    /* Un mando de tres no cabe al lado de su nombre en un movil: o se aprieta
+       hasta que «Sistema» no se lee, o baja a su propia linea con todo el
+       ancho. Baja. */
+    return '<div class="aj-fila' + (apilada ? ' apilada' : '') + '">' +
+      '<span class="grow"><span class="aj-tit">' + esc(titulo) + '</span>' +
+      (sub ? '<span class="aj-sub">' + esc(sub) + '</span>' : '') +
+      '</span>' + control + '</div>';
+  }
+
+  /* Una opcion de una lista de la que se elige una sola */
+  function filaOpcion(attr, valor, actual, ico, titulo, sub) {
+    return '<button class="opcion' + (valor === actual ? ' on' : '') + '" ' + attr + '="' +
+      valor + '" style="--tono:var(--acc)">' +
+      '<span class="op-ico">' + icon(ico) + '</span>' +
+      '<span class="grow"><span class="op-nom">' + esc(titulo) + '</span>' +
+      '<span class="op-sub">' + esc(sub) + '</span></span>' +
+      '<span class="op-marca">' + icon('check') + '</span></button>';
+  }
+
   function viewAjustes() {
     const s = Store.settings();
-    return html`
-      <h1>Ajustes</h1>
+    const sitio = Data.GEAR[s.gear];
+    const cara = (sitio && CARAS_LUGAR[s.gear]) || { icono: 'dumbbell', tono: 'var(--acc)' };
 
-      <div class="card">
-        <label class="tiny">TU NOMBRE</label>
+    return html`
+      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+        ${raw(icon('back'))} Perfil</button>
+      <h1>Ajustes</h1>
+      <p class="muted">Cómo se comporta la app contigo: lo que te pregunta, lo que te
+      propone y lo que se guarda.</p>
+
+      <div class="card tarjeta-premium">
+        <div class="pre-encima">Tú</div>
+        <label class="tiny" style="display:block;margin-top:9px">TU NOMBRE</label>
         <input id="s-name" value="${s.name}" placeholder="¿Cómo te llamas?" style="margin-top:5px">
       </div>
 
-      <div class="card">
-        <div class="row between">
-          <div class="grow">
-            <b>Dónde entrenas</b>
-            <div class="tiny">${raw(Data.GEAR[s.gear]
-              ? esc(Data.GEAR[s.gear].label) + ' · ' + UI.num(cuantosEn(s.gear)) + ' ejercicios'
-              : 'Sin elegir')}</div>
-          </div>
-          <button class="btn sm" data-a="lugar2">Cambiar</button>
-        </div>
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan" data-a="lugar2" style="--fp:${raw(cara.tono)}">
+          <span class="fp-ico">${raw(icon(cara.icono))}</span>
+          <span class="grow"><span class="fp-tit">Dónde entrenas</span>
+            <span class="fp-sub">${raw(sitio
+              ? esc(sitio.label) + ' · ' + UI.num(cuantosEn(s.gear)) + ' ejercicios a tu alcance'
+              : 'Sin elegir')}</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
       </div>
 
       <div class="list-title">Cómo registras las series</div>
-      <div class="list">
-        <button class="list-row tap" data-reg="detallado">
-          <span class="row-icon">${raw(icon('grafica'))}</span>
-          <div class="grow">
-            <div class="list-row-title">Peso y repeticiones</div>
-            <div class="list-row-sub">Anotas cada serie. Necesario para los récords,
-              el volumen y las gráficas de progreso.</div>
-          </div>
-          ${raw(s.registro === 'detallado' ? '<span class="chip solid">' + icon('check') + '</span>' : '')}
-        </button>
-        <button class="list-row tap" data-reg="simple">
-          <span class="row-icon">${raw(icon('check'))}</span>
-          <div class="grow">
-            <div class="list-row-title">Marcar cada serie</div>
-            <div class="list-row-sub">Te propongo el objetivo (por ejemplo 3 × 12) y solo
-              marcas las series que vas haciendo. El peso queda opcional.</div>
-          </div>
-          ${raw(s.registro === 'simple' ? '<span class="chip solid">' + icon('check') + '</span>' : '')}
-        </button>
-        <button class="list-row tap" data-reg="ejercicio">
-          <span class="row-icon">${raw(icon('flag'))}</span>
-          <div class="grow">
-            <div class="list-row-title">Marcar el ejercicio y ya</div>
-            <div class="list-row-sub">Un botón por ejercicio. Ni peso, ni repeticiones,
-              ni series: lo haces y lo das por hecho.</div>
-          </div>
-          ${raw(s.registro === 'ejercicio' ? '<span class="chip solid">' + icon('check') + '</span>' : '')}
-        </button>
+      <div class="opciones">
+        ${raw(filaOpcion('data-reg', 'detallado', s.registro, 'grafica',
+          'Peso y repeticiones',
+          'Anotas cada serie. Necesario para los récords, el volumen y las gráficas.'))}
+        ${raw(filaOpcion('data-reg', 'simple', s.registro, 'check',
+          'Marcar cada serie',
+          'Te propongo el objetivo (3 × 12) y solo marcas las que vas haciendo.'))}
+        ${raw(filaOpcion('data-reg', 'ejercicio', s.registro, 'flag',
+          'Marcar el ejercicio y ya',
+          'Un botón por ejercicio. Ni peso, ni repeticiones, ni series.'))}
       </div>
       ${raw(s.registro !== 'detallado'
         ? '<p class="tiny" style="margin:8px 0 0">Sin peso anotado no hay récords ni ' +
           'volumen; el progreso se mide por series y entrenamientos completados.</p>' : '')}
 
       <div class="list-title">Qué vas marcando</div>
-      <div class="list">
+      <div class="aj-caja">
         ${raw(filaSiNo('nutricion', 'Registrar cuando como',
-          'En el menú, cada plato lleva «me lo comí» y «comí otra cosa». Lo que marques ' +
-          'entra en el recuento del día.', 'registroComida', s.registroComida !== 'no'))}
+          'Cada plato lleva «me lo comí» y «comí otra cosa», y lo que marques entra en el ' +
+          'recuento del día.', 'registroComida', s.registroComida !== 'no'))}
         ${raw(filaSiNo('gota', 'Marcar cuando bebo agua',
-          'Cada toma de la pauta es una casilla, y el total del día sale de lo que ' +
-          'marcas en vez de lo que deberías.', 'registroAgua', s.registroAgua !== 'no'))}
+          'Cada toma de la pauta es una casilla, y el total del día sale de lo que marcas ' +
+          'en vez de lo que deberías.', 'registroAgua', s.registroAgua !== 'no'))}
       </div>
       <p class="tiny" style="margin:8px 0 0">Apagarlos no borra nada de lo que ya llevas
       apuntado: solo quita las casillas de en medio.</p>
 
-      <div class="card">
-        <div class="row between"><span>Unidad de peso</span>
-          <div class="row" style="gap:6px">
-            <button class="chip ${s.unit === 'kg' ? 'on' : ''}" data-unit="kg">kg</button>
-            <button class="chip ${s.unit === 'lb' ? 'on' : ''}" data-unit="lb">lb</button>
-          </div>
-        </div>
-        <div class="hr"></div>
-        <div class="row between"><span>Tema</span>
-          <div class="row" style="gap:6px">
-            <button class="chip ${s.theme === 'light' ? 'on' : ''}" data-theme="light">Claro</button>
-            <button class="chip ${s.theme === 'dark' ? 'on' : ''}" data-theme="dark">Oscuro</button>
-            <button class="chip ${s.theme === 'auto' ? 'on' : ''}" data-theme="auto">Sistema</button>
-          </div>
-        </div>
-        <div class="hr"></div>
-        <div class="row between"><span>Descanso por defecto</span>
-          <div class="row" style="gap:6px;max-width:130px">
-            <input id="s-rest" type="number" min="0" max="600" step="15" value="${s.rest}"
-                   style="text-align:center"><span class="tiny nowrap">seg</span>
-          </div>
-        </div>
-        <div class="hr"></div>
-        <div class="row between"><span>Cada cuánto cambia la frase del entrenador</span>
-          <div class="row" style="gap:6px;max-width:130px">
-            <input id="s-pildora" type="number" min="1" max="24" step="1"
-                   value="${IA.horasPildora ? IA.horasPildora() : 6}"
-                   style="text-align:center"><span class="tiny nowrap">h</span>
-          </div>
-        </div>
-        <div class="hr"></div>
-        <div class="row between"><span>Aviso sonoro al terminar el descanso</span>
-          <button class="chip ${s.sound ? 'on' : ''}" data-a="sound">${s.sound ? 'Activado' : 'Apagado'}</button>
-        </div>
+      <div class="list-title">La app</div>
+      <div class="aj-caja">
+        ${raw(filaAjuste('Unidad de peso', '', mando('data-unit',
+          [{ v: 'kg', t: 'kg' }, { v: 'lb', t: 'lb' }], s.unit)))}
+        ${raw(filaAjuste('Tema', 'Claro, oscuro o lo que diga el móvil', mando('data-theme',
+          [{ v: 'light', t: 'Claro', ico: 'sol' }, { v: 'dark', t: 'Oscuro', ico: 'luna' },
+           { v: 'auto', t: 'Sistema', ico: 'cambiar' }], s.theme), true))}
+        ${raw(filaAjuste('Descanso por defecto', 'Entre serie y serie',
+          contador('s-rest', s.rest, 'seg', 15, 0, 600)))}
+        ${raw(filaAjuste('La frase del entrenador', 'Cada cuánto cambia',
+          contador('s-pildora', IA.horasPildora ? IA.horasPildora() : 6, 'h', 1, 1, 24)))}
+        ${raw(filaAjuste('Aviso sonoro', 'Un pitido al terminar el descanso',
+          '<button class="sw ' + (s.sound ? 'on' : '') + '" data-a="sound" ' +
+          'role="switch" aria-checked="' + (s.sound ? 'true' : 'false') +
+          '" aria-label="Aviso sonoro"></button>'))}
       </div>
 
       <div class="list-title">Claves y conexiones</div>
-      <div class="list">
-        <div class="list-row tap" data-a="claves">
-          <span class="row-icon">${raw(icon('llave'))}</span>
-          <div class="grow">
-            <div class="list-row-title">Bóveda de claves</div>
-            <div class="list-row-sub">${resumenClaves()}</div>
-          </div>
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan" data-a="claves" style="--fp:#f0a23c">
+          <span class="fp-ico">${raw(icon('llave'))}</span>
+          <span class="grow"><span class="fp-tit">Bóveda de claves</span>
+            <span class="fp-sub">${resumenClaves()}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
-        </div>
-      </div>
-
-      <div class="list-title">Mi cuenta</div>
-      <div class="list">
-        <div class="list-row tap" data-a="ircuenta">
-          <span class="row-icon">${raw(icon('nube'))}</span>
-          <div class="grow">
-            <div class="list-row-title">Sincronización</div>
-            <div class="list-row-sub">${raw(Sync.activa() ? esc(Sync.email())
-              : 'Entra con tu correo para tenerlo todo en cada dispositivo')}</div>
-          </div>
+        </button>
+        <button class="fila-plan" data-a="ircuenta" style="--fp:#4f8cf5">
+          <span class="fp-ico">${raw(icon('nube'))}</span>
+          <span class="grow"><span class="fp-tit">Mi cuenta</span>
+            <span class="fp-sub">${raw(Sync.activa() ? esc(Sync.email())
+              : 'Entra con tu correo para tenerlo todo en cada dispositivo')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
-        </div>
+        </button>
       </div>
 
       <div class="list-title">Copia de seguridad</div>
-      <div class="card">
-        <p class="muted">Tus rutinas y tu historial se guardan solo en este navegador. Exporta un archivo
-        para conservarlos o para llevarlos a otro dispositivo.</p>
-        <div class="row">
-          <button class="btn grow" data-a="export">${raw(icon('down'))} Exportar</button>
-          <button class="btn grow" data-a="import">${raw(icon('up'))} Importar</button>
-        </div>
-        <input type="file" id="s-file" accept="application/json,.json" hidden>
+      <p class="tiny" style="margin:0 0 2px">Tus rutinas y tu historial se guardan solo en
+      este navegador. Exporta un archivo para conservarlos o llevarlos a otro dispositivo.</p>
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan" data-a="export" style="--fp:var(--acc)">
+          <span class="fp-ico">${raw(icon('down'))}</span>
+          <span class="grow"><span class="fp-tit">Exportar</span>
+            <span class="fp-sub">Un archivo con todo lo tuyo, listo para guardar</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="fila-plan" data-a="import" style="--fp:#c06bf0">
+          <span class="fp-ico">${raw(icon('up'))}</span>
+          <span class="grow"><span class="fp-tit">Importar</span>
+            <span class="fp-sub">Traer un archivo exportado desde otro dispositivo</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
       </div>
+      <input type="file" id="s-file" accept="application/json,.json" hidden>
 
       <div class="list-title">Uso sin conexión</div>
       <div class="card">
-        <p class="muted">Descarga las imágenes de los ejercicios y la app funcionará entera
-        sin internet: en el gimnasio sin cobertura, en el metro o sin datos.</p>
+        <p class="muted" style="margin-top:0;font-size:.88rem">Descarga las imágenes de los
+        ejercicios y la app funciona entera sin internet: en el gimnasio sin cobertura, en
+        el metro o sin datos.</p>
         <div class="tiny" id="dl-estado">Comprobando lo que ya tienes guardado…</div>
         <div class="dl" id="dl-barra" hidden><i></i></div>
-        <div class="stack" style="margin-top:10px">
-          <button class="btn" data-dl="rutinas">Descargar mis rutinas</button>
-          <button class="btn" data-dl="esenciales">Descargar los ejercicios principales</button>
-          <button class="btn" data-dl="todos">Descargar el catálogo completo</button>
-          <button class="btn ghost sm" data-dl="vaciar">Liberar espacio</button>
-        </div>
+      </div>
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan" data-dl="rutinas" style="--fp:var(--acc)">
+          <span class="fp-ico">${raw(icon('dumbbell'))}</span>
+          <span class="grow"><span class="fp-tit">Mis rutinas</span>
+            <span class="fp-sub">Solo los ejercicios que usas. Lo más rápido.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="fila-plan" data-dl="esenciales" style="--fp:#4f8cf5">
+          <span class="fp-ico">${raw(icon('star'))}</span>
+          <span class="grow"><span class="fp-tit">Los ejercicios principales</span>
+            <span class="fp-sub">Los más usados del catálogo</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="fila-plan" data-dl="todos" style="--fp:#c06bf0">
+          <span class="fp-ico">${raw(icon('catalogo'))}</span>
+          <span class="grow"><span class="fp-tit">El catálogo completo</span>
+            <span class="fp-sub">Todo. Ocupa bastante y tarda un rato.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="fila-plan es-peligro" data-dl="vaciar" style="--fp:var(--bad)">
+          <span class="fp-ico">${raw(icon('trash'))}</span>
+          <span class="grow"><span class="fp-tit">Liberar espacio</span>
+            <span class="fp-sub">Borra las imágenes guardadas. Se vuelven a bajar solas
+            con internet.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
       </div>
 
       <div class="list-title">Versión de la app</div>
       <div class="card">
-        <p class="muted">Si algo se comporta raro después de una actualización, casi siempre
-        es que el móvil se ha quedado con archivos de dos versiones distintas. Esto lo borra
-        todo y vuelve a bajar la última. Tus datos no se tocan.</p>
+        <p class="muted" style="margin-top:0;font-size:.88rem">Si algo se comporta raro
+        después de una actualización, casi siempre es que el móvil se ha quedado con
+        archivos de dos versiones distintas. Esto lo borra todo y vuelve a bajar la última.
+        Tus datos no se tocan.</p>
         <div class="tiny" id="sw-version">Comprobando la versión…</div>
-        <button class="btn block" data-a="actualizarApp" style="margin-top:10px">
-          ${raw(icon('down'))} Forzar actualización</button>
+      </div>
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan" data-a="actualizarApp" style="--fp:#4f8cf5">
+          <span class="fp-ico">${raw(icon('down'))}</span>
+          <span class="grow"><span class="fp-tit">Forzar actualización</span>
+            <span class="fp-sub">Borra los archivos viejos y baja la última versión</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
       </div>
 
       <div class="list-title">Instalar en el móvil</div>
       <div class="card">
-        <p class="muted">Training FR funciona como una app: ábrela en el navegador del móvil y usa
-        <b>«Añadir a la pantalla de inicio»</b> (en Android, desde el menú del navegador; en iPhone, desde el botón Compartir).
+        <p class="muted" style="margin-top:0;font-size:.88rem">Training FR funciona como una
+        app: ábrela en el navegador del móvil y usa <b>«Añadir a la pantalla de inicio»</b>
+        (en Android, desde el menú del navegador; en iPhone, desde el botón Compartir).
         Después arranca a pantalla completa y funciona sin conexión.</p>
-        <button class="btn primary block" data-a="install" hidden id="btn-install">Instalar aplicación</button>
+        <button class="btn primary block btn-arranque" data-a="install" hidden id="btn-install"
+                style="margin-top:11px">Instalar aplicación</button>
       </div>
 
       <div class="list-title">Zona peligrosa</div>
-      <div class="card">
-        <button class="btn danger block" data-a="wipe">${raw(icon('trash'))} Borrar todos mis datos</button>
+      <div class="plan-acciones" style="margin:10px 0 0">
+        <button class="fila-plan es-peligro" data-a="wipe" style="--fp:var(--bad)">
+          <span class="fp-ico">${raw(icon('trash'))}</span>
+          <span class="grow"><span class="fp-tit">Borrar todos mis datos</span>
+            <span class="fp-sub">Rutinas, historial, perfil y ajustes de este dispositivo.
+            No se puede deshacer.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
       </div>
 
       <p class="tiny" style="margin-top:22px">
@@ -4524,6 +4586,7 @@
   }
 
   viewAjustes.mount = function (root) {
+    bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=lugar2]', lugarSheet);
     bind(root, '[data-a=claves]', function () { go('claves'); });
     bind(root, '[data-a=ircuenta]', function () { go('cuenta'); });
@@ -4610,16 +4673,38 @@
 
     bind(root, '[data-a=actualizarApp]', function (el) {
       el.disabled = true;
-      el.textContent = 'Actualizando…';
+      const tit = el.querySelector('.fp-tit');
+      if (tit) tit.textContent = 'Actualizando…';
       forzarActualizacion();
     });
 
     root.querySelector('#s-name').onchange = function (e) {
       Store.setSetting('name', e.target.value.trim());
     };
-    root.querySelector('#s-rest').onchange = function (e) {
-      Store.setSetting('rest', Math.max(0, Number(e.target.value) || 90));
+    /* Los dos contadores comparten el mismo mando: menos, la cifra y más. La
+       casilla de número obligaba a abrir el teclado para pasar de 90 a 120. */
+    const guardarCont = {
+      's-rest': function (n) { Store.setSetting('rest', n); },
+      's-pildora': function (n) {
+        Store.setSetting('pildoraHoras', n);
+        UI.toast('La frase cambiará cada ' + n + (n === 1 ? ' hora' : ' horas'));
+      }
     };
+    root.querySelectorAll('.contador').forEach(function (c) {
+      const cifra = c.querySelector('b');
+      const paso = Number(c.dataset.paso);
+      const min = Number(c.dataset.min);
+      const max = Number(c.dataset.max);
+      c.querySelectorAll('[data-mas]').forEach(function (b) {
+        b.onclick = function () {
+          const n = Math.min(max, Math.max(min, Number(cifra.textContent) +
+            paso * Number(b.dataset.mas)));
+          cifra.textContent = n;
+          const guardar = guardarCont[c.dataset.cont];
+          if (guardar) guardar(n);
+        };
+      });
+    });
     bindAll(root, '[data-reg]', function (el) {
       Store.setSetting('registro', el.dataset.reg);
       render();
@@ -4632,20 +4717,29 @@
       render();
       UI.toast(el.dataset.val === 'si' ? 'Lo irás marcando' : 'Sin casillas de por medio');
     });
-    bindAll(root, '[data-unit]', function (el) { Store.setSetting('unit', el.dataset.unit); render(); });
-    bindAll(root, '[data-theme]', function (el) {
-      Store.setSetting('theme', el.dataset.theme);
-      aplicarTema();
-      render();
-    });
-    const campoPildora = root.querySelector('#s-pildora');
-    if (campoPildora) campoPildora.onchange = function () {
-      const n = Math.min(24, Math.max(1, Number(campoPildora.value) || 6));
-      campoPildora.value = n;
-      Store.setSetting('pildoraHoras', n);
-      UI.toast('La frase cambiará cada ' + n + (n === 1 ? ' hora' : ' horas'));
+    /* La marca se corre y la pantalla se rehace despues. Si se repintara de
+       golpe, la marca aparecería ya puesta en la otra posición y el movimiento
+       —que es lo que dice que una cosa deja paso a la otra— no se vería. */
+    const correrMando = function (el, luego) {
+      const m = el.closest('.mando');
+      if (!m) { luego(); return; }
+      const ops = [].slice.call(m.querySelectorAll('.mando-op'));
+      const marca = m.querySelector('.mando-marca');
+      if (marca) marca.style.transform = 'translateX(' + (ops.indexOf(el) * 100) + '%)';
+      ops.forEach(function (b) { b.classList.toggle('on', b === el); });
+      setTimeout(luego, 220);
     };
 
+    bindAll(root, '[data-unit]', function (el) {
+      correrMando(el, function () { Store.setSetting('unit', el.dataset.unit); render(); });
+    });
+    bindAll(root, '[data-theme]', function (el) {
+      correrMando(el, function () {
+        Store.setSetting('theme', el.dataset.theme);
+        aplicarTema();
+        render();
+      });
+    });
     bind(root, '[data-a=sound]', function () {
       Store.setSetting('sound', !Store.settings().sound);
       render();
