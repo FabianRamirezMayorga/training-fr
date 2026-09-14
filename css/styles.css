@@ -2587,7 +2587,9 @@ html[data-theme="light"] .sem-caja.es-ahora {
    el peso de una caja de formulario. */
 .campo-val { flex: none; display: inline-flex; align-items: baseline; gap: 5px; }
 .val-in {
-  text-align: right; padding: 6px 9px; margin: 0;
+  /* El numero, centrado en su pastilla. Pegado al borde derecho parecia que se
+     escapaba de la caja. */
+  text-align: center; padding: 6px 9px; margin: 0;
   background: color-mix(in srgb, var(--card2) 70%, transparent);
   border: 1px solid transparent; border-radius: 10px;
   font-size: 1rem; font-weight: 700; color: var(--txt);
@@ -2630,3 +2632,55 @@ html[data-theme="light"] .sem-caja.es-ahora {
 
 html[data-theme="light"] .val-in,
 html[data-theme="light"] .campo-largo { background: #fff; border-color: var(--line); }
+
+/* Leyendo, el dato es texto y no una caja: la pantalla se lee como una ficha,
+   no como un formulario siempre abierto. */
+.campo-leido { margin-top: 7px; font-size: .92rem; color: var(--txt); }
+.campo-val .campo-fijo { text-align: right; }
+
+/* El nombre es texto, no un numero: se lee mejor empezando por la izquierda. */
+#p-nombre { text-align: left; }
+
+/* ---------- las opciones, en filas ----------
+   Cinco niveles de actividad con su matiz no son cinco etiquetas sueltas: cada
+   uno dice que significa y el elegido lleva su marca. Leyendo solo se ve el
+   elegido; editando, todos. */
+.opts { display: flex; flex-direction: column; margin-top: 9px; }
+.opt-fila {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 9px 10px; background: none; border: 1px solid transparent;
+  border-radius: 12px; color: inherit; text-align: left; cursor: pointer;
+  transition: background .2s ease, border-color .2s ease;
+}
+.opt-fila[disabled] { cursor: default; padding-left: 0; }
+.opt-fila.on {
+  background: color-mix(in srgb, var(--acc) 12%, transparent);
+  border-color: color-mix(in srgb, var(--acc) 34%, transparent);
+}
+.opt-fila.on[disabled] { background: none; border-color: transparent; }
+.opt-fila:not(.on):active { background: color-mix(in srgb, var(--acc) 8%, transparent); }
+.opt-tit { display: block; font-size: .9rem; font-weight: 600; }
+.opt-sub { display: block; font-size: .75rem; color: var(--dim); margin-top: 1px;
+  line-height: 1.3; }
+.opt-fila.on .opt-tit { color: var(--acc); }
+.opt-check { flex: none; width: 18px; color: var(--acc); }
+.opt-check svg { width: 16px; height: 16px; fill: none; stroke: currentColor;
+  stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* El ritmo puesto a mano */
+.campo-propio { display: flex; align-items: baseline; gap: 8px; margin-top: 9px;
+  padding-left: 10px; }
+
+/* ---------- la barra de guardar ----------
+   Editando, lo que uno busca con el pulgar es salir de aqui sin perder nada:
+   fija abajo, encima de las pestanas. */
+.barra-edicion {
+  position: fixed; left: 0; right: 0; z-index: 58;
+  bottom: calc(64px + var(--safe-b));
+  display: flex; gap: 9px; padding: 10px 16px;
+  max-width: 900px; margin: 0 auto;
+}
+.barra-edicion .btn { box-shadow: 0 8px 24px rgba(0, 0, 0, .35); }
+html[data-theme="light"] .barra-edicion .btn {
+  box-shadow: 0 6px 20px rgba(16, 24, 40, .16);
+}

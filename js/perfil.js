@@ -9,7 +9,7 @@
 
   const VACIO = {
     sexo: '', edad: 0, altura: 0, peso: 0, grasa: 0,
-    actividad: 'moderado', objetivo: 'mantener', ritmo: 'moderado',
+    actividad: 'moderado', objetivo: 'mantener', ritmo: 'moderado', ritmoKg: 0,
     experiencia: 'intermediate',
     sueño: 7, comidas: 4, dieta: 'omnivora',
     /* Marcan el día real: sin ellas, repartir el agua y las comidas por el día
@@ -155,13 +155,31 @@
     return b * a.factor;
   }
 
+  /* El ritmo que toca: uno de los tres de siempre o el que se haya puesto a
+     mano. Con un ritmo propio solo se sabe los kilos por semana, asi que el
+     porcentaje sale de ahi: un kilo de grasa son unas 7.700 kcal, repartidas
+     entre los siete dias y medidas contra el gasto de cada uno. Con tope, que
+     un deficit del 40% no es un ritmo, es pasar hambre. */
+  function ritmoActual(p) {
+    p = p || datos();
+    if (p.ritmo === 'propio' && Number(p.ritmoKg) > 0) {
+      const kg = Math.min(1.2, Math.max(0.1, Number(p.ritmoKg)));
+      const t = tdee(p) || 2000;
+      return {
+        label: 'El mío', kgSemana: Math.round(kg * 100) / 100,
+        pct: Math.min(0.3, (kg * 7700 / 7) / t)
+      };
+    }
+    return RITMO[p.ritmo] || RITMO.moderado;
+  }
+
   /* Calorías objetivo, con suelos de seguridad para no bajar en exceso */
   function calorias(p) {
     p = p || datos();
     const t = tdee(p);
     if (!t) return null;
     const obj = OBJETIVO[p.objetivo] || OBJETIVO.mantener;
-    const r = RITMO[p.ritmo] || RITMO.moderado;
+    const r = ritmoActual(p);
     let kcal = t * (1 + obj.signo * r.pct);
 
     /* nunca por debajo del metabolismo basal ni de los mínimos habituales */
@@ -206,7 +224,7 @@
     if (!p.peso || !pesoMeta) return null;
     const dif = pesoMeta - p.peso;
     if (Math.abs(dif) < 0.3) return { semanas: 0, dif: dif };
-    const r = RITMO[p.ritmo] || RITMO.moderado;
+    const r = ritmoActual(p);
     return { semanas: Math.ceil(Math.abs(dif) / r.kgSemana), dif: dif };
   }
 
@@ -253,7 +271,7 @@
       'IMC ' + imc(p).toFixed(1),
       'actividad ' + (ACTIVIDAD[p.actividad] || {}).label,
       'objetivo: ' + (OBJETIVO[p.objetivo] || {}).label,
-      'ritmo ' + (RITMO[p.ritmo] || {}).label,
+      'ritmo ' + ritmoActual(p).label,
       'gasto estimado ' + Math.round(tdee(p)) + ' kcal',
       m ? 'objetivo diario ' + m.kcal + ' kcal (' + m.prot + ' g proteína, ' +
         m.carbo + ' g hidratos, ' + m.grasa + ' g grasa)' : null,
@@ -275,6 +293,7 @@
     horasDeSueno: horasDeSueno,
     imc: imc, categoriaIMC: categoriaIMC, pesoSaludable: pesoSaludable,
     tmb: tmb, tdee: tdee, calorias: calorias, macros: macros, agua: agua,
+    ritmoActual: ritmoActual,
     previsión: previsión, registrarPeso: registrarPeso, pesajes: pesajes,
     tendencia: tendencia, resumen: resumen
   };

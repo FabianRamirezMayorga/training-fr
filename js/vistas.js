@@ -180,26 +180,33 @@
   }
 
   /* ---------- datos y habitos ----------
-     Era un formulario largo: cada campo con su rotulo en versales, su parrafo
-     de explicacion debajo y una caja de texto a todo lo ancho. Tres renglones
-     por dato, y veinte datos.
+     Una lista agrupada, como las de Ajustes: el nombre del campo a la
+     izquierda, su valor a la derecha y la explicacion debajo en pequeno.
 
-     Ahora es una lista agrupada, como las de Ajustes: el nombre del campo a la
-     izquierda, el valor a la derecha —en una pastilla que se toca y se
-     escribe—, y la explicacion debajo en pequeno. Los textos son los mismos:
-     lo que cambia es que el dato y su nombre van en la misma linea, que es lo
-     que deja leer la pantalla de un vistazo en vez de bajarla entera. */
+     Con dos modos, que es lo que faltaba: de entrada la pantalla solo SE LEE
+     —los datos son texto, no cajas—, y hasta que no se pulsa Editar no se
+     puede tocar nada. Un formulario de veinte campos siempre abierto invita a
+     cambiar algo sin querer, y aqui de estos numeros salen las calorias y los
+     ejercicios que se proponen.
+
+     Al editar se guarda una copia: Cancelar la devuelve entera. Guardar no
+     tiene que escribir nada —cada campo ya se guardo al salir de el— y lo que
+     hace es cerrar el modo y decirlo. */
+  let editandoDatos = false;
+  let copiaDatos = null;
+
   V.datos = function () {
     const p = Perfil.datos();
     const faltan = Perfil.loQueFalta(p);
     const horas = Perfil.horasDeSueno(p.acostar, p.despertar);
+    const edita = editandoDatos;
+    const ritmo = Perfil.ritmoActual(p);
 
     const grupo = function (titulo, contenido) {
       return '<div class="list-title">' + esc(titulo) + '</div>' +
         '<div class="card tarjeta-premium campos">' + contenido + '</div>';
     };
 
-    /* Una fila: nombre a la izquierda, control a la derecha, nota debajo. */
     const campo = function (o) {
       return '<div class="campo">' +
         '<div class="campo-cab">' +
@@ -211,30 +218,57 @@
         '</div>';
     };
 
-    /* Un valor que se escribe: pastilla estrecha, alineada a la derecha, con su
-       unidad al lado. Sin la caja de antes a todo lo ancho. */
-    const valor = function (attrs, unidad, ancho) {
+    /* Leyendo, el dato es texto. Editando, una pastilla que se escribe. */
+    const valor = function (attrs, unidad, ancho, lectura) {
+      if (!edita) {
+        return '<span class="campo-val"><span class="campo-fijo">' +
+          esc(lectura || '\u2014') + '</span>' +
+          (unidad ? '<span class="val-u">' + esc(unidad) + '</span>' : '') + '</span>';
+      }
       return '<span class="campo-val">' +
         '<input class="val-in" style="width:' + (ancho || 74) + 'px" ' + attrs + '>' +
-        (unidad ? '<span class="val-u">' + esc(unidad) + '</span>' : '') +
-        '</span>';
+        (unidad ? '<span class="val-u">' + esc(unidad) + '</span>' : '') + '</span>';
     };
 
-    const opciones = function (campoId, mapa, actual) {
-      return '<div class="row wrap campo-chips">' +
-        Object.keys(mapa).map(function (k) {
-          const label = typeof mapa[k] === 'string' ? mapa[k] : mapa[k].label;
-          return '<button class="chip ' + (actual === k ? 'on' : '') + '" data-set="' +
-            campoId + '" data-val="' + esc(k) + '">' + esc(label) + '</button>';
-        }).join('') + '</div>';
+    /* Las opciones, en filas con su explicacion y su marca de elegida: son
+       cinco niveles de actividad con matiz, no cinco etiquetas sueltas. */
+    const filasOpcion = function (campoId, mapa, actual) {
+      return '<div class="opts">' + Object.keys(mapa).map(function (k) {
+        const o = mapa[k];
+        const label = typeof o === 'string' ? o : o.label;
+        const nota = typeof o === 'string' ? '' : (o.note || '');
+        const on = actual === k;
+        if (!edita && !on) return '';
+        return '<button class="opt-fila' + (on ? ' on' : '') + '"' +
+          (edita ? ' data-set="' + campoId + '" data-val="' + esc(k) + '"' : ' disabled') + '>' +
+          '<span class="grow"><span class="opt-tit">' + esc(label) + '</span>' +
+          (nota ? '<span class="opt-sub">' + esc(nota) + '</span>' : '') + '</span>' +
+          '<span class="opt-check">' + (on ? icon('check') : '') + '</span>' +
+          '</button>';
+      }).join('') + '</div>';
+    };
+
+    const largo = function (campoId, val, ph, lectura) {
+      if (!edita) {
+        return '<div class="campo-leido">' + esc(val || lectura || 'Sin poner') + '</div>';
+      }
+      return '<input class="campo-largo" value="' + esc(val) + '" data-txt="' + campoId +
+        '" placeholder="' + esc(ph) + '">';
     };
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Perfil</button>
-      <h1>Datos y hábitos</h1>
-      <p class="muted">Sirven para calcular tus calorías y ajustar lo que te propongo.
-      No salen de tu dispositivo salvo que actives la sincronización o el entrenador con IA.</p>
+
+      <div class="row between" style="align-items:flex-start;gap:12px">
+        <h1 style="margin:0">Datos y hábitos</h1>
+        ${raw(edita ? '' : '<button class="btn sm primary" data-a="editar">' +
+          icon('edit') + ' Editar</button>')}
+      </div>
+
+      <p class="muted" style="margin-top:8px">Sirven para calcular tus calorías y ajustar lo
+      que te propongo. No salen de tu dispositivo salvo que actives la sincronización o el
+      entrenador con IA.</p>
 
       ${raw(faltan.length ? html`
         <div class="card tarjeta-premium" style="border-color:var(--warn)">
@@ -242,107 +276,119 @@
           <p class="tiny" style="margin:6px 0 0">Sin eso no puedo calcular tus calorías ni
           ajustarte el entrenamiento. Es lo único obligatorio; lo demás lo vas rellenando
           cuando quieras.</p>
-        </div>` : html`
-        <p class="tiny" style="margin:-4px 0 0">Todo lo que cambies aquí se guarda solo al
-        salir del campo. No hay que pulsar nada.</p>`)}
+        </div>` : '')}
 
-      ${raw(grupo('Quién eres',
+      ${raw(grupo('Quién soy',
         campo({
-          tit: 'Tu nombre',
+          tit: 'Mi nombre',
           control: valor('id="p-nombre" value="' + esc(Store.settings().name || '') +
-            '" placeholder="Tu nombre" autocomplete="given-name"', '', 120),
+            '" placeholder="Tu nombre" autocomplete="given-name"', '', 132,
+            Store.settings().name),
           nota: 'Para saludarte al abrir la app y para que el entrenador con IA te hable a ' +
             'ti, no a un usuario.'
         })))}
 
-      ${raw(grupo('Cuerpo',
+      ${raw(grupo('Mi cuerpo',
         campo({
           tit: 'Sexo biológico',
           nota: 'Cambia la fórmula del metabolismo basal.',
-          abajo: opciones('sexo', { hombre: 'Hombre', mujer: 'Mujer' }, p.sexo)
+          abajo: filasOpcion('sexo', { hombre: 'Hombre', mujer: 'Mujer' }, p.sexo)
         }) +
         campo({
           tit: 'Edad',
           control: valor('type="number" inputmode="numeric" min="14" max="99" value="' +
-            (p.edad || '') + '" data-num="edad" placeholder="—"', 'años', 62)
+            (p.edad || '') + '" data-num="edad" placeholder="—"', 'años', 68, p.edad)
         }) +
         campo({
           tit: 'Altura',
           control: valor('type="number" inputmode="numeric" min="120" max="230" value="' +
-            (p.altura || '') + '" data-num="altura" placeholder="—"', 'cm', 62)
+            (p.altura || '') + '" data-num="altura" placeholder="—"', 'cm', 68, p.altura)
         }) +
         campo({
           tit: 'Peso',
           control: valor('type="number" inputmode="decimal" step="0.1" min="30" max="250" ' +
             'value="' + (p.peso || '') + '" data-num="peso" placeholder="—"',
-            Store.settings().unit || 'kg', 62)
+            Store.settings().unit || 'kg', 72,
+            p.peso ? String(p.peso).replace('.', ',') : '')
         }) +
         campo({
           tit: 'Grasa corporal',
           nota: 'Opcional. Si la sabes, afina el cálculo del metabolismo.',
           control: valor('type="number" inputmode="decimal" step="0.5" min="3" max="60" ' +
-            'value="' + (p.grasa || '') + '" data-num="grasa" placeholder="—"', '%', 54)
+            'value="' + (p.grasa || '') + '" data-num="grasa" placeholder="—"', '%', 68,
+            p.grasa ? String(p.grasa).replace('.', ',') : '')
         })))}
 
-      ${raw(grupo('Actividad diaria',
+      ${raw(grupo('Mi actividad diaria',
         campo({
-          tit: 'Lo que te mueves al día',
-          nota: esc((Perfil.ACTIVIDAD[p.actividad] || {}).note || ''),
-          abajo: opciones('actividad', Perfil.ACTIVIDAD, p.actividad)
+          tit: 'Lo que me muevo al día',
+          nota: 'Sin contar el entrenamiento: es el trabajo, los recados y lo que andas.',
+          abajo: filasOpcion('actividad', Perfil.ACTIVIDAD, p.actividad)
         })))}
 
-      ${raw(grupo('Objetivo',
+      ${raw(grupo('Mi objetivo',
         campo({
-          tit: 'Qué buscas',
-          abajo: opciones('objetivo', Perfil.OBJETIVO, p.objetivo)
+          tit: 'Qué busco',
+          abajo: filasOpcion('objetivo', Perfil.OBJETIVO, p.objetivo)
         }) +
         (p.objetivo !== 'mantener'
           ? campo({
               tit: 'A qué ritmo',
-              nota: 'Unos ' + (Perfil.RITMO[p.ritmo] || {}).kgSemana + ' kg por semana.',
-              abajo: opciones('ritmo', Perfil.RITMO, p.ritmo)
+              nota: 'Unos ' + String(ritmo.kgSemana).replace('.', ',') + ' kg por semana' +
+                (p.objetivo === 'perder' ? ' menos' : ' más') + '.',
+              abajo: filasOpcion('ritmo', Object.assign({}, Perfil.RITMO, {
+                propio: { label: 'El mío', note: 'Lo pongo yo en kilos por semana' }
+              }), p.ritmo) +
+              (p.ritmo === 'propio'
+                ? '<div class="campo-propio">' +
+                  (edita
+                    ? '<input class="val-in" style="width:82px" type="number" ' +
+                      'inputmode="decimal" step="0.05" min="0.1" max="1.2" value="' +
+                      (p.ritmoKg || 0.45) + '" data-num="ritmoKg">'
+                    : '<span class="campo-fijo">' +
+                      String(p.ritmoKg || 0.45).replace('.', ',') + '</span>') +
+                  '<span class="val-u">kg por semana</span></div>'
+                : '')
             })
           : '')))}
 
-      ${raw(grupo('Tu día',
+      ${raw(grupo('Mi día',
         campo({
           tit: 'Me levanto',
-          /* El reloj necesita sitio: en formato de 12 horas el AM/PM se cortaba. */
           control: valor('type="time" value="' + (p.despertar || '07:00') +
-            '" data-txt="despertar"', '', 142)
+            '" data-txt="despertar"', '', 142, p.despertar || '07:00')
         }) +
         campo({
           tit: 'Me acuesto',
           control: valor('type="time" value="' + (p.acostar || '23:00') +
-            '" data-txt="acostar"', '', 142),
+            '" data-txt="acostar"', '', 142, p.acostar || '23:00'),
           nota: 'Con esto reparto los recordatorios de agua y comidas por tus horas reales, ' +
             'no por unas por defecto, y saco cuánto duermes.'
         }) +
-        (horas != null
-          ? campo({
-              tit: 'Duermes',
-              control: '<span class="campo-fijo">' +
-                String(horas).replace('.', ',') + ' h</span>',
-              nota: 'Sale de esas dos horas, no hace falta apuntarlo aparte.' +
-                (horas < 6 ? ' Con menos de 6 h cuesta recuperar entre sesiones.' : '')
-            })
-          : campo({ tit: 'Duermes', control: '<span class="campo-fijo">—</span>',
-              nota: 'Pon las dos horas y calculo cuánto duermes.' })) +
+        campo({
+          tit: 'Duermo',
+          control: '<span class="campo-val"><span class="campo-fijo">' +
+            (horas != null ? String(horas).replace('.', ',') + ' h' : '—') + '</span></span>',
+          nota: horas != null
+            ? 'Sale de esas dos horas, no hace falta apuntarlo aparte.' +
+              (horas < 6 ? ' Con menos de 6 h cuesta recuperar entre sesiones.' : '')
+            : 'Pon las dos horas y calculo cuánto duermes.'
+        }) +
         campo({
           tit: 'Comidas al día',
           control: valor('type="number" inputmode="numeric" min="2" max="7" value="' +
-            p.comidas + '" data-num="comidas"', '', 54)
+            p.comidas + '" data-num="comidas"', '', 62, p.comidas)
         }) +
         campo({
-          tit: 'Hora a la que entrenas',
+          tit: 'Hora a la que entreno',
           nota: 'Opcional. Si la dejas vacía, la deduzco de las horas a las que sueles entrenar.',
           control: valor('type="time" value="' + (p.horaEntreno || '') +
-            '" data-txt="horaEntreno"', '', 142)
+            '" data-txt="horaEntreno"', '', 142, p.horaEntreno || 'Sin poner')
         })))}
 
-      ${raw(grupo('Lo tuyo',
+      ${raw(grupo('Lo mío',
         '<div class="campo campo-aviso">' +
-        '<b style="font-size:.88rem">Lo de aquí abajo es lo que más cambia lo que te propongo</b>' +
+        '<b style="font-size:.88rem">Esto es lo que más cambia lo que te propongo</b>' +
         '<p class="tiny" style="margin:5px 0 0">De estos cuatro campos salen los menús que ' +
         'te sugiero y los ejercicios que entran o no en tus rutinas. Si los dejas vacíos, ' +
         'te propongo lo de siempre para cualquiera; si los rellenas, te propongo lo tuyo.</p>' +
@@ -350,44 +396,62 @@
         campo({
           tit: 'Alimentación',
           nota: 'Ningún menú te va a ofrecer algo que no comas.',
-          abajo: opciones('dieta', Perfil.DIETA, p.dieta)
+          abajo: filasOpcion('dieta', Perfil.DIETA, p.dieta)
         }) +
         campo({
-          tit: 'Alergias o alimentos que evitas',
+          tit: 'Alergias o alimentos que evito',
           nota: 'Quedan fuera de todo lo que te proponga, y si salen en la foto de un plato ' +
             'te aviso.',
-          abajo: '<input class="campo-largo" value="' + esc(p.alergias) + '" data-txt="alergias" ' +
-            'placeholder="Lactosa, frutos secos…">'
+          abajo: largo('alergias', p.alergias, 'Lactosa, frutos secos…')
         }) +
         campo({
           tit: 'Lesiones o limitaciones',
           nota: 'Lo que escribas aquí retira ejercicios de tus rutinas y de lo que te propone ' +
             'el entrenador. Es lo que evita que te ofrezca algo que te haga daño.',
-          abajo: '<input class="campo-largo" value="' + esc(p.lesiones) + '" data-txt="lesiones" ' +
-            'placeholder="Hombro derecho, rodilla…">'
+          abajo: largo('lesiones', p.lesiones, 'Hombro derecho, rodilla…')
         }) +
         campo({
           tit: 'Condiciones de salud',
           nota: 'Para que el menú las tenga en cuenta. No sustituye a tu médico ni a un dietista.',
-          abajo: '<input class="campo-largo" value="' + esc(p.condiciones || '') +
-            '" data-txt="condiciones" placeholder="Tensión alta, colesterol, diabetes…">'
+          abajo: largo('condiciones', p.condiciones || '', 'Tensión alta, colesterol, diabetes…')
         })))}
 
       ${raw(Perfil.completo(p) ? html`
-        <div class="list-title">Tus números</div>
-        <div class="list">
-          ${raw(fila({ titulo: 'Metabolismo basal', valor: UI.num(Math.round(Perfil.tmb(p))) + ' kcal' }))}
-          ${raw(fila({ titulo: 'Gasto diario estimado', valor: UI.num(Math.round(Perfil.tdee(p))) + ' kcal' }))}
-          ${raw(fila({ titulo: 'Objetivo diario', valor: UI.num(Perfil.calorias(p)) + ' kcal' }))}
-          ${raw(fila({ titulo: 'Agua al día', valor: Perfil.agua(p) + ' L' }))}
-          ${raw(fila({ titulo: 'Peso saludable',
-            valor: Perfil.pesoSaludable(p).min.toFixed(0) + '–' +
-                   Perfil.pesoSaludable(p).max.toFixed(0) + ' kg' }))}
+        <div class="list-title">Mis números</div>
+        <div class="card tarjeta-premium campos">
+          <div class="campo">
+            <div class="campo-cab">
+              <span class="campo-tit">Objetivo diario</span>
+              <span class="campo-val"><span class="pre-num">${UI.num(Perfil.calorias(p))}</span>
+                <span class="val-u">kcal</span></span>
+            </div>
+            <div class="campo-nota">Es tu gasto ajustado a lo que buscas y al ritmo que has
+              elegido.</div>
+          </div>
+          ${raw([
+            { t: 'Metabolismo basal', v: UI.num(Math.round(Perfil.tmb(p))) + ' kcal' },
+            { t: 'Gasto diario estimado', v: UI.num(Math.round(Perfil.tdee(p))) + ' kcal' },
+            { t: 'Agua al día', v: Perfil.agua(p) + ' L' },
+            { t: 'Peso saludable', v: Perfil.pesoSaludable(p).min.toFixed(0) + '–' +
+              Perfil.pesoSaludable(p).max.toFixed(0) + ' kg' }
+          ].map(function (x) {
+            return '<div class="campo"><div class="campo-cab">' +
+              '<span class="campo-tit">' + x.t + '</span>' +
+              '<span class="campo-fijo">' + x.v + '</span></div></div>';
+          }).join(''))}
         </div>
         <p class="tiny" style="margin-top:10px">Estimaciones para población general
         (Mifflin-St Jeor). Si tienes una condición médica, manda tu médico.</p>` : '')}
 
-      <div style="height:14px"></div>`;
+      <div style="height:${edita ? 90 : 14}px"></div>
+
+      ${raw(edita ? html`
+        <!-- La barra de guardar, fija abajo: editando, lo que uno busca con el
+             pulgar es salir de aqui sin perder nada. -->
+        <div class="barra-edicion">
+          <button class="btn grow" data-a="cancelar">Cancelar</button>
+          <button class="btn primary grow" data-a="guardar">${raw(icon('check'))} Guardar</button>
+        </div>` : '')}`;
   };
 
   function pesoHistorial() {
@@ -461,6 +525,44 @@
 
   V.datos.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
+
+    /* Editar, guardar y cancelar. La copia se hace al entrar en edicion y
+       Cancelar la devuelve entera: incluye el nombre, que no vive en el perfil
+       sino en los ajustes. */
+    bind(root, '[data-a=editar]', function () {
+      copiaDatos = {
+        perfil: JSON.parse(JSON.stringify(Perfil.datos())),
+        nombre: Store.settings().name || ''
+      };
+      editandoDatos = true;
+      render();
+      UI.toast('Toca los campos para cambiarlos');
+    });
+
+    bind(root, '[data-a=guardar]', function () {
+      /* Si el cursor sigue dentro de un campo, lo escrito aun no ha disparado
+         su guardado: se fuerza antes de cerrar. */
+      const foco = document.activeElement;
+      if (foco && root.contains(foco) && (foco.dataset.txt || foco.dataset.num ||
+          foco.id === 'p-nombre')) {
+        foco.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      editandoDatos = false;
+      copiaDatos = null;
+      render();
+      UI.toast('Guardado');
+    });
+
+    bind(root, '[data-a=cancelar]', function () {
+      if (copiaDatos) {
+        Perfil.guardar(copiaDatos.perfil);
+        Store.setSetting('name', copiaDatos.nombre);
+      }
+      editandoDatos = false;
+      copiaDatos = null;
+      render();
+      UI.toast('Sin cambios');
+    });
 
     /* Si se sale de la pantalla con el cursor todavía dentro de un campo, el
        navegador no avisa de nada: lo escrito se quedaba sin guardar. */

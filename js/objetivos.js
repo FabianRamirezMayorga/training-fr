@@ -245,7 +245,7 @@
       const vaBien = (falta < 0 && quiere < 0) || (falta > 0 && quiere > 0);
 
       if (plan && plan.semanas > 0 && vaBien && Perfil.completo(datos)) {
-        const r = Perfil.RITMO[datos.ritmo] || Perfil.RITMO.moderado;
+        const r = Perfil.ritmoActual(datos);
         const dias = plan.semanas * 7;
         return {
           clase: 'meta', segunPlan: true, puntos: puntos, cumplido: false,
