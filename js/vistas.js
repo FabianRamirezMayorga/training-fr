@@ -179,19 +179,53 @@
     return esc(xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1]);
   }
 
+  /* ---------- datos y habitos ----------
+     Era un formulario largo: cada campo con su rotulo en versales, su parrafo
+     de explicacion debajo y una caja de texto a todo lo ancho. Tres renglones
+     por dato, y veinte datos.
+
+     Ahora es una lista agrupada, como las de Ajustes: el nombre del campo a la
+     izquierda, el valor a la derecha —en una pastilla que se toca y se
+     escribe—, y la explicacion debajo en pequeno. Los textos son los mismos:
+     lo que cambia es que el dato y su nombre van en la misma linea, que es lo
+     que deja leer la pantalla de un vistazo en vez de bajarla entera. */
   V.datos = function () {
     const p = Perfil.datos();
     const faltan = Perfil.loQueFalta(p);
     const horas = Perfil.horasDeSueno(p.acostar, p.despertar);
+
     const grupo = function (titulo, contenido) {
-      return '<div class="list-title">' + esc(titulo) + '</div><div class="card">' + contenido + '</div>';
+      return '<div class="list-title">' + esc(titulo) + '</div>' +
+        '<div class="card tarjeta-premium campos">' + contenido + '</div>';
     };
-    const opciones = function (campo, mapa, actual) {
-      return '<div class="row wrap" style="gap:6px;margin-top:7px">' +
+
+    /* Una fila: nombre a la izquierda, control a la derecha, nota debajo. */
+    const campo = function (o) {
+      return '<div class="campo">' +
+        '<div class="campo-cab">' +
+        '<span class="campo-tit">' + esc(o.tit) + '</span>' +
+        (o.control || '') +
+        '</div>' +
+        (o.nota ? '<div class="campo-nota">' + o.nota + '</div>' : '') +
+        (o.abajo || '') +
+        '</div>';
+    };
+
+    /* Un valor que se escribe: pastilla estrecha, alineada a la derecha, con su
+       unidad al lado. Sin la caja de antes a todo lo ancho. */
+    const valor = function (attrs, unidad, ancho) {
+      return '<span class="campo-val">' +
+        '<input class="val-in" style="width:' + (ancho || 74) + 'px" ' + attrs + '>' +
+        (unidad ? '<span class="val-u">' + esc(unidad) + '</span>' : '') +
+        '</span>';
+    };
+
+    const opciones = function (campoId, mapa, actual) {
+      return '<div class="row wrap campo-chips">' +
         Object.keys(mapa).map(function (k) {
           const label = typeof mapa[k] === 'string' ? mapa[k] : mapa[k].label;
           return '<button class="chip ' + (actual === k ? 'on' : '') + '" data-set="' +
-            campo + '" data-val="' + esc(k) + '">' + esc(label) + '</button>';
+            campoId + '" data-val="' + esc(k) + '">' + esc(label) + '</button>';
         }).join('') + '</div>';
     };
 
@@ -203,7 +237,7 @@
       No salen de tu dispositivo salvo que actives la sincronización o el entrenador con IA.</p>
 
       ${raw(faltan.length ? html`
-        <div class="card" style="border-color:var(--warn)">
+        <div class="card tarjeta-premium" style="border-color:var(--warn)">
           <b>Falta ${raw(listaEs(faltan))}</b>
           <p class="tiny" style="margin:6px 0 0">Sin eso no puedo calcular tus calorías ni
           ajustarte el entrenamiento. Es lo único obligatorio; lo demás lo vas rellenando
@@ -212,109 +246,132 @@
         <p class="tiny" style="margin:-4px 0 0">Todo lo que cambies aquí se guarda solo al
         salir del campo. No hay que pulsar nada.</p>`)}
 
-      ${raw(grupo('Quién eres', html`
-        <label class="tiny">TU NOMBRE</label>
-        <div class="tiny" style="margin:2px 0 0">Para saludarte al abrir la app y para que
-        el entrenador con IA te hable a ti, no a un usuario.</div>
-        <input id="p-nombre" value="${Store.settings().name || ''}" placeholder="Tu nombre"
-               autocomplete="given-name" style="margin-top:6px">`))}
+      ${raw(grupo('Quién eres',
+        campo({
+          tit: 'Tu nombre',
+          control: valor('id="p-nombre" value="' + esc(Store.settings().name || '') +
+            '" placeholder="Tu nombre" autocomplete="given-name"', '', 120),
+          nota: 'Para saludarte al abrir la app y para que el entrenador con IA te hable a ' +
+            'ti, no a un usuario.'
+        })))}
 
-      ${raw(grupo('Cuerpo', html`
-        <label class="tiny">SEXO BIOLÓGICO</label>
-        <div class="tiny" style="margin:2px 0 0">Cambia la fórmula del metabolismo basal.</div>
-        ${raw(opciones('sexo', { hombre: 'Hombre', mujer: 'Mujer' }, p.sexo))}
-        <div class="hr"></div>
-        <div class="row" style="gap:10px">
-          <div class="grow"><div class="tiny">EDAD</div>
-            <input type="number" inputmode="numeric" min="14" max="99" value="${p.edad || ''}"
-                   data-num="edad" placeholder="años" style="text-align:center;margin-top:4px"></div>
-          <div class="grow"><div class="tiny">ALTURA (CM)</div>
-            <input type="number" inputmode="numeric" min="120" max="230" value="${p.altura || ''}"
-                   data-num="altura" placeholder="cm" style="text-align:center;margin-top:4px"></div>
-        </div>
-        <div class="row" style="gap:10px;margin-top:10px">
-          <div class="grow"><div class="tiny">PESO (KG)</div>
-            <input type="number" inputmode="decimal" step="0.1" min="30" max="250" value="${p.peso || ''}"
-                   data-num="peso" placeholder="kg" style="text-align:center;margin-top:4px"></div>
-          <div class="grow"><div class="tiny">GRASA % (OPCIONAL)</div>
-            <input type="number" inputmode="decimal" step="0.5" min="3" max="60" value="${p.grasa || ''}"
-                   data-num="grasa" placeholder="—" style="text-align:center;margin-top:4px"></div>
-        </div>`))}
+      ${raw(grupo('Cuerpo',
+        campo({
+          tit: 'Sexo biológico',
+          nota: 'Cambia la fórmula del metabolismo basal.',
+          abajo: opciones('sexo', { hombre: 'Hombre', mujer: 'Mujer' }, p.sexo)
+        }) +
+        campo({
+          tit: 'Edad',
+          control: valor('type="number" inputmode="numeric" min="14" max="99" value="' +
+            (p.edad || '') + '" data-num="edad" placeholder="—"', 'años', 62)
+        }) +
+        campo({
+          tit: 'Altura',
+          control: valor('type="number" inputmode="numeric" min="120" max="230" value="' +
+            (p.altura || '') + '" data-num="altura" placeholder="—"', 'cm', 62)
+        }) +
+        campo({
+          tit: 'Peso',
+          control: valor('type="number" inputmode="decimal" step="0.1" min="30" max="250" ' +
+            'value="' + (p.peso || '') + '" data-num="peso" placeholder="—"',
+            Store.settings().unit || 'kg', 62)
+        }) +
+        campo({
+          tit: 'Grasa corporal',
+          nota: 'Opcional. Si la sabes, afina el cálculo del metabolismo.',
+          control: valor('type="number" inputmode="decimal" step="0.5" min="3" max="60" ' +
+            'value="' + (p.grasa || '') + '" data-num="grasa" placeholder="—"', '%', 54)
+        })))}
 
-      ${raw(grupo('Actividad diaria', opciones('actividad', Perfil.ACTIVIDAD, p.actividad) +
-        '<div class="tiny" style="margin-top:8px">' +
-        esc((Perfil.ACTIVIDAD[p.actividad] || {}).note || '') + '</div>'))}
+      ${raw(grupo('Actividad diaria',
+        campo({
+          tit: 'Lo que te mueves al día',
+          nota: esc((Perfil.ACTIVIDAD[p.actividad] || {}).note || ''),
+          abajo: opciones('actividad', Perfil.ACTIVIDAD, p.actividad)
+        })))}
 
-      ${raw(grupo('Objetivo', opciones('objetivo', Perfil.OBJETIVO, p.objetivo) +
+      ${raw(grupo('Objetivo',
+        campo({
+          tit: 'Qué buscas',
+          abajo: opciones('objetivo', Perfil.OBJETIVO, p.objetivo)
+        }) +
         (p.objetivo !== 'mantener'
-          ? '<div class="hr"></div><label class="tiny">A QUÉ RITMO</label>' +
-            opciones('ritmo', Perfil.RITMO, p.ritmo) +
-            '<div class="tiny" style="margin-top:8px">Unos ' +
-            (Perfil.RITMO[p.ritmo] || {}).kgSemana + ' kg por semana.</div>'
+          ? campo({
+              tit: 'A qué ritmo',
+              nota: 'Unos ' + (Perfil.RITMO[p.ritmo] || {}).kgSemana + ' kg por semana.',
+              abajo: opciones('ritmo', Perfil.RITMO, p.ritmo)
+            })
           : '')))}
 
-      ${raw(grupo('Hábitos', html`
-        <label class="tiny">TU DÍA</label>
-        <div class="tiny" style="margin:2px 0 0">Con esto reparto los recordatorios de agua
-        y comidas por tus horas reales, no por unas por defecto, y saco cuánto duermes.</div>
-        <div class="row" style="gap:10px;margin-top:8px">
-          <div class="grow"><div class="tiny">ME LEVANTO</div>
-            <input type="time" value="${p.despertar || '07:00'}" data-txt="despertar"
-                   style="margin-top:4px"></div>
-          <div class="grow"><div class="tiny">ME ACUESTO</div>
-            <input type="time" value="${p.acostar || '23:00'}" data-txt="acostar"
-                   style="margin-top:4px"></div>
-        </div>
-        ${raw(horas != null ? html`
-          <div class="row between" style="margin-top:10px;gap:10px;align-items:center">
-            <span class="tiny">DUERMES</span>
-            <b>${String(horas).replace('.', ',')} h</b>
-          </div>
-          <div class="tiny" style="margin-top:2px">Sale de esas dos horas, no hace falta
-          apuntarlo aparte.${raw(horas < 6
-            ? ' Con menos de 6 h cuesta recuperar entre sesiones.' : '')}</div>`
-          : html`<div class="tiny" style="margin-top:8px">Pon las dos horas y calculo
-          cuánto duermes.</div>`)}
-        <div class="hr"></div>
-        <div class="tiny">COMIDAS AL DÍA</div>
-        <input type="number" inputmode="numeric" min="2" max="7" value="${p.comidas}"
-               data-num="comidas" style="text-align:center;margin-top:4px;max-width:120px">
-        <div style="height:10px"></div>
-        <div class="tiny">HORA A LA QUE ENTRENAS (OPCIONAL)</div>
-        <input type="time" value="${p.horaEntreno || ''}" data-txt="horaEntreno"
-               style="margin-top:4px">
-        <div class="tiny" style="margin-top:4px">Si la dejas vacía, la deduzco de las horas a
-        las que sueles entrenar.</div>
-        <div class="hr"></div>
-        <div class="destacado-clave" style="padding:11px 12px;border-radius:var(--r-s)">
-          <b style="font-size:.88rem">Lo de aquí abajo es lo que más cambia lo que te propongo</b>
-          <p class="tiny" style="margin:5px 0 0">De estos cuatro campos salen los menús que
-          te sugiero y los ejercicios que entran o no en tus rutinas. Si los dejas vacíos,
-          te propongo lo de siempre para cualquiera; si los rellenas, te propongo lo tuyo.</p>
-        </div>
-        <div style="height:12px"></div>
-        <label class="tiny">ALIMENTACIÓN</label>
-        <div class="tiny" style="margin:2px 0 0">Ningún menú te va a ofrecer algo que no comas.</div>
-        ${raw(opciones('dieta', Perfil.DIETA, p.dieta))}
-        <div class="hr"></div>
-        <label class="tiny">ALERGIAS O ALIMENTOS QUE EVITAS</label>
-        <div class="tiny" style="margin:2px 0 0">Quedan fuera de todo lo que te proponga, y si
-        salen en la foto de un plato te aviso.</div>
-        <input value="${p.alergias}" data-txt="alergias" placeholder="Lactosa, frutos secos…"
-               style="margin-top:5px">
-        <div style="height:10px"></div>
-        <label class="tiny">LESIONES O LIMITACIONES</label>
-        <div class="tiny" style="margin:2px 0 0">Lo que escribas aquí retira ejercicios de tus
-        rutinas y de lo que te propone el entrenador. Es lo que evita que te ofrezca algo que
-        te haga daño.</div>
-        <input value="${p.lesiones}" data-txt="lesiones" placeholder="Hombro derecho, rodilla…"
-               style="margin-top:5px">
-        <div style="height:10px"></div>
-        <label class="tiny">CONDICIONES DE SALUD</label>
-        <div class="tiny" style="margin:2px 0 0">Para que el menú las tenga en cuenta.
-        No sustituye a tu médico ni a un dietista.</div>
-        <input value="${p.condiciones || ''}" data-txt="condiciones"
-               placeholder="Tensión alta, colesterol, diabetes…" style="margin-top:5px">`))}
+      ${raw(grupo('Tu día',
+        campo({
+          tit: 'Me levanto',
+          /* El reloj necesita sitio: en formato de 12 horas el AM/PM se cortaba. */
+          control: valor('type="time" value="' + (p.despertar || '07:00') +
+            '" data-txt="despertar"', '', 142)
+        }) +
+        campo({
+          tit: 'Me acuesto',
+          control: valor('type="time" value="' + (p.acostar || '23:00') +
+            '" data-txt="acostar"', '', 142),
+          nota: 'Con esto reparto los recordatorios de agua y comidas por tus horas reales, ' +
+            'no por unas por defecto, y saco cuánto duermes.'
+        }) +
+        (horas != null
+          ? campo({
+              tit: 'Duermes',
+              control: '<span class="campo-fijo">' +
+                String(horas).replace('.', ',') + ' h</span>',
+              nota: 'Sale de esas dos horas, no hace falta apuntarlo aparte.' +
+                (horas < 6 ? ' Con menos de 6 h cuesta recuperar entre sesiones.' : '')
+            })
+          : campo({ tit: 'Duermes', control: '<span class="campo-fijo">—</span>',
+              nota: 'Pon las dos horas y calculo cuánto duermes.' })) +
+        campo({
+          tit: 'Comidas al día',
+          control: valor('type="number" inputmode="numeric" min="2" max="7" value="' +
+            p.comidas + '" data-num="comidas"', '', 54)
+        }) +
+        campo({
+          tit: 'Hora a la que entrenas',
+          nota: 'Opcional. Si la dejas vacía, la deduzco de las horas a las que sueles entrenar.',
+          control: valor('type="time" value="' + (p.horaEntreno || '') +
+            '" data-txt="horaEntreno"', '', 142)
+        })))}
+
+      ${raw(grupo('Lo tuyo',
+        '<div class="campo campo-aviso">' +
+        '<b style="font-size:.88rem">Lo de aquí abajo es lo que más cambia lo que te propongo</b>' +
+        '<p class="tiny" style="margin:5px 0 0">De estos cuatro campos salen los menús que ' +
+        'te sugiero y los ejercicios que entran o no en tus rutinas. Si los dejas vacíos, ' +
+        'te propongo lo de siempre para cualquiera; si los rellenas, te propongo lo tuyo.</p>' +
+        '</div>' +
+        campo({
+          tit: 'Alimentación',
+          nota: 'Ningún menú te va a ofrecer algo que no comas.',
+          abajo: opciones('dieta', Perfil.DIETA, p.dieta)
+        }) +
+        campo({
+          tit: 'Alergias o alimentos que evitas',
+          nota: 'Quedan fuera de todo lo que te proponga, y si salen en la foto de un plato ' +
+            'te aviso.',
+          abajo: '<input class="campo-largo" value="' + esc(p.alergias) + '" data-txt="alergias" ' +
+            'placeholder="Lactosa, frutos secos…">'
+        }) +
+        campo({
+          tit: 'Lesiones o limitaciones',
+          nota: 'Lo que escribas aquí retira ejercicios de tus rutinas y de lo que te propone ' +
+            'el entrenador. Es lo que evita que te ofrezca algo que te haga daño.',
+          abajo: '<input class="campo-largo" value="' + esc(p.lesiones) + '" data-txt="lesiones" ' +
+            'placeholder="Hombro derecho, rodilla…">'
+        }) +
+        campo({
+          tit: 'Condiciones de salud',
+          nota: 'Para que el menú las tenga en cuenta. No sustituye a tu médico ni a un dietista.',
+          abajo: '<input class="campo-largo" value="' + esc(p.condiciones || '') +
+            '" data-txt="condiciones" placeholder="Tensión alta, colesterol, diabetes…">'
+        })))}
 
       ${raw(Perfil.completo(p) ? html`
         <div class="list-title">Tus números</div>
@@ -328,19 +385,9 @@
                    Perfil.pesoSaludable(p).max.toFixed(0) + ' kg' }))}
         </div>
         <p class="tiny" style="margin-top:10px">Estimaciones para población general
-        (Mifflin-St Jeor). No sustituyen la valoración de un profesional sanitario.</p>` : '')}
+        (Mifflin-St Jeor). Si tienes una condición médica, manda tu médico.</p>` : '')}
 
-      <div class="list-title">Registro de peso</div>
-      <div class="card">
-        <div class="tiny">Esto no guarda la página: apunta cuánto pesas hoy para ver tu
-        evolución. Tu peso de siempre se cambia arriba, en Cuerpo.</div>
-        <div class="row" style="margin-top:8px">
-          <input type="number" inputmode="decimal" step="0.1" id="peso-hoy"
-                 placeholder="Peso de hoy" class="grow">
-          <button class="btn primary" data-a="pesar">Apuntar</button>
-        </div>
-        ${raw(pesoHistorial())}
-      </div>`;
+      <div style="height:14px"></div>`;
   };
 
   function pesoHistorial() {

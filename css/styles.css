@@ -2567,3 +2567,66 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .pc-imc.ok { color: var(--acc); }
 .pc-imc.warn { color: var(--warn); }
 .pc-imc.bad { color: var(--bad); }
+
+/* ---------- el formulario de datos, como una lista de Ajustes ----------
+   Antes cada dato ocupaba tres renglones: rotulo en versales, parrafo y caja a
+   todo lo ancho. Ahora el nombre va a la izquierda, el valor a la derecha en
+   una pastilla que se toca, y la explicacion debajo en pequeno. Mismos textos,
+   la mitad de pantalla. */
+.campos { padding: 2px 13px; }
+
+.campo { padding: 11px 0; }
+.campo + .campo { border-top: 1px solid var(--line); }
+
+.campo-cab { display: flex; align-items: center; gap: 12px; min-height: 30px; }
+.campo-tit { flex: 1; min-width: 0; font-size: .92rem; font-weight: 600;
+  letter-spacing: -.01em; }
+.campo-nota { font-size: .76rem; color: var(--dim); margin-top: 3px; line-height: 1.35; }
+
+/* El valor: pastilla estrecha a la derecha. Que se vea que se toca, pero sin
+   el peso de una caja de formulario. */
+.campo-val { flex: none; display: inline-flex; align-items: baseline; gap: 5px; }
+.val-in {
+  text-align: right; padding: 6px 9px; margin: 0;
+  background: color-mix(in srgb, var(--card2) 70%, transparent);
+  border: 1px solid transparent; border-radius: 10px;
+  font-size: 1rem; font-weight: 700; color: var(--txt);
+  font-variant-numeric: tabular-nums;
+  transition: border-color .18s, background .18s;
+}
+.val-in:focus {
+  outline: none; border-color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 10%, var(--card2));
+}
+.val-u { font-size: .78rem; color: var(--dim); font-weight: 600; }
+/* El reloj del sistema trae su icono y, en formato de 12 horas, el AM/PM: con
+   el ancho de un numero corto se comia las letras. */
+.val-in[type="time"] { padding-left: 6px; padding-right: 6px; font-size: .95rem; }
+.campo-fijo { flex: none; font-size: 1rem; font-weight: 700;
+  font-variant-numeric: tabular-nums; }
+
+/* Las pildoras de opcion, debajo de su nombre */
+.campo-chips { gap: 6px; margin-top: 9px; }
+
+/* Los campos de texto largo —alergias, lesiones— si necesitan todo el ancho:
+   ahi no hay un numero corto que quepa a la derecha. */
+.campo-largo {
+  width: 100%; margin-top: 8px; padding: 9px 11px;
+  background: color-mix(in srgb, var(--card2) 70%, transparent);
+  border: 1px solid transparent; border-radius: 10px;
+  font-size: .92rem; color: var(--txt);
+}
+.campo-largo:focus { outline: none; border-color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 8%, var(--card2)); }
+
+/* El aviso de que lo de abajo es lo que mas cambia las propuestas */
+.campo-aviso {
+  margin: 10px -13px 0; padding: 11px 13px;
+  background: color-mix(in srgb, var(--acc) 10%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--acc) 22%, var(--line));
+  border-bottom: 1px solid color-mix(in srgb, var(--acc) 22%, var(--line));
+}
+.campo-aviso + .campo { border-top: 0; }
+
+html[data-theme="light"] .val-in,
+html[data-theme="light"] .campo-largo { background: #fff; border-color: var(--line); }
