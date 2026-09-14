@@ -560,6 +560,35 @@
     return zona ? zona.label.toLowerCase() : 'lo de hoy';
   }
 
+  /* Lo que ya se ha entrenado hoy. La portada empuja a entrenar, y empujar a
+     alguien a hacer lo que acaba de hacer es lo que convierte un botón grande
+     en ruido: cuando ya está hecho, lo que hace falta es decirlo. */
+  function loDeHoy() {
+    const clave = Store.dayKey(Date.now());
+    const ses = Store.sessions().filter(function (x) {
+      return Store.dayKey(x.start) === clave;
+    });
+    if (!ses.length) return null;
+
+    /* setsDone y volume los apunta la propia sesión al cerrarse: es lo mismo
+       que cuentan las cifras de la portada y el historial, así que aquí no se
+       vuelve a calcular por otro camino. */
+    let series = 0;
+    let volumen = 0;
+    let minutos = 0;
+    const nombres = [];
+    ses.forEach(function (x) {
+      series += x.setsDone || 0;
+      volumen += x.volume || 0;
+      minutos += Math.round(((x.end || x.start) - x.start) / 60000);
+      const n = (x.routineName || '').trim();
+      if (n && nombres.indexOf(n) === -1) nombres.push(n);
+    });
+
+    return { n: ses.length, series: series, volumen: volumen,
+      minutos: minutos, nombres: nombres };
+  }
+
   function viewInicio() {
     const st = Store.stats();
     const rutinas = Store.routines();
@@ -569,6 +598,7 @@
     const nombre = Store.settings().name;
     const olvido = abandonados();
     const peso = Perfil.tendencia(30);
+    const hecho = loDeHoy();
 
     /* Al volver tras un rato, la portada saluda antes que nada */
     const bienvenida = Saludo.pendiente();
@@ -588,10 +618,13 @@
       : html`
         <div class="hola entra">Hola${raw(nombre
           ? ', <span class="nombre">' + esc(nombre) + '</span>' : '')}</div>
-        <p class="muted entra entra-2 hola-sub" style="font-size:.92rem">${st.week === 0
-          ? 'Semana en blanco. Buen momento para empezar.'
-          : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
-          : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.'}</p>`)}
+        <p class="muted entra entra-2 hola-sub" style="font-size:.92rem">${raw(hecho
+          ? 'Muy bien. Llevas ' + st.week +
+            (st.week === 1 ? ' entrenamiento' : ' entrenamientos') + ' esta semana.'
+          : st.week === 0
+            ? 'Semana en blanco. Buen momento para empezar.'
+            : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
+            : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.')}</p>`)}
 
       <div class="muelle"></div>
       ${raw(activa ? html`
@@ -604,6 +637,25 @@
             <button class="btn primary" data-a="resume">Continuar</button>
           </div>
         </div>`
+      : hecho ? html`
+        <!-- Ya está hecho. Un botón verde de «Entrenar pecho» aquí es la app
+             pidiéndote que hagas lo que acabas de hacer: lo que toca es decir
+             que está hecho y dejar a mano lo único que tiene sentido después,
+             que es apuntar algo más si lo haces. -->
+        <div class="card tarjeta-premium hecho-hoy portada-hueco">
+          <span class="hh-silueta" aria-hidden="true">${raw(icon('check'))}</span>
+          <div class="hh-fila">
+            <span class="hh-disco">${raw(icon('check'))}</span>
+            <span class="grow">
+              <span class="pre-encima">Hoy · hecho</span>
+              <span class="hh-tit">${hecho.n > 1 ? 'Ya has entrenado dos veces hoy'
+                : 'Ya entrenaste hoy'}</span>
+              <span class="hh-sub">${raw(resumenHechoHTML(hecho))}</span>
+            </span>
+          </div>
+        </div>
+        <button class="enlace-flojo" data-a="empezarlibre">
+          Apuntar otro entrenamiento</button>`
       : deHoy.length ? html`
         <button class="btn primary block grande portada-hueco btn-arranque" data-a="entrenarhoy">
           ${raw(icon('play'))} Entrenar ${queEsHoy(deHoy)}
@@ -692,6 +744,18 @@
           </div>
           <button class="btn sm" data-a="irperfil">Apuntar peso</button>
         </div>` : '')}`;
+  }
+
+  /* Qué hiciste, en una línea. Sin cifras inventadas: si no se apuntó nada de
+     eso —un entrenamiento libre sin series, o un día importado— se dice lo que
+     hay y no se rellena el hueco. */
+  function resumenHechoHTML(h) {
+    const partes = [];
+    if (h.nombres.length) partes.push(esc(h.nombres.join(' · ')));
+    if (h.series) partes.push(h.series + (h.series === 1 ? ' serie' : ' series'));
+    if (h.volumen) partes.push(UI.kg(h.volumen) + ' levantados');
+    if (h.minutos >= 1) partes.push(h.minutos + ' min');
+    return partes.length ? partes.join(' · ') : 'Queda apuntado en tu historial.';
   }
 
   /* Resalta el nombre dentro del saludo, que es lo único que cambia de persona
@@ -1086,6 +1150,19 @@
     const musculos = musculosDeRutina(r);
     const abierta = rutinaAbierta[ambito] === r.id;
 
+    /* ¿Esta rutina ya está hecha hoy? En la portada y en «mi día» el botón
+       verde de Entrenar deja de tener sentido en cuanto la sesión está
+       apuntada: pedir que hagas lo que acabas de hacer no es una invitación,
+       es ruido. Se cambia por la marca de hecho; para repetirla, ahí está
+       Rutinas. */
+    const hechaHoy = (function () {
+      if (ambito !== 'inicio' && ambito !== 'dia') return false;
+      const clave = Store.dayKey(Date.now());
+      return Store.sessions().some(function (x) {
+        return x.routineId === r.id && Store.dayKey(x.start) === clave;
+      });
+    })();
+
     /* La tarjeta de la portada es otra cosa que una fila de lista: es lo
        primero que se mira al abrir la app y lo que se toca para empezar. Lleva
        la misma información, ordenada por lo que se pregunta uno al verla —qué
@@ -1098,7 +1175,7 @@
          sitios —que es lo que pasaba cuando la rutina no era de hoy— dejaba la
          tarjeta diciendo «Lunes y Miércoles» dos veces. */
       const que = r.mixta ? 'Mixta' : zona ? zona.label : 'Sin ejercicios';
-      const encima = (esDeHoy ? 'Hoy · ' : '') + que;
+      const encima = hechaHoy ? 'Hoy · hecho' : (esDeHoy ? 'Hoy · ' : '') + que;
 
       return html`
         <div class="hoy-fila">
@@ -1111,8 +1188,10 @@
             <div class="hoy-meta">${raw(sinPlan ? '' : esc(nombreRutina(r)) + ' · ')}${n}
               ${n === 1 ? 'ejercicio' : 'ejercicios'}</div>
           </button>
-          <button class="hoy-play" data-train="${r.id}">
-            ${raw(icon('play'))} Entrenar</button>
+          ${raw(hechaHoy
+            ? '<span class="hoy-hecho">' + icon('check') + ' Hecho</span>'
+            : '<button class="hoy-play" data-train="' + esc(r.id) + '">' +
+              icon('play') + ' Entrenar</button>')}
         </div>`;
     };
 
