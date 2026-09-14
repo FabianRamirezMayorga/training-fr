@@ -1122,37 +1122,154 @@
       <p class="muted">Conoce tu perfil, tus rutinas y tu progreso. No está aquí para
       darte la razón: si algo lo estás haciendo mal, te lo dice.</p>
 
-      <div class="card">
+      <!-- Preguntar es lo que se viene a hacer, así que va primero y con el
+           material bueno. La caja de antes era un campo de formulario gris con
+           un botón debajo. -->
+      <div class="card tarjeta-premium ia-caja">
+        <div class="pre-encima">Pregúntale lo que sea</div>
         <textarea id="ia-q" rows="3"
           placeholder="¿Estoy entrenando bien el pecho? ¿Cómo bajo grasa sin perder fuerza?"></textarea>
-        <button class="btn primary block" data-a="preguntar" style="margin-top:10px">
+
+        <!-- Un cuadro en blanco es lo más difícil de empezar. Estas salen de
+             tus datos, no de una lista fija: preguntan por lo que de verdad
+             tienes flojo esta semana. -->
+        <div class="ia-sugeridas">
+          ${raw(preguntasSugeridas().map(function (q) {
+            return '<button class="ia-sug" data-preg="' + esc(q) + '">' + esc(q) + '</button>';
+          }).join(''))}
+        </div>
+
+        <button class="btn primary block btn-arranque" data-a="preguntar" style="margin-top:12px">
           ${raw(icon('chispa'))} Preguntar</button>
       </div>
 
       <div id="ia-respuesta"></div>
 
-      <div class="list-title">Análisis rápidos</div>
-      <div class="list">
-        ${raw(filaAccion('grafica', 'Cómo voy', 'Lee tus últimos entrenamientos sin adornos', 'analizar'))}
-        ${raw(filaAccion('dumbbell', 'Audita mis rutinas', 'Les pone nota y dice qué falla', 'revisar'))}
-        ${raw(filaAccion('nutricion', 'Plan de comidas', 'Menú semanal con tus calorías', 'nutricion'))}
+      <div class="list-title">Lo que puede hacer por ti</div>
+      <div class="plan-acciones">
+        ${raw(filaAccion('grafica', '#4f8cf5', 'Cómo voy',
+          'Lee tus últimos entrenamientos sin adornos y dice qué se sostiene y qué no.',
+          'analizar'))}
+        ${raw(filaAccion('dumbbell', 'var(--acc)', 'Audita mis rutinas',
+          'Les pone nota del uno al diez y dice exactamente qué falla.', 'revisar'))}
+        ${raw(filaAccion('nutricion', '#f0a23c', 'Prepararme el menú',
+          'Semanal, con tus calorías, tu dieta y lo que tienes en casa.', 'nutricion'))}
       </div>
 
-      <div class="list-title">Ajustes de la IA</div>
-      <div class="list">
-        ${raw(filaAccion('chispa', 'Proveedor y clave',
-          IA.proveedorActual().label + ' · ' + (IA.config().modelo || ''), 'config'))}
-      </div>
-      <p class="tiny" style="margin-top:10px">Al preguntar se envían a Google tus datos de
-      perfil, rutinas y progreso. Tu clave se guarda solo en este dispositivo.</p>`;
+      <!-- Lo que sabe de ti, dicho por la app y no por el modelo. Es la
+           pregunta que se hace todo el mundo antes de fiarse de una respuesta,
+           y la contestación honesta es enumerarlo. -->
+      <details class="seccion" data-sec="iasabe">
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="list-title" style="margin:0">Qué sabe de ti</span>
+        </summary>
+        <div class="sec-cuerpo">
+          <div class="list">
+            ${raw(loQueSabe().map(function (x) {
+              return '<div class="list-row"><span class="row-icon">' + icon(x.icono) +
+                '</span><div class="grow"><div class="list-row-title">' + esc(x.que) +
+                '</div><div class="list-row-sub">' + esc(x.detalle) + '</div></div></div>';
+            }).join(''))}
+          </div>
+          <p class="tiny" style="margin-top:10px">Se manda en cada pregunta para que la
+          respuesta sea tuya y no de cualquiera. Tu clave no sale de este dispositivo, y las
+          fotos de comida se sueltan al terminar: no se guardan en ningún sitio.</p>
+        </div>
+      </details>
+
+      <div class="list-title">Ajustes</div>
+      <div class="plan-acciones">
+        ${raw(filaAccion('llave', '#c06bf0', 'Proveedor y clave',
+          IA.proveedorActual().label + (IA.config().modelo ? ' · ' + IA.config().modelo : ''),
+          'config'))}
+      </div>`;
   };
 
-  function filaAccion(ico, titulo, sub, accion) {
-    return '<div class="list-row tap" data-ia="' + accion + '">' +
-      '<span class="row-icon">' + icon(ico) + '</span>' +
-      '<div class="grow"><div class="list-row-title">' + esc(titulo) + '</div>' +
-      '<div class="list-row-sub">' + esc(sub) + '</div></div>' +
-      '<span class="chevron">' + icon('chevron') + '</span></div>';
+  /* ---------- por dónde empezar ----------
+     Un cuadro de texto en blanco es lo más difícil de rellenar que hay. Estas
+     preguntas no son una lista fija: salen de sus datos, así que preguntan por
+     lo que de verdad tiene flojo. Una sugerencia que le vale a cualquiera no
+     sirve para nada. */
+  function preguntasSugeridas() {
+    const fuera = [];
+
+    const s = Store.stats();
+
+    if (s.total < 3) {
+      fuera.push('¿Por dónde empiezo con mi nivel?');
+      fuera.push('¿Cuántos días a la semana me conviene entrenar?');
+    } else {
+      fuera.push('¿Voy bien de volumen para mi objetivo?');
+      fuera.push('¿Qué músculo tengo más flojo?');
+    }
+
+    const p = Perfil.datos();
+    if (Perfil.completo(p)) {
+      const o = (Perfil.OBJETIVO[p.objetivo] || {}).label;
+      if (o) fuera.push('¿Mi plan encaja con «' + o.toLowerCase() + '»?');
+    }
+    if (p.lesiones) fuera.push('¿Qué ejercicios debería evitar por mis lesiones?');
+    if (p.condiciones) fuera.push('¿Qué cambio por mis condiciones de salud?');
+    if (!p.lesiones && !p.condiciones) fuera.push('¿Cómo evito lesionarme?');
+
+    return fuera.slice(0, 4);
+  }
+
+  /* Lo que va en cada pregunta, contado por la app. Es lo que se pregunta todo
+     el mundo antes de fiarse de una respuesta. */
+  function loQueSabe() {
+    const p = Perfil.datos();
+    const s = Store.stats();
+    const rutinas = Store.routines();
+    const fuera = [];
+
+    fuera.push({
+      icono: 'perfil', que: 'Tu perfil',
+      detalle: Perfil.completo(p)
+        ? p.edad + ' años, ' + p.peso + ' kg, ' + p.altura + ' cm, objetivo ' +
+          ((Perfil.OBJETIVO[p.objetivo] || {}).label || '').toLowerCase() +
+          (p.lesiones ? ', y tus lesiones' : '') +
+          (p.condiciones ? ', y tus condiciones de salud' : '')
+        : 'Sin completar. Si falta, no se lo inventa: lo dice.'
+    });
+
+    fuera.push({
+      icono: 'dumbbell', que: 'Tus rutinas',
+      detalle: rutinas.length
+        ? rutinas.length + (rutinas.length === 1 ? ' rutina' : ' rutinas') +
+          ' con sus ejercicios, series y repeticiones'
+        : 'Ninguna guardada todavía'
+    });
+
+    fuera.push({
+      icono: 'grafica', que: 'Tu progreso',
+      detalle: s.total
+        ? s.total + ' entrenamientos, tus series por músculo y lo que llevas sin tocar'
+        : 'Sin entrenamientos registrados; no opina de lo que no ve'
+    });
+
+    if (g.Comidas) {
+      const h = Comidas.hoy();
+      fuera.push({
+        icono: 'nutricion', que: 'Lo que comes',
+        detalle: h.cuantas
+          ? 'Lo apuntado hoy y tus calorías objetivo'
+          : 'Tus calorías objetivo; hoy no has apuntado nada'
+      });
+    }
+
+    return fuera;
+  }
+
+  /* Una cosa que puede hacer, con su icono de color. El mismo patrón que las
+     acciones de un plan: una fila por cosa y el color diciendo cuál es cuál. */
+  function filaAccion(ico, color, titulo, sub, accion) {
+    return '<button class="fila-plan" data-ia="' + accion + '" style="--fp:' + color + '">' +
+      '<span class="fp-ico">' + icon(ico) + '</span>' +
+      '<span class="grow"><span class="fp-tit">' + esc(titulo) + '</span>' +
+      '<span class="fp-sub">' + esc(sub) + '</span></span>' +
+      '<span class="chevron">' + icon('chevron') + '</span></button>';
   }
 
   function configIAHTML() {
@@ -1163,20 +1280,37 @@
       <p class="muted">Analiza tu progreso, revisa tus rutinas y te prepara el plan de comidas.
       Funciona con el proveedor que elijas: Gemini tiene capa gratuita.</p>
 
-      <div class="card">
-        <ol class="instr">
+      <div class="card tarjeta-premium">
+        <div class="pre-encima">Se hace una vez</div>
+        <ol class="instr" style="margin:10px 0 0">
           <li>Entra en <a href="https://aistudio.google.com/apikey" target="_blank"
             rel="noopener noreferrer">aistudio.google.com/apikey</a> con tu cuenta de Google.</li>
           <li>Pulsa <b>Create API key</b> y copia la clave.</li>
           <li>Pégala aquí abajo. Se guarda solo en este dispositivo.</li>
         </ol>
-        <button class="btn primary block" data-a="boveda" style="margin-top:6px">
+        <button class="btn primary block btn-arranque" data-a="boveda" style="margin-top:14px">
           ${raw(icon('llave'))} Ir a la bóveda de claves</button>
       </div>
 
+      <div class="list-title">Qué hace y qué no</div>
+      <div class="list">
+        ${raw(filaEstadoIA(true, 'Lee tus datos reales',
+          'Tu perfil, tus rutinas, tu progreso y lo que comes.'))}
+        ${raw(filaEstadoIA(true, 'Tu clave no sale de aquí',
+          'Se guarda en este dispositivo y no viaja con la sincronización salvo que lo actives.'))}
+        ${raw(filaEstadoIA(false, 'No hace falta para lo demás',
+          'Las calorías, las rutinas y el registro funcionan igual sin ella.'))}
+      </div>
+
       <p class="tiny" style="margin-top:12px">La capa gratuita tiene un límite diario que
-      sobra para uso personal. Si lo superas, la app te avisa y sigue funcionando: los
-      cálculos de calorías y las rutinas no dependen de la IA.</p>`;
+      sobra para uso personal. Si lo superas, la app te avisa y sigue funcionando.</p>`;
+  }
+
+  function filaEstadoIA(si, titulo, sub) {
+    return '<div class="list-row"><span class="fe-marca ' + (si ? 'si' : 'no') + '">' +
+      icon(si ? 'check' : 'close') + '</span>' +
+      '<div class="grow"><div class="list-row-title">' + esc(titulo) + '</div>' +
+      '<div class="list-row-sub">' + esc(sub) + '</div></div></div>';
   }
 
   V.entrenador.mount = function (root) {
@@ -1189,6 +1323,15 @@
       caja.innerHTML = '<div class="card center"><div class="spinner" ' +
         'style="margin:6px auto 10px"></div><div class="tiny">' + esc(texto) + '</div></div>';
     };
+
+    /* Tocar una sugerencia la escribe en la caja y deja el cursor al final: es
+       un punto de partida, no una pregunta cerrada, y casi siempre se retoca. */
+    bindAll(root, '[data-preg]', function (el) {
+      const campo = root.querySelector('#ia-q');
+      campo.value = el.dataset.preg;
+      campo.focus();
+      campo.setSelectionRange(campo.value.length, campo.value.length);
+    });
 
     bind(root, '[data-a=preguntar]', function () {
       const q = root.querySelector('#ia-q').value.trim();

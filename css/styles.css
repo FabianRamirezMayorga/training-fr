@@ -3354,6 +3354,42 @@ html[data-theme="light"] .rec-h.sig {
   .rec .sw, .rec .sw::after { transition: none; }
 }
 
+/* ---------- el entrenador ----------
+   Preguntar es lo que se viene a hacer aqui, asi que va primero y con el
+   material bueno. La caja de antes era un campo de formulario gris con un boton
+   debajo, indistinguible de cualquier otro formulario de la app. */
+.ia-caja { margin-top: 12px; }
+.ia-caja textarea {
+  margin-top: 9px;
+  background: color-mix(in srgb, var(--card2) 72%, transparent);
+  border-color: transparent;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .22), inset 0 0 0 1px var(--vidrio-rim);
+  transition: box-shadow .18s ease, background .18s ease;
+}
+.ia-caja textarea:focus {
+  background: color-mix(in srgb, var(--card2) 90%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .18),
+              inset 0 0 0 1px color-mix(in srgb, var(--acc) 55%, transparent),
+              0 0 0 3px color-mix(in srgb, var(--acc) 16%, transparent);
+}
+html[data-theme="light"] .ia-caja textarea {
+  box-shadow: inset 0 1px 2px rgba(16, 24, 40, .07), inset 0 0 0 1px var(--line);
+}
+
+/* Por donde empezar. Un cuadro en blanco es lo mas dificil de rellenar que hay,
+   y estas salen de sus datos: preguntan por lo que de verdad tiene flojo. */
+.ia-sugeridas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.ia-sug {
+  border: 0; cursor: pointer; font: inherit; text-align: left;
+  font-size: .76rem; padding: 7px 11px; border-radius: 999px; color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 11%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim),
+              inset 0 0 0 1px color-mix(in srgb, var(--acc) 24%, transparent);
+  transition: transform .14s ease, background .16s ease;
+}
+.ia-sug:active { transform: scale(.97);
+  background: color-mix(in srgb, var(--acc) 18%, transparent); }
+
 /* La campana de la cabecera, con su punto cuando falta algo. Sin el punto,
    quien no tenga los avisos dados no tiene por que saber que detras de una
    campana hay algo que arreglar. */
