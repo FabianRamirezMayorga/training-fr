@@ -3750,14 +3750,27 @@ html[data-theme="light"] .al-dia.on { box-shadow: none; }
    al lado. Una portada de lista es cuadrada, asi que recortarla a 56x44 le
    cortaba la cabeza a todas; y con el nombre del mismo tamano que sus datos
    habia que leer la fila entera para saber cual era cual. */
+/* El mismo material que una cancion: son la misma fila y el mismo gesto */
 .sp-lista {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 10px 9px 9px; border-radius: 16px;
-  background: linear-gradient(180deg, var(--vidrio-luz), transparent 55%), var(--card);
-  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
-  transition: box-shadow .18s ease, transform .14s ease;
+  border: 1px solid color-mix(in srgb, #fff 9%, transparent);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, #fff 9%, transparent) 0%,
+      color-mix(in srgb, #fff 2%, transparent) 45%,
+      transparent 75%),
+    color-mix(in srgb, var(--card) 80%, transparent);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 13%, transparent),
+    inset 0 -10px 18px -14px rgba(0, 0, 0, .55),
+    0 4px 14px rgba(0, 0, 0, .26);
+  transition: box-shadow .18s ease, transform .14s ease, border-color .18s ease;
 }
-.sp-lista:active { transform: scale(.994); }
+.sp-lista:active { transform: scale(.985); }
+.sp-lista:hover { border-color: color-mix(in srgb, #fff 15%, transparent); }
 
 .sp-cara {
   display: flex; align-items: center; gap: 11px; flex: 1; min-width: 0;
@@ -3816,10 +3829,6 @@ html[data-theme="light"] .al-dia.on { box-shadow: none; }
   }
 }
 
-html[data-theme="light"] .sp-lista {
-  background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line), var(--vidrio-sombra-corta);
-}
 html[data-theme="light"] .sp-portada { box-shadow: inset 0 0 0 1px var(--line); }
 
 /* ---------- lo de dentro de una emergente ----------
@@ -3843,16 +3852,36 @@ html[data-theme="light"] .modal-box .volcado {
    Eran filas con borde de hilo y fondo macizo, y las listas de Spotify de al
    lado ya eran de vidrio: dos cosas que se hacen igual —mirar una fila y darle
    al play— no pueden estar hechas de materiales distintos. */
+/* Vidrio de verdad y no el de las tarjetas grandes. Los tokens --vidrio-rim y
+   --vidrio-luz estan calibrados para una tarjeta de media pantalla: blanco al 7
+   y al 4 por ciento, que en una superficie grande da cuerpo y en una fila de 60
+   px no se ve. Aqui hacen falta las cuatro cosas y mas marcadas. */
 .pista {
   display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
-  padding: 9px 10px 9px 9px; border: 0; border-radius: 16px; cursor: pointer;
-  background: linear-gradient(180deg, var(--vidrio-luz), transparent 55%), var(--card);
-  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
-  transition: box-shadow .18s ease, transform .14s ease;
+  padding: 9px 10px 9px 9px; border-radius: 16px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, #fff 9%, transparent);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, #fff 9%, transparent) 0%,
+      color-mix(in srgb, #fff 2%, transparent) 45%,
+      transparent 75%),
+    color-mix(in srgb, var(--card) 80%, transparent);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 13%, transparent),
+    inset 0 -10px 18px -14px rgba(0, 0, 0, .55),
+    0 4px 14px rgba(0, 0, 0, .26);
+  transition: box-shadow .18s ease, transform .14s ease, border-color .18s ease;
 }
-.pista:active { transform: scale(.994); }
-.pista:hover { background: linear-gradient(180deg, var(--vidrio-luz), transparent 55%),
-  var(--card); }
+.pista:active { transform: scale(.985); }
+.pista:hover {
+  border-color: color-mix(in srgb, #fff 15%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent),
+    inset 0 -10px 18px -14px rgba(0, 0, 0, .55),
+    0 6px 18px rgba(0, 0, 0, .3);
+}
 
 /* El play, redondo y del color, como en las listas */
 .pista > svg {
@@ -3869,7 +3898,10 @@ html[data-theme="light"] .modal-box .volcado {
 }
 .pista .player-t { font-weight: 700; font-size: .92rem; letter-spacing: -.012em; }
 
-html[data-theme="light"] .pista {
-  background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line), var(--vidrio-sombra-corta);
+html[data-theme="light"] .pista,
+html[data-theme="light"] .sp-lista {
+  background: linear-gradient(180deg, #fff 0%,
+              color-mix(in srgb, #fff 90%, transparent) 100%);
+  border-color: color-mix(in srgb, #141922 9%, transparent);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .07), 0 6px 16px rgba(16, 24, 40, .08);
 }
