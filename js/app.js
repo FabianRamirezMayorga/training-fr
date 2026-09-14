@@ -1422,11 +1422,10 @@
             ? '<span class="bf-num">' + puestos + '</span>' : '')}
         </button>
       </div>
-      <p class="muted" style="margin-top:6px">
-        ${UI.num(res.length)} ejercicios${raw(sinFiltro
-          ? ' del catálogo completo'
-          : ' que puedes hacer ' + esc(lugar))}, con la técnica animada.
-      </p>
+      <!-- Una línea y de las pequeñas: eran dos renglones de texto grande
+           contando lo que se ve solo en cuanto bajas un dedo. -->
+      <p class="tiny ej-sub">${UI.num(res.length)} ejercicios · ${raw(sinFiltro
+        ? 'catálogo completo' : esc(lugar))}</p>
 
       <div class="search-wrap" style="margin-bottom:10px">
         ${raw(icon('search'))}

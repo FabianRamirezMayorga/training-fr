@@ -1530,3 +1530,6 @@ img[src^="data/img/"] {
 .menu-fila + .menu-fila { border-top: 1px solid var(--line); }
 .menu-fila.ahora { border-left-color: var(--acc); }
 .menu-fila.ahora b { color: var(--acc); }
+
+/* El subtitulo de Ejercicios: una linea fina bajo el titulo. */
+.ej-sub { margin: 5px 0 9px; }
