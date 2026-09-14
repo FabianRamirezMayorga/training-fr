@@ -953,8 +953,17 @@
         ${raw(icon('back'))} Perfil</button>
       <div class="row between">
         <h1 style="margin:0">Alertas</h1>
-        <button class="btn primary sm btn-arranque" data-a="nueva">
-          ${raw(icon('plus'))} Nueva</button>
+        <span class="row" style="gap:8px">
+          <!-- El estado de los avisos se gestiona desde aquí. Con su punto
+               cuando falta algo: si no, quien no los tenga dados no tiene por
+               qué saber que detrás de una campana hay algo que arreglar. -->
+          <button class="btn sm icon-vidrio campana-estado${raw(
+            Alertas.diagnostico().permiso === 'granted' ? '' : ' pendiente')}"
+            data-a="avisos" aria-label="Estado de los avisos"
+            title="Estado de los avisos">${raw(icon('campana'))}</button>
+          <button class="btn primary sm btn-arranque" data-a="nueva">
+            ${raw(icon('plus'))} Nueva</button>
+        </span>
       </div>
       <p class="muted" style="margin-top:8px">${raw(lista.length
         ? 'Tienes ' + lista.length + (lista.length === 1 ? ' recordatorio' : ' recordatorios') +
@@ -1070,20 +1079,77 @@
         </div>`;
     }
 
-    /* Concedidos. Aquí ya no hay nada que arreglar, así que lo único útil es
-       poder comprobarlo y saber qué no va a pasar con la app cerrada. */
-    return html`
+    /* Concedidos: aquí arriba no hay nada que arreglar, así que aquí arriba no
+       va nada. La confirmación y el botón de probar se van al final de la
+       pantalla, que es donde se buscan —cuando ya funciona, no urge—. */
+    return '';
+  }
+
+  /* ---------- el estado de los avisos, en su hoja ----------
+     Cuando ya funcionan no hay nada que hacer aquí, así que no tiene por qué
+     ocupar sitio en la pantalla: vive detrás de la campana de la cabecera y se
+     abre cuando se quiere mirar. Lo que sí sigue arriba, en la pantalla, es lo
+     que hay que arreglar —eso no se esconde detrás de nada—. */
+  function avisosSheet() {
+    const d = Alertas.diagnostico();
+
+    UI.modal(html`
+      <h2>Los avisos</h2>
+
       <div class="card tarjeta-premium" style="margin-top:12px">
-        <div class="row between" style="align-items:center;gap:10px">
-          <div class="grow" style="min-width:0">
-            <div class="pre-encima">Avisos activados</div>
-            <p class="tiny" style="margin:4px 0 0">${raw(d.ultimoAviso
-              ? 'El último salió ' + esc(UI.fechaCorta(d.ultimoAviso)) + '.'
-              : 'Todavía no ha salido ninguno.')}</p>
-          </div>
-          <button class="btn sm" data-a="probarAviso">${raw(icon('campana'))} Probar</button>
-        </div>
-      </div>`;
+        <div class="pre-encima">${d.permiso === 'granted' ? 'Activados'
+          : d.permiso === 'denied' ? 'Bloqueados' : 'Sin activar'}</div>
+        <p class="muted" style="margin:6px 0 0;font-size:.88rem">${raw(
+          d.permiso === 'granted'
+            ? (d.ultimoAviso
+                ? 'El último salió ' + esc(UI.fechaCorta(d.ultimoAviso)) + '.'
+                : 'Todavía no ha salido ninguno.')
+            : 'Ahora mismo no va a sonar nada. Cierra esto y mira la tarjeta de ' +
+              'arriba: ahí están los pasos.')}</p>
+        ${raw(d.permiso === 'granted'
+          ? '<button class="btn block btn-arranque" data-x="probar" style="margin-top:12px">' +
+            icon('campana') + ' Lanzar uno de prueba</button>'
+          : '')}
+      </div>
+
+      <div class="list-title">Qué funciona y qué no</div>
+      <div class="list">
+        ${raw(filaEstado('Con la app abierta', true,
+          'Suenan a su hora, aunque la tengas en segundo plano.'))}
+        ${raw(filaEstado('Con la app cerrada', false,
+          'Una página web no ejecuta nada cerrada. Para eso está el calendario, ' +
+          'abajo del todo.'))}
+        ${raw(filaEstado('En la pantalla de inicio', d.instalada || !d.esIOS,
+          d.esIOS
+            ? (d.instalada ? 'Instalada, que es donde el iPhone permite los avisos.'
+                : 'En el iPhone hacen falta desde la app instalada, no desde el navegador.')
+            : 'No hace falta instalarla en este dispositivo.'))}
+      </div>
+
+      <p class="tiny" style="margin-top:12px">${raw(d.activas
+        ? esc(d.activas + (d.activas === 1 ? ' recordatorio encendido.' :
+            ' recordatorios encendidos.'))
+        : 'No tienes ninguno encendido, así que no hay nada que pueda sonar.')}</p>
+
+      <button class="btn ghost block sm" data-x="cerrar" style="margin-top:12px">Cerrar</button>`,
+      function (el) {
+        el.querySelector('[data-x=cerrar]').onclick = UI.closeModal;
+        const probar = el.querySelector('[data-x=probar]');
+        if (probar) probar.onclick = function () {
+          Alertas.probar()
+            .then(function () { UI.toast('Aviso lanzado: mira la pantalla'); })
+            .catch(function (e) { UI.toast(e.message || 'No se pudo lanzar'); });
+        };
+      });
+  }
+
+  /* Una fila de «esto sí / esto no». Un visto y un aspa dicen en medio segundo
+     lo que un párrafo tarda en decir en tres líneas. */
+  function filaEstado(titulo, si, sub) {
+    return '<div class="list-row"><span class="fe-marca ' + (si ? 'si' : 'no') + '">' +
+      icon(si ? 'check' : 'close') + '</span>' +
+      '<div class="grow"><div class="list-row-title">' + esc(titulo) + '</div>' +
+      '<div class="list-row-sub">' + esc(sub) + '</div></div></div>';
   }
 
   /* Cuál es el siguiente que va a sonar hoy. Una lista de recordatorios dice a
@@ -1233,11 +1299,7 @@
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=nueva]', function () { alertaSheet(null); });
 
-    bind(root, '[data-a=probarAviso]', function () {
-      Alertas.probar()
-        .then(function () { UI.toast('Aviso lanzado: mira la pantalla'); })
-        .catch(function (e) { UI.toast(e.message || 'No se pudo lanzar'); });
-    });
+    bind(root, '[data-a=avisos]', avisosSheet);
 
     bind(root, '[data-a=permiso]', function () {
       Alertas.pedirPermiso().then(function (r) {
