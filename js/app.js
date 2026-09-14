@@ -912,32 +912,56 @@
         ]))}
         ${raw(abierto ? '<div class="stack">' +
           suyas.map(function (r) { return routineCard(r, 0, 0, true, 'plan'); }).join('') + '</div>' +
-          (k === activo
-            ? '<p class="tiny" style="margin:10px 0 0">Este es el plan que manda: en ' +
-              '«hoy» solo salen sus rutinas.</p>' +
-              '<button class="btn block sm" data-planactivo="" style="margin-top:6px">' +
-              'Dejar de usarlo como plan principal</button>'
-            : '<button class="btn block sm" data-planactivo="' + esc(k) + '" ' +
-              'style="margin-top:10px">' + icon('check') + ' Usar este como plan principal' +
-              '</button>' +
-              '<p class="tiny" style="margin:6px 0 0">En «hoy» solo saldrán las rutinas ' +
-              'de este plan. Los demás siguen aquí para entrenarlos cuando quieras.</p>') +
-          '<button class="btn block sm" data-iaplan="' + esc(k) + '" ' +
-          'style="margin-top:10px">' + icon('chispa') + ' Revisar el plan con IA</button>' +
-          '<p class="tiny" style="margin:6px 0 0">Lee los ' + suyas.length +
-          ' d\u00edas juntos: el reparto entre m\u00fasculos, lo que se repite y lo que falta. ' +
-          'Lo que proponga se aplica sobre estas mismas rutinas.</p>' +
-          '<button class="btn block sm" data-duplicarplan="' + esc(k) + '" ' +
-          'style="margin-top:8px">' + icon('copiar') + ' Duplicar el plan entero</button>' +
-          '<button class="btn block sm" data-compartirplan="' + esc(k) + '" ' +
-          'style="margin-top:8px">' + icon('compartir') + ' Compartir el plan</button>' +
-          '<button class="btn ghost block sm danger" data-borrarplan="' + esc(k) + '" ' +
-          'style="margin-top:10px">' + icon('trash') + ' Borrar el plan entero (' +
-          suyas.length + (suyas.length === 1 ? ' rutina' : ' rutinas') + ')</button>' : '')}
+          accionesPlanHTML(k, suyas.length, k === activo) : '')}
         </div>`;
     }).join('');
 
     return arriba + html`<div class="list-title">Mis planes de entrenamiento</div>` + bloques;
+  }
+
+  /* Lo que se puede hacer con un plan entero.
+     Eran cinco botones a todo lo ancho con dos parrafos metidos entre medias:
+     un muro gris donde borrar el plan pesaba lo mismo que compartirlo. Ahora es
+     una lista de filas con su icono de color —cada accion el suyo, y el del
+     plan principal el tono del propio plan— y entran una detras de otra al
+     abrirlo. La de borrar va aparte, abajo y en rojo, que es lo unico
+     irreversible de la lista. */
+  function accionesPlanHTML(nombre, cuantas, esActivo) {
+    const id = esc(nombre);
+
+    const fila = function (attr, ico, color, titulo, sub, extra) {
+      return '<button class="fila-plan' + (extra || '') + '" ' + attr +
+        ' style="--fp:' + color + '">' +
+        '<span class="fp-ico">' + icon(ico) + '</span>' +
+        '<span class="grow"><span class="fp-tit">' + esc(titulo) + '</span>' +
+        (sub ? '<span class="fp-sub">' + esc(sub) + '</span>' : '') + '</span>' +
+        '<span class="chevron">' + icon('chevron') + '</span></button>';
+    };
+
+    return '<div class="plan-acciones">' +
+      (esActivo
+        ? fila('data-planactivo=""', 'check', 'var(--tono)',
+            'Dejar de ser el plan principal',
+            'Ahora manda este: en \u00abhoy\u00bb solo salen sus rutinas.', ' es-principal')
+        : fila('data-planactivo="' + id + '"', 'check', 'var(--tono)',
+            'Usar este como plan principal',
+            'En \u00abhoy\u00bb solo saldr\u00e1n las suyas. Los dem\u00e1s siguen aqu\u00ed.')) +
+
+      fila('data-iaplan="' + id + '"', 'chispa', '#c06bf0', 'Revisar el plan con IA',
+        'Lee los ' + cuantas + ' d\u00edas juntos: el reparto entre m\u00fasculos, lo que se ' +
+        'repite y lo que falta.') +
+
+      fila('data-duplicarplan="' + id + '"', 'copiar', '#4f8cf5', 'Duplicar el plan entero',
+        'Una copia con sus rutinas, para probar cambios sin tocar este.') +
+
+      fila('data-compartirplan="' + id + '"', 'compartir', '#2fc4b2', 'Compartir el plan',
+        'Un enlace con las ' + cuantas + ' rutinas dentro.') +
+
+      fila('data-borrarplan="' + id + '"', 'trash', 'var(--bad)',
+        'Borrar el plan entero',
+        cuantas + (cuantas === 1 ? ' rutina' : ' rutinas') + '. No se puede deshacer.',
+        ' es-peligro') +
+      '</div>';
   }
 
   /* Fila que se desliza para descubrir sus acciones. El contenido va delante y

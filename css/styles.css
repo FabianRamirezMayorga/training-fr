@@ -2181,3 +2181,76 @@ html[data-theme="light"] .plan-caja .desliza-cara > .dia-grupo {
 .tarjeta-hoy.compacta .hoy-play svg { width: 15px; height: 15px; }
 .tarjeta-hoy.compacta .hoy-marca .cuerpo { width: 86px; }
 .plan-caja .stack { gap: 7px; }
+
+/* ---------- lo que se hace con un plan entero ----------
+   Cinco botones iguales a todo lo ancho, con parrafos entre medias, hacian un
+   muro gris donde borrar pesaba lo mismo que compartir. En filas con su icono
+   de color se distingue de un vistazo, y el rojo de abajo avisa solo.
+
+   Cada fila trae su color en --fp: el de la primera es el tono del plan, asi
+   que en el plan azul es azul. */
+.plan-acciones {
+  margin: 9px; padding: 0; overflow: hidden;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--card2) 55%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+.fila-plan {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  padding: 9px 11px; background: none; border: 0; color: inherit;
+  text-align: left; cursor: pointer;
+  transition: background .2s ease;
+  /* entran una detras de otra al abrir el plan */
+  animation: fila-plan-entra .4s cubic-bezier(.2, .8, .3, 1) both;
+}
+.fila-plan:nth-child(1) { animation-delay: .02s; }
+.fila-plan:nth-child(2) { animation-delay: .06s; }
+.fila-plan:nth-child(3) { animation-delay: .10s; }
+.fila-plan:nth-child(4) { animation-delay: .14s; }
+.fila-plan:nth-child(5) { animation-delay: .18s; }
+
+@keyframes fila-plan-entra {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.fila-plan + .fila-plan { border-top: 1px solid var(--line); }
+.fila-plan:active { background: color-mix(in srgb, var(--fp) 13%, transparent); }
+
+.fp-ico {
+  flex: none; width: 30px; height: 30px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fp);
+  background: color-mix(in srgb, var(--fp) 15%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent);
+  transition: transform .2s cubic-bezier(.2, .9, .3, 1);
+}
+.fila-plan:active .fp-ico { transform: scale(.9); }
+.fp-ico svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+
+.fila-plan .grow { min-width: 0; }
+.fp-tit { display: block; font-size: .88rem; font-weight: 600; letter-spacing: -.01em; }
+.fp-sub { display: block; font-size: .74rem; color: var(--dim); margin-top: 1px;
+  line-height: 1.3; }
+.fila-plan .chevron { flex: none; color: var(--dim2); }
+.fila-plan .chevron svg { width: 14px; height: 14px; fill: none;
+  stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+
+/* El plan que ya manda lo dice con su icono encendido. */
+.fila-plan.es-principal .fp-ico {
+  background: var(--fp); color: var(--on-acc);
+}
+.fila-plan.es-peligro .fp-tit { color: var(--bad); }
+
+html[data-theme="light"] .plan-acciones {
+  background: color-mix(in srgb, #fff 75%, transparent);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fila-plan { animation: none; }
+}
