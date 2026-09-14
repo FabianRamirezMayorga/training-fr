@@ -207,10 +207,39 @@
     return plan.dias[i] || null;
   }
 
+  /* ¿Este día del menú es hoy? Si el menú no nombra los días —los hay que
+     vienen numerados—, se cuenta por posición con el lunes primero, que es como
+     se lee un plan semanal. */
+  function esElDiaDeHoy(d, i, cuantos) {
+    const hoy = DIAS_LARGOS[new Date().getDay()];
+    if (d && d.dia && g.I18N) return I18N.norm(String(d.dia)) === I18N.norm(hoy);
+    return cuantos === 7 && i === (new Date().getDay() + 6) % 7;
+  }
+
+  /* El día de hoy con su sitio: qué menú es y qué índice ocupa el día dentro.
+     diaDeHoy() devuelve el día suelto, y con eso no se puede construir la
+     referencia «menú|día|comida» que necesita marcar una comida. */
+  function hoyConRef() {
+    const m = activo();
+    const dias = (m && m.plan && m.plan.dias) || [];
+    if (!dias.length) return null;
+
+    const hoy = DIAS_LARGOS[new Date().getDay()];
+    for (let i = 0; i < dias.length; i++) {
+      if (g.I18N && I18N.norm(String(dias[i].dia || '')) === I18N.norm(hoy)) {
+        return { menu: m, dia: dias[i], i: i };
+      }
+    }
+    const i = (new Date().getDay() + 6) % 7;
+    return dias[i] ? { menu: m, dia: dias[i], i: i } : null;
+  }
+
   g.Menus = {
     lista: lista, porId: porId, activo: activo, activoId: activoId,
     marcarActivo: marcarActivo, crear: crear, actualizar: actualizar,
     renombrar: renombrar, duplicar: duplicar, borrar: borrar,
-    nombreLibre: nombreLibre, diaDeHoy: diaDeHoy, tono: tono, migrar: migrar
+    nombreLibre: nombreLibre, diaDeHoy: diaDeHoy, hoyConRef: hoyConRef,
+    esElDiaDeHoy: esElDiaDeHoy,
+    tono: tono, migrar: migrar
   };
 })(window);

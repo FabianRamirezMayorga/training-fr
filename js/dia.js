@@ -92,17 +92,17 @@
             </div>
             <button class="btn primary" data-a="entrenar">${raw(icon('play'))} Entrenar</button>
           </div>
+          <!-- La rutina entera y no los cuatro primeros con un «y 1 más»:
+               esta pantalla es «el día entero», y un resumen recortado del día
+               entero es justo lo que ya da la portada. -->
           <div class="rt-detalle" style="margin-top:10px">
-            ${raw(rutina.exercises.slice(0, 4).map(function (e, k) {
+            ${raw(rutina.exercises.map(function (e, k) {
               const ex = Data.get(e.exId);
-              return '<div class="row between" style="padding:4px 0;gap:10px">' +
+              return '<div class="row between" style="padding:5px 0;gap:10px">' +
                 '<span style="font-size:.86rem">' + (k + 1) + '. ' +
                 esc(ex ? ex.nameEs : e.exId) + '</span>' +
-                '<span class="tiny">' + e.sets + ' × ' + e.reps + '</span></div>';
+                '<span class="tiny nowrap">' + e.sets + ' × ' + e.reps + '</span></div>';
             }).join(''))}
-            ${raw(rutina.exercises.length > 4
-              ? '<div class="tiny" style="padding:4px 0">y ' +
-                (rutina.exercises.length - 4) + ' más</div>' : '')}
           </div>
         </div>`
       : html`
@@ -167,21 +167,10 @@
       <!-- ============ qué comer ============ -->
       <div class="list-title">Qué te toca comer hoy</div>
       ${raw(menu ? html`
-        <div class="card">
-          ${raw((menu.comidas || []).map(function (c) {
-            return '<div style="padding:7px 0">' +
-              '<div class="row between" style="gap:10px">' +
-              '<b style="font-size:.92rem">' + esc(c.nombre || 'Comida') +
-              (c.hora ? ' <span class="tiny">' + esc(c.hora) + '</span>' : '') + '</b>' +
-              '<span class="tiny">' + UI.num(c.kcal || 0) + ' kcal · ' +
-              (c.prot || 0) + ' g</span></div>' +
-              '<p style="margin:3px 0 0;font-size:.88rem">' + esc(c.plato || '') + '</p>' +
-              ((c.alternativas || []).length
-                ? '<p class="tiny" style="margin:3px 0 0">O bien: ' +
-                  esc(c.alternativas.join(' · ')) + '</p>' : '') +
-              '</div>';
-          }).join('<div class="hr"></div>'))}
-        </div>
+        <!-- Con sus marcas: hasta ahora esto era una lista para leer, y para
+             decir que te lo habías comido había que bajar a Alimentación,
+             abrir el menú y buscar el día. Lo tenías delante. -->
+        ${raw(Marcar.hoyHTML())}
         <p class="tiny" style="margin:8px 0 0">Del menú que te preparó el
         entrenador. <b data-a="menu" style="color:var(--acc)">Ver la semana entera</b></p>`
       : html`
@@ -194,10 +183,15 @@
             ${raw(icon('chispa'))} Prepararme el menú</button>
         </div>`)}
 
+      ${raw(Marcar.aguaDeHoyHTML())}
+
       <div style="height:10px"></div>`;
   };
 
   V.dia.mount = function (root) {
+    /* Marcar comidas y agua lo lleva su módulo, el mismo que en Alimentación */
+    if (g.Marcar) Marcar.bind(root);
+
     App.bind(root, '[data-a=atras]', function () { App.go('inicio'); });
     App.bind(root, '[data-a=rutinas]', function () { App.go('rutinas'); });
     App.bind(root, '[data-a=datos]', function () { App.go('datos'); });

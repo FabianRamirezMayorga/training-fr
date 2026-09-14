@@ -432,8 +432,11 @@
      Si no hay menu hecho, aqui no sale nada: una seccion vacia invitando a
      generar algo es justo lo que sobra en una portada. */
   function menuHoyHTML() {
-    if (!g.VISTAS || !VISTAS.menuDeHoy) return '';
-    const menu = VISTAS.menuDeHoy();
+    /* Con su sitio dentro del menú, que es lo que hace falta para poder
+       marcarlo desde aquí y no solo leerlo. */
+    const sitio = g.Menus && Menus.hoyConRef ? Menus.hoyConRef() : null;
+    const menu = sitio ? sitio.dia
+      : (g.VISTAS && VISTAS.menuDeHoy ? VISTAS.menuDeHoy() : null);
     const comidas = (menu && menu.comidas) || [];
     if (!comidas.length) return '';
 
@@ -458,15 +461,22 @@
             ? 'Ahora: ' + (toca.nombre || 'comer') : UI.num(kcal) + ' kcal'}</span>
         </summary>
         <div class="fino-cuerpo">
-          ${raw(comidas.map(function (c) {
+          ${raw(comidas.map(function (c, j) {
             const esAhora = c === toca;
-            return '<div class="menu-fila' + (esAhora ? ' ahora' : '') + '">' +
+            const r = sitio && g.Marcar ? Marcar.ref(sitio.menu.id, sitio.i, j) : '';
+            const hecha = r && g.Comidas && Comidas.seLleva() ? Comidas.marcada(r) : null;
+
+            return '<div class="menu-fila' + (esAhora ? ' ahora' : '') +
+              (hecha ? ' es-hecha' : '') + '">' +
               '<div class="row between" style="gap:10px">' +
               '<b style="font-size:.86rem">' + esc(c.nombre || 'Comida') +
               (c.hora ? ' <span class="tiny">' + esc(c.hora) + '</span>' : '') + '</b>' +
               '<span class="tiny nowrap">' + UI.num(c.kcal || 0) + ' kcal · ' +
               (c.prot || 0) + ' g</span></div>' +
               '<p style="margin:2px 0 0;font-size:.85rem">' + esc(c.plato || '') + '</p>' +
+              /* Y aquí mismo se marca. Tenerlo delante y tener que bajar a
+                 Alimentación para decir que te lo comiste no tiene sentido. */
+              (r ? Marcar.comidaHTML(r, c, true) : '') +
               '</div>';
           }).join(''))}
           <button class="btn sm block" data-a="irnutricion" style="margin-top:9px">
@@ -1198,6 +1208,10 @@
   }
 
   viewInicio.mount = function (root) {
+    /* Marcar el menú de hoy desde aquí mismo, con el mismo módulo que
+       Alimentación y «mi día». */
+    if (g.Marcar) Marcar.bind(root);
+
     recordarSecciones(root);
     bind(root, '[data-a=cerrarSaludo]', function () { Saludo.descartar(); render(); });
     bind(root, '[data-a=irCuenta]', function () { go('cuenta'); });
