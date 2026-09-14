@@ -2363,6 +2363,10 @@ html[data-theme="light"] .sem-caja.es-ahora {
   background: color-mix(in srgb, var(--acc) 14%, transparent); }
 .delta.baja { color: var(--warn);
   background: color-mix(in srgb, var(--warn) 14%, transparent); }
+/* Sin opinion: el peso sube o baja y ya, si no hay un objetivo que diga cual
+   de las dos cosas buscabas. */
+.delta.neutro { color: var(--dim);
+  background: color-mix(in srgb, var(--dim) 12%, transparent); }
 
 /* ---------- cuando llegas a una meta ----------
    La barra de progreso dice donde estas. Esto dice cuando llegas, que es lo
@@ -2430,3 +2434,59 @@ html[data-theme="light"] .sem-caja.es-ahora {
   font-variant-numeric: tabular-nums; }
 .ts-dia.hoy .ts-letra, .ts-dia.hoy .ts-num { color: var(--txt); font-weight: 700; }
 .ts-dia.hoy i { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+/* ---------- como va cada ejercicio ----------
+   Nombre, de cuanto a cuanto, la forma de la curva y el cambio. Cuatro datos
+   en una linea: mas no cabe y menos no dice nada. */
+.lista-ejs { padding: 0; overflow: hidden; }
+
+.fila-ej {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 9px 12px; background: none; border: 0; color: inherit;
+  text-align: left; cursor: pointer;
+  transition: background .2s ease;
+  animation: fila-plan-entra .4s cubic-bezier(.2, .8, .3, 1) both;
+  animation-delay: calc(var(--turno, 0) * 26ms);
+}
+.fila-ej + .fila-ej { border-top: 1px solid var(--line); }
+.fila-ej:active { background: color-mix(in srgb, var(--acc) 10%, transparent); }
+
+.fila-ej .grow { min-width: 0; }
+.ej-tit { display: block; font-size: .88rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ej-sub { display: block; font-size: .74rem; color: var(--dim); margin-top: 1px;
+  font-variant-numeric: tabular-nums; }
+
+.chispa { width: 62px; height: 20px; flex: none; }
+.chispa path { fill: none; stroke: var(--acc); stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
+
+.ej-dif {
+  flex: none; min-width: 46px; text-align: right;
+  font-size: .78rem; font-weight: 800; color: var(--dim2);
+  font-variant-numeric: tabular-nums;
+}
+.ej-dif.sube { color: var(--acc); }
+.ej-dif.baja { color: var(--warn); }
+
+/* El record que ha caido dentro del periodo que estas mirando. */
+.pr-nuevo {
+  display: inline-block; margin-left: 6px; padding: 1px 6px;
+  border-radius: 999px; font-size: .62rem; font-weight: 800;
+  letter-spacing: .05em; text-transform: uppercase;
+  color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fila-ej { animation: none; }
+}
+
+/* La curva del peso: su propia escala, sin relleno ni ejes. */
+.curva-peso { width: 100%; height: 76px; display: block; margin-top: 10px;
+  overflow: visible; }
+.cp-linea { fill: none; stroke: var(--acc); stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round; }
+.cp-hoy { fill: var(--acc); }
+@media (prefers-reduced-motion: no-preference) {
+  .cp-linea { animation: mg-trazo .9s cubic-bezier(.3, .9, .3, 1) both; }
+}

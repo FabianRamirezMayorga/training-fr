@@ -190,6 +190,176 @@
       </div>`;
   }
 
+  /* ---------- como va cada ejercicio ----------
+     La pregunta que la app no sabia contestar: «subo en press de banca?». En la
+     ficha del ejercicio estaba el maximo, las reps y el 1RM, y debajo una lista
+     de filas: numeros sueltos que hay que comparar de cabeza.
+
+     IMPORTANTE: no todo el mundo apunta kilos. Con el registro puesto en
+     «marcar el ejercicio como hecho» no hay pesos que dibujar, asi que la
+     decision no se toma mirando el ajuste sino los datos: si ese ejercicio
+     tiene pesos, se ensena la curva de peso; si no, cuantas veces lo has hecho.
+     Asi tambien funciona para quien cambio de modo por el camino. */
+  function porEjercicio(sesiones, desdeT) {
+    const mapa = {};
+    sesiones.filter(function (x) { return x.start >= desdeT; }).forEach(function (x) {
+      (x.entries || []).forEach(function (e) {
+        const hechas = (e.sets || []).filter(function (st) { return st.done; });
+        if (!hechas.length) return;
+        const m = mapa[e.exId] || (mapa[e.exId] = {
+          exId: e.exId, name: e.name, veces: 0, series: 0, puntos: [], conPeso: false
+        });
+        const mejor = hechas.reduce(function (a2, st) {
+          return Math.max(a2, Number(st.weight) || 0);
+        }, 0);
+        if (mejor > 0) m.conPeso = true;
+        m.veces++;
+        m.series += hechas.length;
+        m.puntos.push({ t: x.start, peso: mejor, series: hechas.length });
+      });
+    });
+
+    return Object.keys(mapa).map(function (k) { return mapa[k]; })
+      .filter(function (m) { return m.puntos.length >= 2; })
+      .sort(function (a2, b2) { return b2.veces - a2.veces; });
+  }
+
+  /* Una curva de 60x20 sin ejes: a este tamano lo que se lee es la forma. */
+  function chispa(valores) {
+    if (valores.length < 2) return '';
+    const W = 62, H = 20, P = 2;
+    const min = Math.min.apply(null, valores);
+    const max = Math.max.apply(null, valores);
+    const alto = Math.max(1e-6, max - min);
+    const d = valores.map(function (v, i) {
+      const x = P + i / (valores.length - 1) * (W - 2 * P);
+      const y = H - P - (v - min) / alto * (H - 2 * P);
+      return (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }).join(' ');
+    return '<svg class="chispa" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' +
+      '<path d="' + d + '"/></svg>';
+  }
+
+  function ejerciciosHTML(lista) {
+    if (!lista.length) return '';
+
+    return html`
+      <div class="list-title">Tus ejercicios</div>
+      <div class="card lista-ejs">
+        ${raw(lista.slice(0, 5).map(function (m, i) {
+          const ex = Data.get(m.exId);
+          const nombre = ex ? ex.nameEs : m.name;
+
+          if (m.conPeso) {
+            const pesos = m.puntos.map(function (q) { return q.peso; })
+              .filter(function (v) { return v > 0; });
+            const ini = pesos[0], fin = pesos[pesos.length - 1];
+            const dif = ini ? Math.round((fin - ini) / ini * 100) : 0;
+            return html`
+              <button class="fila-ej" data-ex="${m.exId}" style="--turno:${i}">
+                <span class="grow">
+                  <span class="ej-tit">${nombre}</span>
+                  <span class="ej-sub">${UI.num(ini)} → ${UI.num(fin)}
+                    ${Store.settings().unit || 'kg'} · ${m.veces} veces</span>
+                </span>
+                ${raw(chispa(pesos))}
+                <span class="ej-dif ${dif > 0 ? 'sube' : dif < 0 ? 'baja' : ''}">${raw(dif > 0
+                  ? '▲ ' + dif + '%' : dif < 0 ? '▼ ' + Math.abs(dif) + '%' : '=')}</span>
+              </button>`;
+          }
+
+          /* Sin pesos apuntados: lo que hay es cuantas veces y cuantas series. */
+          const series = m.puntos.map(function (q) { return q.series; });
+          return html`
+            <button class="fila-ej" data-ex="${m.exId}" style="--turno:${i}">
+              <span class="grow">
+                <span class="ej-tit">${nombre}</span>
+                <span class="ej-sub">${m.veces} veces · ${m.series} series</span>
+              </span>
+              ${raw(chispa(series))}
+              <span class="ej-dif">${m.veces}×</span>
+            </button>`;
+        }).join(''))}
+      </div>`;
+  }
+
+  /* La curva del peso va con su propia escala: la grafica de volumen arranca en
+     cero, y con eso una bajada de 78 a 72 kg sale como una raya plana. Aqui el
+     alto del dibujo es el rango real, que es lo que deja ver el movimiento. */
+  function curvaPeso(lista) {
+    const W = 300, H = 76, P = 5;
+    const vals = lista.map(function (x) { return x.peso; });
+    const min = Math.min.apply(null, vals);
+    const max = Math.max.apply(null, vals);
+    const alto = Math.max(1e-6, max - min);
+
+    const xy = lista.map(function (x, i) {
+      return {
+        x: P + i / Math.max(1, lista.length - 1) * (W - 2 * P),
+        y: H - P - (x.peso - min) / alto * (H - 2 * P)
+      };
+    });
+
+    let d = 'M' + xy[0].x.toFixed(1) + ' ' + xy[0].y.toFixed(1);
+    for (let i = 1; i < xy.length; i++) {
+      const a = xy[i - 1], b = xy[i], cx = (a.x + b.x) / 2;
+      d += ' C' + cx.toFixed(1) + ' ' + a.y.toFixed(1) + ' ' + cx.toFixed(1) + ' ' +
+        b.y.toFixed(1) + ' ' + b.x.toFixed(1) + ' ' + b.y.toFixed(1);
+    }
+    const ult = xy[xy.length - 1];
+
+    return '<svg class="curva-peso" viewBox="0 0 ' + W + ' ' + H + '" ' +
+      'preserveAspectRatio="none" aria-hidden="true">' +
+      '<path class="cp-linea" d="' + d + '"/>' +
+      '<circle class="cp-hoy" cx="' + ult.x.toFixed(1) + '" cy="' + ult.y.toFixed(1) +
+      '" r="3.4"/></svg>';
+  }
+
+  /* ---------- tu peso ----------
+     Vivia solo en Perfil > Cuerpo, dos pantallas adentro y en barras. El peso
+     es el numero que mas se mira y esta es la pantalla de mirar numeros. Si no
+     hay pesajes no sale nada: no todo el mundo se pesa. */
+  function pesoHTML(dias) {
+    if (!g.Perfil) return '';
+    const todos = Perfil.pesajes();
+    const desde = Date.now() - dias * 864e5;
+    const lista = todos.filter(function (x) { return x.fecha >= desde; });
+    if (lista.length < 2) return '';
+
+    const ini = lista[0].peso, fin = lista[lista.length - 1].peso;
+    const dif = Math.round((fin - ini) * 10) / 10;
+    const semanas = Math.max(1, (lista[lista.length - 1].fecha - lista[0].fecha) / (7 * 864e5));
+    const porSemana = Math.round(dif / semanas * 100) / 100;
+
+    /* Subir de peso no es bueno ni malo: depende de a que juegue. Con el
+       objetivo puesto en ganar, el verde es subir; en perder, bajar; y si no
+       hay objetivo declarado, ningun color, que no somos quien para opinar. */
+    const obj = (Perfil.datos() || {}).objetivo;
+    const tono = obj === 'perder' ? (dif <= 0 ? 'sube' : 'baja')
+      : obj === 'ganar' ? (dif >= 0 ? 'sube' : 'baja') : 'neutro';
+
+    /* Con coma, que aqui se escribe en espanol. */
+    const coma = function (n) { return String(n).replace('.', ','); };
+
+    return html`
+      <div class="list-title">Tu peso</div>
+      <div class="card tarjeta-premium">
+        <div class="row between" style="align-items:flex-end">
+          <div>
+            <div class="pre-encima">Ahora</div>
+            <div class="pre-num">${UI.num(fin)}
+              <span class="tiny" style="font-weight:600">${Store.settings().unit || 'kg'}</span></div>
+          </div>
+          <span class="delta ${tono}">
+            ${dif > 0 ? '+' : ''}${coma(dif)} <span class="tiny">en el periodo</span></span>
+        </div>
+        ${raw(curvaPeso(lista))}
+        <p class="tiny" style="margin:8px 0 0">${lista.length} pesajes ·
+          ${porSemana > 0 ? '+' : ''}${coma(porSemana)} ${Store.settings().unit || 'kg'}
+          por semana de media</p>
+      </div>`;
+  }
+
   /* La semana, dia a dia: inicial, numero y una barra con lo que hiciste. Lo
      que en un mapa de calor de siete cuadros no se puede poner. */
   function tiraSemana(dias, max, hoyKey) {
@@ -414,20 +584,29 @@
           ${raw(planVsRealHTML(reparto, r))}
         </div>` : '')}
 
+      ${raw(pesoHTML(r.dias))}
+
+      ${raw(ejerciciosHTML(porEjercicio(sesiones, desdeT)))}
+
       ${raw(metasHTML())}
 
       <!-- Los récords, en una sola lista con su medalla: doce tarjetas sueltas
            eran doce cajas iguales seguidas, y lo que se mira de un récord es el
            peso, no la caja. -->
       ${raw(prs.length ? html`
-        <div class="list-title">Récords personales</div>
+        <div class="list-title">Récords personales${raw((function () {
+          const nuevos = prs.filter(function (x) { return x.pr.date >= desdeT; }).length;
+          return nuevos ? ' <span class="chip solid tiny-chip">' + nuevos +
+            (nuevos === 1 ? ' nuevo' : ' nuevos') + '</span>' : '';
+        })())}</div>
         <div class="card lista-prs">
           ${raw(prs.slice(0, 12).map(function (p, i) {
             return html`
               <button class="fila-pr" data-ex="${p.exId}" style="--turno:${i}">
                 <span class="pr-ico">${raw(icon('trofeo'))}</span>
                 <span class="grow">
-                  <span class="pr-tit">${p.name}</span>
+                  <span class="pr-tit">${p.name}${raw(p.pr.date >= desdeT
+                    ? ' <span class="pr-nuevo">nuevo</span>' : '')}</span>
                   <span class="pr-sub">${UI.fecha(p.pr.date)}</span>
                 </span>
                 <span class="pr-marca">${UI.kg(p.pr.weight)} × ${p.pr.reps}</span>
