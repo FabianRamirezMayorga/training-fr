@@ -669,7 +669,7 @@
         ${raw(icon('back'))} Perfil</button>
       <div class="row between">
         <h1 style="margin:0">Objetivos</h1>
-        <button class="btn primary sm" data-a="nuevo">${raw(icon('plus'))} Nuevo</button>
+        <button class="btn primary sm btn-arranque" data-a="nuevo">${raw(icon('plus'))} Nuevo</button>
       </div>
       <p class="muted" style="margin-top:8px">Se actualizan solos con lo que entrenas
       y con tus pesajes. No hay que apuntar nada a mano.</p>
@@ -677,7 +677,7 @@
       ${raw(metas.length ? '<div class="stack">' + metas.map(tarjetaMeta).join('') + '</div>'
         : html`<div class="empty">${raw(icon('trofeo'))}
             <p>Ponte una meta y te enseño cuánto te falta cada vez que abras la app.</p>
-            <button class="btn primary" data-a="nuevo">Crear mi primer objetivo</button>
+            <button class="btn primary btn-arranque" data-a="nuevo">Crear mi primer objetivo</button>
           </div>`)}`;
   };
 
@@ -760,8 +760,23 @@
     return 'Es una recta sobre lo que llevas, contando con que sigas igual.';
   }
 
-  /* El dibujo: linea de lo hecho, punteada de lo que falta y la meta como raya
-     horizontal. Sin ejes ni rejilla, que en 60px de alto solo estorban. */
+  /* ---------- el dibujo ----------
+     Lo hecho va en linea llena con su relleno degradado, que es lo que le da
+     peso: una linea sola sobre el fondo se lee como un garabato, con el
+     relleno se lee como terreno recorrido. Lo que falta va en puntos hasta
+     cruzar la meta, y esa diferencia de trazo es lo unico que hace falta para
+     entender que la derecha es una estimacion y no un dato.
+
+     La raya de la meta lleva su cifra al lado: una horizontal sin numero
+     obliga a deducir a que altura esta, y el numero es justo lo que se busca.
+
+     Los dos puntos no son circulos del SVG sino dos marcas encima: el dibujo
+     se estira a lo ancho para llenar la tarjeta, y un circulo dentro de un SVG
+     estirado sale ovalado. El de hoy late despacio —es lo unico de aqui que
+     sigue en marcha— y el del final es un aro hueco, lo que todavia no ha
+     pasado. */
+  let nGraf = 0;
+
   function graficaMeta(m, pre) {
     let pts = (pre.puntos || []).slice(-24);
 
@@ -769,49 +784,86 @@
        pasar: de donde estas hoy a la meta. Toda punteada, que aqui no hay ni un
        dato medido. */
     if (pts.length < 2 && pre.segunPlan) {
-      const p = Objetivos.progreso(m);
-      pts = [{ t: Date.now(), v: p.actual }];
+      const p0 = Objetivos.progreso(m);
+      pts = [{ t: Date.now(), v: p0.actual }];
     }
     if (!pts.length) return '';
     if (pts.length < 2 && !pre.segunPlan) return '';
 
-    const W = 280, H = 64, P = 3;
+    const W = 300, H = 92, P = 9;
     const meta = Number(m.meta) || 0;
+    const uid = 'mg' + (++nGraf);
 
     const tIni = pts[0].t;
-    const tFin = pre.fecha && pre.fecha > pts[pts.length - 1].t
-      ? pre.fecha : pts[pts.length - 1].t;
+    const ultimo = pts[pts.length - 1];
+    const hayFuturo = !!(pre.fecha && pre.haciaMeta);
+    const tFin = hayFuturo && pre.fecha > ultimo.t ? pre.fecha : ultimo.t;
     const anchoT = Math.max(1, tFin - tIni);
 
-    const vals = pts.map(function (x) { return x.v; }).concat([meta]);
+    const vals = pts.map(function (q) { return q.v; }).concat([meta]);
     const min = Math.min.apply(null, vals);
     const max = Math.max.apply(null, vals);
-    const alto = Math.max(1e-6, max - min);
+    /* Un respiro arriba y abajo: con la meta pegada al canto, su raya se
+       confunde con el borde del dibujo. */
+    const aire = Math.max(1e-6, (max - min) || Math.abs(max) * 0.08 || 1) * 0.2;
+    const lo = min - aire, hi = max + aire;
 
     const x = function (t) { return P + (t - tIni) / anchoT * (W - 2 * P); };
-    const y = function (v) { return H - P - (v - min) / alto * (H - 2 * P); };
+    const y = function (v) { return H - P - (v - lo) / (hi - lo) * (H - 2 * P); };
+    const pc = function (n, total) { return (n / total * 100).toFixed(2) + '%'; };
 
     const linea = pts.length > 1 ? pts.map(function (q, i) {
       return (i ? 'L' : 'M') + x(q.t).toFixed(1) + ' ' + y(q.v).toFixed(1);
     }).join(' ') : '';
 
-    const ultimo = pts[pts.length - 1];
-    const proyeccion = pre.fecha && pre.haciaMeta
-      ? '<path class="mg-futuro" d="M' + x(ultimo.t).toFixed(1) + ' ' + y(ultimo.v).toFixed(1) +
-        ' L' + x(pre.fecha).toFixed(1) + ' ' + y(meta).toFixed(1) + '"/>'
+    const yMeta = y(meta);
+
+    const trazoFuturo = 'M' + x(ultimo.t).toFixed(1) + ' ' + y(ultimo.v).toFixed(1) +
+      ' L' + x(tFin).toFixed(1) + ' ' + yMeta.toFixed(1);
+
+    const proyeccion = hayFuturo
+      ? '<path class="mg-futuro" vector-effect="non-scaling-stroke" d="' +
+        trazoFuturo + '"/>'
       : '';
 
-    return '<svg class="meta-graf" viewBox="0 0 ' + W + ' ' + H + '" ' +
-      'preserveAspectRatio="none" aria-label="Tu evolución y lo que falta">' +
-      '<path class="mg-meta" d="M0 ' + y(meta).toFixed(1) + ' H' + W + '"/>' +
-      (linea ? '<path class="mg-linea" d="' + linea + '"/>' : '') +
+    /* El relleno va debajo de lo que se ha medido. Cuando no hay nada medido
+       —un solo pesaje y el resto lo pone el plan— va debajo de la linea del
+       plan, mas flojo: sin el, el dibujo se queda en una raya de puntos
+       flotando en el vacio. */
+    const bajo = linea || (hayFuturo ? trazoFuturo : '');
+    const desde = linea ? pts[0].t : ultimo.t;
+    const hasta = linea ? ultimo.t : tFin;
+    const area = bajo
+      ? bajo + ' L' + x(hasta).toFixed(1) + ' ' + H +
+        ' L' + x(desde).toFixed(1) + ' ' + H + ' Z'
+      : '';
+
+    return '<div class="meta-graf-caja" role="img" aria-label="' +
+      esc('Tu evolución y lo que falta hasta ' + Objetivos.formato(m, meta)) + '">' +
+      '<svg class="meta-graf" viewBox="0 0 ' + W + ' ' + H + '" ' +
+      'preserveAspectRatio="none" aria-hidden="true">' +
+      '<defs><linearGradient id="' + uid + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="var(--acc)" stop-opacity=".38"/>' +
+      '<stop offset="55%" stop-color="var(--acc)" stop-opacity=".13"/>' +
+      '<stop offset="100%" stop-color="var(--acc)" stop-opacity="0"/>' +
+      '</linearGradient></defs>' +
+      (area ? '<path class="mg-area' + (linea ? '' : ' es-plan') + '" d="' + area +
+        '" fill="url(#' + uid + ')"/>' : '') +
+      '<path class="mg-meta" vector-effect="non-scaling-stroke" d="M0 ' +
+      yMeta.toFixed(1) + ' H' + W + '"/>' +
+      (linea ? '<path class="mg-linea" vector-effect="non-scaling-stroke" d="' +
+        linea + '"/>' : '') +
       proyeccion +
-      '<circle class="mg-hoy" cx="' + x(ultimo.t).toFixed(1) + '" cy="' +
-      y(ultimo.v).toFixed(1) + '" r="3.2"/>' +
-      (pre.fecha && pre.haciaMeta
-        ? '<circle class="mg-fin" cx="' + x(pre.fecha).toFixed(1) + '" cy="' +
-          y(meta).toFixed(1) + '" r="3.2"/>' : '') +
-      '</svg>';
+      '</svg>' +
+      '<span class="mg-hoy" style="left:' + pc(x(ultimo.t), W) +
+      ';top:' + pc(y(ultimo.v), H) + '"></span>' +
+      (hayFuturo
+        ? '<span class="mg-fin" style="left:' + pc(x(tFin), W) +
+          ';top:' + pc(yMeta, H) + '"></span>'
+        : '') +
+      '<span class="mg-etiqueta" style="top:' + pc(yMeta, H) + '">' +
+      esc(Objetivos.formato(m, meta)) + '</span>' +
+      '</div>';
   }
 
   V.objetivos.mount = function (root) {

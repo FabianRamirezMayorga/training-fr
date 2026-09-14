@@ -2357,44 +2357,142 @@ html[data-theme="light"] .sem-caja.es-ahora {
 
 /* ---------- cuando llegas a una meta ----------
    La barra de progreso dice donde estas. Esto dice cuando llegas, que es lo
-   que uno se pregunta al ponerse la meta. */
+   que uno se pregunta al ponerse la meta.
+
+   Va en su propia lamina dentro de la tarjeta, no colgando de una raya: es
+   otra cosa —lo que viene— y se lee mejor con su propio marco. Vidrio teñido
+   del color de la marca, con la linea de luz arriba y la sombra corta debajo,
+   el mismo material que el resto de la app. */
 .meta-prevision {
-  margin-top: 12px; padding-top: 11px;
-  border-top: 1px solid var(--line);
+  position: relative; overflow: hidden; isolation: isolate;
+  margin-top: 12px; padding: 12px 13px 11px; border-radius: 16px;
+  background:
+    linear-gradient(180deg, var(--vidrio-luz-color), transparent 58%),
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--acc) 11%, transparent),
+      color-mix(in srgb, var(--acc) 4%, transparent));
+  box-shadow:
+    inset 0 1px 0 var(--vidrio-rim),
+    inset 0 0 0 1px color-mix(in srgb, var(--acc) 12%, transparent),
+    var(--vidrio-sombra-corta);
 }
+
+/* El reflejo que se desplaza: lentisimo y muy flojo, solo para que la lamina
+   no parezca una foto de lamina. */
+.meta-prevision::before {
+  content: ''; position: absolute; inset: -70% -20%; pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(50% 120% at 30% -10%,
+              color-mix(in srgb, #fff 9%, transparent) 0%, transparent 70%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meta-prevision::before { animation: vidrio 15s ease-in-out infinite alternate; }
+}
+
 .mp-cab { display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 10px; margin-bottom: 8px; }
+  gap: 10px; margin-bottom: 6px; }
 .mp-cuanto {
-  font-size: 1.32rem; font-weight: 800; letter-spacing: -.022em; line-height: 1.1;
+  font-size: 1.42rem; font-weight: 800; letter-spacing: -.024em; line-height: 1.08;
   font-variant-numeric: tabular-nums; margin-top: 1px;
 }
-.mp-fecha { font-size: .78rem; color: var(--dim); white-space: nowrap; }
-.mp-nota { margin: 8px 0 0; }
-
-/* El dibujo: lo hecho en linea llena, lo que falta punteado hasta cruzar la
-   meta. La diferencia de trazo es lo que dice que la derecha es una
-   estimacion. */
-.meta-graf { width: 100%; height: 64px; display: block; overflow: visible; }
-.meta-graf path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.mg-linea { stroke: var(--acc); stroke-width: 2; }
-.mg-futuro {
-  stroke: var(--acc); stroke-width: 2; opacity: .55;
-  stroke-dasharray: 3 4;
+/* La fecha, en su pastilla: es un dato distinto del «cuanto falta» y sin
+   marco los dos se leen como una sola frase partida. */
+.mp-fecha {
+  font-size: .75rem; font-weight: 600; color: var(--dim); white-space: nowrap;
+  padding: 3px 9px; border-radius: 999px;
+  background: color-mix(in srgb, var(--card2) 70%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim);
 }
-.mg-meta { stroke: var(--dim2); stroke-width: 1; opacity: .5; stroke-dasharray: 2 5; }
-.mg-hoy { fill: var(--acc); }
-.mg-fin { fill: none; stroke: var(--acc); stroke-width: 2; opacity: .7; }
+.mp-nota { margin: 9px 0 0; }
 
-/* La linea se dibuja sola al entrar, como la de Progreso. */
+/* El dibujo: lo hecho en linea llena con su relleno, lo que falta punteado
+   hasta cruzar la meta. La diferencia de trazo es lo que dice que la derecha
+   es una estimacion. */
+.meta-graf-caja { position: relative; margin-top: 2px; }
+.meta-graf { width: 100%; height: 92px; display: block; }
+.meta-graf path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.mg-area { stroke: none; }
+/* Cuando el relleno va bajo la linea del plan y no bajo datos medidos, mas
+   flojo: no es terreno recorrido, es una intencion. */
+.mg-area.es-plan { opacity: .5; }
+.mg-linea { stroke: var(--acc); stroke-width: 2.2; }
+.mg-futuro {
+  stroke: var(--acc); stroke-width: 2.2; opacity: .6;
+  stroke-dasharray: 1 5;
+}
+.mg-meta { stroke: var(--dim2); stroke-width: 1; opacity: .45; stroke-dasharray: 2 5; }
+
+/* Los dos puntos van encima del dibujo y no dentro: el SVG se estira a lo
+   ancho para llenar la tarjeta, y ahi dentro un circulo saldria ovalado. */
+.mg-hoy, .mg-fin {
+  position: absolute; width: 9px; height: 9px; border-radius: 50%;
+  transform: translate(-50%, -50%); pointer-events: none;
+}
+.mg-hoy {
+  background: var(--acc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 18%, transparent),
+              0 2px 8px color-mix(in srgb, var(--acc) 45%, transparent);
+}
+/* Lo que aun no ha pasado se dibuja hueco. */
+.mg-fin {
+  background: var(--card);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--acc) 70%, transparent);
+}
+
+/* La cifra de la meta, al lado de su raya: una horizontal sin numero obliga a
+   deducir a que altura esta, y el numero es justo lo que se busca.
+
+   Va al principio de la raya y no al final, que es donde uno la pondria: el
+   final es justo donde la linea de puntos toca la meta, y el numero tapaba el
+   aro que marca ese cruce. */
+.mg-etiqueta {
+  position: absolute; left: 0; transform: translateY(-50%);
+  padding: 2px 8px; border-radius: 999px;
+  font-size: .68rem; font-weight: 700; color: var(--dim);
+  font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none;
+  background: color-mix(in srgb, var(--card2) 82%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+}
+
+/* La linea se dibuja sola al entrar, como la de Progreso; el relleno sube
+   detras de ella y los puntos aparecen cuando el trazo ya ha llegado. El de
+   hoy se queda latiendo: es lo unico de este dibujo que sigue en marcha. */
 @media (prefers-reduced-motion: no-preference) {
-  .mg-linea { animation: mg-trazo .9s cubic-bezier(.3, .9, .3, 1) both; }
-  .mg-futuro { animation: mg-aparece .5s ease .7s both; }
+  .mg-linea { animation: mg-trazo 1s cubic-bezier(.3, .9, .3, 1) both; }
+  .mg-area { animation: mg-sube .9s cubic-bezier(.3, .9, .3, 1) both;
+    transform-box: view-box; transform-origin: bottom; }
+  /* Su propio fotograma final, porque una animacion gana a la regla de
+     opacidad de arriba y el relleno del plan se quedaria a tope. */
+  .mg-area.es-plan { animation-name: mg-sube-plan; }
+  .mg-futuro { animation: mg-aparece .5s ease .8s both; }
+  .mg-etiqueta { animation: mg-entra-plana .4s ease .5s both; }
+  .mg-fin { animation: mg-entra .45s cubic-bezier(.2, 1.3, .4, 1) 1.05s both; }
+  .mg-hoy {
+    animation: mg-entra .45s cubic-bezier(.2, 1.3, .4, 1) .85s both,
+               mg-late 2.8s ease-in-out 1.3s infinite;
+  }
 }
 @keyframes mg-trazo {
   from { stroke-dasharray: 0 600; }
   to { stroke-dasharray: 600 0; }
 }
-@keyframes mg-aparece { from { opacity: 0 } to { opacity: .55 } }
+@keyframes mg-sube { from { opacity: 0; transform: scaleY(.55) } to { opacity: 1 } }
+@keyframes mg-sube-plan { from { opacity: 0; transform: scaleY(.55) } to { opacity: .5 } }
+@keyframes mg-aparece { from { opacity: 0 } to { opacity: .6 } }
+@keyframes mg-entra {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(.4) }
+  to { opacity: 1 }
+}
+@keyframes mg-late {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 18%, transparent),
+             0 2px 8px color-mix(in srgb, var(--acc) 45%, transparent); }
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--acc) 7%, transparent),
+        0 2px 10px color-mix(in srgb, var(--acc) 30%, transparent); }
+}
+
+/* La etiqueta entra sin el centrado horizontal de los puntos. */
+@keyframes mg-entra-plana { from { opacity: 0 } to { opacity: 1 } }
 
 /* ---------- la semana, dia a dia ----------
    Siete cuadros de mapa de calor son siete cuadrados enormes en los que cabria
