@@ -1474,19 +1474,18 @@
     bind(root, '[data-a=apuntar]', apuntarActividad);
     bindTarjetaRutina(root);
 
-    /* La versión, abajo del todo y sin ruido cuando no hay nada que hacer. Si
-       hay una nueva publicada, esta línea es el botón para cogerla: el aviso
-       automático depende de que el navegador se digne a mirar, y con la app
+    /* La versión solo habla cuando hay algo que hacer. «Training FR v273 · al
+       día» ocupaba un renglón de la portada para no decir nada: quien quiera
+       saber su versión la tiene en Perfil, con su punto ámbar cuando hay una
+       nueva. Si la hay, aquí sale el botón para cogerla, porque el aviso
+       automático depende de que el navegador se digne a mirar y con la app
        instalada eso puede tardar días. */
     const pie = root.querySelector('#pie-version');
     if (pie) {
       estadoVersion().then(function (v) {
-        if (!v || !v.local) { pie.textContent = ''; return; }
+        if (!v || !v.local || v.alDia) { pie.textContent = ''; pie.hidden = true; return; }
         const corto = function (x) { return String(x).replace('trainingfr-', ''); };
-        if (v.alDia) {
-          pie.innerHTML = 'Training FR ' + esc(corto(v.local)) + ' · al día';
-          return;
-        }
+        pie.hidden = false;
         pie.className = 'pie-version hay-nueva';
         pie.innerHTML = '<b>Hay una versión nueva: ' + esc(corto(v.servidor)) + '</b>' +
           '<span>Tú tienes la ' + esc(corto(v.local)) + '. Toca para actualizar; ' +
