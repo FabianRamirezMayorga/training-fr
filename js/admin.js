@@ -204,27 +204,76 @@
         </div>` : '')}
 
       ${raw(usuarios && usuarios.length ? html`
-        <div class="list">
-          ${raw(usuarios.map(function (u) {
-            return '<div class="list-row">' +
-              '<span class="row-icon">' + icon('perfil') + '</span>' +
-              '<div class="grow"><div class="list-row-title">' + esc(u.email || '(sin correo)') +
-              (u.yo ? ' <span class="chip tiny-chip">TÚ</span>' : '') +
-              (u.activo ? '' : ' <span class="chip tiny-chip">DESACTIVADA</span>') +
-              '</div><div class="list-row-sub">' +
-              (u.ultimoAcceso ? 'Última entrada ' + UI.fechaCorta(u.ultimoAcceso)
-                : 'No ha entrado nunca') +
-              ' · alta ' + UI.fechaCorta(u.creado) + '</div></div>' +
-              (u.yo ? '' :
-                '<button class="btn sm" data-gestionar="' + esc(u.id) + '">Gestionar</button>') +
-              '</div>';
-          }).join(''))}
-        </div>
-        <p class="tiny" style="margin:10px 0 0">${usuarios.length}
-        ${usuarios.length === 1 ? 'cuenta' : 'cuentas'} en el proyecto.</p>`
+        ${raw(resumenHTML(usuarios))}
+        <div class="cuentas">
+          ${raw(usuarios.map(fichaCuenta).join(''))}
+        </div>`
       : (!cargando && !fallo ? html`
-        <p class="muted">Todavía no hay ninguna cuenta aparte de la tuya.</p>` : ''))}`;
+        <div class="card center" style="padding:26px 18px">
+          <span class="cu-vacio">${raw(icon('perfil'))}</span>
+          <b style="display:block;margin-top:11px">Solo estás tú</b>
+          <p class="tiny" style="margin:5px 0 0">Todavía no hay ninguna cuenta aparte de la
+          tuya. Crea una con «Nueva» y dale el correo y la contraseña a quien la vaya a
+          usar.</p>
+        </div>` : ''))}`;
   };
+
+  /* Cuándo fue, dicho como lo diría alguien. «13 sep» obliga a mirar el
+     calendario para saber si eso fue ayer o hace tres semanas, que es justo lo
+     que se quiere saber de una cuenta ajena. */
+  function hace(t) {
+    if (!t) return '';
+    const dias = Math.floor((Date.now() - t) / 86400000);
+    if (dias <= 0) return 'hoy';
+    if (dias === 1) return 'ayer';
+    if (dias < 7) return 'hace ' + dias + ' días';
+    if (dias < 30) return 'hace ' + Math.round(dias / 7) + ' semanas';
+    return UI.fechaCorta(t);
+  }
+
+  /* La cuenta, como una ficha. Eran filas de lista con el correo en una línea,
+     dos fechas sueltas en otra y un botón gris al final; con tres cuentas ya
+     costaba distinguir cuál estaba activa y cuál no. */
+  function fichaCuenta(u) {
+    const correo = u.email || '(sin correo)';
+    const inicial = (correo.trim()[0] || '?').toUpperCase();
+    const etiqueta = u.yo ? 'tu cuenta' : 'Gestionar ' + correo;
+
+    return '<' + (u.yo ? 'div' : 'button') + ' class="cuenta' +
+      (u.yo ? ' yo' : '') + (u.activo ? '' : ' apagada') + '"' +
+      (u.yo ? '' : ' data-gestionar="' + esc(u.id) + '" aria-label="' + esc(etiqueta) + '"') +
+      '>' +
+      '<span class="cu-avatar">' + esc(inicial) + '</span>' +
+      '<span class="grow">' +
+        '<span class="cu-correo">' + esc(correo) + '</span>' +
+        '<span class="cu-linea">' +
+          '<span class="cu-punto"></span>' +
+          (u.activo ? 'Puede entrar' : 'Desactivada') +
+          (u.ultimoAcceso
+            ? '<span class="cu-sep">·</span>entró ' + esc(hace(u.ultimoAcceso))
+            : '<span class="cu-sep">·</span>no ha entrado nunca') +
+        '</span>' +
+        '<span class="cu-alta">Alta ' + esc(UI.fechaCorta(u.creado)) + '</span>' +
+      '</span>' +
+      (u.yo ? '<span class="cu-tu">TÚ</span>'
+        : '<span class="chevron">' + icon('chevron') + '</span>') +
+      '</' + (u.yo ? 'div' : 'button') + '>';
+  }
+
+  /* Cuántas hay y cuántas pueden entrar. Era una línea de texto al final, y es
+     lo primero que se quiere saber al abrir la pantalla. */
+  function resumenHTML(lista) {
+    const activas = lista.filter(function (u) { return u.activo; }).length;
+    const fuera = lista.length - activas;
+    return '<div class="cu-resumen">' +
+      '<span class="cur-dato"><b>' + lista.length + '</b>' +
+        (lista.length === 1 ? 'cuenta' : 'cuentas') + '</span>' +
+      '<span class="cur-dato ok"><b>' + activas + '</b>' +
+        (activas === 1 ? 'puede entrar' : 'pueden entrar') + '</span>' +
+      (fuera ? '<span class="cur-dato mal"><b>' + fuera + '</b>' +
+        (fuera === 1 ? 'desactivada' : 'desactivadas') + '</span>' : '') +
+      '</div>';
+  }
 
   V.usuarios.mount = function (root) {
     App.bind(root, '[data-a=atras]', function () { App.go('perfil'); });
@@ -252,24 +301,50 @@
 
   function nuevaSheet() {
     UI.modal(html`
-      <h2>Cuenta nueva</h2>
-      <p class="muted">Se crea con el correo y la contraseña que le pongas, y ya puede
-      entrar. Dile que la cambie cuando entre.</p>
+      <div class="conf-disco"><span class="cu-disco-txt">+</span></div>
+      <h2 class="conf-tit">Cuenta nueva</h2>
+      <p class="muted conf-txt">Se crea con el correo y la contraseña que le pongas, y ya
+      puede entrar. Dile que la cambie cuando entre.</p>
 
-      <div class="tiny" style="margin:14px 0 6px">CORREO</div>
-      <input id="ad-email" class="input" type="email" inputmode="email"
-             autocomplete="off" placeholder="alguien@correo.com">
+      <div class="clave-bloque">
+        <div class="cb-cab"><span class="cb-lab">Correo</span></div>
+        <input id="ad-email" type="email" inputmode="email"
+               autocomplete="off" placeholder="alguien@correo.com">
+      </div>
 
-      <div class="tiny" style="margin:12px 0 6px">CONTRASEÑA PARA EMPEZAR</div>
-      <input id="ad-clave" class="input" type="text" autocomplete="off"
-             placeholder="Ocho caracteres o más">
-      <p class="tiny" style="margin:7px 0 0">Se la tienes que dar tú por donde quieras;
-      la app no manda correos. Y no la escribas en un sitio donde quede guardada.</p>
+      <div class="clave-bloque">
+        <div class="cb-cab"><span class="cb-lab">Contraseña para empezar</span>
+          <button class="btn sm vidrio cb-mini" id="ad-dado">${raw(icon('cambiar'))}
+            Inventar una</button></div>
+        <input id="ad-clave" type="text" autocomplete="off"
+               placeholder="Ocho caracteres o más">
+      </div>
 
-      <button class="btn primary block" id="ad-ok" style="margin-top:16px">Crear</button>
-      <button class="btn ghost block" id="ad-no" style="margin-top:8px">Cancelar</button>`,
+      <div class="nota-prov" style="--tono:var(--warn);margin-top:13px">
+        <span class="np-ico">${raw(icon('aviso'))}</span>
+        <span class="grow"><span class="np-txt">Se la tienes que dar tú por donde quieras:
+        la app no manda correos. Y no la escribas en un sitio donde quede guardada.</span></span>
+      </div>
+
+      <div class="cb-acciones" style="margin-top:16px">
+        <button class="btn primary grow btn-arranque" id="ad-ok">${raw(icon('plus'))}
+          Crear</button>
+        <button class="btn vidrio" id="ad-no">Cancelar</button>
+      </div>`,
       function (el) {
         el.querySelector('#ad-no').onclick = function () { UI.closeModal(); };
+
+        /* Una contraseña de empezar no la tiene que pensar nadie: se usa una
+           vez y se cambia. Inventarla aquí evita el «1234» de siempre. */
+        el.querySelector('#ad-dado').onclick = function () {
+          const abc = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+          let clave = '';
+          const azar = new Uint32Array(12);
+          (window.crypto || window.msCrypto).getRandomValues(azar);
+          for (let i = 0; i < 12; i++) clave += abc[azar[i] % abc.length];
+          el.querySelector('#ad-clave').value = clave;
+        };
+
         el.querySelector('#ad-ok').onclick = function () {
           const email = el.querySelector('#ad-email').value.trim();
           const clave = el.querySelector('#ad-clave').value;
@@ -278,7 +353,7 @@
 
           const boton = el.querySelector('#ad-ok');
           boton.disabled = true;
-          boton.textContent = 'Creando…';
+          boton.innerHTML = 'Creando…';
           llamar({ accion: 'crear', email: email, clave: clave })
             .then(function () {
               UI.closeModal();
@@ -287,7 +362,7 @@
             })
             .catch(function (e) {
               boton.disabled = false;
-              boton.textContent = 'Crear';
+              boton.innerHTML = icon('plus') + ' Crear';
               UI.toast(e.message);
             });
         };
@@ -300,37 +375,57 @@
     const u = (usuarios || []).find(function (x) { return x.id === id; });
     if (!u) { UI.toast('Esa cuenta ya no está'); return; }
 
-    UI.modal(html`
-      <h2>${u.email || 'Cuenta'}</h2>
-      <p class="muted">${u.activo ? 'Puede entrar con normalidad.'
-        : 'Está desactivada: no puede entrar, pero sus datos siguen ahí.'}</p>
+    const correo = u.email || 'Cuenta';
+    const inicial = (correo.trim()[0] || '?').toUpperCase();
 
-      <div class="card">
-        <div class="row between" style="padding:3px 0"><span class="tiny">ALTA</span>
-          <span class="tiny">${UI.fechaCorta(u.creado)}</span></div>
-        <div class="row between" style="padding:3px 0"><span class="tiny">ÚLTIMA ENTRADA</span>
-          <span class="tiny">${u.ultimoAcceso ? UI.fechaCorta(u.ultimoAcceso) : 'nunca'}</span></div>
+    UI.modal(html`
+      <div class="cu-cab">
+        <span class="cu-avatar grande">${inicial}</span>
+        <span class="grow">
+          <span class="cu-correo">${correo}</span>
+          <span class="cu-linea"><span class="cu-punto"></span>${raw(u.activo
+            ? 'Puede entrar con normalidad'
+            : 'Desactivada: no puede entrar, pero sus datos siguen ahí')}</span>
+        </span>
       </div>
 
-      <button class="btn block" id="ad-estado" style="margin-top:14px">
-        ${u.activo ? 'Desactivar la cuenta' : 'Volver a activarla'}</button>
-      <p class="tiny" style="margin:7px 0 0">${u.activo
-        ? 'Deja de poder entrar. Sus datos se quedan donde están y vuelve todo al activarla.'
-        : 'Podrá entrar otra vez con su correo y su contraseña de siempre.'}</p>
+      <div class="aj-caja" style="margin-top:14px">
+        <div class="aj-fila"><span class="grow"><span class="aj-tit">Alta</span></span>
+          <span class="cu-val">${UI.fechaCorta(u.creado)}</span></div>
+        <div class="aj-fila"><span class="grow"><span class="aj-tit">Última entrada</span>
+          </span><span class="cu-val">${u.ultimoAcceso
+            ? UI.fechaCorta(u.ultimoAcceso) : 'nunca'}</span></div>
+      </div>
 
-      <button class="btn ghost block danger" id="ad-borrar" style="margin-top:14px">
-        ${raw(icon('trash'))} Borrar la cuenta y sus datos</button>
-      <p class="tiny" style="margin:7px 0 0">Esto no se puede deshacer: se va la cuenta y
-      con ella todo lo que tenga guardado.</p>
+      <div class="plan-acciones" style="margin:14px 0 0">
+        <button class="fila-plan" id="ad-estado"
+                style="--fp:${raw(u.activo ? 'var(--warn)' : 'var(--acc)')}">
+          <span class="fp-ico">${raw(icon(u.activo ? 'salir' : 'check'))}</span>
+          <span class="grow"><span class="fp-tit">${u.activo
+            ? 'Desactivar la cuenta' : 'Volver a activarla'}</span>
+            <span class="fp-sub">${u.activo
+              ? 'Deja de poder entrar. Sus datos se quedan donde están y vuelve todo al activarla.'
+              : 'Podrá entrar otra vez con su correo y su contraseña de siempre.'}</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="fila-plan es-peligro" id="ad-borrar" style="--fp:var(--bad)">
+          <span class="fp-ico">${raw(icon('trash'))}</span>
+          <span class="grow"><span class="fp-tit">Borrar la cuenta y sus datos</span>
+            <span class="fp-sub">No se puede deshacer: se va la cuenta y con ella todo lo
+            que tenga guardado.</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+      </div>
 
-      <button class="btn ghost block" id="ad-no" style="margin-top:14px">Cerrar</button>`,
+      <button class="btn vidrio block" id="ad-no" style="margin-top:12px">Cerrar</button>`,
       function (el) {
         el.querySelector('#ad-no').onclick = function () { UI.closeModal(); };
 
         el.querySelector('#ad-estado').onclick = function () {
           const boton = el.querySelector('#ad-estado');
+          const tit = boton.querySelector('.fp-tit');
           boton.disabled = true;
-          boton.textContent = 'Un momento…';
+          if (tit) tit.textContent = 'Un momento…';
           llamar({ accion: u.activo ? 'desactivar' : 'activar', id: id })
             .then(function () {
               UI.closeModal();
@@ -339,7 +434,7 @@
             })
             .catch(function (e) {
               boton.disabled = false;
-              boton.textContent = u.activo ? 'Desactivar la cuenta' : 'Volver a activarla';
+              if (tit) tit.textContent = u.activo ? 'Desactivar la cuenta' : 'Volver a activarla';
               UI.toast(e.message);
             });
         };
