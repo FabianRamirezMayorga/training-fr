@@ -241,7 +241,9 @@
     if ((ritmo === null || Math.abs(ritmo) < 1e-9) && m.tipo === 'peso' && g.Perfil) {
       const datos = Perfil.datos();
       const plan = Perfil.previsión(datos, meta);
-      const quiere = datos.objetivo === 'perder' ? -1 : datos.objetivo === 'ganar' ? 1 : 0;
+      /* Hacia donde empuja su plan: lo dice el propio objetivo, que ya no son
+         solo tres. */
+      const quiere = (Perfil.OBJETIVO[datos.objetivo] || {}).signo || 0;
       const vaBien = (falta < 0 && quiere < 0) || (falta > 0 && quiere > 0);
 
       if (plan && plan.semanas > 0 && vaBien && Perfil.completo(datos)) {

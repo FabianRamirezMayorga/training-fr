@@ -10,6 +10,7 @@
   const VACIO = {
     sexo: '', edad: 0, altura: 0, peso: 0, grasa: 0,
     actividad: 'moderado', objetivo: 'mantener', ritmo: 'moderado', ritmoKg: 0,
+    objetivoTexto: '',
     experiencia: 'intermediate',
     sueño: 7, comidas: 4, dieta: 'omnivora',
     /* Marcan el día real: sin ellas, repartir el agua y las comidas por el día
@@ -34,10 +35,28 @@
     atleta: { factor: 1.9, label: 'Muy alto', note: 'Trabajo físico o doble sesión' }
   };
 
+  /* Cada objetivo dice dos cosas: hacia donde van las calorias (signo) y
+     cuanta proteina por kilo pide (prot). Antes la proteina estaba escrita a
+     mano en un si-esto-si-lo-otro dentro de macros(), asi que anadir un
+     objetivo obligaba a tocar dos sitios y era facil olvidarse de uno.
+
+     Los tres nuevos van todos a calorias de mantenimiento —signo 0— porque es
+     lo que son: recomponer, ponerse fuerte o estar sano no piden ni deficit ni
+     superavit, piden proteina y entrenar. Lo que cambia de verdad entre ellos
+     es eso y lo que la IA entiende que buscas. */
   const OBJETIVO = {
-    perder: { label: 'Perder grasa', signo: -1 },
-    mantener: { label: 'Mantenerme', signo: 0 },
-    ganar: { label: 'Ganar músculo', signo: 1 }
+    perder: { label: 'Perder grasa', signo: -1, prot: 2.2,
+      note: 'Déficit sobre tu gasto, con la proteína alta para no perder músculo' },
+    recomposicion: { label: 'Recomponer', signo: 0, prot: 2.2,
+      note: 'Perder grasa y ganar músculo a la vez: calorías de mantenimiento y mucha proteína' },
+    fuerza: { label: 'Ponerme fuerte', signo: 0, prot: 2.0,
+      note: 'Sin tocar el peso: lo que sube son los kilos de la barra' },
+    mantener: { label: 'Mantenerme', signo: 0, prot: 1.7,
+      note: 'Ni subir ni bajar; sostener lo que ya tienes' },
+    salud: { label: 'Estar sano', signo: 0, prot: 1.6,
+      note: 'Moverme, dormir y comer bien, sin una meta de báscula' },
+    ganar: { label: 'Ganar músculo', signo: 1, prot: 1.9,
+      note: 'Superávit controlado sobre tu gasto' }
   };
 
   /* Porcentaje de ajuste sobre el gasto, según lo agresivo que sea el ritmo */
@@ -196,7 +215,7 @@
     const kcal = calorias(p);
     if (!kcal) return null;
 
-    const porKg = p.objetivo === 'perder' ? 2.2 : p.objetivo === 'ganar' ? 1.9 : 1.7;
+    const porKg = (OBJETIVO[p.objetivo] || OBJETIVO.mantener).prot || 1.7;
     let prot = Math.round(p.peso * porKg);
     const pctGrasa = p.objetivo === 'perder' ? 0.27 : 0.30;
     let grasa = Math.round(kcal * pctGrasa / 9);
@@ -270,7 +289,8 @@
       p.grasa ? p.grasa + '% de grasa corporal' : null,
       'IMC ' + imc(p).toFixed(1),
       'actividad ' + (ACTIVIDAD[p.actividad] || {}).label,
-      'objetivo: ' + (OBJETIVO[p.objetivo] || {}).label,
+      'objetivo: ' + (OBJETIVO[p.objetivo] || {}).label +
+        (p.objetivoTexto ? ' (con sus palabras: "' + p.objetivoTexto + '")' : ''),
       'ritmo ' + ritmoActual(p).label,
       'gasto estimado ' + Math.round(tdee(p)) + ' kcal',
       m ? 'objetivo diario ' + m.kcal + ' kcal (' + m.prot + ' g proteína, ' +

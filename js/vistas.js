@@ -331,11 +331,18 @@
           tit: 'Qué busco',
           abajo: filasOpcion('objetivo', Perfil.OBJETIVO, p.objetivo)
         }) +
-        (p.objetivo !== 'mantener'
+        campo({
+          tit: 'Con mis palabras',
+          nota: 'Opcional. Lo lee el entrenador con IA para lo que te propone. Los números ' +
+            'salen de la opción de arriba; esto es el matiz que ninguna lista recoge.',
+          abajo: largo('objetivoTexto', p.objetivoTexto || '',
+            'Volver a correr 10 km, quitarme el dolor de espalda…')
+        }) +
+        ((Perfil.OBJETIVO[p.objetivo] || {}).signo !== 0
           ? campo({
               tit: 'A qué ritmo',
               nota: 'Unos ' + String(ritmo.kgSemana).replace('.', ',') + ' kg por semana' +
-                (p.objetivo === 'perder' ? ' menos' : ' más') + '.',
+                ((Perfil.OBJETIVO[p.objetivo] || {}).signo < 0 ? ' menos' : ' más') + '.',
               abajo: filasOpcion('ritmo', Object.assign({}, Perfil.RITMO, {
                 propio: { label: 'El mío', note: 'Lo pongo yo en kilos por semana' }
               }), p.ritmo) +
