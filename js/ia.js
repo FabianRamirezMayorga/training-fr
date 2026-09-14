@@ -2361,34 +2361,50 @@
 
   function olvidarMusica() { localStorage.removeItem(MEM_MUSICA); }
 
+  /* Cada ambiente con su icono, su color y de que va. Seis pastillas grises con
+     seis nombres obligan a leerlas una a una y no dicen a que suena ninguna; el
+     dibujo y el color se reconocen antes que la palabra, y la frase de debajo es
+     lo unico que de verdad explica en que se diferencian. */
   const AMBIENTES = {
     fuerza: {
       label: 'Fuerza bruta',
+      icono: 'dumbbell', tono: '#e0679a',
+      corto: 'Hip hop duro, metal y trap oscuro. Para series máximas.',
       guia: 'pesado, agresivo y contundente, para series máximas: hip hop duro, metal, ' +
         'rap rock, trap oscuro. Entre 80 y 110 pulsaciones por minuto con mucho golpe.'
     },
     ritmo: {
       label: 'Ritmo constante',
+      icono: 'reloj', tono: '#4f8cf5',
+      corto: 'House, techno y drum and bass. Cadencia estable entre series.',
       guia: 'cadencia estable para mantener el ritmo entre series: house, techno melódico, ' +
         'drum and bass, electrónica. Entre 120 y 135 pulsaciones por minuto.'
     },
     cardio: {
       label: 'Cardio y quema',
+      icono: 'llama', tono: '#f0a23c',
+      corto: 'Dance, EDM y pop enérgico. Rápido, para circuitos.',
       guia: 'rápido y eufórico para cardio o circuitos: dance, EDM, pop enérgico, ' +
         'reguetón rápido. Entre 140 y 160 pulsaciones por minuto.'
     },
     clasicos: {
       label: 'Clásicos de gimnasio',
+      icono: 'trofeo', tono: 'var(--acc)',
+      corto: 'Himnos que todo el mundo reconoce al primer acorde.',
       guia: 'himnos de gimnasio de todas las épocas: rock potente, hard rock ochentero, ' +
         'temas que todo el mundo reconoce al primer acorde.'
     },
     concentracion: {
       label: 'Concentración',
+      icono: 'ojo', tono: '#2fc4b2',
+      corto: 'Instrumental y lo-fi con garra. Sin letra que distraiga.',
       guia: 'sin letra o con letra mínima, para no distraer: instrumental, lo-fi con ' +
         'garra, post rock, bandas sonoras épicas.'
     },
     latino: {
       label: 'Latino',
+      icono: 'musica', tono: '#c06bf0',
+      corto: 'Reguetón, salsa dura, dembow y afrobeat.',
       guia: 'reguetón, dembow, salsa dura, latin trap y afrobeat con mucho ritmo.'
     }
   };

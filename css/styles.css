@@ -3944,3 +3944,268 @@ html[data-theme="light"] .modal-box .volcado {
   background: var(--card2);
   box-shadow: inset 0 0 0 1px var(--line);
 }
+
+/* ---------- la hoja de nueva lista ----------
+   Eran seis pastillas grises con seis nombres, tres numeros sueltos y un campo
+   de texto. Habia que leer las seis una a una y ninguna decia a que suena, el
+   numero obligaba a calcular de cabeza cuanto duraba, y no se veia lo que se
+   estaba pidiendo hasta tenerlo hecho. */
+
+/* Lo que vas a pedir, antes de pedirlo: la misma portada que va a salir en la
+   pantalla, para no tener que imaginarsela. */
+.pl-previo { margin: 14px 0 18px; }
+.pl-previo .mus-portada { animation: none; }
+
+/* Cada ambiente en su fila, con su icono, su color y de que va. El dibujo y el
+   color se reconocen antes que la palabra, y la frase es lo unico que explica
+   en que se diferencian dos nombres que suenan parecido. */
+.pl-ambientes { display: flex; flex-direction: column; gap: 7px; margin-top: 7px; }
+.pl-amb {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  padding: 10px 11px; border-radius: 15px; cursor: pointer; font: inherit;
+  color: var(--txt);
+  border: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 7%, transparent), transparent 60%),
+    color-mix(in srgb, var(--card) 66%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 11%, transparent);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .14s ease;
+}
+.pl-amb:active { transform: scale(.985); }
+
+.pa-ico {
+  flex: none; width: 36px; height: 36px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dim2);
+  background: color-mix(in srgb, var(--card2) 70%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
+  transition: color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.pa-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.pa-nom { display: block; font-weight: 700; font-size: .92rem; letter-spacing: -.012em; }
+.pa-sub { display: block; font-size: .74rem; color: var(--dim2); margin-top: 2px;
+  line-height: 1.35; }
+
+/* La marca de elegido: solo se ve en el que lo esta. Un circulo vacio en los
+   otros cinco seria pedirles atencion a cinco cosas que no la necesitan. */
+.pa-marca {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; opacity: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--on-acc); background: var(--tono);
+  transform: scale(.5);
+  transition: opacity .2s ease, transform .24s cubic-bezier(.3, 1.4, .5, 1);
+}
+.pa-marca svg { width: 13px; height: 13px; fill: none; stroke: currentColor;
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+.pl-amb.on {
+  border-color: color-mix(in srgb, var(--tono) 50%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent),
+              0 4px 14px color-mix(in srgb, var(--tono) 18%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 8%, transparent), transparent 60%),
+    linear-gradient(150deg, color-mix(in srgb, var(--tono) 14%, transparent),
+                    color-mix(in srgb, var(--tono) 4%, transparent));
+}
+.pl-amb.on .pa-ico {
+  color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tono) 26%, transparent);
+}
+.pl-amb.on .pa-marca { opacity: 1; transform: scale(1); }
+
+/* Cuanto va a durar. Nadie elige «veinte canciones»: se elige cuanto va a durar
+   el entreno, y con el numero a secas hay que hacer la cuenta de cabeza. */
+.pl-cuantas { display: flex; gap: 8px; margin-top: 7px; }
+.pl-n {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 11px 6px; border-radius: 14px; cursor: pointer; font: inherit;
+  color: var(--dim);
+  border: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  background: color-mix(in srgb, var(--card) 66%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 11%, transparent);
+  transition: border-color .18s ease, color .18s ease, transform .14s ease;
+}
+.pl-n:active { transform: scale(.96); }
+.pl-n b { font-size: 1.18rem; font-weight: 800; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums; }
+.pl-n i { font-style: normal; font-size: .7rem; }
+.pl-n.on {
+  color: var(--acc);
+  border-color: color-mix(in srgb, var(--acc) 50%, transparent);
+  background: color-mix(in srgb, var(--acc) 12%, transparent);
+}
+
+/* Lo que ya sabe sin preguntartelo */
+.pl-hoy {
+  display: flex; align-items: center; gap: 11px; margin-top: 16px;
+  padding: 11px 12px; border-radius: 14px;
+  background: color-mix(in srgb, var(--card2) 55%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
+}
+.ph-ico {
+  flex: none; width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 13%, transparent);
+}
+.ph-ico svg { width: 16px; height: 16px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pl-hoy b { display: block; font-size: .86rem; }
+.pl-hoy .tiny { display: block; margin-top: 1px; }
+
+html[data-theme="light"] .pl-amb,
+html[data-theme="light"] .pl-n {
+  background: #fff;
+  border-color: color-mix(in srgb, #141922 9%, transparent);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
+}
+html[data-theme="light"] .pl-amb.on {
+  background: linear-gradient(150deg, color-mix(in srgb, var(--tono) 12%, #fff), #fff);
+  border-color: color-mix(in srgb, var(--tono) 45%, transparent);
+}
+html[data-theme="light"] .pl-n.on {
+  background: color-mix(in srgb, var(--acc) 11%, #fff);
+  border-color: color-mix(in srgb, var(--acc) 45%, transparent);
+}
+
+/* ---------- que le has dejado hacer a la app ----------
+   Era un <details> con catorce permisos escritos como los escribe Spotify y un
+   boton gris debajo. El volcado no lo lee nadie, y quien lo lea sigue sin saber
+   que deja de funcionar si falta uno. */
+.sp-permisos { padding: 0; overflow: hidden; }
+.sp-permisos > summary {
+  display: flex; align-items: center; gap: 11px; cursor: pointer; list-style: none;
+  padding: 12px 13px;
+}
+.sp-permisos > summary::-webkit-details-marker { display: none; }
+.sp-permisos > summary::marker { content: ''; }
+.sp-e-flecha { flex: none; color: var(--dim2); }
+.sp-e-flecha svg { transition: transform .2s ease; }
+.sp-permisos[open] > summary .sp-e-flecha svg { transform: rotate(90deg); }
+
+/* El escudo dice el veredicto antes que ninguna palabra: verde si no falta
+   nada, rojo si algo no puede hacerse. */
+.sp-escudo {
+  flex: none; width: 34px; height: 34px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent);
+}
+.sp-escudo svg { width: 16px; height: 16px; fill: none; stroke: currentColor;
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.sp-escudo.bien { color: var(--acc); background: color-mix(in srgb, var(--acc) 15%, transparent); }
+.sp-escudo.mal { color: var(--bad); background: color-mix(in srgb, var(--bad) 15%, transparent); }
+
+.sp-e-tit { display: block; font-weight: 700; font-size: .92rem; letter-spacing: -.012em; }
+.sp-e-sub { display: block; font-size: .74rem; color: var(--dim2); margin-top: 2px;
+  line-height: 1.35; }
+.sp-e-cuerpo { padding: 0 13px 13px; }
+
+/* Los catorce permisos, dichos como las cinco cosas que la app hace con ellos */
+.sp-grupos { display: flex; flex-direction: column; gap: 7px; }
+.sp-g {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 10px; border-radius: 14px;
+  border: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 60%),
+    color-mix(in srgb, var(--card2) 62%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 13%, transparent),
+              inset 0 -8px 16px -12px rgba(0, 0, 0, .55),
+              0 2px 7px rgba(0, 0, 0, .18);
+}
+.sp-g-ico {
+  flex: none; width: 30px; height: 30px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; color: var(--dim);
+  background: color-mix(in srgb, #fff 6%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 11%, transparent);
+}
+.sp-g-ico svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sp-g-tit { display: block; font-weight: 650; font-size: .86rem; }
+.sp-g-sub { display: block; font-size: .73rem; color: var(--dim2); margin-top: 1px;
+  line-height: 1.35; }
+.sp-g-marca { flex: none; color: var(--acc); display: flex; }
+.sp-g-marca svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+.sp-g.no {
+  border-color: color-mix(in srgb, var(--bad) 40%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 60%),
+              color-mix(in srgb, var(--bad) 9%, transparent);
+}
+.sp-g.no .sp-g-ico { color: var(--bad);
+  background: color-mix(in srgb, var(--bad) 14%, transparent); }
+.sp-g.no .sp-g-marca { color: var(--bad); }
+
+/* ---------- lo de desarrollo ----------
+   En su propia caja hundida y al final: es lo que se mira el dia que algo falla
+   y no el resto de los dias. Antes era un boton gris suelto y un rectangulo
+   vacio, que en una pantalla de vidrio se lee como un hueco sin terminar. */
+.sp-dev {
+  margin-top: 14px; padding: 11px; border-radius: 15px;
+  background: color-mix(in srgb, #000 16%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3),
+              inset 0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
+}
+.sp-dev-cab { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.sp-dev-ico {
+  flex: none; width: 28px; height: 28px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; color: var(--dim2);
+  background: color-mix(in srgb, #fff 7%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 11%, transparent);
+}
+.sp-dev-ico svg { width: 14px; height: 14px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sp-dev-cab b { display: block; font-size: .85rem; }
+.sp-dev-cab .tiny { display: block; margin-top: 1px; }
+
+/* La salida, con la voz de una consola: a cuadricula fija, para que las lineas
+   que devuelve Spotify se lean alineadas y no como un parrafo. */
+.sp-salida {
+  margin: 10px 0 0; padding: 10px 11px; border-radius: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .68rem; line-height: 1.5; color: var(--dim);
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 260px; overflow: auto;
+  background: color-mix(in srgb, #000 26%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
+}
+
+.sp-crudo { margin-top: 10px; }
+.sp-crudo > summary { cursor: pointer; list-style: none; color: var(--dim2); }
+.sp-crudo > summary::-webkit-details-marker { display: none; }
+.sp-crudo > summary::marker { content: ''; }
+.sp-crudo > summary::before { content: '› '; }
+.sp-crudo[open] > summary::before { content: '⌄ '; }
+.sp-crudo-txt, .sp-crudo-falta {
+  margin: 7px 0 0; word-break: break-word; line-height: 1.5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .66rem;
+}
+.sp-crudo-falta { color: var(--bad); }
+
+html[data-theme="light"] .sp-g {
+  background: #fff;
+  border-color: color-mix(in srgb, #141922 9%, transparent);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
+}
+html[data-theme="light"] .sp-g.no {
+  background: color-mix(in srgb, var(--bad) 7%, #fff);
+  border-color: color-mix(in srgb, var(--bad) 35%, transparent);
+}
+html[data-theme="light"] .sp-g-ico { background: color-mix(in srgb, #141922 5%, transparent);
+  box-shadow: none; }
+html[data-theme="light"] .sp-dev {
+  background: color-mix(in srgb, #141922 4%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+html[data-theme="light"] .sp-dev-ico { background: color-mix(in srgb, #141922 6%, transparent);
+  box-shadow: none; }
+html[data-theme="light"] .sp-salida {
+  background: color-mix(in srgb, #141922 5%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+}

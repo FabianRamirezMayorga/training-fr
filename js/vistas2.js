@@ -1516,20 +1516,7 @@
 
       <div id="sp-player" style="margin-top:12px"></div>
 
-      <details class="card" style="margin-top:12px">
-        <summary class="tiny">Qué permisos ha dado Spotify</summary>
-        <p class="tiny" style="margin:8px 0 0;word-break:break-word">${
-          Spotify.permisosConcedidos ? (Spotify.permisosConcedidos()
-            || 'la sesión es anterior y no lo apuntó') : ''}</p>
-        ${raw(faltantes.length
-          ? '<p class="tiny" style="margin:6px 0 0;color:var(--bad)">Falta: '
-            + esc(faltantes.join(', ')) + '</p>'
-          : '<p class="tiny" style="margin:6px 0 0">No falta ninguno de los que pide la app.</p>')}
-        <button class="btn sm block" data-a="diagnostico" style="margin-top:10px">
-          Probar las llamadas que fallan</button>
-        <pre class="tiny" id="sp-diag" style="white-space:pre-wrap;word-break:break-word;
-          margin:10px 0 0"></pre>
-      </details>
+      ${raw(permisosHTML(faltantes))}
 
       <div class="list-title">Lista para entrenar</div>
       ${raw(lista ? listaHTML(lista) : html`
@@ -1579,6 +1566,100 @@
         </div>
       </div>`;
   };
+
+  /* ---------- qué le has dejado hacer a la app ----------
+     Era un volcado de los catorce permisos tal y como los escribe Spotify
+     —«user-modify-playback-state»— y debajo un botón gris. Eso no lo lee nadie,
+     y quien lo lea sigue sin saber qué deja de funcionar si falta uno.
+
+     Así que los catorce se agrupan en las cinco cosas que la app hace con
+     ellos, dichas en castellano, cada una con su estado. El volcado crudo sigue
+     estando, plegado al final, porque es lo único que sirve para pegarlo en un
+     correo cuando algo falla de verdad. */
+  const GRUPOS_PERMISO = [
+    { ico: 'altavoz', tit: 'Reproducir aquí dentro',
+      sub: 'Sonar sin salir de la app y manejar el play, la pausa y el volumen.',
+      p: ['streaming', 'user-read-email', 'user-read-private', 'user-read-playback-state',
+        'user-modify-playback-state', 'user-read-currently-playing'] },
+    { ico: 'lista', tit: 'Ver tus listas',
+      sub: 'Las tuyas y las compartidas, para lanzarlas desde aquí.',
+      p: ['playlist-read-private', 'playlist-read-collaborative'] },
+    { ico: 'chispa', tit: 'Guardarte las listas que crea la IA',
+      sub: 'Se crean en tu cuenta para oírlas en el móvil o en el coche.',
+      p: ['playlist-modify-private', 'playlist-modify-public'] },
+    { ico: 'corazon', tit: 'Tus me gusta',
+      sub: 'Saber si una canción ya es tuya y poder darle al corazón.',
+      p: ['user-library-read', 'user-library-modify'] },
+    { ico: 'star', tit: 'Afinar a tu gusto',
+      sub: 'Lo que más escuchas, para que las listas se te parezcan.',
+      p: ['user-top-read'] }
+  ];
+
+  function permisosHTML(faltantes) {
+    const crudo = Spotify.permisosConcedidos ? Spotify.permisosConcedidos() : '';
+    const falla = function (g) {
+      return g.p.filter(function (x) { return faltantes.indexOf(x) !== -1; });
+    };
+    const rotos = GRUPOS_PERMISO.filter(function (g) { return falla(g).length; }).length;
+    const bien = GRUPOS_PERMISO.length - rotos;
+
+    return html`
+      <details class="card sp-permisos" style="margin-top:12px">
+        <summary>
+          <span class="sp-escudo ${raw(rotos ? 'mal' : 'bien')}">
+            ${raw(icon(rotos ? 'close' : 'check'))}</span>
+          <span class="grow">
+            <span class="sp-e-tit">Qué le has dejado hacer a la app</span>
+            <span class="sp-e-sub">${raw(rotos
+              ? rotos + (rotos === 1 ? ' cosa no puede hacerla' : ' cosas no puede hacerlas')
+                + ': reconecta y acepta la pantalla tal cual sale'
+              : (crudo
+                ? 'Las ' + bien + ' cosas que necesita, concedidas'
+                : 'La sesión es anterior y no apuntó los permisos'))}</span>
+          </span>
+          <span class="chevron sp-e-flecha">${raw(icon('chevron'))}</span>
+        </summary>
+
+        <div class="sp-e-cuerpo">
+          <div class="sp-grupos">
+            ${raw(GRUPOS_PERMISO.map(function (g) {
+              const mal = falla(g);
+              return '<div class="sp-g' + (mal.length ? ' no' : '') + '">' +
+                '<span class="sp-g-ico">' + icon(g.ico) + '</span>' +
+                '<span class="grow"><span class="sp-g-tit">' + esc(g.tit) + '</span>' +
+                '<span class="sp-g-sub">' + esc(mal.length
+                  ? 'No puede: Spotify no dio ' + mal.length +
+                    (mal.length === 1 ? ' de los permisos' : ' de los permisos') + ' que pide.'
+                  : g.sub) + '</span></span>' +
+                '<span class="sp-g-marca">' + icon(mal.length ? 'close' : 'check') +
+                '</span></div>';
+            }).join(''))}
+          </div>
+
+          <!-- Lo de desarrollo: aquí abajo y en su propia caja, porque es lo que se
+               mira el día que algo falla y no el resto de los días. -->
+          <div class="sp-dev">
+            <div class="sp-dev-cab">
+              <span class="sp-dev-ico">${raw(icon('llave'))}</span>
+              <span class="grow"><b>Si aún así algo falla</b>
+                <span class="tiny">Prueba una a una las llamadas a Spotify y te dice
+                cuál se cae y por qué.</span></span>
+            </div>
+            <button class="btn vidrio block sm" data-a="diagnostico">
+              ${raw(icon('beep'))} Probar las llamadas que fallan</button>
+            <pre class="tiny sp-salida" id="sp-diag" hidden></pre>
+
+            <details class="sp-crudo">
+              <summary class="tiny">Los permisos tal cual los escribe Spotify</summary>
+              <p class="tiny sp-crudo-txt">${crudo || 'la sesión es anterior y no lo apuntó'}</p>
+              ${raw(faltantes.length
+                ? '<p class="tiny sp-crudo-falta">Falta: ' + esc(faltantes.join(', ')) + '</p>'
+                : '')}
+            </details>
+          </div>
+        </div>
+      </details>`;
+  }
 
   /* Si la última autorización falló, se enseña aquí con el texto exacto que
      devolvió Spotify: un aviso de dos segundos no da tiempo ni a leerlo. */
@@ -2154,6 +2235,7 @@
     bind(root, '[data-a=diagnostico]', function (btn) {
       const caja = root.querySelector('#sp-diag');
       btn.disabled = true;
+      caja.hidden = false;
       caja.textContent = 'Probando…';
       Spotify.diagnostico()
         .then(function (t) { caja.textContent = t; btn.disabled = false; })
@@ -2192,44 +2274,85 @@
 
     let ambiente = 'ritmo';
 
+    /* Cuánto dura una lista. Nadie elige «veinte canciones»: se elige cuánto
+       va a durar el entreno, y tres minutos y medio de media es lo que mide una
+       canción. Con el número a secas hay que hacer la cuenta de cabeza. */
+    const duracion = function (n) {
+      const min = Math.round(n * 3.5);
+      const h = Math.floor(min / 60);
+      return h ? h + ' h' + (min % 60 ? ' ' + (min % 60) : '') : min + ' min';
+    };
+
     UI.modal(html`
       <h2>Nueva lista</h2>
       <p class="muted">La IA propone las canciones y la app las busca en Spotify.
       Las que no existan se descartan solas.</p>
 
-      <label class="tiny">AMBIENTE</label>
-      <div class="row wrap" style="gap:6px;margin:7px 0 14px">
+      <!-- Lo que vas a pedir, antes de pedirlo. La misma portada que va a salir
+           en la pantalla, para no tener que imaginársela. -->
+      <div class="pl-previo" id="pl-previo"></div>
+
+      <label class="tiny">A QUÉ TIENE QUE SONAR</label>
+      <div class="pl-ambientes">
         ${raw(Object.keys(IA.AMBIENTES).map(function (k) {
-          return '<button class="chip ' + (k === ambiente ? 'on' : '') + '" data-amb="' + k + '">' +
-            esc(IA.AMBIENTES[k].label) + '</button>';
+          const a = IA.AMBIENTES[k];
+          return '<button class="pl-amb' + (k === ambiente ? ' on' : '') + '" data-amb="' + k +
+            '" style="--tono:' + (a.tono || 'var(--acc)') + '">' +
+            '<span class="pa-ico">' + icon(a.icono || 'musica') + '</span>' +
+            '<span class="grow"><span class="pa-nom">' + esc(a.label) + '</span>' +
+            '<span class="pa-sub">' + esc(a.corto || '') + '</span></span>' +
+            '<span class="pa-marca">' + icon('check') + '</span></button>';
         }).join(''))}
       </div>
 
-      <label class="tiny">CUÁNTAS CANCIONES</label>
-      <div class="row wrap" style="gap:6px;margin:7px 0 14px">
+      <label class="tiny" style="margin-top:16px;display:block">CUÁNTO VA A DURAR</label>
+      <div class="pl-cuantas">
         ${raw([12, 20, 30].map(function (n) {
-          return '<button class="chip ' + (n === 20 ? 'on' : '') + '" data-num="' + n + '">' +
-            n + '</button>';
+          return '<button class="pl-n' + (n === 20 ? ' on' : '') + '" data-num="' + n + '">' +
+            '<b>' + n + '</b><i>' + duracion(n) + '</i></button>';
         }).join(''))}
       </div>
 
-      <label class="tiny">ALGO MÁS (OPCIONAL)</label>
+      <label class="tiny" style="margin-top:16px;display:block">ALGO MÁS (OPCIONAL)</label>
       <input id="pl-libre" placeholder="Nada de reguetón, más rock de los noventa…"
-             style="margin:6px 0 14px">
+             style="margin-top:6px">
 
-      ${raw(rutinaHoy ? '<p class="tiny">Se adaptará a tu entrenamiento de hoy: ' +
-        esc(rutinaHoy.name) + '.</p>' : '')}
+      ${raw(rutinaHoy ? html`
+        <div class="pl-hoy">
+          <span class="ph-ico">${raw(icon('dumbbell'))}</span>
+          <span class="grow"><b>Se adapta a lo de hoy</b>
+            <span class="tiny">${rutinaHoy.name}: más pesada en las series duras y más
+            constante entre ellas.</span></span>
+        </div>` : '')}
 
-      <button class="btn primary block" data-x="crear">${raw(icon('chispa'))} Crear lista</button>
+      <button class="btn primary block btn-arranque" data-x="crear" style="margin-top:16px">
+        ${raw(icon('chispa'))} Crear lista</button>
       <div class="tiny" id="pl-estado" style="margin-top:12px"></div>`,
       function (el) {
         let num = 20;
+
+        /* La portada de lo que vas a pedir, rehecha con cada toque. Es lo que
+           convierte tres listas de opciones en una sola decisión que se ve. */
+        const pintarPrevio = function () {
+          const a = IA.AMBIENTES[ambiente];
+          el.querySelector('#pl-previo').innerHTML =
+            '<div class="card tarjeta-premium mus-portada" style="margin:0">' +
+            '<span class="mus-onda">' + icon(a.icono || 'musica') + '</span>' +
+            '<div class="pre-encima">Vas a pedir</div>' +
+            '<div class="mus-nom">' + esc(a.label) + '</div>' +
+            '<div class="mus-meta"><span class="mus-chip">' + num + ' canciones</span>' +
+            '<span class="tiny">' + duracion(num) + ' de música</span></div>' +
+            '<p class="muted mus-desc">' + esc(a.corto || '') + '</p>' +
+            '</div>';
+        };
+        pintarPrevio();
 
         el.querySelectorAll('[data-amb]').forEach(function (b) {
           b.onclick = function () {
             ambiente = b.dataset.amb;
             el.querySelectorAll('[data-amb]').forEach(function (x) { x.classList.remove('on'); });
             b.classList.add('on');
+            pintarPrevio();
           };
         });
         el.querySelectorAll('[data-num]').forEach(function (b) {
@@ -2237,6 +2360,7 @@
             num = Number(b.dataset.num);
             el.querySelectorAll('[data-num]').forEach(function (x) { x.classList.remove('on'); });
             b.classList.add('on');
+            pintarPrevio();
           };
         });
 
