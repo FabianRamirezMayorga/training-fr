@@ -1061,58 +1061,90 @@
 
       <div class="stack">
         ${raw(sug.map(function (x, i) {
-          const t = Alertas.TIPOS[x.tipo] || Alertas.TIPOS.libre;
-          return html`
-            <div class="card tarjeta-premium alerta-caja" style="--tono:${raw(t.tono || 'var(--acc)')}">
-              <div class="row" style="align-items:flex-start;gap:11px">
-                <span class="al-ico">${raw(icon(t.icono))}</span>
-                <div class="grow" style="min-width:0">
-                  <div class="al-tit">${x.titulo}</div>
-                  <div class="tiny al-meta">${Alertas.resumenDias({ dias: x.dias })}</div>
-                </div>
-                <button class="btn sm primary" data-sug="${i}">Crear</button>
-              </div>
-              <div class="al-horas">
-                ${raw(x.horas.map(function (h) {
-                  return '<span class="al-hora">' + esc(h) + '</span>';
-                }).join(''))}
-              </div>
-              <p class="tiny" style="margin:9px 0 0">${x.porque}</p>
-            </div>`;
+          /* La misma caja que un recordatorio de verdad: es lo que va a ser si
+             lo creas, y enseñarlo con otra forma obliga a traducir. */
+          return cajaAlerta(x, {
+            activa: true,
+            control: '<button class="btn sm primary rec-crear" data-sug="' + i + '">Crear</button>',
+            pie: '<p class="tiny rec-porque">' + esc(x.porque) + '</p>'
+          });
         }).join(''))}
       </div>`;
   }
 
   /* ---------- un recordatorio ----------
-     Eran ocho tarjetas iguales con el mismo icono gris y tres renglones de texto
-     debajo, y para saber cuál era el del agua había que leerlos uno a uno. Ahora
-     cada tipo lleva su color en el icono y en el filo de la tarjeta, y sus horas
-     van en pastillas en vez de en un renglón de texto: una hora es un dato que
-     se busca, no una frase que se lee.
+     Un recordatorio es una hora. Todo lo demás —cómo se llama, qué días, de qué
+     tipo es— explica esa hora, pero el dato es la hora, y estaba escrita en
+     letra pequeña dentro de un renglón de texto mientras el título se llevaba el
+     tamaño grande.
 
-     Apagado, la tarjeta se apaga con él: no tiene sentido que un recordatorio
-     que no va a sonar se vea igual que uno que sí. */
+     Así que manda la hora, como en el reloj del teléfono: grande, en cifras
+     tabulares, y debajo en pequeño lo que es y qué días. Cuando hay varias —el
+     agua son diez— la grande es la siguiente que va a sonar, que es la única
+     que importa ahora mismo, y las demás quedan en una tira debajo con la
+     siguiente marcada.
+
+     El material es el de la app: vidrio teñido del color de su tipo, con su
+     canto de luz, su sombra y un reflejo que se desplaza muy despacio. Apagado
+     no se mueve nada y el color se va: un recordatorio que no va a sonar no
+     tiene por qué brillar igual que uno que sí. */
   function tarjetaAlerta(a) {
+    return cajaAlerta(a, {
+      id: a.id,
+      activa: !!a.activa,
+      control: '<button class="sw ' + (a.activa ? 'on' : '') + '" data-tog="' + a.id + '" ' +
+        'role="switch" aria-checked="' + a.activa + '" ' +
+        'aria-label="Activar ' + esc(a.titulo) + '"></button>'
+    });
+  }
+
+  function cajaAlerta(a, o) {
     const t = Alertas.TIPOS[a.tipo] || Alertas.TIPOS.libre;
-    return html`
-      <div class="card tarjeta-premium alerta-caja${raw(a.activa ? '' : ' apagada')}"
-           style="--tono:${raw(t.tono || 'var(--acc)')}">
-        <div class="row" style="align-items:flex-start;gap:11px">
-          <span class="al-ico">${raw(icon(t.icono))}</span>
-          <div class="grow" data-edit="${a.id}" style="cursor:pointer;min-width:0">
-            <div class="al-tit">${a.titulo}</div>
-            <div class="tiny al-meta">${Alertas.resumenDias(a)}</div>
-          </div>
-          <button class="sw ${a.activa ? 'on' : ''}" data-tog="${a.id}"
-                  role="switch" aria-checked="${a.activa}"
-                  aria-label="Activar ${esc(a.titulo)}"></button>
-        </div>
-        <div class="al-horas" data-edit="${a.id}" style="cursor:pointer">
-          ${raw((a.horas || []).map(function (h) {
-            return '<span class="al-hora">' + esc(h) + '</span>';
-          }).join(''))}
-        </div>
-      </div>`;
+    const horas = (a.horas || []).slice();
+    const iSig = proximaHora(a, horas);
+    const grande = horas[iSig] || horas[0] || '--:--';
+    const editable = o.id ? ' data-edit="' + o.id + '"' : '';
+
+    /* La tira solo cuando hay mas de una: con una sola hora, repetir debajo la
+       que ya esta en grande es ruido. */
+    const tira = horas.length > 1
+      ? '<div class="rec-tira"' + editable + '>' +
+        horas.map(function (h, i) {
+          return '<span class="rec-h' + (i === iSig ? ' sig' : '') +
+            (i < iSig ? ' ida' : '') + '">' + esc(h) + '</span>';
+        }).join('') + '</div>'
+      : '';
+
+    return '<div class="rec' + (o.activa ? '' : ' apagada') + '" ' +
+      'style="--tono:' + (t.tono || 'var(--acc)') + '">' +
+      /* Sin silueta al fondo: seria el mismo icono que ya lleva la baldosa a dos
+         centimetros, y encima cae justo detras del interruptor. El color de la
+         tarjeta ya dice de que tipo es. */
+      '<div class="rec-cab">' +
+      '<span class="rec-ico">' + icon(t.icono) + '</span>' +
+      '<div class="grow" style="min-width:0"' + editable + '>' +
+      '<div class="rec-hora">' + esc(grande) +
+      (horas.length > 1
+        ? '<i>+' + (horas.length - 1) + '</i>' : '') + '</div>' +
+      '<div class="rec-que">' + esc(a.titulo) + '</div>' +
+      '<div class="rec-dias">' + esc(Alertas.resumenDias(a)) + '</div>' +
+      '</div>' +
+      o.control +
+      '</div>' +
+      tira +
+      (o.pie || '') +
+      '</div>';
+  }
+
+  /* Cual de sus horas es la siguiente que va a sonar. Si ya han pasado todas,
+     la primera: manana vuelve a empezar por ahi. */
+  function proximaHora(a, horas) {
+    const ahora = new Date().getHours() * 60 + new Date().getMinutes();
+    for (let i = 0; i < horas.length; i++) {
+      const m = String(horas[i]).match(/^(\d{1,2}):(\d{2})$/);
+      if (m && Number(m[1]) * 60 + Number(m[2]) >= ahora) return i;
+    }
+    return 0;
   }
 
   V.alertas.mount = function (root) {

@@ -3201,66 +3201,174 @@ html[data-theme="light"] .vista-nutricion textarea {
    dia se monta sobre el titulo igual que pasaba en los planes. */
 
 /* ---------- los recordatorios ----------
-   Eran ocho tarjetas iguales con el mismo icono gris y tres renglones de texto
-   debajo: para saber cual era el del agua habia que leerlos uno a uno. Ahora
-   cada tipo lleva su color en el icono y en el filo de la tarjeta, y sus horas
-   van en pastillas —una hora es un dato que se busca, no una frase que se lee—. */
-.alerta-caja {
-  position: relative; overflow: hidden;
+   Un recordatorio es una hora. Todo lo demas —como se llama, que dias, de que
+   tipo es— explica esa hora, pero el dato es la hora, y estaba en letra pequena
+   dentro de un renglon mientras el titulo se llevaba el tamano grande. Aqui
+   manda la hora, como en el reloj del telefono.
+
+   El material es el de la app: vidrio tenido del color de su tipo, con su canto
+   de luz arriba, su sombra debajo y un reflejo grande que se desplaza muy
+   despacio —eso es lo que lo hace liquido y no una foto de vidrio—. */
+.rec {
+  position: relative; overflow: hidden; isolation: isolate;
+  padding: 14px 15px 13px; border-radius: 20px;
   background:
-    linear-gradient(180deg, var(--vidrio-luz), transparent 58%),
-    linear-gradient(150deg, color-mix(in srgb, var(--tono) 11%, var(--card)) 0%,
-                    var(--card) 58%);
-  box-shadow: inset 0 1px 0 var(--vidrio-rim),
-              inset 3px 0 0 var(--tono),
-              var(--vidrio-sombra);
+    linear-gradient(180deg, color-mix(in srgb, #fff 7%, transparent), transparent 46%),
+    linear-gradient(148deg,
+      color-mix(in srgb, var(--tono) 20%, var(--card)) 0%,
+      color-mix(in srgb, var(--tono) 6%, var(--card)) 46%,
+      var(--card) 100%);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 13%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--tono) 17%, transparent),
+    0 8px 22px color-mix(in srgb, var(--tono) 13%, transparent),
+    0 2px 6px rgba(0, 0, 0, .2);
+  transition: transform .16s cubic-bezier(.2, .9, .3, 1), box-shadow .22s ease,
+              filter .22s ease;
+}
+.rec:active { transform: scale(.993); }
+
+/* El reflejo que se mueve. Grande, suavisimo y lentisimo: si se nota, molesta. */
+.rec::before {
+  content: ''; position: absolute; inset: -70% -25%; pointer-events: none; z-index: -1;
+  background: radial-gradient(48% 120% at 28% -10%,
+              color-mix(in srgb, #fff 11%, transparent) 0%, transparent 70%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rec::before { animation: vidrio 17s ease-in-out infinite alternate; }
 }
 
-/* El icono en su baldosa del color del tipo: es lo primero que se mira al
-   buscar uno concreto en una lista larga. */
-.al-ico {
-  flex: none; width: 38px; height: 38px; border-radius: 12px;
+.rec-cab { display: flex; align-items: center; gap: 12px; }
+
+/* La baldosa del icono, con su propio vidrio */
+.rec-ico {
+  flex: none; width: 42px; height: 42px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   color: var(--tono);
-  background: color-mix(in srgb, var(--tono) 15%, transparent);
-  box-shadow: inset 0 1px 0 var(--vidrio-rim),
-              inset 0 0 0 1px color-mix(in srgb, var(--tono) 22%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 14%, transparent), transparent 60%),
+    color-mix(in srgb, var(--tono) 17%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent),
+              inset 0 0 0 1px color-mix(in srgb, var(--tono) 26%, transparent),
+              0 3px 10px color-mix(in srgb, var(--tono) 20%, transparent);
 }
-.al-ico svg { width: 19px; height: 19px; fill: none; stroke: currentColor;
+.rec-ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor;
   stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-.al-tit { font-weight: 700; font-size: .96rem; letter-spacing: -.012em;
+/* La hora manda: grande, tabular y apretada, como un reloj */
+.rec-hora {
+  font-size: 1.92rem; font-weight: 800; letter-spacing: -.035em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.rec-hora i {
+  font-style: normal; font-size: .7rem; font-weight: 700; letter-spacing: 0;
+  color: var(--tono); margin-left: 6px; vertical-align: 5px;
+  padding: 2px 6px; border-radius: 999px;
+  background: color-mix(in srgb, var(--tono) 15%, transparent);
+}
+.rec-que { font-size: .9rem; font-weight: 600; margin-top: 3px; letter-spacing: -.01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.al-meta { margin-top: 2px; }
+.rec-dias { font-size: .74rem; color: var(--dim2); margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Las horas, en pastillas. Tabulares para que las cifras no bailen de una a
-   otra, que es lo que hace que una fila de horas se lea como una fila. */
-.al-horas { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
-.al-hora {
-  font-size: .73rem; font-weight: 700; padding: 4px 9px; border-radius: 999px;
-  font-variant-numeric: tabular-nums; color: var(--tono);
-  background: color-mix(in srgb, var(--tono) 13%, transparent);
+/* La tira de las demas horas. La siguiente va marcada y las que ya pasaron se
+   apagan: una fila de diez horas iguales no dice en cual vas. */
+.rec-tira {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; padding-top: 11px;
+  border-top: 1px solid color-mix(in srgb, var(--tono) 14%, transparent);
+  cursor: pointer;
+}
+.rec-h {
+  font-size: .72rem; font-weight: 700; padding: 4px 8px; border-radius: 9px;
+  font-variant-numeric: tabular-nums; color: var(--dim);
+  background: color-mix(in srgb, var(--card2) 65%, transparent);
   box-shadow: inset 0 1px 0 var(--vidrio-rim);
 }
-
-/* Apagado, la tarjeta se apaga con el: no tiene sentido que un recordatorio
-   que no va a sonar se vea igual que uno que si. */
-.alerta-caja.apagada { box-shadow: inset 0 1px 0 var(--vidrio-rim),
-  inset 3px 0 0 color-mix(in srgb, var(--tono) 35%, transparent),
-  var(--vidrio-sombra-corta); }
-.alerta-caja.apagada .al-ico,
-.alerta-caja.apagada .al-horas { opacity: .45; }
-.alerta-caja.apagada .al-tit { color: var(--dim); }
-
-/* En claro la tarjeta premium repone su propia sombra y se llevaba por delante
-   el filo de color, que es lo que dice de un vistazo de que tipo es cada una. */
-html[data-theme="light"] .alerta-caja {
-  background:
-    linear-gradient(150deg, color-mix(in srgb, var(--tono) 9%, var(--card)) 0%,
-                    var(--card) 58%);
-  box-shadow: inset 3px 0 0 var(--tono), var(--vidrio-sombra);
+.rec-h.ida { opacity: .4; }
+.rec-h.sig {
+  color: var(--on-acc); background: var(--tono);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--tono) 40%, transparent);
 }
-html[data-theme="light"] .alerta-caja.apagada {
-  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--tono) 35%, transparent),
-              var(--vidrio-sombra-corta);
+
+.rec-crear { flex: none; }
+.rec-porque { margin: 11px 0 0; padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--tono) 14%, transparent); }
+
+/* ---------- apagado ----------
+   Se va el color, se va el brillo y se para el reflejo. Un recordatorio que no
+   va a sonar no tiene por que verse igual que uno que si. */
+.rec.apagada {
+  background: linear-gradient(180deg, var(--vidrio-luz), transparent 50%), var(--card);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+  filter: saturate(.25);
+}
+.rec.apagada::before { animation: none; opacity: 0; }
+.rec.apagada .rec-hora, .rec.apagada .rec-que { color: var(--dim); }
+.rec.apagada .rec-ico { box-shadow: inset 0 0 0 1px var(--line); }
+
+/* Entran escalonadas, como las casillas del filtro */
+@media (prefers-reduced-motion: no-preference) {
+  .rec { animation: rec-entra .42s cubic-bezier(.2, .9, .3, 1) both; }
+  .stack > .rec:nth-child(2) { animation-delay: .05s; }
+  .stack > .rec:nth-child(3) { animation-delay: .1s; }
+  .stack > .rec:nth-child(4) { animation-delay: .15s; }
+  .stack > .rec:nth-child(5) { animation-delay: .2s; }
+  .stack > .rec:nth-child(n+6) { animation-delay: .25s; }
+}
+@keyframes rec-entra {
+  from { opacity: 0; transform: translateY(7px) scale(.985); }
+  to { opacity: 1; }
+}
+
+/* En claro el vidrio se hace con la sombra y no con el degradado: una lamina
+   translucida blanca sobre blanco no se ve. */
+html[data-theme="light"] .rec {
+  background:
+    linear-gradient(148deg, color-mix(in srgb, var(--tono) 13%, var(--card)) 0%,
+                    var(--card) 55%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--tono) 16%, transparent),
+    0 6px 18px color-mix(in srgb, var(--tono) 14%, transparent),
+    0 1px 2px rgba(16, 24, 40, .06);
+}
+html[data-theme="light"] .rec.apagada {
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line), var(--vidrio-sombra-corta);
+}
+html[data-theme="light"] .rec-h { background: var(--card2); box-shadow: none; }
+/* En claro el texto de la pastilla es blanco, y blanco sobre el ambar de la
+   comida no se lee. Se oscurece el fondo lo justo para que cualquier tono
+   aguante el blanco encima. */
+html[data-theme="light"] .rec-h.sig {
+  background: color-mix(in srgb, var(--tono) 74%, #000); color: #fff;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--tono) 32%, transparent);
+}
+
+/* ---------- el interruptor ----------
+   El de iOS: carril hundido, boton con su sombra y un muelle al cambiar. El de
+   antes era un rectangulo plano dentro de una tarjeta de vidrio. */
+.rec .sw {
+  flex: none; width: 51px; height: 31px; border-radius: 999px; border: 0;
+  position: relative; cursor: pointer; padding: 0;
+  background: color-mix(in srgb, var(--card2) 90%, transparent);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .3), inset 0 0 0 1px var(--vidrio-rim);
+  transition: background .24s cubic-bezier(.2, .9, .3, 1), box-shadow .24s ease;
+}
+.rec .sw::after {
+  content: ''; position: absolute; top: 2.5px; left: 2.5px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(180deg, #fff, #eceff4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .32), 0 0 0 .5px rgba(0, 0, 0, .06);
+  transition: transform .26s cubic-bezier(.3, 1.4, .5, 1);
+}
+.rec .sw.on {
+  background: var(--tono);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 25%, transparent),
+              0 2px 8px color-mix(in srgb, var(--tono) 40%, transparent);
+}
+.rec .sw.on::after { transform: translateX(20px); }
+@media (prefers-reduced-motion: reduce) {
+  .rec .sw, .rec .sw::after { transition: none; }
 }
