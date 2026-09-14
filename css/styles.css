@@ -1573,3 +1573,47 @@ img[src^="data/img/"] {
   cursor: pointer; gap: 12px;
 }
 .filtro-sw-t { font-size: .92rem; font-weight: 600; }
+
+/* ---------- la rutina de hoy, en la portada ----------
+   Es lo primero que se mira al abrir la app y lo que se toca para empezar, asi
+   que no puede ser una fila de lista mas. Misma informacion, ordenada por lo
+   que uno se pregunta al verla: que toca hoy (arriba, pequeno y en verde), que
+   dia es (grande), de que plan y cuanto (al pie). El boton va a media altura,
+   que es donde cae el pulgar, y no pegado arriba. */
+.tarjeta-hoy {
+  background:
+    linear-gradient(152deg, color-mix(in srgb, var(--acc) 14%, var(--card)) 0%,
+                    var(--card) 58%);
+  border-color: color-mix(in srgb, var(--acc) 34%, var(--line));
+  border-radius: 20px;
+}
+.hoy-fila { display: flex; align-items: center; gap: 11px; padding: 14px 15px;
+  position: relative; }
+
+/* La silueta de la zona, al fondo y casi transparente: da profundidad y dice
+   de un vistazo si lo de hoy es tren superior o inferior. */
+.hoy-marca { position: absolute; right: -14px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; opacity: .085; }
+.hoy-marca .cuerpo { width: 112px; }
+.hoy-marca .silueta { fill: var(--txt); }
+.hoy-marca .pri { fill: var(--acc); }
+
+.hoy-info { flex: 1; min-width: 0; background: none; border: 0; padding: 0;
+  text-align: left; color: inherit; cursor: pointer; position: relative; }
+.hoy-encima { font-size: .68rem; font-weight: 800; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--acc); }
+.hoy-tit { font-size: 1.12rem; font-weight: 800; letter-spacing: -.022em;
+  line-height: 1.15; margin-top: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hoy-meta { font-size: .78rem; color: var(--dim); margin-top: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.hoy-play { flex: none; display: inline-flex; align-items: center; gap: 7px;
+  border: 0; border-radius: 999px; padding: .7em 1.1em;
+  background: var(--acc); color: var(--on-acc);
+  font-weight: 700; font-size: .92rem; letter-spacing: -.01em;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--acc) 32%, transparent);
+  transition: transform .14s cubic-bezier(.2,.9,.3,1), filter .15s;
+}
+.hoy-play svg { width: 17px; height: 17px; }
+.hoy-play:active { transform: scale(.95); filter: brightness(.95); }

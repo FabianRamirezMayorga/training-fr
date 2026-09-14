@@ -640,6 +640,17 @@
   }
 
   /* Los músculos que toca de verdad, de más a menos presentes */
+  /* Los mismos, sin traducir: la silueta se pinta con los identificadores. */
+  function musculosCrudos(r) {
+    const cuenta = {};
+    (r.exercises || []).forEach(function (re) {
+      const ex = Data.get(re.exId);
+      if (!ex) return;
+      (ex.primaryMuscles || []).forEach(function (m) { cuenta[m] = (cuenta[m] || 0) + 1; });
+    });
+    return Object.keys(cuenta).sort(function (a, b) { return cuenta[b] - cuenta[a]; });
+  }
+
   function musculosDeRutina(r) {
     const cuenta = {};
     (r.exercises || []).forEach(function (re) {
@@ -964,7 +975,39 @@
     const musculos = musculosDeRutina(r);
     const abierta = rutinaAbierta[ambito] === r.id;
 
-    const tarjeta = html`
+    /* La tarjeta de la portada es otra cosa que una fila de lista: es lo
+       primero que se mira al abrir la app y lo que se toca para empezar. Lleva
+       la misma información, ordenada por lo que se pregunta uno al verla —qué
+       toca hoy, de qué plan, cuánto es— con la zona arriba en pequeño, el día
+       en grande y el botón a media altura, que es donde cae el pulgar. */
+    const cabeceraInicio = function () {
+      const zona = zonaDeRutina(r);
+      const dias = (r.days || []).map(UI.diaLargo);
+      const encima = (esDeHoy ? 'Hoy' : listaDias(dias) || 'Sin día') +
+        (r.mixta ? ' · Mixta' : zona ? ' · ' + zona.label : '');
+
+      return html`
+        <div class="hoy-fila">
+          ${raw(musculos.length && g.Musculos ? '<div class="hoy-marca">' +
+            Musculos.una(musculosCrudos(r), 'f') + '</div>' : '')}
+          <button class="hoy-info" data-desplegar="${r.id}" data-ambito="${ambito}">
+            <div class="hoy-encima">${encima}</div>
+            <div class="hoy-tit">${dias.length ? listaDias(dias) : nombreRutina(r)}</div>
+            <!-- Sin repetir los músculos: la zona ya está arriba, en verde. -->
+            <div class="hoy-meta">${raw(sinPlan ? '' : esc(nombreRutina(r)) + ' · ')}${n}
+              ${n === 1 ? 'ejercicio' : 'ejercicios'}</div>
+          </button>
+          <button class="hoy-play" data-train="${r.id}">
+            ${raw(icon('play'))} Entrenar</button>
+        </div>`;
+    };
+
+    const tarjeta = ambito === 'inicio' ? html`
+      <div class="card tarjeta-hoy" style="padding:0;overflow:hidden">
+        ${raw(cabeceraInicio())}
+        ${raw(abierta && n ? detalleHTML() : '')}
+      </div>`
+    : html`
       <div class="card ${esDeHoy && !ordenando ? 'card-hoy' : ''}" style="padding:0;overflow:hidden">
         <div class="row between" style="align-items:flex-start;padding:13px">
           ${raw(editando && total > 1 ? html`
@@ -991,7 +1034,11 @@
                      ${raw(icon('play'))} Entrenar</button>`)}
         </div>
 
-        ${raw(abierta && n ? html`
+        ${raw(abierta && n ? detalleHTML() : '')}
+      </div>`;
+
+    function detalleHTML() {
+      return html`
           <div class="rt-detalle">
             ${raw(r.exercises.map(function (re, k) {
               const ex = Data.get(re.exId);
@@ -1032,8 +1079,8 @@
               <button class="btn sm block" data-iarutina="${r.id}" style="margin-top:8px">
                 ${raw(icon('chispa'))} Revisar esta rutina con IA</button>
             </div>`)}
-          </div>` : '')}
-      </div>`;
+          </div>`;
+    }
 
     /* En la portada la tarjeta va suelta: ahí no se borra ni se duplica nada */
     if (!total && !sinPlan) return tarjeta;
