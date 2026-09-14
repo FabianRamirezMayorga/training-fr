@@ -154,5 +154,13 @@
       '</div></div>';
   }
 
-  g.Musculos = { mapa: mapa, siluetas: siluetas, PIEZAS: PIEZAS };
+  /* Una sola figura, para cuando no cabe el par. La usan las casillas de zona
+     del filtro: ahí el cuerpo entero de frente y de espaldas no cabe, y con una
+     vista bien elegida —la espalda de espaldas, el resto de frente— se entiende
+     igual de qué zona se habla. */
+  function una(musculos, vista) {
+    return figura(vista || 'f', musculos || [], [], 'Zona del cuerpo');
+  }
+
+  g.Musculos = { mapa: mapa, siluetas: siluetas, una: una, PIEZAS: PIEZAS };
 })(window);

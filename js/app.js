@@ -1278,85 +1278,200 @@
   /* Todos los filtros en una hoja, que es donde estorban menos. Con fichas y no
      con desplegables del navegador: un select del sistema en medio de la
      pantalla es justo lo que hace que una app parezca hecha a mano. */
+  /* ---------- el filtro de ejercicios ----------
+     Eran cinco bloques de píldoras idénticas, treinta y cinco en total: una
+     pared de palabras donde todo pesa lo mismo y nada guía. Ahora:
+
+     - La zona del cuerpo se elige sobre el cuerpo. Es la decisión principal y
+       merece ser lo único grande de la hoja; además un dibujo dice qué es
+       «core» mejor que la palabra.
+     - Material y nivel viven plegados con su valor a la derecha: son trece y
+       cuatro opciones que casi nunca se tocan, y ocupaban media pantalla.
+     - Lo que es sí o no —favoritos, mi material— se pregunta con un conmutador,
+       que es lo que significa, y no con una píldora que hay que adivinar si
+       está encendida.
+     - El botón dice cuántos ejercicios vas a ver y el número cambia al tocar,
+       así que uno sabe si se ha pasado de filtros antes de cerrar.
+
+     Y ya no se cierra y se vuelve a abrir la hoja en cada toque: se actualiza
+     donde está. */
   function filtrosSheet() {
     const gear = gearActual();
 
-    const grupo = function (titulo, cuerpo) {
-      return '<div class="tiny" style="margin:16px 0 7px">' + titulo + '</div>' +
-        '<div class="row wrap" style="gap:6px">' + cuerpo + '</div>';
+    const equipos = Object.keys(I18N.EQUIP).filter(function (k) {
+      return !gear || Data.gearAllows(gear, k);
+    });
+
+    /* De frente casi todo; la espalda solo se ve de espaldas. */
+    const VISTA_ZONA = { espalda: 'd', hombro: 'd' };
+
+    const casillaZona = function (id, label, musculos) {
+      const activa = id ? exFilters.group === id && !exFilters.muscle
+        : !exFilters.group && !exFilters.muscle;
+      return '<button class="zona-tile' + (activa ? ' on' : '') + '" data-f-grp="' + id + '">' +
+        (g.Musculos ? Musculos.una(musculos, VISTA_ZONA[id] || 'f') : '') +
+        '<span>' + esc(label) + '</span></button>';
     };
-    const ficha = function (attr, valor, texto, activo) {
+
+    const todosMusculos = I18N.GROUPS.reduce(function (a, gr) {
+      return a.concat(gr.muscles);
+    }, []);
+
+    const pildora = function (attr, valor, texto, activo) {
       return '<button class="chip ' + (activo ? 'on' : '') + '" data-' + attr + '="' +
         esc(valor) + '">' + esc(texto) + '</button>';
     };
 
+    const tituloGrupo = function (t) {
+      return '<div class="tiny filtro-tit">' + t + '</div>';
+    };
+
     UI.modal(html`
-      <h2>Filtrar ejercicios</h2>
+      <h2>Filtrar</h2>
 
-      ${raw(grupo('ZONA DEL CUERPO',
-        ficha('f-grp', '', 'Todas', !exFilters.group && !exFilters.muscle) +
-        I18N.GROUPS.map(function (gr) {
-          return ficha('f-grp', gr.id, gr.label, exFilters.group === gr.id);
-        }).join('')))}
+      ${raw(tituloGrupo('ZONA DEL CUERPO'))}
+      <div class="zona-rejilla">
+        ${raw(casillaZona('', 'Todas', todosMusculos))}
+        ${raw(I18N.GROUPS.map(function (gr) {
+          return casillaZona(gr.id, gr.label, gr.muscles);
+        }).join(''))}
+      </div>
 
-      ${raw(grupo('TIPO DE TRABAJO',
-        ficha('f-tipo', '', 'Todo', !exFilters.tipo) +
-        Data.TIPOS.map(function (t) {
-          return ficha('f-tipo', t.id, t.label, exFilters.tipo === t.id);
-        }).join('')))}
+      ${raw(tituloGrupo('TIPO DE TRABAJO'))}
+      <div class="row wrap" style="gap:6px">
+        ${raw(pildora('f-tipo', '', 'Todo', !exFilters.tipo))}
+        ${raw(Data.TIPOS.map(function (t) {
+          return pildora('f-tipo', t.id, t.label, exFilters.tipo === t.id);
+        }).join(''))}
+      </div>
 
-      ${raw(grupo('MATERIAL',
-        ficha('f-eq', '', 'Todo', !exFilters.equipment) +
-        Object.keys(I18N.EQUIP).filter(function (k) {
-          return !gear || Data.gearAllows(gear, k);
-        }).map(function (k) {
-          return ficha('f-eq', k, I18N.EQUIP[k], exFilters.equipment === k);
-        }).join('')))}
+      <details class="plegable-fino filtro-mas" data-mas="eq">
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="grow">Material</span>
+          <span class="tiny nowrap" data-valor="eq"></span>
+        </summary>
+        <div class="fino-cuerpo">
+          <div class="row wrap" style="gap:6px">
+            ${raw(pildora('f-eq', '', 'Todo', !exFilters.equipment))}
+            ${raw(equipos.map(function (k) {
+              return pildora('f-eq', k, I18N.EQUIP[k], exFilters.equipment === k);
+            }).join(''))}
+          </div>
+        </div>
+      </details>
 
-      ${raw(grupo('NIVEL',
-        ficha('f-lv', '', 'Cualquiera', !exFilters.level) +
-        Object.keys(I18N.LEVEL).map(function (k) {
-          return ficha('f-lv', k, I18N.LEVEL[k], exFilters.level === k);
-        }).join('')))}
+      <details class="plegable-fino filtro-mas" data-mas="lv">
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="grow">Nivel</span>
+          <span class="tiny nowrap" data-valor="lv"></span>
+        </summary>
+        <div class="fino-cuerpo">
+          <div class="row wrap" style="gap:6px">
+            ${raw(pildora('f-lv', '', 'Cualquiera', !exFilters.level))}
+            ${raw(Object.keys(I18N.LEVEL).map(function (k) {
+              return pildora('f-lv', k, I18N.LEVEL[k], exFilters.level === k);
+            }).join(''))}
+          </div>
+        </div>
+      </details>
 
-      ${raw(grupo('SOLO',
-        '<button class="chip ' + (exFilters.favs ? 'on' : '') + '" data-f-favs="1">' +
-        icon('star') + ' Favoritos</button>' +
-        (Store.settings().gear === 'todo' ? ''
-          : '<button class="chip ' + (exFilters.todo ? '' : 'on') + '" data-f-todo="1">' +
-            icon('dumbbell') + ' Lo que puedo hacer donde entreno</button>')))}
+      <div class="filtro-sw">
+        <div class="row between" data-f-favs="1">
+          <div class="grow">
+            <div class="filtro-sw-t">Solo mis favoritos</div>
+            <div class="tiny">Los que has marcado con la estrella</div>
+          </div>
+          <span class="sw ${exFilters.favs ? 'on' : ''}" data-sw="favs"></span>
+        </div>
 
-      <button class="btn primary block" id="f-ver" style="margin-top:20px">Ver ejercicios</button>
-      <button class="btn ghost block sm" id="f-limpiar" style="margin-top:8px">Quitar los filtros</button>`,
+        ${raw(Store.settings().gear === 'todo' ? '' : html`
+        <div class="row between" data-f-todo="1">
+          <div class="grow">
+            <div class="filtro-sw-t">Solo lo que puedo hacer</div>
+            <div class="tiny">Con el material que tienes ${esc(Data.gearFrase(Store.settings().gear))}</div>
+          </div>
+          <span class="sw ${exFilters.todo ? '' : 'on'}" data-sw="todo"></span>
+        </div>`)}
+      </div>
+
+      <button class="btn primary block" id="f-ver" style="margin-top:18px"></button>
+      <button class="btn ghost block sm" id="f-limpiar" style="margin-top:8px" hidden>
+        Quitar los filtros</button>`,
       function (el) {
-        const repintar = function () { UI.closeModal(); exLimit = 40; render(); filtrosSheet(); };
+        const btnVer = el.querySelector('#f-ver');
+        const btnLimpiar = el.querySelector('#f-limpiar');
+
+        /* Repinta lo que cambia sin cerrar la hoja. Antes cada toque la cerraba,
+           repintaba la página de detrás y la volvía a abrir: se veía el salto y
+           se perdía el sitio. */
+        const refrescar = function () {
+          const marca = function (attr, valor) {
+            el.querySelectorAll('[data-' + attr + ']').forEach(function (b) {
+              b.classList.toggle('on', (b.dataset[attr.replace(/-(\w)/g, function (x, c) {
+                return c.toUpperCase();
+              })] || '') === (valor || ''));
+            });
+          };
+          marca('f-tipo', exFilters.tipo);
+          marca('f-eq', exFilters.equipment);
+          marca('f-lv', exFilters.level);
+
+          el.querySelectorAll('[data-f-grp]').forEach(function (b) {
+            b.classList.toggle('on', !exFilters.muscle &&
+              (b.dataset.fGrp || '') === (exFilters.group || ''));
+          });
+
+          el.querySelector('[data-valor="eq"]').textContent =
+            exFilters.equipment ? I18N.EQUIP[exFilters.equipment] : 'Todo';
+          el.querySelector('[data-valor="lv"]').textContent =
+            exFilters.level ? I18N.LEVEL[exFilters.level] : 'Cualquiera';
+
+          const swFavs = el.querySelector('[data-sw="favs"]');
+          if (swFavs) swFavs.classList.toggle('on', !!exFilters.favs);
+          const swTodo = el.querySelector('[data-sw="todo"]');
+          if (swTodo) swTodo.classList.toggle('on', !exFilters.todo);
+
+          const n = Data.search(loQueSeMira().base).length;
+          btnVer.textContent = !n ? 'No hay ninguno así'
+            : n === 1 ? 'Ver el ejercicio' : 'Ver ' + UI.num(n) + ' ejercicios';
+          btnVer.disabled = !n;
+          btnLimpiar.hidden = !cuantosFiltros();
+        };
 
         bindAll(el, '[data-f-grp]', function (b) {
           exFilters.group = b.dataset.fGrp; exFilters.muscle = ''; exFilters.q = '';
-          exFilters.favs = false; repintar();
+          exFilters.favs = false; refrescar();
         });
-        bindAll(el, '[data-f-tipo]', function (b) { exFilters.tipo = b.dataset.fTipo; repintar(); });
-        bindAll(el, '[data-f-eq]', function (b) { exFilters.equipment = b.dataset.fEq; repintar(); });
-        bindAll(el, '[data-f-lv]', function (b) { exFilters.level = b.dataset.fLv; repintar(); });
+        bindAll(el, '[data-f-tipo]', function (b) { exFilters.tipo = b.dataset.fTipo; refrescar(); });
+        bindAll(el, '[data-f-eq]', function (b) { exFilters.equipment = b.dataset.fEq; refrescar(); });
+        bindAll(el, '[data-f-lv]', function (b) { exFilters.level = b.dataset.fLv; refrescar(); });
+
         bind(el, '[data-f-favs]', function () {
           exFilters.favs = !exFilters.favs;
           if (exFilters.favs) { exFilters.group = ''; exFilters.muscle = ''; }
-          repintar();
+          refrescar();
         });
-        bind(el, '[data-f-todo]', function () { exFilters.todo = !exFilters.todo; repintar(); });
+        bind(el, '[data-f-todo]', function () { exFilters.todo = !exFilters.todo; refrescar(); });
 
-        el.querySelector('#f-ver').onclick = function () {
+        btnVer.onclick = function () {
           UI.closeModal(); exLimit = 40; render(); window.scrollTo(0, 0);
         };
-        el.querySelector('#f-limpiar').onclick = function () {
+        btnLimpiar.onclick = function () {
           exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', tipo: '',
             favs: false, todo: exFilters.todo };
           UI.closeModal(); exLimit = 40; render(); window.scrollTo(0, 0);
         };
+
+        refrescar();
       });
   }
 
-  function viewEjercicios() {
+  /* Qué se está mirando ahora mismo en Ejercicios.
+     Lo usan la pantalla y el contador del filtro; con el cálculo escrito dos
+     veces, el número del botón y el de la lista acabarían discrepando. */
+  function loQueSeMira() {
     const gear = gearActual();
 
     /* Escribir "pierna" o "femoral" no es buscar esas palabras en los nombres:
@@ -1369,14 +1484,26 @@
     const region = zonaQ && zonaQ.tipo === 'region' ? zonaQ.region
       : (!musculo && !exFilters.favs ? I18N.region(exFilters.group) : null);
 
-    const base = {
-      q: zonaQ ? '' : exFilters.q,
-      group: region ? '' : exFilters.group,
-      muscles: region ? region.muscles : null,
-      muscle: musculo,
-      equipment: exFilters.equipment, level: exFilters.level, tipo: exFilters.tipo,
-      favs: exFilters.favs, gear: gear
+    return {
+      gear: gear, zonaQ: zonaQ, musculo: musculo, region: region,
+      base: {
+        q: zonaQ ? '' : exFilters.q,
+        group: region ? '' : exFilters.group,
+        muscles: region ? region.muscles : null,
+        muscle: musculo,
+        equipment: exFilters.equipment, level: exFilters.level, tipo: exFilters.tipo,
+        favs: exFilters.favs, gear: gear
+      }
     };
+  }
+
+  function viewEjercicios() {
+    const mirando = loQueSeMira();
+    const gear = mirando.gear;
+    const zonaQ = mirando.zonaQ;
+    const musculo = mirando.musculo;
+    const region = mirando.region;
+    const base = mirando.base;
     const res = Data.search(base);
 
     /* Se segmenta por músculo salvo que se esté mirando un músculo concreto */
