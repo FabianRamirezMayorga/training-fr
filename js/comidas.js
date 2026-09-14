@@ -71,7 +71,14 @@
       prot: Math.max(0, Math.round(Number(c.prot) || 0)),
       detalle: String(c.detalle || '').slice(0, 300),
       confianza: c.confianza || '',
-      fuente: c.fuente || 'mano'
+      fuente: c.fuente || 'mano',
+      /* A qué plato del menú corresponde, si es que corresponde a alguno. Con
+         esto la pantalla del menú puede pintar marcado lo que ya te comiste y
+         no apuntarlo dos veces. */
+      ref: String(c.ref || ''),
+      /* Y qué plato del menú vino a sustituir, cuando comiste otra cosa: sin
+         esto, el registro dice lo que comiste pero no de qué te desviaste. */
+      sustituye: String(c.sustituye || '').slice(0, 80)
     };
     l.push(x);
     escribir(l);
@@ -81,6 +88,18 @@
   function borrar(id) {
     escribir(todas().filter(function (x) { return x.id !== id; }));
   }
+
+  /* ¿Está ya apuntado hoy este plato del menú? */
+  function marcada(ref) {
+    if (!ref) return null;
+    return del().filter(function (x) { return x.ref === ref; })[0] || null;
+  }
+
+  /* ---------- si esto se lleva o no ----------
+     Ir marcando cada comida del menú no le apetece a todo el mundo. Se pregunta
+     una vez en los ajustes y se respeta; por defecto sí, que quien no lo quiera
+     lo apaga y quien no sepa que existe lo descubre. */
+  function seLleva() { return Store.settings().registroComida !== 'no'; }
 
   /* Lo comido agrupado por días, solo los días en los que hay algo.
      Registrando cinco o seis cosas al día, una lista plana de tres semanas son
@@ -177,6 +196,7 @@
   g.Comidas = {
     hoy: hoy, todas: todas, del: del, anotar: anotar, borrar: borrar,
     ultimos: ultimos, porDias: porDias, vaciar: vaciar, claveDia: claveDia,
+    marcada: marcada, seLleva: seLleva,
     prepararFoto: prepararFoto
   };
 })(window);

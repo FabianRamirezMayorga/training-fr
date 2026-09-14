@@ -36,6 +36,12 @@
      cerrarían todos cada vez que se toca cualquier cosa. */
   const menusAbiertos = {};
 
+  /* Y qué días de un menú están desplegados. Vivía solo en el DOM —un atributo
+     `hidden` que se ponía y se quitaba—, y desde que marcar una comida repinta
+     la pantalla eso significaba que el día se te cerraba en las narices justo
+     al marcar. */
+  const diasAbiertosPlan = {};
+
   /* ================= alimentación ================= */
 
   V.nutricion = function () {
@@ -436,8 +442,18 @@
   }
 
   /* La hidratación va aparte y arriba: es la parte del plan que más se olvida */
-  function hidratacionHTML(h) {
+  /* ---------- la hidratación ----------
+     Decía cuánta agua tomar y a qué horas, y ahí se acababa: la pauta se
+     quedaba en un consejo. Ahora cada toma es una casilla —tocarla la marca y
+     volver a tocarla la quita, que es lo que uno espera— y el total del día
+     sale de lo marcado, no de lo que deberías. */
+  function hidratacionHTML(h, menuId) {
     if (!h) return '';
+    const marcable = !!(g.Agua && Agua.seLleva());
+    const llevo = marcable ? Agua.hoy() : null;
+    const metaL = Number(String(h.total || '').replace(',', '.').match(/[\d.]+/) || [0]) ||
+      Number(Perfil.agua()) || 0;
+
     return html`
       <div class="card" style="margin-top:11px;border-color:var(--blue)">
         <div class="row between">
@@ -447,15 +463,46 @@
           </div>
           <span class="chip solid">${h.total || (Perfil.agua() + ' L')}</span>
         </div>
-        ${raw((h.pauta || []).length ? '<div class="stack" style="margin-top:10px">' +
-          h.pauta.map(function (x) {
-            return '<div class="tiny" style="display:flex;gap:8px">' +
-              '<span style="color:var(--blue)">•</span><span>' + esc(x) + '</span></div>';
+
+        ${raw(marcable ? html`
+          <div class="agua-hoy">
+            <div class="row between" style="align-items:baseline">
+              <span class="tiny">Llevas hoy</span>
+              <span class="ah-cif">${String(llevo.litros).replace('.', ',')}<i>
+                de ${String(metaL).replace('.', ',')} L</i></span>
+            </div>
+            ${raw(barra(metaL ? Math.min(100, Math.round(llevo.litros / metaL * 100)) : 0,
+              'var(--blue)'))}
+          </div>` : '')}
+        ${raw((h.pauta || []).length ? '<div class="agua-pauta">' +
+          h.pauta.map(function (x, i) {
+            const ref = (menuId || 'pauta') + '#' + i;
+            const ml = g.Agua ? Agua.mlDeTexto(x) : 250;
+            const ya = marcable && g.Agua ? Agua.marcada(ref) : null;
+
+            /* Sin el registro de agua activado se queda como estaba: un
+               renglón con su punto, que es lo que era antes de que se pudiera
+               marcar nada. */
+            if (!marcable) {
+              return '<div class="tiny" style="display:flex;gap:8px">' +
+                '<span style="color:var(--blue)">•</span><span>' + esc(x) + '</span></div>';
+            }
+
+            return '<button class="agua-toma' + (ya ? ' bebida' : '') +
+              '" data-agua="' + esc(ref) + '" data-ml="' + ml + '">' +
+              '<span class="at-casilla">' + (ya ? icon('check') : '') + '</span>' +
+              '<span class="grow at-txt">' + esc(x) + '</span>' +
+              '</button>';
           }).join('') + '</div>' : '')}
         ${raw(h.nota ? '<p class="tiny" style="margin:10px 0 0">' + esc(h.nota) + '</p>' : '')}
-        <button class="btn sm block" data-a="alertasAgua" style="margin-top:11px">
-          ${raw(icon('campana'))} Ponerme los recordatorios de agua
-        </button>
+        <div class="row" style="margin-top:11px;gap:9px">
+          <button class="btn sm grow" data-a="alertasAgua">
+            ${raw(icon('campana'))} Ponerme los recordatorios</button>
+          ${raw(marcable
+            ? '<button class="btn sm icon-vidrio" data-a="vaso" ' +
+              'aria-label="Apuntar un vaso suelto">' + icon('plus') + '</button>'
+            : '')}
+        </div>
       </div>`;
   }
 
@@ -483,7 +530,7 @@
         </div>` : html`
         <p class="tiny" style="margin:0 0 10px">Creado el ${UI.fecha(menu.t)}</p>`)}
 
-      ${raw(hidratacionHTML(plan.hidratacion))}
+      ${raw(hidratacionHTML(plan.hidratacion, menu.id))}
 
       <div class="stack" style="margin-top:11px">
         ${raw((plan.dias || []).map(function (d, i) {
@@ -500,12 +547,16 @@
                     ? esc(UI.num(d.total.kcal) + ' kcal · ' + d.total.prot + ' g de proteína')
                     : (d.comidas || []).length + ' comidas')}</div>
                 </div>
-                <span class="chevron down">${raw(icon('chevron'))}</span>
+                <span class="chevron down${raw(diasAbiertosPlan[k]
+                  ? ' abierto' : '')}">${raw(icon('chevron'))}</span>
               </div>
-              <div class="stack" data-cuerpo="${k}" hidden style="margin-top:11px">
-                ${raw((d.comidas || []).map(function (c) {
+              <div class="stack" data-cuerpo="${k}"${raw(diasAbiertosPlan[k]
+                ? '' : ' hidden')} style="margin-top:11px">
+                ${raw((d.comidas || []).map(function (c, j) {
+                  const ref = menu.id + '|' + i + '|' + j;
+                  const hecha = hoy && g.Comidas ? Comidas.marcada(ref) : null;
                   return html`
-                    <div class="meal">
+                    <div class="meal${raw(hecha ? ' es-hecha' : '')}">
                       <div class="row between">
                         <b style="font-size:.9rem">${c.nombre}${raw(c.hora
                           ? ' <span class="tiny">· ' + esc(c.hora) + '</span>' : '')}</b>
@@ -515,7 +566,8 @@
                       ${raw((c.alternativas || []).length ? '<div class="tiny" ' +
                         'style="margin-top:5px;color:var(--acc)">O bien: ' +
                         esc(c.alternativas.join(' · ')) + '</div>' : '')}
-                      <div class="tiny" style="margin-top:4px">P ${c.prot} · H ${c.carbo} · G ${c.grasa}</div>
+                      ${raw(macrosDePlato(c))}
+                      ${raw(marcarComidaHTML(ref, c, hecha, hoy))}
                     </div>`;
                 }).join(''))}
               </div>
@@ -559,6 +611,226 @@
 
       <p class="tiny" style="margin-top:14px">Generado por IA a partir de tus datos.
       Revísalo con criterio y consulta a un dietista si tienes alguna condición de salud.</p>`;
+  }
+
+  /* Los macros de un plato. Los menús no siempre traen los tres: con un «H ${}»
+     vacío quedaba una etiqueta colgando sin número detrás. */
+  function macrosDePlato(c) {
+    const partes = [];
+    if (c.prot != null && c.prot !== '') partes.push('P ' + c.prot);
+    if (c.carbo != null && c.carbo !== '') partes.push('H ' + c.carbo);
+    if (c.grasa != null && c.grasa !== '') partes.push('G ' + c.grasa);
+    if (!partes.length) return '';
+    return '<div class="tiny" style="margin-top:4px">' + esc(partes.join(' · ')) + '</div>';
+  }
+
+  /* ---------- marcar un plato del menú ----------
+     El menú decía lo que tocaba comer y ahí se acababa: para que contase en el
+     recuento del día había que apuntarlo otra vez a mano, copiando unos números
+     que la app ya tenía delante. Ahora se marca y ya está.
+
+     Y como nadie come exactamente lo que pone siete días seguidos, la otra
+     mitad es igual de importante: decir por qué lo cambiaste. Eso entra en el
+     recuento con sus propios números y deja dicho de qué te desviaste, que es
+     la diferencia entre un registro y un diario.
+
+     Solo el día de hoy. Marcar el jueves un lunes apuntaría la comida del jueves
+     en el recuento del lunes, y un registro que miente no sirve para nada. */
+  function marcarComidaHTML(ref, c, hecha, esHoy) {
+    if (!g.Comidas || !Comidas.seLleva()) return '';
+    if (!esHoy) return '';
+
+    if (hecha) {
+      const cambiada = !!hecha.sustituye;
+      return '<div class="ml-hecha">' +
+        '<span class="mh-ico">' + icon('check') + '</span>' +
+        '<span class="grow"><span class="mh-tit">' +
+        (cambiada ? 'Comiste otra cosa' : 'Te lo comiste') + '</span>' +
+        '<span class="mh-sub">' + esc((cambiada ? hecha.plato + ' · ' : '') +
+          UI.num(hecha.kcal) + ' kcal · ' + hecha.prot + ' g de proteína') + '</span></span>' +
+        '<button class="btn sm ghost" data-descomer="' + esc(hecha.id) + '">Deshacer</button>' +
+        '</div>';
+    }
+
+    return '<div class="ml-acciones">' +
+      '<button class="btn sm ml-si" data-comi="' + esc(ref) + '">' +
+      icon('check') + ' Me lo comí</button>' +
+      '<button class="btn sm" data-cambie="' + esc(ref) + '">' +
+      icon('cambiar') + ' Comí otra cosa</button>' +
+      '</div>';
+  }
+
+  /* De la referencia al plato: la pantalla guarda «menú|día|comida» y aquí se
+     deshace, que es mejor que pasear el objeto entero por los atributos. */
+  function comidaDeRef(ref) {
+    const trozos = String(ref || '').split('|');
+    const menu = g.Menus ? Menus.porId(trozos[0]) : null;
+    if (!menu || !menu.plan) return null;
+    const dia = (menu.plan.dias || [])[Number(trozos[1])];
+    if (!dia) return null;
+    const c = (dia.comidas || [])[Number(trozos[2])];
+    return c ? { menu: menu, dia: dia, comida: c, ref: ref } : null;
+  }
+
+  /* Lo previsto, tal cual: los números ya están calculados, no hay nada que
+     estimar ni a quién preguntar. */
+  function comerLoPrevisto(ref) {
+    const d = comidaDeRef(ref);
+    if (!d) { UI.toast('Ese plato ya no está en el menú'); return; }
+    Comidas.anotar({
+      plato: d.comida.plato || d.comida.nombre || 'Comida',
+      kcal: d.comida.kcal, prot: d.comida.prot,
+      detalle: d.comida.nombre || '',
+      fuente: 'menu', ref: ref
+    });
+    render();
+    UI.toast('Apuntado: ' + UI.num(Math.round(Number(d.comida.kcal) || 0)) + ' kcal');
+  }
+
+  /* ---------- comí otra cosa ----------
+     Se escribe lo que fuera, lo estima la IA y —esto es lo que se pide de
+     verdad— se dice en qué te deja respecto a lo que tocaba. La diferencia no
+     la calcula la IA sino la app: los dos números están aquí y restarlos es
+     exacto, mientras que pedírselo a un modelo es pagar por una resta que puede
+     salir mal. */
+  function sustituirComidaSheet(ref) {
+    const d = comidaDeRef(ref);
+    if (!d) { UI.toast('Ese plato ya no está en el menú'); return; }
+
+    const c = d.comida;
+    const conIA = IA.activa() && IA.estimarComida;
+
+    UI.modal(html`
+      <h2>Comí otra cosa</h2>
+      <p class="muted">En lugar de <b>${c.plato || c.nombre}</b>
+      (${UI.num(c.kcal)} kcal · ${c.prot} g de proteína).</p>
+
+      <label class="tiny" style="margin-top:12px;display:block">QUÉ COMISTE</label>
+      <input id="sc-plato" placeholder="Ej. dos arepas con queso y un café con leche"
+             autocomplete="off">
+
+      ${raw(conIA ? html`
+        <button class="btn block sm" id="sc-calcular" style="margin-top:10px">
+          ${raw(icon('chispa'))} Calcular con IA</button>` : html`
+        <p class="tiny" style="margin:8px 0 0">Sin el entrenador con IA configurado
+        tendrás que poner tú los números.</p>`)}
+
+      <div id="sc-visto" class="tiny" style="margin-top:10px"></div>
+
+      <div class="row" style="margin-top:10px">
+        <div class="grow">
+          <label class="tiny">CALORÍAS</label>
+          <input id="sc-kcal" type="number" inputmode="numeric" min="0" placeholder="0">
+        </div>
+        <div class="grow">
+          <label class="tiny">PROTEÍNA (g)</label>
+          <input id="sc-prot" type="number" inputmode="numeric" min="0" placeholder="0">
+        </div>
+      </div>
+
+      <div id="sc-diag"></div>
+
+      <button class="btn primary block btn-arranque" id="sc-ok" style="margin-top:14px">
+        Anotar el cambio</button>`,
+      function (el) {
+        const campoPlato = el.querySelector('#sc-plato');
+        const campoKcal = el.querySelector('#sc-kcal');
+        const campoProt = el.querySelector('#sc-prot');
+        const visto = el.querySelector('#sc-visto');
+        const diag = el.querySelector('#sc-diag');
+        const btnCalc = el.querySelector('#sc-calcular');
+        const btnOk = el.querySelector('#sc-ok');
+        let detalle = '';
+        let confianza = '';
+
+        /* El diagnóstico: en qué te deja el cambio. Se repinta cada vez que
+           cambian los números, también si los corriges a mano, porque lo que
+           importa es lo que vas a apuntar y no lo que dijo la IA. */
+        const pintarDiag = function () {
+          const kcal = Number(campoKcal.value) || 0;
+          const prot = Number(campoProt.value) || 0;
+          if (!kcal && !prot) { diag.innerHTML = ''; return; }
+
+          const dk = Math.round(kcal - (Number(c.kcal) || 0));
+          const dp = Math.round(prot - (Number(c.prot) || 0));
+
+          const linea = function (nombre, dif, unidad) {
+            const signo = dif > 0 ? '+' : '';
+            const tono = dif === 0 ? 'igual' : dif > 0 ? 'sube' : 'baja';
+            return '<div class="sc-fila ' + tono + '"><span>' + esc(nombre) + '</span>' +
+              '<b>' + signo + UI.num(dif) + ' ' + esc(unidad) + '</b></div>';
+          };
+
+          diag.innerHTML = '<div class="sc-diag">' +
+            '<div class="pre-encima">Respecto a lo que tocaba</div>' +
+            linea('Calorías', dk, 'kcal') +
+            linea('Proteína', dp, 'g') +
+            '<p class="tiny" style="margin:8px 0 0">' +
+            (Math.abs(dk) < 80 && Math.abs(dp) < 10
+              ? 'Prácticamente lo mismo: el día te sigue cuadrando.'
+              : dp < -15
+                ? 'Te deja corto de proteína. Súmala en la siguiente comida si puedes.'
+                : dk > 250
+                  ? 'Son bastantes más calorías. Si el día te importa, aligera la cena.'
+                  : 'Entra dentro de lo razonable; el recuento del día lo recoge.') +
+            '</p></div>';
+        };
+
+        const calcular = function () {
+          const t = campoPlato.value.trim();
+          if (!t) { UI.toast('Escribe antes qué comiste'); campoPlato.focus(); return; }
+          if (btnCalc) { btnCalc.disabled = true; btnCalc.textContent = 'Calculando…'; }
+          visto.textContent = '';
+
+          return IA.estimarComida(t).then(function (r) {
+            if (!r || !(Number(r.kcal) > 0)) {
+              visto.innerHTML = '<span style="color:var(--warn)">' +
+                esc((r && r.nota) || 'No he sabido qué es eso. Pon tú los números.') +
+                '</span>';
+              return;
+            }
+            campoKcal.value = Math.round(r.kcal);
+            campoProt.value = Math.round(r.prot || 0);
+            if (r.plato) campoPlato.value = r.plato;
+            detalle = r.detalle || '';
+            confianza = r.confianza || '';
+            visto.innerHTML = esc(r.detalle || '') +
+              (r.confianza ? ' <span class="chip tiny-chip">' + esc(r.confianza) + '</span>' : '');
+            pintarDiag();
+          }).catch(function (e) {
+            visto.innerHTML = '<span style="color:var(--warn)">' +
+              esc(e.message || 'No se pudo calcular') + '</span>';
+          }).then(function () {
+            if (btnCalc) {
+              btnCalc.disabled = false;
+              btnCalc.innerHTML = icon('chispa') + ' Calcular con IA';
+            }
+          });
+        };
+
+        if (btnCalc) btnCalc.onclick = calcular;
+        campoKcal.oninput = pintarDiag;
+        campoProt.oninput = pintarDiag;
+
+        btnOk.onclick = function () {
+          const plato = campoPlato.value.trim();
+          const kcal = Number(campoKcal.value) || 0;
+          if (!plato) { UI.toast('Escribe qué comiste'); campoPlato.focus(); return; }
+          if (!kcal) { UI.toast('Faltan las calorías'); campoKcal.focus(); return; }
+
+          UI.closeModal();
+          Comidas.anotar({
+            plato: plato, kcal: kcal, prot: Number(campoProt.value) || 0,
+            detalle: detalle, confianza: confianza,
+            fuente: 'cambio', ref: ref,
+            sustituye: c.plato || c.nombre || ''
+          });
+          render();
+          UI.toast('Cambio apuntado');
+        };
+
+        setTimeout(function () { campoPlato.focus(); }, 60);
+      });
   }
 
   /* Manda la foto, apunta lo que la IA vea y suelta la imagen. Mientras piensa
@@ -803,11 +1075,34 @@
     };
 
     bindAll(root, '[data-dia]', function (el) {
-      const c = root.querySelector('[data-cuerpo="' + el.dataset.dia + '"]');
-      if (c) {
-        c.hidden = !c.hidden;
-        el.querySelector('.chevron').classList.toggle('abierto', !c.hidden);
-      }
+      const k = el.dataset.dia;
+      const c = root.querySelector('[data-cuerpo="' + CSS.escape(k) + '"]');
+      if (!c) return;
+      c.hidden = !c.hidden;
+      if (c.hidden) delete diasAbiertosPlan[k]; else diasAbiertosPlan[k] = true;
+      el.querySelector('.chevron').classList.toggle('abierto', !c.hidden);
+    });
+
+    /* ---- marcar lo que comes y lo que bebes ---- */
+
+    bindAll(root, '[data-comi]', function (el) { comerLoPrevisto(el.dataset.comi); });
+    bindAll(root, '[data-cambie]', function (el) { sustituirComidaSheet(el.dataset.cambie); });
+    bindAll(root, '[data-descomer]', function (el) {
+      Comidas.borrar(el.dataset.descomer);
+      render();
+      UI.toast('Desmarcado');
+    });
+
+    bindAll(root, '[data-agua]', function (el) {
+      const puesto = Agua.alternar(el.dataset.agua, Number(el.dataset.ml) || Agua.VASO);
+      render();
+      UI.toast(puesto ? 'Apuntados ' + puesto.ml + ' ml' : 'Desmarcado');
+    });
+
+    bind(root, '[data-a=vaso]', function () {
+      const x = Agua.anotar(Agua.VASO);
+      render();
+      UI.toast('Un vaso más: ' + x.ml + ' ml');
     });
 
     /* ---- los menús ---- */

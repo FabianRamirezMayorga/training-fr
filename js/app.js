@@ -817,6 +817,23 @@
      Los cinco tonos se leen sobre fondo claro y oscuro. */
   const TONOS_PLAN = ['#8bc34a', '#4f8cf5', '#f0a23c', '#c06bf0', '#2fc4b2'];
 
+  /* Una preferencia de sí o no, con su par de botones. Las de arriba son de
+     elegir una de tres y se pintan solas; estas son interruptores, y meterlos
+     en el mismo molde haría que un «no» pareciese una tercera opción. */
+  function filaSiNo(ico, titulo, sub, clave, activo) {
+    const boton = function (valor, texto) {
+      const puesto = (valor === 'si') === !!activo;
+      return '<button class="btn sm' + (puesto ? ' primary' : '') + '" data-sino="' +
+        clave + '" data-val="' + valor + '">' + esc(texto) + '</button>';
+    };
+    return '<div class="list-row">' +
+      '<span class="row-icon">' + icon(ico) + '</span>' +
+      '<div class="grow"><div class="list-row-title">' + esc(titulo) + '</div>' +
+      '<div class="list-row-sub">' + esc(sub) + '</div></div>' +
+      '<div class="row sino" style="gap:6px">' + boton('si', 'Sí') + boton('no', 'No') +
+      '</div></div>';
+  }
+
   function porPlanes(rutinas) {
     const hoy = UI.DAY_NAMES[new Date().getDay()];
     const deHoy = rutinasDeHoy();
@@ -4295,6 +4312,18 @@
         ? '<p class="tiny" style="margin:8px 0 0">Sin peso anotado no hay récords ni ' +
           'volumen; el progreso se mide por series y entrenamientos completados.</p>' : '')}
 
+      <div class="list-title">Qué vas marcando</div>
+      <div class="list">
+        ${raw(filaSiNo('nutricion', 'Registrar cuando como',
+          'En el menú, cada plato lleva «me lo comí» y «comí otra cosa». Lo que marques ' +
+          'entra en el recuento del día.', 'registroComida', s.registroComida !== 'no'))}
+        ${raw(filaSiNo('gota', 'Marcar cuando bebo agua',
+          'Cada toma de la pauta es una casilla, y el total del día sale de lo que ' +
+          'marcas en vez de lo que deberías.', 'registroAgua', s.registroAgua !== 'no'))}
+      </div>
+      <p class="tiny" style="margin:8px 0 0">Apagarlos no borra nada de lo que ya llevas
+      apuntado: solo quita las casillas de en medio.</p>
+
       <div class="card">
         <div class="row between"><span>Unidad de peso</span>
           <div class="row" style="gap:6px">
@@ -4518,6 +4547,11 @@
       UI.toast(el.dataset.reg === 'simple' ? 'Ahora solo marcarás las series como hechas'
         : el.dataset.reg === 'ejercicio' ? 'Ahora marcas el ejercicio entero de un toque'
         : 'Ahora anotarás peso y repeticiones');
+    });
+    bindAll(root, '[data-sino]', function (el) {
+      Store.setSetting(el.dataset.sino, el.dataset.val);
+      render();
+      UI.toast(el.dataset.val === 'si' ? 'Lo irás marcando' : 'Sin casillas de por medio');
     });
     bindAll(root, '[data-unit]', function (el) { Store.setSetting('unit', el.dataset.unit); render(); });
     bindAll(root, '[data-theme]', function (el) {

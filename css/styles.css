@@ -2911,6 +2911,98 @@ html[data-theme="light"] .vista-nutricion textarea {
   box-shadow: inset 0 1px 2px rgba(16, 24, 40, .07), inset 0 0 0 1px var(--line);
 }
 
+/* ---------- marcar lo que comes ----------
+   El menu decia lo que tocaba y ahi se acababa; para que contase habia que
+   apuntarlo otra vez a mano. Los dos botones van dentro del plato, separados
+   por una linea, para que se lean como lo que se hace con ese plato y no como
+   dos botones sueltos al final de la lista. */
+.ml-acciones {
+  display: flex; gap: 7px; margin-top: 9px; padding-top: 9px;
+  border-top: 1px solid var(--line);
+}
+.ml-acciones .btn { flex: 1; min-width: 0; font-size: .76rem; padding: 7px 6px; }
+.ml-acciones .btn svg { width: 15px; height: 15px; }
+.ml-si {
+  color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 13%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim),
+              inset 0 0 0 1px color-mix(in srgb, var(--acc) 26%, transparent);
+}
+
+/* Un plato ya comido se aparta del camino: sigue ahi, pero deja de pedir nada */
+.meal.es-hecha { opacity: .82; }
+.meal.es-hecha > .row > b { text-decoration: none; }
+
+.ml-hecha {
+  display: flex; align-items: center; gap: 9px;
+  margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line);
+}
+.mh-ico {
+  flex: none; width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--on-acc); background: var(--acc);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--acc) 40%, transparent);
+}
+.mh-ico svg { width: 14px; height: 14px; }
+.mh-tit { display: block; font-size: .8rem; font-weight: 700; }
+.mh-sub { display: block; font-size: .72rem; color: var(--dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* El diagnostico del cambio: en que te deja respecto a lo que tocaba. La resta
+   la hace la app, que tiene los dos numeros delante; pedirsela a un modelo es
+   pagar por una resta que ademas puede salir mal. */
+.sc-diag {
+  margin-top: 12px; padding: 11px 12px; border-radius: 14px;
+  background: linear-gradient(180deg, var(--vidrio-luz), transparent 60%), var(--card2);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
+}
+.sc-fila { display: flex; justify-content: space-between; align-items: baseline;
+  gap: 10px; margin-top: 5px; font-size: .82rem; }
+.sc-fila b { font-variant-numeric: tabular-nums; }
+.sc-fila.sube b { color: var(--warn); }
+.sc-fila.baja b { color: var(--brand-1); }
+.sc-fila.igual b { color: var(--dim); }
+
+/* ---------- marcar lo que bebes ---------- */
+.agua-hoy { margin-top: 11px; }
+.ah-cif { font-size: 1.05rem; font-weight: 800; color: var(--blue);
+  font-variant-numeric: tabular-nums; }
+.ah-cif i { font-style: normal; font-size: .74rem; font-weight: 600; color: var(--dim); }
+
+.agua-pauta { display: flex; flex-direction: column; gap: 5px; margin-top: 11px; }
+
+/* Cada toma, una casilla. Tocarla la marca y volver a tocarla la quita, que es
+   lo que uno espera de una casilla. */
+.agua-toma {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 8px 10px; border: 0; border-radius: 11px; cursor: pointer;
+  text-align: left; font: inherit; color: var(--txt);
+  background: color-mix(in srgb, var(--card2) 60%, transparent);
+  box-shadow: inset 0 1px 0 var(--vidrio-rim);
+  transition: background .16s ease, transform .12s ease;
+}
+.agua-toma:active { transform: scale(.99); }
+.at-casilla {
+  flex: none; width: 21px; height: 21px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--blue) 45%, transparent);
+  transition: background .16s ease, box-shadow .16s ease;
+}
+.at-casilla svg { width: 13px; height: 13px; }
+.at-txt { font-size: .8rem; min-width: 0; }
+
+.agua-toma.bebida { background: color-mix(in srgb, var(--blue) 13%, transparent); }
+.agua-toma.bebida .at-casilla {
+  color: #fff; background: var(--blue);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--blue) 40%, transparent);
+}
+.agua-toma.bebida .at-txt { color: var(--dim); }
+
+/* Los dos botones de sí y no de una preferencia: pegados, para que se lean como
+   un interruptor y no como dos acciones distintas. */
+.sino { flex: none; }
+.sino .btn { min-width: 44px; padding: 6px 10px; font-size: .78rem; }
+
 /* ---------- las cajas de menu ----------
    El cuerpo de un menu abierto no es una pila de rutinas sino tarjetas de
    distinto tipo, asi que el relleno que la caja de un plan le da a su .stack
