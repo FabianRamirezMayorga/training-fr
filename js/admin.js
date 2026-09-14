@@ -13,8 +13,23 @@
   const html = UI.html, raw = UI.raw, icon = UI.icon, esc = UI.esc;
   const V = g.VISTAS = g.VISTAS || {};
 
-  /* Se pregunta una vez por sesión: la respuesta no cambia mientras dure */
+  /* Se pregunta al servidor si esta cuenta administra.
+
+     Tres estados, no dos: sí, no, y «todavía no se ha podido preguntar». Antes
+     eran dos, y cualquier fallo al preguntar —sin red al arrancar, o la sesión
+     caducada, que es lo que pasaba— se guardaba como un «no» que ya no se
+     revisaba en toda la sesión. La entrada de Cuentas desaparecía y no volvia
+     ni al arreglarse la conexion ni al entrar de nuevo: habia que cerrar la app
+     del todo y abrirla con red a la primera.
+
+     Se recuerda ademas de que cuenta es la respuesta. Si entra otra persona en
+     el mismo dispositivo, la de antes no vale. */
   let esAdmin = null;
+  let deQuien = '';
+  let preguntando = null;
+  let ultimoFallo = 0;
+  let porQueNoSeSupo = '';
+
   let usuarios = null;
   let cargando = false;
   let fallo = '';
@@ -54,17 +69,76 @@
     });
   }
 
-  /* ¿Enseñamos la entrada en Perfil? Se pregunta sin bloquear nada: mientras no
-     conteste, la entrada no está, y si contesta que no, tampoco aparece. */
-  function comprobar() {
-    if (esAdmin !== null) return Promise.resolve(esAdmin);
-    if (!Sync.activa || !Sync.activa()) { esAdmin = false; return Promise.resolve(false); }
-    return llamar({ accion: 'soyAdmin' })
-      .then(function (d) { esAdmin = !!d.admin; return esAdmin; })
-      .catch(function () { esAdmin = false; return false; });
+  /* De quien es la sesion abierta ahora mismo */
+  function cuentaActual() {
+    const s = Sync.sesion && Sync.sesion();
+    if (!s || !Sync.activa || !Sync.activa()) return '';
+    return s.user_id || s.email || '';
   }
 
-  function administra() { return esAdmin === true; }
+  /* Lo que se sabe ahora mismo: true, false, o null si no se ha podido
+     preguntar todavia.
+
+     Caduca la respuesta aqui, al leerla, y no solo al preguntar. Si la
+     invalidacion vive dentro de comprobar(), la pantalla que pinta antes de
+     preguntar lee la respuesta de la cuenta anterior y enseña un «tu cuenta no
+     administra» que es de otra persona. */
+  function vigente() {
+    const quien = cuentaActual();
+    if (quien !== deQuien) {
+      deQuien = quien;
+      esAdmin = quien ? null : false;
+      ultimoFallo = 0;
+      porQueNoSeSupo = '';
+      usuarios = null;
+      fallo = '';
+    }
+    return esAdmin;
+  }
+
+  /* ¿Enseñamos la entrada en Perfil? Se pregunta sin bloquear nada: mientras no
+     conteste, la entrada no está, y si contesta que no, tampoco aparece. Lo que
+     sí cambia es que un fallo al preguntar ya no cuenta como respuesta: se
+     vuelve a intentar la próxima vez que haga falta. */
+  function comprobar() {
+    const ya = vigente();
+
+    /* Sin sesión no hay a quién preguntar. */
+    if (!deQuien) return Promise.resolve(false);
+
+    if (ya !== null) return Promise.resolve(ya);
+    if (preguntando) return preguntando;
+
+    /* Falló hace nada: se reintenta, pero no en cada repintado. */
+    if (ultimoFallo && Date.now() - ultimoFallo < 15000) return Promise.resolve(false);
+
+    preguntando = llamar({ accion: 'soyAdmin' })
+      .then(function (d) {
+        esAdmin = !!d.admin; porQueNoSeSupo = '';
+        return esAdmin;
+      })
+      .catch(function (e) {
+        /* No haber podido preguntar no es un «no». Se queda sin respuesta para
+           poder volver a intentarlo. */
+        esAdmin = null;
+        ultimoFallo = Date.now();
+        porQueNoSeSupo = e.message || 'No se pudo preguntar al servidor.';
+        return false;
+      });
+
+    const soltar = function () { preguntando = null; };
+    preguntando.then(soltar, soltar);
+
+    return preguntando;
+  }
+
+  function administra() { return vigente() === true; }
+
+  /* Ni si ni no: se intento preguntar y no se pudo. Perfil lo usa para dejar la
+     entrada a la vista de todos modos, porque si no la unica pantalla que
+     explica el porque es justo la que queda escondida —y quien administra se
+     queda sin saber que ha pasado ni como reintentarlo. */
+  function sinRespuesta() { return vigente() === null && !!porQueNoSeSupo; }
 
   function cargar() {
     cargando = true;
@@ -78,13 +152,32 @@
   /* ---------- la pantalla ---------- */
 
   V.usuarios = function () {
-    if (esAdmin === false) {
+    const estado = vigente();
+
+    if (estado === false) {
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
           ${raw(icon('back'))} Perfil</button>
         <h1>Cuentas</h1>
         <p class="muted">Esta pantalla es para quien administra el proyecto. Tu cuenta
         no lo es.</p>`;
+    }
+
+    /* Ni sí ni no: no se ha podido preguntar. Antes esto se veía igual que un
+       «no lo eres», que es justo lo que despista cuando sí lo eres. */
+    if (estado === null && porQueNoSeSupo) {
+      return html`
+        <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+          ${raw(icon('back'))} Perfil</button>
+        <h1>Cuentas</h1>
+        <div class="card" style="border-color:var(--warn)">
+          <b>No he podido comprobar si administras</b>
+          <p class="tiny" style="margin:6px 0 0">${porQueNoSeSupo}</p>
+          <button class="btn sm block" data-a="reintentar" style="margin-top:10px">
+            Probar otra vez</button>
+        </div>
+        <p class="tiny" style="margin-top:10px">Mientras no conteste, la entrada de
+        Cuentas no aparece en Perfil. No es que hayas dejado de administrar.</p>`;
     }
 
     return html`
@@ -136,12 +229,23 @@
   V.usuarios.mount = function (root) {
     App.bind(root, '[data-a=atras]', function () { App.go('perfil'); });
     App.bind(root, '[data-a=recargar]', cargar);
+    App.bind(root, '[data-a=reintentar]', function () {
+      ultimoFallo = 0; porQueNoSeSupo = ''; deQuien = '';
+      comprobar().then(function () { App.render(); });
+    });
     App.bind(root, '[data-a=nueva]', nuevaSheet);
     App.bindAll(root, '[data-gestionar]', function (el) {
       gestionarSheet(el.dataset.gestionar);
     });
 
-    if (usuarios === null && !cargando && !fallo && esAdmin !== false) cargar();
+    /* Si se llegó aquí sin saber todavía si administra —por el enlace directo,
+       sin pasar por la entrada de Perfil—, se pregunta ahora. */
+    const estado = vigente();
+    if (estado === null && !porQueNoSeSupo) {
+      comprobar().then(function () { App.render(); });
+      return;
+    }
+    if (usuarios === null && !cargando && !fallo && estado === true) cargar();
   };
 
   /* ---------- crear ---------- */
@@ -257,7 +361,7 @@
 
   g.Admin = {
     comprobar: comprobar,
-    administra: administra,
+    administra: administra, sinRespuesta: sinRespuesta,
     llamar: llamar,
     urlFuncion: urlFuncion
   };

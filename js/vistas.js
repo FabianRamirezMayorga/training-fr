@@ -145,7 +145,10 @@
         ${raw(g.Admin && Admin.administra()
           ? fila({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
               sub: 'Crear, desactivar y borrar cuentas del proyecto' })
-          : '')}
+          : g.Admin && Admin.sinRespuesta()
+            ? fila({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
+                sub: 'No he podido comprobar si administras' })
+            : '')}
       </div>
 
       <p class="tiny" style="margin:22px 0 0">Training FR</p>`;
