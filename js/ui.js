@@ -71,6 +71,11 @@
     copiar: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
     chispa: '<svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/></svg>',
     reloj: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
+    /* Una camara es una camara. Los botones de hacer foto llevaban el icono
+       de nutricion —una pera— porque era el de la pantalla donde nacio el
+       primero, y desde entonces habia que adivinar que ese boton abria la
+       camara. Un icono que no dice lo que hace su boton es peor que ninguno. */
+    camara: '<svg viewBox="0 0 24 24"><path d="M9 8l1.2-2.4h3.6L15 8h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2z"/><circle cx="12" cy="14" r="3.4"/></svg>',
     chevron: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
     filtro: '<svg viewBox="0 0 24 24"><path d="M3 7h18M6 12h12M10 17h4"/></svg>',
     llave: '<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4.2"/><path d="M11 11l9 9M17 17l2-2M14 14l2-2"/></svg>',

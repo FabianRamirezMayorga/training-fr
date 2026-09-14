@@ -339,9 +339,9 @@
 
         <div class="row" style="margin-top:13px;gap:9px">
           <label class="btn primary grow btn-arranque" for="foto-comida" style="cursor:pointer">
-            ${raw(icon('nutricion'))} Foto de lo que comes</label>
+            ${raw(icon('camara'))} Foto de lo que comes</label>
           <button class="btn icon-vidrio" data-a="comidaMano"
-                  aria-label="Apuntar a mano">${raw(icon('plus'))}</button>
+                  aria-label="Apuntar a mano" title="Apuntar a mano">${raw(icon('plus'))}</button>
         </div>
         <input type="file" id="foto-comida" accept="image/*" capture="environment" hidden>
         <p class="tiny" style="margin:9px 0 0">La foto se encoge en el móvil, se manda para
@@ -735,11 +735,14 @@
              autocomplete="off">
 
       ${raw(conIA ? html`
+        <!-- Dos botones con su nombre y no uno grande con un cuadradito al lado:
+             el cuadradito se leia como una casilla de marcar, y con el icono de
+             una pera dentro habia que adivinar que abria la camara. -->
         <div class="row" style="margin-top:10px;gap:9px">
           <button class="btn primary grow btn-arranque" id="sc-calcular">
-            ${raw(icon('chispa'))} Calcular y revisar</button>
-          <label class="btn icon-vidrio" for="sc-foto" style="cursor:pointer"
-                 aria-label="Hacerle una foto">${raw(icon('nutricion'))}</label>
+            ${raw(icon('chispa'))} Calcular</button>
+          <label class="btn grow" for="sc-foto" style="cursor:pointer">
+            ${raw(icon('camara'))} Hacer foto</label>
         </div>
         <input type="file" id="sc-foto" accept="image/*" capture="environment" hidden>
         <p class="tiny" style="margin:7px 0 0">Escríbelo o hazle una foto. Saca las calorías
@@ -873,7 +876,7 @@
           }).then(function () {
             if (btnCalc) {
               btnCalc.disabled = false;
-              btnCalc.innerHTML = icon('chispa') + ' Calcular y revisar';
+              btnCalc.innerHTML = icon('chispa') + ' Calcular';
             }
             /* Se suelta en cuanto termina, salga bien o mal */
             if (verFoto) verFoto.innerHTML = '';

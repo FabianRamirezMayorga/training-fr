@@ -170,7 +170,7 @@
       <div class="card">
         <div class="row" style="gap:8px">
           <label class="btn primary grow" for="imp-archivo" style="cursor:pointer">
-            ${raw(icon('nutricion'))} Elegir foto o PDF</label>
+            ${raw(icon('camara'))} Elegir foto o PDF</label>
         </div>
         <input type="file" id="imp-archivo" accept="image/*,application/pdf" hidden>
 

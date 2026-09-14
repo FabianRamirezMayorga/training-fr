@@ -410,7 +410,7 @@
 
         <div class="row" style="margin-top:5px">
           <label class="btn primary grow sm" for="foto-inicio" style="cursor:pointer">
-            ${raw(icon('nutricion'))} Foto</label>
+            ${raw(icon('camara'))} Foto</label>
           <button class="btn grow sm" data-a="comidamano">${raw(icon('plus'))} A mano</button>
         </div>
 

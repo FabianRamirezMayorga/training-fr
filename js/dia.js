@@ -138,7 +138,7 @@
 
           <div class="row" style="margin-top:12px">
             <label class="btn primary grow" for="foto-dia" style="cursor:pointer">
-              ${raw(icon('nutricion'))} Foto</label>
+              ${raw(icon('camara'))} Foto</label>
             <button class="btn grow" data-a="amano">${raw(icon('plus'))} A mano</button>
           </div>
           <input type="file" id="foto-dia" accept="image/*" capture="environment" hidden>
