@@ -5256,3 +5256,105 @@ html[data-theme="light"] .fp-ico.pendiente::after {
 }
 .hoy-hecho svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
   stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- los cajones del dia, con cara ----------
+   Eran cinco titulos grises uno debajo de otro sobre el fondo, sin caja y sin
+   mas color que el verde de un boton: una lista de parrafos. Cada uno lleva ya
+   su tarjeta de vidrio, su icono y su color —azul el agua, turquesa lo que hay
+   que comer, verde el entreno, ambar lo comido, morado el plan—, y en la propia
+   cabecera cuanto llevas de lo que pide. */
+.sec-marcada {
+  position: relative; overflow: hidden; isolation: isolate;
+  border-radius: 18px; margin-bottom: 9px;
+  border: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 55%),
+    color-mix(in srgb, var(--card) 70%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(155%);
+  backdrop-filter: blur(16px) saturate(155%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent),
+              inset 0 -12px 22px -18px rgba(0, 0, 0, .55),
+              0 3px 10px rgba(0, 0, 0, .18);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.sec-marcada[open] {
+  border-color: color-mix(in srgb, var(--tono) 36%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent),
+              0 5px 18px color-mix(in srgb, var(--tono) 15%, transparent);
+}
+.sec-marcada > summary { padding: 13px; gap: 11px; }
+.sec-marcada > .sec-cuerpo { padding: 0 13px 13px; }
+
+.sec-ico {
+  flex: none; width: 36px; height: 36px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 15%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tono) 24%, transparent),
+              inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent);
+}
+.sec-ico svg { width: 17px; height: 17px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.sec-marcada .sec-silueta { color: var(--tono); opacity: .09; }
+.sec-marcada[open] .sec-silueta { opacity: .13; }
+html[data-theme="light"] .sec-marcada .sec-silueta { opacity: .08; }
+
+.sec-marcada > summary .sec-flecha { margin: 0; align-self: center; color: var(--dim2); }
+.sec-marcada > summary .sec-flecha svg { transition: transform .2s ease; }
+.sec-marcada[open] > summary .sec-flecha svg { transform: rotate(90deg); }
+
+/* Cuanto llevas, en la cabecera. Una cuenta escrita hay que leerla; cinco
+   trozos con tres encendidos se ve sin leer nada. */
+.sec-trozos { display: flex; gap: 4px; margin-top: 8px; max-width: 190px; }
+.sec-trozos i {
+  flex: 1; height: 5px; border-radius: 3px;
+  background: color-mix(in srgb, #fff 11%, transparent);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, .22);
+  transition: background .3s ease, box-shadow .3s ease;
+}
+.sec-trozos i.si {
+  background: var(--tono);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--tono) 45%, transparent);
+}
+
+/* Las calorias no van de una en una: ahi es una barra y no trozos. */
+.sec-barra {
+  display: block; height: 5px; border-radius: 3px; margin-top: 8px; max-width: 190px;
+  background: color-mix(in srgb, #fff 11%, transparent);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, .22);
+  overflow: hidden;
+}
+.sec-barra i {
+  display: block; height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tono) 55%, transparent),
+              var(--tono));
+  box-shadow: 0 0 9px color-mix(in srgb, var(--tono) 45%, transparent);
+  transition: width .5s cubic-bezier(.2, .9, .3, 1);
+}
+
+html[data-theme="light"] .sec-marcada {
+  background: var(--card);
+  border-color: color-mix(in srgb, #141922 9%, transparent);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, .07);
+}
+html[data-theme="light"] .sec-marcada[open] {
+  border-color: color-mix(in srgb, var(--tono) 36%, transparent);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--tono) 13%, transparent);
+}
+html[data-theme="light"] .sec-trozos i,
+html[data-theme="light"] .sec-barra {
+  background: color-mix(in srgb, #141922 9%, transparent); box-shadow: none;
+}
+
+/* En el cajon del entreno caben el titulo, la frase, la cuenta y el boton de
+   Entrenar, y en un movil eso deja el titulo partido en dos lineas. La cuenta y
+   el boton bajan a su propia linea: la cabecera respira y el boton queda a todo
+   lo ancho, que es donde cae el pulgar. */
+@media (max-width: 460px) {
+  .sec-marcada > summary { flex-wrap: wrap; }
+  .sec-marcada > summary .sec-boton {
+    order: 3; width: 100%; margin: 11px 0 0; justify-content: center;
+  }
+  .sec-marcada > summary .sec-cola { order: 2; }
+  .sec-marcada > summary .sec-flecha { order: 2; }
+}

@@ -107,10 +107,31 @@
      La frase no es adorno: plegado, «HIDRATACIÓN · 2,5 L hoy» dice cuánto has
      bebido pero no que ahí dentro se marca cada vaso. Quien no lo abra no se
      entera de que existe, y quien lo abra tendrá que deducirlo. */
+  /* Cuánto llevas de lo que pide el cajón, en la propia cabecera. Plegado
+     decía «llevas 3 de 5» con palabras, y una cuenta escrita hay que leerla:
+     cinco trozos con tres encendidos se ve sin leer nada. Cuando lo que se
+     cuenta no son cosas sino calorías —que no van de una en una— es una barra
+     y no trozos. */
+  function barra(pr) {
+    if (!pr || !pr.total) return '';
+    if (pr.continuo) {
+      const pct = Math.max(0, Math.min(100, Math.round(pr.hecho / pr.total * 100)));
+      const casi = pct >= 100 ? ' lleno' : '';
+      return '<span class="sec-barra' + casi + '"><i style="width:' + pct + '%"></i></span>';
+    }
+    let trozos = '';
+    for (let i = 0; i < pr.total; i++) {
+      trozos += '<i' + (i < pr.hecho ? ' class="si"' : '') + '></i>';
+    }
+    return '<span class="sec-trozos' +
+      (pr.hecho >= pr.total ? ' lleno' : '') + '">' + trozos + '</span>';
+  }
+
   function plegable(o) {
     if (!o.cuerpo) return '';
     return html`
-      <details class="seccion sec-marcada" data-sec="${o.id}"${raw(
+      <details class="seccion sec-marcada" data-sec="${o.id}"
+               style="--tono:${raw(o.tono || 'var(--acc)')}"${raw(
         seccionesDia[o.id] ? ' open' : '')}>
         <summary>
           <!-- La silueta va DENTRO del summary y no suelta en el details: un
@@ -118,13 +139,15 @@
                plegado, así que ahí fuera no se veía nunca —que es justo cuando
                más falta hace, para distinguir un cajón de otro sin leerlos—. -->
           ${raw(o.marca ? '<span class="sec-silueta">' + icon(o.marca) + '</span>' : '')}
-          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          ${raw(o.marca ? '<span class="sec-ico">' + icon(o.marca) + '</span>' : '')}
           <span class="grow" style="min-width:0">
             <span class="sec-tit">${o.titulo}</span>
             ${raw(o.sub ? '<span class="sec-sub">' + esc(o.sub) + '</span>' : '')}
+            ${raw(barra(o.progreso))}
           </span>
           ${raw(o.cola ? '<span class="tiny sec-cola">' + esc(o.cola) + '</span>' : '')}
           ${raw(o.extra || '')}
+          <span class="chevron sec-flecha">${raw(icon('chevron'))}</span>
         </summary>
         <div class="sec-cuerpo"><div class="stack">${raw(o.cuerpo)}</div></div>
       </details>`;
@@ -145,7 +168,8 @@
       : 0;
 
     return plegable({
-      id: 'agua', titulo: 'Hidratación', marca: 'vaso',
+      id: 'agua', titulo: 'Hidratación', marca: 'vaso', tono: '#4f8cf5',
+      progreso: { hecho: hechas, total: tomas },
       cola: llevo ? String(llevo.litros).replace('.', ',') + ' L hoy' : '',
       /* «Llevas 0» a secas contradecía al «2,5 L hoy» de al lado cuando el agua
          venía de vasos sueltos: lo que cuenta la frase son las tomas de la
@@ -189,7 +213,8 @@
       : 0;
 
     return plegable({
-      id: 'comer', titulo: 'Lo que debo comer', marca: 'nutricion',
+      id: 'comer', titulo: 'Lo que debo comer', marca: 'nutricion', tono: '#2fc4b2',
+      progreso: { hecho: hechas, total: cuantas },
       cola: total ? UI.num(total) + ' kcal' : '',
       sub: !cuantas ? 'Todavía no tienes menú para hoy.'
         : hechas >= cuantas
@@ -204,7 +229,7 @@
     if (!rutina) {
       return plegable({
         id: 'entrenar', titulo: 'Lo que voy a entrenar', marca: 'dumbbell',
-        cola: 'Hoy descansas',
+        tono: 'var(--acc)', cola: 'Hoy descansas',
         sub: 'Hoy no toca nada. Descansar también es parte del plan.',
         cuerpo: html`
         <div class="card">
@@ -266,6 +291,7 @@
        series ya salen dentro. */
     return plegable({
       id: 'entrenar', titulo: 'Lo que voy a entrenar', marca: 'dumbbell',
+      tono: 'var(--acc)',
       cola: rutina.exercises.length + ' ejercicios',
       sub: (listaZonas ? 'Hoy le das a ' + listaZonas + '. ' : '') +
         rutina.exercises.length + ' ejercicios y ' + series + ' series.',
@@ -326,7 +352,8 @@
       </div>` : '';
 
     return plegable({
-      id: 'comido', titulo: 'Lo que llevo comido', marca: 'proteina',
+      id: 'comido', titulo: 'Lo que llevo comido', marca: 'proteina', tono: '#f0a23c',
+      progreso: m ? { hecho: h.kcal, total: m.kcal, continuo: true } : null,
       cola: m ? UI.num(h.kcal) + ' / ' + UI.num(m.kcal) + ' kcal' : '',
       sub: !m ? 'Sin tus datos no puedo calcular nada.'
         : !h.cuantas ? 'Todavía no has apuntado nada hoy.'
@@ -483,7 +510,8 @@
       </div>`;
 
     return plegable({
-      id: 'plan', titulo: 'Cómo voy con el plan', marca: 'grafica',
+      id: 'plan', titulo: 'Cómo voy con el plan', marca: 'grafica', tono: '#c06bf0',
+      progreso: { hecho: salieron, total: 7 },
       cola: salieron + ' de 7 días',
       sub: 'Los últimos siete días: si entrenaste, si llegaste a la proteína y si ' +
         'bebiste el agua. Llevas ' + hechas + ' de ' + pedidas + '.',
