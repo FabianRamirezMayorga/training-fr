@@ -196,6 +196,7 @@
       session.kcal = kcalActividad(a, session.end);
       session.musculos = a.actividad.musculos || [];
       session.nota = a.actividad.nota || '';
+      session.origen = a.actividad.origen || '';
     }
 
     stopTimers();
@@ -335,7 +336,8 @@
       minutos: minutos,
       kcal: kcalDe(act, minutos),
       musculos: act.musculos || [],
-      nota: act.nota || ''
+      nota: act.nota || '',
+      origen: act.origen || ''
     };
 
     if (Store.active()) {
@@ -370,6 +372,16 @@
           '</div>' : '')}
 
         ${raw(act.nota ? '<p class="tiny" style="margin:10px 0 0">' + UI.esc(act.nota) + '</p>' : '')}
+
+        ${raw(act.origen === 'ia'
+          ? '<p class="tiny" style="margin:8px 0 0;opacity:.75">Analizado por tu entrenador: ' +
+            UI.esc(String(act.met).replace('.', ',')) + ' MET' +
+            (act.intensidad ? ' · intensidad ' + UI.esc(act.intensidad) : '') +
+            ' · ' + pesoDelPerfil() + ' kg' +
+            (act.tardo ? ' · ' + (act.tardo / 1000).toFixed(1).replace('.', ',') + ' s' : '') +
+            '</p>'
+          : '<p class="tiny" style="margin:8px 0 0;color:var(--warn)">Sin analizar: gasto medio ' +
+            'de 4 MET. Conecta la IA en Ajustes para que lo calcule de verdad.</p>')}
 
         <div class="row" style="margin-top:12px">
           <button class="btn sm grow" data-w="actividad">Cambiarlo</button>
@@ -916,7 +928,8 @@
           UI.closeModal();
           if (g.App) g.App.go('inicio');
           UI.toast(act.nombre + ': ' + minutos + ' min, ~' +
-            UI.num(kcalDe(act, minutos)) + ' kcal');
+            UI.num(kcalDe(act, minutos)) + ' kcal' +
+            (act.origen === 'ia' ? '' : ' (gasto medio, sin analizar)'));
         };
 
         const rematar = function (act) {
@@ -928,7 +941,8 @@
           if (!t) { UI.toast('Escribe qué has hecho'); campo.focus(); return; }
 
           if (!conIA) {
-            rematar({ nombre: t, met: 4, musculos: [], nota: '', intensidad: '' });
+            rematar({ nombre: t, met: 4, musculos: [], nota: '', intensidad: '',
+              origen: 'medio' });
             return;
           }
 

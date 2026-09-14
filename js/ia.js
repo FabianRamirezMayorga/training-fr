@@ -2057,6 +2057,8 @@
         '"musculos":["..."],"nota":""}'
     ].join(SALTO);
 
+    const arranque = Date.now();
+
     return llamarJSON(prompt, { maxTokens: 1024, temperatura: 0.2 }).then(function (r) {
       const met = Number(r && r.met) || 0;
       return {
@@ -2064,7 +2066,12 @@
         met: met > 0 ? Math.min(20, Math.max(1.5, met)) : 0,
         intensidad: (r && r.intensidad) || '',
         musculos: musculosLimpios(r && r.musculos),
-        nota: String((r && r.nota) || '')
+        nota: String((r && r.nota) || ''),
+        /* De dónde salen estos números y cuánto tardó en darlos. Una respuesta
+           de una línea llega en menos de un segundo y parece que no haya
+           pensado nada; la pantalla lo enseña para que no haya que fiarse. */
+        origen: 'ia',
+        tardo: Date.now() - arranque
       };
     });
   }
