@@ -1714,9 +1714,9 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
       color-mix(in srgb, #fff 3%, transparent) 38%,
       transparent 60%),
     linear-gradient(135deg,
-      color-mix(in srgb, var(--acc) 94%, #fff) 0%,
-      color-mix(in srgb, var(--acc) 88%, transparent) 52%,
-      color-mix(in srgb, var(--acc) 92%, #000) 100%);
+      color-mix(in srgb, var(--acc) 97%, #fff) 0%,
+      color-mix(in srgb, var(--acc) 94%, transparent) 52%,
+      color-mix(in srgb, var(--acc) 95%, #000) 100%);
   backdrop-filter: blur(18px) saturate(175%);
   -webkit-backdrop-filter: blur(18px) saturate(175%);
   box-shadow:
@@ -1784,12 +1784,17 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
 :root {
   --vidrio-rim: color-mix(in srgb, #fff 7%, transparent);
   --vidrio-luz: color-mix(in srgb, #fff 4%, transparent);
+  /* El brillo sobre algo de color va aparte del brillo sobre algo neutro: el
+     blanco que le sienta bien a una tarjeta gris le come el color a un boton
+     verde y lo deja lavado. */
+  --vidrio-luz-color: color-mix(in srgb, #fff 5%, transparent);
   --vidrio-sombra: 0 6px 18px rgba(0, 0, 0, .28);
   --vidrio-sombra-corta: 0 2px 6px rgba(0, 0, 0, .2);
 }
 html[data-theme="light"] {
   --vidrio-rim: color-mix(in srgb, #fff 85%, transparent);
   --vidrio-luz: color-mix(in srgb, #fff 55%, transparent);
+  --vidrio-luz-color: color-mix(in srgb, #fff 15%, transparent);
   --vidrio-sombra: 0 1px 2px rgba(16, 24, 40, .05), 0 10px 26px rgba(16, 24, 40, .07);
   --vidrio-sombra-corta: 0 1px 2px rgba(16, 24, 40, .06);
 }
@@ -1814,15 +1819,18 @@ html[data-theme="light"] {
   box-shadow: inset 0 1px 0 var(--vidrio-rim), var(--vidrio-sombra-corta);
 }
 
+/* El verde de la portada tiene que ser el mismo verde que el de las demas
+   pantallas: aqui solo se sombrea un poco de arriba abajo para darle cuerpo,
+   sin irse de tono. */
 .vista-inicio .btn.primary,
 .vista-inicio .hoy-play {
   background:
-    linear-gradient(180deg, var(--vidrio-luz) 0%, transparent 58%),
+    linear-gradient(180deg, var(--vidrio-luz-color) 0%, transparent 56%),
     linear-gradient(135deg,
-      color-mix(in srgb, var(--acc) 96%, #fff) 0%,
-      var(--acc) 55%,
-      color-mix(in srgb, var(--acc) 94%, #000) 100%);
-  border: 1px solid color-mix(in srgb, #fff 14%, transparent);
+      color-mix(in srgb, var(--acc) 97%, #fff) 0%,
+      var(--acc) 52%,
+      color-mix(in srgb, var(--acc) 96%, #000) 100%);
+  border: 1px solid color-mix(in srgb, #fff 12%, transparent);
 }
 
 .vista-inicio .hoy-play {
