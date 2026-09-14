@@ -1295,11 +1295,14 @@ img[src^="data/img/"] {
   border-radius: var(--r);
   padding: 0 9px 9px;
   margin-top: 10px;
-  /* El cajon no lleva fondo: el color va en su cabecera, que es lo que se
-     toca. Ponerlo aqui dejaba dentro un rectangulo negro —la cabecera necesita
-     fondo propio para tapar los botones de deslizar— y se veian dos cajas, una
-     dentro de otra. */
+  /* Una sola pieza, como la tarjeta de la rutina de hoy. La cabecera necesita
+     fondo propio —tapa los botones de deslizar que hay debajo— asi que es ella
+     la que lleva el degradado, y el cajon se le ajusta: relleno cero y las
+     esquinas recortadas, de modo que la cabecera llega hasta el borde y no se
+     ve una caja dentro de otra. */
   background: none;
+  padding: 0;
+  overflow: hidden;
   transition: border-color .18s, box-shadow .18s;
 }
 .plan-caja.abierta {
@@ -1307,20 +1310,31 @@ img[src^="data/img/"] {
 }
 /* La cabecera trae su propio margen y su relleno de fila suelta; dentro del
    cajon sobran los dos y es lo que lo hacia tan alto. */
-.plan-caja { padding: 4px 4px 4px 5px; }
-.plan-caja .desliza { margin-top: 0; }
-.plan-caja .stack { margin-top: 4px; padding: 0 5px 5px; }
+/* El margen de 14px que separa una cabecera de plan suelta lo pone una regla
+   con :has(), que pesa mas que un simple descendiente: hay que igualarla o el
+   cajon se queda con una franja del fondo entre su borde y el degradado. */
+.plan-caja .desliza,
+.plan-caja .desliza:has(> .desliza-cara > .dia-grupo) { margin-top: 0; }
+.plan-caja .stack { margin-top: 0; padding: 0 9px 9px; }
 
-/* La cabecera es el boton del plan: el degradado va aqui, del color del plan y
-   de esquina a esquina. */
+/* La cabecera ES el plan: ocupa el cajon entero y lleva el degradado de su
+   color, el mismo que la tarjeta de la rutina de hoy. */
 .plan-caja .desliza-cara > .dia-grupo {
-  padding: 9px 11px;
-  border-radius: 13px;
+  /* Sin el margen de arriba: son los 14px de una fila suelta, y aqui dejaban
+     una franja del fondo de la pagina entre el borde del cajon y el degradado.
+     Eso era la caja dentro de la caja. */
+  margin: 0;
+  padding: 11px 13px;
+  border-radius: 0;
   background:
-    linear-gradient(140deg, color-mix(in srgb, var(--tono) 22%, var(--card)) 0%,
-                    color-mix(in srgb, var(--tono) 6%, var(--card)) 100%);
+    linear-gradient(152deg, color-mix(in srgb, var(--tono) 16%, var(--card)) 0%,
+                    var(--card) 62%);
 }
 .plan-caja .desliza-cara { background: none; }
+
+/* Abierta, el cuerpo continua el mismo fondo para que no haya escalon debajo
+   de la cabecera. */
+.plan-caja.abierta { background: var(--card); }
 
 /* Los datos del plan, en un renglon */
 .plan-meta {
