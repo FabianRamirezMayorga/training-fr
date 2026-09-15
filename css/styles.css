@@ -5846,6 +5846,34 @@ html[data-theme="light"] .sc-barra { background: color-mix(in srgb, #141922 7%, 
 .wa-lado.seg i { font-style: normal; font-size: .72rem; font-weight: 700;
   margin-left: 1px; opacity: .7; }
 
+/* Corriendo: el boton se enciende y ensena lo que queda. En verde solido
+   competiria con «marcar como hecho», que es la accion; esto es un estado, asi
+   que se queda en un lavado de acento con el borde encendido. */
+.wo-descanso.corriendo {
+  border-color: color-mix(in srgb, var(--acc) 48%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 5%, transparent), transparent 55%),
+    color-mix(in srgb, var(--acc) 13%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent),
+              0 4px 16px color-mix(in srgb, var(--acc) 18%, transparent);
+}
+.wo-descanso.corriendo .wa-ico {
+  color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 30%, transparent);
+  animation: descanso-late 2s ease-in-out infinite;
+}
+.wo-descanso.corriendo .wa-lado.seg { font-variant-numeric: tabular-nums; }
+
+/* Latido lento: dice «esto esta corriendo» sin pedir que lo mires. */
+@keyframes descanso-late {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.09); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wo-descanso.corriendo .wa-ico { animation: none; }
+}
+
 /* ---------- pasar de ejercicio ----------
    No es la accion del entrenamiento, es moverse por el: mas bajo que los
    botones de arriba, para que la jerarquia se vea sin leer.
@@ -5874,9 +5902,11 @@ html[data-theme="light"] .sc-barra { background: color-mix(in srgb, #141922 7%, 
   stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
   opacity: .55;
 }
-.wo-nav-b.atras { flex: 0 0 auto; padding: 0 16px; }
+/* Los dos miden lo mismo. Atras estrecho y siguiente ancho era mi manera de
+   decir cual se usa mas, pero dos botones de la misma fila que hacen lo mismo
+   —moverse— y tienen distinto tamano se leen como si uno fuera el bueno. */
+.wo-nav-b.atras, .wo-nav-b.sig { flex: 1 1 0; min-width: 0; }
 .wo-nav-b.atras[disabled] { color: var(--dim2); opacity: .45; pointer-events: none; }
-.wo-nav-b.sig { flex: 1; }
 
 /* Terminar se lleva el verde solo cuando de verdad toca terminar: con
    ejercicios aun sin marcar, competia con «marcar como hecho» y las dos cosas

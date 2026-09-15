@@ -238,13 +238,38 @@
     paintRest();
   }
 
+  /* ---------- el botón de descansar, mientras corre ----------
+     Se pulsaba y no cambiaba nada: el aviso salía abajo del todo, pegado a la
+     barra de pestañas, y desde el botón no había manera de saber si lo habías
+     dado o si no te había cogido el toque. Ahora el propio botón dice que está
+     corriendo y enseña lo que queda, que es donde estás mirando cuando lo
+     pulsas. El aviso de abajo se queda: es el que se ve desde cualquier
+     pantalla de la app. */
+  function pintarBotonDescanso(left) {
+    const b = document.querySelector('.wo-descanso');
+    if (!b) return;
+    const lado = b.querySelector('.wa-lado');
+    const txt = b.querySelector('.wa-t');
+    if (!lado || !txt) return;
+
+    if (left == null) {
+      b.classList.remove('corriendo');
+      txt.textContent = 'Descansar';
+      lado.innerHTML = UI.esc(lado.dataset.seg || '') + '<i>s</i>';
+      return;
+    }
+    b.classList.add('corriendo');
+    txt.textContent = 'Descansando';
+    lado.textContent = UI.mmss(left);
+  }
+
   /* Se dibuja una sola vez y después solo cambia el número: si se reescribiera
      el HTML en cada tic, la animación de entrada se reiniciaría sin parar. */
   function paintRest() {
     const host = document.getElementById('rest-host');
     if (!host) return;
 
-    if (!restEnd) { host.innerHTML = ''; return; }
+    if (!restEnd) { host.innerHTML = ''; pintarBotonDescanso(null); return; }
 
     const left = (restEnd - Date.now()) / 1000;
     if (left <= 0) {
@@ -252,9 +277,12 @@
       restEnd = 0;
       clearInterval(restTimer); restTimer = null;
       host.innerHTML = '';
+      pintarBotonDescanso(null);
       UI.toast('Descanso terminado. ¡A por la siguiente serie!');
       return;
     }
+
+    pintarBotonDescanso(left);
 
     let out = host.querySelector('[data-rest-out]');
     if (!out) {
@@ -601,7 +629,7 @@
             <button class="wo-accion wo-descanso" data-w="rest">
               <span class="wa-ico">${raw(icon('timer'))}</span>
               <span class="wa-t">Descansar</span>
-              <span class="wa-lado seg">${entry.rest}<i>s</i></span>
+              <span class="wa-lado seg" data-seg="${entry.rest}">${entry.rest}<i>s</i></span>
             </button>` : '')}
         </div>` : html`
       <div class="card">
