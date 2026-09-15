@@ -5982,13 +5982,13 @@ html[data-theme="light"] .wo-hecho {
    Los dos botones y el numero en la misma pastilla: sueltos parecian tres
    cosas que casualmente estan juntas, y el dedo no sabe donde acaba uno. */
 .sf-reps {
-  flex: none; display: flex; align-items: center; gap: 1px;
-  padding: 2px; border-radius: 11px;
+  flex: none; display: flex; align-items: center; gap: 4px;
+  padding: 3px; border-radius: 13px;
   background: color-mix(in srgb, #000 16%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
 }
 .sf-pm {
-  flex: none; width: 30px; height: 30px; border-radius: 9px;
+  flex: none; width: 36px; height: 36px; border-radius: 11px;
   display: flex; align-items: center; justify-content: center;
   border: 0; cursor: pointer; color: var(--dim2);
   background: color-mix(in srgb, #fff 6%, transparent);
@@ -5997,12 +5997,12 @@ html[data-theme="light"] .wo-hecho {
 .sf-pm:active { transform: scale(.9); background: color-mix(in srgb, var(--acc) 22%, transparent);
   color: var(--acc); }
 .sf-pm svg {
-  width: 15px; height: 15px; fill: none; stroke: currentColor;
+  width: 17px; height: 17px; fill: none; stroke: currentColor;
   stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round;
 }
 
 .sf-num {
-  min-width: 52px; text-align: center; padding: 0 3px;
+  min-width: 54px; text-align: center; padding: 0 2px;
   transition: color .2s ease;
 }
 .sf-num b {
@@ -6020,7 +6020,7 @@ html[data-theme="light"] .wo-hecho {
 
 /* ---------- la marca ---------- */
 .sf-chk {
-  flex: none; width: 34px; height: 34px; border-radius: 11px;
+  flex: none; width: 36px; height: 36px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: transparent;
   border: 1.5px solid color-mix(in srgb, #fff 18%, transparent);
