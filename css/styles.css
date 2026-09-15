@@ -5527,3 +5527,14 @@ button.dia-cabeza:active { transform: scale(.985); }
 }
 .hf-ico svg { width: 13px; height: 13px; fill: none; stroke: currentColor;
   stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* El boton lleva «tarjeta-premium» para heredar su forma, y en tema claro esa
+   clase repinta el fondo en blanco con mas especificidad que la del boton:
+   texto blanco sobre fondo blanco. El verde se le devuelve aqui, con la
+   especificidad suficiente para ganarle. */
+html[data-theme="light"] button.dia-cabeza {
+  background: linear-gradient(168deg, color-mix(in srgb, var(--acc) 92%, #fff), var(--acc));
+  border-color: transparent;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 26%, transparent),
+              0 6px 20px color-mix(in srgb, var(--acc) 26%, transparent);
+}
