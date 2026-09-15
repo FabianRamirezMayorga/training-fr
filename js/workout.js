@@ -586,20 +586,22 @@
             <span>lo que te propongo</span>
           </div>
 
-          <button class="wo-hecho ${hecho ? 'on' : ''}" data-w="hechoya">
-            <span class="wh-ico">${raw(icon('check'))}</span>
-            <span class="wh-txt">
-              <span class="wh-t">${hecho ? 'Hecho' : 'Marcar como hecho'}</span>
-              <span class="wh-s">${hecho ? 'Tócalo otra vez para deshacerlo'
-                : entry.sets.length + ' series de ' + entry.targetReps + ' repeticiones'}</span>
-            </span>
+          <!-- Las dos, la misma pieza: casilla o icono a la izquierda, lo que
+               hace en el centro, y el dato a la derecha. El subtitulo que
+               llevaba esta —«3 series de 10 repeticiones»— repetia el «3 × 10»
+               que esta dos centimetros mas arriba, y de paso la hacia mas alta
+               que la de descansar. Fuera el subtitulo: se igualan solas. -->
+          <button class="wo-accion wo-hecho ${hecho ? 'on' : ''}" data-w="hechoya">
+            <span class="wa-ico">${raw(icon('check'))}</span>
+            <span class="wa-t">${hecho ? 'Hecho' : 'Marcar como hecho'}</span>
+            ${raw(hecho ? '<span class="wa-lado deshacer">deshacer</span>' : '')}
           </button>
 
           ${raw(entry.rest ? html`
-            <button class="wo-descanso" data-w="rest">
-              <span class="wd-ico">${raw(icon('timer'))}</span>
-              <span class="grow">Descansar</span>
-              <span class="wd-seg">${entry.rest}<i>s</i></span>
+            <button class="wo-accion wo-descanso" data-w="rest">
+              <span class="wa-ico">${raw(icon('timer'))}</span>
+              <span class="wa-t">Descansar</span>
+              <span class="wa-lado seg">${entry.rest}<i>s</i></span>
             </button>` : '')}
         </div>` : html`
       <div class="card">
@@ -661,7 +663,7 @@
           ${raw(icon('back'))}<span>Anterior</span></button>
         <button class="wo-nav-b sig ${a.idx === a.entries.length - 1
           ? (todoHecho ? 'fin listo' : 'fin') : ''}" data-w="next">
-          <span>${a.idx === a.entries.length - 1 ? 'Terminar entrenamiento' : 'Siguiente ejercicio'}</span>
+          <span>${a.idx === a.entries.length - 1 ? 'Terminar' : 'Siguiente'}</span>
           ${raw(icon(a.idx === a.entries.length - 1 ? 'check' : 'chevron'))}</button>
       </div>
 
