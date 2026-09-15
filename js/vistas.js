@@ -178,9 +178,6 @@
 
       <div class="list-title">Aplicación</div>
       <div class="plan-acciones indice" style="margin:10px 0 0">
-        ${raw(filaPerfil({ icono: 'ayuda', titulo: 'Ayuda', accion: 'ayuda',
-          tono: '#39b8c9',
-          sub: 'Guía, preguntas frecuentes y cómo se hace cada cosa' }))}
         ${raw(filaPerfil({ icono: 'nube', titulo: 'Mi cuenta', accion: 'cuenta',
           tono: '#4f8cf5', pendiente: !Sync.activa(),
           sub: Sync.activa() ? Sync.email() : 'Sin sincronizar' }))}
@@ -202,6 +199,15 @@
                 tono: '#f0a23c', pendiente: true,
                 sub: 'No he podido comprobar si administras' })
             : '')}
+      </div>
+
+      <!-- La ayuda va al final y sola. Metida entre la cuenta y los ajustes
+           parecia una opcion mas que configurar; aqui abajo es lo que es: el
+           sitio al que se baja cuando algo no se entiende. -->
+      <div class="plan-acciones indice" style="margin:22px 0 0">
+        ${raw(filaPerfil({ icono: 'ayuda', titulo: 'Ayuda', accion: 'ayuda',
+          tono: 'var(--dim2)',
+          sub: 'Cómo se hace cada cosa, cómo funciona y las dudas de siempre' }))}
       </div>
 
       <p class="tiny pie-marca">Training FR</p>`;

@@ -10,6 +10,9 @@
   /* qué pantalla hay pintada ahora mismo, para saber si un render es un
      cambio de pantalla o solo un repintado de la misma */
   let pantallaPintada = '';
+  /* Lo que hay que tocar nada más llegar a la pantalla siguiente, si alguien
+     pidió ir a un sitio a hacer algo concreto. */
+  let pendiente = null;
   let exFilters = { q: '', group: '', muscle: '', equipment: '', level: '', tipo: '', favs: false, todo: false };
   let exLimit = 40;
 
@@ -25,6 +28,15 @@
     const h = '#/' + name + (arg ? '/' + encodeURIComponent(arg) : '');
     /* si ya estamos en esa ruta no hay hashchange, así que se repinta a mano */
     if (location.hash === h) render(); else location.hash = h;
+  }
+
+  /* Ir a una pantalla y pulsar algo al llegar. La ayuda lo usa para que
+     «crear una rutina» no sea una instrucción sino el botón ya abierto; si el
+     botón no existe —porque esa pantalla cambió—, se queda uno en la pantalla,
+     que es un mal menor y no un error. */
+  function irYHacer(name, arg, selector) {
+    pendiente = selector ? { ruta: name, sel: selector } : null;
+    go(name, arg);
   }
 
   function render() {
@@ -73,6 +85,21 @@
     window.scrollTo(0, mismaPantalla ? alturaPrevia : 0);
 
     if (fn.mount) fn.mount(viewEl);
+
+    /* Un enlace de la ayuda no puede quedarse en «vete a Rutinas»: la mitad de
+       lo que hay que explicar es qué botón tocar al llegar. Así que se llega y
+       se toca. Va después del mount —antes el botón todavía no tiene su
+       manejador— y fuera del render, porque el clic vuelve a repintar y
+       repintar dentro de un repintado deja la pantalla a medias. */
+    if (pendiente && pendiente.ruta === route.name) {
+      const que = pendiente.sel;
+      pendiente = null;
+      setTimeout(function () {
+        const el = document.getElementById('view').querySelector(que);
+        if (el) el.click();
+      }, 0);
+    }
+
     UI.mountDemos(viewEl);
     UI.cerrarDeslizadas();
     UI.deslizables(viewEl);
@@ -6253,7 +6280,7 @@
   }
 
   g.App = {
-    go: go, render: render, exerciseSheet: exerciseSheet, pickExercise: pickExerciseSheet,
+    go: go, irYHacer: irYHacer, render: render, exerciseSheet: exerciseSheet, pickExercise: pickExerciseSheet,
     bind: bind, bindAll: bindAll, aplicarTema: aplicarTema,
     lugarSheet: lugarSheet, cuantosEn: cuantosEn, CARAS_LUGAR: CARAS_LUGAR,
     abandonados: abandonados,
