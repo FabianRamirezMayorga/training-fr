@@ -178,6 +178,9 @@
 
       <div class="list-title">Aplicación</div>
       <div class="plan-acciones indice" style="margin:10px 0 0">
+        ${raw(filaPerfil({ icono: 'ayuda', titulo: 'Ayuda', accion: 'ayuda',
+          tono: '#39b8c9',
+          sub: 'Guía, preguntas frecuentes y cómo se hace cada cosa' }))}
         ${raw(filaPerfil({ icono: 'nube', titulo: 'Mi cuenta', accion: 'cuenta',
           tono: '#4f8cf5', pendiente: !Sync.activa(),
           sub: Sync.activa() ? Sync.email() : 'Sin sincronizar' }))}
@@ -207,7 +210,8 @@
   V.perfil.mount = function (root) {
     const ir = { datos: 'datos', objetivos: 'objetivos', nutricion: 'nutricion',
       alertas: 'alertas', entrenador: 'entrenador', musica: 'musica',
-      cuenta: 'cuenta', ajustes: 'ajustes', usuarios: 'usuarios', version: 'version' };
+      cuenta: 'cuenta', ajustes: 'ajustes', usuarios: 'usuarios', version: 'version',
+      ayuda: 'ayuda' };
 
     /* La primera vez que se entra en Perfil se pregunta si hay versión nueva y
        se repinta con la respuesta. Después ya está sabida y no se vuelve a
@@ -225,6 +229,7 @@
     bindAll(root, '[data-fila]', function (el) {
       const d = el.dataset.fila;
       if (d === 'lugar') return App.lugarSheet();
+      if (d === 'ayuda' && g.Ayuda) Ayuda.reiniciar();
       go(ir[d] || 'ajustes');
     });
     bind(root, '[data-a=datos]', function () { go('datos'); });

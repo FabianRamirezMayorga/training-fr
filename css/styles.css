@@ -5642,3 +5642,130 @@ html[data-theme="light"] .sc-barra { background: color-mix(in srgb, #141922 7%, 
   stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
 .aviso-exceso b { display: block; font-size: .88rem; color: var(--t); }
 .aviso-exceso .tiny { display: block; margin-top: 3px; line-height: 1.45; }
+
+/* ---------- ayuda ----------
+   Cada entrada es una tarjeta plegada, como la boveda de claves: con veinte
+   entradas abiertas no se encuentra nada, y plegadas se lee la lista entera de
+   un vistazo y se abre solo lo que se viene a resolver.
+
+   El vidrio calibrado al tamano de la pieza: en una tarjeta de 60 px el 7 % de
+   blanco del rim no se ve, asi que va al 13 % arriba y sombra interior abajo,
+   que es lo que hace que parezca un cristal y no un rectangulo mas claro. */
+.ay-tema {
+  margin-bottom: 8px;
+  border-radius: 17px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, #fff 9%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 55%),
+    color-mix(in srgb, var(--card) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 13%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #000 16%, transparent),
+    0 5px 18px color-mix(in srgb, #000 20%, transparent);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.ay-tema[open] {
+  border-color: color-mix(in srgb, var(--tono) 38%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 15%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #000 16%, transparent),
+    0 6px 22px color-mix(in srgb, var(--tono) 15%, transparent);
+}
+
+.ay-tema > summary {
+  display: flex; align-items: center; gap: 11px;
+  padding: 12px 13px; cursor: pointer; list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ay-tema > summary::-webkit-details-marker { display: none; }
+.ay-tema > summary::marker { content: ''; }
+.ay-tema > summary .grow { min-width: 0; }
+.ay-tema > summary:active { transform: scale(.992); }
+
+.ay-ico {
+  flex: none; width: 36px; height: 36px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tono) 24%, transparent);
+}
+.ay-ico svg { width: 19px; height: 19px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* La interrogacion de las preguntas: el mismo hueco que el icono de los temas,
+   para que las tres pestanas tengan la misma reja y no baile el texto. */
+.ay-marca {
+  flex: none; width: 36px; height: 36px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.02rem; font-weight: 800; letter-spacing: -.02em;
+  color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tono) 24%, transparent);
+}
+
+.ay-tit { display: block; font-weight: 700; font-size: .93rem; letter-spacing: -.012em;
+  line-height: 1.3; }
+.ay-sub { display: block; margin-top: 2px; font-size: .75rem; color: var(--dim2);
+  line-height: 1.35; }
+
+.ay-flecha { flex: none; color: var(--dim2); transition: transform .22s ease; }
+.ay-flecha svg { width: 16px; height: 16px; display: block; fill: none;
+  stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ay-tema[open] > summary .ay-flecha { transform: rotate(90deg); color: var(--tono); }
+
+/* El .stack global es display:flex y le gana a la regla del navegador que
+   pliega el contenido, asi que se pliega a mano, igual que en la boveda. */
+.ay-tema:not([open]) > .ay-cuerpo { display: none; }
+.ay-tema > .ay-cuerpo { padding: 0 13px 13px 60px; }
+.ay-cuerpo p {
+  margin: 0 0 9px; font-size: .86rem; line-height: 1.5; color: var(--dim);
+}
+.ay-cuerpo p:last-of-type { margin-bottom: 0; }
+.ay-cuerpo p b { color: var(--txt); font-weight: 700; }
+
+/* La sangria de 60 px alinea el texto con el titulo, pero en pantallas
+   estrechas deja la columna en nada. Ahi el texto vuelve al borde. */
+@media (max-width: 400px) {
+  .ay-tema > .ay-cuerpo { padding-left: 13px; }
+}
+
+.ay-pasos { margin-top: 2px; }
+.ay-pasos li { font-size: .86rem; line-height: 1.5; }
+.ay-pasos li::before { background: color-mix(in srgb, var(--tono) 18%, transparent);
+  color: var(--tono); }
+.ay-pasos li b { color: var(--txt); font-weight: 700; }
+
+.ay-ir { margin-top: 12px; }
+.ay-ir svg { width: 14px; height: 14px; vertical-align: -2px; margin-left: 2px;
+  fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round;
+  stroke-linejoin: round; }
+
+/* De donde sale cada resultado de la busqueda: sin esto, una pregunta y un
+   tutorial se ven igual y no se sabe si lo que se abre es una respuesta o
+   cuatro pasos que hay que seguir. */
+.ay-de {
+  font-size: .64rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--dim2); margin: 12px 0 5px 2px;
+}
+.ay-de:first-child { margin-top: 0; }
+
+/* En claro el vidrio se hace con negro, no con blanco: el rim blanco sobre
+   fondo claro no existe y la tarjeta se queda sin borde superior. */
+html[data-theme="light"] .ay-tema {
+  border-color: color-mix(in srgb, #000 10%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 70%, transparent), transparent 55%),
+    color-mix(in srgb, var(--card) 86%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 80%, transparent),
+    0 4px 14px color-mix(in srgb, #000 8%, transparent);
+}
+html[data-theme="light"] .ay-tema[open] {
+  border-color: color-mix(in srgb, var(--tono) 42%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 80%, transparent),
+    0 5px 18px color-mix(in srgb, var(--tono) 14%, transparent);
+}
