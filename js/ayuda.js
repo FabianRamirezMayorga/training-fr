@@ -77,6 +77,18 @@
       ],
       ver: ['c-entrenar', 'c-libre'] },
 
+    { id: 'g-registro', titulo: 'Las tres formas de apuntar',
+      resumen: 'Cuánto detalle quieres llevar, y qué se pierde con cada uno',
+      cuerpo: [
+        'En Ajustes eliges cuánto apuntas de cada ejercicio, y eso cambia la pantalla de entrenamiento entera.',
+        '*Peso y repeticiones*: anotas cada serie. Es el único que da récords, volumen levantado, gráficas de peso y progresión de cargas, porque son las cuatro cosas que necesitan un número.',
+        '*Marcar cada serie*: la app te propone el objetivo —3 × 12— y tú solo marcas las que vas haciendo. El peso es opcional: si lo pones cuenta, y si no, no.',
+        '*Marcar el ejercicio y ya*: un botón por ejercicio y a otra cosa. Ni peso, ni repeticiones, ni series.',
+        'Lo que se pierde al bajar de detalle no es la app, es la medida: sin peso apuntado no hay récords ni volumen, y el progreso se mide por series y entrenamientos hechos. Por eso, en los modos sin peso, la pantalla no te enseña récords: un récord de cero kilos no es un récord.',
+        'Se puede cambiar cuando quieras, y lo ya apuntado se queda como está.'
+      ],
+      ver: ['c-entrenar', 'g-peso'] },
+
     { id: 'g-plan', titulo: 'Rutina, plan y días',
       resumen: 'Por qué asignar días no es cosmético',
       cuerpo: [
@@ -254,15 +266,17 @@
           d: 'El botón grande arranca lo que te toca hoy según tu plan. Si hoy no toca nada, te ofrece el entrenamiento libre.',
           ir: { ruta: 'inicio', label: 'Ir a Inicio' } },
         { t: 'Mira el peso propuesto antes de la primera serie.',
-          d: 'Encima de cada ejercicio te dice si hoy subes, repites o bajas, y por qué. Si no te cuadra, cámbialo: es una propuesta.' },
-        { t: 'Marca cada serie según la vas haciendo.',
-          d: 'El descanso arranca solo al marcarla, y el cronómetro te acompaña por toda la app: puedes salir a mirar otra cosa sin perderlo.' },
+          d: 'Encima de cada ejercicio te dice si hoy subes, repites o bajas, y por qué. Si no te cuadra, cámbialo: es una propuesta. Esto solo sale si apuntas peso y repeticiones.' },
+        { t: 'Ve marcando según avanzas.',
+          d: 'Qué marcas depende de cómo tengas puesto el registro en Ajustes: cada serie con su peso, cada serie a secas, o el ejercicio entero de una vez. El descanso arranca solo al marcar, y el cronómetro te acompaña por toda la app: puedes salir a mirar otra cosa sin perderlo.' },
         { t: 'Apunta lo que de verdad hiciste.',
           d: 'Si sacaste ocho en vez de diez, pon ocho. De ahí sale la propuesta de la próxima vez, y una cifra inflada hoy es un peso que no podrás mover la semana que viene.' },
-        { t: 'Guarda al terminar.',
-          d: 'Se suma al historial, a los récords, al volumen levantado y a la constancia.' }
+        { t: 'Si un ejercicio no puedes hacerlo, cámbialo ahí mismo.',
+          d: '*Otra opción* te propone recambios que trabajan lo mismo con otro material, y las series que ya llevas marcadas no se pierden. *Cómo se hace* enseña la técnica sin salir del entrenamiento.' },
+        { t: 'Termina cuando esté todo marcado.',
+          d: 'El botón de terminar se enciende en verde cuando ya no queda nada por marcar. Se suma al historial, a los récords, al volumen levantado y a la constancia.' }
       ],
-      ver: ['g-peso', 'c-libre'] },
+      ver: ['g-peso', 'g-registro', 'c-libre'] },
 
     { id: 'c-libre', titulo: 'Registrar un entrenamiento libre',
       resumen: 'Apuntar lo que no estaba en ningún plan',
@@ -404,6 +418,12 @@
       a: ['Porque la app decide el peso de hoy con tu historial, en vez de repetir el último.',
         'Encima del ejercicio te dice cuál de los tres casos es —subes, repites o bajas— y por qué. Y el número se puede cambiar siempre.'],
       ver: ['g-peso'] },
+
+    { id: 'p-record', q: '¿Por qué no me sale ningún récord?',
+      a: ['Porque los récords se calculan con el peso, y si no apuntas peso no hay nada que comparar.',
+        'Pasa en los modos «marcar cada serie» sin poner peso y «marcar el ejercicio y ya». En ese caso la app no te enseña un récord de cero kilos: te dice cuántas veces has hecho ese ejercicio y cuándo fue la última, que es la historia que sí existe.',
+        'Si quieres récords, volumen y gráficas de peso, cambia el registro a «peso y repeticiones» en Ajustes.'],
+      ver: ['g-registro'] },
 
     { id: 'p-nota', q: '¿Por qué mi plan saca esa nota?',
       a: ['La nota parte de un 10 y baja por cada fallo encontrado, según su gravedad.',

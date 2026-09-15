@@ -406,12 +406,20 @@
      ejercicio, y en mitad de una serie no se va uno a otra pantalla a buscar
      con qué sustituir la máquina ocupada. Van cerrados porque las dos son
      largas y aquí lo que manda es el peso y las repeticiones. */
+  /* Cambiar de ejercicio y ver cómo se hace estaban dos veces en la misma
+     pantalla: dos iconos mudos en la esquina de la tarjeta y, tres centímetros
+     más abajo, los dos mismos botones con su texto. Se quedan los de abajo,
+     que dicen lo que hacen.
+
+     Y aquí ya no se puede devolver cadena vacía. Cuando el ejercicio no tenía
+     recambios ni guía, esta fila no se pintaba, y con los iconos fuera uno se
+     quedaba sin manera de cambiarlo: los botones están siempre, y el que no
+     tiene nada que desplegar abre la hoja que corresponda. */
   function ayudaHTML(ex) {
     const hayAlt = !!(g.App && g.App.alternativasHTML && g.App.alternativasHTML(ex));
     const guia = g.Tecnica ? Tecnica.para(ex) : null;
-    if (!hayAlt && !guia) return '';
 
-    function boton(clave, titulo, icono) {
+    function plegable(clave, titulo, icono) {
       const abierto = ayudaAbierta === clave;
       return html`
         <button class="btn sm grow plegar ${abierto ? 'abierta' : ''}"
@@ -419,14 +427,68 @@
           ${raw(icono)} ${titulo}</button>`;
     }
 
+    function hoja(accion, titulo, icono) {
+      return html`
+        <button class="btn sm grow" data-w="${accion}">${raw(icono)} ${titulo}</button>`;
+    }
+
     /* Los dos en la misma línea: uno debajo del otro se comían el sitio de lo
        que de verdad se mira aquí, el peso y las repeticiones. */
     return '<div class="row ayuda-fila">'
-      + (hayAlt ? boton('alt', 'Otra opción', icon('cambiar')) : '')
-      + (guia ? boton('guia', 'Cómo se hace', icon('search')) : '')
+      + (hayAlt ? plegable('alt', 'Otra opción', icon('cambiar'))
+                : hoja('cambiar', 'Otra opción', icon('cambiar')))
+      + (guia ? plegable('guia', 'Cómo se hace', icon('search'))
+              : hoja('info', 'Cómo se hace', icon('search')))
       + '</div>'
       + (hayAlt ? '<div data-ayuda-caja="alt"' + (ayudaAbierta === 'alt' ? '' : ' hidden') + '></div>' : '')
       + (guia ? '<div data-ayuda-caja="guia"' + (ayudaAbierta === 'guia' ? '' : ' hidden') + '></div>' : '');
+  }
+
+  /* «Hace tres días» se lee; «14 sep» hay que restarlo de cabeza. */
+  function haceQue(ts) {
+    const dias = Math.floor((Date.now() - ts) / 864e5);
+    if (dias <= 0) return 'hoy';
+    if (dias === 1) return 'ayer';
+    if (dias < 7) return 'hace ' + dias + ' días';
+    if (dias < 14) return 'hace una semana';
+    if (dias < 60) return 'hace ' + Math.round(dias / 7) + ' semanas';
+    return 'hace ' + Math.round(dias / 30) + ' meses';
+  }
+
+  /* ---------- lo que se enseña del historial ----------
+     Con «marcar el ejercicio y ya» no se apunta ningún peso, y la tarjeta
+     seguía enseñando «Récord: 0 kg × 7» y «Última vez: 0×7 · 0×7». Números de
+     una pregunta que ese modo no hace: un récord de cero kilos no es un
+     récord, es la prueba de que ahí no hay nada que medir.
+
+     En ese modo la historia que sí existe es otra —cuántas veces lo has hecho
+     y cuándo fue la última— y es la que se cuenta. En los demás modos el peso
+     también es opcional, así que tampoco se enseña si no lo hay: entonces se
+     enseñan las repeticiones, que es lo único que de verdad se apuntó. */
+  function historialHTML(exId, pr, last, soloEjercicio) {
+    if (soloEjercicio) {
+      const hist = Store.historyOf(exId);
+      if (!hist.length) return '';
+      return '<div class="row wrap" style="margin-top:10px;gap:6px">' +
+        '<span class="chip solid">' + (hist.length === 1
+          ? 'Lo has hecho una vez' : 'Lo has hecho ' + hist.length + ' veces') + '</span>' +
+        '<span class="chip">Última vez, ' + haceQue(hist[0].date) + '</span></div>';
+    }
+
+    const record = pr.best && Number(pr.best.weight) > 0
+      ? '<span class="chip solid">Récord: ' + UI.kg(pr.best.weight) + ' × ' +
+        pr.best.reps + '</span>' : '';
+
+    let ultima = '';
+    if (last && last.sets.length) {
+      const conPeso = last.sets.some(function (x) { return Number(x.weight) > 0; });
+      ultima = '<span class="chip">Última vez: ' + (conPeso
+        ? last.sets.map(function (x) { return UI.num(x.weight) + '×' + x.reps; }).join(' · ')
+        : last.sets.map(function (x) { return x.reps; }).join(' · ') + ' reps') + '</span>';
+    }
+
+    if (!record && !ultima) return '';
+    return '<div class="row wrap" style="margin-top:10px;gap:6px">' + record + ultima + '</div>';
   }
 
   /* Cuál de las dos está abierta, para que sobreviva a los re-render que hace
@@ -453,6 +515,10 @@
     const simple = modo === 'simple';
     const soloEjercicio = modo === 'ejercicio';
     const hecho = entry.sets.every(function (x) { return x.done; });
+    /* Si queda algo por marcar, terminar todavia no es lo que toca */
+    const todoHecho = a.entries.every(function (e) {
+      return e.sets.every(function (x) { return x.done; });
+    });
 
     return html`
       <div class="wo-head">
@@ -488,17 +554,9 @@
                     ? ' · ' + UI.esc(ex.secondaryMuscles.map(I18N.muscle).join(', ')) : '')}
                 </div>` : '')}
             </div>
-            <button class="btn icon" data-w="cambiar"
-                    aria-label="Cambiar por otro ejercicio">${raw(icon('cambiar'))}</button>
-            <button class="btn icon" data-w="info" aria-label="Ver instrucciones">${raw(icon('search'))}</button>
           </div>
           ${raw(entry.note ? html`<p class="muted" style="margin:8px 0 0">${entry.note}</p>` : '')}
-          ${raw(last || pr.best ? html`<div class="row wrap" style="margin-top:10px;gap:6px">
-              ${raw(pr.best ? html`<span class="chip solid">Récord: ${UI.kg(pr.best.weight)} × ${pr.best.reps}</span>` : '')}
-              ${raw(last ? html`<span class="chip">Última vez: ${last.sets.map(function (s) {
-                return UI.num(s.weight) + '×' + s.reps;
-              }).join(' · ')}</span>` : '')}
-            </div>` : '')}
+          ${raw(historialHTML(entry.exId, pr, last, soloEjercicio))}
 
           <!-- Qué peso poner hoy y por qué. Iba en la casilla y en silencio:
                el número aparecía puesto y nadie sabía de dónde salía ni si
@@ -522,17 +580,27 @@
       ${raw(ex ? ayudaHTML(ex) : '')}
 
       ${raw(soloEjercicio ? html`
-        <div class="card center">
-          <div class="objetivo" style="margin-bottom:12px">
+        <div class="card wo-solo ${hecho ? 'listo' : ''}">
+          <div class="objetivo">
             <b>${entry.sets.length} × ${entry.targetReps}</b>
-            <span>lo que te propongo${raw(entry.rest ? ' · descanso ' + entry.rest + ' s' : '')}</span>
+            <span>lo que te propongo</span>
           </div>
-          <button class="btn ${hecho ? '' : 'primary'} block grande" data-w="hechoya">
-            ${raw(icon(hecho ? 'close' : 'check'))}
-            ${hecho ? 'Marcarlo como no hecho' : 'Marcar ejercicio como hecho'}
+
+          <button class="wo-hecho ${hecho ? 'on' : ''}" data-w="hechoya">
+            <span class="wh-ico">${raw(icon('check'))}</span>
+            <span class="wh-txt">
+              <span class="wh-t">${hecho ? 'Hecho' : 'Marcar como hecho'}</span>
+              <span class="wh-s">${hecho ? 'Tócalo otra vez para deshacerlo'
+                : entry.sets.length + ' series de ' + entry.targetReps + ' repeticiones'}</span>
+            </span>
           </button>
-          <button class="btn sm block ghost" data-w="rest" style="margin-top:8px">
-            ${raw(icon('timer'))} Descansar ${entry.rest}s</button>
+
+          ${raw(entry.rest ? html`
+            <button class="wo-descanso" data-w="rest">
+              <span class="wd-ico">${raw(icon('timer'))}</span>
+              <span class="grow">Descansar</span>
+              <span class="wd-seg">${entry.rest}<i>s</i></span>
+            </button>` : '')}
         </div>` : html`
       <div class="card">
         ${raw(simple ? html`
@@ -583,11 +651,18 @@
         </div>
       </div>`)}
 
-      <div class="row" style="margin-top:12px">
-        <button class="btn grow" data-w="prev" ${a.idx === 0 ? 'disabled' : ''}>${raw(icon('back'))} Anterior</button>
-        <button class="btn grow primary" data-w="next">
-          ${a.idx === a.entries.length - 1 ? 'Terminar' : 'Siguiente'}
-        </button>
+      <!-- Esto es navegación, no la acción del día. En verde y del mismo
+           tamaño que «marcar como hecho», los dos botones se disputaban la
+           mirada y no ganaba ninguno. Ir al siguiente es firme pero neutro; el
+           verde se guarda para terminar, que sí cierra la sesión. -->
+      <div class="wo-nav">
+        <button class="wo-nav-b atras" data-w="prev" ${a.idx === 0 ? 'disabled' : ''}
+                aria-label="Ejercicio anterior">
+          ${raw(icon('back'))}<span>Anterior</span></button>
+        <button class="wo-nav-b sig ${a.idx === a.entries.length - 1
+          ? (todoHecho ? 'fin listo' : 'fin') : ''}" data-w="next">
+          <span>${a.idx === a.entries.length - 1 ? 'Terminar entrenamiento' : 'Siguiente ejercicio'}</span>
+          ${raw(icon(a.idx === a.entries.length - 1 ? 'check' : 'chevron'))}</button>
       </div>
 
       <button class="btn ghost block" data-w="anadir" style="margin-top:10px">
