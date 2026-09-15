@@ -44,6 +44,87 @@
 
   /* ================= alimentación ================= */
 
+  /* ---------- lo que comiste esta semana ----------
+     Toda la parte de alimentación vivía en el día de hoy: las dos barras, el
+     menú, lo apuntado. Y comer bien un martes no significa nada; lo que
+     significa algo es cómo fue la semana.
+
+     Los siete días de la semana en curso, en el mismo orden que la tira de
+     entrenamientos de la portada: así se leen los dos juntos y se ve si los
+     días que entrenas son también los que comes. */
+  function semanaComidaHTML(m) {
+    if (!m || !g.Comidas) return '';
+
+    const ahora = new Date();
+    const desdeLunes = (ahora.getDay() + 6) % 7;
+    const lunes = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - desdeLunes);
+    const INICIALES = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
+    /* Lo apuntado, por clave de día, para no recorrer la lista siete veces */
+    const porDia = {};
+    (Comidas.porDias(60) || []).forEach(function (d) { porDia[d.dia] = d; });
+
+    let conAlgo = 0;
+    let sumaKcal = 0;
+    let diasProte = 0;
+
+    const celdas = INICIALES.map(function (ini, i) {
+      const f = new Date(lunes.getFullYear(), lunes.getMonth(), lunes.getDate() + i);
+      const d = porDia[Comidas.claveDia(f.getTime())];
+      const esHoy = i === desdeLunes;
+      const futuro = i > desdeLunes;
+      const kcal = d ? d.kcal : 0;
+      const prot = d ? d.prot : 0;
+
+      if (kcal > 0) { conAlgo++; sumaKcal += kcal; }
+      if (prot >= m.prot) diasProte++;
+
+      /* La barra mide contra el objetivo y se corta en el 100 %: pasarse de
+         calorías no hace la barra más alta que las demás, lo dice el color.
+         Una barra de 160 px por un día de fiesta aplasta a las otras seis. */
+      const alto = Math.max(4, Math.min(100, Math.round(kcal / m.kcal * 100)));
+      const clase = !kcal ? 'vacio'
+        : prot >= m.prot ? 'bien'
+        : kcal >= m.kcal * 0.8 ? 'flojo' : 'poco';
+
+      return '<div class="sc-dia' + (esHoy ? ' es-hoy' : '') +
+        (futuro ? ' futuro' : '') + '">' +
+        '<div class="sc-barra"><i class="' + clase + '" style="height:' + alto + '%"></i></div>' +
+        '<span class="sc-ini">' + (esHoy ? 'Hoy' : ini) + '</span>' +
+        '<span class="sc-num">' + f.getDate() + '</span></div>';
+    }).join('');
+
+    const media = conAlgo ? Math.round(sumaKcal / conAlgo) : 0;
+
+    return html`
+      <div class="list-title">Lo que comiste esta semana</div>
+      <div class="card tarjeta-premium">
+        <div class="pre-encima">${raw(conAlgo
+          ? 'Media de ' + conAlgo + (conAlgo === 1 ? ' día apuntado' : ' días apuntados')
+          : 'Sin nada apuntado')}</div>
+        <div class="pre-num" style="margin:1px 0 13px">${raw(conAlgo
+          ? UI.num(media) + ' <span class="tiny" style="font-weight:600">de ' +
+            UI.num(m.kcal) + ' kcal</span>'
+          : '—')}</div>
+
+        <div class="sc-semana">
+          <span class="sc-meta" aria-hidden="true"></span>
+          ${raw(celdas)}
+        </div>
+
+        <p class="tiny sc-pie">${raw(conAlgo
+          ? diasProte + (diasProte === 1 ? ' día' : ' días') + ' llegaste a los ' +
+            m.prot + ' g de proteína. La raya es tu objetivo de calorías.'
+          : 'Apunta lo que comes y aquí verás la semana entera de un vistazo.')}</p>
+
+        <div class="sc-leyenda">
+          <span><i class="bien"></i> Proteína cubierta</span>
+          <span><i class="flojo"></i> Cerca</span>
+          <span><i class="poco"></i> Corto</span>
+        </div>
+      </div>`;
+  }
+
   V.nutricion = function () {
     const p = Perfil.datos();
     if (!Perfil.completo(p)) {
@@ -70,6 +151,7 @@
 
       ${raw(numerosHTML(m))}
       ${raw(comidasHoyHTML(m))}
+      ${raw(semanaComidaHTML(m))}
 
       <div class="list-title">Mis números</div>
       <div class="card tarjeta-premium campos">

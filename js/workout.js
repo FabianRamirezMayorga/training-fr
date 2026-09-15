@@ -17,13 +17,25 @@
     return routine.exercises.map(function (re) {
       const ex = Data.get(re.exId);
       const last = Store.lastPerformance(re.exId);
-      const prevWeight = last && last.sets.length ? Number(last.sets[0].weight) || 0 : Number(re.weight) || 0;
+
+      /* El peso de hoy lo decide la progresión con lo que ya está apuntado. Si
+         no tiene con qué decidir —primer día con ese ejercicio, o uno que no
+         lleva peso— se queda lo de siempre: el de la última vez. */
+      const prog = g.Progresion ? Progresion.sugerir(re.exId, re.sets, re.reps) : null;
+      const prevWeight = prog ? prog.peso
+        : (last && last.sets.length ? Number(last.sets[0].weight) || 0 : Number(re.weight) || 0);
+
       return {
         exId: re.exId,
         name: ex ? ex.nameEs : re.exId,
         targetReps: re.reps,
         rest: re.rest || Store.settings().rest,
         note: re.note || '',
+        /* Se guarda el porqué con la sesión en marcha: si la pantalla se
+           repinta a mitad del entreno, la explicación sigue ahí sin volver a
+           recorrer el historial. */
+        prog: prog ? { estado: prog.estado, peso: prog.peso, anterior: prog.anterior,
+          salto: prog.salto, porque: prog.porque } : null,
         sets: Array.from({ length: Math.max(1, re.sets) }, function () {
           return { weight: prevWeight, reps: re.reps, done: false };
         })
@@ -486,6 +498,23 @@
               ${raw(last ? html`<span class="chip">Última vez: ${last.sets.map(function (s) {
                 return UI.num(s.weight) + '×' + s.reps;
               }).join(' · ')}</span>` : '')}
+            </div>` : '')}
+
+          <!-- Qué peso poner hoy y por qué. Iba en la casilla y en silencio:
+               el número aparecía puesto y nadie sabía de dónde salía ni si
+               había cambiado respecto a la última vez. -->
+          ${raw(entry.prog && !simple && !soloEjercicio ? html`
+            <div class="prog-hoy ${entry.prog.estado}">
+              <span class="ph-ico">${raw(icon(entry.prog.estado === 'sube' ? 'up'
+                : entry.prog.estado === 'baja' ? 'down' : 'reloj'))}</span>
+              <span class="grow">
+                <span class="ph-tit">${raw(entry.prog.estado === 'sube'
+                  ? 'Hoy subes a ' + UI.kg(entry.prog.peso)
+                  : entry.prog.estado === 'baja'
+                    ? 'Hoy bajas a ' + UI.kg(entry.prog.peso)
+                    : 'Hoy repites ' + UI.kg(entry.prog.peso))}</span>
+                <span class="ph-sub">${entry.prog.porque}</span>
+              </span>
             </div>` : '')}
         </div>
       </div>
