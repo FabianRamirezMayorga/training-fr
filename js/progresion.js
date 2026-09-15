@@ -153,6 +153,54 @@
     };
   }
 
+  /* ---------- ¿esa zona avanza o está atascada? ----------
+     Hacer mucho volumen no es un problema: el problema es hacer mucho y no
+     avanzar, que es la diferencia entre entrenar duro y cavar un agujero. Y eso
+     la app lo sabe mirando lo que ya tiene apuntado, sin preguntarle a nadie.
+
+     Se compara el peso de la última sesión de cada ejercicio de la zona con el
+     de la primera dentro del periodo. Si ninguno ha subido, la zona no avanza.
+     Los ejercicios sin peso no cuentan: ahí se progresa en repeticiones y eso
+     no se mide igual. */
+  function zonaAvanza(grupo, dias) {
+    if (!g.Store || !g.Data) return null;
+    const desde = Date.now() - (dias || 28) * 86400000;
+    const porEj = {};
+
+    Store.sessions().forEach(function (ses) {
+      if (ses.start < desde) return;
+      (ses.entries || []).forEach(function (e) {
+        const ex = Data.get(e.exId);
+        if (!ex || !ex.groups || ex.groups.indexOf(grupo) === -1) return;
+        const hechas = (e.sets || []).filter(function (x) { return x.done; });
+        if (!hechas.length) return;
+        const peso = hechas.reduce(function (m, x) {
+          return Math.max(m, Number(x.weight) || 0);
+        }, 0);
+        if (!peso) return;
+        if (!porEj[e.exId]) porEj[e.exId] = [];
+        porEj[e.exId].push({ t: ses.start, peso: peso });
+      });
+    });
+
+    const ids = Object.keys(porEj);
+    if (!ids.length) return null;
+
+    let conDatos = 0;
+    let suben = 0;
+    ids.forEach(function (id) {
+      const h = porEj[id].sort(function (a2, b2) { return a2.t - b2.t; });
+      /* Con una sola sesión no se puede decir si sube o no: no es que esté
+         atascado, es que no hay con qué comparar. */
+      if (h.length < 2) return;
+      conDatos++;
+      if (h[h.length - 1].peso > h[0].peso) suben++;
+    });
+
+    if (!conDatos) return null;
+    return { ejercicios: conDatos, suben: suben, avanza: suben > 0 };
+  }
+
   /* La frase corta, la que cabe en una pastilla al lado del ejercicio */
   function etiqueta(s) {
     if (!s) return '';
@@ -162,7 +210,7 @@
   }
 
   g.Progresion = {
-    sugerir: sugerir, etiqueta: etiqueta,
+    sugerir: sugerir, etiqueta: etiqueta, zonaAvanza: zonaAvanza,
     salto: salto, SALTOS_KG: SALTOS_KG, SALTOS_LB: SALTOS_LB
   };
 })(window);

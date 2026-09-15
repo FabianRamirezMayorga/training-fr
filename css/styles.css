@@ -5614,3 +5614,31 @@ html[data-theme="light"] button.dia-cabeza {
 .sc-leyenda i.poco { background: color-mix(in srgb, var(--warn) 45%, transparent); }
 
 html[data-theme="light"] .sc-barra { background: color-mix(in srgb, #141922 7%, transparent); }
+
+/* ---------- pasarse ----------
+   La app decia donde te quedabas corto y se callaba cuando te pasabas. Con un
+   plan que pide once series de pecho y treinta y cuatro hechas, esa asimetria
+   deja sin decir justo lo que mas cuesta ver desde dentro. */
+.aviso-exceso {
+  display: flex; align-items: flex-start; gap: 11px; margin-top: 12px;
+  padding: 11px 12px; border-radius: 15px;
+  background: color-mix(in srgb, var(--warn) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warn) 26%, transparent);
+  --t: var(--warn);
+}
+/* Mucho volumen pero subiendo peso no es un aviso, es una nota: verde, y sin
+   la alarma de quien esta cavando un agujero. */
+.aviso-exceso.ok {
+  background: color-mix(in srgb, var(--acc) 9%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 24%, transparent);
+  --t: var(--acc);
+}
+.ae-ico {
+  flex: none; width: 30px; height: 30px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; color: var(--t);
+  background: color-mix(in srgb, var(--t) 16%, transparent);
+}
+.ae-ico svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+.aviso-exceso b { display: block; font-size: .88rem; color: var(--t); }
+.aviso-exceso .tiny { display: block; margin-top: 3px; line-height: 1.45; }

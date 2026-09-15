@@ -232,6 +232,107 @@
     });
   }
 
+  /* ---------- el que no es de este día ----------
+     La regla del orden mira si un básico llega tarde, y eso deja fuera el caso
+     que más energía cuesta: el ejercicio que directamente no pinta nada ahí. Un
+     «buenos días» —cadena posterior, pesado— en un día de pecho y hombro no va
+     tarde ni pronto: va en el día equivocado, y si encima cae de los primeros
+     se lleva la fuerza que necesitaba el press.
+
+     Lo que decide no es la zona fina sino la mitad del cuerpo. Medirlo por
+     zonas —pecho, hombro, brazo— marcaba ejercicios legítimos: un día de
+     empuje reparte el trabajo entre tres zonas y ninguna llega a mandar, así
+     que cualquiera de las tres parecía de fuera. Arriba contra abajo, en
+     cambio, es la división que de verdad se respeta al programar, y cruzarla
+     con un movimiento pesado sí cuesta la sesión.
+
+     Solo se mira entre los tres primeros. De séptimo, como accesorio al final,
+     meter algo de la otra mitad es una decisión legítima —terminar con algo que
+     no compite— y avisar ahí sería ruido. */
+  const MITAD = {
+    pecho: 'arriba', espalda: 'arriba', hombro: 'arriba', brazo: 'arriba',
+    pierna: 'abajo'
+  };
+  const NOMBRE_MITAD = { arriba: 'tren superior', abajo: 'tren inferior' };
+
+  /* El core no cuenta para ningún lado, y lo que toca las dos mitades —un peso
+     muerto es espalda y pierna a la vez— tampoco: ahí no hay intruso posible,
+     entre en el día que entre. */
+  function mitadDe(e) {
+    const ex = Data.get(e.exId);
+    const z = (ex && ex.groups) || [];
+    let arriba = 0, abajo = 0;
+    z.forEach(function (gr) {
+      if (MITAD[gr] === 'arriba') arriba++;
+      else if (MITAD[gr] === 'abajo') abajo++;
+    });
+    if (arriba && !abajo) return 'arriba';
+    if (abajo && !arriba) return 'abajo';
+    return '';
+  }
+
+  function reglaIntruso(sesiones, hallazgos) {
+    sesiones.forEach(function (s, i) {
+      const lista = ejerciciosDe(s);
+      if (lista.length < 4) return;   // con tres ejercicios no hay «resto del día»
+
+      /* Se cuenta por series y no por ejercicios: un día no lo define lo que
+         más veces aparece, sino dónde está el trabajo. */
+      let arriba = 0, abajo = 0;
+      lista.forEach(function (e) {
+        const m = mitadDe(e);
+        const n = Number(e.sets) || 1;
+        if (m === 'arriba') arriba += n;
+        else if (m === 'abajo') abajo += n;
+      });
+      const total = arriba + abajo;
+      if (!total) return;
+
+      /* Siete de cada diez series para el mismo lado: eso es un día de arriba o
+         un día de abajo. Por debajo de ahí es cuerpo completo, y en cuerpo
+         completo no hay intruso porque cabe todo. */
+      const dominante = arriba / total >= 0.7 ? 'arriba'
+        : abajo / total >= 0.7 ? 'abajo' : '';
+      if (!dominante) return;
+
+      /* Un día de arriba que lleva pecho y espalda a la vez no es un split: es
+         cuerpo completo o un día de torso, y ahí meter una sentadilla es el
+         propio diseño del día, no un descuido. Sin esta salvedad, un full body
+         de cinco ejercicios con una sola pierna daba aviso por la sentadilla.
+         Abajo no hace falta: la pierna no tiene antagonista que separar. */
+      if (dominante === 'arriba') {
+        const zonas = {};
+        lista.forEach(function (e) {
+          const ex = Data.get(e.exId);
+          ((ex && ex.groups) || []).forEach(function (gr) { zonas[gr] = 1; });
+        });
+        if (zonas.pecho && zonas.espalda) return;
+      }
+
+      const intrusos = [];
+      lista.slice(0, 3).forEach(function (e, k) {
+        const m = mitadDe(e);
+        if (!m || m === dominante) return;
+        /* Y solo si pesa: un accesorio ligero de la otra mitad entre los tres
+           primeros es raro, pero no te arruina la sesión. */
+        if (!esPesado(e)) return;
+        intrusos.push({ e: e, k: k, m: m });
+      });
+      if (!intrusos.length) return;
+
+      const primero = intrusos[0];
+      hallazgos.push({
+        id: 'intruso:' + i, gravedad: 2,
+        titulo: nombre(primero.e) + ' no es de ese día',
+        dato: 'en ' + tituloSesion(s, i) + ' va el ' + (primero.k + 1) +
+          '.º, y es un movimiento pesado de ' + NOMBRE_MITAD[primero.m] +
+          ' en una sesión de ' + NOMBRE_MITAD[dominante] +
+          ': se lleva la fuerza que necesitas para lo principal',
+        arreglo: { tipo: 'mover', exId: primero.e.exId, dia: i, motivo: 'mitad' }
+      });
+    });
+  }
+
   /* En cuántos días distintos aparece cada músculo. Dos planes pueden llevar las
      mismas series semanales y no valer lo mismo: doce series de pecho en un
      solo día rinden menos que seis y seis en dos días, porque el estímulo de una
@@ -407,6 +508,7 @@
       reglaEquilibrio(sesiones, hallazgos);
     }
     reglaOrden(sesiones, hallazgos);
+    reglaIntruso(sesiones, hallazgos);
     reglaDescansos(sesiones, hallazgos);
 
     /* Lo grave primero; a igualdad, el orden en que se han comprobado, que es
@@ -710,19 +812,34 @@
            día que menos carga esa zona. */
         const ex = Data.get(a.exId);
         if (!ex) return;
-        const destino = diaParaMover(sesiones, ex, a.dia);
+
+        /* Dos motivos distintos para mover, y no admiten el mismo destino. Si
+           el problema es que hay dos axiales el mismo día, el día de destino no
+           puede llevar otro; si el problema es que el ejercicio es de la otra
+           mitad del cuerpo, su sitio es justo el día de esa mitad —y ese día
+           casi siempre tiene ya una sentadilla, así que vetarlo dejaba a un
+           «buenos días» sin ningún destino posible y el arreglo acababa siendo
+           quitarlo, que no era lo que decía el aviso. */
+        const porMitad = a.motivo === 'mitad';
+        const destino = porMitad
+          ? diaAfin(sesiones, ex, a.dia, false)
+          : diaParaMover(sesiones, ex, a.dia);
         if (destino === -1) {
           /* No hay ningún día libre de básicos donde meterlo: entonces el arreglo
              no es moverlo, es quitarlo, y se dice así. */
           cambios.push({ accion: 'quitar', quitar: ex.nameEs, poner: '', dia: a.dia + 1,
             series: 0, reps: 0,
-            porque: 'dos básicos pesados el mismo día; no hay otro día libre donde ' +
-              'colocarlo, así que sale' });
+            porque: porMitad
+              ? 'no encaja en ese día y no hay otro donde llevarlo, así que sale'
+              : 'dos básicos pesados el mismo día; no hay otro día libre donde ' +
+                'colocarlo, así que sale' });
           return;
         }
         cambios.push({ accion: 'quitar', quitar: ex.nameEs, poner: '', dia: a.dia + 1,
           series: 0, reps: 0,
-          porque: 'sacarlo del día en que choca con el otro básico pesado' });
+          porque: porMitad
+            ? 'sacarlo de un día que es de la otra mitad del cuerpo'
+            : 'sacarlo del día en que choca con el otro básico pesado' });
         cambios.push(Object.assign({ accion: 'anadir', quitar: '', poner: ex.nameEs,
           dia: destino + 1,
           porque: 'llevarlo a un día que ya trabaja esa zona y llegas descansado' },

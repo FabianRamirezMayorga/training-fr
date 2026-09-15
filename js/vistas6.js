@@ -763,6 +763,72 @@
      Ahora es una fila por zona: tu barra, una muesca donde esta lo que pide el
      plan y, a la derecha, las dos cifras. Donde la barra no llega a la muesca,
      vas corto. Se lee de un vistazo y ocupa la mitad. */
+  /* ---------- pasarse ----------
+     La app te decía dónde te quedabas corto y se callaba cuando te pasabas. Con
+     un plan que pide once series de pecho y treinta y cuatro hechas, esa
+     asimetría deja sin decir justo lo que más cuesta ver desde dentro.
+
+     Pero el disparador no puede ser «el triple de lo que pide tu plan»: tu plan
+     puede estar mal escrito, y entonces lo que está mal es el once, no el
+     treinta y cuatro. Se mide contra lo que sirve para crecer —de diez a veinte
+     series por grupo a la semana, y por encima de ahí lo que se añade es
+     fatiga— y se cruza con si esa zona está avanzando.
+
+     Volumen alto y subiendo peso es entrenar duro, y ahí no hay nada que decir.
+     Volumen alto y semanas sin mover una barra es cavar un agujero, y eso sí
+     merece una frase. */
+  const TOPE_UTIL = 20;
+
+  function excesoHTML(ids, hecho, plan, etiqueta, rango) {
+    const pasados = ids.filter(function (id) {
+      return (hecho[id] || 0) > TOPE_UTIL;
+    }).sort(function (a, b) { return (hecho[b] || 0) - (hecho[a] || 0); });
+
+    if (!pasados.length || !g.Progresion || !Progresion.zonaAvanza) return '';
+
+    const dias = Math.min(rango.dias, 35);
+    const atascadas = [];
+    const duras = [];
+
+    pasados.forEach(function (id) {
+      const av = Progresion.zonaAvanza(id, dias);
+      /* Sin con qué comparar no se dice nada: puede que lleve dos semanas con
+         ese volumen y vaya estupendamente. */
+      if (!av) return;
+      (av.avanza ? duras : atascadas).push({ id: id, series: hecho[id] || 0, av: av });
+    });
+
+    if (!atascadas.length && !duras.length) return '';
+
+    const nombres = function (lista) {
+      return lista.map(function (x) { return etiqueta(x.id).toLowerCase(); }).join(', ');
+    };
+
+    if (atascadas.length) {
+      const uno = atascadas[0];
+      return '<div class="aviso-exceso">' +
+        '<span class="ae-ico">' + icon('aviso') + '</span>' +
+        '<span class="grow"><b>' + Math.round(uno.series) + ' series de ' +
+        esc(etiqueta(uno.id).toLowerCase()) + ' a la semana, y sin subir</b>' +
+        '<span class="tiny">Por encima de veinte series lo que se añade es fatiga, no ' +
+        'músculo, y en ' + (dias === 35 ? 'las últimas cinco semanas' : 'este periodo') +
+        ' ninguno de los ' + uno.av.ejercicios + ' ejercicios de esa zona ha subido de ' +
+        'peso. Baja el volumen una semana y vuelve: es cuando se crece.' +
+        (atascadas.length > 1 ? ' Lo mismo con ' +
+          esc(nombres(atascadas.slice(1))) + '.' : '') +
+        '</span></span></div>';
+    }
+
+    const uno = duras[0];
+    return '<div class="aviso-exceso ok">' +
+      '<span class="ae-ico">' + icon('up') + '</span>' +
+      '<span class="grow"><b>' + Math.round(uno.series) + ' series de ' +
+      esc(etiqueta(uno.id).toLowerCase()) + ' a la semana</b>' +
+      '<span class="tiny">Es mucho —de diez a veinte es lo que suele hacer falta—, pero ' +
+      'estás subiendo peso, así que te lo estás recuperando. Si un día se para el ' +
+      'progreso, ahí es donde hay que recortar.</span></span></div>';
+  }
+
   function zonasHTML(reparto, rango) {
     const plan = planPorZona();
     const semanas = Math.max(1, Math.round(Math.min(rango.dias, 90) / 7));
@@ -825,6 +891,8 @@
         <span><i class="zl-hago"></i> series por semana que haces</span>
         ${raw(plan.total ? '<span><i class="zl-pide"></i> lo que pide tu plan</span>' : '')}
       </div>
+
+      ${raw(excesoHTML(ids, hecho, plan, etiqueta, rango))}
 
       ${raw(peor && peor.falta > 0.5
         ? '<p class="tiny" style="margin:9px 0 0">Donde más te separas es <b>' +
