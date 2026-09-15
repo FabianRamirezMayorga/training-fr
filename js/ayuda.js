@@ -82,7 +82,7 @@
       cuerpo: [
         'En Ajustes eliges cuánto apuntas de cada ejercicio, y eso cambia la pantalla de entrenamiento entera.',
         '*Peso y repeticiones*: anotas cada serie. Es el único que da récords, volumen levantado, gráficas de peso y progresión de cargas, porque son las cuatro cosas que necesitan un número.',
-        '*Marcar cada serie*: la app te propone el objetivo —3 × 12— y tú solo marcas las que vas haciendo. El peso es opcional: si lo pones cuenta, y si no, no.',
+        '*Marcar cada serie*: la app te propone el objetivo —3 × 12— y tú solo marcas las que vas haciendo. Cada serie lleva un *más y un menos* para apuntar las repeticiones que de verdad sacaste, y cuando el número no coincide con lo que pedía la rutina se pone en ámbar: así se ve de un vistazo en qué serie te quedaste corto. El peso es opcional: si lo pones cuenta, y si no, no.',
         '*Marcar el ejercicio y ya*: un botón por ejercicio y a otra cosa. Ni peso, ni repeticiones, ni series.',
         'Lo que se pierde al bajar de detalle no es la app, es la medida: sin peso apuntado no hay récords ni volumen, y el progreso se mide por series y entrenamientos hechos. Por eso, en los modos sin peso, la pantalla no te enseña récords: un récord de cero kilos no es un récord.',
         'Se puede cambiar cuando quieras, y lo ya apuntado se queda como está.'
@@ -418,6 +418,12 @@
       a: ['Porque la app decide el peso de hoy con tu historial, en vez de repetir el último.',
         'Encima del ejercicio te dice cuál de los tres casos es —subes, repites o bajas— y por qué. Y el número se puede cambiar siempre.'],
       ver: ['g-peso'] },
+
+    { id: 'p-ambar', q: '¿Por qué hay repeticiones en color ámbar?',
+      a: ['Porque esa serie no salió como pedía la rutina: hiciste más o menos repeticiones de las previstas.',
+        'No es un error ni un aviso. Es el dato: si la rutina pide cuatro series de siete y la tercera se quedó en cinco, eso es justo lo que hay que ver al mirar la sesión, y es lo que decide el peso de la próxima vez.',
+        'Se cambia con el más y el menos de cada serie, en el modo «marcar cada serie», o escribiendo el número en «peso y repeticiones».'],
+      ver: ['g-registro', 'g-peso'] },
 
     { id: 'p-record', q: '¿Por qué no me sale ningún récord?',
       a: ['Porque los récords se calculan con el peso, y si no apuntas peso no hay nada que comparar.',

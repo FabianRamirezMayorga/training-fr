@@ -517,13 +517,6 @@ code{font-family:var(--mono);
 .objetivo{text-align:center;padding:6px 0 14px}
 .objetivo b{display:block;font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1}
 .objetivo span{font-size:.8rem;color:var(--dim2)}
-.serie-simple{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
-  padding:13px 14px;background:var(--card2);border:1px solid transparent;
-  border-radius:var(--r-s);transition:background .15s,border-color .15s,transform .12s}
-.serie-simple:active{transform:scale(.985)}
-.serie-simple.on{background:var(--acc-d);border-color:var(--acc)}
-.serie-simple .grow{font-weight:600;font-size:.95rem}
-.serie-simple .chk{width:30px;height:30px}
 .list-row.tap[data-reg]{width:100%;text-align:left}
 
 /* ---------- listas de reproducción ---------- */
@@ -5941,4 +5934,203 @@ html[data-theme="light"] .wo-nav-b.sig.fin.listo {
 }
 html[data-theme="light"] .wo-hecho {
   border-color: color-mix(in srgb, var(--acc) 55%, transparent);
+}
+
+/* ---------- las series, cuando solo se marcan ----------
+   Eran cuatro rectangulos planos de fondo gris con el mismo aspecto que una
+   fila de lista cualquiera, y son lo que se toca veinte veces en una sesion:
+   la pieza que mas se usa de la app era la que menos hecha estaba.
+
+   Ahora llevan lo mismo que el resto: vidrio calibrado al tamano —relleno
+   translucido, reborde arriba, sombra dentro abajo—, la ficha redonda con el
+   numero de serie y el acento reservado para lo que cambia de estado.
+
+   Y llevan contador. Decir «7 reps» en las cuatro series era repetir el
+   objetivo de la rutina, no contar lo que pasa: a la tercera ya no sacas
+   siete, y ese dato se perdia. Con el mas y el menos se apunta, y el numero se
+   marca cuando no coincide con lo que pedia la rutina para que se vea de un
+   vistazo donde te quedaste corto. */
+.serie-fila {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 11px; border-radius: 15px;
+  border: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 58%),
+    color-mix(in srgb, var(--card2) 74%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #000 12%, transparent);
+  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.sf-n {
+  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .76rem; font-weight: 800; letter-spacing: -.01em;
+  color: var(--dim2);
+  background: color-mix(in srgb, #fff 7%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 9%, transparent);
+  transition: color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.sf-lbl {
+  flex: 1; min-width: 0; font-weight: 600; font-size: .92rem;
+  letter-spacing: -.01em; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- el contador ----------
+   Los dos botones y el numero en la misma pastilla: sueltos parecian tres
+   cosas que casualmente estan juntas, y el dedo no sabe donde acaba uno. */
+.sf-reps {
+  flex: none; display: flex; align-items: center; gap: 1px;
+  padding: 2px; border-radius: 11px;
+  background: color-mix(in srgb, #000 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
+}
+.sf-pm {
+  flex: none; width: 30px; height: 30px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  border: 0; cursor: pointer; color: var(--dim2);
+  background: color-mix(in srgb, #fff 6%, transparent);
+  transition: background .15s ease, color .15s ease, transform .12s ease;
+}
+.sf-pm:active { transform: scale(.9); background: color-mix(in srgb, var(--acc) 22%, transparent);
+  color: var(--acc); }
+.sf-pm svg {
+  width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.sf-num {
+  min-width: 52px; text-align: center; padding: 0 3px;
+  transition: color .2s ease;
+}
+.sf-num b {
+  font-size: 1rem; font-weight: 800; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+}
+.sf-num i {
+  font-style: normal; font-size: .64rem; font-weight: 700; margin-left: 2px;
+  color: var(--dim2); text-transform: lowercase;
+}
+/* No coincide con lo que pedia la rutina: ni bien ni mal, distinto, y por eso
+   ambar y no rojo. Es el dato que hace util apuntarlo. */
+.sf-num.cambiado b { color: var(--warn); }
+.sf-num.cambiado i { color: color-mix(in srgb, var(--warn) 65%, var(--dim2)); }
+
+/* ---------- la marca ---------- */
+.sf-chk {
+  flex: none; width: 34px; height: 34px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: transparent;
+  border: 1.5px solid color-mix(in srgb, #fff 18%, transparent);
+  background: color-mix(in srgb, #000 12%, transparent);
+  transition: background .2s ease, border-color .2s ease, color .2s ease,
+              transform .12s ease;
+}
+.sf-chk:active { transform: scale(.9); }
+.sf-chk svg {
+  width: 17px; height: 17px; fill: none; stroke: currentColor;
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+  transform: scale(.6); transition: transform .3s cubic-bezier(.3, 1.5, .5, 1);
+}
+
+/* ---------- hecha ---------- */
+.serie-fila.on {
+  border-color: color-mix(in srgb, var(--acc) 40%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 55%),
+    color-mix(in srgb, var(--acc) 12%, transparent);
+}
+.serie-fila.on .sf-n {
+  color: var(--on-acc); background: var(--acc);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 22%, transparent);
+}
+.serie-fila.on .sf-chk {
+  color: var(--on-acc); background: var(--acc);
+  border-color: color-mix(in srgb, var(--acc) 70%, transparent);
+}
+.serie-fila.on .sf-chk svg { transform: scale(1); }
+
+/* En claro el vidrio se hace con negro: el reborde blanco sobre fondo claro no
+   existe y la fila se queda sin borde de arriba. */
+html[data-theme="light"] .serie-fila {
+  border-color: color-mix(in srgb, #000 10%, transparent);
+  background: color-mix(in srgb, var(--card2) 88%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 70%, transparent);
+}
+html[data-theme="light"] .sf-n {
+  background: color-mix(in srgb, #000 6%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 8%, transparent);
+}
+html[data-theme="light"] .sf-reps {
+  background: color-mix(in srgb, #000 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 7%, transparent);
+}
+html[data-theme="light"] .sf-pm { background: color-mix(in srgb, #fff 80%, transparent); }
+html[data-theme="light"] .sf-chk {
+  background: color-mix(in srgb, #fff 70%, transparent);
+  border-color: color-mix(in srgb, #000 16%, transparent);
+}
+html[data-theme="light"] .serie-fila.on {
+  border-color: color-mix(in srgb, var(--acc) 45%, transparent);
+  background: color-mix(in srgb, var(--acc) 10%, transparent);
+}
+
+/* En pantallas estrechas el nombre de la serie sobra: la ficha redonda ya lo
+   dice, y lo que no puede encogerse es el contador. */
+@media (max-width: 380px) {
+  .sf-lbl { display: none; }
+  .sf-reps { margin-left: auto; }
+}
+
+/* ---------- la misma fila, con peso y repeticiones ----------
+   Era una rejilla de tres columnas con «# KG REPS» de cabecera: se leia como
+   una hoja de calculo y no como la app, y las cuatro filas de campos desnudos
+   no tenian nada que ver con el resto de piezas.
+
+   Ahora es la misma caja que en «marcar cada serie», con dos campos en vez del
+   contador. La unidad va dentro de cada campo, asi que la cabecera sobra: se
+   entiende mejor y la tarjeta encoge una fila entera. */
+.serie-fila.detalle { gap: 8px; padding: 8px 10px; }
+
+.sf-campo {
+  flex: 1 1 0; min-width: 0;
+  display: flex; align-items: baseline; justify-content: center; gap: 3px;
+  padding: 7px 8px; border-radius: 11px; cursor: text;
+  background: color-mix(in srgb, #000 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 7%, transparent);
+  transition: box-shadow .18s ease, background .18s ease;
+}
+/* El foco se ve en la pastilla entera, no solo en el borde del input: en el
+   gimnasio, con el movil en la mano, hay que saber en que casilla se escribe
+   sin acercarse a mirar el cursor. */
+.sf-campo:focus-within {
+  background: color-mix(in srgb, var(--acc) 10%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--acc) 55%, transparent);
+}
+.sf-campo input {
+  width: 100%; min-width: 0; padding: 0; border: 0; background: none;
+  text-align: right; font: inherit; font-size: 1.05rem; font-weight: 700;
+  letter-spacing: -.02em; color: var(--txt);
+  font-variant-numeric: tabular-nums;
+}
+.sf-campo input:focus { outline: none; }
+/* Las flechitas del number roban la mitad del ancho en un movil y nadie las
+   toca: se escribe el numero o se usa el mas y el menos del otro modo. */
+.sf-campo input::-webkit-outer-spin-button,
+.sf-campo input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.sf-campo input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.sf-campo > span {
+  flex: none; font-size: .66rem; font-weight: 700; color: var(--dim2);
+  text-transform: lowercase;
+}
+
+html[data-theme="light"] .sf-campo {
+  background: color-mix(in srgb, #000 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 8%, transparent);
+}
+html[data-theme="light"] .sf-campo:focus-within {
+  background: color-mix(in srgb, var(--acc) 9%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--acc) 55%, transparent);
 }

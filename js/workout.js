@@ -638,29 +638,64 @@
             <b>${entry.sets.length} × ${entry.targetReps}</b>
             <span>series por repeticiones${raw(entry.rest ? ' · descanso ' + entry.rest + ' s' : '')}</span>
           </div>` : html`
-          <div class="setgrid" style="margin-bottom:8px">
-            <div class="hd">#</div><div class="hd">${Store.settings().unit === 'lb' ? 'Lb' : 'Kg'}</div>
-            <div class="hd">Reps</div><div class="hd"></div>
+          <div class="objetivo">
+            <b>${entry.sets.length} × ${entry.targetReps}</b>
+            <span>lo que te propongo${raw(entry.rest ? ' · descanso ' + entry.rest + ' s' : '')}</span>
           </div>`)}
 
         <div class="stack" id="wo-sets">
           ${raw(entry.sets.map(function (s, i) {
             if (simple) {
+              /* Las repeticiones, con su mas y su menos. Antes la fila decia
+                 «7 reps» y era mentira a partir de la tercera serie: el
+                 objetivo es lo que pide la rutina, no lo que sacaste. Si
+                 cambias el numero se marca, para que se vea de un vistazo en
+                 que series te quedaste corto.
+
+                 Y ya no es un <button> con cosas dentro: un boton dentro de
+                 otro boton no es HTML valido y el navegador lo desarma. La
+                 fila es una caja, y marcar es su propio boton. */
+              const cambiado = Number(s.reps) !== Number(entry.targetReps);
               return html`
-                <button class="serie-simple ${s.done ? 'on' : ''}" data-set="${i}" data-f="done">
-                  <span class="rt-idx">${i + 1}</span>
-                  <span class="grow">Serie ${i + 1}</span>
-                  <span class="tiny">${entry.targetReps} reps</span>
-                  <span class="chk ${s.done ? 'on' : ''}">${raw(icon('check'))}</span>
-                </button>`;
+                <div class="serie-fila ${s.done ? 'on' : ''}" data-set="${i}">
+                  <span class="sf-n">${i + 1}</span>
+                  <span class="sf-lbl">Serie ${i + 1}</span>
+                  <span class="sf-reps">
+                    <button class="sf-pm" data-f="menos"
+                            aria-label="Una repetición menos en la serie ${i + 1}">
+                      ${raw(icon('menos'))}</button>
+                    <span class="sf-num ${cambiado ? 'cambiado' : ''}">
+                      <b>${s.reps}</b><i>reps</i></span>
+                    <button class="sf-pm" data-f="mas"
+                            aria-label="Una repetición más en la serie ${i + 1}">
+                      ${raw(icon('plus'))}</button>
+                  </span>
+                  <button class="sf-chk" data-f="done"
+                          aria-label="Marcar serie ${i + 1} como hecha">
+                    ${raw(icon('check'))}</button>
+                </div>`;
             }
+            /* La misma pieza que en «marcar cada serie», con dos campos en
+               vez de un contador. Era una rejilla de tres columnas con «# KG
+               REPS» de cabecera: se leia como una hoja de calculo y no como la
+               app. La unidad va dentro de cada campo, asi que la cabecera
+               sobra y la tarjeta encoge cuatro filas de golpe. */
             return html`
-              <div class="setgrid" data-set="${i}">
-                <div class="rt-idx">${i + 1}</div>
-                <input type="number" inputmode="decimal" step="0.5" min="0" value="${s.weight}" data-f="weight">
-                <input type="number" inputmode="numeric" step="1" min="0" value="${s.reps}" data-f="reps">
-                <button class="chk ${s.done ? 'on' : ''}" data-f="done"
-                        aria-label="Marcar serie ${i + 1}">${raw(icon('check'))}</button>
+              <div class="serie-fila detalle ${s.done ? 'on' : ''}" data-set="${i}">
+                <span class="sf-n">${i + 1}</span>
+                <label class="sf-campo">
+                  <input type="number" inputmode="decimal" step="0.5" min="0"
+                         value="${s.weight}" data-f="weight" aria-label="Peso de la serie ${i + 1}">
+                  <span>${raw(Store.settings().unit === 'lb' ? 'lb' : 'kg')}</span>
+                </label>
+                <label class="sf-campo">
+                  <input type="number" inputmode="numeric" step="1" min="0"
+                         value="${s.reps}" data-f="reps" aria-label="Repeticiones de la serie ${i + 1}">
+                  <span>reps</span>
+                </label>
+                <button class="sf-chk" data-f="done"
+                        aria-label="Marcar serie ${i + 1} como hecha">
+                  ${raw(icon('check'))}</button>
               </div>`;
           }).join(''))}
         </div>
@@ -813,23 +848,45 @@
           Store.setActive(a);
         };
       });
+      /* El mas y el menos no repintan la pantalla entera: se toca un numero
+         y repintar aqui es perder el sitio en la lista a mitad de serie. */
+      const paso = function (delta) {
+        return function () {
+          const set = entry.sets[i];
+          const base = Number(set.reps) || Number(entry.targetReps) || 1;
+          set.reps = Math.max(1, Math.min(200, base + delta));
+          Store.setActive(a);
+          const caja = rowEl.querySelector('.sf-num');
+          if (caja) {
+            const b = caja.querySelector('b');
+            if (b) b.textContent = set.reps;
+            caja.classList.toggle('cambiado',
+              Number(set.reps) !== Number(entry.targetReps));
+          }
+        };
+      };
+      const menos = rowEl.querySelector('[data-f=menos]');
+      const mas = rowEl.querySelector('[data-f=mas]');
+      if (menos) menos.onclick = paso(-1);
+      if (mas) mas.onclick = paso(1);
+
       const marcar = rowEl.matches('[data-f=done]') ? rowEl : rowEl.querySelector('[data-f=done]');
-      marcar.onclick = function (e) {
-        const btn = e.currentTarget;
+      marcar.onclick = function () {
         const set = entry.sets[i];
         set.done = !set.done;
 
         if (simple) {
-          /* sin campos: se da por hecho el objetivo de la rutina */
-          set.reps = entry.targetReps;
+          /* Se respeta lo que diga el contador. Aqui se escribia el objetivo de
+             la rutina encima de lo apuntado, asi que bajar a seis con el menos
+             y marcar la serie la devolvia a siete: el boton nuevo no habria
+             servido para nada. El objetivo solo se usa si no hay nada. */
+          if (!set.reps) set.reps = entry.targetReps;
           set.weight = campoPeso ? (Number(campoPeso.value) || 0) : (set.weight || 0);
-          btn.classList.toggle('on', set.done);
-          const marca = btn.querySelector('.chk');
-          if (marca) marca.classList.toggle('on', set.done);
+          rowEl.classList.toggle('on', set.done);
         } else {
           set.weight = Number(rowEl.querySelector('[data-f=weight]').value) || 0;
           set.reps = Number(rowEl.querySelector('[data-f=reps]').value) || 0;
-          btn.classList.toggle('on', set.done);
+          rowEl.classList.toggle('on', set.done);
         }
         Store.setActive(a);
 
