@@ -36,7 +36,7 @@
        vivía allí. A quien vive en Bogotá o en Lima, un entrenador que dice
        «vale» y «coger» le suena a que le están leyendo el plan de otro. El
        español que toca lo dice el bloque de su país, más abajo. */
-    'Eres el entrenador personal de la aplicación Training FR. Respondes en español, ' +
+    'Eres el entrenador personal de la aplicación Training FR. Respondes ' +
     'en segunda persona, con frases cortas y concretas. Nada de rodeos ni ' +
     'de listas interminables. Te apoyas en los datos reales que te pasan y, si faltan, ' +
     'lo dices en lugar de inventarlos. No eres médico ni dietista titulado: cuando ' +
@@ -1190,9 +1190,13 @@
         /* El idioma va aquí y no en las normas generales: es la misma decisión
            que la de los ingredientes, y separada se quedaba clavada en el
            español de un país que no es el suyo. */
-        'ESCRIBE EN EL ESPAÑOL DE ' + pais.toUpperCase() + ': su vocabulario, sus ' +
-        'expresiones corrientes y sus nombres para las cosas. Nada de giros que allí ' +
-        'suenen de otro país, ni de España ni de ningún otro de América.' +
+        (g.Idioma && Idioma.actual() === 'en'
+          ? 'Le contestas en inglés, pero los alimentos siguen siendo los de ' + pais +
+            ': si algo no tiene nombre corriente en inglés, pon el de allí y explícalo ' +
+            'entre paréntesis la primera vez.'
+          : 'ESCRIBE EN EL ESPAÑOL DE ' + pais.toUpperCase() + ': su vocabulario, sus ' +
+            'expresiones corrientes y sus nombres para las cosas. Nada de giros que allí ' +
+            'suenen de otro país, ni de España ni de ningún otro de América.') +
         (conComida ? '\n' +
         'Todo lo que le propongas comer tiene que existir en el supermercado corriente ' +
         'de ' + Paises.nombreDe(iso) + ' y llamarse como se llama allí. Los cortes de ' +
@@ -1239,6 +1243,19 @@
     /* De dónde es va en TODOS los prompts y no solo en los de comida: decide en
        qué español se le habla, y eso vale igual para un plan de pesas. El
        párrafo del supermercado, ese sí, solo donde hay comida de por medio. */
+    /* ---------- en qué idioma se le contesta ----------
+       Lo manda el ajuste de la app, no el país: quien la pone en inglés espera
+       que el entrenador también le hable en inglés, igual que los botones. Va
+       lo primero de todo porque decide CÓMO se escribe todo lo que viene
+       detrás, y una instrucción de idioma al final se cumple a medias. */
+    if (g.Idioma && Idioma.actual() === 'en') {
+      trozos.push('RESPONDE EN INGLÉS. Toda tu respuesta va en inglés: los títulos, las ' +
+        'frases, los nombres de los platos y los de los ejercicios. Tiene la app puesta ' +
+        'en inglés y espera que tú también le hables en inglés. Los datos que te llegan ' +
+        'abajo están en español porque así los guarda la app: entiéndelos, pero no le ' +
+        'contestes en español. Inglés corriente y directo, sin florituras.');
+    }
+
     const donde = dondeVive(!!incluir.comida);
     if (donde) trozos.push(donde);
 
@@ -1464,6 +1481,9 @@
          en la clave, apuntarla y volver a pedir el menú devuelve el de antes,
          el que no la tenía en cuenta. */
       ':' + (p.pais || '') +
+      /* Sin el idioma en la clave, cambiar a inglés devolvía el menú de antes,
+         en español, guardado en caché. */
+      ':' + (g.Idioma ? Idioma.actual() : 'es') +
       ':' + (Store.settings().medicacion || '') +
       ':' + (Store.settings().medicacionDicho || '') +
       ':' + (g.Perfil && Perfil.franjas ? Perfil.franjas().map(function (f) {
@@ -2533,7 +2553,7 @@
     if (!lista.length) return Promise.reject(new Error('No tienes ninguno apuntado.'));
 
     const resumen = Suplementos.resumenIA();
-    const clave = 'suplementos:' + resumen;
+    const clave = 'suplementos:' + (g.Idioma ? Idioma.actual() : 'es') + ':' + resumen;
     const guardado = leerCache(clave, 24 * 30);
     if (guardado && !opciones.forzar) return Promise.resolve(guardado);
 

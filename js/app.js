@@ -4608,9 +4608,8 @@
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Perfil</button>
-      <h1>Ajustes</h1>
-      <p class="muted">Cómo se comporta la app contigo: lo que te pregunta, lo que te
-      propone y lo que se guarda.</p>
+      <h1>${T('Ajustes')}</h1>
+      <p class="muted">${T('Cómo se comporta la app contigo: lo que te pregunta, lo que te propone y lo que se guarda.')}</p>
 
       <!-- El nombre ocupaba una tarjeta entera para una palabra: rótulo arriba,
            etiqueta debajo y una caja de ancho completo para escribir «Fabián».
@@ -4618,19 +4617,20 @@
       <div class="aj-caja" style="margin-top:14px">
         <div class="aj-fila">
           <span class="aj-ico">${raw(icon('perfil'))}</span>
-          <span class="grow"><span class="aj-tit">Tu nombre</span>
-            <span class="aj-sub">Con el que te saluda la app</span></span>
-          <input class="aj-campo" id="s-name" value="${s.name}" placeholder="¿Cómo te llamas?">
+          <span class="grow"><span class="aj-tit">${T('Tu nombre')}</span>
+            <span class="aj-sub">${T('Con el que te saluda la app')}</span></span>
+          <input class="aj-campo" id="s-name" value="${s.name}" placeholder="${T('¿Cómo te llamas?')}">
         </div>
       </div>
 
       <div class="plan-acciones" style="margin:10px 0 0">
         <button class="fila-plan" data-a="lugar2" style="--fp:${raw(cara.tono)}">
           <span class="fp-ico">${raw(icon(cara.icono))}</span>
-          <span class="grow"><span class="fp-tit">Dónde entrenas</span>
+          <span class="grow"><span class="fp-tit">${T('Dónde entrenas')}</span>
             <span class="fp-sub">${raw(sitio
-              ? esc(sitio.label) + ' · ' + UI.num(cuantosEn(s.gear)) + ' ejercicios a tu alcance'
-              : 'Sin elegir')}</span></span>
+              ? esc(sitio.label) + ' · ' + Tn('{n} ejercicios a tu alcance',
+                { n: UI.num(cuantosEn(s.gear)) })
+              : T('Sin elegir'))}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
 
@@ -4641,56 +4641,62 @@
              todas partes. -->
         <button class="fila-plan" data-a="franjas" style="--fp:#f0a23c">
           <span class="fp-ico">${raw(icon('reloj'))}</span>
-          <span class="grow"><span class="fp-tit">A qué hora comes</span>
+          <span class="grow"><span class="fp-tit">${T('A qué hora comes')}</span>
             <span class="fp-sub">${raw(Perfil.franjas().map(function (f) {
               return esc(f.label.toLowerCase()) + ' ' + esc(UI.hora ? UI.hora(f.desde) : f.desde);
             }).join(' · '))}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
-      <p class="tiny" style="margin:8px 0 0">De ahí salen los avisos de comer, con qué
-      comida se cruza la foto de un plato y a qué hora te toca cada suplemento.</p>
+      <p class="tiny" style="margin:8px 0 0">${T('De ahí salen los avisos de comer, con qué comida se cruza la foto de un plato y a qué hora te toca cada suplemento.')}</p>
 
-      <div class="list-title">Cómo registras las series</div>
+      <div class="list-title">${T('Cómo registras las series')}</div>
       <div class="opciones">
         ${raw(FORMAS_REGISTRO.map(function (o) {
           return filaOpcion(o, s.registro);
         }).join(''))}
       </div>
       ${raw(s.registro !== 'detallado'
-        ? '<p class="tiny" style="margin:8px 0 0">Sin peso anotado no hay récords ni ' +
-          'volumen; el progreso se mide por series y entrenamientos completados.</p>' : '')}
+        ? '<p class="tiny" style="margin:8px 0 0">' + esc(T('Sin peso anotado no hay récords ni volumen; el progreso se mide por series y entrenamientos completados.')) + '</p>' : '')}
 
-      <div class="list-title">Qué vas marcando</div>
+      <div class="list-title">${T('Qué vas marcando')}</div>
       <div class="opciones">
         ${raw(tarjetaSiNo({ clave: 'registroComida', ico: 'nutricion', tono: '#f0a23c',
-          t: 'Registrar cuando como',
-          sub: 'Cada plato lleva «me lo comí» y «comí otra cosa», y lo que marques entra ' +
-            'en el recuento del día.' }, s.registroComida !== 'no'))}
+          t: T('Registrar cuando como'),
+          sub: T('Cada plato lleva «me lo comí» y «comí otra cosa», y lo que marques entra en el recuento del día.') },
+          s.registroComida !== 'no'))}
         ${raw(tarjetaSiNo({ clave: 'registroAgua', ico: 'gota', tono: '#4f8cf5',
-          t: 'Marcar cuando bebo agua',
-          sub: 'Cada toma de la pauta es una casilla, y el total del día sale de lo que ' +
-            'marcas en vez de lo que deberías.' }, s.registroAgua !== 'no'))}
+          t: T('Marcar cuando bebo agua'),
+          sub: T('Cada toma de la pauta es una casilla, y el total del día sale de lo que marcas en vez de lo que deberías.') },
+          s.registroAgua !== 'no'))}
       </div>
-      <p class="tiny" style="margin:8px 0 0">Apagarlos no borra nada de lo que ya llevas
-      apuntado: solo quita las casillas de en medio.</p>
+      <p class="tiny" style="margin:8px 0 0">${T('Apagarlos no borra nada de lo que ya llevas apuntado: solo quita las casillas de en medio.')}</p>
 
-      <div class="list-title">La app</div>
+      <div class="list-title">${T('La app')}</div>
       <div class="aj-caja">
-        ${raw(filaAjuste('Unidad de peso', 'En la que anotas y ves los pesos',
+        ${raw(filaAjuste(T('Unidad de peso'), T('En la que anotas y ves los pesos'),
           mando('data-unit', [{ v: 'kg', t: 'kg' }, { v: 'lb', t: 'lb' }], s.unit), false, 'dumbbell'))}
-        ${raw(filaAjuste('Tema', 'Claro, oscuro o lo que diga el móvil', mando('data-theme',
-          [{ v: 'light', t: 'Claro', ico: 'sol' }, { v: 'dark', t: 'Oscuro', ico: 'luna' },
-           { v: 'auto', t: 'Sistema', ico: 'cambiar' }], s.theme), true, 'sol'))}
-        ${raw(filaAjuste('Descanso por defecto', 'Entre serie y serie',
-          contador('s-rest', s.rest, 'seg', 15, 0, 600), false, 'timer'))}
-        ${raw(filaAjuste('La frase del entrenador', 'Cada cuánto cambia',
+        ${raw(filaAjuste(T('Tema'), T('Claro, oscuro o lo que diga el móvil'),
+          mando('data-theme',
+          [{ v: 'light', t: T('Claro'), ico: 'sol' }, { v: 'dark', t: T('Oscuro'), ico: 'luna' },
+           { v: 'auto', t: T('Sistema'), ico: 'cambiar' }], s.theme), true, 'sol'))}
+
+        <!-- Al lado del tema y con la misma forma: las dos son «cómo la veo»,
+             no «qué hace». Con las siglas y sin icono propio, que una bandera
+             para un idioma es lo de siempre —el inglés no es de un país— y a
+             dos letras no le hace falta dibujo. -->
+        ${raw(filaAjuste(T('Idioma'), T('En qué idioma ves la app'), mando('data-idioma',
+          Idioma.IDIOMAS.map(function (x) { return { v: x.id, t: x.corto }; }),
+          Idioma.actual()), false, 'mundo'))}
+        ${raw(filaAjuste(T('Descanso por defecto'), T('Entre serie y serie'),
+          contador('s-rest', s.rest, T('seg'), 15, 0, 600), false, 'timer'))}
+        ${raw(filaAjuste(T('La frase del entrenador'), T('Cada cuánto cambia'),
           contador('s-pildora', IA.horasPildora ? IA.horasPildora() : 6, 'h', 1, 1, 24),
           false, 'chispa'))}
-        ${raw(filaAjuste('Aviso sonoro', 'Un pitido al terminar el descanso',
+        ${raw(filaAjuste(T('Aviso sonoro'), T('Un pitido al terminar el descanso'),
           '<button class="sw ' + (s.sound ? 'on' : '') + '" data-a="sound" ' +
           'role="switch" aria-checked="' + (s.sound ? 'true' : 'false') +
-          '" aria-label="Aviso sonoro"></button>', false, 'altavoz'))}
+          '" aria-label="' + esc(T('Aviso sonoro')) + '"></button>', false, 'altavoz'))}
       </div>
       ${raw((function () {
         /* Un modelo no se acuerda de ayer: sin esto vuelve a caer en la misma
@@ -4704,7 +4710,7 @@
           '<button class="btn sm ghost" data-a="olvidarfrases">Que empiece de cero</button></p>';
       })())}
 
-      <div class="list-title">Claves y conexiones</div>
+      <div class="list-title">${T('Claves y conexiones')}</div>
       <div class="plan-acciones" style="margin:10px 0 0">
         <button class="fila-plan" data-a="claves" style="--fp:#f0a23c">
           <span class="fp-ico">${raw(icon('llave'))}</span>
@@ -5029,6 +5035,15 @@
   viewAjustes.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=lugar2]', lugarSheet);
+
+    /* Cambiar de idioma repinta entero, que es lo que hay que hacer: las
+       cadenas se resuelven al pintar, no se guardan traducidas en ningún sitio,
+       así que un repintado ya lo cambia todo. */
+    bindAll(root, '[data-idioma]', function (el) {
+      Idioma.poner(el.dataset.idioma);
+      render();
+      UI.toast(Idioma.datos().suyo);
+    });
     bind(root, '[data-a=franjas]', function () {
       if (g.VISTAS && VISTAS.franjasSheet) VISTAS.franjasSheet();
     });
