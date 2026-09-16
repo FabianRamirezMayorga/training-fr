@@ -6263,20 +6263,15 @@ html[data-theme="light"] .sf-campo:focus-within {
 /* El nombre manda, pero en el color del texto y no en el acento: es lo que se
    busca al mirar la lista, no un estado ni un dato que destaque. Cinco nombres
    en verde seguidos convierten el acento en el color de fondo de la lista, y
-   entonces deja de significar nada cuando de verdad hace falta. */
-.sup-nom {
-  display: block; font-weight: 700; font-size: .95rem; letter-spacing: -.015em;
-  color: var(--txt);
-}
-.sup-sub { display: block; margin-top: 2px; font-size: .74rem; color: var(--dim2);
-  line-height: 1.35; }
+   entonces deja de significar nada cuando de verdad hace falta.
+
+   El tamano y el peso salen de la regla compartida con la lista de arriba. */
+.sup-nom { display: block; }
+.sup-sub { display: block; margin-top: 2px; }
 
 /* Lo que aporta, en la misma columna en todas las filas: leidas en vertical se
    suman de un vistazo sin tener que abrir ninguna. */
-.sup-aporta {
-  flex: none; font-size: .88rem; font-weight: 800; letter-spacing: -.02em;
-  color: var(--acc); font-variant-numeric: tabular-nums;
-}
+.sup-aporta { flex: none; }
 .sup-aporta i { font-style: normal; font-size: .62rem; font-weight: 700; opacity: .7;
   margin-left: 1px; }
 
@@ -6299,13 +6294,29 @@ html[data-theme="light"] .sf-campo:focus-within {
   background: var(--line); transform: scaleY(.5);
 }
 .sl-cab { display: flex; align-items: baseline; gap: 9px; min-width: 0; }
-.sl-n {
-  min-width: 0; font-size: .89rem; font-weight: 650; letter-spacing: -.012em;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+/* ---------- una sola tipografia para las dos listas ----------
+   «Que no se te olvide» y «lo que tomas» son dos listas de lo mismo —un
+   suplemento, su cantidad y un dato— en la misma pantalla, y estaban escritas
+   con letras distintas: el nombre a 14,2 arriba y 15,2 abajo, el gris a 12 y a
+   11,8, el verde a 12,6 y a 14,1. Ninguna diferencia era una decision; eran dos
+   bloques escritos en dos momentos. Aqui se define una vez y valen las dos.
+
+   La estructura si cambia entre ellas, y a proposito: arriba manda la hora y
+   abajo el nombre. Lo que no puede cambiar es la letra. */
+.sl-n, .sup-nom {
+  min-width: 0; font-size: .92rem; font-weight: 700; letter-spacing: -.015em;
+  color: var(--txt);
 }
-.sl-d { flex: none; font-size: .75rem; color: var(--dim2); white-space: nowrap; }
-.sl-h {
-  font-size: .79rem; font-weight: 700; letter-spacing: -.01em;
+.sl-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sl-d, .sup-sub {
+  font-size: .75rem; font-weight: 400; letter-spacing: -.005em;
+  line-height: 1.4; color: var(--dim2);
+}
+.sl-d { flex: none; white-space: nowrap; }
+
+.sl-h, .sup-aporta {
+  font-size: .8rem; font-weight: 800; letter-spacing: -.02em;
   color: var(--acc); font-variant-numeric: tabular-nums;
 }
 .sl-h i { font-style: normal; opacity: .4; margin: 0 4px; }
