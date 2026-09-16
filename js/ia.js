@@ -1171,14 +1171,34 @@
   }
 
   function dondeVive() {
+    /* Lo que dice él, primero. La zona horaria se queda de respaldo para quien
+       no lo haya puesto todavía: acierta casi siempre, pero calla cuando se
+       equivoca —quien viaja, o quien tiene el móvil en otra zona—, y por eso
+       no manda sobre lo que la persona ha elegido a mano. */
+    const iso = String(Perfil.datos().pais || '').trim();
+    if (iso && g.Paises && Paises.nombreDe(iso)) {
+      return 'VIVE EN ' + Paises.nombreDe(iso).toUpperCase() + '. Esto lo ha dicho él, ' +
+        'no es una suposición.\n' +
+        'Todo lo que le propongas comer tiene que existir en el supermercado corriente ' +
+        'de ' + Paises.nombreDe(iso) + ' y llamarse como se llama allí. Los cortes de ' +
+        'carne, los pescados, las frutas, las verduras, los lácteos y las legumbres ' +
+        'cambian de nombre y de disponibilidad de un país a otro: usa el nombre de allí ' +
+        'y no el de España, y si una cosa se conoce por dos nombres pon el de allí con ' +
+        'el otro entre paréntesis la primera vez. Las medidas caseras, las de allí. ' +
+        'Y los platos: si hay una manera corriente de comer eso en su país, esa es la ' +
+        'que le propones, no una versión de otro sitio. Un menú con ingredientes que no ' +
+        'encuentra no es un menú, por bien que cuadren los números.';
+    }
+
     let zona = '';
     let idioma = '';
     try { zona = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { zona = ''; }
     try { idioma = navigator.language || ''; } catch (e) { idioma = ''; }
     if (!zona && !idioma) return '';
 
-    return 'DE DÓNDE ES: su móvil está en la zona horaria ' + (zona || 'desconocida') +
-      ' y su idioma es ' + (idioma || 'desconocido') + '. De ahí sale su país. ' +
+    return 'DE DÓNDE ES: no lo ha dicho, así que hay que deducirlo. Su móvil está en la ' +
+      'zona horaria ' + (zona || 'desconocida') + ' y su idioma es ' +
+      (idioma || 'desconocido') + '. De ahí sale su país, pero no es seguro. ' +
       'Todo lo que le propongas comer tiene que existir en el supermercado corriente ' +
       'de ESE país y llamarse como se llama allí: los cortes de carne, los pescados, ' +
       'las frutas de temporada, los lácteos y las legumbres cambian de nombre y de ' +
@@ -1422,6 +1442,7 @@
       /* La medicación cambia horarios y a veces el propio cálculo: si no entra
          en la clave, apuntarla y volver a pedir el menú devuelve el de antes,
          el que no la tenía en cuenta. */
+      ':' + (p.pais || '') +
       ':' + (Store.settings().medicacion || '') +
       ':' + (Store.settings().medicacionDicho || '') +
       ':' + (g.Perfil && Perfil.franjas ? Perfil.franjas().map(function (f) {

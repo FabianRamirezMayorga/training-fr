@@ -49,6 +49,10 @@
     correo: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg>',
     nube: '<svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 01-.5-7.97A5.5 5.5 0 0117.9 9.2 3.9 3.9 0 0117 18z"/></svg>',
     salir: '<svg viewBox="0 0 24 24"><path d="M15 17l5-5-5-5M20 12H9M12 3H5v18h7"/></svg>',
+    /* El globo: circulo, ecuador y un meridiano curvado. Con dos meridianos y
+       dos paralelos a 20 px se convierte en una rejilla gris sin forma. */
+    mundo: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>' +
+      '<path d="M3 12h18M12 3a14 14 0 000 18a14 14 0 000-18"/></svg>',
     perfil: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>',
     campana: '<svg viewBox="0 0 24 24"><path d="M18 15V10a6 6 0 10-12 0v5l-2 3h16zM10 21h4"/></svg>',
     /* Era una manzana, y una manzana es «fruta», no «alimentación»: en la fila

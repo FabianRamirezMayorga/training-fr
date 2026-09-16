@@ -365,9 +365,16 @@
       ${raw(faltan.length ? html`
         <div class="card tarjeta-premium" style="border-color:var(--warn)">
           <b>Falta ${raw(listaEs(faltan))}</b>
-          <p class="tiny" style="margin:6px 0 0">Sin eso no puedo calcular tus calorías ni
-          ajustarte el entrenamiento. Es lo único obligatorio; lo demás lo vas rellenando
-          cuando quieras.</p>
+          <!-- Decia «sin eso no puedo calcular tus calorias» de todo, y con el pais
+               dentro eso dejo de ser verdad: el pais no entra en ninguna formula,
+               pero decide de que supermercado sale el menu. Cada cosa con su
+               motivo, que un aviso que exagera se aprende a ignorar. -->
+          <p class="tiny" style="margin:6px 0 0">${raw(faltan.length === 1 && !p.pais
+            ? 'Sin el país el menú sale de un supermercado que no es el tuyo, con nombres ' +
+              'que no usas.'
+            : 'Sin tus datos no puedo calcular tus calorías ni ajustarte el entrenamiento, ' +
+              'y sin el país el menú sale de otro supermercado.')} Es lo único obligatorio;
+          lo demás lo vas rellenando cuando quieras.</p>
         </div>` : '')}
 
       ${raw(grupo('Quién soy',
@@ -378,6 +385,24 @@
             Store.settings().name),
           nota: 'Para saludarte al abrir la app y para que el entrenador con IA te hable a ' +
             'ti, no a un usuario.'
+        }) +
+        /* No es papeleo: de aquí sale si lo que te propongo comer existe en tu
+           supermercado y cómo se llama. Antes se deducía de la zona horaria del
+           móvil, que acierta casi siempre pero no avisa cuando falla. */
+        campo({
+          tit: 'País',
+          nota: 'De aquí salen el menú y la lista de la compra: los nombres, los cortes ' +
+            'de carne y lo que hay en el súper cambian de un país a otro.',
+          abajo: '<button class="pais-fila' + (edita ? '' : ' fijo') + '"' +
+            (edita ? ' data-a="pais"' : ' disabled') + '>' +
+            (p.pais
+              ? '<span class="pais-bandera">' + esc(Paises.bandera(p.pais)) + '</span>' +
+                '<span class="grow pais-nom">' + esc(Paises.nombreDe(p.pais)) + '</span>'
+              : '<span class="pais-bandera vacia">' + icon('mundo') + '</span>' +
+                '<span class="grow pais-nom sin">' +
+                (edita ? 'Elige tu país' : 'Sin poner') + '</span>') +
+            (edita ? '<span class="chevron">' + icon('chevron') + '</span>' : '') +
+            '</button>'
         })))}
 
       ${raw(grupo('Mi cuerpo',
@@ -622,8 +647,72 @@
     });
   }
 
+  /* ---------- elegir país ----------
+     Casi doscientos nombres. En una lista sin buscador hay que bajar un minuto
+     para llegar a Venezuela, así que el buscador va arriba y con el foco
+     puesto: se escriben tres letras y ya está. La bandera delante hace el
+     trabajo del ojo, que reconoce un dibujo antes que una palabra.
+
+     Y lo que el móvil sabe se ofrece arriba en vez de darse por hecho: quien
+     tiene razón sobre dónde vive es la persona, no la zona horaria. */
+  function paisSheet() {
+    const actual = Perfil.datos().pais || '';
+    const sugerido = !actual && g.Paises ? Paises.sugerido() : '';
+
+    const filas = function (lista) {
+      if (!lista.length) {
+        return '<p class="tiny" style="margin:14px 2px">Ninguno con ese nombre. ' +
+          'Prueba con menos letras.</p>';
+      }
+      return '<div class="list pais-lista">' + lista.map(function (x) {
+        return '<button class="list-row tap pais-op' + (x.iso === actual ? ' on' : '') +
+          '" data-pais="' + esc(x.iso) + '">' +
+          '<span class="pais-bandera">' + esc(Paises.bandera(x.iso)) + '</span>' +
+          '<span class="grow"><span class="list-row-title">' + esc(x.nombre) + '</span></span>' +
+          '<span class="do-marca">' + icon('check') + '</span></button>';
+      }).join('') + '</div>';
+    };
+
+    UI.modal(html`
+      <div class="conf-disco cambio">${raw(icon('mundo'))}</div>
+      <h2 class="conf-tit">¿De dónde eres?</h2>
+      <p class="muted conf-txt">Con esto el menú sale del supermercado que tienes al lado,
+      con los nombres que usas tú.</p>
+
+      <div class="pais-buscar">
+        ${raw(icon('search'))}
+        <input id="pa-q" type="search" placeholder="Busca tu país" autocomplete="off"
+               autocorrect="off" spellcheck="false">
+      </div>
+
+      ${raw(sugerido ? '<button class="pais-sug" data-pais="' + esc(sugerido) + '">' +
+        '<span class="pais-bandera">' + esc(Paises.bandera(sugerido)) + '</span>' +
+        '<span class="grow"><b>' + esc(Paises.nombreDe(sugerido)) + '</b>' +
+        '<i>Es lo que dice tu móvil. Tócalo si es correcto.</i></span></button>' : '')}
+
+      <div id="pa-lista">${raw(filas(Paises.LISTA))}</div>`,
+      function (el) {
+        const caja = el.querySelector('#pa-lista');
+        const q = el.querySelector('#pa-q');
+
+        /* Sin foco automático: en el móvil abrir el teclado de golpe tapa media
+           lista, y quien ya ve su bandera no quiere escribir nada. */
+        q.oninput = function () { caja.innerHTML = filas(Paises.buscar(q.value)); };
+
+        el.onclick = function (ev) {
+          const b = ev.target.closest('[data-pais]');
+          if (!b) return;
+          Perfil.guardar({ pais: b.dataset.pais });
+          UI.closeModal();
+          render();
+          UI.toast(Paises.bandera(b.dataset.pais) + ' ' + Paises.nombreDe(b.dataset.pais));
+        };
+      });
+  }
+
   V.datos.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
+    bind(root, '[data-a=pais]', paisSheet);
 
     /* Editar, guardar y cancelar. La copia se hace al entrar en edicion y
        Cancelar la devuelve entera: incluye el nombre, que no vive en el perfil

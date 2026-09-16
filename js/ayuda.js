@@ -367,6 +367,20 @@
       cierre: 'Si luego cambias las horas de comer, los días de tu plan o los propios suplementos, la pantalla te avisa de que las alertas no coinciden y se rehacen con un toque.',
       ver: ['g-suplementos', 'c-franjas', 'c-calendario'] },
 
+    { id: 'c-pais', titulo: 'Decir de qué país eres',
+      resumen: 'Para que el menú salga de tu supermercado',
+      pasos: [
+        { t: 'Entra en *Perfil › Datos y hábitos*.',
+          ir: { ruta: 'datos', label: 'Abrir Datos y hábitos' } },
+        { t: 'Toca *Editar*, arriba a la derecha.' },
+        { t: 'Debajo de tu nombre, toca *País*.',
+          d: 'Se abre la lista entera con su bandera. Arriba hay un buscador: escribe tres letras y aparece el tuyo. Si tu móvil ya lo sabe, te lo propone el primero para que lo toques y listo.' },
+        { t: 'Tócalo y guarda.',
+          d: 'Se queda con la bandera puesta. A partir de ahí el menú, la lista de la compra y los consejos del entrenador salen de lo que hay en tu país y con los nombres que usas tú.' }
+      ],
+      cierre: 'Es obligatorio, y por eso: media lista de la compra de un menú de otro país no está en tu súper, y la otra media se llama de otra manera.',
+      ver: ['p-comidapais', 'g-comida'] },
+
     { id: 'c-franjas', titulo: 'Poner las horas de tus comidas',
       resumen: 'Para que el cruce acierte',
       pasos: [
@@ -594,10 +608,11 @@
       ver: ['g-suplementos'] },
 
     { id: 'p-comidapais', q: '¿Por qué me propone comida que no encuentro?',
-      a: ['Si eso te pasa, avísame: el menú tiene que salir del supermercado de tu país.',
-        'La app le dice al entrenador la zona horaria y el idioma de tu móvil, y de ahí sale dónde vives. Con eso los nombres, los cortes de carne, los pescados y la fruta son los de tu sitio y no los de otro.',
+      a: ['Lo primero: mira que tengas puesto tu país en *Perfil › Datos y hábitos*, justo debajo de tu nombre. Es obligatorio, y de ahí sale de qué supermercado se monta el menú.',
+        'Con el país puesto, los nombres son los de tu sitio: las mismas verduras, los mismos cortes de carne y los mismos pescados que pides tú, no los de otro país. Si una cosa se conoce por dos nombres, te pone el tuyo y el otro entre paréntesis la primera vez.',
+        'Si no lo has puesto, la app lo deduce de la zona horaria del móvil. Acierta casi siempre, pero no avisa cuando falla: por eso se pregunta.',
         'Y lo que de verdad manda es lo que pones en *Con qué cuentas*: si el menú sale con cosas que no tienes, escribe ahí lo que sueles comprar y el siguiente se monta con eso.'],
-      ver: ['g-comida', 'c-franjas'] },
+      ver: ['c-pais', 'g-comida'] },
 
     { id: 'p-kcal', q: '¿Las calorías que me da son exactas?',
       a: ['Son una estimación calculada con tus datos —sexo, peso, altura, edad, actividad y objetivo— con las fórmulas habituales.',

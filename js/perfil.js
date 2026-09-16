@@ -16,6 +16,7 @@
     /* Marcan el día real: sin ellas, repartir el agua y las comidas por el día
        sería inventarse a qué hora te levantas. */
     despertar: '07:00', acostar: '23:00', horaEntreno: '',
+    pais: '',
     alergias: '', lesiones: '', notas: '',
     /* Lo que condiciona qué se puede comer: diabetes, tensión, colesterol… */
     condiciones: '',
@@ -178,7 +179,21 @@
     if (!(p.edad > 0)) faltan.push('la edad');
     if (!(p.altura > 0)) faltan.push('la altura');
     if (!(p.peso > 0)) faltan.push('el peso');
+    /* Obligatorio, pero por otro motivo que los cuatro de arriba: aquellos
+       hacen falta para la fórmula del metabolismo y sin ellos no hay números;
+       el país no toca ni una caloría, pero sin él el menú sale de un
+       supermercado que no es el suyo. Por eso se pide aquí y bloquea el menú,
+       y no en `completo()`, que es lo que deja calcular: meterlo ahí dejaría
+       sin calorías a quien ya tenía su perfil hecho, por un dato que no entra
+       en el cálculo. */
+    if (!p.pais) faltan.push('el país');
     return faltan;
+  }
+
+  /* Lo que hace falta para montar un menú: lo de la fórmula, y de dónde es. */
+  function completoParaComer(p) {
+    p = p || datos();
+    return completo(p) && !!p.pais;
   }
 
   function imc(p) {
@@ -351,6 +366,10 @@
       'se levanta a las ' + p.despertar + ' y se acuesta a las ' + p.acostar,
       p.comidas + ' comidas al día',
       'dieta: ' + (DIETA[p.dieta] || p.dieta),
+      /* El pais no es un adorno del perfil: decide si lo que se le propone
+         comer existe en su supermercado y como se llama. Va en el resumen, que
+         es lo que llega a todos los prompts. */
+      p.pais && g.Paises ? 'vive en ' + Paises.nombreDe(p.pais) : null,
       p.alergias ? 'alergias o intolerancias: ' + p.alergias : null,
       p.lesiones ? 'lesiones o limitaciones: ' + p.lesiones : null,
       p.condiciones ? 'condiciones de salud: ' + p.condiciones : null,
@@ -362,7 +381,8 @@
   g.Perfil = {
     FRANJAS: FRANJAS, franjas: franjas, franjaDe: franjaDe,
     ACTIVIDAD: ACTIVIDAD, OBJETIVO: OBJETIVO, RITMO: RITMO, DIETA: DIETA,
-    datos: datos, guardar: guardar, completo: completo, loQueFalta: loQueFalta,
+    datos: datos, guardar: guardar, completo: completo,
+    completoParaComer: completoParaComer, loQueFalta: loQueFalta,
     horasDeSueno: horasDeSueno,
     imc: imc, categoriaIMC: categoriaIMC, pesoSaludable: pesoSaludable,
     tmb: tmb, tdee: tdee, calorias: calorias, macros: macros, agua: agua,

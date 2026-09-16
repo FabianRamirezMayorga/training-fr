@@ -1100,6 +1100,15 @@
       return;
     }
 
+    /* El pais no entra en el calculo de calorias, asi que el perfil puede estar
+       «completo» sin el; para un menu, no. Sin saber de donde es, la lista de
+       la compra sale de otro pais y media no esta en su super. */
+    if (!Perfil.datos().pais) {
+      UI.toast('Dime de qué país eres: el menú sale de tu supermercado');
+      go('datos');
+      return;
+    }
+
     let plan = null;      // lo generado, todavía sin guardar
     let comoSeHizo = '';
 
