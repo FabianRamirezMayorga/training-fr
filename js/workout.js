@@ -415,10 +415,10 @@
 
         ${raw(act.origen === 'ia'
           ? '<p class="tiny" style="margin:8px 0 0;opacity:.75">Analizado por tu entrenador: ' +
-            UI.esc(String(act.met).replace('.', ',')) + ' MET' +
+            UI.esc(UI.dec(act.met)) + ' MET' +
             (act.intensidad ? ' · intensidad ' + UI.esc(act.intensidad) : '') +
             ' · ' + pesoDelPerfil() + ' kg' +
-            (act.tardo ? ' · ' + (act.tardo / 1000).toFixed(1).replace('.', ',') + ' s' : '') +
+            (act.tardo ? ' · ' + UI.dec((act.tardo / 1000).toFixed(1)) + ' s' : '') +
             '</p>'
           : '<p class="tiny" style="margin:8px 0 0;color:var(--warn)">Sin analizar: gasto medio ' +
             'de 4 MET. Conecta la IA en Ajustes para que lo calcule de verdad.</p>')}

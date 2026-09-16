@@ -255,7 +255,7 @@
           bajando: quiere < 0, semanas: plan.semanas, dias: dias,
           fecha: Date.now() + dias * 864e5,
           frase: 'Según tu plan: ritmo ' + (r.label || '').toLowerCase() + ', ' +
-            (quiere < 0 ? '-' : '+') + String(r.kgSemana).replace('.', ',') +
+            (quiere < 0 ? '-' : '+') + UI.dec(r.kgSemana) +
             ' kg por semana'
         };
       }

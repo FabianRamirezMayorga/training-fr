@@ -723,7 +723,7 @@
     if (real) {
       const porSemana = Math.round(real.sesiones / real.semanas * 10) / 10;
       if (porSemana + 0.6 < ndias) {
-        out.push('En el último mes has entrenado ' + String(porSemana).replace('.', ',') +
+        out.push('En el último mes has entrenado ' + UI.dec(porSemana) +
           ' días por semana y este plan pide ' + ndias + '. O bajas los días y los ' +
           'cumples, o el plan se queda en papel: vale más un plan de tres días hecho ' +
           'que uno de cinco a medias.');
@@ -733,9 +733,9 @@
       if (flojos.length) {
         out.push('Lo que vienes dejando de lado: ' + flojos.slice(0, 3).map(function (m) {
           const n = real.porMusculo[m] || 0;
-          return I18N.muscle(m).toLowerCase() + ' (' + String(n).replace('.', ',') +
+          return I18N.muscle(m).toLowerCase() + ' (' + UI.dec(n) +
             (n === 1 ? ' serie' : ' series') + ' por semana, el plan te pide ' +
-            String(volumenPlan[m]).replace('.', ',') + ')';
+            UI.dec(volumenPlan[m]) + ')';
         }).join('; ') + '. Ahí es donde este plan te va a cambiar algo.');
       }
     } else {

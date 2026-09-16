@@ -59,7 +59,16 @@
      los lleva también: si en inglés lo que hay que destacar es otra palabra, se
      destaca otra palabra. */
   function fmt(s) {
-    return esc(T(s)).replace(/\*([^*]+)\*/g, '<b>$1</b>');
+    return esc(plano(s)).replace(/\*([^*]+)\*/g, '<b>$1</b>');
+  }
+
+  /* Una frase puede ser un texto suelto o {t, v}: el texto con huecos y los
+     valores que van dentro. Se escribe así, y no pegando trozos con +, porque
+     una frase partida en tres nunca llega entera al diccionario —y en inglés
+     el número casi nunca cae en el mismo sitio de la frase. */
+  function plano(s) {
+    if (s && typeof s === 'object') return Tn(s.t, (typeof s.v === 'function' ? s.v() : s.v) || {});
+    return T(s || '');
   }
 
   /* ---------- lo que la ayuda no se inventa ----------
@@ -128,7 +137,11 @@
         'Ahora lo decide con lo que ya tienes apuntado, y te dice cuál de los tres casos es antes de empezar la serie:',
         '*Subes* si la última vez sacaste todas las series con las repeticiones pedidas. *Repites* si te quedaste corto: el mismo peso hasta sacarlo entero. *Bajas* un 10 % si llevas tres sesiones seguidas sin sacarlo al mismo peso, para cogerle la técnica y volver a subir.',
         'Dos veces cortas no bastan para bajar: un mal día o una mala noche le pasa a cualquiera, y bajar ahí desanima por nada. Tres seguidas ya no es mala suerte.',
-        'El salto es el de cada material, no un número inventado: ' + saltoDe('barbell') + ' en barra, máquina y polea; ' + saltoDe('dumbbell') + ' en mancuernas; ' + saltoDe('kettlebells') + ' en kettlebell. Una barra admite discos de 1,25 por lado; un par de mancuernas del gimnasio va de dos en dos y no hay nada entre medias.',
+        { t: 'El salto es el de cada material, no un número inventado: {barra} en barra, máquina y polea; {mancuerna} en mancuernas; {kettlebell} en kettlebell. Una barra admite discos de 1,25 por lado; un par de mancuernas del gimnasio va de dos en dos y no hay nada entre medias.',
+          v: function () {
+            return { barra: saltoDe('barbell'), mancuerna: saltoDe('dumbbell'),
+                     kettlebell: saltoDe('kettlebells') };
+          } },
         'Con peso corporal o con bandas no dice nada: ahí se progresa en repeticiones y eso ya lo lleva la propia rutina. Y el número siempre se puede cambiar a mano: es una propuesta, no una orden.'
       ],
       ver: ['g-nota'] },
@@ -236,7 +249,8 @@
             { t: 'Decide si es mixta.',
               d: 'Apagado, la rutina se queda en su zona y te avisa si metes un ejercicio de otra. Enciéndelo solo si quieres mezclar tren superior e inferior a propósito.' },
             { t: 'Añade ejercicios con el botón *Añadir*.',
-              d: 'Se abre el buscador con tu material ya filtrado. El mínimo son ' + minimoEjercicios() + ' ejercicios; por arriba, los que quieras.' },
+              d: { t: 'Se abre el buscador con tu material ya filtrado. El mínimo son {n} ejercicios; por arriba, los que quieras.',
+                   v: function () { return { n: minimoEjercicios() }; } } },
             { t: 'Pon series, repeticiones y descanso de cada uno.',
               d: 'Los tres campos están debajo de cada ejercicio. El descanso va en segundos, y la auditoría te dirá si te has quedado corto para lo que pesa ese ejercicio.' },
             { t: 'Ordena.',
@@ -716,28 +730,40 @@
   function texto(x) {
     /* Se busca sobre lo que se LEE, no sobre el original: con la app en inglés,
        escribir «weight» tiene que encontrar la entrada del peso. */
-    const trozos = [titulo(x), T(x.resumen || ''), T(x.intro || ''), T(x.cierre || '')]
-      .concat((x.cuerpo || []).map(T), (x.a || []).map(T));
+    const trozos = [titulo(x), T(x.resumen || ''), T(x.intro || ''), plano(x.cierre)]
+      .concat((x.cuerpo || []).map(plano), (x.a || []).map(plano));
     const depasos = function (ps) {
-      (ps || []).forEach(function (p) { trozos.push(T(p.t || ''), T(p.d || '')); });
+      (ps || []).forEach(function (p) { trozos.push(plano(p.t), plano(p.d)); });
     };
     depasos(x.pasos);
     (x.ramas || []).forEach(function (r) {
-      trozos.push(T(r.titulo || ''), T(r.sub || ''), T(r.cierre || ''));
+      trozos.push(T(r.titulo || ''), T(r.sub || ''), plano(r.cierre));
       depasos(r.pasos);
     });
     return I18N.norm(trozos.join(' '));
   }
 
-  const INDICE = Object.keys(TODO).map(function (id) {
-    return { id: id, x: TODO[id], t: texto(TODO[id]) };
-  });
+  /* Se construye la primera vez que se busca y se rehace al cambiar de idioma:
+     antes se montaba al cargar el archivo, así que quien cambiaba a inglés
+     seguía buscando sobre el texto en español y no encontraba nada. */
+  let INDICE = null;
+  let indiceIdioma = null;
+  function indice() {
+    const id = g.Idioma ? Idioma.actual() : 'es';
+    if (!INDICE || indiceIdioma !== id) {
+      indiceIdioma = id;
+      INDICE = Object.keys(TODO).map(function (k) {
+        return { id: k, x: TODO[k], t: texto(TODO[k]) };
+      });
+    }
+    return INDICE;
+  }
 
   function buscar(q) {
     const n = I18N.norm(q);
     const partes = n.split(' ').filter(function (p) { return p.length > 1; });
     if (!partes.length) return [];
-    return INDICE.filter(function (e) {
+    return indice().filter(function (e) {
       return partes.every(function (p) { return e.t.indexOf(p) !== -1; });
     }).map(function (e) { return e.x; });
   }
@@ -784,7 +810,7 @@
       '<div class="list ay-lista">' + xs.map(function (x) {
         return '<button class="list-row tap ay-fila" data-ay="' + esc(x.id) + '">' +
           '<span class="grow"><span class="list-row-title">' + esc(titulo(x)) + '</span>' +
-          '<span class="list-row-sub">' + esc(ETIQUETA[x.tipo]) + '</span></span>' +
+          '<span class="list-row-sub">' + esc(etiqueta(x.tipo)) + '</span></span>' +
           '<span class="chevron">' + icon('chevron') + '</span></button>';
       }).join('') + '</div>';
   }

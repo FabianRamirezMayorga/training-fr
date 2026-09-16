@@ -154,8 +154,8 @@
           <div class="agua-hoy"${raw(conCabecera ? '' : ' style="margin-top:0"')}>
             <div class="row between" style="align-items:baseline">
               <span class="tiny">Llevas hoy</span>
-              <span class="ah-cif">${String(llevo.litros).replace('.', ',')}<i>
-                de ${String(metaL).replace('.', ',')} L</i></span>
+              <span class="ah-cif">${UI.dec(llevo.litros)}<i>
+                de ${UI.dec(metaL)} L</i></span>
             </div>
             <div class="nu-barra"><i style="width:${metaL
               ? Math.min(100, Math.round(llevo.litros / metaL * 100)) : 0}%;--bc:var(--agua)"></i></div>

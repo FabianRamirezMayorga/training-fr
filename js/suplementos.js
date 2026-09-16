@@ -70,7 +70,7 @@
     const u = unidadDe(unidad);
     const cant = Number(n) || 0;
     if (!cant) return '';
-    const num = String(Math.round(cant * 10) / 10).replace('.', ',');
+    const num = UI.dec(Math.round(cant * 10) / 10);
     return num + ' ' + (cant === 1 ? u.sing : u.plur);
   }
 

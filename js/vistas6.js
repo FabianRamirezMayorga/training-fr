@@ -374,7 +374,7 @@
       : obj === 'ganar' ? (dif >= 0 ? 'sube' : 'baja') : 'neutro';
 
     /* Con coma, que aqui se escribe en espanol. */
-    const coma = function (n) { return String(n).replace('.', ','); };
+    const coma = function (n) { return UI.dec(n); };
 
     return html`
       <div class="list-title">Tu peso</div>
@@ -853,7 +853,7 @@
       return r2 ? r2.label : id;
     };
     /* Aqui se escribe en espanol: 2,2 y no 2.2 */
-    const coma = function (n2) { return String(n2).replace('.', ','); };
+    const coma = function (n2) { return UI.dec(n2); };
 
     const ids = [];
     reparto.filas.forEach(function (f) { if (ids.indexOf(f.id) === -1) ids.push(f.id); });

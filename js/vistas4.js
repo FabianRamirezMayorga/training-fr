@@ -679,7 +679,7 @@
                 <span class="comp-pista">
                   <i style="width:${Math.round(f.series / mayor * 100)}%"></i>
                 </span>
-                <span class="comp-num">${String(f.series).replace('.', ',')}
+                <span class="comp-num">${UI.dec(f.series)}
                   <span class="comp-pct">${pct}%</span></span>
               </div>`;
           }).join(''))}

@@ -89,12 +89,12 @@
           <div class="pc-dato">
             <b>${UI.num(p.peso)}<span class="pc-u">${Store.settings().unit || 'kg'}</span></b>
             <span class="tiny">${raw(t
-              ? (t.dif > 0 ? '+' : '') + String(Math.round(t.dif * 10) / 10).replace('.', ',') +
+              ? (t.dif > 0 ? '+' : '') + UI.dec(Math.round(t.dif * 10) / 10) +
                 ' ' + T('en 30 días')
               : T('peso de hoy'))}</span>
           </div>
           <div class="pc-dato">
-            <b>${String(v.toFixed(1)).replace('.', ',')}</b>
+            <b>${UI.dec(v.toFixed(1))}</b>
             <span class="tiny pc-imc ${esc(cat.tono)}">${esc(T(cat.label))}</span>
           </div>
           <div class="pc-dato">
@@ -431,14 +431,14 @@
           control: valor('type="number" inputmode="decimal" step="0.1" min="30" max="250" ' +
             'value="' + (p.peso || '') + '" data-num="peso" placeholder="—"',
             Store.settings().unit || 'kg', 72,
-            p.peso ? String(p.peso).replace('.', ',') : '')
+            p.peso ? UI.dec(p.peso) : '')
         }) +
         campo({
           tit: 'Grasa corporal',
           nota: 'Opcional. Si la sabes, afina el cálculo del metabolismo.',
           control: valor('type="number" inputmode="decimal" step="0.5" min="3" max="60" ' +
             'value="' + (p.grasa || '') + '" data-num="grasa" placeholder="—"', '%', 68,
-            p.grasa ? String(p.grasa).replace('.', ',') : '')
+            p.grasa ? UI.dec(p.grasa) : '')
         })))}
 
       ${raw(grupo('Mi actividad diaria',
@@ -463,7 +463,7 @@
         ((Perfil.OBJETIVO[p.objetivo] || {}).signo !== 0
           ? campo({
               tit: 'A qué ritmo',
-              nota: 'Unos ' + String(ritmo.kgSemana).replace('.', ',') + ' kg por semana' +
+              nota: 'Unos ' + UI.dec(ritmo.kgSemana) + ' kg por semana' +
                 ((Perfil.OBJETIVO[p.objetivo] || {}).signo < 0 ? ' menos' : ' más') + '.',
               abajo: filasOpcion('ritmo', Object.assign({}, Perfil.RITMO, {
                 propio: { label: 'El mío', note: 'Lo pongo yo en kilos por semana' }
@@ -475,7 +475,7 @@
                       'inputmode="decimal" step="0.05" min="0.1" max="1.2" value="' +
                       (p.ritmoKg || 0.45) + '" data-num="ritmoKg">'
                     : '<span class="campo-fijo">' +
-                      String(p.ritmoKg || 0.45).replace('.', ',') + '</span>') +
+                      UI.dec(p.ritmoKg || 0.45) + '</span>') +
                   '<span class="val-u">kg por semana</span></div>'
                 : '')
             })
@@ -497,7 +497,7 @@
         campo({
           tit: 'Duermo',
           control: '<span class="campo-val"><span class="campo-fijo">' +
-            (horas != null ? String(horas).replace('.', ',') + ' h' : '—') + '</span></span>',
+            (horas != null ? UI.dec(horas) + ' h' : '—') + '</span></span>',
           nota: horas != null
             ? 'Sale de esas dos horas, no hace falta apuntarlo aparte.' +
               (horas < 6 ? ' Con menos de 6 h cuesta recuperar entre sesiones.' : '')

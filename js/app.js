@@ -162,9 +162,9 @@
     return html`
       <button class="lugar-chip${raw(cambia ? ' cambia' : '')}" data-a="lugar"
               style="--tono:${raw(cara.tono)}"
-              aria-label="Entrenas ${gset.label}. Cambiar de sitio">
+              aria-label="${Tn('Entrenas {sitio}. Cambiar de sitio', { sitio: T(gset.label) })}">
         <span class="lc-ico">${raw(icon(cara.icono))}</span>
-        <span class="lc-txt">${cara.corto || gset.label}</span>
+        <span class="lc-txt">${T(cara.corto || gset.label)}</span>
       </button>`;
   }
 
@@ -204,16 +204,16 @@
         <span class="lg-cab">
           <span class="lg-ico">${raw(icon(cara.icono))}</span>
           <span class="grow">
-            <span class="lg-nom">${gset.label}</span>
-            <span class="lg-note">${gset.note}</span>
+            <span class="lg-nom">${T(gset.label)}</span>
+            <span class="lg-note">${T(gset.note)}</span>
           </span>
           <span class="lg-marca">${raw(icon('check'))}</span>
         </span>
         <span class="lg-barra"><i style="width:${parte}%"></i></span>
-        <span class="lg-pie"><b>${UI.num(cuantos)}</b> ejercicios
-          <span class="lg-pct">${parte}% del catálogo</span></span>
-        ${raw(igualQueGym ? '<span class="lg-aviso">Los mismos que en el gimnasio: el ' +
-          'catálogo no tiene nada que el gimnasio no permita.</span>' : '')}
+        <span class="lg-pie"><b>${UI.num(cuantos)}</b> ${T('ejercicios')}
+          <span class="lg-pct">${Tn('{n}% del catálogo', { n: parte })}</span></span>
+        ${raw(igualQueGym ? '<span class="lg-aviso">' + UI.esc(T('Los mismos que en el ' +
+          'gimnasio: el catálogo no tiene nada que el gimnasio no permita.')) + '</span>' : '')}
       </button>`;
   }
 
@@ -226,7 +226,8 @@
        con los otros cuatro se elige por error, y separado con su rótulo se
        entiende de qué va sin tener que leerlo. */
     return sitios.map(function (k) { return tarjetaLugar(k, actual, total, enGym); }).join('') +
-      '<div class="lg-o"><span>o mira el catálogo entero</span></div>' +
+      '<div class="lg-o"><span>' + UI.esc(T('o mira el catálogo entero')) +
+        '</span></div>' +
       tarjetaLugar('todo', actual, total, enGym);
   }
 

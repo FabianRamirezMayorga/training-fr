@@ -1050,7 +1050,7 @@
         claves.sort(function (a, b) { return porMusculo[b] - porMusculo[a]; });
         salida.push('SERIES REALES POR SEMANA (últimas 6 semanas, de lo que ha ' +
           'registrado): ' + claves.map(function (m) {
-            return I18N.muscle(m) + ' ' + String(porMusculo[m]).replace('.', ',');
+            return I18N.muscle(m) + ' ' + UI.dec(porMusculo[m]);
           }).join(', ') + '.');
       }
     }
@@ -1118,7 +1118,7 @@
       if (d > 5 && d < 240) { minutos += d; conDuracion++; }
     });
 
-    const porSemana = (Object.keys(dias).length / 4).toFixed(1).replace('.', ',');
+    const porSemana = UI.dec((Object.keys(dias).length / 4).toFixed(1));
     const partes = ['CONSTANCIA REAL: ' + porSemana + ' días por semana en el último mes'];
     if (conDuracion) partes.push('sesiones de ' + Math.round(minutos / conDuracion) + ' min de media');
 
@@ -1174,7 +1174,7 @@
   function porKilo(gramos, peso) {
     const kg = Number(peso) || 0;
     if (!kg) return '?';
-    return (Math.round(Number(gramos) / kg * 10) / 10).toFixed(1).replace('.', ',');
+    return UI.dec((Math.round(Number(gramos) / kg * 10) / 10).toFixed(1));
   }
 
   function dondeVive(conComida) {
@@ -1316,7 +1316,7 @@
 
       const t = Perfil.tendencia(30);
       if (t) {
-        trozos.push('PESO: ' + (t.dif >= 0 ? '+' : '') + t.dif.toFixed(1).replace('.', ',') +
+        trozos.push('PESO: ' + (t.dif >= 0 ? '+' : '') + UI.dec(t.dif.toFixed(1)) +
           ' kg en los últimos 30 días, con ' + t.n + ' pesajes.');
       } else {
         trozos.push('PESO: no se pesa con regularidad, así que no puedes saber si sube o baja.');
@@ -1526,7 +1526,7 @@
       (p.acostar || '23:00') + '.\n' +
       (diasEntreno.length ? 'ENTRENA: ' + diasEntreno.join(', ') +
         (horaEntreno ? ' sobre las ' + horaEntreno : '') + '.\n' : '') +
-      (litros ? 'AGUA: le corresponden ' + String(litros).replace('.', ',') + ' L al día.\n' : '') +
+      (litros ? 'AGUA: le corresponden ' + UI.dec(litros) + ' L al día.\n' : '') +
       (p.dieta !== 'omnivora' ? 'DIETA: ' + Perfil.DIETA[p.dieta] + '. Todo el menú la respeta.\n' : '') +
       (p.alergias ? 'NO PUEDE COMER (innegociable: no aparece en ningún plato, en ninguna ' +
         'alternativa ni en la lista de la compra): ' + p.alergias + '.\n' : '') +

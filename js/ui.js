@@ -363,7 +363,16 @@
   /* ---------- formateo ---------- */
   function num(n) {
     n = Number(n) || 0;
-    return n.toLocaleString('es-ES', { maximumFractionDigits: n < 100 ? 1 : 0 });
+    return n.toLocaleString(localeIdioma(), { maximumFractionDigits: n < 100 ? 1 : 0 });
+  }
+
+  /* El separador decimal de un número que se PINTA. Iba a mano —`.replace('.',
+     ',')`— en casi treinta sitios, y todos escribían «25,2» con la app en
+     inglés. No pasa por toLocaleString a propósito: aquí llegan números ya
+     redondeados por quien llama, y toLocaleString volvería a redondearlos. */
+  function dec(n) {
+    const t = String(n);
+    return (g.Idioma && Idioma.actual() === 'en') ? t : t.replace('.', ',');
   }
 
   function kg(n) {
@@ -466,20 +475,37 @@
 
   const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
+  /* El mes y el día abreviados de una fecha que se PINTA. No se saca de
+     DAY_NAMES ni de MONTHS a secas porque DAY_NAMES es la clave con la que se
+     guardan los días de una rutina: tiene que seguir diciendo 'Lun' en inglés o
+     se rompe lo guardado. Esto es lo otro, lo que lee el usuario. */
+  function mesCorto(d) {
+    if (!g.Idioma || Idioma.actual() === 'es') return MONTHS[d.getMonth()];
+    try { return d.toLocaleDateString(localeIdioma(), { month: 'short' }); }
+    catch (e) { return MONTHS[d.getMonth()]; }
+  }
+  function diaCorto(d) {
+    if (!g.Idioma || Idioma.actual() === 'es') return DAY_NAMES[d.getDay()];
+    try {
+      const t = d.toLocaleDateString(localeIdioma(), { weekday: 'short' });
+      return t.charAt(0).toUpperCase() + t.slice(1);
+    } catch (e) { return DAY_NAMES[d.getDay()]; }
+  }
+
   function fecha(ts) {
     const d = new Date(ts);
     const hoy = new Date();
     const mismoDia = d.toDateString() === hoy.toDateString();
     const ayer = new Date(hoy.getTime() - 864e5).toDateString() === d.toDateString();
     const hora = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-    if (mismoDia) return 'Hoy · ' + hora;
-    if (ayer) return 'Ayer · ' + hora;
-    return DAY_NAMES[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' · ' + hora;
+    if (mismoDia) return T('Hoy') + ' · ' + hora;
+    if (ayer) return T('Ayer') + ' · ' + hora;
+    return diaCorto(d) + ' ' + d.getDate() + ' ' + mesCorto(d) + ' · ' + hora;
   }
 
   function fechaCorta(ts) {
     const d = new Date(ts);
-    return d.getDate() + ' ' + MONTHS[d.getMonth()];
+    return d.getDate() + ' ' + mesCorto(d);
   }
 
   /* ---------- sonido y vibración ---------- */
@@ -732,7 +758,7 @@
     demoHTML: demoHTML, mountDemos: mountDemos, clearDemos: clearDemos,
     deslizables: deslizables, cerrarDeslizadas: cerrarDeslizadas,
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,
-    num: num, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
+    num: num, dec: dec, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
     beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos,
     hora: hora, INICIALES: INICIALES, inicialDia: inicialDia
   };

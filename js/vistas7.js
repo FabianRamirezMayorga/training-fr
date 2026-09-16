@@ -433,7 +433,7 @@
 
     const paso = function () { return S().unidadDe(u).paso || 1; };
     const enCasa = function (x) { return Math.max(paso(), Math.min(999, x || paso())); };
-    const escrito = function (x) { return String(Math.round(x * 10) / 10).replace('.', ','); };
+    const escrito = function (x) { return UI.dec(Math.round(x * 10) / 10); };
 
     /* `escribe` manda cuándo se toca el campo. Con los botones sí, porque el
        número lo cambian ellos; mientras se teclea no, porque reescribirlo a

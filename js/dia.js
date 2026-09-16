@@ -170,7 +170,7 @@
     return plegable({
       id: 'agua', titulo: 'Hidratación', marca: 'vaso', tono: '#4f8cf5',
       progreso: { hecho: hechas, total: tomas },
-      cola: llevo ? String(llevo.litros).replace('.', ',') + ' L hoy' : '',
+      cola: llevo ? UI.dec(llevo.litros) + ' L hoy' : '',
       /* «Llevas 0» a secas contradecía al «2,5 L hoy» de al lado cuando el agua
          venía de vasos sueltos: lo que cuenta la frase son las tomas de la
          pauta marcadas, y hay que decirlo. */

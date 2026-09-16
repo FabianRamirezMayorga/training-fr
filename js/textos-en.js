@@ -52,6 +52,16 @@
     '¿Cómo te llamas?': "What's your name?",
 
     'Dónde entrenas': 'Where you train',
+    'Gimnasio': 'Gym',
+    'Con mancuernas': 'With dumbbells',
+    'Con bandas': 'With bands',
+    'Todo': 'Everything',
+    'ejercicios': 'exercises',
+    '{n}% del catálogo': '{n}% of the catalogue',
+    'o mira el catálogo entero': 'or browse the whole catalogue',
+    'Entrenas {sitio}. Cambiar de sitio': 'You train {sitio}. Change where you train',
+    'Los mismos que en el gimnasio: el catálogo no tiene nada que el gimnasio no permita.':
+      'The same as in the gym: the catalogue has nothing the gym does not allow.',
     'Sin elegir': 'Not chosen',
     'A qué hora comes': 'When you eat',
     'De ahí salen los avisos de comer, con qué comida se cruza la foto de un plato y a qué hora te toca cada suplemento.':
@@ -275,6 +285,7 @@
     'Ver el día entero': 'See the whole day',
 
     'Hoy': 'Today',
+    'Ayer': 'Yesterday',
     'Día libre': 'Rest day',
     'Empieza aquí': 'Start here',
     'No toca nada en tu plan': 'Nothing on your plan',

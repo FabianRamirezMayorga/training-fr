@@ -162,7 +162,7 @@
       out.push({
         clave: 'agua', tipo: 'agua', dias: todos, horas: horas,
         titulo: 'Hidrátate', mensaje: 'Un vaso de agua (250 ml).',
-        porque: 'Te tocan ' + String(litros).replace('.', ',') +
+        porque: 'Te tocan ' + UI.dec(litros) +
           ' L al día por tu peso y tu actividad: son ' + vasos +
           ' vasos de 250 ml repartidos entre las ' + horas[0] + ' y las ' +
           horas[horas.length - 1] + '. De una sentada no se bebe.'

@@ -318,7 +318,7 @@
         'tiene que cuadrar cada comida y qué debe llevar.',
       dias: dias,
       hidratacion: litros ? {
-        total: String(litros).replace('.', ',') + ' L',
+        total: UI.dec(litros) + ' L',
         pauta: ['Al levantarte: un vaso grande',
           'A media mañana: un vaso', 'Antes de entrenar: un vaso',
           'Al terminar de entrenar: un vaso', 'Con la cena: un vaso'],
