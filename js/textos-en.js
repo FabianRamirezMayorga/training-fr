@@ -485,6 +485,73 @@
     '{n}% de las series': '{n}% of your sets',
     'Récords personales': 'Personal records',
     'Menos': 'Less',
-    'Más': 'More'
+    'Más': 'More',
+
+    /* ---------- Suplementos ---------- */
+    'Módulo no disponible.': 'Module not available.',
+    'Lo que tomas, cuánto y cuándo. Con esto la app te crea las alertas sola, deja de proponerte en el menú lo que ya tomas y cuenta lo que aportan.':
+      'What you take, how much and when. With this the app creates your reminders itself, stops suggesting in your meal plan what you already take, and counts what they add.',
+    'Todavía nada': 'Nothing yet',
+    '¿Tomas algo?': 'Do you take anything?',
+    'Creatina, proteína, omega 3, un multivitamínico… Apúntalo una vez y el resto de la app se entera: los recordatorios, el menú y las cuentas del día.':
+      'Creatine, protein, omega 3, a multivitamin… Log it once and the rest of the app knows: your reminders, your meal plan and the day’s numbers.',
+    'Añadir el primero': 'Add the first one',
+    'Lo que tomas': 'What you take',
+    'Añadir otro': 'Add another',
+    'Se crean con el nombre y la dosis puestos, y a la hora que salga de cada momento. Si cambias las horas de tus comidas o los días de tu plan, vuelve aquí y se rehacen.':
+      'They are created with the name and dose already in, at whatever time each moment works out to. If you change your meal times or your plan days, come back here and they are rebuilt.',
+    'Tus alertas no coinciden': "Your reminders don't match",
+    'Has cambiado suplementos, horas de comer o días de entreno desde la última vez.':
+      'You have changed supplements, meal times or training days since last time.',
+    'Rehacer las alertas': 'Rebuild the reminders',
+    'Crear alertas': 'Create reminders',
+    'Solo toca las de suplementos: las alertas que hayas creado tú se quedan como están.':
+      'It only touches the supplement ones: reminders you created stay as they are.',
+
+    'Que no se te olvide': "Don't forget",
+    'Hoy no toca ninguno. Los de «los días que entreno» y «un día sí y otro no» se saltan solos.':
+      'None due today. The "training days" and "every other day" ones skip themselves.',
+    '{n} toma': '{n} dose',
+    '{n} tomas': '{n} doses',
+
+    'Lo que suman a tu día': 'What they add to your day',
+    'calculando…': 'calculating…',
+    'sin calcular': 'not calculated',
+    'kcal': 'kcal',
+    'proteína': 'protein',
+    'hidratos': 'carbs',
+    'grasa': 'fat',
+    'Cubre.': 'Covers.',
+    'Horarios.': 'Timing.',
+    'Se pisan.': 'Overlap.',
+    'En tu menú.': 'In your meal plan.',
+    'Sin calcular.': 'Not calculated.',
+    'Lo ha calculado el entrenador con tu lista, no es una suma del catálogo. Ya está contado en tu menú: no te pedirá en comida lo que estos te dan.':
+      'Your coach worked this out from your list, not by adding up the catalogue. It is already counted in your meal plan: it won’t ask you to eat what these already give you.',
+    'Volver a calcularlo': 'Work it out again',
+    'Calculando lo que suman, con lo que tienes apuntado…':
+      'Working out what they add, from what you have logged…',
+    'Sumar esto a mano sale mal: no cuenta lo que escribes tú, ni las vitaminas ni los minerales. Lo calcula el entrenador, y lo que salga se descuenta solo de tu menú.':
+      'Adding this up by hand goes wrong: it misses what you type in, and says nothing about vitamins or minerals. Your coach works it out, and whatever comes back is deducted from your meal plan automatically.',
+    'Calcularlo ahora': 'Work it out now',
+    'Calcularlo': 'Work it out',
+    'Necesita el entrenador con IA configurado, en Perfil.':
+      'Needs the AI coach set up, in Profile.',
+    'Esto es una lista para acordarte y para que las cuentas cuadren, no una recomendación. Qué tomar, cuánto y si te conviene lo decides tú con quien te lleve la salud, sobre todo si tomas medicación.':
+      'This is a list to help you remember and to make the numbers add up, not a recommendation. What to take, how much, and whether it suits you is between you and whoever looks after your health — especially if you take medication.',
+
+    'Todos los días': 'Every day',
+    'Los días que entreno': 'Training days',
+    'Un día sí y otro no': 'Every other day',
+    'Un día a la semana': 'One day a week',
+    'Varias veces al día': 'Several times a day',
+    'Cada 4 horas': 'Every 4 hours',
+    'Cada 6 horas': 'Every 6 hours',
+    'Cada 8 horas': 'Every 8 hours',
+    'Cada 12 horas': 'Every 12 hours',
+    'Antes de cada comida': 'Before every meal',
+    'Con cada comida': 'With every meal',
+    'Después de cada comida': 'After every meal',
+    'Las pongo yo': 'I set them myself'
   };
 })(window);

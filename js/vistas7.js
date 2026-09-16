@@ -49,8 +49,8 @@
     /* Con reparto, lo que dice «cada cuánto» es el patrón y no la frecuencia:
        «varias veces al día» ya se ve en que hay varias horas. */
     const cada = s.frecuencia === 'varias'
-      ? S().patronDe(s.patron).label
-      : (f ? f.label : '');
+      ? T(S().patronDe(s.patron).label)
+      : (f ? T(f.label) : '');
 
     const cuando = horas.map(function (h) {
       return UI.hora ? UI.hora(h) : h;
@@ -114,10 +114,9 @@
 
     if (!l.length) {
       return html`
-        <div class="list-title">Que no se te olvide</div>
+        <div class="list-title">${T('Que no se te olvide')}</div>
         <div class="card sup-hoy2 vacia">
-          <p class="tiny" style="margin:0">Hoy no toca ninguno. Los de «los días que
-          entreno» y «un día sí y otro no» se saltan solos.</p>
+          <p class="tiny" style="margin:0">${T('Hoy no toca ninguno. Los de «los días que entreno» y «un día sí y otro no» se saltan solos.')}</p>
         </div>`;
     }
 
@@ -126,8 +125,8 @@
 
     return html`
       <div class="list-head">
-        <span class="list-title">Que no se te olvide</span>
-        <span class="sh-cuenta">${tomas} ${tomas === 1 ? 'toma' : 'tomas'}</span>
+        <span class="list-title">${T('Que no se te olvide')}</span>
+        <span class="sh-cuenta">${Tp(tomas, '{n} toma', '{n} tomas')}</span>
       </div>
 
       <div class="card sup-hoy2 ${alLado ? 'al-lado' : 'debajo'}">
@@ -163,68 +162,61 @@
       <details class="sup-plegable menor" ${raw(aportaAbierto ? 'open' : '')}
                data-det="aporta">
         <summary>
-          <span class="grow">Lo que suman a tu día</span>
+          <span class="grow">${T('Lo que suman a tu día')}</span>
           ${raw(a ? '<span class="sp-cuantos">' + a.kcal + ' kcal</span>'
-            : calculando ? '<span class="sp-cargando">calculando…</span>'
-              : '<span class="sp-falta">sin calcular</span>')}
+            : calculando ? '<span class="sp-cargando">' + esc(T('calculando…')) + '</span>'
+              : '<span class="sp-falta">' + esc(T('sin calcular')) + '</span>')}
           <span class="sp-flecha">${raw(icon('chevron'))}</span>
         </summary>
 
         <div class="sup-aportan">
           ${raw(a ? html`
             <div class="sa-nums">
-              ${raw([['kcal', a.kcal, ''], ['proteína', a.prot, 'g'],
-                ['hidratos', a.carbo, 'g'], ['grasa', a.grasa, 'g']]
+              ${raw([[T('kcal'), a.kcal, ''], [T('proteína'), a.prot, 'g'],
+                [T('hidratos'), a.carbo, 'g'], [T('grasa'), a.grasa, 'g']]
                 .map(function (n) {
                   return '<span class="sa-n"><b>' + UI.num(n[1]) + '<i>' + n[2] +
                     '</i></b><span>' + n[0] + '</span></span>';
                 }).join(''))}
             </div>
-            ${raw(a.cubre ? '<p class="tiny"><b>Cubre.</b> ' + esc(a.cubre) + '</p>' : '')}
-            ${raw(a.horario ? '<p class="tiny"><b>Horarios.</b> ' + esc(a.horario) + '</p>' : '')}
-            ${raw(a.solapa ? '<p class="tiny"><b>Se pisan.</b> ' + esc(a.solapa) + '</p>' : '')}
-            ${raw(a.menu ? '<p class="tiny"><b>En tu menú.</b> ' + esc(a.menu) + '</p>' : '')}
-            ${raw(a.dudas ? '<p class="tiny"><b>Sin calcular.</b> ' + esc(a.dudas) + '</p>' : '')}
-            <p class="tiny sa-pie">Lo ha calculado el entrenador con tu lista, no es una
-            suma del catálogo. Ya está contado en tu menú: no te pedirá en comida lo que
-            estos te dan.</p>
+            ${raw(a.cubre ? '<p class="tiny"><b>' + esc(T('Cubre.')) + '</b> ' + esc(a.cubre) + '</p>' : '')}
+            ${raw(a.horario ? '<p class="tiny"><b>' + esc(T('Horarios.')) + '</b> ' + esc(a.horario) + '</p>' : '')}
+            ${raw(a.solapa ? '<p class="tiny"><b>' + esc(T('Se pisan.')) + '</b> ' + esc(a.solapa) + '</p>' : '')}
+            ${raw(a.menu ? '<p class="tiny"><b>' + esc(T('En tu menú.')) + '</b> ' + esc(a.menu) + '</p>' : '')}
+            ${raw(a.dudas ? '<p class="tiny"><b>' + esc(T('Sin calcular.')) + '</b> ' + esc(a.dudas) + '</p>' : '')}
+            <p class="tiny sa-pie">${T('Lo ha calculado el entrenador con tu lista, no es una suma del catálogo. Ya está contado en tu menú: no te pedirá en comida lo que estos te dan.')}</p>
             <button class="btn sm block" data-a="analizar" style="margin-top:10px">
-              ${raw(icon('cambiar'))} Volver a calcularlo</button>` : calculando ? html`
-            <p class="tiny" style="margin:0">Calculando lo que suman, con lo que tienes
-            apuntado…</p>` : html`
-            <p class="tiny" style="margin:0 0 10px">Sumar esto a mano sale mal: no cuenta
-            lo que escribes tú, ni las vitaminas ni los minerales. Lo calcula el
-            entrenador, y lo que salga se descuenta solo de tu menú.</p>
+              ${raw(icon('cambiar'))} ${T('Volver a calcularlo')}</button>` : calculando ? html`
+            <p class="tiny" style="margin:0">${T('Calculando lo que suman, con lo que tienes apuntado…')}</p>` : html`
+            <p class="tiny" style="margin:0 0 10px">${T('Sumar esto a mano sale mal: no cuenta lo que escribes tú, ni las vitaminas ni los minerales. Lo calcula el entrenador, y lo que salga se descuenta solo de tu menú.')}</p>
             <button class="btn sm primary block" data-a="analizar" ${raw(hayIA ? '' : 'disabled')}>
-              ${raw(icon('chispa'))} ${raw(hayIA ? 'Calcularlo ahora' : 'Calcularlo')}</button>
-            ${raw(hayIA ? '' : '<p class="tiny" style="margin:8px 0 0">Necesita el ' +
-              'entrenador con IA configurado, en Perfil.</p>')}`)}
+              ${raw(icon('chispa'))} ${raw(hayIA ? esc(T('Calcularlo ahora')) : esc(T('Calcularlo')))}</button>
+            ${raw(hayIA ? '' : '<p class="tiny" style="margin:8px 0 0">' +
+              esc(T('Necesita el entrenador con IA configurado, en Perfil.')) + '</p>')}`)}
         </div>
       </details>`;
   }
 
   V.suplementos = function () {
-    if (!g.Suplementos) return '<div class="empty"><p>Módulo no disponible.</p></div>';
+    if (!g.Suplementos) return '<div class="empty"><p>' +
+      esc(T('Módulo no disponible.')) + '</p></div>';
 
     const l = S().lista();
     const desfase = S().alertasDesfasadas();
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
-      <h1>Suplementos</h1>
-      <p class="muted">Lo que tomas, cuánto y cuándo. Con esto la app te crea las alertas
-      sola, deja de proponerte en el menú lo que ya tomas y cuenta lo que aportan.</p>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
+      <h1>${T('Suplementos')}</h1>
+      <p class="muted">${T('Lo que tomas, cuánto y cuándo. Con esto la app te crea las alertas sola, deja de proponerte en el menú lo que ya tomas y cuenta lo que aportan.')}</p>
 
       ${raw(!l.length ? html`
         <div class="card tarjeta-premium" style="margin-top:14px">
-          <div class="pre-encima">Todavía nada</div>
-          <div class="pre-num" style="margin:2px 0 8px">¿Tomas algo?</div>
-          <p class="muted" style="margin-bottom:12px;font-size:.88rem">Creatina, proteína,
-          omega 3, un multivitamínico… Apúntalo una vez y el resto de la app se entera:
-          los recordatorios, el menú y las cuentas del día.</p>
+          <div class="pre-encima">${T('Todavía nada')}</div>
+          <div class="pre-num" style="margin:2px 0 8px">${T('¿Tomas algo?')}</div>
+          <p class="muted" style="margin-bottom:12px;font-size:.88rem">${T('Creatina, proteína, omega 3, un multivitamínico… Apúntalo una vez y el resto de la app se entera: los recordatorios, el menú y las cuentas del día.')}</p>
           <button class="btn primary block" data-a="nuevo">
-            ${raw(icon('plus'))} Añadir el primero</button>
+            ${raw(icon('plus'))} ${T('Añadir el primero')}</button>
         </div>` : html`
 
         ${raw(hoyHTML())}
@@ -237,7 +229,7 @@
              plegada no habría manera de añadir nada. -->
         <details class="sup-plegable" ${raw(listaAbierta ? 'open' : '')}>
           <summary>
-            <span class="grow">Lo que tomas</span>
+            <span class="grow">${T('Lo que tomas')}</span>
             <span class="sp-cuantos">${l.length}</span>
             <span class="sp-flecha">${raw(icon('chevron'))}</span>
           </summary>
@@ -253,34 +245,28 @@
         </details>
 
         <button class="btn block" data-a="nuevo" style="margin-top:12px">
-          ${raw(icon('plus'))} Añadir otro</button>
+          ${raw(icon('plus'))} ${T('Añadir otro')}</button>
 
-        <div class="list-title">Alertas</div>
+        <div class="list-title">${T('Alertas')}</div>
         <div class="card">
-          <p class="muted" style="margin:0 0 12px;font-size:.88rem">Se crean con el nombre y
-          la dosis puestos, y a la hora que salga de cada momento. Si cambias las horas de
-          tus comidas o los días de tu plan, vuelve aquí y se rehacen.</p>
+          <p class="muted" style="margin:0 0 12px;font-size:.88rem">${T('Se crean con el nombre y la dosis puestos, y a la hora que salga de cada momento. Si cambias las horas de tus comidas o los días de tu plan, vuelve aquí y se rehacen.')}</p>
 
           ${raw(desfase ? html`
             <div class="cal-viejo" style="margin-bottom:12px">
               <span class="cv-ico">${raw(icon('aviso'))}</span>
-              <span class="grow"><b>Tus alertas no coinciden</b>
-              <span class="tiny">Has cambiado suplementos, horas de comer o días de
-              entreno desde la última vez.</span></span>
+              <span class="grow"><b>${T('Tus alertas no coinciden')}</b>
+              <span class="tiny">${T('Has cambiado suplementos, horas de comer o días de entreno desde la última vez.')}</span></span>
             </div>` : '')}
 
           <button class="btn ${desfase ? 'primary' : ''} block" data-a="sincronizar">
             ${raw(icon('campana'))} ${raw(S().hayAlertas()
-              ? 'Rehacer las alertas' : 'Crear alertas')}</button>
-          <p class="tiny" style="margin-top:8px">Solo toca las de suplementos: las alertas
-          que hayas creado tú se quedan como están.</p>
+              ? esc(T('Rehacer las alertas')) : esc(T('Crear alertas')))}</button>
+          <p class="tiny" style="margin-top:8px">${T('Solo toca las de suplementos: las alertas que hayas creado tú se quedan como están.')}</p>
         </div>`)}
 
       <!-- Una vez, y no en cada aviso. Repetirlo en cada pantalla es lo que
            hace que se deje de leer, y aquí es donde de verdad toca decirlo. -->
-      <p class="tiny sup-aviso">Esto es una lista para acordarte y para que las cuentas
-      cuadren, no una recomendación. Qué tomar, cuánto y si te conviene lo decides tú con
-      quien te lleve la salud, sobre todo si tomas medicación.</p>`;
+      <p class="tiny sup-aviso">${T('Esto es una lista para acordarte y para que las cuentas cuadren, no una recomendación. Qué tomar, cuánto y si te conviene lo decides tú con quien te lleve la salud, sobre todo si tomas medicación.')}</p>`;
   };
 
   V.suplementos.mount = function (root) {
