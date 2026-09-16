@@ -528,7 +528,8 @@
     const f = Perfil.franjaDe(hora);
     if (!f) return null;
 
-    const out = { franja: f, titulo: VERBO[f.id] || ('Es hora de ' + f.label.toLowerCase()) };
+    const out = { franja: f,
+      titulo: traduce(VERBO[f.id]) || (traduce('Es hora de ') + traduce(f.label).toLowerCase()) };
 
     /* Lo que le toca a esa comida según el menú de hoy. Se busca por nombre de
        comida y, si el menú no la nombra igual, por la hora más cercana: los
@@ -576,14 +577,22 @@
      genera la app, que nacen con un título de fábrica. */
   function mio(a) { return !a.auto && !a.sup; }
 
+  /* ---------- el titulo, en el idioma de la app ----------
+     Los titulos de las que genera la app se guardan escritos en espanol dentro
+     de la propia alerta, asi que cambiar de idioma no los cambiaria. Pasarlos
+     por T() los traduce, y lo bueno de que la clave sea la propia frase es que
+     lo que hayas escrito TU no esta en el diccionario y sale tal cual: no hay
+     forma de que la app te traduzca por error un nombre que pusiste a mano. */
   function tituloEn(a, hora) {
-    if (a.sinFranja || mio(a)) return a.titulo;
+    if (a.sinFranja || mio(a)) return traduce(a.titulo);
     if (TIPOS[a.tipo] && TIPOS[a.tipo].segunLaHora) {
       const c = comidaDeEsaHora(hora || (a.horas || [])[0]);
       if (c) return c.titulo;
     }
-    return a.titulo;
+    return traduce(a.titulo);
   }
+
+  function traduce(t) { return g.Idioma ? Idioma.T(t) : t; }
 
   /* Un adelanto corto de lo que llevará el aviso. No es el texto entero: en una
      tarjeta de lista, tres líneas de menú tapan las horas y los días, que es a
@@ -599,12 +608,12 @@
   }
 
   function tituloDe(x) {
-    if (x.alerta.sinFranja || mio(x.alerta)) return x.titulo;
+    if (x.alerta.sinFranja || mio(x.alerta)) return traduce(x.titulo);
     if (TIPOS[x.alerta.tipo] && TIPOS[x.alerta.tipo].segunLaHora) {
       const c = comidaDeEsaHora(x.hora);
       if (c) return c.titulo;
     }
-    if (!esDeIA(x.alerta.tipo)) return x.titulo;
+    if (!esDeIA(x.alerta.tipo)) return traduce(x.titulo);
     const n = String(Store.settings().name || '').trim();
     return n ? n + ', un momento' : x.titulo;
   }
@@ -1007,9 +1016,9 @@
   }
 
   function resumenDias(a) {
-    if (a.dias.length === 7) return 'Todos los días';
+    if (a.dias.length === 7) return traduce('Todos los días');
     if (a.dias.length === 5 && a.dias.every(function (d) { return d >= 1 && d <= 5; })) {
-      return 'De lunes a viernes';
+      return traduce('De lunes a viernes');
     }
     return a.dias.slice().sort().map(function (d) { return UI.diaLargo(DIAS[d]); }).join(', ');
   }

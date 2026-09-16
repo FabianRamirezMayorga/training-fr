@@ -4628,7 +4628,7 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <h1>${T('Ajustes')}</h1>
       <p class="muted">${T('Cómo se comporta la app contigo: lo que te pregunta, lo que te propone y lo que se guarda.')}</p>
 
@@ -4882,7 +4882,7 @@
   function viewVersion() {
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <h1>Actualizaciones</h1>
       <p class="muted">Si hay una versión nueva, y qué llevas descargado para usar la app
       sin internet.</p>
@@ -5391,7 +5391,7 @@
   function viewCuenta() {
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <h1>Mi cuenta</h1>
       <p class="muted">Entra con tu correo y la app queda igual en todos tus dispositivos:
       rutinas, historial, perfil, objetivos, alertas y ajustes.</p>

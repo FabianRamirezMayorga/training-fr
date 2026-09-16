@@ -351,7 +351,7 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
 
       <div class="row between" style="align-items:flex-start;gap:12px">
         <h1 style="margin:0">Datos y hábitos</h1>
@@ -852,7 +852,7 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <div class="row between">
         <h1 style="margin:0">Objetivos</h1>
         <button class="btn primary sm btn-arranque" data-a="nuevo">${raw(icon('plus'))} Nuevo</button>
@@ -1133,57 +1133,53 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <!-- Cuatro controles en una fila con el título no caben en un móvil
            estrecho, así que la fila envuelve y los botones bajan enteros en vez
            de encogerse hasta no leerse. -->
       <div class="row between al-cabecera">
-        <h1 style="margin:0">Alertas</h1>
+        <h1 style="margin:0">${T('Alertas')}</h1>
         <span class="row" style="gap:8px">
           <!-- El estado de los avisos se gestiona desde aquí. Con su punto
                cuando falta algo: si no, quien no los tenga dados no tiene por
                qué saber que detrás de una campana hay algo que arreglar. -->
           <button class="btn sm icon-vidrio campana-estado${raw(
             Alertas.diagnostico().permiso === 'granted' ? '' : ' pendiente')}"
-            data-a="avisos" aria-label="Estado de los avisos"
-            title="Estado de los avisos">${raw(icon('campana'))}</button>
+            data-a="avisos" aria-label="${T('Estado de los avisos')}"
+            title="${T('Estado de los avisos')}">${raw(icon('campana'))}</button>
           <!-- «Automáticas» y no el nombre entero: el botón cabe, y lo que va a
                hacer se cuenta con detalle en la hoja que abre, que es donde hay
                sitio para contarlo y donde todavía se puede decir que no. -->
           <button class="btn sm vidrio" data-a="autogen">
-            ${raw(icon('chispa'))} Automáticas</button>
+            ${raw(icon('chispa'))} ${T('Automáticas')}</button>
           <button class="btn primary sm btn-arranque" data-a="nueva">
-            ${raw(icon('plus'))} Nueva</button>
+            ${raw(icon('plus'))} ${T('Nueva')}</button>
         </span>
       </div>
       <p class="muted" style="margin-top:8px">${raw(lista.length
-        ? 'Tienes ' + lista.length + (lista.length === 1 ? ' recordatorio' : ' recordatorios') +
+        ? esc(Tp(lista.length, 'Tienes {n} recordatorio', 'Tienes {n} recordatorios')) +
           (activas < lista.length
-            ? ', ' + activas + ' encendidos.'
-            : ', todos encendidos.') +
+            ? esc(Tn(', {n} encendidos.', { n: activas }))
+            : esc(T(', todos encendidos.'))) +
           ' ' + esc(proximoTexto(lista))
-        : 'Las horas salen de tus datos: tu peso, a qué hora te levantas y cuándo entrenas.')}</p>
+        : esc(T('Las horas salen de tus datos: tu peso, a qué hora te levantas y cuándo entrenas.')))}</p>
 
       ${raw(permisoHTML())}
 
-      ${raw(lista.length ? '<div class="list-title">Mis recordatorios</div>' +
+      ${raw(lista.length ? '<div class="list-title">' + esc(T('Mis recordatorios')) + '</div>' +
         '<div class="stack">' + lista.map(tarjetaAlerta).join('') + '</div>'
         : html`<div class="empty" style="padding-top:28px">${raw(icon('campana'))}
-            <p>Sin recordatorios todavía. Abajo tienes los que te propongo con tus datos,
-            con las horas ya calculadas.</p>
+            <p>${T('Sin recordatorios todavía. Abajo tienes los que te propongo con tus datos, con las horas ya calculadas.')}</p>
           </div>`)}
 
       ${raw(sugerenciasHTML())}
 
       <button class="btn block" data-a="desdeRutinas" style="margin-top:14px">
-        ${raw(icon('dumbbell'))} Crear desde mis rutinas</button>
+        ${raw(icon('dumbbell'))} ${T('Crear desde mis rutinas')}</button>
 
-      <div class="list-title">Que suenen con la app cerrada</div>
+      <div class="list-title">${T('Que suenen con la app cerrada')}</div>
       <div class="card tarjeta-premium">
-        <p class="muted" style="margin:0 0 12px;font-size:.88rem">Una página web no puede
-        avisarte sola si está cerrada, salvo pagando un servidor de notificaciones. La vía
-        que sí funciona y no cuesta nada es llevarlos al calendario del móvil, que sí avisa
-        siempre.</p>
+        <p class="muted" style="margin:0 0 12px;font-size:.88rem">${T('Una página web no puede avisarte sola si está cerrada, salvo pagando un servidor de notificaciones. La vía que sí funciona y no cuesta nada es llevarlos al calendario del móvil, que sí avisa siempre.')}</p>
         ${raw((function () {
           const caduca = Alertas.calendarioCaduca();
           const viejo = Alertas.calendarioDesfasado();
@@ -1192,10 +1188,10 @@
           /* Se acaba manda sobre ha cambiado: si los avisos van a dejar de
              sonar, eso es lo urgente aunque además haya cambios. */
           const tit = caduca
-            ? (caduca.caducado ? 'Tus avisos del calendario ya se acabaron'
-              : caduca.dias <= 1 ? 'Tus avisos del calendario se acaban hoy'
-                : 'Tus avisos del calendario se acaban en ' + caduca.dias + ' días')
-            : 'Tu calendario está desfasado';
+            ? (caduca.caducado ? T('Tus avisos del calendario ya se acabaron')
+              : caduca.dias <= 1 ? T('Tus avisos del calendario se acaban hoy')
+                : Tn('Tus avisos del calendario se acaban en {n} días', { n: caduca.dias }))
+            : T('Tu calendario está desfasado');
           const txt = caduca
             ? 'Los generaste con un plazo y ese plazo termina. Vuelve a descargarlo y ' +
               'siguen sonando desde donde estaban.'
@@ -1256,10 +1252,8 @@
     if (!d.soportado) {
       return html`
         <div class="card tarjeta-premium" style="margin-top:12px">
-          <div class="pre-encima">Sin avisos aquí</div>
-          <p class="muted" style="margin:6px 0 0;font-size:.88rem">Este navegador no sabe
-          mostrar avisos del sistema. Los recordatorios los sigues viendo dentro de la app,
-          y para que suenen con la app cerrada tienes el calendario, más abajo.</p>
+          <div class="pre-encima">${T('Sin avisos aquí')}</div>
+          <p class="muted" style="margin:6px 0 0;font-size:.88rem">${T('Este navegador no sabe mostrar avisos del sistema. Los recordatorios los sigues viendo dentro de la app, y para que suenen con la app cerrada tienes el calendario, más abajo.')}</p>
         </div>`;
     }
 
@@ -1269,15 +1263,13 @@
     if (d.esIOS && !d.instalada && d.permiso !== 'granted') {
       return html`
         <div class="card tarjeta-premium" style="margin-top:12px">
-          <div class="pre-encima">Falta instalar la app</div>
-          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">Añádela a tu
-          pantalla de inicio</div>
-          <p class="muted" style="margin:0 0 10px;font-size:.88rem">En el iPhone los avisos
-          solo funcionan desde la app instalada, no desde el navegador. Se hace una vez:</p>
+          <div class="pre-encima">${T('Falta instalar la app')}</div>
+          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">${T('Añádela a tu pantalla de inicio')}</div>
+          <p class="muted" style="margin:0 0 10px;font-size:.88rem">${T('En el iPhone los avisos solo funcionan desde la app instalada, no desde el navegador. Se hace una vez:')}</p>
           <ol class="instr" style="margin:0">
-            <li>Toca el botón de compartir de Safari, el cuadrado con la flecha.</li>
-            <li>Baja y elige <b>Añadir a pantalla de inicio</b>.</li>
-            <li>Abre Training FR desde el icono nuevo y vuelve aquí.</li>
+            <li>${T('Toca el botón de compartir de Safari, el cuadrado con la flecha.')}</li>
+            <li>${raw(Tn('Baja y elige <b>{q}</b>.', { q: esc(T('Añadir a pantalla de inicio')) }))}</li>
+            <li>${T('Abre Training FR desde el icono nuevo y vuelve aquí.')}</li>
           </ol>
         </div>`;
     }
@@ -1285,19 +1277,17 @@
     if (d.permiso === 'denied') {
       return html`
         <div class="card tarjeta-premium" style="margin-top:12px;border-color:var(--warn)">
-          <div class="pre-encima">Bloqueados</div>
-          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">Los avisos están
-          bloqueados</div>
-          <p class="muted" style="margin:0 0 10px;font-size:.88rem">Se dijo que no una vez y
-          el sistema no lo vuelve a preguntar. Hay que activarlos a mano:</p>
+          <div class="pre-encima">${T('Bloqueados')}</div>
+          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">${T('Los avisos están bloqueados')}</div>
+          <p class="muted" style="margin:0 0 10px;font-size:.88rem">${T('Se dijo que no una vez y el sistema no lo vuelve a preguntar. Hay que activarlos a mano:')}</p>
           <ol class="instr" style="margin:0">
             ${raw(d.esIOS
-              ? '<li>Abre los <b>Ajustes</b> del iPhone.</li>' +
-                '<li>Baja hasta <b>Training FR</b> y entra.</li>' +
-                '<li>Entra en <b>Notificaciones</b> y enciende <b>Permitir notificaciones</b>.</li>'
-              : '<li>Toca el candado de la barra de direcciones.</li>' +
-                '<li>Busca <b>Notificaciones</b> y ponlo en <b>Permitir</b>.</li>' +
-                '<li>Recarga esta página.</li>')}
+              ? '<li>' + esc(T('Abre los Ajustes del iPhone.')) + '</li>' +
+                '<li>' + esc(T('Baja hasta Training FR y entra.')) + '</li>' +
+                '<li>' + esc(T('Entra en Notificaciones y enciende Permitir notificaciones.')) + '</li>'
+              : '<li>' + esc(T('Toca el candado de la barra de direcciones.')) + '</li>' +
+                '<li>' + esc(T('Busca Notificaciones y ponlo en Permitir.')) + '</li>' +
+                '<li>' + esc(T('Recarga esta página.')) + '</li>')}
           </ol>
         </div>`;
     }
@@ -1305,12 +1295,11 @@
     if (d.permiso !== 'granted') {
       return html`
         <div class="card tarjeta-premium" style="margin-top:12px">
-          <div class="pre-encima">Falta un paso</div>
-          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">Permite los avisos</div>
-          <p class="muted" style="margin:0 0 12px;font-size:.88rem">Sin permiso solo verás los
-          recordatorios dentro de la app. El sistema te lo va a preguntar una vez.</p>
+          <div class="pre-encima">${T('Falta un paso')}</div>
+          <div class="pre-num" style="margin:2px 0 6px;font-size:1.05rem">${T('Permite los avisos')}</div>
+          <p class="muted" style="margin:0 0 12px;font-size:.88rem">${T('Sin permiso solo verás los recordatorios dentro de la app. El sistema te lo va a preguntar una vez.')}</p>
           <button class="btn primary block btn-arranque" data-a="permiso">
-            ${raw(icon('campana'))} Activar los avisos</button>
+            ${raw(icon('campana'))} ${T('Activar los avisos')}</button>
         </div>`;
     }
 
@@ -1408,8 +1397,9 @@
       });
     });
 
-    if (!mejor) return 'Hoy ya no queda ninguno.';
-    return 'El siguiente, «' + mejor.titulo + '» a las ' + UI.hora(mejor.hora) + '.';
+    if (!mejor) return T('Hoy ya no queda ninguno.');
+    return Tn('El siguiente, «{t}» a las {h}.',
+      { t: mejor.titulo, h: UI.hora(mejor.hora) });
   }
 
   /* ---------- sugerencias calculadas con tus datos ---------- */
@@ -1417,12 +1407,10 @@
     if (!Perfil.completo()) {
       return html`
         <div class="card tarjeta-premium" style="margin-top:14px">
-          <div class="pre-encima">Puedo proponerte las horas</div>
-          <p class="muted" style="margin:6px 0 12px;font-size:.88rem">Con tu peso, tu
-          actividad y a qué hora te levantas calculo cuántos vasos de agua te tocan y a qué
-          horas, cuándo comer y cuándo entrenar. Necesito el perfil completo.</p>
+          <div class="pre-encima">${T('Puedo proponerte las horas')}</div>
+          <p class="muted" style="margin:6px 0 12px;font-size:.88rem">${T('Con tu peso, tu actividad y a qué hora te levantas calculo cuántos vasos de agua te tocan y a qué horas, cuándo comer y cuándo entrenar. Necesito el perfil completo.')}</p>
           <button class="btn primary block btn-arranque" data-a="irperfil">
-            Completar mi perfil</button>
+            ${T('Completar mi perfil')}</button>
         </div>`;
     }
 
@@ -1430,19 +1418,16 @@
     if (!sug.length) {
       return html`
         <div class="card tarjeta-premium" style="margin-top:14px">
-          <p class="muted" style="margin:0;font-size:.88rem">Ya tienes creados todos los
-          recordatorios que te propondría con tus datos. Si cambias de peso, de horarios o
-          de rutinas, vuelve por aquí y recalculo.</p>
+          <p class="muted" style="margin:0;font-size:.88rem">${T('Ya tienes creados todos los recordatorios que te propondría con tus datos. Si cambias de peso, de horarios o de rutinas, vuelve por aquí y recalculo.')}</p>
         </div>`;
     }
 
     return html`
       <div class="row between" style="margin-top:20px;align-items:center">
-        <span class="list-title" style="margin:0">Lo que te propongo</span>
-        <button class="btn sm ghost" data-a="crearTodas">Crear todas</button>
+        <span class="list-title" style="margin:0">${T('Lo que te propongo')}</span>
+        <button class="btn sm ghost" data-a="crearTodas">${T('Crear todas')}</button>
       </div>
-      <p class="tiny" style="margin:-2px 0 10px">Calculado con tus datos, no son horas por
-      defecto. Puedes cambiarlas después.</p>
+      <p class="tiny" style="margin:-2px 0 10px">${T('Calculado con tus datos, no son horas por defecto. Puedes cambiarlas después.')}</p>
 
       <div class="stack">
         ${raw(sug.map(function (x, i) {
@@ -1450,7 +1435,8 @@
              lo creas, y enseñarlo con otra forma obliga a traducir. */
           return cajaAlerta(x, {
             activa: true,
-            control: '<button class="btn sm primary rec-crear" data-sug="' + i + '">Crear</button>',
+            control: '<button class="btn sm primary rec-crear" data-sug="' + i + '">' +
+              esc(T('Crear')) + '</button>',
             pie: '<p class="tiny rec-porque">' + esc(x.porque) + '</p>'
           });
         }).join(''))}
@@ -1823,7 +1809,7 @@
           return '<button class="al-tipo' + (a.tipo === k ? ' on' : '') + '" data-tipo="' + k +
             '" style="--tono:' + (t.tono || 'var(--acc)') + '">' +
             '<span class="alt-ico">' + icon(t.icono) + '</span>' +
-            '<span class="alt-nom">' + esc(t.label) + '</span></button>';
+            '<span class="alt-nom">' + esc(T(t.label)) + '</span></button>';
         }).join(''))}
       </div>
 

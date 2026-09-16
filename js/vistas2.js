@@ -131,7 +131,7 @@
     if (!Perfil.completo(p)) {
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-          ${raw(icon('back'))} Perfil</button>
+          ${raw(icon('back'))} ${T('Perfil')}</button>
         <h1>Alimentación</h1>
         <div class="empty">${raw(icon('nutricion'))}
           <p>Necesito tu peso, altura, edad y sexo para calcular tus calorías.</p>
@@ -145,7 +145,7 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <h1>Alimentación</h1>
       <p class="muted">Calculado a partir de tus datos con la fórmula de Mifflin-St Jeor.
       Es una orientación, no una pauta médica.</p>
@@ -1388,7 +1388,7 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <!-- Su marca al lado del título: es el único sitio de la app donde
            contesta alguien, y conviene que se note de quién es la voz. -->
       <div class="ia-cab">
@@ -1555,7 +1555,7 @@
   function configIAHTML() {
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <h1>Entrenador con IA</h1>
       <p class="muted">Analiza tu progreso, revisa tus rutinas y te prepara el plan de comidas.
       Funciona con el proveedor que elijas: Gemini tiene capa gratuita.</p>
@@ -1708,7 +1708,7 @@
     if (!Spotify.configurado()) {
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-          ${raw(icon('back'))} Perfil</button>
+          ${raw(icon('back'))} ${T('Perfil')}</button>
         <h1>Música</h1>
         <p class="muted">Reproduce dentro de la app y deja que la IA te prepare listas
         distintas para cada entrenamiento.</p>
@@ -1736,7 +1736,7 @@
     if (!Spotify.activa()) {
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-          ${raw(icon('back'))} Perfil</button>
+          ${raw(icon('back'))} ${T('Perfil')}</button>
         <h1>Música</h1>
         <div class="card tarjeta-premium">
           <div class="pre-encima">Un toque</div>
@@ -1758,7 +1758,7 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <div class="row between">
         <h1 style="margin:0">Música</h1>
         <!-- Vidrio neutro y no verde: desconectar no es lo que se viene a hacer

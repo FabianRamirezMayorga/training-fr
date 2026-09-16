@@ -552,6 +552,100 @@
     'Antes de cada comida': 'Before every meal',
     'Con cada comida': 'With every meal',
     'Después de cada comida': 'After every meal',
-    'Las pongo yo': 'I set them myself'
+    'Las pongo yo': 'I set them myself',
+
+    /* ---------- Alertas ---------- */
+    'Estado de los avisos': 'Notification status',
+    'Automáticas': 'Automatic',
+    'Nueva': 'New',
+    'Tienes {n} recordatorio': 'You have {n} reminder',
+    'Tienes {n} recordatorios': 'You have {n} reminders',
+    ', {n} encendidos.': ', {n} switched on.',
+    ', todos encendidos.': ', all switched on.',
+    'Hoy ya no queda ninguno.': 'None left for today.',
+    'El siguiente, «{t}» a las {h}.': 'Next up, "{t}" at {h}.',
+    'Las horas salen de tus datos: tu peso, a qué hora te levantas y cuándo entrenas.':
+      'The times come from your data: your weight, when you get up and when you train.',
+    'Mis recordatorios': 'My reminders',
+    'Sin recordatorios todavía. Abajo tienes los que te propongo con tus datos, con las horas ya calculadas.':
+      'No reminders yet. Below are the ones I suggest from your data, with the times already worked out.',
+    'Crear desde mis rutinas': 'Create from my routines',
+    'Que suenen con la app cerrada': 'Make them fire with the app closed',
+    'Una página web no puede avisarte sola si está cerrada, salvo pagando un servidor de notificaciones. La vía que sí funciona y no cuesta nada es llevarlos al calendario del móvil, que sí avisa siempre.':
+      'A web page cannot notify you on its own once it is closed, unless you pay for a notification server. The route that does work and costs nothing is putting them in your phone calendar, which always fires.',
+    'Tus avisos del calendario ya se acabaron': 'Your calendar reminders have run out',
+    'Tus avisos del calendario se acaban hoy': 'Your calendar reminders run out today',
+    'Tus avisos del calendario se acaban en {n} días':
+      'Your calendar reminders run out in {n} days',
+    'Tu calendario está desfasado': 'Your calendar is out of date',
+    'Puedo proponerte las horas': 'I can suggest the times',
+    'Con tu peso, tu actividad y a qué hora te levantas calculo cuántos vasos de agua te tocan y a qué horas, cuándo comer y cuándo entrenar. Necesito el perfil completo.':
+      'From your weight, your activity and when you get up I work out how many glasses of water you need and when, when to eat and when to train. I need the full profile.',
+    'Completar mi perfil': 'Complete my profile',
+    'Ya tienes creados todos los recordatorios que te propondría con tus datos. Si cambias de peso, de horarios o de rutinas, vuelve por aquí y recalculo.':
+      'You already have every reminder I would suggest from your data. If your weight, your times or your routines change, come back and I will recalculate.',
+    'Lo que te propongo': 'What I suggest',
+    'Crear todas': 'Create them all',
+    'Calculado con tus datos, no son horas por defecto. Puedes cambiarlas después.':
+      'Worked out from your data, not default times. You can change them afterwards.',
+
+    /* «Entrenamiento» ya está arriba, en la sección de Perfil: es la misma
+       palabra y la misma traducción. */
+    'Beber agua': 'Drink water',
+    'Comida': 'Meal',
+    'Pesarte': 'Weigh in',
+    'Suplemento': 'Supplement',
+    'Mensaje del entrenador': 'Message from your coach',
+    'Personalizada': 'Custom',
+
+    /* Los títulos que la app escribe dentro de cada alerta. Van aquí porque se
+       guardan en español dentro del propio recordatorio, y pasan por T() al
+       pintarlos; lo que escribes tú no está en esta lista y sale tal cual. */
+    'Toca entrenar': 'Time to train',
+    'Hidrátate': 'Drink up',
+    'Hora de comer': 'Meal time',
+    'Pésate': 'Weigh yourself',
+    'Recordatorio': 'Reminder',
+    'Tu entrenador': 'Your coach',
+    'Es hora de desayunar': 'Time for breakfast',
+    'Es hora de almorzar': 'Time for lunch',
+    'Es hora de merendar': 'Time for a snack',
+    'Es hora de cenar': 'Time for dinner',
+    'Es hora de ': 'Time for ',
+    'Comida antes de entrenar': 'Pre-workout meal',
+    'Empieza a apagar el día': 'Start winding down',
+    'Tus suplementos': 'Your supplements',
+    'De lunes a viernes': 'Monday to Friday',
+
+    /* ---------- los avisos del sistema ---------- */
+    'Sin avisos aquí': 'No notifications here',
+    'Este navegador no sabe mostrar avisos del sistema. Los recordatorios los sigues viendo dentro de la app, y para que suenen con la app cerrada tienes el calendario, más abajo.':
+      'This browser cannot show system notifications. You still see your reminders inside the app, and to have them fire with the app closed there is the calendar, further down.',
+    'Falta instalar la app': 'The app needs installing',
+    'Añádela a tu pantalla de inicio': 'Add it to your home screen',
+    'En el iPhone los avisos solo funcionan desde la app instalada, no desde el navegador. Se hace una vez:':
+      'On iPhone, notifications only work from the installed app, not from the browser. You do this once:',
+    'Toca el botón de compartir de Safari, el cuadrado con la flecha.':
+      'Tap the Safari share button, the square with the arrow.',
+    'Baja y elige <b>{q}</b>.': 'Scroll down and pick <b>{q}</b>.',
+    'Añadir a pantalla de inicio': 'Add to Home Screen',
+    'Abre Training FR desde el icono nuevo y vuelve aquí.':
+      'Open Training FR from the new icon and come back here.',
+    'Bloqueados': 'Blocked',
+    'Los avisos están bloqueados': 'Notifications are blocked',
+    'Se dijo que no una vez y el sistema no lo vuelve a preguntar. Hay que activarlos a mano:':
+      'You said no once and the system never asks again. You have to switch them on by hand:',
+    'Abre los Ajustes del iPhone.': 'Open the iPhone Settings.',
+    'Baja hasta Training FR y entra.': 'Scroll down to Training FR and open it.',
+    'Entra en Notificaciones y enciende Permitir notificaciones.':
+      'Go into Notifications and turn on Allow Notifications.',
+    'Toca el candado de la barra de direcciones.': 'Tap the padlock in the address bar.',
+    'Busca Notificaciones y ponlo en Permitir.': 'Find Notifications and set it to Allow.',
+    'Recarga esta página.': 'Reload this page.',
+    'Falta un paso': 'One step missing',
+    'Permite los avisos': 'Allow notifications',
+    'Sin permiso solo verás los recordatorios dentro de la app. El sistema te lo va a preguntar una vez.':
+      'Without permission you will only see reminders inside the app. The system will ask you once.',
+    'Activar los avisos': 'Turn on notifications'
   };
 })(window);
