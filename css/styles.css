@@ -6480,3 +6480,36 @@ html[data-theme="light"] .rec-adelanto {
   fill: none; stroke: currentColor; stroke-width: 2.6;
   stroke-linecap: round; stroke-linejoin: round;
 }
+
+/* ---------- la lista, plegada de entrada ----------
+   Lo que se mira a diario es la tarjeta de arriba; la lista completa es para el
+   dia que se cambia algo, y eso pasa una vez al mes. Con cinco botes
+   desplegados habia que pasar media pantalla para llegar a los recordatorios. */
+.sup-plegable > summary {
+  display: flex; align-items: center; gap: 9px;
+  padding: 14px 2px 8px; cursor: pointer; list-style: none;
+  font-size: .72rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--dim2);
+  -webkit-tap-highlight-color: transparent;
+}
+.sup-plegable > summary::-webkit-details-marker { display: none; }
+.sup-plegable > summary::marker { content: ''; }
+
+.sp-cuantos {
+  flex: none; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 800; letter-spacing: 0;
+  color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 26%, transparent);
+}
+.sp-flecha { flex: none; display: flex; transition: transform .2s ease; }
+.sp-flecha svg {
+  width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.sup-plegable[open] > summary .sp-flecha { transform: rotate(90deg); color: var(--acc); }
+
+/* El .stack global es display:flex y le gana a la regla del navegador que
+   pliega el contenido, asi que se pliega a mano, igual que en la boveda. */
+.sup-plegable:not([open]) > .sup-lista { display: none; }

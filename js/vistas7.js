@@ -21,6 +21,12 @@
 
   const S = function () { return g.Suplementos; };
 
+  /* Plegada de entrada. La lista completa es para el día que se cambia algo, y
+     eso pasa una vez al mes; lo que se mira a diario es la tarjeta de arriba.
+     Con cinco botes desplegados había que pasar media pantalla para llegar a
+     los recordatorios. Como render() repinta entero, el estado vive fuera. */
+  let listaAbierta = false;
+
   /* ---------- la lista ----------
      La hora iba en una columna propia, en verde y con un «HOY» debajo, y
      robaba el sitio y la mirada a lo que de verdad identifica la fila: el
@@ -139,16 +145,26 @@
 
         ${raw(hoyHTML(aporta))}
 
-        <div class="list-title">Lo que tomas</div>
-        <!-- Por hora y no por orden de alta: la lista se lee como la agenda del
-             día, y con cuatro botes el orden en que los apuntaste no le importa
-             a nadie. -->
-        <div class="sup-lista">
-          ${raw(l.slice().sort(function (a, b) {
-            return Alertas.enMinutos(S().horasDe(a)[0]) -
-              Alertas.enMinutos(S().horasDe(b)[0]);
-          }).map(filaHTML).join(''))}
-        </div>
+        <!-- Plegable y cerrada de entrada: lo que se mira a diario es la
+             tarjeta de arriba, y la lista completa es para el día que se cambia
+             algo. El botón de añadir se queda fuera: si estuviera dentro,
+             plegada no habría manera de añadir nada. -->
+        <details class="sup-plegable" ${raw(listaAbierta ? 'open' : '')}>
+          <summary>
+            <span class="grow">Lo que tomas</span>
+            <span class="sp-cuantos">${l.length}</span>
+            <span class="sp-flecha">${raw(icon('chevron'))}</span>
+          </summary>
+          <!-- Por hora y no por orden de alta: la lista se lee como la agenda
+               del día, y con cuatro botes el orden en que los apuntaste no le
+               importa a nadie. -->
+          <div class="sup-lista">
+            ${raw(l.slice().sort(function (a, b) {
+              return Alertas.enMinutos(S().horasDe(a)[0]) -
+                Alertas.enMinutos(S().horasDe(b)[0]);
+            }).map(filaHTML).join(''))}
+          </div>
+        </details>
 
         <button class="btn block" data-a="nuevo" style="margin-top:12px">
           ${raw(icon('plus'))} Añadir otro</button>
@@ -188,6 +204,9 @@
       const s = S().lista().filter(function (x) { return x.id === el.dataset.sup; })[0];
       if (s) fichaSheet(s);
     });
+
+    const det = root.querySelector('.sup-plegable');
+    if (det) det.addEventListener('toggle', function () { listaAbierta = det.open; });
 
     bind(root, '[data-a=sincronizar]', function () {
       const n = S().sincronizarAlertas();
