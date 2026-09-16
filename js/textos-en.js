@@ -983,6 +983,248 @@
 
     /* ---------- peso e historial ---------- */
     'Registra tu peso cada semana para ver la evolución.':
-      'Log your weight every week to see how it moves.'
+      'Log your weight every week to see how it moves.',
+
+    /* ---------- Ajustes: copia, instalar y zona peligrosa ---------- */
+    'Borrar todos mis datos': 'Delete all my data',
+    'Bóveda de claves': 'Key vault',
+    'Copia de seguridad': 'Backup',
+    'Entra con tu correo para tenerlo todo en cada dispositivo':
+      'Sign in with your email to have everything on every device',
+    'Exportar': 'Export',
+    'Importar': 'Import',
+    'Instalar aplicación': 'Install the app',
+    'Instalar en el móvil': 'Install on your phone',
+    'Rutinas, historial, perfil y ajustes de este dispositivo. No se puede deshacer.':
+      'Routines, history, profile and settings on this device. This cannot be undone.',
+    'Traer un archivo exportado desde otro dispositivo':
+      'Bring in a file exported from another device',
+    'Training FR funciona como una app: ábrela en el navegador del móvil y usa <b>{que}</b> (en Android, desde el menú del navegador; en iPhone, desde el botón Compartir). Después arranca a pantalla completa y funciona sin conexión.':
+      'Training FR works like an app: open it in your phone’s browser and use <b>{que}</b> (on Android, from the browser menu; on iPhone, from the Share button). After that it starts full screen and works offline.',
+    'Training FR · Catálogo de ejercicios de {a} (dominio público) y {b}, que es de donde salen los nombres y las instrucciones escritos en español.':
+      'Training FR · Exercise catalogue from {a} (public domain) and {b}, which is where the hand-written Spanish names and instructions come from.',
+    'Tus datos se quedan en tu dispositivo salvo que actives la sincronización con tu correo.':
+      'Your data stays on your device unless you turn on sync with your email.',
+    'Tus rutinas y tu historial se guardan solo en este navegador. Exporta un archivo para conservarlos o llevarlos a otro dispositivo.':
+      'Your routines and history are saved in this browser only. Export a file to keep them or take them to another device.',
+    'Un archivo con todo lo tuyo, listo para guardar':
+      'One file with everything of yours, ready to keep',
+    'Zona peligrosa': 'Danger zone',
+    '«Añadir a la pantalla de inicio»': '“Add to Home Screen”',
+    'Anotas cada serie. Necesario para los récords, el volumen y las gráficas.':
+      'You log every set. Needed for records, volume and charts.',
+    'Te propongo el objetivo (3 × 12) y solo marcas las que vas haciendo.':
+      'I suggest the target (3 × 12) and you just tick off the ones you do.',
+    'Un botón por ejercicio. Ni peso, ni repeticiones, ni series.':
+      'One button per exercise. No weight, no reps, no sets.',
+    'El entrenador recuerda la {n} frase que ya te ha dicho para no repetirse.':
+      'The coach remembers the {n} line it has already said to you so it does not repeat itself.',
+    'El entrenador recuerda las {n} frases que ya te ha dicho para no repetirse.':
+      'The coach remembers the {n} lines it has already said to you so it does not repeat itself.',
+
+    /* ---------- las tres formas de apuntar ---------- */
+    'Peso y repeticiones': 'Weight and reps',
+    'Marcar cada serie': 'Tick off each set',
+    'Marcar el ejercicio y ya': 'Just tick off the exercise',
+    '{a} de {b}': '{a} of {b}',
+
+    /* ---------- donde entrenas y las horas de comer ---------- */
+    '¿Dónde entrenas?': 'Where do you train?',
+    'Cambia el sitio y el catálogo se ajusta al momento.':
+      'Change the place and the catalogue adjusts straight away.',
+    'Qué cambia al elegir': 'What choosing changes',
+    'El catálogo, el buscador de ejercicios y las rutinas que te genere la IA: solo te ofrecerán lo que puedas hacer ahí. Lo que ya tengas guardado no se toca.':
+      'The catalogue, the exercise search and any routine the AI builds you: they will only offer what you can do there. Anything you have already saved is untouched.',
+    'Ahora entrenas {donde}': 'You now train {donde}',
+    'Tus horas de comer': 'Your meal times',
+    'Dime a qué hora empieza cada comida. Cada una llega hasta que empieza la siguiente, y la cena se estira hasta el desayuno del día siguiente.':
+      'Tell me what time each meal starts. Each one runs until the next begins, and dinner stretches to the next day’s breakfast.',
+    'desde las {a} hasta las {b}': 'from {a} to {b}',
+    'Volver a las horas de siempre': 'Go back to the usual times',
+
+    /* ---------- Bóveda de claves ---------- */
+    'Aquí se guardan las claves de los servicios que usa la app. Se quedan en este dispositivo: no viajan al repositorio ni las ve nadie más.':
+      'This is where the keys for the services the app uses are kept. They stay on this device: they never travel to the repository and nobody else sees them.',
+    'Núcleo inteligente': 'The thinking core',
+    'Quién piensa por la app': 'Who does the thinking for the app',
+    'Sin clave: el entrenador y el plan de comidas no funcionan':
+      'No key: the coach and the meal plan do not work',
+    '{prov} · clave guardada · {modelo}': '{prov} · key saved · {modelo}',
+    'Activo con otro proveedor; {prov} aún sin clave':
+      'Active with another provider; {prov} still has no key',
+    'Auditoría de rutinas, plan de comidas, foto del plato, entrenador y listas de música.':
+      'Routine audits, meal plans, plate photos, the coach and music playlists.',
+    'Elige quién contesta. Cada uno guarda su propia clave, así que puedes tener varios puestos y cambiar de uno a otro con un toque; lo que cambies aquí vale para toda la app.':
+      'Choose who answers. Each one keeps its own key, so you can have several set up and switch between them with one tap; what you change here applies across the whole app.',
+    'gratis': 'free',
+    'La clave se saca en {donde}.': 'You get the key at {donde}.',
+    'No lee fotos': 'It does not read photos',
+    '{no}, así que el cálculo de la comida por foto necesita Gemini o Anthropic.':
+      '{no}, so working out food from a photo needs Gemini or Anthropic.',
+    'Clave de {prov}': '{prov} key',
+    'Modelo': 'Model',
+    'Ver los suyos': 'See theirs',
+    'o escribe otro nombre de modelo': 'or type another model name',
+    'Probar': 'Test',
+    'Cómo consigo la clave de {prov}': 'How do I get a {prov} key',
+    'Borrar la clave de {prov}': 'Delete the {prov} key',
+    'Música · Spotify': 'Music · Spotify',
+    'Client ID de Spotify': 'Spotify Client ID',
+    'Hay que reconectar para dar los permisos nuevos':
+      'You need to reconnect to grant the new permissions',
+    'Conectado · puede reproducir y crear listas':
+      'Connected · it can play and create playlists',
+    'Client ID puesto, falta conectar la cuenta':
+      'Client ID set, the account still needs connecting',
+    'Sin Client ID: la música no se puede controlar desde aquí':
+      'No Client ID: music cannot be controlled from here',
+    'Controlar la música desde la pantalla de entrenamiento.':
+      'Control the music from the workout screen.',
+    'La app ya puede reproducir por sí misma y crear listas. Pulsa Conectar para dar los permisos nuevos.':
+      'The app can now play by itself and create playlists. Press Connect to grant the new permissions.',
+    '32 caracteres': '32 characters',
+    'Desconectar': 'Disconnect',
+    'Conectar': 'Connect',
+    'Dirección de retorno': 'Redirect URI',
+    'cópiala en el panel': 'copy it into the dashboard',
+    'dirección de retorno': 'redirect URI',
+    'Cómo consigo el Client ID': 'How do I get the Client ID',
+    'Borrar la configuración de Spotify': 'Delete the Spotify setup',
+    'Cuenta y sincronización': 'Account and sync',
+    'Cuenta y sincronización · Supabase': 'Account and sync · Supabase',
+    'No tienes que tocar nada': 'There is nothing for you to do',
+    'La lleva quien administra': 'Whoever administers it runs it',
+    'Tus datos viajan a la base de datos de quien te dio el acceso, y solo los ves tú: la base no deja que nadie lea lo de otra persona.':
+      'Your data goes to the database of whoever gave you access, and only you see it: the database does not let anyone read someone else’s.',
+    'Sesión abierta · tus datos viajan entre dispositivos':
+      'Signed in · your data travels between devices',
+    'Proyecto configurado, sin sesión iniciada': 'Project set up, not signed in',
+    'Sin configurar: los datos solo viven en este dispositivo':
+      'Not set up: your data lives on this device only',
+    'Entrar con tu correo y sincronizar entre dispositivos.':
+      'Sign in with your email and sync between devices.',
+    'Clave publishable (o anon)': 'Publishable key (or anon)',
+    'Montarla paso a paso': 'Set it up step by step',
+    'Ocho pasos con capturas de cada menú, diciendo qué botón tocar. Esta pantalla es el atajo para quien ya lo tiene montado.':
+      'Eight steps with a screenshot of every menu, saying which button to tap. This screen is the shortcut for anyone who already has it set up.',
+    'El resumen, si ya te lo sabes': 'The short version, if you already know it',
+    'SQL para crear la tabla': 'SQL to create the table',
+    'Copiar': 'Copy',
+    'Borrar la configuración de Supabase': 'Delete the Supabase setup',
+    'Varios dispositivos': 'Several devices',
+    'Sincronizar mis claves': 'Sync my keys',
+    'Encendido · no hay que repetirlas en cada dispositivo':
+      'On · no need to repeat them on every device',
+    'Apagado · cada dispositivo lleva las suyas': 'Off · each device keeps its own',
+    'Que viajen con mis datos': 'Let them travel with my data',
+    'Las claves de IA y el Client ID de Spotify, para no repetirlos en cada dispositivo':
+      'Your AI keys and Spotify Client ID, so you do not repeat them on every device',
+    'Sincronizar claves': 'Sync keys',
+    'Las sesiones abiertas nunca se sincronizan: cada dispositivo abre la suya, que es lo correcto. En uno nuevo solo tendrás que pulsar Conectar en Spotify.':
+      'Open sessions are never synced: each device opens its own, which is as it should be. On a new one you will only have to press Connect in Spotify.',
+    'Un enlace y ya': 'One link and that is it',
+    'Enlazar un dispositivo nuevo': 'Link a new device',
+    'La configuración de Supabase no puede venir de la nube, porque es justo la que abre la puerta. Abre este enlace en el otro dispositivo y quedará listo para entrar con tu correo.':
+      'The Supabase setup cannot come from the cloud, because it is the very thing that opens the door. Open this link on the other device and it will be ready for you to sign in with your email.',
+    'Compartir enlace': 'Share link',
+    'Copiar enlace': 'Copy link',
+    'El enlace lleva la URL del proyecto y la clave anon, que son públicas por diseño: sin entrar con tu correo no dan acceso a ningún dato.':
+      'The link carries the project URL and the anon key, which are public by design: without signing in with your email they give access to no data.',
+    'Dónde viven las claves': 'Where the keys live',
+    'Y cómo borrarlas todas de golpe': 'And how to delete them all at once',
+    'Las claves viven en el almacenamiento de este navegador y, si la sincronización de claves está activada, también en tu base de datos de Supabase, donde solo tú puedes leerlas.':
+      'The keys live in this browser’s storage and, if key sync is on, in your Supabase database too, where only you can read them.',
+    'La clave <i>publishable</i> de Supabase y el <i>Client ID</i> de Spotify están pensados para ir en el navegador y no son secretos. Las de IA sí lo son: no las compartas ni las pegues en el código.':
+      'Supabase’s <i>publishable</i> key and Spotify’s <i>Client ID</i> are meant to live in the browser and are not secrets. The AI ones are: do not share them or paste them into code.',
+    'Borrar todas las claves': 'Delete all the keys',
+    '<li>Entra en <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">console.groq.com/keys</a> y crea una cuenta. No pide tarjeta.</li>':
+      '<li>Go to <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">console.groq.com/keys</a> and create an account. No card needed.</li>',
+    '<li>Pulsa <b>Create API Key</b>, ponle un nombre y cópiala (empieza por <code>gsk_</code>). Solo se enseña una vez.</li>':
+      '<li>Press <b>Create API Key</b>, give it a name and copy it (it starts with <code>gsk_</code>). It is only shown once.</li>',
+    '<li>Pégala aquí y <b>Guardar</b>. Después toca <b>Ver los suyos</b> para que la lista de modelos se llene con los que tengas de verdad.</li>':
+      '<li>Paste it here and press <b>Save</b>. Then tap <b>See theirs</b> so the model list fills up with the ones you actually have.</li>',
+    '<li>La capa gratuita da de sobra para esta app. El límite exacto lo ves en tu propia consola: lo cambian cada poco y no me lo invento aquí.</li>':
+      '<li>The free tier is plenty for this app. The exact limit is in your own console: they change it often and I am not going to invent it here.</li>',
+    '<li>Entra en <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer">openrouter.ai/keys</a> y crea una cuenta.</li>':
+      '<li>Go to <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer">openrouter.ai/keys</a> and create an account.</li>',
+    '<li>Pulsa <b>Create Key</b> y cópiala (empieza por <code>sk-or-v1-</code>).</li>':
+      '<li>Press <b>Create Key</b> and copy it (it starts with <code>sk-or-v1-</code>).</li>',
+    '<li>Pégala aquí y <b>Guardar</b>. En la lista de modelos salen primero los que acaban en <b>:free</b>: esos no cuestan nada y no hace falta meter saldo.</li>':
+      '<li>Paste it here and press <b>Save</b>. The models ending in <b>:free</b> come first in the list: those cost nothing and need no credit.</li>',
+    '<li>Si algún día quieres uno de pago —Claude, Gemini, GPT— metes saldo y lo eliges de la misma lista, con la misma clave.</li>':
+      '<li>If one day you want a paid one — Claude, Gemini, GPT — you add credit and pick it from the same list, with the same key.</li>',
+    '<li>Entra en <a href="https://console.mistral.ai/api-keys" target="_blank" rel="noopener noreferrer">console.mistral.ai</a> y crea una cuenta.</li>':
+      '<li>Go to <a href="https://console.mistral.ai/api-keys" target="_blank" rel="noopener noreferrer">console.mistral.ai</a> and create an account.</li>',
+    '<li>Crea una clave en <b>API Keys</b> y cópiala.</li>':
+      '<li>Create a key under <b>API Keys</b> and copy it.</li>',
+    '<li>Pégala aquí y <b>Guardar</b>, y toca <b>Ver los suyos</b> para la lista de modelos.</li>':
+      '<li>Paste it here and press <b>Save</b>, then tap <b>See theirs</b> for the model list.</li>',
+    '<li>Tiene capa gratuita; si la agotas, te lo dirá al llamar.</li>':
+      '<li>It has a free tier; if you use it up, it will tell you on the next call.</li>',
+    '<li>Entra en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> con tu cuenta de Google.</li>':
+      '<li>Go to <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> with your Google account.</li>',
+    '<li>Pulsa <b>Create API key</b>. Si pide proyecto, deja el que propone.</li>':
+      '<li>Press <b>Create API key</b>. If it asks for a project, keep the one it suggests.</li>',
+    '<li>Copia la clave (empieza por <code>AIza</code>), pégala aquí y <b>Guardar</b>.</li>':
+      '<li>Copy the key (it starts with <code>AIza</code>), paste it here and press <b>Save</b>.</li>',
+    '<li>Es gratis dentro del límite diario, que sobra para uso personal. Al superarlo la app avisa y el resto sigue funcionando.</li>':
+      '<li>It is free within the daily limit, which is plenty for personal use. If you go over, the app tells you and everything else keeps working.</li>',
+    '<li>Entra en <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com</a> y crea una cuenta.</li>':
+      '<li>Go to <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com</a> and create an account.</li>',
+    '<li>Mete saldo en <b>Billing</b>: se paga por uso y no hay capa gratuita. Si tienes Claude Pro, <b>no vale aquí</b>: la suscripción y la API se facturan por separado.</li>':
+      '<li>Add credit under <b>Billing</b>: it is pay-as-you-go and there is no free tier. If you have Claude Pro, <b>it does not count here</b>: the subscription and the API are billed separately.</li>',
+    '<li>En <b>API Keys</b> pulsa <b>Create Key</b> y copia la clave (empieza por <code>sk-ant-</code>). Solo se enseña una vez.</li>':
+      '<li>Under <b>API Keys</b> press <b>Create Key</b> and copy the key (it starts with <code>sk-ant-</code>). It is only shown once.</li>',
+    '<li>Pégala aquí y <b>Guardar</b>. Con lo que hace esta app, unos pocos euros duran meses.</li>':
+      '<li>Paste it here and press <b>Save</b>. With what this app does, a few euros last months.</li>',
+    '<li>Entra en <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">platform.deepseek.com</a> y crea una cuenta.</li>':
+      '<li>Go to <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">platform.deepseek.com</a> and create an account.</li>',
+    '<li>Mete saldo: se paga por uso y es de lo más barato que hay.</li>':
+      '<li>Add credit: it is pay-as-you-go and about the cheapest there is.</li>',
+    '<li>En <b>API keys</b> crea una y cópiala (empieza por <code>sk-</code>).</li>':
+      '<li>Under <b>API keys</b> create one and copy it (it starts with <code>sk-</code>).</li>',
+    '<li>Pégala aquí y <b>Guardar</b>. Ojo: no lee fotos, así que deja Gemini o Anthropic puestos si usas el cálculo de comida por foto.</li>':
+      '<li>Paste it here and press <b>Save</b>. Careful: it does not read photos, so keep Gemini or Anthropic set up if you use food-from-photo.',
+    '<li>Entra en <a href="https://console.x.ai" target="_blank" rel="noopener noreferrer">console.x.ai</a> y crea una cuenta.</li>':
+      '<li>Go to <a href="https://console.x.ai" target="_blank" rel="noopener noreferrer">console.x.ai</a> and create an account.</li>',
+    '<li>Mete saldo en <b>Billing</b> y crea una clave en <b>API Keys</b> (empieza por <code>xai-</code>).</li>':
+      '<li>Add credit under <b>Billing</b> and create a key under <b>API Keys</b> (it starts with <code>xai-</code>).</li>',
+    '<li>Pégala aquí y <b>Guardar</b>.</li>':
+      '<li>Paste it here and press <b>Save</b>.</li>',
+    '<li>Los nombres de sus modelos cambian a menudo. Si da error de modelo, mira cuál tienes disponible en tu consola y escríbelo en el campo de abajo.</li>':
+      '<li>Their model names change often. If you get a model error, check which one you have available in your console and type it in the field below.</li>',
+    '<li>Entra en <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener noreferrer">developer.spotify.com/dashboard</a> con tu cuenta de Spotify y acepta las condiciones de desarrollador.</li>':
+      '<li>Go to <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener noreferrer">developer.spotify.com/dashboard</a> with your Spotify account and accept the developer terms.</li>',
+    '<li>Pulsa <b>Create app</b>. En nombre y descripción pon lo que quieras, por ejemplo <i>Training FR</i>.</li>':
+      '<li>Press <b>Create app</b>. Put whatever you like in the name and description, for example <i>Training FR</i>.</li>',
+    '<li>En <b>Redirect URIs</b> pega la dirección de retorno de arriba, tal cual, y pulsa <b>Add</b>. Tiene que coincidir carácter por carácter.</li>':
+      '<li>Under <b>Redirect URIs</b> paste the redirect URI from above, exactly as it is, and press <b>Add</b>. It has to match character for character.</li>',
+    '<li>Marca la casilla <b>Web API</b> y guarda.</li>':
+      '<li>Tick the <b>Web API</b> box and save.</li>',
+    '<li>Abre la app recién creada, ve a <b>Settings</b> y copia el <b>Client ID</b>. El <i>Client Secret</i> no hace falta: esta app usa PKCE, que no necesita secretos.</li>':
+      '<li>Open the app you just created, go to <b>Settings</b> and copy the <b>Client ID</b>. The <i>Client Secret</i> is not needed: this app uses PKCE, which needs no secrets.</li>',
+    '<li>Pégalo aquí, pulsa <b>Guardar</b> y luego <b>Conectar</b> para autorizar tu cuenta.</li>':
+      '<li>Paste it here, press <b>Save</b> and then <b>Connect</b> to authorise your account.</li>',
+    '<li>Al publicar la app en internet, vuelve al panel y añade también la dirección definitiva en <b>Redirect URIs</b>.</li>':
+      '<li>When you publish the app online, go back to the dashboard and add the final address under <b>Redirect URIs</b> too.</li>',
+
+    /* ---------- las notas de cada proveedor de IA ---------- */
+    'Capa gratuita generosa y sin tarjeta, y lee fotos. Es el que trae la app de serie y el que recomiendo si no quieres pagar nada. El límite que te toca lo ves en tu consola de AI Studio.':
+      'A generous free tier with no card, and it reads photos. It is what the app ships with and what I recommend if you do not want to pay anything. Your particular limit is in your AI Studio console.',
+    'Capa gratuita sin tarjeta y muy rápido: corre modelos abiertos (Llama, Qwen, GPT-OSS). Ojo, los de texto no leen fotos. El límite que te toca lo ves en tu consola.':
+      'A free tier with no card and very fast: it runs open models (Llama, Qwen, GPT-OSS). Careful, the text ones do not read photos. Your particular limit is in your console.',
+    'De pago por uso y de lo más barato que hay. No lee fotos: para el cálculo de la comida por foto hace falta otro.':
+      'Pay-as-you-go and about the cheapest there is. It does not read photos: working out food from a photo needs another one.',
+    'De pago por uso.': 'Pay-as-you-go.',
+    'De pago por uso: tu suscripción de Claude Pro no sirve aquí, la API se factura aparte. Es el que mejor sigue instrucciones largas, que es lo que más hace esta app. Opus es el bueno; Haiku, el barato.':
+      'Pay-as-you-go: your Claude Pro subscription does not count here, the API is billed separately. It is the best at following long instructions, which is most of what this app does. Opus is the good one; Haiku, the cheap one.',
+    'Tiene capa gratuita. Europeo, por si te importa dónde acaban tus datos.':
+      'It has a free tier. European, in case you care where your data ends up.',
+    'Una sola clave para casi todos los modelos que existen. Los que acaban en «:free» no cuestan nada; el resto se paga por uso con saldo.':
+      'One key for nearly every model there is. The ones ending in “:free” cost nothing; the rest are pay-as-you-go from your credit.',
+
+    /* ---------- pistas de las claves ---------- */
+    'sin guardar': 'not saved',
+    'sin prefijo fijo': 'no fixed prefix'
   };
 })(window);

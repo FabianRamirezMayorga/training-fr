@@ -338,18 +338,18 @@
 
   function lugarSheet() {
     UI.modal(html`
-      <h2>¿Dónde entrenas?</h2>
-      <p class="muted">Cambia el sitio y el catálogo se ajusta al momento.</p>
+      <h2>${T('¿Dónde entrenas?')}</h2>
+      <p class="muted">${T('Cambia el sitio y el catálogo se ajusta al momento.')}</p>
       <div class="stack" style="margin-top:14px">${raw(tarjetasLugar(Store.settings().gear))}</div>
 
       <!-- Qué se lleva por delante el cambio. Se toca una vez y afecta a tres
            pantallas, y hasta ahora eso no se decía en ninguna parte. -->
       <div class="lg-efecto">
         <span class="lg-e-ico">${raw(icon('filtro'))}</span>
-        <span class="grow"><b>Qué cambia al elegir</b>
-          <span class="tiny">El catálogo, el buscador de ejercicios y las rutinas que te
-          genere la IA: solo te ofrecerán lo que puedas hacer ahí. Lo que ya tengas
-          guardado no se toca.</span></span>
+        <span class="grow"><b>${T('Qué cambia al elegir')}</b>
+          <span class="tiny">${T('El catálogo, el buscador de ejercicios y las rutinas ' +
+          'que te genere la IA: solo te ofrecerán lo que puedas hacer ahí. Lo que ya ' +
+          'tengas guardado no se toca.')}</span></span>
       </div>`,
       function (el) {
         el.querySelectorAll('[data-lugar]').forEach(function (b) {
@@ -359,8 +359,8 @@
             UI.closeModal();
             render();
             UI.toast(b.dataset.lugar === 'todo'
-              ? 'Mostrando el catálogo completo'
-              : 'Ahora entrenas ' + Data.gearFrase(b.dataset.lugar));
+              ? T('Mostrando el catálogo completo')
+              : Tn('Ahora entrenas {donde}', { donde: Data.gearFrase(b.dataset.lugar) }));
           };
         });
       });
@@ -4613,8 +4613,8 @@
       o.v + '" style="--tono:' + o.tono + '">' +
       '<span class="op-silueta" aria-hidden="true">' + icon(o.ico) + '</span>' +
       '<span class="op-ico">' + icon(o.ico) + '</span>' +
-      '<span class="grow"><span class="op-nom">' + esc(o.t) + '</span>' +
-      '<span class="op-sub">' + esc(o.sub) + '</span>' +
+      '<span class="grow"><span class="op-nom">' + esc(T(o.t)) + '</span>' +
+      '<span class="op-sub">' + esc(T(o.sub)) + '</span>' +
       '<span class="op-muestra">' + o.muestra + '</span></span>' +
       '<span class="op-marca">' + icon('check') + '</span></button>';
   }
@@ -4644,10 +4644,11 @@
     { v: 'simple', ico: 'check', tono: '#4f8cf5', t: 'Marcar cada serie',
       sub: 'Te propongo el objetivo (3 × 12) y solo marcas las que vas haciendo.',
       muestra: '<span class="mu-serie hecha"></span><span class="mu-serie hecha"></span>' +
-        '<span class="mu-serie"></span><span class="mu-txt">2 de 3</span>' },
+        '<span class="mu-serie"></span><span class="mu-txt">' +
+        UI.esc(Tn('{a} de {b}', { a: 2, b: 3 })) + '</span>' },
     { v: 'ejercicio', ico: 'flag', tono: '#c06bf0', t: 'Marcar el ejercicio y ya',
       sub: 'Un botón por ejercicio. Ni peso, ni repeticiones, ni series.',
-      muestra: '<span class="mu-hecho">Hecho</span>' }
+      muestra: '<span class="mu-hecho">' + UI.esc(T('Hecho')) + '</span>' }
   ];
 
   function viewAjustes() {
@@ -4678,7 +4679,7 @@
           <span class="fp-ico">${raw(icon(cara.icono))}</span>
           <span class="grow"><span class="fp-tit">${T('Dónde entrenas')}</span>
             <span class="fp-sub">${raw(sitio
-              ? esc(sitio.label) + ' · ' + Tn('{n} ejercicios a tu alcance',
+              ? esc(T(sitio.label)) + ' · ' + Tn('{n} ejercicios a tu alcance',
                 { n: UI.num(cuantosEn(s.gear)) })
               : T('Sin elegir'))}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
@@ -4754,77 +4755,82 @@
            busque otra cosa, y aquí se puede borrar esa memoria. */
         const n = g.IA && IA.frasesDichas ? IA.frasesDichas().length : 0;
         if (!n) return '';
-        return '<p class="tiny" style="margin:8px 0 0">El entrenador recuerda las ' +
-          (n === 1 ? 'frase que ya te ha dicho' : n + ' frases que ya te ha dicho') +
-          ' para no repetirse. ' +
-          '<button class="btn sm ghost" data-a="olvidarfrases">Que empiece de cero</button></p>';
+        return '<p class="tiny" style="margin:8px 0 0">' +
+          UI.esc(Tp(n, 'El entrenador recuerda la {n} frase que ya te ha dicho para no ' +
+            'repetirse.', 'El entrenador recuerda las {n} frases que ya te ha dicho para ' +
+            'no repetirse.')) + ' ' +
+          '<button class="btn sm ghost" data-a="olvidarfrases">' +
+          UI.esc(T('Que empiece de cero')) + '</button></p>';
       })())}
 
       <div class="list-title">${T('Claves y conexiones')}</div>
       <div class="plan-acciones" style="margin:10px 0 0">
         <button class="fila-plan" data-a="claves" style="--fp:#f0a23c">
           <span class="fp-ico">${raw(icon('llave'))}</span>
-          <span class="grow"><span class="fp-tit">Bóveda de claves</span>
+          <span class="grow"><span class="fp-tit">${T('Bóveda de claves')}</span>
             <span class="fp-sub">${resumenClaves()}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
         <button class="fila-plan" data-a="ircuenta" style="--fp:#4f8cf5">
           <span class="fp-ico">${raw(icon('nube'))}</span>
-          <span class="grow"><span class="fp-tit">Mi cuenta</span>
-            <span class="fp-sub">${raw(Sync.activa() ? esc(Sync.email())
-              : 'Entra con tu correo para tenerlo todo en cada dispositivo')}</span></span>
+          <span class="grow"><span class="fp-tit">${T('Mi cuenta')}</span>
+            <span class="fp-sub">${raw(esc(Sync.activa() ? Sync.email()
+              : T('Entra con tu correo para tenerlo todo en cada dispositivo')))}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
 
-      <div class="list-title">Copia de seguridad</div>
-      <p class="tiny" style="margin:0 0 2px">Tus rutinas y tu historial se guardan solo en
-      este navegador. Exporta un archivo para conservarlos o llevarlos a otro dispositivo.</p>
+      <div class="list-title">${T('Copia de seguridad')}</div>
+      <p class="tiny" style="margin:0 0 2px">${T('Tus rutinas y tu historial se guardan ' +
+      'solo en este navegador. Exporta un archivo para conservarlos o llevarlos a otro ' +
+      'dispositivo.')}</p>
       <div class="plan-acciones" style="margin:10px 0 0">
         <button class="fila-plan" data-a="export" style="--fp:var(--acc)">
           <span class="fp-ico">${raw(icon('down'))}</span>
-          <span class="grow"><span class="fp-tit">Exportar</span>
-            <span class="fp-sub">Un archivo con todo lo tuyo, listo para guardar</span></span>
+          <span class="grow"><span class="fp-tit">${T('Exportar')}</span>
+            <span class="fp-sub">${T('Un archivo con todo lo tuyo, listo para guardar')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
         <button class="fila-plan" data-a="import" style="--fp:#c06bf0">
           <span class="fp-ico">${raw(icon('up'))}</span>
-          <span class="grow"><span class="fp-tit">Importar</span>
-            <span class="fp-sub">Traer un archivo exportado desde otro dispositivo</span></span>
+          <span class="grow"><span class="fp-tit">${T('Importar')}</span>
+            <span class="fp-sub">${T('Traer un archivo exportado desde otro dispositivo')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
       <input type="file" id="s-file" accept="application/json,.json" hidden>
 
-      <div class="list-title">Instalar en el móvil</div>
+      <div class="list-title">${T('Instalar en el móvil')}</div>
       <div class="card">
-        <p class="muted" style="margin-top:0;font-size:.88rem">Training FR funciona como una
-        app: ábrela en el navegador del móvil y usa <b>«Añadir a la pantalla de inicio»</b>
-        (en Android, desde el menú del navegador; en iPhone, desde el botón Compartir).
-        Después arranca a pantalla completa y funciona sin conexión.</p>
+        <p class="muted" style="margin-top:0;font-size:.88rem">${raw(Tn('Training FR ' +
+        'funciona como una app: ábrela en el navegador del móvil y usa <b>{que}</b> (en ' +
+        'Android, desde el menú del navegador; en iPhone, desde el botón Compartir). ' +
+        'Después arranca a pantalla completa y funciona sin conexión.',
+        { que: esc(T('«Añadir a la pantalla de inicio»')) }))}</p>
         <button class="btn primary block btn-arranque" data-a="install" hidden id="btn-install"
-                style="margin-top:11px">Instalar aplicación</button>
+                style="margin-top:11px">${T('Instalar aplicación')}</button>
       </div>
 
-      <div class="list-title">Zona peligrosa</div>
+      <div class="list-title">${T('Zona peligrosa')}</div>
       <div class="plan-acciones" style="margin:10px 0 0">
         <button class="fila-plan es-peligro" data-a="wipe" style="--fp:var(--bad)">
           <span class="fp-ico">${raw(icon('trash'))}</span>
-          <span class="grow"><span class="fp-tit">Borrar todos mis datos</span>
-            <span class="fp-sub">Rutinas, historial, perfil y ajustes de este dispositivo.
-            No se puede deshacer.</span></span>
+          <span class="grow"><span class="fp-tit">${T('Borrar todos mis datos')}</span>
+            <span class="fp-sub">${T('Rutinas, historial, perfil y ajustes de este ' +
+            'dispositivo. No se puede deshacer.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
 
       <p class="tiny" style="margin-top:22px">
-        Training FR · Catálogo de ejercicios de
-        <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener noreferrer">free-exercise-db</a>
-        (dominio público) y
-        <a href="https://repdb.co" target="_blank" rel="noopener noreferrer">RepDB (repdb.co)</a>,
-        que es de donde salen los nombres y las instrucciones escritos en
-        español.<br>Tus datos se quedan en tu dispositivo salvo que
-        actives la sincronización con tu correo.
+        ${raw(Tn('Training FR · Catálogo de ejercicios de {a} (dominio público) y {b}, que ' +
+        'es de donde salen los nombres y las instrucciones escritos en español.', {
+          a: '<a href="https://github.com/yuhonas/free-exercise-db" target="_blank" ' +
+             'rel="noopener noreferrer">free-exercise-db</a>',
+          b: '<a href="https://repdb.co" target="_blank" rel="noopener noreferrer">' +
+             'RepDB (repdb.co)</a>'
+        }))}<br>${T('Tus datos se quedan en tu dispositivo salvo que actives la ' +
+        'sincronización con tu correo.')}
       </p>`;
   }
 

@@ -992,18 +992,21 @@
 
     UI.modal(html`
       <div class="conf-disco cambio">${raw(icon('reloj'))}</div>
-      <h2 class="conf-tit">Tus horas de comer</h2>
-      <p class="muted conf-txt">Dime a qué hora empieza cada comida. Cada una llega hasta
-      que empieza la siguiente, y la cena se estira hasta el desayuno del día siguiente.</p>
+      <h2 class="conf-tit">${T('Tus horas de comer')}</h2>
+      <p class="muted conf-txt">${T('Dime a qué hora empieza cada comida. Cada una llega ' +
+      'hasta que empieza la siguiente, y la cena se estira hasta el desayuno del día ' +
+      'siguiente.')}</p>
 
       <div class="fr-lista">
         ${raw(actuales.map(function (f, i) {
           const sig = actuales[(i + 1) % actuales.length];
           return '<div class="fr-fila">' +
-            '<span class="grow"><span class="fr-nom">' + esc(f.label) + '</span>' +
-            '<span class="fr-rango" data-rango="' + esc(f.id) + '">desde las ' +
-            esc(UI.hora ? UI.hora(f.desde) : f.desde) + ' hasta las ' +
-            esc(UI.hora ? UI.hora(sig.desde) : sig.desde) + '</span></span>' +
+            '<span class="grow"><span class="fr-nom">' + esc(T(f.label)) + '</span>' +
+            '<span class="fr-rango" data-rango="' + esc(f.id) + '">' +
+            esc(Tn('desde las {a} hasta las {b}', {
+              a: UI.hora ? UI.hora(f.desde) : f.desde,
+              b: UI.hora ? UI.hora(sig.desde) : sig.desde
+            })) + '</span></span>' +
             '<input type="time" class="fr-hora" data-franja="' + esc(f.id) +
             '" value="' + esc(f.desde) + '"></div>';
         }).join(''))}
@@ -1011,11 +1014,11 @@
 
       <div class="cb-acciones" style="margin-top:16px">
         <button class="btn primary grow btn-arranque" data-x="ok">
-          ${raw(icon('check'))} Guardar</button>
-        <button class="btn vidrio" data-x="no">Cancelar</button>
+          ${raw(icon('check'))} ${T('Guardar')}</button>
+        <button class="btn vidrio" data-x="no">${T('Cancelar')}</button>
       </div>
       <button class="btn ghost block sm" data-x="reset" style="margin-top:9px">
-        Volver a las horas de siempre</button>`,
+        ${T('Volver a las horas de siempre')}</button>`,
       function (el) {
         const pintarRangos = function () {
           const vals = {};
@@ -1028,8 +1031,8 @@
             if (!caja) return;
             const a = vals[f.id] || f.desde;
             const b = vals[sig.id] || sig.desde;
-            caja.textContent = 'desde las ' + (UI.hora ? UI.hora(a) : a) +
-              ' hasta las ' + (UI.hora ? UI.hora(b) : b);
+            caja.textContent = Tn('desde las {a} hasta las {b}', {
+              a: UI.hora ? UI.hora(a) : a, b: UI.hora ? UI.hora(b) : b });
           });
         };
 

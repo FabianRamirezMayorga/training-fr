@@ -16,13 +16,19 @@
   const render = function () { return App.render(); };
 
   /* Bloque plegable con las instrucciones de cada servicio */
+  /* Los pasos llegan como lista y no pegados: asi cada <li> es una frase
+     entera que el diccionario puede casar. La etiqueta viaja dentro, como los
+     asteriscos del manual, porque en ingles la negrita no cae en la misma
+     palabra. */
   function guia(id, titulo, pasos) {
+    const lista = Array.isArray(pasos) ? pasos.map(function (x) { return T(x); }).join('')
+      : raw(pasos);
     return html`
       <button class="guia-tit" data-guia="${id}">
         ${raw(icon('chevron'))} ${titulo}
       </button>
       <div class="guia" data-guia-cuerpo="${id}" hidden>
-        <ol class="instr">${raw(pasos)}</ol>
+        <ol class="instr">${raw(lista)}</ol>
       </div>`;
   }
 
@@ -55,11 +61,11 @@
           <span class="bov-silueta" aria-hidden="true">${raw(icon(o.ico || 'llave'))}</span>
           <span class="bov-ico">${raw(icon(o.ico || 'llave'))}</span>
           <span class="grow">
-            <span class="bov-tit">${o.titulo}</span>
+            <span class="bov-tit">${T(o.titulo)}</span>
             <span class="tiny bov-sub">${o.resumen}</span>
           </span>
           ${raw(o.probar ? '<button class="btn sm vidrio bov-probar" data-probar="' +
-            esc(o.probar) + '">Probar</button>' : '')}
+            esc(o.probar) + '">' + esc(T('Probar')) + '</button>' : '')}
           ${raw(o.chip || '')}
           <span class="chevron bov-flecha">${raw(icon('chevron'))}</span>
         </summary>
@@ -70,7 +76,7 @@
   /* El estado, como un punto y una palabra. Verde puesto, gris sin poner,
      ámbar cuando hay algo que hacer. */
   function estadoPunto(clase, texto) {
-    return '<span class="bov-estado ' + clase + '"><i></i>' + esc(texto) + '</span>';
+    return '<span class="bov-estado ' + clase + '"><i></i>' + esc(T(texto)) + '</span>';
   }
 
   function estado(ok, textoOk, textoNo) {
@@ -103,7 +109,7 @@
           ${raw(valor
             ? '<span class="cb-huella">' + icon('check') + '<code>' +
               esc(resumida(valor)) + '</code></span>'
-            : '<span class="cb-huella vacia">sin guardar</span>')}
+            : '<span class="cb-huella vacia">' + esc(T('sin guardar')) + '</span>')}
         </div>
         ${raw(campoSecreto(id, valor, marcador))}
       </div>`;
@@ -147,7 +153,7 @@
       'lista de modelos se llene con los que tengas de verdad.</li>',
       '<li>La capa gratuita da de sobra para esta app. El límite exacto lo ves en tu ' +
       'propia consola: lo cambian cada poco y no me lo invento aquí.</li>'
-    ].join(''),
+    ],
     openrouter: [
       '<li>Entra en <a href="https://openrouter.ai/keys" target="_blank" ' +
       'rel="noopener noreferrer">openrouter.ai/keys</a> y crea una cuenta.</li>',
@@ -156,7 +162,7 @@
       'acaban en <b>:free</b>: esos no cuestan nada y no hace falta meter saldo.</li>',
       '<li>Si algún día quieres uno de pago —Claude, Gemini, GPT— metes saldo y lo ' +
       'eliges de la misma lista, con la misma clave.</li>'
-    ].join(''),
+    ],
     mistral: [
       '<li>Entra en <a href="https://console.mistral.ai/api-keys" target="_blank" ' +
       'rel="noopener noreferrer">console.mistral.ai</a> y crea una cuenta.</li>',
@@ -164,7 +170,7 @@
       '<li>Pégala aquí y <b>Guardar</b>, y toca <b>Ver los suyos</b> para la lista de ' +
       'modelos.</li>',
       '<li>Tiene capa gratuita; si la agotas, te lo dirá al llamar.</li>'
-    ].join(''),
+    ],
     gemini: [
       '<li>Entra en <a href="https://aistudio.google.com/apikey" target="_blank" ' +
       'rel="noopener noreferrer">aistudio.google.com/apikey</a> con tu cuenta de Google.</li>',
@@ -172,7 +178,7 @@
       '<li>Copia la clave (empieza por <code>AIza</code>), pégala aquí y <b>Guardar</b>.</li>',
       '<li>Es gratis dentro del límite diario, que sobra para uso personal. Al superarlo ' +
       'la app avisa y el resto sigue funcionando.</li>'
-    ].join(''),
+    ],
     anthropic: [
       '<li>Entra en <a href="https://console.anthropic.com/settings/keys" target="_blank" ' +
       'rel="noopener noreferrer">console.anthropic.com</a> y crea una cuenta.</li>',
@@ -183,7 +189,7 @@
       '(empieza por <code>sk-ant-</code>). Solo se enseña una vez.</li>',
       '<li>Pégala aquí y <b>Guardar</b>. Con lo que hace esta app, unos pocos euros ' +
       'duran meses.</li>'
-    ].join(''),
+    ],
     deepseek: [
       '<li>Entra en <a href="https://platform.deepseek.com/api_keys" target="_blank" ' +
       'rel="noopener noreferrer">platform.deepseek.com</a> y crea una cuenta.</li>',
@@ -191,7 +197,7 @@
       '<li>En <b>API keys</b> crea una y cópiala (empieza por <code>sk-</code>).</li>',
       '<li>Pégala aquí y <b>Guardar</b>. Ojo: no lee fotos, así que deja Gemini o ' +
       'Anthropic puestos si usas el cálculo de comida por foto.</li>'
-    ].join(''),
+    ],
     grok: [
       '<li>Entra en <a href="https://console.x.ai" target="_blank" ' +
       'rel="noopener noreferrer">console.x.ai</a> y crea una cuenta.</li>',
@@ -200,7 +206,7 @@
       '<li>Pégala aquí y <b>Guardar</b>.</li>',
       '<li>Los nombres de sus modelos cambian a menudo. Si da error de modelo, mira ' +
       'cuál tienes disponible en tu consola y escríbelo en el campo de abajo.</li>'
-    ].join('')
+    ]
   };
 
   V.claves = function () {
@@ -216,31 +222,32 @@
     /* La línea que se lee sin abrir. Dice lo único que uno quiere saber de un
        vistazo: si está puesto y con qué. */
     const resumenIA = claveProv
-      ? prov.label + ' · clave guardada · ' + esc(IA.modeloDe(prov.id))
+      ? esc(Tn('{prov} · clave guardada · {modelo}',
+          { prov: prov.label, modelo: IA.modeloDe(prov.id) }))
       : (puestos.length
-        ? 'Activo con otro proveedor; ' + prov.label + ' aún sin clave'
-        : 'Sin clave: el entrenador y el plan de comidas no funcionan');
+        ? esc(Tn('Activo con otro proveedor; {prov} aún sin clave', { prov: prov.label }))
+        : esc(T('Sin clave: el entrenador y el plan de comidas no funcionan')));
 
-    const resumenSp = Spotify.permisosCaducados()
-      ? 'Hay que reconectar para dar los permisos nuevos'
-      : (Spotify.activa() ? 'Conectado · puede reproducir y crear listas'
-        : (Spotify.configurado() ? 'Client ID puesto, falta conectar la cuenta'
-          : 'Sin Client ID: la música no se puede controlar desde aquí'));
+    const resumenSp = esc(Spotify.permisosCaducados()
+      ? T('Hay que reconectar para dar los permisos nuevos')
+      : (Spotify.activa() ? T('Conectado · puede reproducir y crear listas')
+        : (Spotify.configurado() ? T('Client ID puesto, falta conectar la cuenta')
+          : T('Sin Client ID: la música no se puede controlar desde aquí'))));
 
-    const resumenSb = Sync.activa()
-      ? 'Sesión abierta · tus datos viajan entre dispositivos'
-      : (Sync.configurado() ? 'Proyecto configurado, sin sesión iniciada'
-        : 'Sin configurar: los datos solo viven en este dispositivo');
+    const resumenSb = esc(Sync.activa()
+      ? T('Sesión abierta · tus datos viajan entre dispositivos')
+      : (Sync.configurado() ? T('Proyecto configurado, sin sesión iniciada')
+        : T('Sin configurar: los datos solo viven en este dispositivo')));
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Ajustes</button>
-      <h1>Bóveda de claves</h1>
-      <p class="muted">Aquí se guardan las claves de los servicios que usa la app.
-      Se quedan en este dispositivo: no viajan al repositorio ni las ve nadie más.</p>
+        ${raw(icon('back'))} ${T('Ajustes')}</button>
+      <h1>${T('Bóveda de claves')}</h1>
+      <p class="muted">${T('Aquí se guardan las claves de los servicios que usa la app. ' +
+      'Se quedan en este dispositivo: no viajan al repositorio ni las ve nadie más.')}</p>
 
       <!-- ============ nucleo inteligente ============ -->
-      <div class="list-title">Núcleo inteligente</div>
+      <div class="list-title">${T('Núcleo inteligente')}</div>
       ${raw(plegable({
         id: 'ia',
         ico: 'chispa',
@@ -250,19 +257,20 @@
         chip: estado(IA.activa(), 'Activo', 'Sin configurar'),
         probar: claveProv ? 'ia' : '',
         cuerpo: html`
-        <p class="tiny" style="margin:0 0 9px">Auditoría de rutinas, plan de comidas, foto
-        del plato, entrenador y listas de música.</p>
+        <p class="tiny" style="margin:0 0 9px">${T('Auditoría de rutinas, plan de ' +
+        'comidas, foto del plato, entrenador y listas de música.')}</p>
 
-        <p class="tiny" style="margin:0 0 9px">Elige quién contesta. Cada uno guarda su
-        propia clave, así que puedes tener varios puestos y cambiar de uno a otro con un
-        toque; lo que cambies aquí vale para toda la app.</p>
+        <p class="tiny" style="margin:0 0 9px">${T('Elige quién contesta. Cada uno guarda ' +
+        'su propia clave, así que puedes tener varios puestos y cambiar de uno a otro con ' +
+        'un toque; lo que cambies aquí vale para toda la app.')}</p>
 
         <div class="row wrap" style="gap:6px;margin-bottom:12px" id="ia-provs">
           ${raw(IA.PROVEEDORES.map(function (pv) {
             const tiene = puestos.indexOf(pv.id) !== -1;
             return '<button class="chip ' + (pv.id === provId ? 'on' : '') +
               '" data-prov="' + pv.id + '">' + esc(pv.label) +
-              (pv.gratis ? ' <span class="tiny" style="opacity:.7">gratis</span>' : '') +
+              (pv.gratis ? ' <span class="tiny" style="opacity:.7">' +
+                esc(T('gratis')) + '</span>' : '') +
               (tiene ? ' <span class="punto-ok"></span>' : '') + '</button>';
           }).join(''))}
         </div>
@@ -270,22 +278,25 @@
         <div class="nota-prov">
           <span class="np-ico">${raw(icon('chispa'))}</span>
           <span class="grow">
-            <span class="np-txt">${prov.nota}</span>
-            <span class="np-txt">La clave se saca en
-              <a href="${prov.donde}" target="_blank" rel="noopener noreferrer">${prov.dondeTxt}</a>.
-              ${raw(prov.imagen ? '' : '<b>No lee fotos</b>, así que el cálculo de la comida ' +
-                'por foto necesita Gemini o Anthropic.')}</span>
+            <span class="np-txt">${T(prov.nota)}</span>
+            <span class="np-txt">${raw(Tn('La clave se saca en {donde}.',
+              { donde: '<a href="' + esc(prov.donde) + '" target="_blank" ' +
+                'rel="noopener noreferrer">' + esc(prov.dondeTxt) + '</a>' }))}
+              ${raw(prov.imagen ? '' : Tn('{no}, así que el cálculo de la comida por foto ' +
+                'necesita Gemini o Anthropic.',
+                { no: '<b>' + esc(T('No lee fotos')) + '</b>' }))}</span>
           </span>
         </div>
 
-        ${raw(campoClave('Clave de ' + prov.label, 'k-ia', claveProv, prov.pista))}
+        ${raw(campoClave(Tn('Clave de {prov}', { prov: prov.label }),
+          'k-ia', claveProv, T(prov.pista)))}
 
         <div class="clave-bloque">
           <div class="cb-cab">
-            <span class="cb-lab">Modelo</span>
+            <span class="cb-lab">${T('Modelo')}</span>
             ${raw(claveProv || prov.listaPublica
               ? '<button class="btn sm vidrio cb-mini" data-a="refrescarModelos">' +
-                icon('cambiar') + ' Ver los suyos</button>' : '')}
+                icon('cambiar') + ' ' + esc(T('Ver los suyos')) + '</button>' : '')}
           </div>
         <select id="k-ia-modelo" style="margin:0 0 8px">
           ${raw((function () {
@@ -298,25 +309,27 @@
             }).join('');
           })())}
         </select>
-        <input id="k-ia-modelo-libre" placeholder="o escribe otro nombre de modelo"
+        <input id="k-ia-modelo-libre" placeholder="${T('o escribe otro nombre de modelo')}"
                autocomplete="off" spellcheck="false" style="margin:0">
         </div>
 
         ${raw(acciones(
           '<button class="btn primary grow btn-arranque" data-a="guardarIA">' +
-            icon('check') + ' Guardar</button>',
+            icon('check') + ' ' + esc(T('Guardar')) + '</button>',
           '<button class="btn vidrio" data-a="probarIA"' + (claveProv ? '' : ' disabled') + '>' +
-            icon('beep') + ' Probar</button>'))}
+            icon('beep') + ' ' + esc(T('Probar')) + '</button>'))}
         <div class="tiny cb-estado" id="ia-estado"></div>
 
-        ${raw(guia('ia', 'Cómo consigo la clave de ' + prov.label, PASOS_CLAVE[prov.id]))}
+        ${raw(guia('ia', Tn('Cómo consigo la clave de {prov}', { prov: prov.label }),
+          PASOS_CLAVE[prov.id]))}
 
         ${raw(claveProv ? '<button class="btn danger block sm" data-a="borrarIA" ' +
-          'style="margin-top:10px">Borrar la clave de ' + esc(prov.label) + '</button>' : '')}`
+          'style="margin-top:10px">' +
+          esc(Tn('Borrar la clave de {prov}', { prov: prov.label })) + '</button>' : '')}`
       }))}
 
       <!-- ============ Spotify ============ -->
-      <div class="list-title">Música · Spotify</div>
+      <div class="list-title">${T('Música · Spotify')}</div>
       ${raw(plegable({
         id: 'sp',
         ico: 'musica',
@@ -328,32 +341,34 @@
           : estado(Spotify.activa(), 'Conectado',
               Spotify.configurado() ? 'Sin conectar' : 'Sin configurar'),
         cuerpo: html`
-        <p class="tiny" style="margin:0 0 9px">Controlar la música desde la pantalla de
-        entrenamiento.</p>
+        <p class="tiny" style="margin:0 0 9px">${T('Controlar la música desde la pantalla ' +
+        'de entrenamiento.')}</p>
         ${raw(Spotify.permisosCaducados()
-          ? '<p class="tiny" style="margin:0 0 11px;color:var(--warn)">La app ya puede ' +
-            'reproducir por sí misma y crear listas. Pulsa Conectar para dar los permisos nuevos.</p>'
+          ? '<p class="tiny" style="margin:0 0 11px;color:var(--warn)">' +
+            esc(T('La app ya puede reproducir por sí misma y crear listas. Pulsa Conectar ' +
+            'para dar los permisos nuevos.')) + '</p>'
           : '')}
 
-        ${raw(campoClave('Client ID', 'k-sp', cfgSp.clientId, '32 caracteres'))}
+        ${raw(campoClave('Client ID', 'k-sp', cfgSp.clientId, T('32 caracteres')))}
 
         ${raw(acciones(
           '<button class="btn primary grow btn-arranque" data-a="guardarSp">' +
-            icon('check') + ' Guardar</button>',
+            icon('check') + ' ' + esc(T('Guardar')) + '</button>',
           Spotify.configurado()
             ? (Spotify.activa()
-              ? '<button class="btn vidrio" data-a="salirSp">Desconectar</button>'
+              ? '<button class="btn vidrio" data-a="salirSp">' +
+                esc(T('Desconectar')) + '</button>'
               : '<button class="btn vidrio" data-a="conectarSp">' + icon('musica') +
-                ' Conectar</button>')
+                ' ' + esc(T('Conectar')) + '</button>')
             : ''))}
 
         <div class="clave-bloque" style="margin-top:14px">
-          <div class="cb-cab"><span class="cb-lab">Dirección de retorno</span>
-            <span class="cb-pista">cópiala en el panel</span></div>
-          ${raw(copiable(retorno, 'dirección de retorno'))}
+          <div class="cb-cab"><span class="cb-lab">${T('Dirección de retorno')}</span>
+            <span class="cb-pista">${T('cópiala en el panel')}</span></div>
+          ${raw(copiable(retorno, T('dirección de retorno')))}
         </div>
 
-        ${raw(guia('sp', 'Cómo consigo el Client ID', [
+        ${raw(guia('sp', T('Cómo consigo el Client ID'), [
           '<li>Entra en <a href="https://developer.spotify.com/dashboard" target="_blank" ' +
           'rel="noopener noreferrer">developer.spotify.com/dashboard</a> con tu cuenta de ' +
           'Spotify y acepta las condiciones de desarrollador.</li>',
@@ -367,24 +382,25 @@
           '<li>Pégalo aquí, pulsa <b>Guardar</b> y luego <b>Conectar</b> para autorizar tu cuenta.</li>',
           '<li>Al publicar la app en internet, vuelve al panel y añade también la ' +
           'dirección definitiva en <b>Redirect URIs</b>.</li>'
-        ].join('')))}
+        ]))}
 
         ${raw(Spotify.configurado() ? '<button class="btn danger block sm" data-a="borrarSp" ' +
-          'style="margin-top:10px">Borrar la configuración de Spotify</button>' : '')}`
+          'style="margin-top:10px">' + esc(T('Borrar la configuración de Spotify')) +
+          '</button>' : '')}`
       }))}
 
       <!-- ============ Supabase ============ -->
       ${raw(!Sync.puedeConfigurar() ? html`
-        <div class="list-title">Cuenta y sincronización</div>
+        <div class="list-title">${T('Cuenta y sincronización')}</div>
         <div class="card tarjeta-premium">
-          <div class="pre-encima">No tienes que tocar nada</div>
-          <div style="font-weight:700;font-size:1rem;margin:5px 0 4px">La lleva quien
-          administra</div>
-          <p class="muted" style="margin:0;font-size:.88rem">Tus datos viajan a la base de
-          datos de quien te dio el acceso, y solo los ves tú: la base no deja que nadie lea
-          lo de otra persona.</p>
+          <div class="pre-encima">${T('No tienes que tocar nada')}</div>
+          <div style="font-weight:700;font-size:1rem;margin:5px 0 4px">${T('La lleva quien ' +
+          'administra')}</div>
+          <p class="muted" style="margin:0;font-size:.88rem">${T('Tus datos viajan a la ' +
+          'base de datos de quien te dio el acceso, y solo los ves tú: la base no deja que ' +
+          'nadie lea lo de otra persona.')}</p>
         </div>` : html`
-      <div class="list-title">Cuenta y sincronización · Supabase</div>
+      <div class="list-title">${T('Cuenta y sincronización · Supabase')}</div>
       ${raw(plegable({
         id: 'sb',
         ico: 'nube',
@@ -394,34 +410,34 @@
         chip: estado(Sync.activa(), 'Conectado',
           Sync.configurado() ? 'Sin sesión' : 'Sin configurar'),
         cuerpo: html`
-        <p class="tiny" style="margin:0 0 9px">Entrar con tu correo y sincronizar entre
-        dispositivos.</p>
+        <p class="tiny" style="margin:0 0 9px">${T('Entrar con tu correo y sincronizar ' +
+        'entre dispositivos.')}</p>
 
         <div class="clave-bloque">
           <div class="cb-cab"><span class="cb-lab">Project URL</span></div>
           <input id="k-sb-url" autocomplete="off" spellcheck="false"
                  value="${cfgSync.url || ''}" placeholder="https://xxxxxxxx.supabase.co">
         </div>
-        ${raw(campoClave('Clave publishable (o anon)', 'k-sb-key', cfgSync.key,
+        ${raw(campoClave(T('Clave publishable (o anon)'), 'k-sb-key', cfgSync.key,
           'sb_publishable_... o eyJhbGciOi...'))}
         ${raw(acciones('<button class="btn primary grow btn-arranque" data-a="guardarSb">' +
-          icon('check') + ' Guardar</button>'))}
+          icon('check') + ' ' + esc(T('Guardar')) + '</button>'))}
 
         <div class="clave-bloque" style="margin-top:14px">
-          <div class="cb-cab"><span class="cb-lab">Dirección de retorno</span>
-            <span class="cb-pista">cópiala en el panel</span></div>
-          ${raw(copiable(retorno, 'dirección de retorno'))}
+          <div class="cb-cab"><span class="cb-lab">${T('Dirección de retorno')}</span>
+            <span class="cb-pista">${T('cópiala en el panel')}</span></div>
+          ${raw(copiable(retorno, T('dirección de retorno')))}
         </div>
 
         <button class="fila-plan fila-suelta" data-a="verpasoapaso" style="--fp:#4f8cf5">
           <span class="fp-ico">${raw(icon('lista'))}</span>
-          <span class="grow"><span class="fp-tit">Montarla paso a paso</span>
-            <span class="fp-sub">Ocho pasos con capturas de cada menú, diciendo qué botón
-            tocar. Esta pantalla es el atajo para quien ya lo tiene montado.</span></span>
+          <span class="grow"><span class="fp-tit">${T('Montarla paso a paso')}</span>
+            <span class="fp-sub">${T('Ocho pasos con capturas de cada menú, diciendo qué ' +
+            'botón tocar. Esta pantalla es el atajo para quien ya lo tiene montado.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
 
-        ${raw(guia('sb', 'El resumen, si ya te lo sabes', [
+        ${raw(guia('sb', T('El resumen, si ya te lo sabes'), [
           '<li><b>Project Settings &rarr; Data API</b>: copia la <b>Project URL</b>.</li>',
           '<li><b>Project Settings &rarr; API Keys</b>: copia la <b>Publishable key</b> ' +
           '(empieza por <code>sb_publishable_</code>). En proyectos antiguos es la ' +
@@ -434,80 +450,83 @@
           'aquí arriba, en <b>Site URL</b> y en <b>Redirect URLs</b>.</li>',
           '<li>Pega los dos valores aquí y guarda. Luego crea tu cuenta en ' +
           '<b>Perfil &rarr; Mi cuenta</b>.</li>'
-        ].join('')) + html`
+        ]) + html`
           <div class="cb-cab" style="margin:12px 0 7px">
-            <span class="cb-lab">SQL para crear la tabla</span>
+            <span class="cb-lab">${T('SQL para crear la tabla')}</span>
             <button class="btn sm vidrio cb-mini" data-a="copiarsql">${raw(icon('copy'))}
-              Copiar</button>
+              ${T('Copiar')}</button>
           </div>
           <pre class="consola" id="sql-box">${Sync.SQL}</pre>`)}
 
         ${raw(Sync.configurado() ? '<button class="btn danger block sm" data-a="borrarSb" ' +
-          'style="margin-top:10px">Borrar la configuración de Supabase</button>' : '')}`
+          'style="margin-top:10px">' + esc(T('Borrar la configuración de Supabase')) +
+          '</button>' : '')}`
       }))}`)}
 
       <!-- ============ varios dispositivos ============ -->
-      <div class="list-title">Varios dispositivos</div>
+      <div class="list-title">${T('Varios dispositivos')}</div>
       ${raw(plegable({
         id: 'disp',
         ico: 'compartir',
         tono: '#c06bf0',
         titulo: 'Sincronizar mis claves',
-        resumen: Store.settings().sincronizarClaves !== false
-          ? 'Encendido · no hay que repetirlas en cada dispositivo'
-          : 'Apagado · cada dispositivo lleva las suyas',
+        resumen: esc(Store.settings().sincronizarClaves !== false
+          ? T('Encendido · no hay que repetirlas en cada dispositivo')
+          : T('Apagado · cada dispositivo lleva las suyas')),
         chip: '',
         cuerpo: html`
         <div class="aj-fila" style="padding-top:0">
-          <span class="grow"><span class="aj-tit">Que viajen con mis datos</span>
-            <span class="aj-sub">Las claves de IA y el Client ID de Spotify, para no
-            repetirlos en cada dispositivo</span></span>
+          <span class="grow"><span class="aj-tit">${T('Que viajen con mis datos')}</span>
+            <span class="aj-sub">${T('Las claves de IA y el Client ID de Spotify, para no ' +
+            'repetirlos en cada dispositivo')}</span></span>
           <button class="sw ${Store.settings().sincronizarClaves !== false ? 'on' : ''}"
                   data-a="togglesync" role="switch"
                   aria-checked="${Store.settings().sincronizarClaves !== false}"
-                  aria-label="Sincronizar claves"></button>
+                  aria-label="${T('Sincronizar claves')}"></button>
         </div>
-        <p class="tiny" style="margin:10px 0 0">Las sesiones abiertas nunca se sincronizan:
-        cada dispositivo abre la suya, que es lo correcto. En uno nuevo solo tendrás que
-        pulsar Conectar en Spotify.</p>`
+        <p class="tiny" style="margin:10px 0 0">${T('Las sesiones abiertas nunca se ' +
+        'sincronizan: cada dispositivo abre la suya, que es lo correcto. En uno nuevo solo ' +
+        'tendrás que pulsar Conectar en Spotify.')}</p>`
       }))}
 
       ${raw(Sync.configurado() && Sync.puedeConfigurar() ? html`
         <div class="card tarjeta-premium">
-          <div class="pre-encima">Un enlace y ya</div>
-          <div style="font-weight:700;font-size:1rem;margin:5px 0 4px">Enlazar un
-          dispositivo nuevo</div>
-          <p class="muted" style="margin:0 0 12px;font-size:.88rem">La configuración de
-          Supabase no puede venir de la nube, porque es justo la que abre la puerta. Abre
-          este enlace en el otro dispositivo y quedará listo para entrar con tu correo.</p>
+          <div class="pre-encima">${T('Un enlace y ya')}</div>
+          <div style="font-weight:700;font-size:1rem;margin:5px 0 4px">${T('Enlazar un ' +
+          'dispositivo nuevo')}</div>
+          <p class="muted" style="margin:0 0 12px;font-size:.88rem">${T('La configuración ' +
+          'de Supabase no puede venir de la nube, porque es justo la que abre la puerta. ' +
+          'Abre este enlace en el otro dispositivo y quedará listo para entrar con tu ' +
+          'correo.')}</p>
           <div class="row">
             <button class="btn primary grow btn-arranque" data-a="compartirEnlace">
-              ${raw(icon('share'))} Compartir enlace</button>
-            <button class="btn icon vidrio" data-a="copiarEnlace" aria-label="Copiar enlace">
+              ${raw(icon('share'))} ${T('Compartir enlace')}</button>
+            <button class="btn icon vidrio" data-a="copiarEnlace" aria-label="${T('Copiar enlace')}">
               ${raw(icon('copy'))}</button>
           </div>
-          <p class="tiny" style="margin:10px 0 0">El enlace lleva la URL del proyecto y la
-          clave anon, que son públicas por diseño: sin entrar con tu correo no dan acceso a
-          ningún dato.</p>
+          <p class="tiny" style="margin:10px 0 0">${T('El enlace lleva la URL del proyecto ' +
+          'y la clave anon, que son públicas por diseño: sin entrar con tu correo no dan ' +
+          'acceso a ningún dato.')}</p>
         </div>` : '')}
 
       <!-- ============ seguridad ============ -->
-      <div class="list-title">Seguridad</div>
+      <div class="list-title">${T('Seguridad')}</div>
       ${raw(plegable({
         id: 'seg',
         ico: 'llave',
         tono: '#f0a23c',
         titulo: 'Dónde viven las claves',
-        resumen: 'Y cómo borrarlas todas de golpe',
+        resumen: esc(T('Y cómo borrarlas todas de golpe')),
         chip: '',
         cuerpo: html`
-        <p class="muted" style="margin:0 0 10px">Las claves viven en el almacenamiento de
-        este navegador y, si la sincronización de claves está activada, también en tu base
-        de datos de Supabase, donde solo tú puedes leerlas.</p>
-        <p class="tiny" style="margin:0 0 12px">La clave <i>publishable</i> de Supabase y el
-        <i>Client ID</i> de Spotify están pensados para ir en el navegador y no son
-        secretos. Las de IA sí lo son: no las compartas ni las pegues en el código.</p>
-        <button class="btn danger block" data-a="borrarTodo">Borrar todas las claves</button>`
+        <p class="muted" style="margin:0 0 10px">${T('Las claves viven en el ' +
+        'almacenamiento de este navegador y, si la sincronización de claves está activada, ' +
+        'también en tu base de datos de Supabase, donde solo tú puedes leerlas.')}</p>
+        <p class="tiny" style="margin:0 0 12px">${raw(T('La clave <i>publishable</i> de ' +
+        'Supabase y el <i>Client ID</i> de Spotify están pensados para ir en el navegador ' +
+        'y no son secretos. Las de IA sí lo son: no las compartas ni las pegues en el ' +
+        'código.'))}</p>
+        <button class="btn danger block" data-a="borrarTodo">${T('Borrar todas las claves')}</button>`
       }))}`;
   };
 
