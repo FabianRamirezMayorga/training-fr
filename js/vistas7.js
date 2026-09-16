@@ -26,6 +26,7 @@
      Con cinco botes desplegados había que pasar media pantalla para llegar a
      los recordatorios. Como render() repinta entero, el estado vive fuera. */
   let listaAbierta = false;
+  let aportaAbierto = false;
 
   /* ---------- la lista ----------
      La hora iba en una columna propia, en verde y con un «HOY» debajo, y
@@ -63,18 +64,19 @@
 
   /* ---------- lo que hay que tomar hoy ----------
      Llegó a tener botón de «tomar» y casillas que se marcaban, y se ha quitado:
-     esto es para acordarse, no un diario de cumplimiento. Una lista de casillas
-     sin marcar acaba siendo un reproche.
+     esto es para acordarse, no un diario de cumplimiento.
 
      Va agrupado por bote y no por toma: con un magnesio cada seis horas salían
-     tres renglones que decían «Magnesio» tres veces, y la tarjeta crecía con
-     las repeticiones mientras lo que se lee en ella no cambiaba.
+     tres renglones que decían «Magnesio» tres veces.
 
-     Y en una línea cuando hay una sola hora. Dos renglones para decir «Creatina
-     5 g, a las seis» es gastar el doble de alto en el caso más común; los dos
-     renglones se guardan para cuando hay varias horas, que es cuando hace falta
-     un sitio aparte donde ponerlas. */
-  function hoyHTML(aporta) {
+     Y TODAS LAS FILAS IGUALES. Se probó a poner la hora al lado cuando era una
+     sola y debajo cuando eran varias, y quedaba un escalonado horrible: cada
+     fila con la hora en un sitio distinto obliga a buscarla en cada renglón. El
+     formato lo decide la tarjeta entera, no cada fila: si ninguno se toma varias
+     veces, todas llevan la hora al lado; en cuanto uno la lleva debajo, la
+     llevan todas. Se pierde alto en un caso y se gana en poder leer la columna
+     de un vistazo, que es para lo que está. */
+  function hoyHTML() {
     const l = S().lista().filter(function (x) { return S().tocaHoy(x); })
       .map(function (x) { return { sup: x, horas: S().horasDe(x) }; })
       .sort(function (a, b) {
@@ -84,16 +86,14 @@
     if (!l.length) {
       return html`
         <div class="list-title">Que no se te olvide</div>
-        <div class="card sup-hoy2">
+        <div class="card sup-hoy2 vacia">
           <p class="tiny" style="margin:0">Hoy no toca ninguno. Los de «los días que
           entreno» y «un día sí y otro no» se saltan solos.</p>
         </div>`;
     }
 
     const tomas = l.reduce(function (n, x) { return n + x.horas.length; }, 0);
-    const horasDe = function (hs) {
-      return hs.map(function (h) { return esc(UI.hora ? UI.hora(h) : h); }).join('<i>·</i>');
-    };
+    const alLado = l.every(function (x) { return x.horas.length === 1; });
 
     return html`
       <div class="list-head">
@@ -101,30 +101,75 @@
         <span class="sh-cuenta">${tomas} ${tomas === 1 ? 'toma' : 'tomas'}</span>
       </div>
 
-      <div class="card sup-hoy2">
+      <div class="card sup-hoy2 ${alLado ? 'al-lado' : 'debajo'}">
         ${raw(l.map(function (x) {
-          const una = x.horas.length === 1;
-          return '<div class="sh-linea' + (una ? ' corta' : '') + '">' +
+          return '<div class="sh-linea">' +
             '<span class="sl-cab"><span class="sl-n">' + esc(x.sup.nombre) + '</span>' +
             (x.sup.dosis ? '<span class="sl-d">' + esc(x.sup.dosis) + '</span>' : '') +
-            (una ? '<span class="sl-h">' + horasDe(x.horas) + '</span>' : '') +
             '</span>' +
-            (una ? '' : '<span class="sl-h">' + horasDe(x.horas) + '</span>') +
-            '</div>';
+            '<span class="sl-h">' + x.horas.map(function (h) {
+              return esc(UI.hora ? UI.hora(h) : h);
+            }).join('<i>·</i>') + '</span></div>';
         }).join(''))}
-
-        ${raw(aporta.kcal || aporta.prot ? html`
-          <p class="tiny sup-pie">Suman <b>${aporta.kcal} kcal</b> y
-          <b>${aporta.prot} g de proteína</b> al día, y el menú lo descuenta.</p>` : '')}
       </div>`;
+  }
+
+  /* ---------- lo que suman a tu día ----------
+     Estaba dentro de la tarjeta de arriba y era un número mal calculado: la app
+     sumaba a mano las fichas del catálogo, así que no contaba lo que uno
+     escribe a mano ni decía nada de vitaminas o minerales, que es justo para lo
+     que se toma un multivitamínico. Un total incompleto presentado como total
+     es peor que ninguno.
+
+     Ahora lo calcula el entrenador, va fuera y plegado —es una consulta, no
+     algo que haga falta ver cada vez que se abre la pantalla— y lo que
+     devuelve entra en el menú, que es lo que hacía falta para que no te pida
+     otra vez la proteína que ya te bebiste. */
+  function aportanHTML() {
+    if (!S().lista().length) return '';
+    const a = S().analisis();
+    const hayIA = g.IA && IA.activa && IA.activa();
+
+    return html`
+      <details class="sup-plegable" ${raw(aportaAbierto ? 'open' : '')} data-det="aporta">
+        <summary>
+          <span class="grow">Lo que suman a tu día</span>
+          ${raw(a ? '<span class="sp-cuantos">' + a.kcal + ' kcal</span>' : '')}
+          <span class="sp-flecha">${raw(icon('chevron'))}</span>
+        </summary>
+
+        <div class="sup-aportan">
+          ${raw(a ? html`
+            <div class="sa-nums">
+              ${raw([['kcal', a.kcal, ''], ['proteína', a.prot, 'g'],
+                ['hidratos', a.carbo, 'g'], ['grasa', a.grasa, 'g']]
+                .map(function (n) {
+                  return '<span class="sa-n"><b>' + UI.num(n[1]) + '<i>' + n[2] +
+                    '</i></b><span>' + n[0] + '</span></span>';
+                }).join(''))}
+            </div>
+            ${raw(a.cubre ? '<p class="tiny"><b>Cubre.</b> ' + esc(a.cubre) + '</p>' : '')}
+            ${raw(a.menu ? '<p class="tiny"><b>En tu menú.</b> ' + esc(a.menu) + '</p>' : '')}
+            ${raw(a.dudas ? '<p class="tiny"><b>Sin calcular.</b> ' + esc(a.dudas) + '</p>' : '')}
+            <p class="tiny sa-pie">Ya está contado en tu menú: no te pedirá en comida lo
+            que estos te dan.</p>
+            <button class="btn sm block" data-a="analizar" style="margin-top:10px">
+              ${raw(icon('cambiar'))} Volver a calcularlo</button>` : html`
+            <p class="tiny" style="margin:0 0 10px">Sumar esto a mano sale mal: no cuenta
+            lo que escribes tú, ni las vitaminas ni los minerales. Que lo mire el
+            entrenador, y lo que salga se descuenta solo de tu menú.</p>
+            <button class="btn sm primary block" data-a="analizar" ${raw(hayIA ? '' : 'disabled')}>
+              ${raw(icon('chispa'))} Calcularlo con el entrenador</button>
+            ${raw(hayIA ? '' : '<p class="tiny" style="margin:8px 0 0">Necesita el ' +
+              'entrenador con IA configurado, en Perfil.</p>')}`)}
+        </div>
+      </details>`;
   }
 
   V.suplementos = function () {
     if (!g.Suplementos) return '<div class="empty"><p>Módulo no disponible.</p></div>';
 
     const l = S().lista();
-    const hoy = S().tomasDeHoy();
-    const aporta = S().aportaDiario();
     const desfase = S().alertasDesfasadas();
 
     return html`
@@ -146,7 +191,7 @@
             ${raw(icon('plus'))} Añadir el primero</button>
         </div>` : html`
 
-        ${raw(hoyHTML(aporta))}
+        ${raw(hoyHTML())}
 
         <!-- Plegable y cerrada de entrada: lo que se mira a diario es la
              tarjeta de arriba, y la lista completa es para el día que se cambia
@@ -171,6 +216,8 @@
 
         <button class="btn block" data-a="nuevo" style="margin-top:12px">
           ${raw(icon('plus'))} Añadir otro</button>
+
+        ${raw(aportanHTML())}
 
         <div class="list-title">Recordatorios</div>
         <div class="card">
@@ -208,8 +255,25 @@
       if (s) fichaSheet(s);
     });
 
-    const det = root.querySelector('.sup-plegable');
-    if (det) det.addEventListener('toggle', function () { listaAbierta = det.open; });
+    root.querySelectorAll('.sup-plegable').forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (d.dataset.det === 'aporta') aportaAbierto = d.open;
+        else listaAbierta = d.open;
+      });
+    });
+
+    bind(root, '[data-a=analizar]', function (el) {
+      if (!g.IA || !IA.analizarSuplementos) return;
+      el.disabled = true;
+      el.textContent = 'Calculando…';
+      IA.analizarSuplementos({ forzar: true })
+        .then(function () { aportaAbierto = true; render(); })
+        .catch(function (e) {
+          el.disabled = false;
+          render();
+          UI.toast(e.message || 'No he podido calcularlo');
+        });
+    });
 
     bind(root, '[data-a=sincronizar]', function () {
       const n = S().sincronizarAlertas();

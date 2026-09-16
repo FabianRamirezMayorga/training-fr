@@ -155,7 +155,7 @@
         '*Y la IA lo sabe*: al montarte un menú no te propone lo que ya tomas, y si una toma va con una comida concreta la menciona ahí en vez de inventar otra.',
         'Las frecuencias que hay: todos los días, los días que entrenas —sale de los días de tu plan—, un día sí y otro no, un día a la semana, y *varias veces al día*.',
         'Lo de varias veces al día se reparte de tres maneras. *Por reloj*: cada 4, 6, 8 o 12 horas, arrancando a la hora que elijas y cortando en la cena, que nadie quiere el magnesio a las tres de la mañana. *Con tus comidas*: antes, con o después de cada una, y entonces las tomas se mueven si mueves una comida. *A mano*: pones tú cada hora, una a una, para lo que no encaja en ningún patrón —lo que manda una receta, o los turnos de quien no come a las mismas horas—. En las dos primeras te enseña las horas que salen con tus datos antes de elegir.',
-        'Lo que aportan se cuenta por toma y no por bote: dos batidos al día son el doble de proteína, y el menú lo descuenta entero.',
+        '*Lo que aportan lo calcula el entrenador*, en «Lo que suman a tu día». Sumarlo a mano salía mal: no contaba lo que escribes tú ni decía nada de vitaminas o minerales, que es justo para lo que se toma un multivitamínico. Lo que salga se descuenta solo de tu menú, así que no te pedirá en comida la proteína que ya te bebiste.',
         'La tarjeta de arriba dice lo que hay que tomar hoy, entero: la hora, qué es y cuánto. No hay nada que marcar ahí: es para acordarse, no un diario de cumplimiento.'
       ],
       ver: ['c-suplementos', 'g-comida', 'p-suplerecet'] },
@@ -516,6 +516,13 @@
       a: ['Por una de tres: la hora de la foto cae fuera de todas las franjas, no tienes un menú activo para ese día, o las franjas no están puestas a tus horas.',
         'Lo que quedó sin cruzar se puede cruzar después, y también a mano eligiendo tú la comida.'],
       ver: ['c-franjas', 'g-comida'] },
+
+    { id: 'p-supaporta', q: '¿La app cuenta lo que me aportan los suplementos?',
+      a: ['Sí, pero no a ojo. En Suplementación, abajo del todo, hay un bloque plegado —«Lo que suman a tu día»— con un botón para que lo calcule el entrenador.',
+        'Lo hace él y no la app porque una suma a mano no cuenta lo que escribes tú, ni las vitaminas, ni los minerales. Te dice las calorías y los macros que suman todas las tomas juntas, qué micronutrientes quedan cubiertos, y qué debería tener en cuenta tu menú.',
+        'Y eso entra en el menú automáticamente: si tus batidos ya te dan 48 g de proteína, el menú te pide el resto en comida, no el total otra vez.',
+        'Se guarda con la lista que analizó: si cambias un bote, hay que volver a pedirlo.'],
+      ver: ['g-suplementos', 'g-comida'] },
 
     { id: 'p-supvarias', q: '¿Y si tomo algo varias veces al día?',
       a: ['En «cada cuánto» elige *Varias al día* y te pregunta ahí mismo cómo lo repartes.',

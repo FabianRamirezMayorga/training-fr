@@ -1211,6 +1211,17 @@
        los 24 gramos que ya se había bebido. */
     if (g.Suplementos && Suplementos.lista().length) {
       const aporta = Suplementos.aportaDiario();
+      const an = Suplementos.analisis ? Suplementos.analisis() : null;
+      if (an) {
+        trozos.push('LO QUE SUS SUPLEMENTOS LE APORTAN AL DÍA, ya calculado: ' +
+          an.kcal + ' kcal, ' + an.prot + ' g de proteína' +
+          (an.carbo ? ', ' + an.carbo + ' g de hidratos' : '') +
+          (an.grasa ? ', ' + an.grasa + ' g de grasa' : '') + '.' +
+          /* Sin punto detras: la frase que devuelve ya suele traer el suyo, y
+             dos puntos seguidos en un prompt es ruido que se copia. */
+          (an.cubre ? ' Cubre: ' + an.cubre.replace(/\.$/, '') + '.' : '') +
+          (an.menu ? ' Para el menú: ' + an.menu : ''));
+      }
       trozos.push('SUPLEMENTOS QUE YA TOMA:\n' + Suplementos.resumenIA() +
         '\nNO se los vuelvas a proponer ni le sugieras nada que duplique lo que ya toma. ' +
         (aporta.kcal || aporta.prot
@@ -2216,6 +2227,70 @@
 
      Si no dice cantidades se asume una racion normal y se dice en la nota, para
      que se vea que es una estimación y no una medida. */
+  /* ---------- qué aportan de verdad los suplementos ----------
+     La app sumaba a mano las calorías y la proteína de un puñado de fichas del
+     catálogo, y esa cifra estaba mal por dos sitios: no contaba lo que uno
+     escribe a mano —la mitad de los botes de cualquier casa— y no decía nada de
+     micronutrientes, que es justo para lo que se toma un multivitamínico o un
+     omega 3. Un número incompleto presentado como total es peor que ninguno.
+
+     Esto lo mira quien puede mirarlo: se le pasa la lista tal cual está escrita,
+     con sus dosis y sus tomas, y devuelve lo que suma al día y qué cubre. Y el
+     resultado entra en el menú, que es lo que hacía falta para que no te pida
+     otra vez la proteína que ya te bebiste. */
+  function analizarSuplementos(opciones) {
+    opciones = opciones || {};
+    if (!g.Suplementos) return Promise.reject(new Error('No hay suplementos.'));
+
+    const lista = Suplementos.lista();
+    if (!lista.length) return Promise.reject(new Error('No tienes ninguno apuntado.'));
+
+    const resumen = Suplementos.resumenIA();
+    const clave = 'suplementos:' + resumen;
+    const guardado = leerCache(clave, 24 * 30);
+    if (guardado && !opciones.forzar) return Promise.resolve(guardado);
+
+    const m = Perfil.macros ? Perfil.macros() : null;
+
+    const prompt = contexto({ comida: true }) + '\n\n' +
+      'ESTO ES LO QUE TOMA, tal y como lo tiene apuntado:\n' + resumen + '\n\n' +
+      (m ? 'Al día le tocan ' + m.kcal + ' kcal y ' + m.prot + ' g de proteína.\n\n' : '') +
+      'Calcula qué le suman al día TODAS las tomas juntas, no una. Si algo lo toma ' +
+      'tres veces al día, cuenta las tres.\n' +
+      '- "kcal", "prot", "carbo" y "grasa": números enteros del total diario. La ' +
+      'mayoría de suplementos no aportan nada de eso y van a cero; los que sí son los ' +
+      'que llevan comida dentro (proteína en polvo, colágeno, ganadores, barritas).\n' +
+      '- No te inventes precisión: una dosis típica del mercado basta. Si no sabes qué ' +
+      'es algo que ha escrito, ponlo a cero y dilo en "dudas".\n\n' +
+      '- "cubre": una frase corta con los micronutrientes que sí quedan cubiertos con ' +
+      'lo que toma (vitaminas, minerales, omega 3). Solo lo que se deduzca de la lista, ' +
+      'sin suponer dosis que no ha escrito.\n' +
+      '- "menu": una o dos frases sobre qué debería tener en cuenta su menú por esto. ' +
+      'Concreto y accionable: qué descontar, qué no hace falta repetir. Nada de ' +
+      'generalidades.\n' +
+      '- "dudas": lo que no has podido calcular y por qué, o cadena vacía.\n\n' +
+      'NO le recomiendes tomar nada, ni quitar nada, ni le digas si las dosis están ' +
+      'bien o mal: no es tu decisión ni te lo ha preguntado. Esto es una cuenta, no un ' +
+      'consejo médico. Si algo te parece llamativo, cabe en "dudas" en una frase seca y ' +
+      'sin alarmismo.\n\n' +
+      'Devuelve SOLO este JSON:\n' +
+      '{"kcal":0,"prot":0,"carbo":0,"grasa":0,"cubre":"","menu":"","dudas":""}';
+
+    return llamarJSON(prompt, { temperatura: 0.2 }).then(function (r) {
+      if (!r) throw new Error('No he podido calcularlo.');
+      const n = function (x) { return Math.max(0, Math.round(Number(x) || 0)); };
+      const out = {
+        kcal: n(r.kcal), prot: n(r.prot), carbo: n(r.carbo), grasa: n(r.grasa),
+        cubre: String(r.cubre || ''), menu: String(r.menu || ''),
+        dudas: String(r.dudas || ''),
+        t: Date.now(), huella: resumen
+      };
+      escribirCache(clave, out);
+      if (g.Suplementos && Suplementos.guardarAnalisis) Suplementos.guardarAnalisis(out);
+      return out;
+    });
+  }
+
   function estimarComida(texto) {
     const t = String(texto || '').trim();
     if (!t) return Promise.reject(new Error('Escribe antes qu\u00e9 has comido.'));
@@ -2642,6 +2717,7 @@
     revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
     crearPrograma: crearPrograma, pildora: pildora, horasPildora: horasPildora,
     analizarComida: analizarComida, estimarComida: estimarComida,
+    analizarSuplementos: analizarSuplementos,
     revisarCambioComida: revisarCambioComida,
     estimarActividad: estimarActividad,
     leerRutina: leerRutina,

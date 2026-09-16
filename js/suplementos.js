@@ -282,10 +282,27 @@
   })();
 
   /* ---------- lo que suman al día ----------
-     Solo los que aportan de verdad. Sin esto, el menú te pide la proteína
-     entera en comida y acabas pasándote todos los días por el batido que no
-     contaba nadie. */
+     Sumar a mano las fichas del catálogo estaba mal por dos sitios: no contaba
+     lo que uno escribe a mano —la mitad de los botes de cualquier casa— y no
+     decía nada de micronutrientes, que es justo para lo que se toma un
+     multivitamínico. Un número incompleto presentado como total es peor que
+     ninguno, así que la cuenta buena la hace el entrenador y esta se queda de
+     reserva para cuando no hay IA.
+
+     Se guarda con la huella de lo que se analizó: si cambias un bote, lo
+     anterior deja de valer y hay que volver a preguntarlo. */
+  function analisis() {
+    const a = Store.settings().supAnalisis;
+    if (!a || a.huella !== resumenIA()) return null;
+    return a;
+  }
+
+  function guardarAnalisis(a) { Store.setSetting('supAnalisis', a); }
+
   function aportaDiario() {
+    const a = analisis();
+    if (a) return { kcal: a.kcal, prot: a.prot, deIA: true };
+
     let kcal = 0, prot = 0;
     lista().forEach(function (s) {
       if (!s.aporta || !tocaHoy(s)) return;
@@ -295,7 +312,7 @@
       kcal += (Number(s.aporta.kcal) || 0) * veces;
       prot += (Number(s.aporta.prot) || 0) * veces;
     });
-    return { kcal: Math.round(kcal), prot: Math.round(prot) };
+    return { kcal: Math.round(kcal), prot: Math.round(prot), deIA: false };
   }
 
   /* ---------- lo que se le cuenta a la IA ----------
@@ -429,6 +446,7 @@
     horaDe: horaDe, horasDe: horasDe, etiquetaMomento: etiquetaMomento,
     PATRONES: PATRONES, patronDe: patronDe,
     tocaHoy: tocaHoy, tomasDeHoy: tomasDeHoy, aportaDiario: aportaDiario,
+    analisis: analisis, guardarAnalisis: guardarAnalisis,
     resumenIA: resumenIA, alertasDe: alertasDe,
     sincronizarAlertas: sincronizarAlertas, hayAlertas: hayAlertas,
     alertasDesfasadas: alertasDesfasadas, diasDeEntreno: diasDeEntreno

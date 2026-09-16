@@ -6279,45 +6279,78 @@ html[data-theme="light"] .sf-campo:focus-within {
   margin-left: 1px; }
 
 /* ---------- lo que hay que tomar hoy ----------
-   El titulo se sale de la tarjeta y se pone donde los demas de la pantalla:
-   dentro era una cabecera mas que competia con el contenido, y fuera la seccion
-   se lee como las otras dos sin tener que entrar en la tarjeta.
-
-   Y una linea cuando hay una sola hora. Dos renglones para decir «Creatina 5 g,
-   a las seis» es gastar el doble de alto en el caso mas comun. */
+   Todas las filas iguales. Se probo a poner la hora al lado cuando era una sola
+   y debajo cuando eran varias, y quedaba un escalonado horrible: cada fila con
+   la hora en un sitio distinto obliga a buscarla en cada renglon. El formato lo
+   decide la tarjeta entera y no cada fila. */
 .sup-hoy2 { padding: 4px 13px; }
+.sup-hoy2.vacia { padding: 13px; }
 
 .sh-cuenta {
   font-size: .78rem; font-weight: 800; letter-spacing: -.01em;
   color: var(--acc); font-variant-numeric: tabular-nums; margin-bottom: 1px;
 }
 
-.sh-linea { padding: 9px 0; position: relative; }
-.sh-linea.corta { padding: 7px 0; }
+.sh-linea { position: relative; }
 .sh-linea + .sh-linea::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
   background: var(--line); transform: scaleY(.5);
 }
-.sl-cab { display: flex; align-items: baseline; gap: 9px; }
+.sl-cab { display: flex; align-items: baseline; gap: 9px; min-width: 0; }
 .sl-n {
   min-width: 0; font-size: .89rem; font-weight: 650; letter-spacing: -.012em;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-/* Con una sola hora, la dosis empuja hacia el centro y la hora se va al borde;
-   con varias, la dosis se va al borde porque la hora baja de renglon. */
-.sh-linea.corta .sl-d { flex: 1; }
-.sh-linea:not(.corta) .sl-n { flex: 1; }
 .sl-d { flex: none; font-size: .75rem; color: var(--dim2); white-space: nowrap; }
 .sl-h {
-  flex: none; font-size: .79rem; font-weight: 700; letter-spacing: -.01em;
-  color: var(--acc); font-variant-numeric: tabular-nums; white-space: nowrap;
+  font-size: .79rem; font-weight: 700; letter-spacing: -.01em;
+  color: var(--acc); font-variant-numeric: tabular-nums;
 }
-.sh-linea:not(.corta) .sl-h { display: block; margin-top: 3px; white-space: normal; }
 .sl-h i { font-style: normal; opacity: .4; margin: 0 4px; }
 
-.sup-pie { margin: 0; padding: 9px 0 10px; line-height: 1.45;
-  border-top: 1px solid var(--line); }
-.sup-pie b { color: var(--txt); font-weight: 700; }
+/* Con la hora al lado: la fila es una linea y la hora se va al borde */
+.sup-hoy2.al-lado .sh-linea {
+  display: flex; align-items: baseline; gap: 10px; padding: 8px 0;
+}
+.sup-hoy2.al-lado .sl-cab { flex: 1; }
+.sup-hoy2.al-lado .sl-d { flex: 1; }
+.sup-hoy2.al-lado .sl-h { flex: none; white-space: nowrap; }
+
+/* Con la hora debajo: dos renglones y el nombre ocupa la primera entera */
+.sup-hoy2.debajo .sh-linea { padding: 9px 0; }
+.sup-hoy2.debajo .sl-n { flex: 1; }
+.sup-hoy2.debajo .sl-h { display: block; margin-top: 3px; }
+
+/* ---------- lo que suman a tu dia ----------
+   Fuera de la tarjeta y plegado: es una consulta, no algo que haga falta ver
+   cada vez que se abre la pantalla. */
+.sup-aportan { padding: 2px 2px 4px; }
+.sa-nums {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 11px;
+}
+.sa-n {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 9px 4px; border-radius: 12px;
+  background: color-mix(in srgb, var(--card2) 76%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 9%, transparent);
+}
+.sa-n b {
+  font-size: 1rem; font-weight: 800; letter-spacing: -.02em; color: var(--acc);
+  font-variant-numeric: tabular-nums;
+}
+.sa-n b i { font-style: normal; font-size: .62rem; font-weight: 700; opacity: .7; }
+.sa-n > span {
+  font-size: .62rem; font-weight: 600; letter-spacing: .02em; color: var(--dim2);
+  text-transform: lowercase;
+}
+.sup-aportan p.tiny { margin: 0 0 7px; line-height: 1.5; }
+.sup-aportan p.tiny b { color: var(--txt); font-weight: 700; }
+.sa-pie { color: var(--dim2); font-style: italic; }
+
+html[data-theme="light"] .sa-n {
+  background: color-mix(in srgb, #000 4%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 7%, transparent);
+}
 
 /* El boton de anadir en claro era casi invisible: el .btn de la app se apoya en
    un fondo translucido que sobre blanco desaparece. Aqui lleva borde y sombra
