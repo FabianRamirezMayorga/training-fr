@@ -5254,6 +5254,26 @@ html[data-theme="light"] .fp-ico.pendiente::after {
   50% { transform: translateY(1.5px); }
 }
 
+/* Mientras se pregunta al servidor. El numero ya esta escrito —se sabe sin
+   preguntar a nadie— y lo unico que falta es el veredicto, asi que el latido
+   va en el disco, que es justo lo que va a cambiar, y no en toda la tarjeta. */
+.ver-caja.ver-mirando .ver-disco { color: var(--dim2); }
+.ver-caja.ver-mirando .ver-num { opacity: .75; }
+@media (prefers-reduced-motion: no-preference) {
+  .ver-caja.ver-mirando .ver-disco { animation: ver-late 1.4s ease-in-out infinite; }
+}
+@keyframes ver-late {
+  0%, 100% { opacity: .5; }
+  50% { opacity: 1; }
+}
+
+/* El boton de la tarjeta es el estado: cuando hay version nueva es el verde de
+   arranque y cuando no, apenas se ve. Con margen propio para que aparecer y
+   desaparecer no cambie el alto del resto. */
+.ver-btn { margin-top: 13px; }
+.ver-btn[hidden] { display: none; }
+.ver-caja.ver-bajando .ver-disco { opacity: .5; }
+
 /* ---------- ya entrenaste hoy ----------
    La portada empuja a entrenar, y empujar a alguien a hacer lo que acaba de
    hacer es lo que convierte un boton grande en ruido. Cuando ya esta hecho, lo

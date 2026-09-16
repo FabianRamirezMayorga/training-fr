@@ -1514,7 +1514,11 @@
     const pie = root.querySelector('#pie-version');
     if (pie) {
       estadoVersion().then(function (v) {
-        if (!v || !v.local || v.alDia) { pie.textContent = ''; pie.hidden = true; return; }
+        /* Sin red no se sabe si hay otra, y «hay una versión nueva» sin
+           poder comprobarlo es inventarse una alarma. */
+        if (!v || !v.local || v.alDia || v.sinRed) {
+          pie.textContent = ''; pie.hidden = true; return;
+        }
         const corto = function (x) { return String(x).replace('trainingfr-', ''); };
         pie.hidden = false;
         pie.className = 'pie-version hay-nueva';
@@ -4840,26 +4844,36 @@
       <p class="muted">Si hay una versión nueva, y qué llevas descargado para usar la app
       sin internet.</p>
 
-      <div class="card tarjeta-premium ver-caja" id="ver-caja">
+      <!-- La versión que llevas se sabe sin preguntarle a nadie, así que se
+           escribe de una vez. Antes ponía «Comprobando…» en el hueco del número
+           y no aparecía nada hasta que contestaba el servidor: la pantalla se
+           abría vacía y parecía que la app se había quedado colgada, cuando lo
+           único que faltaba era la mitad de la respuesta. Ahora falta solo el
+           veredicto, y se dice dónde falta. -->
+      <div class="card tarjeta-premium ver-caja ver-mirando" id="ver-caja">
         <div class="pre-encima">Tu versión</div>
         <div class="ver-fila">
           <span class="ver-disco" id="ver-disco">${raw(icon('nube'))}</span>
           <span class="grow">
-            <span class="ver-num" id="ver-num">Comprobando…</span>
-            <span class="tiny" id="ver-sub">Preguntando al servidor qué hay publicado.</span>
+            <span class="ver-num" id="ver-num">${raw(esc(g.APP_VERSION || '—'))}</span>
+            <span class="tiny" id="ver-sub">Comprobando si hay una nueva…</span>
           </span>
         </div>
-        <button class="btn vidrio block sm" data-a="mirarVersion" style="margin-top:13px">
-          ${raw(icon('cambiar'))} Comprobar ahora</button>
+        <!-- Un solo botón, y dice lo que va a pasar. Cuando había una versión
+             nueva, esto ponía «Comprobar ahora» —lo que acababa de hacer solo—
+             y el texto te mandaba a buscar otra fila más abajo para cogerla:
+             dos pasos y dos párrafos para un toque. -->
+        <button class="btn block sm ver-btn" id="ver-btn" hidden></button>
       </div>
 
+      <!-- Y esto deja de ser la acción principal: es la salida para cuando algo
+           quedó a medias, no la manera normal de actualizar. -->
       <div class="plan-acciones" style="margin:10px 0 0">
-        <button class="fila-plan" data-a="actualizarApp" style="--fp:#4f8cf5">
-          <span class="fp-ico">${raw(icon('down'))}</span>
-          <span class="grow"><span class="fp-tit">Forzar actualización</span>
-            <span class="fp-sub">Si algo se comporta raro después de una actualización,
-            casi siempre es que el móvil se ha quedado con archivos de dos versiones. Esto
-            los borra y baja la última. Tus datos no se tocan.</span></span>
+        <button class="fila-plan" data-a="actualizarApp" style="--fp:var(--dim2)">
+          <span class="fp-ico">${raw(icon('actualizar'))}</span>
+          <span class="grow"><span class="fp-tit">¿Algo va raro?</span>
+            <span class="fp-sub">Borra los archivos que hayan quedado mezclados de dos
+            versiones y vuelve a bajar la app. Tus datos no se tocan.</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
@@ -4909,40 +4923,84 @@
     const num = root.querySelector('#ver-num');
     const sub = root.querySelector('#ver-sub');
     const disco = root.querySelector('#ver-disco');
+    const btn = root.querySelector('#ver-btn');
     const corto = function (x) { return String(x || '').replace('trainingfr-', ''); };
 
-    const pintar = function (v) {
-      /* «al-dia» ya existía: es el cuadrito de cada día en Alertas, que mide
-         46 px y es cuadrado. La tarjeta se encogía a un círculo. */
+    const bajar = function () {
+      btn.disabled = true;
+      btn.innerHTML = 'Actualizando…';
+      caja.classList.add('ver-bajando');
+      forzarActualizacion();
+    };
+
+    /* El botón es el estado: lo que dice es lo que va a hacer, y cuando no hay
+       nada que hacer no está. */
+    const boton = function (clase, texto, ico, fn) {
+      btn.hidden = !clase;
+      if (!clase) return;
+      btn.className = 'btn block sm ver-btn ' + clase;
+      btn.disabled = false;
+      btn.innerHTML = (ico ? icon(ico) + ' ' : '') + esc(texto);
+      btn.onclick = fn;
+    };
+
+    const mirar = function () {
       caja.classList.remove('ver-ok', 'ver-nueva', 'ver-sinred');
-      if (!v || !v.local) {
+      caja.classList.add('ver-mirando');
+      disco.innerHTML = icon('nube');
+      sub.textContent = 'Comprobando si hay una nueva…';
+      boton('', '');
+      /* El número, en cuanto se sepa, sin esperar al servidor: no depende de él
+         y es lo primero que se viene a mirar aquí. */
+      versionLocal().then(function (l) { if (l) num.textContent = corto(l); });
+      estadoVersion().then(pintar);
+    };
+
+    const pintar = function (v) {
+      caja.classList.remove('ver-mirando', 'ver-ok', 'ver-nueva', 'ver-sinred');
+
+      if (!v || v.sinRed) {
         caja.classList.add('ver-sinred');
         disco.innerHTML = icon('aviso');
-        num.textContent = 'Sin poder comprobarlo';
-        sub.textContent = 'Hace falta conexión para preguntar qué hay publicado.';
+        num.textContent = corto((v && v.local) || g.APP_VERSION || '—');
+        sub.textContent = 'Esta es la que llevas. No he podido preguntar si hay otra: '
+          + 'hace falta conexión.';
+        boton('vidrio', 'Reintentar', 'cambiar', mirar);
         return;
       }
+
+      /* Sin caché de shell —instalación recién estrenada, o el navegador la ha
+         limpiado— no hay con qué comparar, y decir «hay una nueva» sería
+         mentir: lo que hay es que aún no se ha guardado nada. */
+      if (!v.local) {
+        caja.classList.add('ver-ok');
+        disco.innerHTML = icon('nube');
+        num.textContent = corto(v.servidor);
+        sub.textContent = 'Recién instalada. Es la última que hay publicada.';
+        boton('ghost', 'Volver a comprobar', 'cambiar', mirar);
+        return;
+      }
+
       if (v.alDia) {
         caja.classList.add('ver-ok');
         disco.innerHTML = icon('check');
         num.textContent = corto(v.local);
         sub.textContent = 'Estás en la última versión.';
+        boton('ghost', 'Volver a comprobar', 'cambiar', mirar);
         return;
       }
+
+      /* Aquí es donde estaba el rodeo: se enteraba de que había una nueva y te
+         mandaba a otra fila a leer un párrafo para cogerla. Ahora el botón que
+         ya estás mirando la baja. */
       caja.classList.add('ver-nueva');
       disco.innerHTML = icon('down');
-      num.textContent = corto(v.servidor) + ' disponible';
-      sub.textContent = 'Tú tienes la ' + corto(v.local) + '. Toca «Forzar actualización» '
-        + 'para cogerla ahora; si no, entrará sola.';
+      num.textContent = corto(v.servidor);
+      sub.textContent = 'Nueva versión. Tú llevas la ' + corto(v.local) + '.';
+      boton('primary btn-arranque', 'Actualizar ahora', 'down', bajar);
     };
 
-    estadoVersion().then(pintar);
-
-    bind(root, '[data-a=mirarVersion]', function (b) {
-      b.disabled = true;
-      num.textContent = 'Comprobando…';
-      estadoVersion().then(function (v) { pintar(v); b.disabled = false; });
-    });
+    mirar();
 
     bind(root, '[data-a=actualizarApp]', function (el) {
       el.disabled = true;
@@ -5855,22 +5913,51 @@
   let ultimaVersion = null;
   function versionSabida() { return ultimaVersion; }
 
-  function estadoVersion() {
-    if (!window.caches) return Promise.resolve(null);
-    return fetch('sw.js?v=' + Date.now(), { cache: 'no-store' })
+  /* Con cobertura mala, este fetch se puede quedar colgado hasta que el
+     navegador se canse, y mientras tanto la pantalla se queda diciendo
+     «comprobando» sin final. Ocho segundos y se da por no contestado: quien
+     esta en el metro prefiere un «no he podido» y un boton de reintentar a un
+     reloj de arena eterno. */
+  function conTope(promesa, ms) {
+    return Promise.race([
+      promesa,
+      new Promise(function (ok) { setTimeout(function () { ok(null); }, ms || 8000); })
+    ]);
+  }
+
+  /* Qué versión hay AQUÍ. No sale de la red: sale del nombre de la caché que
+     dejó puesta el service worker que está mandando. Se pregunta aparte del
+     servidor a propósito, porque esto se sabe siempre —también en el metro— y
+     antes se perdía: si el fetch fallaba, la pantalla no enseñaba ni el número
+     que ya tenía delante. */
+  function versionLocal() {
+    if (!window.caches) return Promise.resolve('');
+    return caches.keys().then(function (ks) {
+      return ks.filter(function (k) { return k.indexOf('-shell') !== -1; })
+        .map(function (k) { return k.replace('-shell', ''); })[0] || '';
+    }).catch(function () { return ''; });
+  }
+
+  function versionPublicada() {
+    return conTope(fetch('sw.js?v=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.text(); })
       .then(function (t) {
         const m = t.match(/VERSION = '([^']+)'/);
-        const servidor = m ? m[1] : '';
-        return caches.keys().then(function (ks) {
-          const local = ks.filter(function (k) { return k.indexOf('-shell') !== -1; })
-            .map(function (k) { return k.replace('-shell', ''); })[0] || '';
-          ultimaVersion = { local: local, servidor: servidor,
-            alDia: !!local && local === servidor };
-          return ultimaVersion;
-        });
+        return m ? m[1] : '';
       })
-      .catch(function () { return null; });
+      .catch(function () { return ''; }));
+  }
+
+  function estadoVersion() {
+    if (!window.caches) return Promise.resolve(null);
+    return Promise.all([versionLocal(), versionPublicada()]).then(function (r) {
+      ultimaVersion = {
+        local: r[0], servidor: r[1],
+        sinRed: !r[1],
+        alDia: !!r[0] && !!r[1] && r[0] === r[1]
+      };
+      return ultimaVersion;
+    });
   }
 
   /* Borrar el service worker y las cachés de código y volver a empezar. Es lo

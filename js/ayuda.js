@@ -582,7 +582,9 @@
     { id: 'p-actualiza', q: '¿Por qué me pide actualizar tan a menudo?',
       a: ['Porque la app se sigue construyendo y cada mejora se publica en cuanto está probada.',
         'La actualización pesa muy poco y no toca tus datos: rutinas, historial y perfil se quedan como están.',
-        'Si algo se comporta raro justo después de actualizar, casi siempre es que el móvil se ha quedado con archivos de dos versiones mezclados. Para eso está «Forzar actualización».'] },
+        'En *Perfil › Actualizaciones* sale la que llevas puesta. Si hay una nueva, ahí mismo aparece un botón que la baja: no hay que buscar nada más.',
+        'Sin conexión la pantalla te enseña igual la versión que llevas, y te dice que no ha podido comprobar si hay otra en vez de callarse.',
+        'Si algo se comporta raro justo después de actualizar, casi siempre es que el móvil se ha quedado con archivos de dos versiones mezclados. Para eso está *¿Algo va raro?*, debajo de la versión.'] },
 
     { id: 'p-kcal', q: '¿Las calorías que me da son exactas?',
       a: ['Son una estimación calculada con tus datos —sexo, peso, altura, edad, actividad y objetivo— con las fórmulas habituales.',

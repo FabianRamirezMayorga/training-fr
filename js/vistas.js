@@ -200,12 +200,18 @@
           tono: '#c06bf0',
           sub: 'Unidades, tema, descanso y copias de seguridad' }))}
         ${raw(filaPerfil({ icono: 'actualizar', titulo: 'Actualizaciones', accion: 'version',
-          tono: '#4f8cf5', pendiente: !!(ver && ver.local && !ver.alDia),
-          sub: !ver || !ver.local ? 'Comprobando si estás al día…'
-            : ver.alDia ? 'Al día · ' + String(ver.local).replace('trainingfr-', '') +
-              ' · y lo descargado para usarla sin internet'
-            : 'Hay una versión nueva: ' +
-              String(ver.servidor).replace('trainingfr-', '') }))}
+          tono: '#4f8cf5', pendiente: !!(ver && ver.local && !ver.alDia && !ver.sinRed),
+          /* El punto naranja solo cuando se ha podido comprobar. Sin red el
+             estado no es «hay una nueva», es «no se sabe», y marcar la fila
+             manda al usuario a una pantalla que no puede contarle nada. */
+          sub: !ver ? 'Comprobando si estás al día…'
+            : ver.sinRed ? String(ver.local || '').replace('trainingfr-', '') +
+              ' · sin conexión para comprobar si hay otra'
+            : ver.alDia || !ver.local
+              ? 'Al día · ' + String(ver.local || ver.servidor).replace('trainingfr-', '') +
+                ' · y lo descargado para usarla sin internet'
+              : 'Hay una versión nueva: ' +
+                String(ver.servidor).replace('trainingfr-', '') }))}
         ${raw(g.Admin && Admin.administra()
           ? filaPerfil({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
               tono: '#f0a23c', sub: 'Crear, desactivar y borrar cuentas del proyecto' })
