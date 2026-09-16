@@ -145,10 +145,10 @@
       ],
       ver: ['c-foto', 'c-franjas'] },
 
-    { id: 'g-suplementos', titulo: 'Los suplementos',
+    { id: 'g-suplementos', titulo: 'La suplementación',
       resumen: 'Se apuntan una vez y lo usa toda la app',
       cuerpo: [
-        'En Perfil › Suplementos apuntas qué tomas, cuánto, cada cuánto y en qué momento. A partir de ahí no hay que repetirlo en ningún otro sitio.',
+        'En Perfil › Suplementación apuntas qué tomas, cuánto, cada cuánto y en qué momento. A partir de ahí no hay que repetirlo en ningún otro sitio.',
         '*Los recordatorios se crean solos*, con el nombre y la dosis puestos. Los que caen a la misma hora van en un solo aviso: tres notificaciones seguidas a las ocho para tres botes del mismo cajón es ruido, y el ruido acaba silenciándose entero.',
         '*El momento no guarda una hora*, guarda que es «con el desayuno» o «después de entrenar». La hora sale de tus horas de comer y de la hora a la que entrenas de verdad, así que si mueves el desayuno de las ocho a las seis, la creatina se mueve sola.',
         '*Lo que aportan cuenta*: un batido de proteína son unas 120 kcal y 24 g, y el menú los descuenta en vez de pedírtelos otra vez en comida.',
@@ -191,7 +191,7 @@
       cuerpo: [
         'La app entera funciona sin conexión: las rutinas, el entrenamiento, el cronómetro, apuntar series, el historial y las estadísticas. Todo eso vive en el móvil.',
         'Lo único que conviene bajar antes son las *imágenes de los ejercicios*, porque pesan y no vienen de serie. Puedes bajar solo las de tus rutinas —lo más rápido—, las principales del catálogo o el catálogo completo.',
-        'Se hace desde Perfil › Versión y espacio, y te dice cuánto ocupa antes de empezar y cuánto llevas ya guardado.',
+        'Se hace desde Perfil › Actualizaciones, y te dice cuánto ocupa antes de empezar y cuánto llevas ya guardado.',
         'Lo que sí necesita conexión: el entrenador con IA, sincronizar con tu cuenta y actualizar la app.'
       ],
       ver: ['c-offline'] }
@@ -339,8 +339,8 @@
     { id: 'c-suplementos', titulo: 'Apuntar lo que tomas',
       resumen: 'Y que se creen los recordatorios solos',
       pasos: [
-        { t: 'Entra en *Perfil › Suplementos*.',
-          ir: { ruta: 'suplementos', label: 'Abrir Suplementos' } },
+        { t: 'Entra en *Perfil › Suplementación*.',
+          ir: { ruta: 'suplementos', label: 'Abrir Suplementación' } },
         { t: 'Toca *Añadir* y elige de la lista.',
           d: 'Creatina, proteína, omega 3, multivitamínico, magnesio… Sale con la dosis que suele traer la etiqueta, para no teclearla. Si el tuyo no está, elige *Otro* y lo escribes.' },
         { t: 'Ajusta la dosis como la midas tú.',
@@ -436,8 +436,8 @@
     { id: 'c-offline', titulo: 'Dejarla lista para un gimnasio sin cobertura',
       resumen: 'Descargar lo que pesa, antes de ir',
       pasos: [
-        { t: 'Entra en Perfil › Versión y espacio.',
-          ir: { ruta: 'version', label: 'Abrir Versión y espacio' } },
+        { t: 'Entra en Perfil › Actualizaciones.',
+          ir: { ruta: 'version', label: 'Abrir Actualizaciones' } },
         { t: 'En *Entrenar sin internet*, elige qué bajar.',
           d: 'Solo las de tus rutinas es lo más rápido y suele bastar. Los ejercicios principales o el catálogo completo, si te gusta buscar sobre la marcha.' },
         { t: 'Espera a que termine la barra.',

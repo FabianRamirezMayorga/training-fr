@@ -51,7 +51,28 @@
     salir: '<svg viewBox="0 0 24 24"><path d="M15 17l5-5-5-5M20 12H9M12 3H5v18h7"/></svg>',
     perfil: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>',
     campana: '<svg viewBox="0 0 24 24"><path d="M18 15V10a6 6 0 10-12 0v5l-2 3h16zM10 21h4"/></svg>',
-    nutricion: '<svg viewBox="0 0 24 24"><path d="M12 21c-4 0-6-3.5-6-8 0-3.5 2.5-6 6-6s6 2.5 6 6c0 4.5-2 8-6 8z"/><path d="M12 7V3M12 3c2 0 3 1 3 2"/></svg>',
+    /* Era una manzana, y una manzana es «fruta», no «alimentación»: en la fila
+       de Perfil, al lado del cuerpo y de la campana, se leía como una sección
+       de dieta de fruta. Un tenedor y un cuchillo es lo que todo el mundo
+       reconoce como comer, y a 18 píxeles se distingue de todo lo demás. */
+    nutricion: '<svg viewBox="0 0 24 24">'
+      + '<path d="M4.2 3v4.4a2.8 2.8 0 005.6 0V3M7 3v4.4M7 10.2V21"/>'
+      + '<path d="M17 21v-7.2c-1.9-.4-2.8-1.9-2.8-4.4 0-2.7 1.3-4.8 3.8-6.3.5-.3 1.2.05 1.2.65V21"/>'
+      + '</svg>',
+
+    /* Ajustes llevaba el cronómetro del descanso. El mismo dibujo para «cuánto
+       descanso entre series» y para «cómo se comporta la app» hacía que uno de
+       los dos estuviera siempre mintiendo. Deslizadores: lo que se viene a
+       hacer aquí es mover cosas de sitio. */
+    ajustes: '<svg viewBox="0 0 24 24">'
+      + '<path d="M4 7.5h8.5M17.5 7.5H20M4 16.5h3.5M12.5 16.5H20"/>'
+      + '<circle cx="15" cy="7.5" r="2.4"/><circle cx="10" cy="16.5" r="2.4"/></svg>',
+
+    /* Buscar actualizaciones: la flecha de bajar dentro del círculo de volver a
+       mirar. La flecha sola ya la usa descargar, y son cosas distintas. */
+    actualizar: '<svg viewBox="0 0 24 24">'
+      + '<path d="M21 12a9 9 0 11-3.4-7"/><path d="M21.2 3.8v4.6h-4.6"/>'
+      + '<path d="M12 8.4v6.2M9.3 11.9L12 14.6l2.7-2.7"/></svg>',
     trofeo: '<svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 01-8 0zM8 5H5v2a3 3 0 003 3M16 5h3v2a3 3 0 01-3 3M9 21h6M12 13v8"/></svg>',
     grafica: '<svg viewBox="0 0 24 24"><path d="M4 19h16M7 16V9M12 16V5M17 16v-5"/></svg>',
     gota: '<svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 10.5a6 6 0 01-12 0C6 9.5 12 3 12 3z"/></svg>',

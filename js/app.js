@@ -2687,7 +2687,7 @@
             'Lo que tocaba hoy pasa a mañana, y así el resto, en vez de perder la sesión.')
           : '')}
 
-        ${raw(filaAccion('importar', 'nutricion', 'Traer una rutina que tengo en papel',
+        ${raw(filaAccion('importar', 'camara', 'Traer una rutina que tengo en papel',
           'Una foto de la hoja del gimnasio o el PDF de tu entrenador: la leo y tú decides.'))}
       </div>
 
@@ -4836,9 +4836,9 @@
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Perfil</button>
-      <h1>Versión y espacio</h1>
-      <p class="muted">Qué versión tienes, si hay una nueva y qué llevas descargado para
-      entrenar sin internet.</p>
+      <h1>Actualizaciones</h1>
+      <p class="muted">Si hay una versión nueva, y qué llevas descargado para usar la app
+      sin internet.</p>
 
       <div class="card tarjeta-premium ver-caja" id="ver-caja">
         <div class="pre-encima">Tu versión</div>

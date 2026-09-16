@@ -148,14 +148,15 @@
             : listo ? Store.settings().name + ' · ' + p.edad + ' años · ' +
               Perfil.ACTIVIDAD[p.actividad].label
             : 'Sin completar' }))}
-        ${raw(filaPerfil({ icono: 'trofeo', titulo: 'Objetivos', accion: 'objetivos',
-          tono: '#f0a23c',
-          sub: metas.length ? metas.length + ' en marcha · ' + cumplidas + ' cumplidos'
-            : 'Ninguno todavía' }))}
+        <!-- El orden es el de la cadena, no el de cuándo se fue añadiendo cada
+             cosa: tus datos mandan sobre tus calorías, tus calorías sobre lo
+             que comes, lo que comes sobre lo que suplementas. Los objetivos y
+             los recordatorios van después porque se apoyan en todo lo de
+             arriba, no al revés. -->
         ${raw(filaPerfil({ icono: 'nutricion', titulo: 'Alimentación', accion: 'nutricion',
           tono: '#2fc4b2', pendiente: !m,
           sub: m ? m.kcal + ' kcal · ' + m.prot + ' g de proteína' : 'Necesita tus datos' }))}
-        ${raw(filaPerfil({ icono: 'bote', titulo: 'Suplementos', accion: 'suplementos',
+        ${raw(filaPerfil({ icono: 'bote', titulo: 'Suplementación', accion: 'suplementos',
           tono: '#8e7cf0',
           sub: (function () {
             if (!g.Suplementos) return 'Qué tomas y cuándo';
@@ -165,6 +166,10 @@
             return n + (n === 1 ? ' apuntado' : ' apuntados') + ' · ' +
               (hoy ? hoy + (hoy === 1 ? ' toma hoy' : ' tomas hoy') : 'hoy ninguna');
           })() }))}
+        ${raw(filaPerfil({ icono: 'trofeo', titulo: 'Objetivos', accion: 'objetivos',
+          tono: '#f0a23c',
+          sub: metas.length ? metas.length + ' en marcha · ' + cumplidas + ' cumplidos'
+            : 'Ninguno todavía' }))}
         ${raw(filaPerfil({ icono: 'campana', titulo: 'Alertas', accion: 'alertas',
           tono: '#e0679a',
           sub: alertas ? alertas + (alertas === 1 ? ' recordatorio activo' : ' recordatorios activos')
@@ -191,14 +196,14 @@
         ${raw(filaPerfil({ icono: 'nube', titulo: 'Mi cuenta', accion: 'cuenta',
           tono: '#4f8cf5', pendiente: !Sync.activa(),
           sub: Sync.activa() ? Sync.email() : 'Sin sincronizar' }))}
-        ${raw(filaPerfil({ icono: 'timer', titulo: 'Ajustes', accion: 'ajustes',
+        ${raw(filaPerfil({ icono: 'ajustes', titulo: 'Ajustes', accion: 'ajustes',
           tono: '#c06bf0',
           sub: 'Unidades, tema, descanso y copias de seguridad' }))}
-        ${raw(filaPerfil({ icono: 'down', titulo: 'Versión y espacio', accion: 'version',
+        ${raw(filaPerfil({ icono: 'actualizar', titulo: 'Actualizaciones', accion: 'version',
           tono: '#4f8cf5', pendiente: !!(ver && ver.local && !ver.alDia),
           sub: !ver || !ver.local ? 'Comprobando si estás al día…'
             : ver.alDia ? 'Al día · ' + String(ver.local).replace('trainingfr-', '') +
-              ' · lo descargado para entrenar sin internet'
+              ' · y lo descargado para usarla sin internet'
             : 'Hay una versión nueva: ' +
               String(ver.servidor).replace('trainingfr-', '') }))}
         ${raw(g.Admin && Admin.administra()
