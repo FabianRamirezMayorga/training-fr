@@ -6160,3 +6160,19 @@ html[data-theme="light"] .sf-campo:focus-within {
 .cal-truco > .grow > b { display: block; font-size: .88rem; letter-spacing: -.01em; }
 .cal-truco .tiny b { color: var(--txt); font-weight: 700; }
 .cal-truco .tiny { display: block; margin-top: 3px; line-height: 1.45; }
+
+/* Cuando lo descargado ya no es lo que hay. Ambar y no rojo: no esta roto,
+   esta viejo, y se arregla con un boton. */
+.cal-viejo {
+  display: flex; align-items: flex-start; gap: 11px;
+  margin-bottom: 12px; padding: 11px 12px; border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--warn) 38%, transparent);
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+}
+.cal-viejo .cv-ico { flex: none; display: flex; color: var(--warn); margin-top: 1px; }
+.cal-viejo .cv-ico svg {
+  width: 17px; height: 17px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.cal-viejo b { display: block; font-size: .88rem; letter-spacing: -.01em; }
+.cal-viejo .tiny { display: block; margin-top: 3px; line-height: 1.45; }

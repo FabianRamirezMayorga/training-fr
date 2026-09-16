@@ -369,8 +369,8 @@
         { t: 'Compruébalo: se llaman *Training FR · algo*.',
           d: 'Ese prefijo va en todos, así que buscando «Training FR» en tu calendario salen todos aunque los hayas metido mezclados.' }
       ],
-      cierre: 'Si cambias horas o días, vuelve a descargarlo: los eventos que ya tienes se actualizan en vez de duplicarse, porque cada uno lleva su identificador.',
-      ver: ['c-quitarcal', 'p-calendario'] },
+      cierre: 'Si luego cambias horas o días, la pantalla de Alertas te avisa de que el calendario se quedó viejo y el botón pasa a decir «Volver a descargar». Los eventos que ya tienes se actualizan en vez de duplicarse, porque cada uno lleva su identificador.',
+      ver: ['c-quitarcal', 'p-calendario', 'p-calauto'] },
 
     { id: 'c-quitarcal', titulo: 'Quitar los recordatorios del calendario',
       resumen: 'Sin buscarlos uno a uno',
@@ -494,6 +494,13 @@
         'Pero lo que de verdad los hace fáciles de administrar es meterlos en un calendario propio llamado Training FR, creado antes de importarlos. Así se apagan, se esconden o se borran enteros de un toque.',
         'Eso no lo decide el archivo, lo decide tu app de calendario al preguntarte dónde meterlos. El archivo ya trae el nombre puesto para que te lo ofrezca.',
         'Y si los quieres quitar, no hace falta buscarlos: en Alertas hay un botón que descarga un archivo que los retira de golpe.'],
+      ver: ['c-calendario', 'c-quitarcal'] },
+
+    { id: 'p-calauto', q: '¿El calendario se actualiza solo si cambio una alerta?',
+      a: ['No. Lo que descargas es un archivo, y un archivo es una foto del momento: si mañana cambias la hora del agua, el calendario sigue avisando a la de antes hasta que lo vuelvas a bajar.',
+        'Para que se actualizara solo haría falta una suscripción por URL, es decir, un servidor sirviendo esto todo el rato. Y aun así no valdría: los calendarios refrescan lo suscrito con mucha pereza —algunos una vez al día—, y un aviso que tarda un día en enterarse de que cambiaste la hora es peor que volver a bajar el archivo.',
+        'Lo que sí hace la app es no dejar que se te olvide: cuando lo que tienes en el calendario ya no coincide con tus recordatorios, la pantalla de Alertas te lo dice y el botón pasa a «Volver a descargar».',
+        'Y volver a bajarlo es seguro: los eventos que ya tienes se actualizan en vez de duplicarse.'],
       ver: ['c-calendario', 'c-quitarcal'] },
 
     { id: 'p-actualiza', q: '¿Por qué me pide actualizar tan a menudo?',

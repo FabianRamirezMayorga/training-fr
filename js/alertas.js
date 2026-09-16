@@ -556,6 +556,7 @@
     (Store.settings().alertasExportadas || []).forEach(function (u) { sabidos[u] = 1; });
     uids.forEach(function (u) { sabidos[u] = 1; });
     Store.setSetting('alertasExportadas', Object.keys(sabidos));
+    Store.setSetting('alertasHuella', huella());
 
     lineas.push('END:VCALENDAR');
     return lineas.map(plegar).join(FIN);
@@ -607,6 +608,31 @@
     return (Store.settings().alertasExportadas || []).length;
   }
 
+  /* ---------- ¿el calendario está al día? ----------
+     Un archivo descargado es una foto del momento: cambias la hora del agua en
+     la app y el calendario sigue avisando a la de antes, sin que nada lo diga.
+     Que se actualizara solo pediría una suscripción por URL —un servidor que
+     sirva esto—, y ni con eso valdría: los calendarios refrescan lo suscrito
+     con mucha pereza, algunos una vez al día, y un aviso que tarda un día en
+     enterarse de que cambiaste la hora es peor que volver a bajar el archivo.
+
+     Lo que sí se puede hacer sin depender de nadie es no olvidarse: se guarda
+     una huella de lo exportado y, si lo de ahora no coincide, la app lo dice.
+     Que es el problema de verdad —nadie se acuerda—, no el de tener que tocar
+     un botón. */
+  function huella() {
+    return lista().filter(function (a) { return a.activa && a.dias.length; })
+      .map(function (a) {
+        return a.id + ':' + a.titulo + ':' + (a.horas || []).join('-') +
+          ':' + (a.dias || []).slice().sort().join('');
+      }).sort().join('|');
+  }
+
+  function calendarioDesfasado() {
+    if (!cuantosExportados()) return false;
+    return (Store.settings().alertasHuella || '') !== huella();
+  }
+
   function escaparICS(s) {
     return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;')
       .replace(/,/g, '\\,').replace(/\n/g, '\\n');
@@ -639,6 +665,7 @@
     soportado: soportado, permiso: permiso, pedirPermiso: pedirPermiso, avisar: avisar,
     pendientes: pendientes, arrancar: arrancar, parar: parar, marcarLanzada: marcarLanzada,
     ics: ics, icsCancelar: icsCancelar, cuantosExportados: cuantosExportados,
+    calendarioDesfasado: calendarioDesfasado,
     resumenDias: resumenDias, resumenHoras: resumenHoras,
     diagnostico: diagnostico, probar: probar,
     sugerencias: sugerencias, yaExiste: yaExiste, crearDesdeSugerencia: crearDesdeSugerencia,

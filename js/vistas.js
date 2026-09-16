@@ -1061,8 +1061,17 @@
         avisarte sola si está cerrada, salvo pagando un servidor de notificaciones. La vía
         que sí funciona y no cuesta nada es llevarlos al calendario del móvil, que sí avisa
         siempre.</p>
+        ${raw(Alertas.calendarioDesfasado() ? html`
+          <div class="cal-viejo">
+            <span class="cv-ico">${raw(icon('aviso'))}</span>
+            <span class="grow"><b>Tu calendario está desfasado</b>
+            <span class="tiny">Has cambiado recordatorios desde la última descarga. El
+            calendario sigue avisando con lo de antes hasta que vuelvas a bajarlo.</span></span>
+          </div>` : '')}
+
         <button class="btn primary block" data-a="calendario" ${lista.length ? '' : 'disabled'}>
-          ${raw(icon('down'))} Descargar para el calendario</button>
+          ${raw(icon('down'))} ${Alertas.calendarioDesfasado()
+            ? 'Volver a descargar' : 'Descargar para el calendario'}</button>
         <p class="tiny" style="margin-top:8px">Se crean como eventos semanales con aviso,
         llamados <b>«Training FR · …»</b>, y tocando uno se abre la app en la pantalla que
         toca. Al volver a descargarlo, los que ya tengas se actualizan en vez de
