@@ -66,13 +66,14 @@
      esto es para acordarse, no un diario de cumplimiento. Una lista de casillas
      sin marcar acaba siendo un reproche.
 
-     Y va agrupado por bote, no por toma. Con un magnesio cada seis horas salían
-     tres renglones que decían «Magnesio» tres veces: la tarjeta crecía con las
-     repeticiones y lo que se lee en ella —qué tengo que tomar hoy— no cambiaba.
-     Un bote, una entrada, y sus horas juntas debajo.
+     Va agrupado por bote y no por toma: con un magnesio cada seis horas salían
+     tres renglones que decían «Magnesio» tres veces, y la tarjeta crecía con
+     las repeticiones mientras lo que se lee en ella no cambiaba.
 
-     Aquí las horas van en color y el nombre no, justo al revés que en la lista
-     de abajo: esta tarjeta responde «cuándo» y aquella responde «qué». */
+     Y en una línea cuando hay una sola hora. Dos renglones para decir «Creatina
+     5 g, a las seis» es gastar el doble de alto en el caso más común; los dos
+     renglones se guardan para cuando hay varias horas, que es cuando hace falta
+     un sitio aparte donde ponerlas. */
   function hoyHTML(aporta) {
     const l = S().lista().filter(function (x) { return S().tocaHoy(x); })
       .map(function (x) { return { sup: x, horas: S().horasDe(x) }; })
@@ -82,33 +83,35 @@
 
     if (!l.length) {
       return html`
-        <div class="card sup-hoy2" style="margin-top:14px">
-          <div class="sh-cab"><span class="sh-et">Hoy no toca nada</span></div>
-          <p class="tiny" style="margin:6px 0 0">Los de «los días que entreno» y «un día
-          sí y otro no» se saltan solos.</p>
+        <div class="list-title">Que no se te olvide</div>
+        <div class="card sup-hoy2">
+          <p class="tiny" style="margin:0">Hoy no toca ninguno. Los de «los días que
+          entreno» y «un día sí y otro no» se saltan solos.</p>
         </div>`;
     }
 
     const tomas = l.reduce(function (n, x) { return n + x.horas.length; }, 0);
+    const horasDe = function (hs) {
+      return hs.map(function (h) { return esc(UI.hora ? UI.hora(h) : h); }).join('<i>·</i>');
+    };
 
     return html`
-      <div class="card sup-hoy2" style="margin-top:14px">
-        <div class="sh-cab">
-          <span class="sh-et">Que no se te olvide</span>
-          <span class="sh-cuenta">${tomas} ${tomas === 1 ? 'toma' : 'tomas'}</span>
-        </div>
+      <div class="list-head">
+        <span class="list-title">Que no se te olvide</span>
+        <span class="sh-cuenta">${tomas} ${tomas === 1 ? 'toma' : 'tomas'}</span>
+      </div>
 
-        <div class="sh-lista">
-          ${raw(l.map(function (x) {
-            return '<div class="sh-linea">' +
-              '<span class="sl-cab"><span class="sl-n">' + esc(x.sup.nombre) + '</span>' +
-              (x.sup.dosis ? '<span class="sl-d">' + esc(x.sup.dosis) + '</span>' : '') +
-              '</span>' +
-              '<span class="sl-h">' + x.horas.map(function (h) {
-                return esc(UI.hora ? UI.hora(h) : h);
-              }).join('<i>·</i>') + '</span></div>';
-          }).join(''))}
-        </div>
+      <div class="card sup-hoy2">
+        ${raw(l.map(function (x) {
+          const una = x.horas.length === 1;
+          return '<div class="sh-linea' + (una ? ' corta' : '') + '">' +
+            '<span class="sl-cab"><span class="sl-n">' + esc(x.sup.nombre) + '</span>' +
+            (x.sup.dosis ? '<span class="sl-d">' + esc(x.sup.dosis) + '</span>' : '') +
+            (una ? '<span class="sl-h">' + horasDe(x.horas) + '</span>' : '') +
+            '</span>' +
+            (una ? '' : '<span class="sl-h">' + horasDe(x.horas) + '</span>') +
+            '</div>';
+        }).join(''))}
 
         ${raw(aporta.kcal || aporta.prot ? html`
           <p class="tiny sup-pie">Suman <b>${aporta.kcal} kcal</b> y

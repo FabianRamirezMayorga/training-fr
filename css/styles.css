@@ -6279,49 +6279,44 @@ html[data-theme="light"] .sf-campo:focus-within {
   margin-left: 1px; }
 
 /* ---------- lo que hay que tomar hoy ----------
-   Llego a tener boton de «tomar» y casillas que se marcaban, y se ha quitado:
-   esto es para acordarse, no un diario de cumplimiento. Una lista de casillas
-   sin marcar acaba siendo un reproche.
+   El titulo se sale de la tarjeta y se pone donde los demas de la pantalla:
+   dentro era una cabecera mas que competia con el contenido, y fuera la seccion
+   se lee como las otras dos sin tener que entrar en la tarjeta.
 
-   Informacion y nada mas, pero dicha entera: hora, nombre y cuanto. Antes
-   decia la hora y el nombre, y habia que abrir la ficha para saber si eran
-   cinco gramos o un cazo, que es justo el dato que se va de la cabeza. */
-.sup-hoy2 { padding: 13px; }
-.sh-cab { display: flex; align-items: baseline; gap: 10px; margin-bottom: 9px; }
-.sh-et {
-  flex: 1; font-size: .66rem; font-weight: 800; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--dim2);
-}
+   Y una linea cuando hay una sola hora. Dos renglones para decir «Creatina 5 g,
+   a las seis» es gastar el doble de alto en el caso mas comun. */
+.sup-hoy2 { padding: 4px 13px; }
+
 .sh-cuenta {
-  font-size: .8rem; font-weight: 800; letter-spacing: -.01em;
-  color: var(--acc); font-variant-numeric: tabular-nums;
+  font-size: .78rem; font-weight: 800; letter-spacing: -.01em;
+  color: var(--acc); font-variant-numeric: tabular-nums; margin-bottom: 1px;
 }
 
-/* Un bote por entrada y sus horas juntas debajo. Por tomas, un magnesio cada
-   seis horas daba tres renglones que decian «Magnesio» tres veces.
-
-   Las horas en color y el nombre no, al reves que en la lista de abajo: esta
-   tarjeta responde «cuando» y aquella responde «que». */
-.sh-lista { display: flex; flex-direction: column; }
-.sh-linea { padding: 8px 0; position: relative; }
+.sh-linea { padding: 9px 0; position: relative; }
+.sh-linea.corta { padding: 7px 0; }
 .sh-linea + .sh-linea::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
   background: var(--line); transform: scaleY(.5);
 }
 .sl-cab { display: flex; align-items: baseline; gap: 9px; }
 .sl-n {
-  flex: 1; min-width: 0; font-size: .9rem; font-weight: 650; letter-spacing: -.012em;
+  min-width: 0; font-size: .89rem; font-weight: 650; letter-spacing: -.012em;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.sl-d { flex: none; font-size: .76rem; color: var(--dim2); white-space: nowrap; }
+/* Con una sola hora, la dosis empuja hacia el centro y la hora se va al borde;
+   con varias, la dosis se va al borde porque la hora baja de renglon. */
+.sh-linea.corta .sl-d { flex: 1; }
+.sh-linea:not(.corta) .sl-n { flex: 1; }
+.sl-d { flex: none; font-size: .75rem; color: var(--dim2); white-space: nowrap; }
 .sl-h {
-  display: block; margin-top: 2px;
-  font-size: .8rem; font-weight: 700; letter-spacing: -.01em;
-  color: var(--acc); font-variant-numeric: tabular-nums;
+  flex: none; font-size: .79rem; font-weight: 700; letter-spacing: -.01em;
+  color: var(--acc); font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.sl-h i { font-style: normal; opacity: .4; margin: 0 5px; }
+.sh-linea:not(.corta) .sl-h { display: block; margin-top: 3px; white-space: normal; }
+.sl-h i { font-style: normal; opacity: .4; margin: 0 4px; }
 
-.sup-pie { margin: 10px 0 0; line-height: 1.45; }
+.sup-pie { margin: 0; padding: 9px 0 10px; line-height: 1.45;
+  border-top: 1px solid var(--line); }
 .sup-pie b { color: var(--txt); font-weight: 700; }
 
 /* El boton de anadir en claro era casi invisible: el .btn de la app se apoya en
