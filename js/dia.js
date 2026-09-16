@@ -368,7 +368,7 @@
                 icon('cambiar') + ' Cruzar</button>'
               : '') +
             '<button class="btn sm ghost danger" data-quitar="' + esc(c.id) +
-            '" aria-label="Quitar">' + icon('trash') + '</button></div>';
+            '" aria-label="' + esc(T('Quitar')) + '">' + icon('trash') + '</button></div>';
         }).join(''))}
       </div>` : '';
 

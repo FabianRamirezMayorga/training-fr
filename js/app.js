@@ -68,7 +68,9 @@
     }
     const fn = views[route.name] || viewInicio;
 
-    actionsEl.innerHTML = route.name === 'bienvenida' ? temaChip() : lugarChip() + temaChip();
+    actionsEl.innerHTML = route.name === 'bienvenida'
+      ? idiomaChip() + temaChip()
+      : lugarChip() + idiomaChip() + temaChip();
 
     /* Subir al principio solo al cambiar de pantalla. Repintar es lo que hace
        esta app cada vez que se toca algo —marcar una opción, escribir un
@@ -115,6 +117,12 @@
     if (chipTema) chipTema.onclick = function () {
       Store.setSetting('theme', temaEfectivo() === 'light' ? 'dark' : 'light');
       aplicarTema();
+      render();
+    };
+
+    const chipIdioma = actionsEl.querySelector('[data-a=idioma]');
+    if (chipIdioma) chipIdioma.onclick = function () {
+      Idioma.poner(Idioma.actual() === 'es' ? 'en' : 'es');
       render();
     };
 
@@ -1330,9 +1338,9 @@
           ${raw(editando && total > 1 ? html`
             <div class="mover">
               <button class="btn sm" data-sube="${r.id}" ${i === 0 ? 'disabled' : ''}
-                      aria-label="Subir">${raw(icon('up'))}</button>
+                      aria-label="${T('Subir')}">${raw(icon('up'))}</button>
               <button class="btn sm" data-baja="${r.id}" ${i === total - 1 ? 'disabled' : ''}
-                      aria-label="Bajar">${raw(icon('down'))}</button>
+                      aria-label="${T('Bajar')}">${raw(icon('down'))}</button>
             </div>` : '')}
           <div class="grow" style="cursor:pointer;min-width:0" data-desplegar="${r.id}"
                data-ambito="${ambito}">
@@ -1346,7 +1354,7 @@
           </div>
           ${raw(editando
             ? html`<button class="btn sm danger" data-borrar="${r.id}"
-                     aria-label="Borrar rutina">${raw(icon('trash'))}</button>`
+                     aria-label="${T('Borrar rutina')}">${raw(icon('trash'))}</button>`
             : html`<button class="btn primary sm" data-train="${r.id}">
                      ${raw(icon('play'))} Entrenar</button>`)}
         </div>
@@ -1643,8 +1651,8 @@
       const t = Data.TIPOS.filter(function (x) { return x.id === exFilters.tipo; })[0];
       if (t) fichas.push(['tipo', t.label]);
     }
-    if (exFilters.equipment) fichas.push(['equipment', I18N.EQUIP[exFilters.equipment]]);
-    if (exFilters.level) fichas.push(['level', I18N.LEVEL[exFilters.level]]);
+    if (exFilters.equipment) fichas.push(['equipment', I18N.equip(exFilters.equipment)]);
+    if (exFilters.level) fichas.push(['level', I18N.level(exFilters.level)]);
     if (!fichas.length) return '';
 
     return '<div class="pill-scroll" style="margin-bottom:12px">' +
@@ -1713,35 +1721,35 @@
     };
 
     UI.modal(html`
-      <h2>Filtrar</h2>
+      <h2>${T('Filtrar')}</h2>
 
-      ${raw(tituloGrupo('ZONA DEL CUERPO'))}
+      ${raw(tituloGrupo(T('ZONA DEL CUERPO')))}
       <div class="zona-rejilla">
-        ${raw(casillaZona('', 'Todas', todosMusculos))}
+        ${raw(casillaZona('', T('Todas'), todosMusculos))}
         ${raw(I18N.GROUPS.map(function (gr) {
           return casillaZona(gr.id, gr.label, gr.muscles);
         }).join(''))}
       </div>
 
-      ${raw(tituloGrupo('TIPO DE TRABAJO'))}
+      ${raw(tituloGrupo(T('TIPO DE TRABAJO')))}
       <div class="row wrap" style="gap:6px">
-        ${raw(pildora('f-tipo', '', 'Todo', !exFilters.tipo))}
+        ${raw(pildora('f-tipo', '', T('Todo'), !exFilters.tipo))}
         ${raw(Data.TIPOS.map(function (t) {
-          return pildora('f-tipo', t.id, t.label, exFilters.tipo === t.id);
+          return pildora('f-tipo', t.id, T(t.label), exFilters.tipo === t.id);
         }).join(''))}
       </div>
 
       <details class="plegable-fino filtro-mas" data-mas="eq">
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
-          <span class="grow">Material</span>
+          <span class="grow">${T('Material')}</span>
           <span class="tiny nowrap" data-valor="eq"></span>
         </summary>
         <div class="fino-cuerpo">
           <div class="row wrap" style="gap:6px">
-            ${raw(pildora('f-eq', '', 'Todo', !exFilters.equipment))}
+            ${raw(pildora('f-eq', '', T('Todo'), !exFilters.equipment))}
             ${raw(equipos.map(function (k) {
-              return pildora('f-eq', k, I18N.EQUIP[k], exFilters.equipment === k);
+              return pildora('f-eq', k, I18N.equip(k), exFilters.equipment === k);
             }).join(''))}
           </div>
         </div>
@@ -1750,14 +1758,14 @@
       <details class="plegable-fino filtro-mas" data-mas="lv">
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
-          <span class="grow">Nivel</span>
+          <span class="grow">${T('Nivel')}</span>
           <span class="tiny nowrap" data-valor="lv"></span>
         </summary>
         <div class="fino-cuerpo">
           <div class="row wrap" style="gap:6px">
-            ${raw(pildora('f-lv', '', 'Cualquiera', !exFilters.level))}
+            ${raw(pildora('f-lv', '', T('Cualquiera'), !exFilters.level))}
             ${raw(Object.keys(I18N.LEVEL).map(function (k) {
-              return pildora('f-lv', k, I18N.LEVEL[k], exFilters.level === k);
+              return pildora('f-lv', k, I18N.level(k), exFilters.level === k);
             }).join(''))}
           </div>
         </div>
@@ -1766,8 +1774,8 @@
       <div class="filtro-sw">
         <div class="row between" data-f-favs="1">
           <div class="grow">
-            <div class="filtro-sw-t">Solo mis favoritos</div>
-            <div class="tiny">Los que has marcado con la estrella</div>
+            <div class="filtro-sw-t">${T('Solo mis favoritos')}</div>
+            <div class="tiny">${T('Los que has marcado con la estrella')}</div>
           </div>
           <span class="sw ${exFilters.favs ? 'on' : ''}" data-sw="favs"></span>
         </div>
@@ -1775,8 +1783,9 @@
         ${raw(Store.settings().gear === 'todo' ? '' : html`
         <div class="row between" data-f-todo="1">
           <div class="grow">
-            <div class="filtro-sw-t">Solo lo que puedo hacer</div>
-            <div class="tiny">Con el material que tienes ${esc(Data.gearFrase(Store.settings().gear))}</div>
+            <div class="filtro-sw-t">${T('Solo lo que puedo hacer')}</div>
+            <div class="tiny">${Tn('Con el material que tienes {donde}',
+              { donde: Data.gearFrase(Store.settings().gear) })}</div>
           </div>
           <span class="sw ${exFilters.todo ? '' : 'on'}" data-sw="todo"></span>
         </div>`)}
@@ -1784,7 +1793,7 @@
 
       <button class="btn primary block" id="f-ver" style="margin-top:18px"></button>
       <button class="btn ghost block sm" id="f-limpiar" style="margin-top:8px" hidden>
-        Quitar los filtros</button>`,
+        ${T('Quitar los filtros')}</button>`,
       function (el) {
         /* La hoja se apoya sobre la pantalla de ejercicios: si es translucida y
            desenfoca lo de detras, se ve de donde sale. */
@@ -1814,9 +1823,9 @@
           });
 
           el.querySelector('[data-valor="eq"]').textContent =
-            exFilters.equipment ? I18N.EQUIP[exFilters.equipment] : 'Todo';
+            exFilters.equipment ? I18N.equip(exFilters.equipment) : T('Todo');
           el.querySelector('[data-valor="lv"]').textContent =
-            exFilters.level ? I18N.LEVEL[exFilters.level] : 'Cualquiera';
+            exFilters.level ? I18N.level(exFilters.level) : T('Cualquiera');
 
           const swFavs = el.querySelector('[data-sw="favs"]');
           if (swFavs) swFavs.classList.toggle('on', !!exFilters.favs);
@@ -1824,8 +1833,8 @@
           if (swTodo) swTodo.classList.toggle('on', !exFilters.todo);
 
           const n = Data.search(loQueSeMira().base).length;
-          btnVer.textContent = !n ? 'No hay ninguno así'
-            : n === 1 ? 'Ver el ejercicio' : 'Ver ' + UI.num(n) + ' ejercicios';
+          btnVer.textContent = !n ? T('No hay ninguno así')
+            : n === 1 ? T('Ver el ejercicio') : Tn('Ver {n} ejercicios', { n: UI.num(n) });
           btnVer.disabled = !n;
           btnLimpiar.hidden = !cuantosFiltros();
         };
@@ -3600,7 +3609,7 @@
         <div class="row wrap" style="gap:6px;margin-top:9px">
           ${raw(Object.keys(I18N.LEVEL).map(function (k) {
             return '<button class="chip ' + (p.level === k ? 'on' : '') +
-                   '" data-plevel="' + k + '">' + esc(I18N.LEVEL[k]) + '</button>';
+                   '" data-plevel="' + k + '">' + esc(I18N.level(k)) + '</button>';
           }).join(''))}
         </div>
       </div>
@@ -3629,7 +3638,7 @@
                   <div class="tiny">${r.exercises.length} ejercicios · ~${Planner.estimate(r)} min ·
                     ${r.muscles.map(I18N.muscle).join(' · ')}</div>
                 </div>
-                <button class="btn icon sm" data-pdet="${i}" aria-label="Ver ejercicios">
+                <button class="btn icon sm" data-pdet="${i}" aria-label="${T('Ver ejercicios')}">
                   ${raw(icon('down'))}</button>
               </div>
               <div class="stack" data-pbody="${i}" hidden style="margin-top:10px">
@@ -3815,7 +3824,7 @@
                   <div class="row" style="gap:6px;flex:none">
                     <button class="btn sm" data-rcambio="${i}">Aplicar</button>
                     <button class="btn sm ghost" data-rnocambio="${i}"
-                            aria-label="Descartar">✕</button>
+                            aria-label="${T('Descartar')}">✕</button>
                   </div>
                 </div>`;
             }).join(''))}
@@ -4122,7 +4131,7 @@
               un ejercicio de otra. Enciéndelo para mezclar tren superior e inferior.</div>
           </div>
           <button class="sw ${draft.mixta ? 'on' : ''}" data-a="mixta"
-                  role="switch" aria-checked="${!!draft.mixta}" aria-label="Rutina mixta"></button>
+                  role="switch" aria-checked="${!!draft.mixta}" aria-label="${T('Rutina mixta')}"></button>
         </div>
       </div>
 
@@ -4151,14 +4160,14 @@
                   </div>
                   <div class="row" style="gap:4px">
                     <button class="btn icon sm" data-up="${i}" ${i === 0 ? 'disabled' : ''}
-                            aria-label="Subir">${raw(icon('up'))}</button>
+                            aria-label="${T('Subir')}">${raw(icon('up'))}</button>
                     <button class="btn icon sm" data-down="${i}"
                             ${i === draft.exercises.length - 1 ? 'disabled' : ''}
-                            aria-label="Bajar">${raw(icon('down'))}</button>
+                            aria-label="${T('Bajar')}">${raw(icon('down'))}</button>
                     <button class="btn icon sm" data-cambiar="${i}"
-                            aria-label="Cambiar por otro">${raw(icon('cambiar'))}</button>
+                            aria-label="${T('Cambiar por otro')}">${raw(icon('cambiar'))}</button>
                     <button class="btn icon sm danger" data-del="${i}"
-                            aria-label="Quitar">${raw(icon('trash'))}</button>
+                            aria-label="${T('Quitar')}">${raw(icon('trash'))}</button>
                   </div>
                 </div>
                 <div class="row" style="margin-top:10px;gap:8px">
@@ -4183,8 +4192,8 @@
       <div class="row" style="margin-top:16px">
         <button class="btn primary grow" data-a="guardar">${raw(icon('check'))} Guardar</button>
         ${raw(draft.id ? html`
-          <button class="btn icon" data-a="dup" aria-label="Duplicar">${raw(icon('copy'))}</button>
-          <button class="btn icon danger" data-a="borrar" aria-label="Borrar">${raw(icon('trash'))}</button>` : '')}
+          <button class="btn icon" data-a="dup" aria-label="${T('Duplicar')}">${raw(icon('copy'))}</button>
+          <button class="btn icon danger" data-a="borrar" aria-label="${T('Borrar')}">${raw(icon('trash'))}</button>` : '')}
       </div>
       ${raw(draft.id && draft.exercises.length ? html`
         <button class="btn block" data-a="entrenar" style="margin-top:8px">
@@ -4478,13 +4487,14 @@
       const gset = Data.GEAR[Store.settings().gear];
       if (info) {
         info.textContent = todo || !gset
-          ? 'Mostrando el catálogo completo'
-          : 'Solo lo que puedes hacer ' + Data.gearFrase(Store.settings().gear);
+          ? T('Mostrando el catálogo completo')
+          : Tn('Solo lo que puedes hacer {donde}',
+              { donde: Data.gearFrase(Store.settings().gear) });
       }
       const btnAll = el.querySelector('[data-pickall]');
       if (btnAll) {
         btnAll.classList.toggle('on', todo);
-        btnAll.textContent = todo ? 'Solo mi material' : 'Ver todo el catálogo';
+        btnAll.textContent = todo ? T('Solo mi material') : T('Ver todo el catálogo');
         btnAll.onclick = function () { todo = !todo; pinta(el); };
       }
     }
@@ -4577,10 +4587,10 @@
   function contador(id, valor, unidad, paso, min, max) {
     return '<div class="contador" data-cont="' + id + '" data-paso="' + paso +
       '" data-min="' + min + '" data-max="' + max + '">' +
-      '<button class="cont-b" data-mas="-1" aria-label="Menos">' + icon('menos') + '</button>' +
+      '<button class="cont-b" data-mas="-1" aria-label="' + esc(T('Menos')) + '">' + icon('menos') + '</button>' +
       '<span class="cont-v"><b id="' + id + '">' + valor + '</b>' +
       '<i>' + esc(unidad) + '</i></span>' +
-      '<button class="cont-b" data-mas="1" aria-label="Mas">' + icon('plus') + '</button></div>';
+      '<button class="cont-b" data-mas="1" aria-label="' + esc(T('Más')) + '">' + icon('plus') + '</button></div>';
   }
 
   /* Una fila de ajuste: lo que se cambia a la izquierda y su mando a la derecha */
@@ -5261,7 +5271,7 @@
             <input id="sync-pass" type="password"
                    autocomplete="${accesoModo === 'crear' ? 'new-password' : 'current-password'}"
                    placeholder="${accesoModo === 'crear' ? 'Al menos 8 caracteres' : 'Tu contraseña'}">
-            <button class="btn sm" data-ver="sync-pass" aria-label="Mostrar u ocultar">
+            <button class="btn sm" data-ver="sync-pass" aria-label="${T('Mostrar u ocultar')}">
               ${raw(icon('ojo'))}</button>
           </div>
 
@@ -5361,7 +5371,7 @@
           <div class="secreto">
             <input id="pass-nueva" type="password" autocomplete="new-password"
                    placeholder="Al menos 8 caracteres">
-            <button class="btn sm" data-ver="pass-nueva" aria-label="Mostrar u ocultar">
+            <button class="btn sm" data-ver="pass-nueva" aria-label="${T('Mostrar u ocultar')}">
               ${raw(icon('ojo'))}</button>
           </div>
 
@@ -5369,7 +5379,7 @@
           <div class="secreto">
             <input id="pass-repe" type="password" autocomplete="new-password"
                    placeholder="La misma otra vez">
-            <button class="btn sm" data-ver="pass-repe" aria-label="Mostrar u ocultar">
+            <button class="btn sm" data-ver="pass-repe" aria-label="${T('Mostrar u ocultar')}">
               ${raw(icon('ojo'))}</button>
           </div>
 
@@ -6151,6 +6161,19 @@
     return html`<button class="btn icon tema-chip${raw(gira ? ' gira' : '')}" data-a="tema"
       aria-label="${claro ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}">
       ${raw(icon(claro ? 'luna' : 'sol'))}</button>`;
+  }
+
+  /* El de al lado: ES / EN de un toque, sin entrar en Ajustes.
+
+     Dice el idioma al que LLEVA, no el que tienes puesto, igual que el del
+     tema enseña la luna cuando estás en claro. Los dos son botones, y un botón
+     dice lo que va a pasar al pulsarlo, no dónde estás. */
+  function idiomaChip() {
+    const otro = Idioma.actual() === 'es' ? 'en' : 'es';
+    const d = Idioma.datos(otro);
+    return html`<button class="btn icon tema-chip idioma-chip" data-a="idioma"
+      aria-label="${Tn('Ver la app en {idioma}', { idioma: d.suyo })}">
+      <span>${d.corto}</span></button>`;
   }
 
   /* Hoja de técnica que se abre durante el entrenamiento: lo esencial para

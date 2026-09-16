@@ -138,12 +138,12 @@
           <button class="crono-ir" data-c="ir">
             <span class="crono-pulso"></span>
             <span class="crono-txt">
-              <span>${T('ENTRENANDO')}</span>
+              <span data-crono-rotulo>${T('ENTRENANDO')}</span>
               <b data-crono-nombre>${a.routineName}</b>
             </span>
           </button>
           <b class="crono-t" data-crono-out>0:00</b>
-          <button class="crono-fin" data-c="fin">${T('Finalizar')}</button>
+          <button class="crono-fin" data-c="fin" data-crono-fin>${T('Finalizar')}</button>
         </div>`;
       host.querySelector('[data-c=ir]').onclick = function () { g.App.go('entrenar'); };
       host.querySelector('[data-c=fin]').onclick = doFinish;
@@ -156,6 +156,13 @@
        repasa en cada pintado; cuesta una comparación de cadenas. */
     const nombre = host.querySelector('[data-crono-nombre]');
     if (nombre && nombre.textContent !== a.routineName) nombre.textContent = a.routineName;
+
+    /* Y por lo mismo, sus dos rótulos: el idioma se cambia con el banner en
+       pantalla y se quedaba en el de antes hasta terminar el entrenamiento. */
+    const rotulo = host.querySelector('[data-crono-rotulo]');
+    if (rotulo && rotulo.textContent !== T('ENTRENANDO')) rotulo.textContent = T('ENTRENANDO');
+    const fin = host.querySelector('[data-crono-fin]');
+    if (fin && fin.textContent !== T('Finalizar')) fin.textContent = T('Finalizar');
 
     salida.textContent = UI.mmss((Date.now() - a.start) / 1000);
     if (!bannerTimer) bannerTimer = setInterval(pintarBanner, 1000);
@@ -278,7 +285,7 @@
       clearInterval(restTimer); restTimer = null;
       host.innerHTML = '';
       pintarBotonDescanso(null);
-      UI.toast('Descanso terminado. ¡A por la siguiente serie!');
+      UI.toast(T('Descanso terminado. ¡A por la siguiente serie!'));
       return;
     }
 
@@ -325,20 +332,20 @@
 
       ${raw(a.actividad ? tarjetaActividad(a) : html`
       <div class="card center">
-        <p class="muted" style="margin-bottom:12px">El cronómetro ya está corriendo. Puedes
-        entrenar así, solo con el tiempo, contarme qué estás haciendo, o ir añadiendo
-        los ejercicios para registrar series y pesos.</p>
+        <p class="muted" style="margin-bottom:12px">${T('El cronómetro ya está corriendo. ' +
+        'Puedes entrenar así, solo con el tiempo, contarme qué estás haciendo, o ir ' +
+        'añadiendo los ejercicios para registrar series y pesos.')}</p>
         <button class="btn primary block" data-w="actividad">
-          ${raw(icon('chispa'))} Cuéntame qué estoy haciendo</button>
+          ${raw(icon('chispa'))} ${T('Cuéntame qué estoy haciendo')}</button>
         <button class="btn block" data-w="anadir" style="margin-top:8px">
           ${raw(icon('plus'))} ${T('Añadir ejercicio')}</button>
-        <button class="btn block" data-w="rutina" style="margin-top:8px">Cargar una rutina</button>
+        <button class="btn block" data-w="rutina" style="margin-top:8px">${T('Cargar una rutina')}</button>
       </div>`)}
 
       <button class="btn danger block" data-w="finish" style="margin-top:16px">
-        ${raw(icon('flag'))} Terminar y guardar el tiempo
+        ${raw(icon('flag'))} ${T('Terminar y guardar el tiempo')}
       </button>
-      <button class="btn ghost block" data-w="cancel" style="margin-top:8px">Descartar entrenamiento</button>`;
+      <button class="btn ghost block" data-w="cancel" style="margin-top:8px">${T('Descartar entrenamiento')}</button>`;
   }
 
   /* Lo que se está haciendo cuando no son series: un partido, una subida, la
@@ -414,17 +421,19 @@
         ${raw(act.nota ? '<p class="tiny" style="margin:10px 0 0">' + UI.esc(act.nota) + '</p>' : '')}
 
         ${raw(act.origen === 'ia'
-          ? '<p class="tiny" style="margin:8px 0 0;opacity:.75">Analizado por tu entrenador: ' +
-            UI.esc(UI.dec(act.met)) + ' MET' +
-            (act.intensidad ? ' · intensidad ' + UI.esc(act.intensidad) : '') +
+          ? '<p class="tiny" style="margin:8px 0 0;opacity:.75">' +
+            UI.esc(Tn('Analizado por tu entrenador: {met} MET', { met: UI.dec(act.met) })) +
+            (act.intensidad ? ' · ' + UI.esc(Tn('intensidad {q}',
+              { q: T(act.intensidad) })) : '') +
             ' · ' + pesoDelPerfil() + ' kg' +
             (act.tardo ? ' · ' + UI.dec((act.tardo / 1000).toFixed(1)) + ' s' : '') +
             '</p>'
-          : '<p class="tiny" style="margin:8px 0 0;color:var(--warn)">Sin analizar: gasto medio ' +
-            'de 4 MET. Conecta la IA en Ajustes para que lo calcule de verdad.</p>')}
+          : '<p class="tiny" style="margin:8px 0 0;color:var(--warn)">' +
+            UI.esc(T('Sin analizar: gasto medio de 4 MET. Conecta la IA en Ajustes para ' +
+            'que lo calcule de verdad.')) + '</p>')}
 
         <div class="row" style="margin-top:12px">
-          <button class="btn sm grow" data-w="actividad">Cambiarlo</button>
+          <button class="btn sm grow" data-w="actividad">${T('Cambiarlo')}</button>
           <button class="btn sm grow" data-w="anadir">${raw(icon('plus'))} ${T('Añadir ejercicio')}</button>
         </div>
       </div>`;
@@ -475,12 +484,12 @@
   /* «Hace tres días» se lee; «14 sep» hay que restarlo de cabeza. */
   function haceQue(ts) {
     const dias = Math.floor((Date.now() - ts) / 864e5);
-    if (dias <= 0) return 'hoy';
-    if (dias === 1) return 'ayer';
-    if (dias < 7) return 'hace ' + dias + ' días';
-    if (dias < 14) return 'hace una semana';
-    if (dias < 60) return 'hace ' + Math.round(dias / 7) + ' semanas';
-    return 'hace ' + Math.round(dias / 30) + ' meses';
+    if (dias <= 0) return T('hoy');
+    if (dias === 1) return T('ayer');
+    if (dias < 7) return Tp(dias, 'hace {n} día', 'hace {n} días');
+    if (dias < 14) return T('hace una semana');
+    if (dias < 60) return Tp(Math.round(dias / 7), 'hace {n} semana', 'hace {n} semanas');
+    return Tp(Math.round(dias / 30), 'hace {n} mes', 'hace {n} meses');
   }
 
   /* ---------- lo que se enseña del historial ----------
@@ -498,8 +507,8 @@
       const hist = Store.historyOf(exId);
       if (!hist.length) return '';
       return '<div class="row wrap" style="margin-top:10px;gap:6px">' +
-        '<span class="chip solid">' + (hist.length === 1
-          ? 'Lo has hecho una vez' : 'Lo has hecho ' + hist.length + ' veces') + '</span>' +
+        '<span class="chip solid">' + UI.esc(Tp(hist.length,
+          'Lo has hecho {n} vez', 'Lo has hecho {n} veces')) + '</span>' +
         '<span class="chip">' + UI.esc(Tn('Última vez, {c}',
           { c: haceQue(hist[0].date) })) + '</span></div>';
     }
@@ -684,7 +693,7 @@
                       ${raw(icon('plus'))}</button>
                   </span>
                   <button class="sf-chk" data-f="done"
-                          aria-label="Marcar serie ${i + 1} como hecha">
+                          aria-label="${Tn('Marcar serie {n} como hecha', { n: i + 1 })}">
                     ${raw(icon('check'))}</button>
                 </div>`;
             }
@@ -709,7 +718,7 @@
                   <span>${T('reps')}</span>
                 </label>
                 <button class="sf-chk" data-f="done"
-                        aria-label="Marcar serie ${i + 1} como hecha">
+                        aria-label="${Tn('Marcar serie {n} como hecha', { n: i + 1 })}">
                   ${raw(icon('check'))}</button>
               </div>`;
           }).join(''))}
@@ -763,15 +772,16 @@
                 <div class="tiny">${Tn('{d}/{t} series · objetivo {r} reps',
                   { d: d, t: e.sets.length, r: e.targetReps })}</div>
               </div>
-              ${raw(d === e.sets.length ? '<span class="chip solid">Hecho</span>' : '')}
+              ${raw(d === e.sets.length ? '<span class="chip solid">' +
+                UI.esc(T('Hecho')) + '</span>' : '')}
             </button>`;
         }).join(''))}
       </div>
 
       <button class="btn danger block" data-w="finish" style="margin-top:16px">
-        ${raw(icon('flag'))} Terminar y guardar entrenamiento
+        ${raw(icon('flag'))} ${T('Terminar y guardar entrenamiento')}
       </button>
-      <button class="btn ghost block" data-w="cancel" style="margin-top:8px">Descartar entrenamiento</button>`;
+      <button class="btn ghost block" data-w="cancel" style="margin-top:8px">${T('Descartar entrenamiento')}</button>`;
   }
 
   /* ---------- interacción ---------- */
@@ -909,7 +919,7 @@
         if (set.done) {
           const prev = Store.prOf(entry.exId).best;
           if (!simple && set.weight > 0 && (!prev || set.weight > prev.weight)) {
-            UI.toast('¡Nuevo récord en ' + entry.name + '!');
+            UI.toast(Tn('¡Nuevo récord en {que}!', { que: entry.name }));
           }
           startRest(entry.rest);
           /* la barra de progreso de la cabecera se actualiza sin recargar la vista */
@@ -962,7 +972,7 @@
       Store.setActive(a);
       if (!todas && entry.rest) startRest(entry.rest);
       rerender();
-      UI.toast(todas ? 'Ejercicio desmarcado' : 'Hecho. A por el siguiente.');
+      UI.toast(todas ? T('Ejercicio desmarcado') : T('Hecho. A por el siguiente.'));
     });
 
     act('prev', function () {
@@ -994,7 +1004,7 @@
         UI.closeModal();
         añadirEjercicio(ex);
         rerender();
-        UI.toast('«' + ex.nameEs + '» añadido a la sesión');
+        UI.toast(Tn('«{que}» añadido a la sesión', { que: ex.nameEs }));
       });
     });
 
@@ -1005,10 +1015,10 @@
     act('finish', doFinish);
 
     act('cancel', function () {
-      UI.confirm('Descartar entrenamiento',
-        'Se perderán las series registradas en esta sesión. Esta acción no se puede deshacer.',
-        'Descartar', true).then(function (ok) {
-        if (ok) { discard(); g.App.go('inicio'); UI.toast('Entrenamiento descartado'); }
+      UI.confirm(T('Descartar entrenamiento'),
+        T('Se perderán las series registradas en esta sesión. Esta acción no se puede deshacer.'),
+        T('Descartar'), true).then(function (ok) {
+        if (ok) { discard(); g.App.go('inicio'); UI.toast(T('Entrenamiento descartado')); }
       });
     });
 
@@ -1044,31 +1054,31 @@
     let minutos = 60;
 
     UI.modal(html`
-      <h2>¿Qué estás haciendo?</h2>
-      <p class="muted">Escríbelo como lo dirías: «partido de fútbol», «subí a
-      Monserrate», «ciclovía». ${raw(conIA
-        ? 'Yo calculo el gasto y qué partes del cuerpo trabajas.'
-        : 'Sin la IA conectada lo apunto con un gasto medio.')}</p>
+      <h2>${T('¿Qué estás haciendo?')}</h2>
+      <p class="muted">${T('Escríbelo como lo dirías: «partido de fútbol», «subí a ' +
+      'Monserrate», «ciclovía».')} ${raw(UI.esc(conIA
+        ? T('Yo calculo el gasto y qué partes del cuerpo trabajas.')
+        : T('Sin la IA conectada lo apunto con un gasto medio.')))}</p>
 
-      <input id="ac-que" placeholder="Partido de fútbol" autocomplete="off"
+      <input id="ac-que" placeholder="${T('Partido de fútbol')}" autocomplete="off"
              value="${yaHay ? yaHay.nombre : ''}">
 
-      <label class="tiny" style="display:block;margin-top:14px">CUÁNDO</label>
+      <label class="tiny" style="display:block;margin-top:14px">${T('CUÁNDO')}</label>
       <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-cuando">
-        <button class="chip on" data-cuando="ahora">Lo estoy haciendo</button>
-        <button class="chip" data-cuando="hecho">Ya lo hice</button>
+        <button class="chip on" data-cuando="ahora">${T('Lo estoy haciendo')}</button>
+        <button class="chip" data-cuando="hecho">${T('Ya lo hice')}</button>
       </div>
 
       <div id="ac-tiempo" hidden>
-        <label class="tiny" style="display:block;margin-top:14px">CUÁNTO DURÓ</label>
+        <label class="tiny" style="display:block;margin-top:14px">${T('CUÁNTO DURÓ')}</label>
         <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-mins">
           ${raw([20, 30, 45, 60, 90, 120].map(function (m) {
             return '<button class="chip ' + (m === 60 ? 'on' : '') + '" data-min="' + m +
-              '">' + m + ' min</button>';
+              '">' + UI.esc(Tn('{n} min', { n: m })) + '</button>';
           }).join(''))}
         </div>
         <input id="ac-otro" type="number" inputmode="numeric" min="1" max="600"
-               placeholder="u otro número de minutos" style="margin-top:8px">
+               placeholder="${T('u otro número de minutos')}" style="margin-top:8px">
       </div>
 
       <div id="ac-visto" class="tiny" style="margin-top:10px"></div>
@@ -1082,8 +1092,8 @@
 
         const textoBoton = function () {
           return cuando === 'ahora'
-            ? (conIA ? 'Calcular y empezar' : 'Empezar')
-            : (conIA ? 'Calcular y apuntar' : 'Apuntar');
+            ? (conIA ? T('Calcular y empezar') : T('Empezar'))
+            : (conIA ? T('Calcular y apuntar') : T('Apuntar'));
         };
         const pintarBoton = function () { btn.textContent = textoBoton(); };
         pintarBoton();
@@ -1126,7 +1136,7 @@
           UI.closeModal();
           rerender();
           pintarBanner();
-          UI.toast(act.nombre + ' en marcha');
+          UI.toast(Tn('{que} en marcha', { que: act.nombre }));
         };
 
         /* Ya hecho: se apunta con sus minutos y se cierra el entrenamiento. */
@@ -1134,9 +1144,9 @@
           apuntarHecha(act, minutos);
           UI.closeModal();
           if (g.App) g.App.go('inicio');
-          UI.toast(act.nombre + ': ' + minutos + ' min, ~' +
-            UI.num(kcalDe(act, minutos)) + ' kcal' +
-            (act.origen === 'ia' ? '' : ' (gasto medio, sin analizar)'));
+          UI.toast(Tn('{que}: {min} min, ~{kcal} kcal',
+            { que: act.nombre, min: minutos, kcal: UI.num(kcalDe(act, minutos)) }) +
+            (act.origen === 'ia' ? '' : ' ' + T('(gasto medio, sin analizar)')));
         };
 
         const rematar = function (act) {
@@ -1145,7 +1155,7 @@
 
         btn.onclick = function () {
           const t = campo.value.trim();
-          if (!t) { UI.toast('Escribe qué has hecho'); campo.focus(); return; }
+          if (!t) { UI.toast(T('Escribe qué has hecho')); campo.focus(); return; }
 
           if (!conIA) {
             rematar({ nombre: t, met: 4, musculos: [], nota: '', intensidad: '',
@@ -1154,13 +1164,13 @@
           }
 
           btn.disabled = true;
-          btn.textContent = 'Calculando…';
+          btn.textContent = T('Calculando…');
           visto.textContent = '';
 
           IA.estimarActividad(t).then(function (r) {
             if (!r || !r.met) {
               visto.innerHTML = '<span style="color:var(--warn)">' +
-                UI.esc(r && r.nota ? r.nota : 'Eso no me suena a actividad física.') + '</span>';
+                UI.esc(r && r.nota ? r.nota : T('Eso no me suena a actividad física.')) + '</span>';
               btn.disabled = false;
               pintarBoton();
               return;
@@ -1168,7 +1178,7 @@
             rematar(r);
           }).catch(function (e) {
             visto.innerHTML = '<span style="color:var(--bad)">' +
-              UI.esc(e.message || 'No he podido calcularlo.') + '</span>';
+              UI.esc(e.message || T('No he podido calcularlo.')) + '</span>';
             btn.disabled = false;
             pintarBoton();
           });
@@ -1190,15 +1200,15 @@
     }
 
     if (!lista.length) {
-      UI.toast('No encuentro un recambio para este ejercicio');
+      UI.toast(T('No encuentro un recambio para este ejercicio'));
       return;
     }
 
     UI.modal(UI.html`
-      <h2>Cambiar «${ex.nameEs}»</h2>
-      <p class="muted">${raw(fuera
-        ? 'Con tu material no hay recambio directo; estas son del catálogo completo.'
-        : 'Mismo trabajo, otro material. Las series que ya has marcado no se pierden.')}</p>
+      <h2>${Tn('Cambiar «{que}»', { que: ex.nameEs })}</h2>
+      <p class="muted">${raw(UI.esc(fuera
+        ? T('Con tu material no hay recambio directo; estas son del catálogo completo.')
+        : T('Mismo trabajo, otro material. Las series que ya has marcado no se pierden.')))}</p>
       <div class="stack">
         ${raw(lista.map(function (a) {
           return UI.html`
@@ -1276,9 +1286,9 @@
                 <span class="bm-txt"><b>${s.titulo}</b><span>${s.artista}</span></span>
               </button>
               <button class="bm-b" data-w2="alternar"
-                      aria-label="${s.sonando ? 'Pausar' : 'Reproducir'}">
+                      aria-label="${s.sonando ? T('Pausar') : T('Reproducir')}">
                 ${raw(icon(s.sonando ? 'pausaLleno' : 'playLleno'))}</button>
-              <button class="bm-b" data-w2="siguiente" aria-label="Siguiente">
+              <button class="bm-b" data-w2="siguiente" aria-label="${T('Siguiente')}">
                 ${raw(icon('siguiente'))}</button>
             </div>
           </div>`;
@@ -1343,10 +1353,13 @@
 
   function resumen(h) {
     if (!h.done) {
-      return 'Llevas ' + UI.mmss(h.segundos) + ' entrenando y no has anotado ninguna serie.';
+      return Tn('Llevas {t} entrenando y no has anotado ninguna serie.',
+        { t: UI.mmss(h.segundos) });
     }
-    return h.done + (h.done === 1 ? ' serie completada' : ' series completadas') +
-      ' y ' + UI.mmss(h.segundos) + ' de entrenamiento.';
+    return Tn(h.done === 1
+      ? '{n} serie completada y {t} de entrenamiento.'
+      : '{n} series completadas y {t} de entrenamiento.',
+      { n: h.done, t: UI.mmss(h.segundos) });
   }
 
   /* Las cuatro salidas de un entrenamiento en curso. Antes solo había guardar o
@@ -1362,15 +1375,15 @@
       <p class="muted">${resumen(h)}</p>
 
       <button class="btn primary block" data-f="guardar" style="margin-top:18px">
-        ${UI.raw(icon('check'))} ${h.done ? 'Guardar el entrenamiento' : 'Guardar el tiempo'}</button>
+        ${UI.raw(icon('check'))} ${h.done ? T('Guardar el entrenamiento') : T('Guardar el tiempo')}</button>
 
       <button class="btn block" data-f="reiniciar" style="margin-top:8px">
-        ${UI.raw(icon('cambiar'))} Reiniciar y empezar de cero</button>
+        ${UI.raw(icon('cambiar'))} ${T('Reiniciar y empezar de cero')}</button>
 
       <button class="btn danger block" data-f="descartar" style="margin-top:8px">
-        ${UI.raw(icon('trash'))} Descartar, no guardar nada</button>
+        ${UI.raw(icon('trash'))} ${T('Descartar, no guardar nada')}</button>
 
-      <button class="btn ghost block" data-f="cancelar" style="margin-top:8px">Cancelar</button>`,
+      <button class="btn ghost block" data-f="cancelar" style="margin-top:8px">${T('Cancelar')}</button>`,
       function (el) {
         el.querySelector('[data-f=cancelar]').onclick = function () { UI.closeModal(); };
 
@@ -1379,39 +1392,44 @@
           const s = finish();
           g.App.go('inicio');
           UI.toast(s && s.volume
-            ? '¡Entrenamiento guardado! Volumen: ' + UI.kg(s.volume)
-            : '¡Entrenamiento guardado! ' + UI.mmss(h.segundos));
+            ? Tn('¡Entrenamiento guardado! Volumen: {v}', { v: UI.kg(s.volume) })
+            : Tn('¡Entrenamiento guardado! {t}', { t: UI.mmss(h.segundos) }));
         };
 
         el.querySelector('[data-f=reiniciar]').onclick = function () {
           UI.closeModal();
-          UI.confirm('¿Reiniciar el entrenamiento?',
+          UI.confirm(T('¿Reiniciar el entrenamiento?'),
             h.done
-              ? 'Se borran las ' + h.done + (h.done === 1 ? ' serie que llevas marcada' :
-                ' series que llevas marcadas') + ' y el cronómetro vuelve a cero. ' +
-                'La rutina se queda igual y los pesos que hayas escrito también.'
-              : 'El cronómetro vuelve a cero y empiezas otra vez por el primer ejercicio.',
-            'Reiniciar', true).then(function (ok) {
+              ? Tp(h.done,
+                  'Se borra la {n} serie que llevas marcada y el cronómetro vuelve a cero. ' +
+                  'La rutina se queda igual y los pesos que hayas escrito también.',
+                  'Se borran las {n} series que llevas marcadas y el cronómetro vuelve a cero. ' +
+                  'La rutina se queda igual y los pesos que hayas escrito también.')
+              : T('El cronómetro vuelve a cero y empiezas otra vez por el primer ejercicio.'),
+            T('Reiniciar'), true).then(function (ok) {
             if (!ok) return;
             reiniciar();
             g.App.render();
-            UI.toast('Entrenamiento reiniciado');
+            UI.toast(T('Entrenamiento reiniciado'));
           });
         };
 
         el.querySelector('[data-f=descartar]').onclick = function () {
           UI.closeModal();
-          UI.confirm('¿Descartar el entrenamiento?',
+          UI.confirm(T('¿Descartar el entrenamiento?'),
             h.done
-              ? 'No se guarda nada: ni las ' + h.done + (h.done === 1 ? ' serie' : ' series') +
-                ' que llevas ni los ' + UI.mmss(h.segundos) + ' de entrenamiento. ' +
-                'Esto no se puede deshacer.'
-              : 'No se guarda nada, ni el tiempo. Esto no se puede deshacer.',
-            'Descartar', true).then(function (ok) {
+              ? Tn(h.done === 1
+                  ? 'No se guarda nada: ni la {n} serie que llevas ni los {t} de ' +
+                    'entrenamiento. Esto no se puede deshacer.'
+                  : 'No se guarda nada: ni las {n} series que llevas ni los {t} de ' +
+                    'entrenamiento. Esto no se puede deshacer.',
+                  { n: h.done, t: UI.mmss(h.segundos) })
+              : T('No se guarda nada, ni el tiempo. Esto no se puede deshacer.'),
+            T('Descartar'), true).then(function (ok) {
             if (!ok) return;
             discard();
             g.App.go('inicio');
-            UI.toast('Entrenamiento descartado');
+            UI.toast(T('Entrenamiento descartado'));
           });
         };
       });

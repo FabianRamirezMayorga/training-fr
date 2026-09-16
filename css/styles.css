@@ -4525,6 +4525,17 @@ html[data-theme="light"] .lg-efecto {
   transition: transform .18s cubic-bezier(.2, .9, .3, 1), color .2s ease;
 }
 .btn.icon.tema-chip:active { transform: scale(.94); }
+
+/* El de idioma es el mismo vidrio con dos letras dentro en vez de un icono.
+   Van en versalitas y algo apretadas: «ES» a tamaño de texto normal dentro de
+   un circulo de 36 px se come los margenes y deja de parecer un boton. */
+.btn.icon.idioma-chip span {
+  font-size: .72rem; font-weight: 700; letter-spacing: .04em;
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn.icon.idioma-chip.gira span { animation: tema-gira .45s cubic-bezier(.3, 1.3, .5, 1); }
+}
 @media (prefers-reduced-motion: no-preference) {
   .btn.icon.tema-chip.gira svg { animation: tema-gira .45s cubic-bezier(.3, 1.3, .5, 1); }
 }

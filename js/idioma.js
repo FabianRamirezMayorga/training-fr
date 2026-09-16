@@ -114,6 +114,11 @@
     d.querySelectorAll('[data-t]').forEach(function (el) {
       el.textContent = T(el.dataset.t);
     });
+    /* La etiqueta de accesibilidad va aparte: no es texto que se vea, asi que
+       no puede quedarse escrita dentro de la etiqueta como el resto. */
+    d.querySelectorAll('[data-t-aria]').forEach(function (el) {
+      el.setAttribute('aria-label', T(el.getAttribute('data-t-aria')));
+    });
   }
 
   g.Idioma = {

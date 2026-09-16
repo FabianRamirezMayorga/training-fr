@@ -124,8 +124,8 @@
     secundarios = secundarios || [];
     if (!hayAlgo(principales, secundarios)) return '';
     return '<div class="mapa-figuras compacto">' +
-      figura('f', principales, secundarios, 'Músculos que trabajan, de frente') +
-      figura('d', principales, secundarios, 'Músculos que trabajan, de espaldas') +
+      figura('f', principales, secundarios, T('Músculos que trabajan, de frente')) +
+      figura('d', principales, secundarios, T('Músculos que trabajan, de espaldas')) +
       '</div>';
   }
 

@@ -884,7 +884,7 @@
             ? '<span class="chip solid">' + icon('check') + ' Cumplido</span>'
             : '<span class="chip">' + pct + '%</span>')}
           <button class="btn icon sm danger" data-del="${m.id}"
-                  aria-label="Borrar objetivo">${raw(icon('trash'))}</button>
+                  aria-label="${T('Borrar objetivo')}">${raw(icon('trash'))}</button>
         </div>
 
         <div class="prog" style="margin-top:10px"><i style="width:${pct}%"></i></div>
@@ -1465,7 +1465,7 @@
       activa: !!a.activa,
       control: '<button class="sw ' + (a.activa ? 'on' : '') + '" data-tog="' + a.id + '" ' +
         'role="switch" aria-checked="' + a.activa + '" ' +
-        'aria-label="Activar ' + esc(a.titulo) + '"></button>'
+        'aria-label="' + esc(Tn('Activar {que}', { que: a.titulo })) + '"></button>'
     });
   }
 

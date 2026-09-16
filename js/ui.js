@@ -266,7 +266,7 @@
     const box = document.getElementById('modal');
     box.innerHTML = '<div class="modal-box"><div class="modal-cab">' +
       '<span class="modal-grab"></span>' +
-      '<button class="modal-x" data-cerrar aria-label="Cerrar">' + ICON.close + '</button>' +
+      '<button class="modal-x" data-cerrar aria-label="' + esc(T('Cerrar')) + '">' + ICON.close + '</button>' +
       '</div>' + contentHTML + '</div>';
     box.hidden = false;
     ajustarAlTeclado();
@@ -565,9 +565,9 @@
           '</span></div>' : '')}
         ${raw(controls ? `
           <div class="demo-ctl">
-            <button data-act="toggle" aria-label="Pausar animación">${icon('pause')}</button>
+            <button data-act="toggle" aria-label="${T('Pausar animación')}">${icon('pause')}</button>
             <input type="range" min="350" max="2000" step="50" value="${speed}" data-act="speed"
-                   aria-label="Velocidad de la animación">
+                   aria-label="${T('Velocidad de la animación')}">
             <span data-out>${(speed / 1000).toFixed(1)}s</span>
           </div>` : '')}
       </div>`;

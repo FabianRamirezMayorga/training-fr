@@ -140,6 +140,7 @@
     'Sistema': 'System',
     'Idioma': 'Language',
     'En qué idioma ves la app': 'What language you read the app in',
+    'Ver la app en {idioma}': 'View the app in {idioma}',
     'Descanso por defecto': 'Default rest',
     'Entre serie y serie': 'Between sets',
     'La frase del entrenador': "Your coach's line",
@@ -390,7 +391,6 @@
     'Récord': 'Record',
     'Última vez': 'Last time',
     'Última vez, {c}': 'Last time, {c}',
-    'Terminar entrenamiento': 'Finish workout',
     'No hay ningún entrenamiento en curso.': 'No workout in progress.',
     'ENTRENANDO': 'TRAINING',
     'Finalizar': 'Finish',
@@ -763,6 +763,142 @@
     'Proteína cubierta': 'Protein met',
     'Cerca': 'Close',
     'Corto': 'Short',
-    'Lo que comiste esta semana': 'What you ate this week'
+    'Lo que comiste esta semana': 'What you ate this week',
+
+    /* ---------- entrenar y las etiquetas de accesibilidad ---------- */
+    'Descanso terminado. ¡A por la siguiente serie!': 'Rest over. On to the next set!',
+    'Analizado por tu entrenador: {met} MET': 'Analysed by your coach: {met} MET',
+    'intensidad {q}': '{q} intensity',
+    'Sin analizar: gasto medio de 4 MET. Conecta la IA en Ajustes para que lo calcule de verdad.':
+      'Not analysed: an average 4 MET. Connect the AI in Settings so it can work it out properly.',
+    'Cambiarlo': 'Change it',
+    'hoy': 'today',
+    'ayer': 'yesterday',
+    'hace {n} día': '{n} day ago',
+    'hace {n} días': '{n} days ago',
+    'hace una semana': 'a week ago',
+    'hace {n} semana': '{n} week ago',
+    'hace {n} semanas': '{n} weeks ago',
+    'hace {n} mes': '{n} month ago',
+    'hace {n} meses': '{n} months ago',
+    'Lo has hecho {n} vez': 'You have done it {n} time',
+    'Lo has hecho {n} veces': 'You have done it {n} times',
+    'El cronómetro ya está corriendo. Puedes entrenar así, solo con el tiempo, contarme qué estás haciendo, o ir añadiendo los ejercicios para registrar series y pesos.':
+      'The timer is already running. You can train like this, just on time, tell me what you are doing, or add the exercises as you go to log sets and weights.',
+    'Cuéntame qué estoy haciendo': 'Tell me what I am doing',
+    'Cargar una rutina': 'Load a routine',
+    'Terminar y guardar el tiempo': 'Finish and save the time',
+    'Terminar y guardar entrenamiento': 'Finish and save workout',
+    'Descartar entrenamiento': 'Discard workout',
+    '¡Nuevo récord en {que}!': 'New record on {que}!',
+    'Ejercicio desmarcado': 'Exercise unticked',
+    'Hecho. A por el siguiente.': 'Done. On to the next one.',
+    '«{que}» añadido a la sesión': '“{que}” added to the session',
+    'Se perderán las series registradas en esta sesión. Esta acción no se puede deshacer.':
+      'The sets logged in this session will be lost. This cannot be undone.',
+    'Descartar': 'Discard',
+    'Entrenamiento descartado': 'Workout discarded',
+    '¿Qué estás haciendo?': 'What are you doing?',
+    'Escríbelo como lo dirías: «partido de fútbol», «subí a Monserrate», «ciclovía».':
+      'Write it the way you would say it: “football match”, “walked up the hill”, “cycle lane”.',
+    'Yo calculo el gasto y qué partes del cuerpo trabajas.':
+      'I work out the burn and which parts of your body you are working.',
+    'Sin la IA conectada lo apunto con un gasto medio.':
+      'Without the AI connected I log it with an average burn.',
+    'Partido de fútbol': 'Football match',
+    'CUÁNDO': 'WHEN',
+    'Lo estoy haciendo': 'I am doing it now',
+    'Ya lo hice': 'I already did it',
+    'CUÁNTO DURÓ': 'HOW LONG IT TOOK',
+    '{n} min': '{n} min',
+    'u otro número de minutos': 'or another number of minutes',
+    'Calcular y empezar': 'Work it out and start',
+    'Calcular y apuntar': 'Work it out and log it',
+    'Apuntar': 'Log it',
+    '{que} en marcha': '{que} under way',
+    '{que}: {min} min, ~{kcal} kcal': '{que}: {min} min, ~{kcal} kcal',
+    '(gasto medio, sin analizar)': '(average burn, not analysed)',
+    'Escribe qué has hecho': 'Write what you did',
+    'Calculando…': 'Working it out…',
+    'Eso no me suena a actividad física.':
+      'That does not sound like physical activity to me.',
+    'No he podido calcularlo.': 'I could not work it out.',
+    'No encuentro un recambio para este ejercicio':
+      'I cannot find a replacement for this exercise',
+    'Cambiar «{que}»': 'Swap “{que}”',
+    'Con tu material no hay recambio directo; estas son del catálogo completo.':
+      'There is no direct replacement with your equipment; these come from the whole catalogue.',
+    'Mismo trabajo, otro material. Las series que ya has marcado no se pierden.':
+      'Same work, different kit. The sets you have already ticked are not lost.',
+    'Pausar': 'Pause',
+    'Reproducir': 'Play',
+    'Llevas {t} entrenando y no has anotado ninguna serie.':
+      'You have been training for {t} and have not logged a single set.',
+    '{n} serie completada y {t} de entrenamiento.':
+      '{n} set completed and {t} of training.',
+    '{n} series completadas y {t} de entrenamiento.':
+      '{n} sets completed and {t} of training.',
+    'Guardar el entrenamiento': 'Save the workout',
+    'Guardar el tiempo': 'Save the time',
+    'Reiniciar y empezar de cero': 'Reset and start from scratch',
+    'Descartar, no guardar nada': 'Discard, save nothing',
+    '¡Entrenamiento guardado! Volumen: {v}': 'Workout saved! Volume: {v}',
+    '¡Entrenamiento guardado! {t}': 'Workout saved! {t}',
+    '¿Reiniciar el entrenamiento?': 'Reset the workout?',
+    'Reiniciar': 'Reset',
+    'Entrenamiento reiniciado': 'Workout reset',
+    '¿Descartar el entrenamiento?': 'Discard the workout?',
+    'No se guarda nada, ni el tiempo. Esto no se puede deshacer.':
+      'Nothing is saved, not even the time. This cannot be undone.',
+    'Se borra la {n} serie que llevas marcada y el cronómetro vuelve a cero. La rutina se queda igual y los pesos que hayas escrito también.':
+      'The {n} set you have ticked is cleared and the timer goes back to zero. The routine stays as it is, and so do any weights you typed in.',
+    'Se borran las {n} series que llevas marcadas y el cronómetro vuelve a cero. La rutina se queda igual y los pesos que hayas escrito también.':
+      'The {n} sets you have ticked are cleared and the timer goes back to zero. The routine stays as it is, and so do any weights you typed in.',
+    'El cronómetro vuelve a cero y empiezas otra vez por el primer ejercicio.':
+      'The timer goes back to zero and you start again from the first exercise.',
+    'No se guarda nada: ni la {n} serie que llevas ni los {t} de entrenamiento. Esto no se puede deshacer.':
+      'Nothing is saved: neither the {n} set you have done nor the {t} of training. This cannot be undone.',
+    'No se guarda nada: ni las {n} series que llevas ni los {t} de entrenamiento. Esto no se puede deshacer.':
+      'Nothing is saved: neither the {n} sets you have done nor the {t} of training. This cannot be undone.',
+    'Subir': 'Move up',
+    'Bajar': 'Move down',
+    'Borrar rutina': 'Delete routine',
+    'Ver ejercicios': 'See exercises',
+    'Rutina mixta': 'Mixed routine',
+    'Cambiar por otro': 'Swap for another',
+    'Mostrar u ocultar': 'Show or hide',
+    'Apuntar un vaso suelto': 'Log a single glass',
+    'Pausar animación': 'Pause the animation',
+    'Velocidad de la animación': 'Animation speed',
+    'Borrar objetivo': 'Delete goal',
+    'Activar {que}': 'Turn on {que}',
+    'Marcar serie {n} como hecha': 'Tick set {n} as done',
+    'Músculos que trabajan, de frente': 'Muscles worked, front view',
+    'Músculos que trabajan, de espaldas': 'Muscles worked, back view',
+    'Ir al inicio': 'Go to Home',
+    'Terminar entrenamiento': 'Finish workout',
+
+    /* ---------- filtrar y elegir ejercicio ---------- */
+    'Filtrar': 'Filter',
+    'ZONA DEL CUERPO': 'AREA OF THE BODY',
+    'Todas': 'All',
+    'TIPO DE TRABAJO': 'TYPE OF WORK',
+    'Material': 'Equipment',
+    'Nivel': 'Level',
+    'Cualquiera': 'Any',
+    'Solo mis favoritos': 'Only my favourites',
+    'Los que has marcado con la estrella': 'The ones you starred',
+    'Solo lo que puedo hacer': 'Only what I can do',
+    'Con el material que tienes {donde}': 'With the equipment you have {donde}',
+    'Quitar los filtros': 'Clear the filters',
+    'Mostrando el catálogo completo': 'Showing the whole catalogue',
+    'Solo lo que puedes hacer {donde}': 'Only what you can do {donde}',
+    'Solo mi material': 'Only my equipment',
+    'Ver todo el catálogo': 'See the whole catalogue',
+
+    /* ---------- tipos de trabajo y la cuenta de ejercicios ---------- */
+    'No hay ninguno así': 'There are none like that',
+    'Ver el ejercicio': 'See the exercise',
+    'Ver {n} ejercicios': 'See {n} exercises'
   };
 })(window);

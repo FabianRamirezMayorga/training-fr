@@ -169,7 +169,7 @@
             ${raw(icon('campana'))} Ponerme los recordatorios</button>
           ${raw(marcable
             ? '<button class="btn sm icon-vidrio" data-a="vaso" title="Un vaso suelto" ' +
-              'aria-label="Apuntar un vaso suelto">' + icon('plus') + '</button>'
+              'aria-label="' + UI.esc(T('Apuntar un vaso suelto')) + '">' + icon('plus') + '</button>'
             : '')}
         </div>
       </div>`;
