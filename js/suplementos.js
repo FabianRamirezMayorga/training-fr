@@ -417,8 +417,27 @@
       });
     });
 
-    return Object.keys(porHora).map(function (h) {
-      const grupo = porHora[h];
+    /* ---------- y una alerta por BOTE, no por hora ----------
+       Agrupar solo por hora dejaba el magnesio de las 10:00 y el de las 14:00
+       como dos alertas distintas que decían lo mismo: en la lista salía
+       «Magnesio» dos veces y había que leer la hora para distinguirlas, cuando
+       lo que hay es una cosa que se toma dos veces.
+
+       Ahora se juntan las horas que llevan EXACTAMENTE los mismos botes, que es
+       lo que conserva las dos cosas a la vez: el magnesio de las diez y el de
+       las dos son una sola alerta con dos horas, y si a las diez además toca la
+       creatina, esa hora se va a su propia alerta en vez de sonar dos veces
+       seguidas. */
+    const porFirma = {};
+    Object.keys(porHora).forEach(function (h) {
+      const firma = porHora[h].map(function (s) { return s.id; }).sort().join(',');
+      if (!porFirma[firma]) porFirma[firma] = { grupo: porHora[h], horas: [] };
+      porFirma[firma].horas.push(h);
+    });
+
+    return Object.keys(porFirma).map(function (firma) {
+      const grupo = porFirma[firma].grupo;
+      const horas = porFirma[firma].horas.slice().sort();
       const dias = diasDe(grupo);
       if (!dias.length) return null;
 
@@ -427,12 +446,14 @@
       });
 
       return {
-        id: 'sup:' + h.replace(':', ''),
-        sup: grupo.map(function (s) { return s.id; }).join(','),
+        /* El id sale de los botes y no de la hora: así cambiar la hora de una
+           toma actualiza la alerta que ya había en vez de dejar la vieja. */
+        id: 'sup:' + firma,
+        sup: firma,
         tipo: 'suplemento',
         titulo: grupo.length === 1 ? grupo[0].nombre : 'Tus suplementos',
         mensaje: que.join(' · '),
-        horas: [h],
+        horas: horas,
         dias: dias,
         activa: true,
         ultima: {}

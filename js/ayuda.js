@@ -422,7 +422,9 @@
         { t: 'Arriba, toca *Automáticas*.',
           d: 'Está al lado de «Nueva». Se abre una hoja que te dice exactamente qué va a crear antes de tocar nada.' },
         { t: 'Mira lo que te propone y confirma.',
-          d: 'El agua que te toca por tu peso repartida en vasos, una alerta por cada comida que haces con sus calorías y su proteína, el entrenamiento en los días que tienen rutina y a la hora a la que entrenas de verdad, pesarte los lunes en ayunas, y tus suplementos agrupados por hora.' },
+          d: 'El agua que te toca por tu peso repartida en vasos; *una alerta por cada comida*, a la hora que tú has puesto en Ajustes y diciendo cuál es —«es hora de desayunar», «es hora de almorzar»—; el entrenamiento en los días que tienen rutina y a la hora a la que entrenas de verdad; pesarte los lunes en ayunas; y tus suplementos.' },
+        { t: 'Lo que tomas varias veces al día va en *una sola alerta*.',
+          d: 'Si tomas magnesio a las diez y a las dos, es una alerta con dos horas y no dos que se llaman igual. Y si a una de esas horas coincide con otro bote, esa hora se agrupa aparte para no sonarte dos veces seguidas.' },
         { t: 'Ya está. Cámbialas si quieres.',
           d: 'Son alertas normales: puedes tocarles la hora, los días o apagarlas, una a una.' }
       ],
@@ -617,11 +619,18 @@
         'Sin conexión la pantalla te enseña igual la versión que llevas, y te dice que no ha podido comprobar si hay otra en vez de callarse.',
         'Si algo se comporta raro justo después de actualizar, casi siempre es que el móvil se ha quedado con archivos de dos versiones mezclados. Para eso está *¿Algo va raro?*, debajo de la versión.'] },
 
+    { id: 'p-menualerta', q: '¿Por qué el aviso de comer me sale cortado?',
+      a: ['Porque un plato entero no cabe en una línea, y tres líneas de menú taparían las horas y los días, que es a lo que se viene a esa pantalla.',
+        '*Tócalo y se abre entero.* La flecha del lado derecho es la que dice que hay más debajo; vuelve a tocarlo y se cierra.',
+        'Lo que se ve ahí es un adelanto de lo que va a decir el aviso cuando suene: el plato que te toca a esa comida según tu menú de hoy, y sus calorías y su proteína.'],
+      ver: ['c-autoalertas', 'p-avisocomida'] },
+
     { id: 'p-autoalertas', q: 'Si vuelvo a pulsar «Automáticas», ¿se me duplican las alertas?',
       a: ['No. Cada alerta que crea la app lleva por dentro una marca de qué la generó: la del agua sabe que es la del agua aunque le cambies el nombre. Al volver a pulsarlo busca esa marca y *actualiza la que ya está* en vez de crear otra.',
         'Las que has creado tú no llevan esa marca, así que *no se tocan nunca*: ni se cambian ni se borran. La hoja te dice cuántas son antes de que confirmes.',
         'Y respeta dos cosas más: si apagaste una, sigue apagada —recalcular una hora no es motivo para volver a encenderte algo que decidiste callar—, y lo que ya sonó hoy no vuelve a sonar.',
-        'Por eso tiene sentido pulsarlo cada vez que cambies de peso, de hora de levantarte, de comidas o de rutina: las horas se recalculan solas.'],
+        'Por eso tiene sentido pulsarlo cada vez que cambies de peso, de horas de comer o de rutina: las horas se recalculan solas.',
+        'Lo de comer sale de las horas que tienes puestas en *Perfil › Ajustes*, no de un reparto inventado: si desayunas a las 8:15, el aviso es a las 8:15 y dice «es hora de desayunar».'],
       ver: ['c-autoalertas'] },
 
     { id: 'p-medicacion', q: '¿Por qué me pregunta si tomo medicación al crear un menú?',

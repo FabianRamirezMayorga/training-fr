@@ -6461,12 +6461,40 @@ html[data-theme="light"] .sh-pieza {
 /* Lo que va a decir el aviso, en la propia tarjeta del recordatorio. Va en
    pequeno y a una linea: tres lineas de menu aqui taparian las horas y los
    dias, que es a lo que se viene a esta pantalla. */
+/* El plato de esa comida. Se corta en una linea porque tres lineas de menu
+   taparian las horas y los dias, que es a lo que se viene a esta pantalla, pero
+   se toca y se abre entero: cortarlo sin mas dejaba a medias justo lo que se
+   venia a leer. La flecha es lo que dice que hay mas debajo. */
 .rec-adelanto {
+  display: flex; align-items: flex-start; gap: 8px; width: calc(100% - 26px);
   margin: 9px 13px 0; padding: 7px 10px; border-radius: 10px;
+  border: 0; text-align: left; cursor: pointer; font: inherit;
   font-size: .74rem; line-height: 1.35; color: var(--dim2);
   background: color-mix(in srgb, #000 14%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
+  -webkit-tap-highlight-color: transparent;
+  transition: background .15s ease;
+}
+.ra-txt {
+  flex: 1; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rec-adelanto.abierto .ra-txt { white-space: normal; overflow: visible; }
+.ra-mas {
+  flex: none; display: flex; margin-top: 1px; opacity: .6;
+  transition: transform .2s ease;
+}
+.ra-mas svg { width: 12px; height: 12px; fill: none; stroke: currentColor;
+  stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.rec-adelanto.abierto .ra-mas { transform: rotate(90deg); color: var(--tono); opacity: 1; }
+.rec-adelanto:active { background: color-mix(in srgb, #000 22%, transparent); }
+
+html[data-theme="light"] .rec-adelanto {
+  background: color-mix(in srgb, #000 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 7%, transparent);
+}
+html[data-theme="light"] .rec-adelanto:active {
+  background: color-mix(in srgb, #000 9%, transparent);
 }
 html[data-theme="light"] .rec-adelanto {
   background: color-mix(in srgb, #000 4%, transparent);

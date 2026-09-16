@@ -1517,9 +1517,16 @@
       '</div>' +
       /* Lo que va a decir, en una línea y en pequeño. Sin esto hay que esperar
          a que suene para saber si el recordatorio sabe de tu menú. */
+      /* Un plato entero no cabe en una línea, y cortarlo con puntos
+         suspensivos sin más deja a medias justo lo que se venía a leer. Se corta
+         igual —tres líneas de menú taparían las horas y los días, que es a lo
+         que se viene a esta pantalla— pero se puede tocar para verlo entero. */
       (function () {
         const ad = Alertas.adelantoEn ? Alertas.adelantoEn(a, grande) : '';
-        return ad ? '<div class="rec-adelanto">' + esc(ad) + '</div>' : '';
+        if (!ad) return '';
+        return '<button class="rec-adelanto" data-mas aria-expanded="false">' +
+          '<span class="ra-txt">' + esc(ad) + '</span>' +
+          '<span class="ra-mas">' + icon('chevron') + '</span></button>';
       })() +
       tira +
       (o.pie || '') +
@@ -1623,6 +1630,14 @@
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=nueva]', function () { alertaSheet(null); });
     bind(root, '[data-a=autogen]', autoSheet);
+
+    /* Desplegar el plato entero. Sin pasar por render(): es un estado de mirar,
+       no un dato, y repintar la pantalla entera para enseñar dos líneas más
+       cerraría de paso todo lo demás que hubiera abierto. */
+    bindAll(root, '[data-mas]', function (el) {
+      const abierto = el.classList.toggle('abierto');
+      el.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+    });
 
     bind(root, '[data-a=avisos]', avisosSheet);
 

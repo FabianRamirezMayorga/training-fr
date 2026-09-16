@@ -169,20 +169,32 @@
       });
     }
 
-    /* --- comidas --- */
-    const n = Math.max(2, Math.min(7, p.comidas || 4));
-    const horasComida = repartir(aHora(enMinutos(despierta) + 30),
-      aHora(enMinutos(acuesta) - 150), n);
+    /* --- comidas: una por comida, y a TU hora ----------
+       Antes era una sola alerta con las horas repartidas por igual entre que te
+       levantas y dos horas y media antes de dormir, ignorando las horas de
+       comer que tú mismo has puesto. Salían disparates: con el desayuno puesto
+       a las 8:15, el primer aviso caía a las 6:30, que según tus propias
+       franjas sigue siendo la cena de anoche, y la tarjeta decía «Es hora de
+       cenar» a las seis y media de la mañana.
+
+       Y va una por comida en vez de una con cuatro horas: así cada tarjeta dice
+       cuál es y enseña el plato que le toca a ESA comida, en vez de que las
+       cuatro se identifiquen por la primera. */
     const m = Perfil.macros(p);
-    out.push({
-      clave: 'comida', tipo: 'comida', dias: todos, horas: horasComida,
-      titulo: 'Hora de comer',
-      mensaje: m ? 'Unas ' + Math.round(m.kcal / n) + ' kcal y ' +
-        Math.round(m.prot / n) + ' g de proteína.' : 'Toca comida según tu plan.',
-      porque: 'Haces ' + n + ' comidas al día' + (m
-        ? ', así que a cada una le tocan unas ' + Math.round(m.kcal / n) + ' kcal y ' +
-          Math.round(m.prot / n) + ' g de proteína'
-        : '') + '. Repartidas desde que te levantas hasta dos horas y media antes de dormir.'
+    const franjas = g.Perfil && Perfil.franjas ? Perfil.franjas() : [];
+    const cuantas = Math.max(1, franjas.length);
+    franjas.forEach(function (f) {
+      out.push({
+        clave: 'comida:' + f.id, tipo: 'comida', dias: todos, horas: [f.desde],
+        titulo: VERBO[f.id] || ('Es hora de ' + f.label.toLowerCase()),
+        mensaje: m ? 'Unas ' + Math.round(m.kcal / cuantas) + ' kcal y ' +
+          Math.round(m.prot / cuantas) + ' g de proteína.' : 'Toca comida según tu plan.',
+        porque: 'A las ' + f.desde + ', que es la hora que has puesto para ' +
+          f.label.toLowerCase() + ' en Ajustes' + (m
+            ? '. Le tocan unas ' + Math.round(m.kcal / cuantas) + ' kcal y ' +
+              Math.round(m.prot / cuantas) + ' g de proteína'
+            : '') + '. Si tienes menú, el aviso trae el plato de ese día.'
+      });
     });
 
     /* --- entrenamiento, en los días que tienes rutina --- */
@@ -211,7 +223,13 @@
       /* comida antes de entrenar: hora y media antes, solo esos días */
       const antes = aHora(enMinutos(horaE) - 90);
       out.push({
+        /* Esta no se renombra con la franja en la que caiga. Es de tipo
+           comida para heredar su color y su icono, pero no ES una comida del
+           día: con la merienda a las 16:00 y el entreno a las 18:00, la de
+           antes de entrenar salía en la lista llamándose «Es hora de merendar»
+           justo al lado de la merienda de verdad. */
         clave: 'preentreno', tipo: 'comida', dias: nums, horas: [antes],
+        sinFranja: true,
         titulo: 'Comida antes de entrenar',
         mensaje: 'Algo con hidratos y proteína, ligero.',
         porque: 'Hora y media antes de tu entrenamiento: da tiempo a digerir y llegas con ' +
@@ -269,6 +287,7 @@
   function crearDesdeSugerencia(sug) {
     const a = nueva(sug.tipo);
     a.auto = sug.clave;
+    a.sinFranja = !!sug.sinFranja;
     a.titulo = sug.titulo;
     a.mensaje = sug.mensaje;
     a.dias = sug.dias.slice();
@@ -287,8 +306,20 @@
      - El interruptor: si apagaste la del agua, sigue apagada. Recalcular horas
        no es motivo para volver a encenderte algo que decidiste callar.
      - Lo ya lanzado hoy, que si no volvería a sonar todo de golpe. */
+  /* Claves que la app ha retirado: lo que generó en su día y ya no genera
+     igual. Sin esto, partir la alerta única de comidas en una por comida dejaba
+     la vieja de cuatro horas conviviendo con las cuatro nuevas, y acababas con
+     cinco avisos de comer. Solo se quitan las que llevan marca de la app: lo
+     tuyo no se toca ni aunque se llame igual. */
+  const RETIRADAS = ['comida'];
+
   function generarTodo() {
     const res = { creadas: 0, actualizadas: 0, suplementos: 0, tuyas: 0 };
+
+    const viejas = lista().filter(function (a) {
+      return RETIRADAS.indexOf(autoDe(a)) !== -1;
+    });
+    viejas.forEach(function (a) { borrar(a.id); });
 
     sugerencias().forEach(function (sug) {
       const ya = buscarAuto(sug.clave, sug);
@@ -303,6 +334,7 @@
         ya.dias.join() === sug.dias.join() && ya.titulo === sug.titulo &&
         ya.mensaje === sug.mensaje && autoDe(ya) === sug.clave;
       ya.auto = sug.clave;
+      ya.sinFranja = !!sug.sinFranja;
       ya.titulo = sug.titulo;
       ya.mensaje = sug.mensaje;
       ya.dias = sug.dias.slice();
@@ -433,8 +465,8 @@
      lo hay. Todo eso ya está en la app; lo único que faltaba era juntarlo en la
      línea que se lee con el móvil bloqueado. */
   const VERBO = {
-    desayuno: 'Toca desayunar', almuerzo: 'Toca almorzar',
-    merienda: 'Toca merendar', cena: 'Toca cenar'
+    desayuno: 'Es hora de desayunar', almuerzo: 'Es hora de almorzar',
+    merienda: 'Es hora de merendar', cena: 'Es hora de cenar'
   };
 
   function comidaDeEsaHora(hora) {
@@ -442,7 +474,7 @@
     const f = Perfil.franjaDe(hora);
     if (!f) return null;
 
-    const out = { franja: f, titulo: VERBO[f.id] || ('Toca ' + f.label.toLowerCase()) };
+    const out = { franja: f, titulo: VERBO[f.id] || ('Es hora de ' + f.label.toLowerCase()) };
 
     /* Lo que le toca a esa comida según el menú de hoy. Se busca por nombre de
        comida y, si el menú no la nombra igual, por la hora más cercana: los
@@ -485,6 +517,7 @@
      Estas dos se calculan igual que al lanzarlo, así que lista y aviso no
      pueden separarse nunca. */
   function tituloEn(a, hora) {
+    if (a.sinFranja) return a.titulo;
     if (TIPOS[a.tipo] && TIPOS[a.tipo].segunLaHora) {
       const c = comidaDeEsaHora(hora || (a.horas || [])[0]);
       if (c) return c.titulo;
@@ -496,6 +529,7 @@
      tarjeta de lista, tres líneas de menú tapan las horas y los días, que es a
      lo que se viene a esa pantalla. */
   function adelantoEn(a, hora) {
+    if (a.sinFranja) return '';
     if (!TIPOS[a.tipo] || !TIPOS[a.tipo].segunLaHora) return '';
     const c = comidaDeEsaHora(hora || (a.horas || [])[0]);
     if (!c) return '';
@@ -505,6 +539,7 @@
   }
 
   function tituloDe(x) {
+    if (x.alerta.sinFranja) return x.titulo;
     if (TIPOS[x.alerta.tipo] && TIPOS[x.alerta.tipo].segunLaHora) {
       const c = comidaDeEsaHora(x.hora);
       if (c) return c.titulo;
