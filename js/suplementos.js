@@ -278,16 +278,30 @@
     }, base || {});
   }
 
+  /* Cambiar la hora de algo que ya tiene aviso lo mueve con él. Solo si ya lo
+     tenía: crear avisos a quien no los ha pedido es otra cosa, y para eso está
+     el botón de abajo. */
   function guardar(s) {
     const arr = lista();
     const i = arr.findIndex(function (x) { return x.id === s.id; });
     if (i === -1) arr.push(s); else arr[i] = s;
     guardarLista(arr);
+    if (tieneAlerta(s.id)) sincronizarAlertas();
     return s;
   }
 
+  /* ---------- quitar un bote se lleva su aviso ----------
+     Antes no: la alerta se quedaba sonando a las diez para algo que ya no
+     tomas, y el propio mensaje de confirmación tenía que avisar de que eso iba
+     a pasar. Un aviso que te manda tomar lo que has dejado de tomar es peor que
+     no tener aviso: te enseña a ignorarlos.
+
+     Se rehacen todas las de suplementos en vez de buscar la suya, porque una
+     alerta puede llevar dos botes: quitar uno de los dos no borra la alerta,
+     la deja con el que queda. */
   function borrar(id) {
     guardarLista(lista().filter(function (x) { return x.id !== id; }));
+    if (hayAlertas()) sincronizarAlertas();
   }
 
   /* ---------- qué toca hoy ----------
@@ -500,9 +514,36 @@
 
   /* Deja los recordatorios de suplementos igual que la lista de suplementos, y
      no toca los demás. Devuelve cuántos han quedado. */
+  /* ¿Este bote concreto ya tiene aviso creado? */
+  function tieneAlerta(id) {
+    return (Store.settings().alertas || []).some(function (a) {
+      /* `sup` lleva los ids separados por comas; el id de la alerta lleva
+         guiones porque acaba siendo el UID del calendario. Aqui se mira el
+         campo, no el id. */
+      return a.sup && String(a.sup).split(',').indexOf(String(id)) !== -1;
+    });
+  }
+
   function sincronizarAlertas() {
-    const otras = (Store.settings().alertas || []).filter(function (a) { return !a.sup; });
-    const nuevas = alertasDe();
+    const todas = Store.settings().alertas || [];
+    const otras = todas.filter(function (a) { return !a.sup; });
+
+    /* Rehacerlas de cero las devolvía encendidas y con el día limpio: si habías
+       apagado la del magnesio, volvía sola, y lo que ya había sonado hoy sonaba
+       otra vez. Se rehace el contenido —nombres, dosis, horas, días— y se
+       conserva lo que es decisión tuya o historia del día. */
+    const antes = {};
+    todas.forEach(function (a) { if (a.sup) antes[a.id] = a; });
+
+    const nuevas = alertasDe().map(function (n) {
+      const v = antes[n.id];
+      if (v) {
+        n.activa = v.activa !== false;
+        n.ultima = v.ultima || {};
+      }
+      return n;
+    });
+
     Store.setSetting('alertas', otras.concat(nuevas));
     return nuevas.length;
   }

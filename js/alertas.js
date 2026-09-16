@@ -396,6 +396,30 @@
     return res;
   }
 
+  /* ---------- mover las comidas que ya tienen aviso ----------
+     Cambiar la hora del desayuno y que el aviso siguiera sonando a la de antes
+     es el mismo fallo que dejar el aviso de un suplemento que ya no tomas: la
+     app dice una cosa y hace otra. Aquí no se crea nada —quien no tenga avisos
+     de comer sigue sin tenerlos— solo se mueve lo que ya está.
+
+     Lo apagado sigue apagado y lo ya lanzado hoy no se reabre: se toca la hora
+     y el nombre, que es lo que ha cambiado, y nada más. */
+  function moverComidas() {
+    if (!g.Perfil || !Perfil.franjas) return 0;
+    let n = 0;
+    const l = lista();
+    Perfil.franjas().forEach(function (f) {
+      const a = l.filter(function (x) { return autoDe(x) === 'comida:' + f.id; })[0];
+      if (!a) return;
+      if (a.horas.length === 1 && a.horas[0] === f.desde) return;
+      a.horas = [f.desde];
+      a.titulo = VERBO[f.id] || ('Es hora de ' + f.label.toLowerCase());
+      guardar(a);
+      n++;
+    });
+    return n;
+  }
+
   /* Lo que haría si lo pulsaras, para poder contarlo antes de hacerlo. */
   function previoGenerar() {
     const sug = sugerencias();
@@ -1015,7 +1039,7 @@
     resumenDias: resumenDias, resumenHoras: resumenHoras,
     diagnostico: diagnostico, probar: probar,
     sugerencias: sugerencias, yaExiste: yaExiste, crearDesdeSugerencia: crearDesdeSugerencia,
-    generarTodo: generarTodo, previoGenerar: previoGenerar,
+    generarTodo: generarTodo, previoGenerar: previoGenerar, moverComidas: moverComidas,
     repartir: repartir, enMinutos: enMinutos, aHora: aHora,
     horaHabitualDeEntreno: horaHabitualDeEntreno
   };

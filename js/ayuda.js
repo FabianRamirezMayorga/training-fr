@@ -619,6 +619,19 @@
         'Sin conexión la pantalla te enseña igual la versión que llevas, y te dice que no ha podido comprobar si hay otra en vez de callarse.',
         'Si algo se comporta raro justo después de actualizar, casi siempre es que el móvil se ha quedado con archivos de dos versiones mezclados. Para eso está *¿Algo va raro?*, debajo de la versión.'] },
 
+    { id: 'p-quitarsup', q: 'Si quito un suplemento, ¿se va también su alerta?',
+      a: ['Sí. Se va de la lista, de «que no se te olvide», de las cuentas del día y *de sus alertas*, todo a la vez. Antes no: la alerta se quedaba sonando a las diez para algo que ya no tomabas, y un aviso que te manda tomar lo que has dejado de tomar te enseña a ignorar los avisos.',
+        'Si ese suplemento compartía hora con otro, la alerta *no se borra*: se queda con el que sigues tomando. «Tus suplementos» a las 20:00 pasa a llamarse por el que queda.',
+        'Y si cambias la hora de uno que ya tiene alerta, la alerta se mueve con él. Lo que no hace es crearte alertas sin pedirlo: un suplemento nuevo no la tiene hasta que pulses el botón de crearlas.',
+        'Lo que apagaste sigue apagado y lo que ya sonó hoy no vuelve a sonar, aunque se rehagan.'],
+      ver: ['c-suplementos', 'c-autoalertas'] },
+
+    { id: 'p-moverhoras', q: 'Si cambio una hora de comer, ¿se mueve la alerta?',
+      a: ['Sí, si ya la tenías creada. Guardas tus horas en *Perfil › Ajustes* y las alertas de comer que existan se mueven con ellas: te dice cuántas al guardar.',
+        'No te crea ninguna: si no tenías alertas de comer, sigues sin tenerlas.',
+        'Lo mismo pasa con el reparto de los suplementos que van «con el desayuno» o «con la cena»: no guardan una hora, guardan el momento, así que se recolocan solos.'],
+      ver: ['c-franjas', 'c-autoalertas'] },
+
     { id: 'p-menudiario', q: '¿El aviso de comer cambia cada día con el menú?',
       a: ['Sí. El plato no se guarda dentro de la alerta: *se busca en el momento de sonar*, en el menú que tengas activo y en el día que toque. Por eso el martes te dice el plato del martes.',
         'Lo mismo en la tarjeta de la lista: lo que ves ahí es lo de hoy, y mañana enseñará lo de mañana.',

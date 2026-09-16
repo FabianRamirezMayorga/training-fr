@@ -709,8 +709,9 @@
           borrarB.onclick = function () {
             UI.closeModal();
             UI.confirm('Quitar ' + (dat.nombre || 'el suplemento'),
-              'Se va de la lista y de las cuentas. Los recordatorios ya creados no se ' +
-              'borran hasta que los rehagas.', 'Quitar', true).then(function (ok) {
+              'Se va de la lista, de las cuentas y de sus alertas. Si compartía hora con ' +
+              'otro, esa alerta se queda con el que sigues tomando.',
+              'Quitar', true).then(function (ok) {
               if (!ok) return;
               S().borrar(dat.id);
               render();

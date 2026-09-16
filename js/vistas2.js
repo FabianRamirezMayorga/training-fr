@@ -1066,9 +1066,15 @@
           });
           if (faltan) { UI.toast('Dale una hora a cada comida'); return; }
           Perfil.guardar({ franjas: f });
+          /* Las alertas de comer que ya existan se mueven con las horas nuevas:
+             dejarlas sonando a la hora de antes sería que la app dijera una cosa
+             y sonara otra. No crea ninguna: quien no las tenga sigue igual. */
+          const movidas = g.Alertas && Alertas.moverComidas ? Alertas.moverComidas() : 0;
           UI.closeModal();
           render();
-          UI.toast('Guardado');
+          UI.toast(movidas
+            ? 'Guardado · ' + movidas + (movidas === 1 ? ' alerta movida' : ' alertas movidas')
+            : 'Guardado');
         };
       });
   }
