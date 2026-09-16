@@ -389,8 +389,19 @@
      uno se quede atrás para que la app se contradiga a sí misma. */
   const INICIALES = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
 
-  /* Recibe el día tal y como lo da Date.getDay(): 0 es domingo. */
-  function inicialDia(n) { return INICIALES[((Number(n) % 7) + 7) % 7]; }
+  /* Recibe el día tal y como lo da Date.getDay(): 0 es domingo.
+
+     En inglés no vale traducir las dos letras españolas: «Mi» de miércoles es
+     «We» de Wednesday, y «Sá» es «Sa». Se le pide al sistema, que además
+     resuelve solo el caso de que un día futuro se añada otro idioma. */
+  function inicialDia(n) {
+    const i = ((Number(n) % 7) + 7) % 7;
+    if (g.Idioma && g.Idioma.actual() === 'es') return INICIALES[i];
+    try {
+      const t = unDia(i).toLocaleDateString(localeIdioma(), { weekday: 'short' });
+      return t.slice(0, 2).charAt(0).toUpperCase() + t.slice(1, 2).toLowerCase();
+    } catch (e) { return INICIALES[i]; }
+  }
 
   /* ---------- la hora, como la escribe su teléfono ----------
      Dentro se guarda siempre «HH:MM» de 24 h: es lo que entiende el campo de
@@ -416,12 +427,43 @@
 
   /* Los días se guardan abreviados desde la primera versión, pero al leerlos
      "Jue" suena a nota de la compra. Se muestran enteros. */
+  /* ---------- los días, en el idioma que toque ----------
+     Dentro se guardan siempre en español abreviado —«Lun», «Mié»— porque es la
+     forma en la que están escritas las rutinas de todo el mundo desde la
+     primera versión, y cambiar eso obligaría a migrar los datos de cada
+     usuario. Lo que cambia es cómo se enseñan.
+
+     Y no se traducen con T(): un día de la semana no es una frase de interfaz,
+     es un dato que el sistema ya sabe decir en cualquier idioma. Se le
+     pregunta a Intl con una fecha cualquiera que caiga en ese día, y así sale
+     bien escrito —con su mayúscula donde toca— sin mantener una lista por
+     idioma. */
   const DIA_LARGO = {
     Dom: 'Domingo', Lun: 'Lunes', Mar: 'Martes', 'Mié': 'Miércoles',
     Jue: 'Jueves', Vie: 'Viernes', 'Sáb': 'Sábado'
   };
-  function diaLargo(d) { return DIA_LARGO[d] || d; }
+
+  /* Del abreviado que se guarda al 0-6 de Date.getDay() */
+  const DIA_NUM = { Dom: 0, Lun: 1, Mar: 2, 'Mié': 3, Jue: 4, Vie: 5, 'Sáb': 6 };
+
+  function localeIdioma() {
+    return (g.Idioma && g.Idioma.actual() === 'en') ? 'en-US' : 'es-ES';
+  }
+
+  /* Un domingo cualquiera, para sumarle el día que haga falta */
+  function unDia(n) { return new Date(2024, 0, 7 + (((n % 7) + 7) % 7)); }
+
+  function diaLargo(d) {
+    const n = DIA_NUM[d];
+    if (n === undefined) return DIA_LARGO[d] || d;
+    if (g.Idioma && g.Idioma.actual() === 'es') return DIA_LARGO[d];
+    try {
+      const t = unDia(n).toLocaleDateString(localeIdioma(), { weekday: 'long' });
+      return t.charAt(0).toUpperCase() + t.slice(1);
+    } catch (e) { return DIA_LARGO[d] || d; }
+  }
   function diasLargos(lista) { return (lista || []).map(diaLargo).join(', '); }
+
   const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
   function fecha(ts) {

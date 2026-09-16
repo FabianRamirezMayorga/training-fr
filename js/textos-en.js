@@ -236,6 +236,80 @@
     'Desayuno': 'Breakfast',
     'Almuerzo': 'Lunch',
     'Merienda': 'Afternoon snack',
-    'Cena': 'Dinner'
+    'Cena': 'Dinner',
+
+    /* ---------- Inicio ---------- */
+    'Hola': 'Hi',
+    'Muy bien. Llevas {n} entrenamiento esta semana.':
+      "Nicely done. That's {n} workout this week.",
+    'Muy bien. Llevas {n} entrenamientos esta semana.':
+      "Nicely done. That's {n} workouts this week.",
+    'Semana en blanco. Buen momento para empezar.':
+      'Blank week. Good moment to start one.',
+    'Llevas 1 entrenamiento esta semana. Sigue así.':
+      "That's 1 workout this week. Keep it up.",
+    'Llevas {n} entrenamientos esta semana. Muy bien.':
+      "That's {n} workouts this week. Nicely done.",
+
+    'ENTRENAMIENTO EN CURSO': 'WORKOUT IN PROGRESS',
+    'Continuar': 'Continue',
+
+    'Hoy, {d} · hecho': 'Today, {d} · done',
+    'Hoy, {d}': 'Today, {d}',
+    'Ya entrenaste': 'You already trained',
+    'Ya entrenaste dos veces': 'You already trained twice',
+    'Hiciste {q}': 'You did {q}',
+    'Apuntar otro entrenamiento': 'Log another workout',
+
+    'Entrenar': 'Train',
+    '{n} rutinas para hoy: te dejo elegir': '{n} routines for today: you pick',
+    'O un entrenamiento libre': 'Or a free workout',
+    'Iniciar entrenamiento': 'Start workout',
+    'Arranca el cronómetro ahora y añade los ejercicios sobre la marcha. El tiempo se ve desde cualquier pantalla.':
+      'Start the timer now and add exercises as you go. The clock shows on every screen.',
+
+    'Días seguidos': 'Day streak',
+    'Entrenos': 'Workouts',
+    'Series semana': 'Sets this week',
+    'Volumen semana': 'Volume this week',
+    'Ver el día entero': 'See the whole day',
+
+    'Hoy': 'Today',
+    'Día libre': 'Rest day',
+    'Empieza aquí': 'Start here',
+    'No toca nada en tu plan': 'Nothing on your plan',
+    'Todavía no tienes rutinas': "You don't have routines yet",
+    'Si has hecho algo por tu cuenta, apúntalo. Y si te apetece entrenar, elige una rutina.':
+      'If you did something on your own, log it. And if you fancy training, pick a routine.',
+    'Copia una plantilla probada y edítala a tu gusto, o móntate el programa con tus datos.':
+      'Copy a proven template and edit it, or build the programme from your own data.',
+    'Apuntar algo': 'Log something',
+    'Elegir rutina': 'Pick a routine',
+    'Ver plantillas': 'See templates',
+    'Crear mi programa': 'Build my programme',
+
+    'y': 'and',
+    '{n} más': '{n} more',
+    '{n} serie': '{n} set',
+    '{n} series': '{n} sets',
+    '{v} levantados': '{v} lifted',
+    'Queda apuntado en tu historial.': "It's logged in your history.",
+
+    'Tu semana': 'Your week',
+    '{c} de {p} días del plan': '{c} of {p} plan days',
+    '{n} suelto': '{n} extra',
+    '{n} sueltos': '{n} extra',
+    '{n} días entrenados': '{n} days trained',
+
+    'Lo que llevas comido': 'What you have eaten',
+    'Calorías': 'Calories',
+    'Proteína': 'Protein',
+    'Hoy no has apuntado nada. Una foto del plato basta.':
+      'Nothing logged today. A photo of the plate is enough.',
+    'Te faltan {n} g de proteína para el objetivo del día.':
+      "You're {n} g of protein short of today's target.",
+    'Proteína del día cubierta.': "Today's protein is covered.",
+    'Foto': 'Photo',
+    'A mano': 'By hand'
   };
 })(window);

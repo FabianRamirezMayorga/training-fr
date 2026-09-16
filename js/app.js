@@ -440,22 +440,26 @@
          miércoles es el de esta semana o el de la que viene hay que contar con
          el dedo. Con el número debajo se lee de un vistazo, y el de hoy se
          dice con todas las letras. */
+      /* La inicial sale de UI, que la da en el idioma puesto: la «M» de
+         miércoles no vale para Wednesday. Se corta a una letra, que es lo que
+         cabe en el cuadro. */
       return '<div class="' + clases.join(' ') + '">' +
-        '<span>' + (esHoy ? 'Hoy' : d.charAt(0)) + '</span>' +
+        '<span>' + (esHoy ? T('Hoy') : UI.inicialDia(fecha.getDay()).charAt(0)) + '</span>' +
         '<b>' + fecha.getDate() + '</b><i></i></div>';
     }).join('');
 
     const frase = previstos
-      ? cumplidos + ' de ' + previstos + ' días del plan' +
-        (sueltos ? ' y ' + sueltos + ' suelto' + (sueltos > 1 ? 's' : '') : '')
-      : (cumplidos + sueltos) + ' días entrenados';
+      ? Tn('{c} de {p} días del plan', { c: cumplidos, p: previstos }) +
+        (sueltos ? ' ' + T('y') + ' ' +
+          Tp(sueltos, '{n} suelto', '{n} sueltos') : '')
+      : Tn('{n} días entrenados', { n: cumplidos + sueltos });
 
     return html`
       <div class="muelle"></div>
       <div class="card inicio-compacta semana-caja portada-titulo tarjeta-premium"
            data-a="verprogreso" role="button" tabindex="0">
         <div class="row between" style="margin-bottom:6px">
-          <span class="pre-encima">Tu semana</span>
+          <span class="pre-encima">${T('Tu semana')}</span>
           <span class="tiny nowrap">${frase}</span>
         </div>
         <div class="semana">${raw(celdas)}</div>
@@ -478,17 +482,17 @@
 
     return html`
       <div class="muelle"></div>
-      <div class="list-title portada-titulo">Lo que llevas comido</div>
+      <div class="list-title portada-titulo">${T('Lo que llevas comido')}</div>
       <div class="card inicio-compacta comida-caja tarjeta-premium">
         <div class="row" style="gap:16px;align-items:flex-start">
           <div class="grow">
-            <div class="pre-encima">${raw(icon('llama'))}Calorías</div>
+            <div class="pre-encima">${raw(icon('llama'))}${T('Calorías')}</div>
             <div><b class="pre-num">${UI.num(h.kcal)}</b>
               <span class="tiny"> / ${UI.num(m.kcal)}</span></div>
             <div class="prog" style="margin-top:5px"><i style="width:${pk}%"></i></div>
           </div>
           <div class="grow">
-            <div class="pre-encima prot">${raw(icon('proteina'))}Proteína</div>
+            <div class="pre-encima prot">${raw(icon('proteina'))}${T('Proteína')}</div>
             <div><b class="pre-num" style="color:var(--brand-1)">${h.prot}</b>
               <span class="tiny"> / ${m.prot} g</span></div>
             <div class="prog" style="margin-top:5px">
@@ -496,14 +500,15 @@
           </div>
         </div>
         <p class="tiny" style="margin:4px 0 0">${h.kcal === 0
-          ? 'Hoy no has apuntado nada. Una foto del plato basta.'
-          : faltaProt > 0 ? 'Te faltan ' + faltaProt + ' g de proteína para el objetivo del día.'
-          : 'Proteína del día cubierta.'}</p>
+          ? T('Hoy no has apuntado nada. Una foto del plato basta.')
+          : faltaProt > 0
+            ? Tn('Te faltan {n} g de proteína para el objetivo del día.', { n: faltaProt })
+            : T('Proteína del día cubierta.')}</p>
 
         <div class="row" style="margin-top:5px">
           <label class="btn primary grow sm" for="foto-inicio" style="cursor:pointer">
-            ${raw(icon('camara'))} Foto</label>
-          <button class="btn grow sm" data-a="comidamano">${raw(icon('plus'))} A mano</button>
+            ${raw(icon('camara'))} ${T('Foto')}</label>
+          <button class="btn grow sm" data-a="comidamano">${raw(icon('plus'))} ${T('A mano')}</button>
         </div>
 
         <input type="file" id="foto-inicio" accept="image/*" capture="environment" hidden>
@@ -689,33 +694,33 @@
               <p class="entra entra-2" style="margin:0;font-size:.92rem">${bienvenida.texto}</p>
             </div>
             <button class="btn icon ghost" data-a="cerrarSaludo"
-                    aria-label="Cerrar">${raw(icon('close'))}</button>
+                    aria-label="${T('Cerrar')}">${raw(icon('close'))}</button>
           </div>
         </div>`
       : html`
-        <div class="hola entra">Hola${raw(nombre
+        <div class="hola entra">${T('Hola')}${raw(nombre
           ? ', <span class="nombre">' + esc(nombre) + '</span>' : '')}</div>
         ${raw(frasePortada ? html`
           <p class="hola-frase entra entra-2">
             <span class="hf-ico">${raw(icon('chispa'))}</span>${frasePortada}</p>`
         : html`
           <p class="muted entra entra-2 hola-sub" style="font-size:.92rem">${raw(hecho
-            ? 'Muy bien. Llevas ' + st.week +
-              (st.week === 1 ? ' entrenamiento' : ' entrenamientos') + ' esta semana.'
+            ? Tp(st.week, 'Muy bien. Llevas {n} entrenamiento esta semana.',
+                'Muy bien. Llevas {n} entrenamientos esta semana.')
             : st.week === 0
-              ? 'Semana en blanco. Buen momento para empezar.'
-              : st.week === 1 ? 'Llevas 1 entrenamiento esta semana. Sigue así.'
-              : 'Llevas ' + st.week + ' entrenamientos esta semana. Muy bien.')}</p>`)}`)}
+              ? T('Semana en blanco. Buen momento para empezar.')
+              : st.week === 1 ? T('Llevas 1 entrenamiento esta semana. Sigue así.')
+              : Tn('Llevas {n} entrenamientos esta semana. Muy bien.', { n: st.week }))}</p>`)}`)}
 
       <div class="muelle"></div>
       ${raw(activa ? html`
         <div class="card" style="border-color:var(--acc);background:var(--acc-d)">
           <div class="row between">
             <div class="grow">
-              <div class="tiny" style="color:var(--acc)">ENTRENAMIENTO EN CURSO</div>
+              <div class="tiny" style="color:var(--acc)">${T('ENTRENAMIENTO EN CURSO')}</div>
               <h3 style="margin:2px 0 0">${activa.routineName}</h3>
             </div>
-            <button class="btn primary" data-a="resume">Continuar</button>
+            <button class="btn primary" data-a="resume">${T('Continuar')}</button>
           </div>
         </div>`
       : hecho ? html`
@@ -731,17 +736,19 @@
           <span class="hh-silueta" aria-hidden="true">${raw(icon('check'))}</span>
           <span class="dc-disco">${raw(icon('check'))}</span>
           <span class="grow">
-            <span class="dc-rotulo">Hoy, ${UI.diaLargo(hoy).toLowerCase()} · hecho</span>
-            <span class="dc-tit">${hecho.n > 1 ? 'Ya entrenaste dos veces'
-              : 'Ya entrenaste'}</span>
+            <span class="dc-rotulo">${Tn('Hoy, {d} · hecho',
+              { d: UI.diaLargo(hoy).toLowerCase() })}</span>
+            <span class="dc-tit">${hecho.n > 1 ? T('Ya entrenaste dos veces')
+              : T('Ya entrenaste')}</span>
             ${raw(musculosHechos(hecho)
-              ? '<span class="dc-que">Hiciste ' + esc(musculosHechos(hecho)) + '</span>'
+              ? '<span class="dc-que">' + esc(Tn('Hiciste {q}',
+                  { q: musculosHechos(hecho) })) + '</span>'
               : '')}
             <span class="dc-sub">${raw(resumenHechoHTML(hecho))}</span>
           </span>
         </div>
         <button class="enlace-flojo" data-a="empezarlibre">
-          Apuntar otro entrenamiento</button>`
+          ${T('Apuntar otro entrenamiento')}</button>`
       : deHoy.length ? html`
         <!-- El cajón de «Hoy, lunes» decía de qué plan es la rutina y cuántos
              ejercicios tiene, y justo encima había un botón verde que solo
@@ -752,31 +759,31 @@
                 data-a="entrenarhoy">
           <span class="dc-play">${raw(icon('play'))}</span>
           <span class="grow">
-            <span class="dc-rotulo">Hoy, ${UI.diaLargo(hoy).toLowerCase()}${raw(
+            <span class="dc-rotulo">${Tn('Hoy, {d}',
+              { d: UI.diaLargo(hoy).toLowerCase() })}${raw(
               deHoy.length === 1 && queEsHoy(deHoy) !== 'lo de hoy'
                 ? ' · ' + esc(queEsHoy(deHoy)) : '')}</span>
-            <span class="dc-tit">Entrenar</span>
+            <span class="dc-tit">${T('Entrenar')}</span>
             <span class="dc-sub">${deHoy.length === 1
               ? resumenRutina(deHoy[0])
-              : deHoy.length + ' rutinas para hoy: te dejo elegir'}</span>
+              : Tn('{n} rutinas para hoy: te dejo elegir', { n: deHoy.length })}</span>
           </span>
         </button>
         <button class="enlace-flojo" data-a="empezarlibre">
-          O un entrenamiento libre</button>`
+          ${T('O un entrenamiento libre')}</button>`
       : html`
         <button class="btn primary block grande portada-hueco btn-arranque" data-a="empezarlibre">
-          ${raw(icon('play'))} Iniciar entrenamiento
+          ${raw(icon('play'))} ${T('Iniciar entrenamiento')}
         </button>
-        <p class="tiny" style="margin:7px 0 0">Arranca el cronómetro ahora y añade los
-        ejercicios sobre la marcha. El tiempo se ve desde cualquier pantalla.</p>`)}
+        <p class="tiny" style="margin:7px 0 0">${T('Arranca el cronómetro ahora y añade los ejercicios sobre la marcha. El tiempo se ve desde cualquier pantalla.')}</p>`)}
 
       <div class="muelle"></div>
       <div class="stats portada-hueco">
-        <div class="stat"><b>${st.streak}</b><span>Días seguidos</span></div>
-        <div class="stat"><b>${st.total}</b><span>Entrenos</span></div>
+        <div class="stat"><b>${st.streak}</b><span>${T('Días seguidos')}</span></div>
+        <div class="stat"><b>${st.total}</b><span>${T('Entrenos')}</span></div>
         <div class="stat"><b>${UI.num(Store.settings().registro !== 'detallado' || st.totalVolume === 0
           ? st.weekSets : st.weekVolume)}</b><span>${Store.settings().registro !== 'detallado' ||
-          st.totalVolume === 0 ? 'Series semana' : 'Volumen semana'}</span></div>
+          st.totalVolume === 0 ? T('Series semana') : T('Volumen semana')}</span></div>
       </div>
 
       ${raw(Modo.franjaInvitado())}
@@ -790,8 +797,9 @@
            lo dice nadie más, y lo que viene debajo —la semana y lo comido— sigue
            siendo lo de hoy. -->
       <div class="list-head portada-titulo">
-        <span class="list-title" style="margin:0">Hoy, ${UI.diaLargo(hoy).toLowerCase()}</span>
-        <button class="btn sm primary" data-a="verdia">${raw(icon('lista'))} Ver el día entero</button>
+        <span class="list-title" style="margin:0">${Tn('Hoy, {d}',
+          { d: UI.diaLargo(hoy).toLowerCase() })}</span>
+        <button class="btn sm primary" data-a="verdia">${raw(icon('lista'))} ${T('Ver el día entero')}</button>
       </div>
       ${raw(deHoy.length
         ? ''
@@ -800,19 +808,20 @@
                algo: era la única caja lisa de la portada, y es la que ve quien
                acaba de entrar en la app. -->
           <div class="card tarjeta-premium tarjeta-libre">
-            <div class="hoy-encima">Hoy · ${rutinas.length ? 'Día libre' : 'Empieza aquí'}</div>
+            <div class="hoy-encima">${T('Hoy')} · ${rutinas.length
+              ? T('Día libre') : T('Empieza aquí')}</div>
             <div class="hoy-tit">${rutinas.length
-              ? 'No toca nada en tu plan'
-              : 'Todavía no tienes rutinas'}</div>
+              ? T('No toca nada en tu plan')
+              : T('Todavía no tienes rutinas')}</div>
             <p class="hoy-meta">${rutinas.length
-              ? 'Si has hecho algo por tu cuenta, apúntalo. Y si te apetece entrenar, elige una rutina.'
-              : 'Copia una plantilla probada y edítala a tu gusto, o móntate el programa con tus datos.'}</p>
+              ? T('Si has hecho algo por tu cuenta, apúntalo. Y si te apetece entrenar, elige una rutina.')
+              : T('Copia una plantilla probada y edítala a tu gusto, o móntate el programa con tus datos.')}</p>
             <div class="row" style="margin-top:12px">
               ${raw(rutinas.length
-                ? '<button class="btn grow sm" data-a="apuntar">Apuntar algo</button>' +
-                  '<button class="btn primary grow sm" data-a="plantillas">Elegir rutina</button>'
-                : '<button class="btn grow sm" data-a="plantillas">Ver plantillas</button>' +
-                  '<button class="btn primary grow sm" data-a="programa">Crear mi programa</button>')}
+                ? '<button class="btn grow sm" data-a="apuntar">' + esc(T('Apuntar algo')) + '</button>' +
+                  '<button class="btn primary grow sm" data-a="plantillas">' + esc(T('Elegir rutina')) + '</button>'
+                : '<button class="btn grow sm" data-a="plantillas">' + esc(T('Ver plantillas')) + '</button>' +
+                  '<button class="btn primary grow sm" data-a="programa">' + esc(T('Crear mi programa')) + '</button>')}
             </div>
           </div>`)}
 
@@ -834,10 +843,13 @@
   function musculosHechos(h) {
     const m = h.musculos || [];
     if (!m.length) return '';
+    /* La «y» de la última coma cambia de idioma, así que la enumeración se
+       arma con la conjunción traducida en vez de escribirla a mano. */
+    const y = ' ' + T('y') + ' ';
     if (m.length === 1) return m[0];
-    if (m.length === 2) return m[0] + ' y ' + m[1];
-    if (m.length === 3) return m[0] + ', ' + m[1] + ' y ' + m[2];
-    return m[0] + ', ' + m[1] + ', ' + m[2] + ' y ' + (m.length - 3) + ' más';
+    if (m.length === 2) return m[0] + y + m[1];
+    if (m.length === 3) return m[0] + ', ' + m[1] + y + m[2];
+    return m[0] + ', ' + m[1] + ', ' + m[2] + y + Tn('{n} más', { n: m.length - 3 });
   }
 
   /* Y debajo, de dónde salió y cuánto fue. Sin cifras inventadas: si no se
@@ -846,10 +858,10 @@
   function resumenHechoHTML(h) {
     const partes = [];
     if (h.nombres.length) partes.push(esc(h.nombres.join(' · ')));
-    if (h.series) partes.push(h.series + (h.series === 1 ? ' serie' : ' series'));
-    if (h.volumen) partes.push(UI.kg(h.volumen) + ' levantados');
+    if (h.series) partes.push(Tp(h.series, '{n} serie', '{n} series'));
+    if (h.volumen) partes.push(Tn('{v} levantados', { v: UI.kg(h.volumen) }));
     if (h.minutos >= 1) partes.push(h.minutos + ' min');
-    return partes.length ? partes.join(' · ') : 'Queda apuntado en tu historial.';
+    return partes.length ? partes.join(' · ') : T('Queda apuntado en tu historial.');
   }
 
   /* Resalta el nombre dentro del saludo, que es lo único que cambia de persona
