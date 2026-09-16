@@ -355,6 +355,38 @@
       cierre: 'Si algo deja de funcionar, vuelve aquí antes que a ningún otro sitio: casi siempre es una clave caducada o sin saldo.',
       ver: ['g-ia', 'p-precio'] },
 
+    { id: 'c-calendario', titulo: 'Llevar los recordatorios al calendario',
+      resumen: 'Para que suenen con la app cerrada',
+      pasos: [
+        { t: 'Antes de nada, crea un calendario llamado *Training FR* en tu móvil.',
+          d: 'En iPhone, Calendario › Calendarios › Añadir calendario. En Android, desde Google Calendar en el navegador: Configuración › Añadir otro calendario. Este paso es el que hace que luego puedas administrarlos: en un calendario propio los apagas, los escondes o los borras todos de una vez.' },
+        { t: 'Entra en Perfil › Alertas y baja hasta *Que suenen con la app cerrada*.',
+          ir: { ruta: 'alertas', label: 'Abrir Alertas' } },
+        { t: 'Toca *Descargar para el calendario*.',
+          d: 'Se baja un archivo .ics con un evento semanal por cada hora de cada recordatorio activo, con su aviso cinco minutos antes.' },
+        { t: 'Ábrelo y elige el calendario Training FR.',
+          d: 'El móvil te pregunta a cuál añadirlos. Ahí es donde se decide si luego son fáciles de administrar o si quedan mezclados con el resto de tu agenda.' },
+        { t: 'Compruébalo: se llaman *Training FR · algo*.',
+          d: 'Ese prefijo va en todos, así que buscando «Training FR» en tu calendario salen todos aunque los hayas metido mezclados.' }
+      ],
+      cierre: 'Si cambias horas o días, vuelve a descargarlo: los eventos que ya tienes se actualizan en vez de duplicarse, porque cada uno lleva su identificador.',
+      ver: ['c-quitarcal', 'p-calendario'] },
+
+    { id: 'c-quitarcal', titulo: 'Quitar los recordatorios del calendario',
+      resumen: 'Sin buscarlos uno a uno',
+      pasos: [
+        { t: 'Entra en Perfil › Alertas y baja hasta *Que suenen con la app cerrada*.',
+          ir: { ruta: 'alertas', label: 'Abrir Alertas' } },
+        { t: 'Toca *Quitarlos del calendario*.',
+          d: 'Solo aparece si alguna vez descargaste el archivo.' },
+        { t: 'Ábrelo igual que el otro.',
+          d: 'Es un archivo de cancelación: el calendario retira los eventos en vez de añadirlos.' },
+        { t: 'Se van todos, incluidos los que ya no existen en la app.',
+          d: 'La app recuerda todo lo que te ha exportado alguna vez, así que también quita los avisos de horas que cambiaste después y que se habían quedado sonando por su cuenta.' }
+      ],
+      cierre: 'Tus recordatorios dentro de la app no se tocan: esto solo limpia el calendario del móvil.',
+      ver: ['c-calendario'] },
+
     { id: 'c-copia', titulo: 'Guardar una copia de tus datos',
       resumen: 'El archivo que no depende de nadie',
       pasos: [
@@ -456,6 +488,13 @@
       a: ['Nada. No tiene suscripción, ni anuncios, ni compras.',
         'Lo único que puede costar dinero es el entrenador con IA, porque funciona con tu propia clave: lo que gastes se lo pagas a quien te la dio, no a la app. Sin activarlo, todo lo demás funciona igual.'],
       ver: ['g-ia', 'c-ia'] },
+
+    { id: 'p-calendario', q: '¿Cómo distingo en mi calendario los avisos de la app?',
+      a: ['Por el nombre: todos se llaman *Training FR · algo*, así que buscando «Training FR» en tu calendario salen todos.',
+        'Pero lo que de verdad los hace fáciles de administrar es meterlos en un calendario propio llamado Training FR, creado antes de importarlos. Así se apagan, se esconden o se borran enteros de un toque.',
+        'Eso no lo decide el archivo, lo decide tu app de calendario al preguntarte dónde meterlos. El archivo ya trae el nombre puesto para que te lo ofrezca.',
+        'Y si los quieres quitar, no hace falta buscarlos: en Alertas hay un botón que descarga un archivo que los retira de golpe.'],
+      ver: ['c-calendario', 'c-quitarcal'] },
 
     { id: 'p-actualiza', q: '¿Por qué me pide actualizar tan a menudo?',
       a: ['Porque la app se sigue construyendo y cada mejora se publica en cuanto está probada.',

@@ -6134,3 +6134,29 @@ html[data-theme="light"] .sf-campo:focus-within {
   background: color-mix(in srgb, var(--acc) 9%, transparent);
   box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--acc) 55%, transparent);
 }
+
+/* ---------- el truco del calendario aparte ----------
+   La parte que de verdad decide si estos avisos se pueden administrar no la
+   hace el archivo: la hace la app de calendario al importarlo. Metidos en el
+   calendario del trabajo hay que borrarlos uno a uno; en uno propio se apagan
+   enteros con un toque. Eso no se puede programar desde aqui, asi que se dice,
+   y se dice antes de descargar y no despues. */
+.cal-truco {
+  display: flex; align-items: flex-start; gap: 11px;
+  margin-top: 12px; padding: 11px 12px; border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--agua) 30%, transparent);
+  background: color-mix(in srgb, var(--agua) 10%, transparent);
+}
+.cal-truco .ct-ico {
+  flex: none; display: flex; color: var(--agua); margin-top: 1px;
+}
+.cal-truco .ct-ico svg {
+  width: 17px; height: 17px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+/* Solo el titulo va en su renglon. Con el selector suelto, el «Training FR»
+   que va dentro de la explicacion tambien se ponia en bloque y partia la frase
+   en tres lineas. */
+.cal-truco > .grow > b { display: block; font-size: .88rem; letter-spacing: -.01em; }
+.cal-truco .tiny b { color: var(--txt); font-weight: 700; }
+.cal-truco .tiny { display: block; margin-top: 3px; line-height: 1.45; }

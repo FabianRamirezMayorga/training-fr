@@ -462,6 +462,21 @@
     return fuera.join(String.fromCharCode(13, 10) + ' ');
   }
 
+  const FIN = String.fromCharCode(13, 10);
+
+  /* La misma cabecera para el archivo que los pone y el que los quita. El
+     nombre va en X-WR-CALNAME: los calendarios que saben leerlo ofrecen meter
+     todo esto en un calendario aparte, que es la única manera de poder
+     apagarlos o borrarlos de una vez sin tocar nada más. */
+  function cabecera(metodo) {
+    return [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Training FR//ES', 'CALSCALE:GREGORIAN',
+      'METHOD:' + metodo,
+      'X-WR-CALNAME:Training FR',
+      'X-WR-CALDESC:' + escaparICS('Recordatorios creados por la app Training FR')
+    ];
+  }
+
   function ics() {
     const NOMBRE_DIA = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
     const ahora = new Date();
@@ -469,10 +484,8 @@
       dosDigitos(ahora.getUTCDate()) + 'T' + dosDigitos(ahora.getUTCHours()) +
       dosDigitos(ahora.getUTCMinutes()) + '00Z';
 
-    const lineas = [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Training FR//ES', 'CALSCALE:GREGORIAN',
-      'METHOD:PUBLISH', 'X-WR-CALNAME:Training FR'
-    ];
+    const lineas = cabecera('PUBLISH');
+    const uids = [];
 
     /* Un evento por cada hora de cada alerta: el calendario no sabe de "ocho
        veces al día", así que se le dan ocho eventos semanales. */
@@ -505,15 +518,22 @@
         const cuerpo = (a.mensaje ? a.mensaje + String.fromCharCode(10) +
           String.fromCharCode(10) : '') + 'Abrir en Training FR: ' + enlace;
 
+        const uid = a.id + '-' + n + '@trainingfr';
+        uids.push(uid);
+
         lineas.push(
           'BEGIN:VEVENT',
-          'UID:' + a.id + '-' + n + '@trainingfr',
+          'UID:' + uid,
           'DTSTAMP:' + sello,
           'DTSTART:' + fecha,
           'DURATION:PT15M',
           'RRULE:FREQ=WEEKLY;BYDAY=' + a.dias.map(function (d) { return NOMBRE_DIA[d]; }).join(','),
           'SUMMARY:' + escaparICS(titulo),
           'DESCRIPTION:' + escaparICS(cuerpo),
+          /* Para los calendarios de escritorio, que sí saben filtrar y buscar
+             por categoría. El móvil la ignora, pero no estorba y cuesta una
+             línea. */
+          'CATEGORIES:Training FR',
           'URL:' + enlace,
           'BEGIN:VALARM', 'TRIGGER:-PT5M', 'ACTION:DISPLAY',
           'DESCRIPTION:' + escaparICS(titulo), 'END:VALARM',
@@ -522,8 +542,69 @@
       });
     });
 
+    /* Se apunta lo que se ha exportado, sumando y sin borrar lo de antes. Sin
+       esto, el archivo que los quita no puede quitar lo que ya no existe en la
+       app: si bajaste ocho avisos de agua y luego los dejaste en cuatro, los
+       otros cuatro siguen sonando en el calendario y la app ya no sabe ni sus
+       identificadores.
+
+       Y tiene que acumular, no sustituir: guardando solo la última descarga,
+       volver a bajar el archivo despues de quitar horas borraba de la memoria
+       justo los que habian quedado huerfanos, que son los unicos que no se
+       pueden cancelar de otra manera. */
+    const sabidos = {};
+    (Store.settings().alertasExportadas || []).forEach(function (u) { sabidos[u] = 1; });
+    uids.forEach(function (u) { sabidos[u] = 1; });
+    Store.setSetting('alertasExportadas', Object.keys(sabidos));
+
     lineas.push('END:VCALENDAR');
-    return lineas.map(plegar).join('\r\n');
+    return lineas.map(plegar).join(FIN);
+  }
+
+  /* ---------- quitarlos del calendario ----------
+     Buscar a mano ocho eventos repetidos entre los del trabajo y los cumpleaños
+     es el motivo por el que nadie los quita nunca: se quedan sonando meses
+     después de dejar de usarlos.
+
+     El formato tiene una manera de decirlo —METHOD:CANCEL con los mismos
+     identificadores— y es lo que lee el calendario para retirarlos de golpe.
+     Se cancelan los de la última descarga más los de ahora: los primeros
+     cubren lo que ya no existe en la app, los segundos lo que sigue vivo. */
+  function icsCancelar() {
+    const ahora = new Date();
+    const sello = ahora.getUTCFullYear() + dosDigitos(ahora.getUTCMonth() + 1) +
+      dosDigitos(ahora.getUTCDate()) + 'T' + dosDigitos(ahora.getUTCHours()) +
+      dosDigitos(ahora.getUTCMinutes()) + '00Z';
+
+    const vistos = {};
+    (Store.settings().alertasExportadas || []).forEach(function (u) { vistos[u] = 1; });
+    lista().forEach(function (a) {
+      (a.horas || []).forEach(function (h, n) { vistos[a.id + '-' + n + '@trainingfr'] = 1; });
+    });
+
+    const uids = Object.keys(vistos);
+    if (!uids.length) return '';
+
+    const lineas = cabecera('CANCEL');
+    uids.forEach(function (uid) {
+      lineas.push(
+        'BEGIN:VEVENT',
+        'UID:' + uid,
+        'DTSTAMP:' + sello,
+        /* Una cancelación sube de versión: un calendario que ya tiene la 0
+           guardada ignora otra 0, y el evento se quedaría donde estaba. */
+        'SEQUENCE:9',
+        'STATUS:CANCELLED',
+        'SUMMARY:' + escaparICS('Training FR · aviso retirado'),
+        'END:VEVENT'
+      );
+    });
+    lineas.push('END:VCALENDAR');
+    return lineas.map(plegar).join(FIN);
+  }
+
+  function cuantosExportados() {
+    return (Store.settings().alertasExportadas || []).length;
   }
 
   function escaparICS(s) {
@@ -557,7 +638,8 @@
     lista: lista, nueva: nueva, guardar: guardar, borrar: borrar, desdeRutinas: desdeRutinas,
     soportado: soportado, permiso: permiso, pedirPermiso: pedirPermiso, avisar: avisar,
     pendientes: pendientes, arrancar: arrancar, parar: parar, marcarLanzada: marcarLanzada,
-    ics: ics, resumenDias: resumenDias, resumenHoras: resumenHoras,
+    ics: ics, icsCancelar: icsCancelar, cuantosExportados: cuantosExportados,
+    resumenDias: resumenDias, resumenHoras: resumenHoras,
     diagnostico: diagnostico, probar: probar,
     sugerencias: sugerencias, yaExiste: yaExiste, crearDesdeSugerencia: crearDesdeSugerencia,
     repartir: repartir, enMinutos: enMinutos, aHora: aHora,

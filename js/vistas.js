@@ -1061,12 +1061,31 @@
         avisarte sola si está cerrada, salvo pagando un servidor de notificaciones. La vía
         que sí funciona y no cuesta nada es llevarlos al calendario del móvil, que sí avisa
         siempre.</p>
-        <button class="btn block" data-a="calendario" ${lista.length ? '' : 'disabled'}>
+        <button class="btn primary block" data-a="calendario" ${lista.length ? '' : 'disabled'}>
           ${raw(icon('down'))} Descargar para el calendario</button>
-        <p class="tiny" style="margin-top:8px">Abre el archivo en el móvil y acepta
-        añadirlo. Se crean como eventos semanales con aviso, llamados «Training FR · …»
-        para que se distingan de lo tuyo, y tocando uno se abre la app en la pantalla
-        que toca.</p>
+        <p class="tiny" style="margin-top:8px">Se crean como eventos semanales con aviso,
+        llamados <b>«Training FR · …»</b>, y tocando uno se abre la app en la pantalla que
+        toca. Al volver a descargarlo, los que ya tengas se actualizan en vez de
+        duplicarse.</p>
+
+        <!-- Lo que hace que esto sea administrable no es el archivo, es dónde
+             se mete: en un calendario propio se apaga o se borra entero de un
+             toque, y mezclado con el del trabajo hay que ir uno por uno. Eso no
+             lo decide el .ics, lo decide quien lo importa, así que se dice. -->
+        <div class="cal-truco">
+          <span class="ct-ico">${raw(icon('aviso'))}</span>
+          <span class="grow"><b>Mételos en un calendario aparte</b>
+          <span class="tiny">Crea antes un calendario llamado <b>Training FR</b> en tu móvil
+          y elígelo al importar. Así los apagas, los escondes o los borras todos de una vez,
+          sin tocar el resto de tu agenda.</span></span>
+        </div>
+
+        ${raw(Alertas.cuantosExportados() ? html`
+          <button class="btn block sm" data-a="quitarcal" style="margin-top:10px">
+            ${raw(icon('trash'))} Quitarlos del calendario</button>
+          <p class="tiny" style="margin-top:7px">Descarga un archivo que los retira. Ábrelo
+          igual que el otro: el calendario borra los ${Alertas.cuantosExportados()} avisos
+          que le pusiste desde aquí, incluidos los de horas que ya cambiaste.</p>` : '')}
       </div>`;
   };
 
@@ -1419,14 +1438,36 @@
       UI.toast('Recordatorio creado para tus días de entrenamiento');
     });
 
-    bind(root, '[data-a=calendario]', function () {
-      const blob = new Blob([Alertas.ics()], { type: 'text/calendar;charset=utf-8' });
+    /* Con la fecha en el nombre: de otra manera, la tercera descarga se llama
+       «training-fr-alertas (2).ics» y no hay forma de saber cuál es la buena. */
+    const bajarICS = function (texto, sufijo, aviso) {
+      if (!texto) { UI.toast('No hay nada que llevar al calendario'); return; }
+      const d = new Date();
+      const dd = function (n) { return String(n).padStart(2, '0'); };
+      const blob = new Blob([texto], { type: 'text/calendar;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'training-fr-alertas.ics';
+      a.download = 'training-fr-alertas' + sufijo + '-' +
+        d.getFullYear() + dd(d.getMonth() + 1) + dd(d.getDate()) + '.ics';
       a.click();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-      UI.toast('Archivo descargado. Ábrelo para añadirlo al calendario.');
+      UI.toast(aviso);
+    };
+
+    bind(root, '[data-a=calendario]', function () {
+      bajarICS(Alertas.ics(), '', 'Archivo descargado. Ábrelo para añadirlo al calendario.');
+      render();
+    });
+
+    bind(root, '[data-a=quitarcal]', function () {
+      UI.confirm('Quitarlos del calendario',
+        'Se descarga un archivo que retira los avisos de Training FR de tu calendario. ' +
+        'Ábrelo y acéptalo igual que el otro. Tus recordatorios de la app no se tocan.',
+        'Descargar').then(function (ok) {
+        if (!ok) return;
+        bajarICS(Alertas.icsCancelar(), '-quitar',
+          'Archivo descargado. Ábrelo para retirarlos del calendario.');
+      });
     });
   };
 
