@@ -361,6 +361,8 @@
           d: 'Aparece *Empezando a las* debajo del reparto. Tócalo y pon la hora en la rueda: de ahí salen las demás, contando hacia delante y cortando en la cena.' },
         { t: 'Y si vas *A mano*, pon cada hora en la rueda.',
           d: 'Se abre un panel con la misma rueda. Gírala hasta la hora que quieras, toca *Añadir esta hora* y se queda abajo en «Tus horas». Repite hasta tenerlas todas —las que sobren se quitan tocando la × de cada una— y termina con *Listo*. Se crea una alerta por cada hora.' },
+        { t: 'Para cambiarlo o quitarlo, *desliza la fila*.',
+          d: 'En «Lo que tomas», desliza hacia la *derecha* y sale Borrar; hacia la *izquierda*, Editar. Tocar la fila sin deslizar abre la ficha, como siempre. Es el mismo gesto que en tus rutinas y tus menús.' },
         { t: 'Guarda y, abajo, toca *Crear alertas*.',
           d: 'Se crean con el nombre y la dosis. Solo toca las de suplementos: las alertas que hayas creado tú se quedan como están.' }
       ],

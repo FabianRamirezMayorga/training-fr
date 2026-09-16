@@ -7027,3 +7027,18 @@ html[data-theme="light"] .ag-ico {
   background: color-mix(in srgb, #000 5%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 7%, transparent);
 }
+
+/* ---------- las filas de suplementos, deslizables ----------
+   El mecanismo es el de siempre; lo unico que cambia es que estas filas traen
+   su propio vidrio y su propio redondeo, y el contenedor del deslizable no.
+   Sin esto, al abrirla los botones asomaban con la esquina cuadrada por detras
+   de una fila redondeada. */
+.sup-lista .desliza { border-radius: 15px; }
+/* El hueco lo pone el `gap` de la lista; el margen del deslizable lo sumaba
+   encima y las filas quedaban al doble de separacion que antes. */
+.sup-lista .desliza + .desliza { margin-top: 0; }
+/* La cara trae fondo propio para tapar los botones; aqui ese fondo ya lo pone
+   la fila, y el de la cara la dejaba plana y sin el vidrio. */
+.sup-lista .desliza-cara { background: transparent; }
+.sup-lista .desliza.abierta, .sup-lista .desliza.abierta-izq { background: var(--card2); }
+.sup-lista .desliza-cara > .sup-fila { border-radius: 15px; }

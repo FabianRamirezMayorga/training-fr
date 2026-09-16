@@ -56,7 +56,7 @@
       return UI.hora ? UI.hora(h) : h;
     }).join(', ');
 
-    return html`
+    const cara = html`
       <button class="sup-fila" data-sup="${s.id}">
         <span class="grow">
           <span class="sup-nom">${s.nombre}</span>
@@ -66,6 +66,27 @@
         ${raw(s.aporta ? '<span class="sup-aporta">' + s.aporta.prot + '<i>g</i></span>' : '')}
         <span class="chevron">${raw(icon('chevron'))}</span>
       </button>`;
+
+    /* ---------- deslizar para borrar o editar ----------
+       El mismo mecanismo que las rutinas y los menús, no uno nuevo: si dos
+       listas de la misma app se deslizan distinto, la que se aprendió primero
+       estorba para usar la otra.
+
+       Hacia la derecha sale Borrar y hacia la izquierda Editar. En iOS suele ser
+       al revés —borrar a la izquierda—, pero aquí manda lo que él ha pedido, y
+       la fila entera sigue abriendo la ficha de un toque para quien no deslice.
+
+       Borrar lleva su color de peligro: el gesto es el mismo para las dos cosas
+       y lo único que distingue una de otra antes de soltar es el color. */
+    if (!App.deslizable) return cara;
+
+    return App.deslizable(cara, [
+      { icono: 'edit', texto: 'Editar', tono: 'suave',
+        attr: 'data-editarsup="' + esc(s.id) + '"' }
+    ], [
+      { icono: 'trash', texto: 'Borrar', tono: 'malo',
+        attr: 'data-borrarsup="' + esc(s.id) + '"' }
+    ]);
   }
 
   /* ---------- lo que hay que tomar hoy ----------
@@ -284,6 +305,32 @@
     });
 
     bind(root, '[data-a=analizar]', function () { pedirAnalisis(true); });
+
+    bindAll(root, '[data-editarsup]', function (el) {
+      const s = S().lista().filter(function (x) {
+        return x.id === el.dataset.editarsup;
+      })[0];
+      if (s) fichaSheet(s, false);
+    });
+
+    /* Se pregunta antes, como en el botón de dentro de la ficha: un gesto es
+       más fácil de hacer sin querer que un botón, así que con más motivo. Y el
+       aviso dice lo que se lleva por delante, que no es solo la fila. */
+    bindAll(root, '[data-borrarsup]', function (el) {
+      const s = S().lista().filter(function (x) {
+        return x.id === el.dataset.borrarsup;
+      })[0];
+      if (!s) return;
+      UI.confirm('Quitar ' + (s.nombre || 'el suplemento'),
+        'Se va de la lista, de las cuentas y de sus alertas. Si compartía hora con ' +
+        'otro, esa alerta se queda con el que sigues tomando.',
+        'Quitar', true).then(function (ok) {
+        if (!ok) return;
+        S().borrar(s.id);
+        render();
+        UI.toast(s.nombre + ' quitado');
+      });
+    });
 
     /* Nada más entrar, si hay algo que contar y no está contado. Nadie va a
        tocar un botón para que le cuadren los números de su menú: o se hace
