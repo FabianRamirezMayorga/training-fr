@@ -4633,7 +4633,23 @@
               : 'Sin elegir')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
+
+        <!-- Estaban en Alimentación, debajo de la despensa, y no son de allí:
+             no se tocan al montar un menú. De estas horas dependen el cruce de
+             las fotos, los avisos de comer, el reparto de los suplementos y el
+             propio menú, así que su sitio es donde se pone lo que la app usa en
+             todas partes. -->
+        <button class="fila-plan" data-a="franjas" style="--fp:#f0a23c">
+          <span class="fp-ico">${raw(icon('reloj'))}</span>
+          <span class="grow"><span class="fp-tit">A qué hora comes</span>
+            <span class="fp-sub">${raw(Perfil.franjas().map(function (f) {
+              return esc(f.label.toLowerCase()) + ' ' + esc(UI.hora ? UI.hora(f.desde) : f.desde);
+            }).join(' · '))}</span></span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
       </div>
+      <p class="tiny" style="margin:8px 0 0">De ahí salen los avisos de comer, con qué
+      comida se cruza la foto de un plato y a qué hora te toca cada suplemento.</p>
 
       <div class="list-title">Cómo registras las series</div>
       <div class="opciones">
@@ -5013,6 +5029,9 @@
   viewAjustes.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=lugar2]', lugarSheet);
+    bind(root, '[data-a=franjas]', function () {
+      if (g.VISTAS && VISTAS.franjasSheet) VISTAS.franjasSheet();
+    });
     bind(root, '[data-a=claves]', function () { go('claves'); });
     bind(root, '[data-a=ircuenta]', function () { go('cuenta'); });
 

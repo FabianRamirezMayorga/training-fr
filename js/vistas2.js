@@ -182,19 +182,12 @@
         <textarea id="nu-ordenes" rows="3" placeholder="Ej. nada de pescado; la cena siempre ligera; el desayuno que se prepare en cinco minutos; los domingos cocino para toda la semana">${p.ordenesComida || ''}</textarea>
       </div>
 
-      <div class="list-title">Mis horas de comer</div>
-      <div class="plan-acciones" style="margin:10px 0 0">
-        <button class="fila-plan" data-a="franjas" style="--fp:#f0a23c">
-          <span class="fp-ico">${raw(icon('reloj'))}</span>
-          <span class="grow"><span class="fp-tit">A qué hora comes cada cosa</span>
-            <span class="fp-sub">${raw(Perfil.franjas().map(function (f) {
-              return esc(f.label.toLowerCase()) + ' ' + esc(UI.hora ? UI.hora(f.desde) : f.desde);
-            }).join(' · '))}</span></span>
-          <span class="chevron">${raw(icon('chevron'))}</span>
-        </button>
-      </div>
-      <p class="tiny" style="margin:8px 0 0">Con esto, cuando le hagas una foto a un plato
-      la app sabe con qué comida del menú cruzarlo.</p>
+      <!-- Las horas de comer se fueron a Perfil › Ajustes. Aquí estaban
+           enterradas debajo de la despensa y las órdenes al entrenador, y no son
+           de esta pantalla: no se tocan al montar un menú, se ponen una vez y
+           las usan el cruce de las fotos, las alertas de comer, el reparto de
+           los suplementos y el propio menú. Un dato del que depende media app
+           no vive dentro de una de sus pantallas. -->
 
       <div class="row between" style="margin-top:20px;align-items:center">
         <span class="list-title" style="margin:0">Mis menús</span>
@@ -970,7 +963,6 @@
     };
 
     bind(root, '[data-a=generar]', function () { nuevoMenuSheet(); });
-    bind(root, '[data-a=franjas]', franjasSheet);
     bind(root, '[data-a=regenerar]', function () {
       rehacerMenu(menuALaVista());
     });
@@ -1001,6 +993,9 @@
      la siguiente. Pidiendo las dos puntas se puede dejar un hueco entre la una
      y las dos —y entonces una foto de la una y media no es de ninguna comida—
      o solaparlas, y entonces es de dos. */
+  /* Se llama desde Ajustes, que vive en otro archivo, así que sale del módulo.
+     La hoja es la misma: cambiarla en dos sitios acabaría con dos que no dicen
+     lo mismo. */
   function franjasSheet() {
     const actuales = Perfil.franjas();
 
@@ -2986,4 +2981,5 @@
   g.Reproductor = {
     html: reproductorHTML, montar: montarReproductor, barra: pintarBarraMusica
   };
+  V.franjasSheet = franjasSheet;
 })(window);
