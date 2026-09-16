@@ -646,6 +646,63 @@
     'Permite los avisos': 'Allow notifications',
     'Sin permiso solo verás los recordatorios dentro de la app. El sistema te lo va a preguntar una vez.':
       'Without permission you will only see reminders inside the app. The system will ask you once.',
-    'Activar los avisos': 'Turn on notifications'
+    'Activar los avisos': 'Turn on notifications',
+
+    /* ---------- Alimentación ---------- */
+    'Necesito tu peso, altura, edad y sexo para calcular tus calorías.':
+      'I need your weight, height, age and sex to work out your calories.',
+    'Completar mis datos': 'Fill in my details',
+    'Calculado a partir de tus datos con la fórmula de Mifflin-St Jeor. Es una orientación, no una pauta médica.':
+      'Worked out from your data with the Mifflin-St Jeor formula. It is a guide, not medical advice.',
+    'Mis números': 'My numbers',
+    'Gasto diario estimado': 'Estimated daily burn',
+    'Objetivo': 'Goal',
+    'Agua al día': 'Water a day',
+    'Comidas al día': 'Meals a day',
+    'Con qué cocino': 'What I cook with',
+    'Un menú con ingredientes que no tienes —o que ni conoces— no lo sigue nadie. Dime con qué sueles cocinar y el menú sale de ahí.':
+      'Nobody follows a meal plan full of ingredients they don’t have — or have never heard of. Tell me what you usually cook with and the plan comes from that.',
+    'LO QUE SUELES TENER O COMPRAR': 'WHAT YOU USUALLY HAVE OR BUY',
+    'Ej. arroz, pasta, lentejas, huevos, pollo, atún en lata, yogur griego, plátano, avena, aceite de oliva, tomate, cebolla, pan integral':
+      'e.g. rice, pasta, lentils, eggs, chicken, tinned tuna, Greek yoghurt, banana, oats, olive oil, tomato, onion, wholemeal bread',
+    'Ponlo a tu manera, separado por comas. Si para cuadrar tus números hiciera falta algo que no esté aquí, te lo dirá aparte en vez de colártelo en un plato.':
+      'Write it however you like, separated by commas. If something not on this list is needed to make your numbers work, it will tell you separately instead of slipping it into a dish.',
+    '¿LE PIDES ALGO CONCRETO AL ENTRENADOR?': 'ANYTHING SPECIFIC TO ASK YOUR COACH?',
+    'Lo de arriba es con qué cuentas; esto son órdenes. Manda sobre lo demás, menos sobre tus alergias y tus condiciones de salud.':
+      'Above is what you have; this is instructions. It overrides everything else except your allergies and health conditions.',
+    'Ej. nada de pescado; la cena siempre ligera; el desayuno que se prepare en cinco minutos; los domingos cocino para toda la semana':
+      'e.g. no fish; dinner always light; breakfast ready in five minutes; on Sundays I cook for the whole week',
+    'Mis menús': 'My meal plans',
+    'Nuevo': 'New',
+    'Un menú semanal que cuadre con tus calorías, tu dieta, lo que no puedes comer y lo que tienes en casa. Lo prepara el entrenador con IA, o se hace uno genérico con tus números si prefieres poner tú los platos. Puedes guardar los que quieras —el de la semana fuerte, el de cuando viajas— y marcar cuál manda.':
+      'A weekly plan that fits your calories, your diet, what you can’t eat and what you have at home. The AI coach builds it, or a generic one is made from your numbers if you would rather pick the dishes yourself. You can save as many as you like — the heavy week, the travelling one — and mark which one counts.',
+    'Crear mi primer menú': 'Create my first meal plan',
+    'Tu objetivo del día': "Today's target",
+    '{n}% de las kcal': '{n}% of kcal',
+    'Hidratos': 'Carbs',
+    'Grasa': 'Fat',
+    'de {n} kcal': 'of {n} kcal',
+    'de {n} g': 'of {n} g',
+    'Te quedan <b>{n}</b> kcal': '<b>{n}</b> kcal to go',
+    'Objetivo de calorías cubierto': 'Calorie target met',
+    'Te faltan <b>{n} g de proteína</b> para llegar al objetivo del día.':
+      "You're <b>{n} g of protein</b> short of today's target.",
+    'Foto de lo que comes': 'Photo of what you eat',
+    'Apuntar a mano': 'Log by hand',
+    'La foto se encoge en el móvil, se manda para que la IA la lea y se suelta: no se guarda ni aquí ni en ningún sitio. Solo quedan el nombre del plato y los números.':
+      'The photo is shrunk on your phone, sent for the AI to read and then dropped: it is not stored here or anywhere. Only the dish name and the numbers stay.',
+    'Media de {n} día apuntado': 'Average over {n} logged day',
+    'Media de {n} días apuntados': 'Average over {n} logged days',
+    'Sin nada apuntado': 'Nothing logged',
+    '{n} día llegaste a los {g} g de proteína. La raya es tu objetivo de calorías.':
+      'On {n} day you hit {g} g of protein. The line is your calorie target.',
+    '{n} días llegaste a los {g} g de proteína. La raya es tu objetivo de calorías.':
+      'On {n} days you hit {g} g of protein. The line is your calorie target.',
+    'Apunta lo que comes y aquí verás la semana entera de un vistazo.':
+      'Log what you eat and you will see the whole week at a glance here.',
+    'Proteína cubierta': 'Protein met',
+    'Cerca': 'Close',
+    'Corto': 'Short',
+    'Lo que comiste esta semana': 'What you ate this week'
   };
 })(window);

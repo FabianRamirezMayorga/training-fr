@@ -98,14 +98,14 @@
     const media = conAlgo ? Math.round(sumaKcal / conAlgo) : 0;
 
     return html`
-      <div class="list-title">Lo que comiste esta semana</div>
+      <div class="list-title">${T('Lo que comiste esta semana')}</div>
       <div class="card tarjeta-premium">
         <div class="pre-encima">${raw(conAlgo
-          ? 'Media de ' + conAlgo + (conAlgo === 1 ? ' día apuntado' : ' días apuntados')
-          : 'Sin nada apuntado')}</div>
+          ? esc(Tp(conAlgo, 'Media de {n} día apuntado', 'Media de {n} días apuntados'))
+          : esc(T('Sin nada apuntado')))}</div>
         <div class="pre-num" style="margin:1px 0 13px">${raw(conAlgo
-          ? UI.num(media) + ' <span class="tiny" style="font-weight:600">de ' +
-            UI.num(m.kcal) + ' kcal</span>'
+          ? UI.num(media) + ' <span class="tiny" style="font-weight:600">' +
+            esc(Tn('de {n} kcal', { n: UI.num(m.kcal) })) + '</span>'
           : '—')}</div>
 
         <div class="sc-semana">
@@ -114,14 +114,15 @@
         </div>
 
         <p class="tiny sc-pie">${raw(conAlgo
-          ? diasProte + (diasProte === 1 ? ' día' : ' días') + ' llegaste a los ' +
-            m.prot + ' g de proteína. La raya es tu objetivo de calorías.'
-          : 'Apunta lo que comes y aquí verás la semana entera de un vistazo.')}</p>
+          ? esc(Tp(diasProte, '{n} día llegaste a los {g} g de proteína. La raya es tu objetivo de calorías.',
+                   '{n} días llegaste a los {g} g de proteína. La raya es tu objetivo de calorías.')
+              .split('{g}').join(String(m.prot)))
+          : esc(T('Apunta lo que comes y aquí verás la semana entera de un vistazo.')))}</p>
 
         <div class="sc-leyenda">
-          <span><i class="bien"></i> Proteína cubierta</span>
-          <span><i class="flojo"></i> Cerca</span>
-          <span><i class="poco"></i> Corto</span>
+          <span><i class="bien"></i> ${T('Proteína cubierta')}</span>
+          <span><i class="flojo"></i> ${T('Cerca')}</span>
+          <span><i class="poco"></i> ${T('Corto')}</span>
         </div>
       </div>`;
   }
@@ -132,10 +133,10 @@
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
           ${raw(icon('back'))} ${T('Perfil')}</button>
-        <h1>Alimentación</h1>
+        <h1>${T('Alimentación')}</h1>
         <div class="empty">${raw(icon('nutricion'))}
-          <p>Necesito tu peso, altura, edad y sexo para calcular tus calorías.</p>
-          <button class="btn primary" data-a="datos">Completar mis datos</button>
+          <p>${T('Necesito tu peso, altura, edad y sexo para calcular tus calorías.')}</p>
+          <button class="btn primary" data-a="datos">${T('Completar mis datos')}</button>
         </div>`;
     }
 
@@ -146,40 +147,33 @@
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Perfil')}</button>
-      <h1>Alimentación</h1>
-      <p class="muted">Calculado a partir de tus datos con la fórmula de Mifflin-St Jeor.
-      Es una orientación, no una pauta médica.</p>
+      <h1>${T('Alimentación')}</h1>
+      <p class="muted">${T('Calculado a partir de tus datos con la fórmula de Mifflin-St Jeor. Es una orientación, no una pauta médica.')}</p>
 
       ${raw(numerosHTML(m))}
       ${raw(comidasHoyHTML(m))}
       ${raw(semanaComidaHTML(m))}
 
-      <div class="list-title">Mis números</div>
+      <div class="list-title">${T('Mis números')}</div>
       <div class="card tarjeta-premium campos">
-        ${raw(filaSimple('Gasto diario estimado', UI.num(Math.round(Perfil.tdee(p))) + ' kcal'))}
-        ${raw(filaSimple('Objetivo', (Perfil.OBJETIVO[p.objetivo] || {}).label))}
-        ${raw(filaSimple('Agua al día', Perfil.agua(p) + ' L'))}
-        ${raw(filaSimple('Comidas al día', String(p.comidas)))}
+        ${raw(filaSimple(T('Gasto diario estimado'), UI.num(Math.round(Perfil.tdee(p))) + ' kcal'))}
+        ${raw(filaSimple(T('Objetivo'), T((Perfil.OBJETIVO[p.objetivo] || {}).label)))}
+        ${raw(filaSimple(T('Agua al día'), Perfil.agua(p) + ' L'))}
+        ${raw(filaSimple(T('Comidas al día'), String(p.comidas)))}
       </div>
 
-      <div class="list-title">Con qué cocino</div>
+      <div class="list-title">${T('Con qué cocino')}</div>
       <div class="card tarjeta-premium">
-        <p class="muted" style="margin:0 0 10px;font-size:.88rem">Un menú con ingredientes
-        que no tienes —o que ni conoces— no lo sigue nadie. Dime con qué sueles cocinar y
-        el menú sale de ahí.</p>
+        <p class="muted" style="margin:0 0 10px;font-size:.88rem">${T('Un menú con ingredientes que no tienes —o que ni conoces— no lo sigue nadie. Dime con qué sueles cocinar y el menú sale de ahí.')}</p>
 
-        <label class="tiny">LO QUE SUELES TENER O COMPRAR</label>
-        <textarea id="nu-despensa" rows="4" placeholder="Ej. arroz, pasta, lentejas, huevos, pollo, atún en lata, yogur griego, plátano, avena, aceite de oliva, tomate, cebolla, pan integral">${p.despensa || ''}</textarea>
-        <p class="tiny" style="margin:6px 0 0">Ponlo a tu manera, separado por comas. Si
-        para cuadrar tus números hiciera falta algo que no esté aquí, te lo dirá aparte
-        en vez de colártelo en un plato.</p>
+        <label class="tiny">${T('LO QUE SUELES TENER O COMPRAR')}</label>
+        <textarea id="nu-despensa" rows="4" placeholder="${T('Ej. arroz, pasta, lentejas, huevos, pollo, atún en lata, yogur griego, plátano, avena, aceite de oliva, tomate, cebolla, pan integral')}">${p.despensa || ''}</textarea>
+        <p class="tiny" style="margin:6px 0 0">${T('Ponlo a tu manera, separado por comas. Si para cuadrar tus números hiciera falta algo que no esté aquí, te lo dirá aparte en vez de colártelo en un plato.')}</p>
 
         <div class="hr"></div>
-        <label class="tiny">¿LE PIDES ALGO CONCRETO AL ENTRENADOR?</label>
-        <div class="tiny" style="margin:2px 0 6px">Lo de arriba es con qué cuentas; esto
-        son órdenes. Manda sobre lo demás, menos sobre tus alergias y tus condiciones
-        de salud.</div>
-        <textarea id="nu-ordenes" rows="3" placeholder="Ej. nada de pescado; la cena siempre ligera; el desayuno que se prepare en cinco minutos; los domingos cocino para toda la semana">${p.ordenesComida || ''}</textarea>
+        <label class="tiny">${T('¿LE PIDES ALGO CONCRETO AL ENTRENADOR?')}</label>
+        <div class="tiny" style="margin:2px 0 6px">${T('Lo de arriba es con qué cuentas; esto son órdenes. Manda sobre lo demás, menos sobre tus alergias y tus condiciones de salud.')}</div>
+        <textarea id="nu-ordenes" rows="3" placeholder="${T('Ej. nada de pescado; la cena siempre ligera; el desayuno que se prepare en cinco minutos; los domingos cocino para toda la semana')}">${p.ordenesComida || ''}</textarea>
       </div>
 
       <!-- Las horas de comer se fueron a Perfil › Ajustes. Aquí estaban
@@ -190,14 +184,14 @@
            no vive dentro de una de sus pantallas. -->
 
       <div class="row between" style="margin-top:20px;align-items:center">
-        <span class="list-title" style="margin:0">Mis menús</span>
+        <span class="list-title" style="margin:0">${T('Mis menús')}</span>
         <!-- Siempre el mismo botón, con IA o sin ella: desde que se puede crear
              un menú genérico, mandar a configurar el entrenador era negarle a
              quien no lo tiene la única forma que sí podía usar. La hoja ya
              ofrece las dos, y la de IA lleva a configurarla si hace falta. -->
         ${raw(menus.length
           ? '<button class="btn primary sm btn-arranque" data-a="generar">' +
-            icon('plus') + ' Nuevo</button>'
+            icon('plus') + ' ' + esc(T('Nuevo')) + '</button>'
           : '')}
       </div>
 
@@ -205,13 +199,9 @@
         ? menus.map(function (x, i) { return menuCaja(x, i, x.id === activo, p); }).join('')
         : html`
         <div class="card tarjeta-premium">
-          <p class="muted" style="margin:0 0 12px;font-size:.9rem">Un menú semanal que
-          cuadre con tus calorías, tu dieta, lo que no puedes comer y lo que tienes en casa.
-          Lo prepara el entrenador con IA, o se hace uno genérico con tus números si
-          prefieres poner tú los platos. Puedes guardar los que quieras —el de la semana
-          fuerte, el de cuando viajas— y marcar cuál manda.</p>
+          <p class="muted" style="margin:0 0 12px;font-size:.9rem">${T('Un menú semanal que cuadre con tus calorías, tu dieta, lo que no puedes comer y lo que tienes en casa. Lo prepara el entrenador con IA, o se hace uno genérico con tus números si prefieres poner tú los platos. Puedes guardar los que quieras —el de la semana fuerte, el de cuando viajas— y marcar cuál manda.')}</p>
           <button class="btn primary block btn-arranque" data-a="generar">
-            ${raw(icon('plus'))} Crear mi primer menú</button>
+            ${raw(icon('plus'))} ${T('Crear mi primer menú')}</button>
         </div>`)}
 
       ${raw(menus.length > 1 ? html`
@@ -234,13 +224,13 @@
       return '<div class="nu-macro" style="--mc:' + color + '">' +
         '<span class="nm-cif">' + gramos + '<i>g</i></span>' +
         '<span class="nm-nom">' + esc(nombre) + '</span>' +
-        '<span class="nm-pct">' + porciento + '% de las kcal</span>' +
+        '<span class="nm-pct">' + esc(Tn('{n}% de las kcal', { n: porciento })) + '</span>' +
         '</div>';
     };
 
     return html`
       <div class="card tarjeta-premium nu-objetivo">
-        <div class="pre-encima">Tu objetivo del día</div>
+        <div class="pre-encima">${T('Tu objetivo del día')}</div>
         <div class="nu-kcal"><b>${UI.num(m.kcal)}</b><span>kcal</span></div>
 
         <div class="macro-bar nu-bar">
@@ -250,9 +240,9 @@
         </div>
 
         <div class="nu-macros">
-          ${raw(macro('var(--brand-1)', m.prot, 'Proteína', pct(m.prot, 4)))}
-          ${raw(macro('var(--acc)', m.carbo, 'Hidratos', pct(m.carbo, 4)))}
-          ${raw(macro('var(--warn)', m.grasa, 'Grasa', pct(m.grasa, 9)))}
+          ${raw(macro('var(--brand-1)', m.prot, T('Proteína'), pct(m.prot, 4)))}
+          ${raw(macro('var(--acc)', m.carbo, T('Hidratos'), pct(m.carbo, 4)))}
+          ${raw(macro('var(--warn)', m.grasa, T('Grasa'), pct(m.grasa, 9)))}
         </div>
       </div>`;
   }
@@ -402,39 +392,40 @@
     const faltaKcal = Math.max(0, m.kcal - h.kcal);
 
     return html`
-      <div class="list-title">Hoy</div>
+      <div class="list-title">${T('Hoy')}</div>
       <div class="card tarjeta-premium nu-hoy">
         <div class="nu-hoy-cab">
           ${raw(aroKcal(h.kcal, m.kcal))}
           <div class="grow" style="min-width:0">
-            <div class="nu-grande">${UI.num(h.kcal)}<i>de ${UI.num(m.kcal)} kcal</i></div>
+            <div class="nu-grande">${UI.num(h.kcal)}<i>${Tn('de {n} kcal',
+              { n: UI.num(m.kcal) })}</i></div>
             <div class="nu-falta">${raw(faltaKcal > 0
-              ? 'Te quedan <b>' + UI.num(faltaKcal) + '</b> kcal'
-              : 'Objetivo de calorías cubierto')}</div>
+              ? Tn('Te quedan <b>{n}</b> kcal', { n: UI.num(faltaKcal) })
+              : esc(T('Objetivo de calorías cubierto')))}</div>
           </div>
         </div>
 
         <div class="nu-linea">
           <span class="nl-nom"><i class="dot" style="background:var(--brand-1)"></i>
-            Proteína</span>
-          <span class="nl-cif">${h.prot}<i> de ${m.prot} g</i></span>
+            ${T('Proteína')}</span>
+          <span class="nl-cif">${h.prot}<i> ${Tn('de {n} g', { n: m.prot })}</i></span>
         </div>
         ${raw(barra(pp, 'var(--brand-1)'))}
 
         <p class="tiny" style="margin:10px 0 0">${raw(faltaProt > 0
-          ? 'Te faltan <b>' + faltaProt + ' g de proteína</b> para llegar al objetivo del día.'
-          : 'Proteína del día cubierta.')}</p>
+          ? Tn('Te faltan <b>{n} g de proteína</b> para llegar al objetivo del día.',
+              { n: faltaProt })
+          : esc(T('Proteína del día cubierta.')))}</p>
 
         <div class="row" style="margin-top:13px;gap:9px">
           <label class="btn primary grow btn-arranque" for="foto-comida" style="cursor:pointer">
-            ${raw(icon('camara'))} Foto de lo que comes</label>
+            ${raw(icon('camara'))} ${T('Foto de lo que comes')}</label>
           <button class="btn icon-vidrio" data-a="comidaMano"
-                  aria-label="Apuntar a mano" title="Apuntar a mano">${raw(icon('plus'))}</button>
+                  aria-label="${T('Apuntar a mano')}"
+                  title="${T('Apuntar a mano')}">${raw(icon('plus'))}</button>
         </div>
         <input type="file" id="foto-comida" accept="image/*" capture="environment" hidden>
-        <p class="tiny" style="margin:9px 0 0">La foto se encoge en el móvil, se manda para
-        que la IA la lea y se suelta: no se guarda ni aquí ni en ningún sitio. Solo quedan
-        el nombre del plato y los números.</p>
+        <p class="tiny" style="margin:9px 0 0">${T('La foto se encoge en el móvil, se manda para que la IA la lea y se suelta: no se guarda ni aquí ni en ningún sitio. Solo quedan el nombre del plato y los números.')}</p>
       </div>
 
       <div id="comida-pensando"></div>
