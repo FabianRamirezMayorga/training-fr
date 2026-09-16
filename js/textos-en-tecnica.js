@@ -866,7 +866,487 @@
     'Es trabajo de potencia: pocas repeticiones y buen descanso.':
       'This is power work: few reps and plenty of rest.',
     'La calidad se pierde en cuanto llega el cansancio. Series cortas y descanso generoso.':
-      'Quality goes the moment fatigue arrives. Short sets and generous rest.'
+      'Quality goes the moment fatigue arrives. Short sets and generous rest.',
+
+    /* ---------- calistenia: las lineas compuestas y el empuje ---------- */
+    'Progresión: {familia} · escalón {n}.':
+      'Progression: {familia} · step {n}.',
+    'Progresión: {familia}.':
+      'Progression: {familia}.',
+    'Antes de empezar con este: {que}':
+      'Before you start on this one: {que}',
+    'Beneficios: {que}':
+      'Benefits: {que}',
+    'Vertical: hacia el pino':
+      'Vertical: towards the handstand',
+    '10 flexiones normales seguidas y limpias.':
+      '10 clean standard push-ups in a row.',
+    'De pie, manos y pies en el suelo formando una uve invertida con la cadera bien alta. Baja la coronilla hacia el suelo entre las manos doblando los codos, y empuja. Cuanto más vertical pongas el torso, más peso llevan los hombros y menos el pecho.':
+      'From standing, hands and feet on the floor forming an inverted V with your hips high. Lower the crown of your head towards the floor between your hands by bending your elbows, then press. The more vertical your torso, the more weight your shoulders take and the less your chest does.',
+    '3 series de 10 flexiones en pica.':
+      '3 sets of 10 pike push-ups.',
+    'La misma flexión en pica pero con los pies subidos a un cajón, un sofá o unas escaleras. Al elevar los pies el torso se acerca a la vertical y el hombro carga más peso. Es el escalón entre la pica y el pino.':
+      'The same pike push-up but with your feet up on a box, a sofa or some stairs. Raising your feet brings your torso closer to vertical and loads the shoulder more. It is the step between the pike and the handstand.',
+    'Hombros sin dolor y muñecas calentadas.':
+      'Pain-free shoulders and warmed-up wrists.',
+    'Boca abajo, manos a un palmo de la pared y los pies apoyados en ella, el cuerpo recto. Aguanta. Lo que se entrena aquí no es fuerza, es tolerancia del hombro y de la muñeca a estar bajo el peso del cuerpo.':
+      'Facing the wall, hands a hand’s width from it and feet up on it, body straight. Hold. What you train here is not strength, it is your shoulders’ and wrists’ tolerance to carrying your bodyweight.',
+    'Un minuto de pino contra la pared, cómodo.':
+      'A comfortable minute of wall handstand.',
+    'El pino sin pared. El equilibrio se corrige con los dedos y la muñeca, no con la cadera: se aprieta con las yemas para no caer hacia delante y se suelta para no caer hacia atrás.':
+      'The handstand without the wall. Balance is corrected with your fingers and wrists, not your hips: press with your fingertips to stop yourself falling forward and release to stop yourself falling back.',
+    'Pino contra la pared 45 s y flexión en pica elevada con soltura.':
+      '45 s wall handstand and elevated pike push-ups done comfortably.',
+    'En pino contra la pared, baja la cabeza hasta rozar el suelo y sube. Es el press militar de la calistenia: todo el peso del cuerpo por encima de la cabeza.':
+      'In a wall handstand, lower your head until it grazes the floor and press back up. It is calisthenics’ overhead press: your whole bodyweight above your head.',
+    'Planche':
+      'Planche',
+    'Aguantar un minuto en posición de flexión sin que se caiga la cadera.':
+      'Holding a minute in the top push-up position without your hips dropping.',
+    'En posición de flexión con los brazos rectos, lleva los hombros por delante de las manos inclinando todo el cuerpo hacia delante, sin doblar los codos. Cuanto más adelante, más peso sobre el hombro. Es el ejercicio que construye el planche y el que más lo acerca.':
+      'In the top push-up position with straight arms, bring your shoulders in front of your hands by leaning your whole body forward, without bending your elbows. The further forward, the more weight on the shoulder. It is the exercise that builds the planche and gets you closest to it.',
+    '30 s de planche lean con los hombros bien por delante de las manos.':
+      '30 s of planche lean with your shoulders well in front of your hands.',
+    'Brazos rectos, rodillas pegadas al pecho y los pies despegados del suelo: todo el cuerpo hecho una bola sostenida solo por las manos. El primer escalón en el que de verdad no tocas el suelo con nada más.':
+      'Straight arms, knees tucked to your chest and feet off the floor: your whole body a ball held up by your hands alone. The first step where nothing else really touches the ground.',
+    '20 s de planche agrupado.':
+      '20 s of tuck planche.',
+    'Como el agrupado, pero con la espalda plana y los muslos en línea con el torso, solo las rodillas dobladas. Alargar la palanca es lo que sube la dificultad, y aquí es donde la mayoría se atasca un año.':
+      'Like the tuck, but with a flat back and your thighs in line with your torso, only your knees bent. Lengthening the lever is what raises the difficulty, and this is where most people get stuck for a year.',
+    '15 s de planche agrupado avanzado.':
+      '15 s of advanced tuck planche.',
+    'Piernas rectas y muy abiertas, cuerpo paralelo al suelo, sostenido solo con las manos. Abrir las piernas acerca el peso a las manos y por eso va antes que el completo.':
+      'Legs straight and wide apart, body parallel to the floor, held up by your hands alone. Splitting the legs brings the weight closer to your hands, which is why it comes before the full version.',
+    '10 s de planche en straddle.':
+      '10 s of straddle planche.',
+    'El cuerpo entero recto y paralelo al suelo sobre las manos. Son años de trabajo, no meses, y el hombro y el bíceps distal se lo toman en serio: aquí las prisas se pagan con una lesión larga.':
+      'Your whole body straight and parallel to the floor on your hands. This is years of work, not months, and your shoulder and distal biceps take it seriously: rushing here is paid for with a long injury.',
+    'Aguantar el escalón de planche que trabajes, y hacerlo con solvencia.':
+      'Holding whichever planche step you are working on, and holding it well.',
+    'La flexión hecha desde la posición de planche, sin que los pies toquen el suelo. Se hace en el escalón que domines: hay flexión planche agrupada, en straddle y completa.':
+      'The push-up done from the planche position, with your feet never touching the floor. You do it at whichever step you have mastered: there is a tuck, a straddle and a full planche push-up.',
+    'Hacia la flexión a una mano':
+      'Towards the one-arm push-up',
+    '20 flexiones normales seguidas.':
+      '20 standard push-ups in a row.',
+    'Manos muy separadas. Bajas cargando el peso sobre un brazo, que se dobla, mientras el otro se queda estirado como el arco de un arquero. Reparte el peso sin llegar a ser a una mano.':
+      'Hands set wide apart. You lower by loading the weight onto one arm, which bends, while the other stays straight like an archer’s bow. It shares the load without being a true one-arm push-up.',
+    '8 flexiones arqueras por lado.':
+      '8 archer push-ups a side.',
+    'Una mano en el suelo, la otra a la espalda, pies separados para no volcar. Se llega por pasos: primero con la mano libre elevada en un cajón alto, luego más bajo, y por último sin nada.':
+      'One hand on the floor, the other behind your back, feet wide so you do not tip over. You get there in steps: first with your free hand raised on a high box, then a lower one, and finally on nothing.',
+    'Base de tracción':
+      'Pulling base',
+    'Dominada escapular con soltura.':
+      'Scapular pull-ups done comfortably.',
+    'Te colocas arriba con un salto o un cajón, barbilla por encima de la barra, y bajas lo más lento que puedas hasta quedar colgado. La bajada fabrica casi toda la fuerza que hace falta para la primera dominada.':
+      'Get yourself to the top with a jump or a box, chin over the bar, and lower as slowly as you can until you are hanging. The descent builds nearly all the strength the first pull-up needs.',
+    'Hacia la dominada a un brazo':
+      'Towards the one-arm pull-up',
+    '12 dominadas seguidas y limpias.':
+      '12 clean pull-ups in a row.',
+    'Agarre ancho. Subes tirando de un lado mientras el otro brazo se queda estirado. Es el paso natural hacia la dominada a un brazo porque enseña a tirar en desequilibrio.':
+      'Wide grip. You pull up on one side while the other arm stays straight. It is the natural step towards the one-arm pull-up because it teaches you to pull off balance.',
+    '6 dominadas arqueras por lado.':
+      '6 archer pull-ups a side.',
+    'Subes al centro y, arriba, te desplazas de una mano a la otra manteniendo la barbilla a la altura de la barra, como el carro de una máquina de escribir. Suma tiempo bajo tensión en la parte alta, que es la que más cuesta.':
+      'You pull up in the middle and, at the top, travel from one hand to the other keeping your chin at bar height, like a typewriter carriage. It adds time under tension at the top, which is the hardest part.',
+    'Dominadas typewriter con control.':
+      'Typewriter pull-ups under control.',
+    'Una mano en la barra y la otra agarrando tu propia muñeca, una toalla colgada o una goma. Se va bajando la ayuda: de la muñeca al antebrazo, del antebrazo a dos dedos, de dos dedos a nada.':
+      'One hand on the bar and the other gripping your own wrist, a hanging towel or a band. You reduce the help step by step: from the wrist to the forearm, from the forearm to two fingers, from two fingers to nothing.',
+    'Dominada asistida con un solo dedo de ayuda.':
+      'Assisted pull-up with a single finger of help.',
+    'Subir la barbilla por encima de la barra con un solo brazo. De las cosas más duras que se pueden hacer con el propio peso, y muy dependiente de lo que peses.':
+      'Getting your chin over the bar with one arm. One of the hardest things you can do with your own bodyweight, and very dependent on what you weigh.',
+    'Hacia el muscle-up':
+      'Towards the muscle-up',
+    '10 dominadas estrictas.':
+      '10 strict pull-ups.',
+    'Una dominada tirando tan fuerte como puedas para que el pecho —y luego el ombligo— llegue a la barra. Es lo que construye la altura que el muscle-up necesita para pasar por encima.':
+      'A pull-up where you pull as hard as you can so your chest — and then your navel — reaches the bar. It is what builds the height the muscle-up needs to get over.',
+
+    /* ---------- calistenia: muscle-up, palancas y core ---------- */
+    'Dominada explosiva al ombligo.':
+      'Explosive pull-up to the navel.',
+    'El muscle-up se cae casi siempre en el paso de tirar a empujar. Se ensaya suelto: con una banda, desde un salto o partiendo de una barra baja, repitiendo solo ese trozo del movimiento.':
+      'The muscle-up nearly always falls apart at the switch from pulling to pushing. You drill it on its own: with a band, from a jump or off a low bar, repeating just that piece of the movement.',
+    'La transición ensayada con banda.':
+      'The transition drilled with a band.',
+    'Empiezas arriba, en apoyo sobre la barra con los brazos rectos, y deshaces el movimiento despacio hasta quedar colgado. Enseña el camino exacto que tiene que hacer el cuerpo.':
+      'You start at the top, supported over the bar with straight arms, and undo the movement slowly until you are hanging. It teaches the exact path your body has to take.',
+    'Front lever':
+      'Front lever',
+    '8 dominadas estrictas y colgarte con los hombros activos.':
+      '8 strict pull-ups and an active-shoulder hang.',
+    'Colgado de la barra con los brazos rectos, te agrupas y llevas la espalda hasta quedar horizontal, boca arriba, con las rodillas en el pecho. El primer escalón de la palanca frontal.':
+      'Hanging from the bar with straight arms, you tuck up and bring your back round until you are horizontal, face up, knees to your chest. The first step of the front lever.',
+    '20 s de front lever agrupado.':
+      '20 s of tuck front lever.',
+    'El mismo agrupado pero abriendo la cadera hasta que muslos y torso formen una línea, con las rodillas todavía dobladas. La palanca se alarga y el dorsal pasa a trabajar de verdad.':
+      'The same tuck but opening your hips until your thighs and torso are in line, knees still bent. The lever lengthens and the lat starts genuinely working.',
+    '15 s de front lever agrupado avanzado.':
+      '15 s of advanced tuck front lever.',
+    'Piernas rectas y abiertas, cuerpo horizontal colgado de la barra. Abrir las piernas acorta la palanca, y por eso va antes que el completo.':
+      'Legs straight and split, body horizontal hanging from the bar. Splitting the legs shortens the lever, which is why it comes before the full version.',
+    '10 s de front lever en straddle.':
+      '10 s of straddle front lever.',
+    'El cuerpo entero recto y horizontal, colgado de la barra con los brazos rectos, boca arriba. La postura insignia de la calistenia de tracción.':
+      'Your whole body straight and horizontal, hanging from the bar with straight arms, face up. The signature hold of pulling calisthenics.',
+    'Aguantar 10 s el escalón que trabajes.':
+      'Holding whichever step you are working on for 10 s.',
+    'Desde la posición de front lever —en el escalón que domines— tiras del cuerpo hacia la barra manteniendo la horizontal. Es el ejercicio que más fuerza de tracción da de toda la calistenia.':
+      'From the front lever position — at whichever step you have mastered — you pull your body towards the bar while staying horizontal. It is the single biggest pulling-strength builder in all of calisthenics.',
+    'Back lever':
+      'Back lever',
+    'Saber darte la vuelta colgado (skin the cat) sin forzar el hombro.':
+      'Being able to turn yourself over while hanging (skin the cat) without straining your shoulder.',
+    'Pasas por dentro de los brazos hasta quedar boca abajo, agrupado, con el cuerpo horizontal y los brazos rectos por detrás. Es la palanca que más abre el hombro y el bíceps.':
+      'You pass through your arms until you are face down, tucked, body horizontal and arms straight behind you. It is the lever that opens the shoulder and biceps the most.',
+    '20 s de back lever agrupado.':
+      '20 s of tuck back lever.',
+    'Boca abajo, horizontal, piernas rectas y abiertas. Igual que en el front lever, abrir acorta la palanca.':
+      'Face down, horizontal, legs straight and split. As with the front lever, splitting shortens the lever.',
+    '15 s de back lever en straddle.':
+      '15 s of straddle back lever.',
+    'Cuerpo recto y horizontal, boca abajo, brazos rectos por detrás. Pide bastante movilidad de hombro además de fuerza.':
+      'Body straight and horizontal, face down, arms straight behind you. It asks for a fair amount of shoulder mobility as well as strength.',
+    'Colgarte 30 s y no tener molestias de hombro.':
+      'A 30 s hang with no shoulder trouble.',
+    'Colgado, subes las piernas y pasas por dentro de los brazos hasta quedar estirado boca abajo, y vuelves. Es el ejercicio que prepara el hombro para todo lo que va por detrás: back lever, anillas, invertidos.':
+      'Hanging, you bring your legs up and pass through your arms until you are stretched out face down, then come back. It is the exercise that prepares your shoulder for everything that goes behind you: back lever, rings, inversions.',
+    'Base de core':
+      'Core base',
+    'Ninguno. Este es el punto de partida de todo lo demás.':
+      'None. This is the starting point for everything else.',
+    'Tumbado boca arriba, lumbar pegada al suelo, y levantas piernas y hombros hasta quedar con forma de plátano. No hay postura de calistenia que no dependa de saber hacer esto.':
+      'Lying face up, lower back pressed into the floor, you lift your legs and shoulders until you are banana-shaped. There is no calisthenics hold that does not depend on being able to do this.',
+    '40 s de hollow body.':
+      '40 s of hollow body.',
+    'La misma posición hueca, meciéndote adelante y atrás como una mecedora, sin romper la forma. Enseña a mantener la tensión mientras el cuerpo se mueve, que es lo que pasa en cualquier palanca.':
+      'The same hollow position, rocking back and forth like a rocking chair, without breaking the shape. It teaches you to hold tension while your body moves, which is what happens in any lever.',
+    'L-sit':
+      'L-sit',
+    '30 s de hollow body.':
+      '30 s of hollow body.',
+    'Sentado en el suelo o sobre dos apoyos, manos al lado de la cadera, brazos rectos, te elevas con las rodillas dobladas al pecho y los pies en el aire.':
+      'Sitting on the floor or on two supports, hands beside your hips, arms straight, you lift yourself with your knees tucked to your chest and your feet in the air.',
+    '20 s de L-sit agrupado.':
+      '20 s of tuck L-sit.',
+    'Igual que el agrupado pero estirando una pierna, alternando. Medio escalón que evita el salto brusco al L-sit completo.':
+      'The same as the tuck but extending one leg, alternating. A half step that avoids the sharp jump to the full L-sit.',
+    '15 s de L-sit a una pierna por lado.':
+      '15 s of one-leg L-sit a side.',
+    'Las dos piernas rectas y paralelas al suelo, el cuerpo sostenido solo con las manos, formando una L. Fuerza de abdomen, sí, pero sobre todo isquiotibiales flexibles y hombros fuertes.':
+      'Both legs straight and parallel to the floor, body held up by your hands alone, forming an L. Abdominal strength, yes, but above all flexible hamstrings and strong shoulders.',
+    '30 s de L-sit.':
+      '30 s of L-sit.',
+    'Desde el L-sit, subes las piernas rectas por encima de la cadera hasta formar una uve. Pide compresión, que es una cualidad que se entrena aparte.':
+      'From the L-sit, you raise your straight legs above your hips to form a V. It asks for compression, which is a quality you train separately.',
+    'Dragon flag':
+      'Dragon flag',
+    '45 s de hollow body.':
+      '45 s of hollow body.',
+
+    /* ---------- calistenia: dragon flag, bandera, pierna y apoyos ---------- */
+    'Tumbado, agarrado a algo firme detrás de la cabeza, subes el cuerpo recto apoyado solo en los omóplatos y lo bajas lo más lento posible sin doblar la cadera.':
+      'Lying down, holding something solid behind your head, you raise your body straight up supported only on your shoulder blades and lower it as slowly as you can without bending at the hips.',
+    '5 negativas de 5 s.':
+      '5 negatives of 5 s.',
+    'La dragon flag con las rodillas dobladas, subiendo y bajando con control. Palanca corta para poder hacer repeticiones de verdad.':
+      'The dragon flag with bent knees, up and down under control. A short lever so you can do real reps.',
+    '8 dragon flags agrupadas.':
+      '8 tuck dragon flags.',
+    'Cuerpo recto de arriba abajo apoyado solo en los omóplatos, subiendo y bajando con control. Una de las cosas más duras que se le pueden pedir al abdomen.':
+      'Body straight from top to bottom supported only on your shoulder blades, up and down under control. One of the hardest things you can ask of your abs.',
+    'Core colgado':
+      'Hanging core',
+    '10 elevaciones de piernas a la barra.':
+      '10 toes-to-bar leg raises.',
+    'Colgado con las piernas rectas arriba, junto a la barra, las llevas de lado a lado como un limpiaparabrisas. Oblicuos y agarre a la vez.':
+      'Hanging with your straight legs up beside the bar, you sweep them side to side like a windscreen wiper. Obliques and grip at the same time.',
+    'Bandera humana':
+      'Human flag',
+    'Hombros sanos y una barra o poste vertical firme.':
+      'Healthy shoulders and a solid vertical bar or pole.',
+    'Agarras el poste con una mano alta y otra baja y te cuelgas en vertical, con el cuerpo pegado, aprendiendo a repartir: la de arriba tira, la de abajo empuja. Es el gesto que hay que automatizar antes de intentar nada horizontal.':
+      'You grip the pole with one hand high and one low and hang vertically with your body against it, learning the split: the top hand pulls, the bottom hand pushes. It is the pattern to make automatic before attempting anything horizontal.',
+    'Apoyo vertical cómodo y 20 s de plancha lateral.':
+      'A comfortable vertical support and 20 s of side plank.',
+    'Con las rodillas agrupadas al pecho, despegas el cuerpo del poste hasta quedar de lado en el aire. Aquí la bandera empieza a ser bandera.':
+      'With your knees tucked to your chest, you take your body off the pole until you are sideways in the air. This is where the flag starts being a flag.',
+    '10 s de bandera agrupada.':
+      '10 s of tuck flag.',
+    'Piernas rectas y abiertas, cuerpo horizontal sostenido de lado en el poste.':
+      'Legs straight and split, body horizontal held sideways on the pole.',
+    '8 s de bandera en straddle.':
+      '8 s of straddle flag.',
+    'El cuerpo entero recto y horizontal, de lado, agarrado a un poste vertical. La postura más reconocible de la calistenia de calle.':
+      'Your whole body straight and horizontal, sideways, holding a vertical pole. The most recognisable hold in street calisthenics.',
+    'Hacia la pistol':
+      'Towards the pistol squat',
+    '20 sentadillas con tu propio peso.':
+      '20 bodyweight squats.',
+    'A una pierna, bajas hasta sentarte en un cajón o una silla y te levantas sin ayuda, con la otra pierna estirada delante. Bajando la altura del asiento se va ganando recorrido.':
+      'On one leg, you lower until you sit on a box or a chair and stand back up unaided, with the other leg out in front. Lowering the seat height gains you range.',
+    '8 sentadillas a una pierna a cajón bajo.':
+      '8 single-leg squats to a low box.',
+    'De pie, agarras el empeine de un pie por detrás y bajas hasta que la rodilla toque el suelo, y subes. Pide menos flexibilidad de tobillo que la pistol, por eso suele salir antes.':
+      'Standing, you grab the top of one foot behind you and lower until that knee touches the floor, then stand up. It asks for less ankle flexibility than the pistol, which is why it usually comes first.',
+    '6 shrimp squats por pierna.':
+      '6 shrimp squats a leg.',
+    'La pistol agarrándote a un marco de puerta o a una anilla, usando el brazo solo para equilibrarte. Va bajando la ayuda hasta que sea un dedo.':
+      'The pistol while holding a door frame or a ring, using your arm only for balance. You reduce the help until it is one finger.',
+    'Pistol asistida con un dedo.':
+      'Pistol assisted with one finger.',
+    'Bajar hasta abajo del todo sobre una pierna, con la otra estirada delante sin tocar el suelo, y subir. Fuerza, equilibrio y movilidad de tobillo a la vez.':
+      'Going all the way down on one leg, with the other out in front never touching the floor, and standing back up. Strength, balance and ankle mobility all at once.',
+    'Pierna sin material':
+      'Legs with no equipment',
+    'Alguien que te sujete los tobillos, o algo firme donde meterlos.':
+      'Someone to hold your ankles, or something solid to hook them under.',
+    'De rodillas con los tobillos sujetos, dejas caer el cuerpo recto hacia delante aguantando con los isquiotibiales y vuelves. Lo más duro que existe para isquios sin material, y de lo mejor para prevenir roturas.':
+      'Kneeling with your ankles held, you let your body fall straight forward, resisting with your hamstrings, and come back. The hardest hamstring exercise there is without equipment, and one of the best for preventing tears.',
+    'Ninguno.':
+      'None.',
+    'A una pierna, en el borde de un escalón, bajas el talón todo lo que dé y subes hasta la punta. Sin material, el gemelo solo crece a una pierna: con las dos, el propio peso se queda corto enseguida.':
+      'On one leg, on the edge of a step, you drop your heel as far as it goes and rise onto your toes. With no equipment the calf only grows one leg at a time: on two, your own bodyweight runs out of challenge fast.',
+    'Base de apoyo':
+      'Support base',
+    'Sostenerte en unas paralelas con los brazos rectos y bloqueados, cuerpo recto. Es el primer paso antes de cualquier fondo, y el que enseña al hombro a aguantar el peso desde arriba.':
+      'Holding yourself on parallel bars with your arms straight and locked, body upright. It is the first step before any dip, and the one that teaches your shoulder to carry weight from above.',
+    'Ninguno. Esto es el escalón cero de todo lo que se hace en barra.':
+      'None. This is step zero for everything done on a bar.',
+    'Colgarse de la barra con los brazos rectos y aguantar. Construye el agarre, que es lo que se acaba antes en casi todo lo de tracción, y descomprime el hombro.':
+      'Hanging from the bar with straight arms and holding. It builds grip, which is what runs out first in nearly all pulling work, and decompresses the shoulder.',
+    '20 s colgado.':
+      '20 s of hanging.',
+    'Colgado con los brazos rectos, subes el cuerpo un palmo bajando los hombros, sin doblar los codos en ningún momento. Es el recorrido que casi nadie hace y el que falta cuando la dominada se atasca.':
+      'Hanging with straight arms, you lift your body a hand’s width by pulling your shoulders down, never bending your elbows. It is the range almost nobody trains and the one that is missing when a pull-up stalls.',
+    'La cadera alta todo el rato: en cuanto se cae, esto se convierte en una flexión.':
+      'Hips high throughout: the moment they drop, this becomes a push-up.',
+    'Los codos hacia delante y algo abiertos, no pegados al cuerpo.':
+      'Elbows forward and slightly out, not tucked to your body.',
+    'La coronilla toca por delante de las manos, no entre ellas.':
+      'The crown of your head touches in front of your hands, not between them.',
+
+    /* ---------- calistenia: las claves (1) ---------- */
+    'Sube la altura poco a poco: cada palmo es bastante más difícil.':
+      'Raise the height gradually: every hand’s width is a good deal harder.',
+    'Si la espalda baja se arquea, has subido demasiado.':
+      'If your lower back arches, you have gone too high.',
+    'Empuja el suelo lejos: hombros a la altura de las orejas, no hundidos.':
+      'Push the floor away: shoulders up by your ears, not sunk.',
+    'Costillas metidas y glúteo apretado, que la espalda no se arquee.':
+      'Ribs tucked and glutes squeezed, so your back does not arch.',
+    'Empieza por aguantes de 20 s y sube hasta el minuto.':
+      'Start with 20 s holds and work up to a minute.',
+    'Ten una salida ensayada antes: rueda de lado o da un paso, no caigas de espaldas.':
+      'Have a bail-out rehearsed first: roll to the side or step out, do not fall on your back.',
+    'Mira al suelo entre las manos, no hacia delante.':
+      'Look at the floor between your hands, not ahead of you.',
+    'Es coordinación, así que va mejor muchos intentos cortos que pocos largos.':
+      'It is coordination, so many short attempts beat a few long ones.',
+    'Manos, cabeza y suelo forman un triángulo: la cabeza cae por delante, no en línea.':
+      'Hands, head and floor form a triangle: your head goes in front, not in line.',
+    'Baja controlado; la parte que fabrica fuerza es la bajada.':
+      'Lower under control; the part that builds strength is the descent.',
+    'Si no sale entera, empieza por bajadas lentas y sube con los pies.':
+      'If you cannot do the whole thing, start with slow descents and come up using your feet.',
+    'Las manos giradas hacia fuera o hacia atrás, que la muñeca lo agradece.':
+      'Hands turned out or back, which your wrists will thank you for.',
+    'Escápulas separadas y hacia abajo, nunca juntas.':
+      'Shoulder blades spread and down, never pulled together.',
+    'Mide con los pies: cuanto más lejos quedan los hombros de las manos, más avanzas.':
+      'Measure it with your feet: the further your shoulders are past your hands, the further you have come.',
+    'Brazos completamente rectos: si el codo se dobla, ya no es planche.':
+      'Arms completely straight: if the elbow bends, it is no longer a planche.',
+    'Empuja el suelo y redondea la espalda alta.':
+      'Push the floor away and round your upper back.',
+    'La cadera a la altura de los hombros, no más baja.':
+      'Hips level with your shoulders, no lower.',
+    'La espalda deja de estar redondeada: costillas metidas y cadera abierta.':
+      'The back stops being rounded: ribs tucked and hips open.',
+    'Si la cadera se hunde, vuelve al agrupado normal unas semanas.':
+      'If your hips drop, go back to the plain tuck for a few weeks.',
+    'Cuanto más abras, más fácil: se cierra poco a poco con los meses.':
+      'The wider you split, the easier it is: you close it up over the months.',
+    'Glúteo y cuádriceps apretados; las piernas no cuelgan.':
+      'Glutes and quads squeezed; your legs do not dangle.',
+    'Antes de entrar, codos y muñecas bien calentados; el tendón del codo es el que avisa.':
+      'Before you get into it, warm your elbows and wrists properly; the elbow tendon is the one that complains.',
+    'Mejor aguantes de 3-5 s muy limpios que uno de 10 doblando los brazos.':
+      'Better very clean 3–5 s holds than one of 10 with your arms bending.',
+    'El cuerpo no se mueve hacia atrás al bajar: el hombro se queda por delante.':
+      'Your body does not travel back as you lower: your shoulder stays in front.',
+    'Recorrido corto al principio; ya se irá ganando.':
+      'A short range at first; you will gain it.',
+    'El brazo estirado ayuda lo justo: cuanto menos empuje, mejor.':
+      'The straight arm helps only as much as it has to: the less it pushes, the better.',
+    'La cadera mirando al suelo, sin girar el torso para hacer trampa.':
+      'Hips facing the floor, without twisting your torso to cheat.',
+    'Los pies anchos: es lo que evita que el cuerpo gire.':
+      'Feet wide: that is what stops your body twisting.',
+    'Aprieta el glúteo y el abdominal como si fueras a recibir un puñetazo.':
+      'Squeeze your glutes and abs as if you were about to take a punch.',
+    'Baja lento; a una mano, el hombro no perdona un rebote.':
+      'Lower slowly; one-armed, your shoulder will not forgive a bounce.',
+    'Apunta a 5 segundos de bajada; si bajas en dos, usa el cajón para arrancar más alto.':
+      'Aim for a 5-second descent; if you drop in two, use the box to start higher.',
+    'Hombros abajo y atrás desde el principio, no encogidos.':
+      'Shoulders down and back from the start, not shrugged.',
+    '3 series de 4 bajadas, tres veces por semana, y llega sola.':
+      '3 sets of 4 descents, three times a week, and it arrives on its own.',
+    'El brazo estirado no se dobla: si se dobla, es una dominada normal desplazada.':
+      'The straight arm does not bend: if it bends, it is just an off-centre pull-up.',
+    'La barbilla va a la mano que trabaja, no al centro.':
+      'Your chin goes to the working hand, not to the middle.',
+    'La barbilla no baja mientras te desplazas.':
+      'Your chin does not drop while you travel across.',
+    'Ve despacio: el valor está en el recorrido, no en el número.':
+      'Go slowly: the value is in the range, not the number.',
+    'La ayuda tiene que ser medible, para saber si progresas.':
+      'The assistance has to be measurable, so you know whether you are progressing.',
+    'El hombro que trabaja, abajo y atrás antes de tirar: si se encoge, se resiente.':
+      'The working shoulder goes down and back before you pull: if it shrugs, it suffers.',
+    'El cuerpo gira solo: se compensa apretando el abdominal y el glúteo del lado libre.':
+      'Your body twists by itself: you counter it by squeezing the abs and glute on the free side.',
+    'El codo y el bíceps son los que sufren; calienta de verdad antes.':
+      'The elbow and biceps are what take the strain; warm up properly first.',
+    'Tira del pecho a la barra, no de la barbilla.':
+      'Pull your chest to the bar, not your chin.',
+    'Sin balanceo: si la haces con impulso, no estás ganando nada.':
+      'No swinging: if you do it with momentum, you are gaining nothing.',
+    'Las muñecas giran por encima de la barra: es un giro, no un tirón más fuerte.':
+      'Your wrists turn over the bar: it is a rotation, not a harder pull.',
+    'Mete el pecho por delante en cuanto pases; quedarte debajo te devuelve abajo.':
+      'Get your chest forward as soon as you are over; staying underneath sends you straight back down.',
+    'Cuanto más lento bajes la transición, antes sale la subida.':
+      'The slower you lower the transition, the sooner the way up appears.',
+    'Fíjate en dónde se te van los codos: ahí es donde se rompe la subida.':
+      'Watch where your elbows go: that is where the ascent breaks down.',
+    'Brazos rectos y escápulas deprimidas: el tirón sale del dorsal, no del codo.':
+      'Straight arms and depressed shoulder blades: the pull comes from the lat, not the elbow.',
+    'La espalda paralela al suelo; si la cadera queda más baja, aún no estás en la posición.':
+      'Back parallel to the floor; if your hips sit lower, you are not in the position yet.',
+    'Aguantes de 10-15 s.':
+      'Holds of 10–15 s.',
+    'La espalda baja plana: si se arquea, has abierto más de lo que aguantas.':
+      'Lower back flat: if it arches, you have opened up further than you can hold.',
+    'Costillas metidas, como si quisieras juntarlas con la pelvis.':
+      'Ribs tucked, as if trying to bring them down to your pelvis.',
+    'Abre todo lo que puedas al principio y ve cerrando con los meses.':
+      'Split as wide as you can at first and close it up over the months.',
+    'Punta de pie estirada y glúteo apretado: si las piernas cuelgan, pesan más.':
+      'Toes pointed and glutes squeezed: dangling legs weigh more.',
+
+    /* ---------- calistenia: las claves (2) ---------- */
+    'Todo el cuerpo en una línea: hombros, cadera y talones.':
+      'Your whole body in one line: shoulders, hips and heels.',
+    'Cuenta solo el tiempo en el que estás horizontal de verdad.':
+      'Count only the time you are genuinely horizontal.',
+    'El cuerpo sube paralelo al suelo, sin que la cadera se hunda.':
+      'Your body rises parallel to the floor, without your hips dropping.',
+    'Hazlo en el escalón anterior al que aguantas: en agrupado si tu aguante es el avanzado.':
+      'Do it one step below the one you can hold: in the tuck if your hold is the advanced tuck.',
+    'Los hombros y el bíceps se estiran mucho: entra despacio la primera vez.':
+      'Your shoulders and biceps get a big stretch: go in slowly the first time.',
+    'Mejor agarre prono para proteger el codo.':
+      'An overhand grip is better for protecting the elbow.',
+    'Mirada al suelo y cuerpo en línea, sin arquear la lumbar.':
+      'Eyes on the floor and body in line, without arching your lower back.',
+    'Si notas tirón en la parte interna del codo, sal: es la lesión típica de esta postura.':
+      'If you feel a pull on the inside of your elbow, come out: that is this hold’s classic injury.',
+    'Empieza con poco recorrido y ve ganando rango semana a semana.':
+      'Start with a small range and gain more week by week.',
+    'Hazlo lento en los dos sentidos; la vuelta es tan importante como la ida.':
+      'Go slowly in both directions; coming back matters as much as going out.',
+    'La lumbar NO se despega del suelo: si se despega, sube más las piernas.':
+      'Your lower back does NOT leave the floor: if it does, raise your legs higher.',
+    'Si aguantas un minuto, baja las piernas en vez de alargar el tiempo.':
+      'If you can hold a minute, lower your legs rather than adding time.',
+    'El balanceo sale de los hombros, no de doblar la cadera.':
+      'The rocking comes from your shoulders, not from bending at the hips.',
+    'Si el cuerpo se «rompe» por la mitad, vuelve al aguante.':
+      'If your body “breaks” in the middle, go back to the static hold.',
+    'Hombros abajo, lejos de las orejas: es lo que permite subir la cadera.':
+      'Shoulders down, away from your ears: that is what lets your hips rise.',
+    'Si no despegas, usa dos libros o unas paralelas bajas.':
+      'If you cannot lift off, use two books or low parallettes.',
+    'La pierna estirada, a la altura de la cadera y con el cuádriceps apretado.':
+      'The straight leg at hip height with the quad squeezed.',
+    'Si no llegas, casi siempre son los isquios y no el abdomen: estíralos.':
+      'If you cannot get there it is nearly always your hamstrings and not your abs: stretch them.',
+    'Codos bloqueados y escápulas hacia abajo.':
+      'Elbows locked and shoulder blades down.',
+    'Entrena la compresión sentado en el suelo, levantando las piernas rectas con las manos apoyadas.':
+      'Train compression sitting on the floor, lifting your straight legs with your hands down.',
+    'Solo los omóplatos tocan: ni la lumbar, ni el glúteo.':
+      'Only your shoulder blades touch: not your lower back, not your glutes.',
+    'El cuerpo baja recto como una tabla; si se dobla por la cadera, es otro ejercicio.':
+      'Your body lowers straight as a plank; if it bends at the hips, it is a different exercise.',
+    'Sube y baja sin apoyar la espalda entre repeticiones.':
+      'Go up and down without resting your back between reps.',
+    'Glúteo apretado: es lo que impide que la cadera se rompa por la mitad.':
+      'Glutes squeezed: that is what stops your body folding at the hips.',
+    'Mejor 3 repeticiones perfectas que 8 dobladas.':
+      'Better 3 perfect reps than 8 folded ones.',
+    'Las piernas no bajan mientras cruzas.':
+      'Your legs do not drop as you sweep across.',
+    'Aguanta un segundo en cada lado en vez de dejarte caer.':
+      'Hold for a second on each side rather than letting yourself swing through.',
+    'La mano de abajo EMPUJA, no tira: ahí se decide la bandera entera.':
+      'The bottom hand PUSHES, it does not pull: the whole flag is decided there.',
+    'Los brazos rectos los dos.':
+      'Both arms straight.',
+    'Sal desde arriba, dejándote caer poco a poco, no desde abajo subiendo.':
+      'Enter from the top, lowering yourself gradually, not from the bottom coming up.',
+    'Cadera y hombros en el mismo plano; si te giras boca abajo, es más fácil pero no es bandera.':
+      'Hips and shoulders in the same plane; rolling face down makes it easier but it is not a flag.',
+    'La pierna de arriba tira hacia el techo; es lo que sostiene la horizontal.':
+      'The top leg pulls towards the ceiling; that is what holds you horizontal.',
+    'Cuerpo en una línea de las manos a los pies.':
+      'Body in one line from hands to feet.',
+    'Un poste que no se mueva: esto se prueba una vez en algo que aguante.':
+      'A pole that does not move: you test this once on something that will hold.',
+    'La rodilla apuntando a la punta del pie, sin irse hacia dentro.':
+      'Knee tracking over your toes, without caving in.',
+    'Baja el asiento un par de dedos cada vez que te salgan 8 repeticiones.':
+      'Drop the seat a couple of fingers every time you get 8 reps.',
+    'El torso recto; inclinarte convierte esto en otra cosa.':
+      'Torso upright; leaning turns this into something else.',
+    'Pon una toalla bajo la rodilla las primeras semanas.':
+      'Put a towel under your knee for the first few weeks.',
+    'El brazo equilibra, no tira. Si tiras, no estás progresando.':
+      'The arm balances, it does not pull. If you pull, you are not progressing.',
+    'Si el talón se despega, el problema es el tobillo: estira gemelo y sóleo.':
+      'If your heel lifts, the problem is your ankle: stretch your calf and soleus.',
+    'El talón pegado al suelo todo el recorrido.':
+      'Heel down on the floor through the whole range.',
+    'Los brazos delante hacen de contrapeso.':
+      'Your arms out in front act as a counterweight.',
+    'El cuerpo cae recto desde la rodilla: sin doblar la cadera.':
+      'Your body falls straight from the knee: no bending at the hips.',
+    'Al principio frena solo el primer tramo y empuja con las manos para volver.':
+      'At first only resist the first stretch and push back with your hands.',
+    'Recorrido completo: abajo del todo, arriba del todo.':
+      'Full range: all the way down, all the way up.',
+    'Un segundo arriba en cada repetición.':
+      'A second at the top on every rep.',
+    'Hombros abajo, lejos de las orejas.':
+      'Shoulders down, away from your ears.',
+    'Codos bloqueados del todo.':
+      'Elbows completely locked.',
+    'Aguantes de 30 s hasta llegar al minuto.':
+      '30 s holds, working up to a minute.',
+    'Primero colgado suelto, después activo: bajando los hombros sin doblar los codos.':
+      'First a dead hang, then an active one: pulling your shoulders down without bending your elbows.',
+    'Si buscas agarre, suma tiempo total del día; no hace falta que sea seguido.':
+      'If you are after grip, add up the total time in a day; it does not have to be in one go.',
+    'Codos rectos de principio a fin: si se doblan, es una dominada corta.':
+      'Elbows straight from start to finish: if they bend, it is a short pull-up.',
+    'El movimiento es pequeño, de unos centímetros. Está bien así.':
+      'The movement is small, a few centimetres. That is how it should be.'
   };
 
   /* Se fusiona con lo que ya haya, sin pisar nada: si una frase estuviera en dos

@@ -845,16 +845,29 @@ const FIGURAS = {
   /* Al catálogo. Lo de siempre —id, músculos, material— más lo propio de la
      calistenia, que es de dónde vienes y qué necesitas para estar aquí: eso va
      dentro de las instrucciones, porque es donde la app ya sabe enseñarlo. */
+  /* Se compone al leerlo, no al cargar el archivo: lleva el nombre de la
+     familia y el número de escalón dentro de la frase, y pegarlos con + deja
+     tres trozos que ningún diccionario puede casar. */
+  function pasosDe(e) {
+    const T = (g.Idioma && g.Idioma.T) || function (x) { return x; };
+    const Tn = (g.Idioma && g.Idioma.Tn) || function (x) { return x; };
+    const pasos = [];
+    if (e.familia) {
+      pasos.push(e.paso
+        ? Tn('Progresión: {familia} · escalón {n}.', { familia: T(e.familia), n: e.paso })
+        : Tn('Progresión: {familia}.', { familia: T(e.familia) }));
+    }
+    if (e.requisito) {
+      pasos.push(Tn('Antes de empezar con este: {que}', { que: T(e.requisito) }));
+    }
+    pasos.push(T(e.desc));
+    (e.claves || []).forEach(function (c) { pasos.push(T(c)); });
+    return pasos;
+  }
+
   function crudos() {
     return EJERCICIOS.map(function (e) {
-      const pasos = [];
-      if (e.familia) {
-        pasos.push('Progresión: ' + e.familia +
-          (e.paso ? ' · escalón ' + e.paso : '') + '.');
-      }
-      if (e.requisito) pasos.push('Antes de empezar con este: ' + e.requisito);
-      pasos.push(e.desc);
-      (e.claves || []).forEach(function (c) { pasos.push(c); });
+      const pasos = pasosDe(e);
 
       return {
         id: e.id,
@@ -877,6 +890,7 @@ const FIGURAS = {
           return m;
         }).filter(function (m, i, a) { return a.indexOf(m) === i; }),
         instructions: pasos,
+        _pasos: function () { return pasosDe(e); },
         /* Los fotogramas salen dibujados, no de una foto: entran por el mismo
            sitio que las del catálogo y el reproductor de siempre los anima. */
         /* La ilustracion de verdad manda sobre el dibujo. El muñeco se queda

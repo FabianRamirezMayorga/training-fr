@@ -141,16 +141,18 @@
 
     return '<div class="mapa-musculos">' +
       '<div class="mapa-figuras">' +
-      figura('f', principales, secundarios, 'Vista de frente') +
-      figura('d', principales, secundarios, 'Vista de espaldas') +
+      figura('f', principales, secundarios, T('Vista de frente')) +
+      figura('d', principales, secundarios, T('Vista de espaldas')) +
       '</div>' +
       '<div class="mapa-lista">' +
       (nombres.length ? '<div class="mapa-grupo"><span class="punto pri"></span>' +
         '<div><b>' + UI.esc(nombres.join(', ')) + '</b>' +
-        '<div class="tiny">Es lo que mueve el ejercicio</div></div></div>' : '') +
+        '<div class="tiny">' + UI.esc(T('Es lo que mueve el ejercicio')) +
+        '</div></div></div>' : '') +
       (otros.length ? '<div class="mapa-grupo"><span class="punto sec"></span>' +
         '<div><b>' + UI.esc(otros.join(', ')) + '</b>' +
-        '<div class="tiny">Ayudan, pero no son el objetivo</div></div></div>' : '') +
+        '<div class="tiny">' + UI.esc(T('Ayudan, pero no son el objetivo')) +
+        '</div></div></div>' : '') +
       '</div></div>';
   }
 
@@ -159,7 +161,7 @@
      vista bien elegida —la espalda de espaldas, el resto de frente— se entiende
      igual de qué zona se habla. */
   function una(musculos, vista) {
-    return figura(vista || 'f', musculos || [], [], 'Zona del cuerpo');
+    return figura(vista || 'f', musculos || [], [], T('Zona del cuerpo'));
   }
 
   g.Musculos = { mapa: mapa, siluetas: siluetas, una: una, PIEZAS: PIEZAS };

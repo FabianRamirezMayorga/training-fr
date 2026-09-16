@@ -296,6 +296,16 @@
     yoga_warrior_two: 'es_warrior_two'
   };
 
+  /* La descripción y los beneficios vienen de Yoga API y están EN INGLÉS: no
+     pasan por el diccionario, porque su idioma de origen ya es el de destino.
+     Con la app en español los traduce el entrenador, como el resto del catálogo
+     de fuera. Lo único que se traduce aquí es el rótulo. */
+  function pasosDe(p) {
+    const Tn = (g.Idioma && g.Idioma.Tn) || function (x) { return x; };
+    return [p.desc, p.bien ? Tn('Beneficios: {que}', { que: p.bien }) : '']
+      .filter(Boolean);
+  }
+
   function crudos() {
     return POSTURAS.map(function (p) {
       return {
@@ -308,7 +318,8 @@
         equipment: 'body only',
         primaryMuscles: p.primary ? [p.primary] : [],
         secondaryMuscles: p.secondary,
-        instructions: [p.desc, p.bien ? 'Beneficios: ' + p.bien : ''].filter(Boolean),
+        instructions: pasosDe(p),
+        _pasos: function () { return pasosDe(p); },
         foto: FOTOS[p.id] || null,
         category: 'yoga',
         images: [p.img]

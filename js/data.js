@@ -173,10 +173,14 @@
     return ex.images.map(rutaImagen);
   }
 
-  /* Texto normalizado sobre el que busca el usuario: inglés + español */
-  function haystack(ex) {
+  /* Texto normalizado sobre el que busca el usuario: ingles + espanol.
+     Los dos nombres van SIEMPRE, no el que toque ahora: esto se calcula una vez
+     al cargar y con la app en ingles se habria quedado sin los nombres en
+     espanol, asi que buscar «sentadilla» despues de cambiar de idioma no habria
+     encontrado nada. */
+  function haystack(ex, nombreEs) {
     const parts = [
-      ex.name, ex.nameEs, ex.equipment, I18N.equip(ex.equipment),
+      ex.name, nombreEs || ex.nameEs, ex.equipment, I18N.equip(ex.equipment),
       ex.category, I18N.category(ex.category), I18N.level(ex.level)
     ];
     (ex.primaryMuscles || []).concat(ex.secondaryMuscles || []).forEach(function (m) {
@@ -234,13 +238,27 @@
           return (g.Idioma && g.Idioma.actual() === 'en') ? ex.name : nombreEs;
         }
       });
+      /* Igual que el nombre: se elige al LEER. `_pasos` lo ponen calistenia
+         y yoga, que están escritos en español y componen sus líneas con un
+         número dentro; el resto se resuelve con lo que ya hay. */
+      const insEs = ex.instructions || [];
+      const insEn = ex.instruccionesEn || null;
+      Object.defineProperty(e, 'instructions', {
+        enumerable: true, configurable: true,
+        get: function () {
+          if (typeof ex._pasos === 'function') return ex._pasos();
+          if (insEn && g.Idioma && g.Idioma.actual() === 'en') return insEn;
+          return insEs;
+        }
+      });
+
       e._rank = rank(ex);
       e.groups = I18N.GROUPS
         .filter(function (gr) {
           return (ex.primaryMuscles || []).some(function (m) { return gr.muscles.indexOf(m) !== -1; });
         })
         .map(function (gr) { return gr.id; });
-      e._q = haystack(e);
+      e._q = haystack(e, nombreEs);
       return e;
     }).sort(function (a, b) {
       return a._rank - b._rank || a.nameEs.localeCompare(b.nameEs, 'es');
@@ -306,6 +324,10 @@
         const copia = Object.assign({}, e);
         copia.nameEs = mejor.nameEs;
         copia.images = mejor.images;
+        /* El texto en inglés era el original de este ejercicio y se pierde
+           al quedarse con el del catálogo español. Se guarda: con la app en
+           inglés es exactamente lo que hay que enseñar, y ya está escrito. */
+        copia.instruccionesEn = e.instructions;
         copia.instructions = mejor.instructions;
         copia.yaEnEspanol = true;
         return copia;
