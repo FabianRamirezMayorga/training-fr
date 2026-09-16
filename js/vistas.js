@@ -1061,21 +1061,37 @@
         avisarte sola si está cerrada, salvo pagando un servidor de notificaciones. La vía
         que sí funciona y no cuesta nada es llevarlos al calendario del móvil, que sí avisa
         siempre.</p>
-        ${raw(Alertas.calendarioDesfasado() ? html`
-          <div class="cal-viejo">
-            <span class="cv-ico">${raw(icon('aviso'))}</span>
-            <span class="grow"><b>Tu calendario está desfasado</b>
-            <span class="tiny">Has cambiado recordatorios desde la última descarga. El
-            calendario sigue avisando con lo de antes hasta que vuelvas a bajarlo.</span></span>
-          </div>` : '')}
+        ${raw((function () {
+          const caduca = Alertas.calendarioCaduca();
+          const viejo = Alertas.calendarioDesfasado();
+          if (!caduca && !viejo) return '';
+
+          /* Se acaba manda sobre ha cambiado: si los avisos van a dejar de
+             sonar, eso es lo urgente aunque además haya cambios. */
+          const tit = caduca
+            ? (caduca.caducado ? 'Tus avisos del calendario ya se acabaron'
+              : caduca.dias <= 1 ? 'Tus avisos del calendario se acaban hoy'
+                : 'Tus avisos del calendario se acaban en ' + caduca.dias + ' días')
+            : 'Tu calendario está desfasado';
+          const txt = caduca
+            ? 'Los generaste con un plazo y ese plazo termina. Vuelve a descargarlo y ' +
+              'siguen sonando desde donde estaban.'
+            : 'Has cambiado recordatorios desde la última descarga. El calendario sigue ' +
+              'avisando con lo de antes hasta que vuelvas a bajarlo.';
+
+          return '<div class="cal-viejo">' +
+            '<span class="cv-ico">' + icon('aviso') + '</span>' +
+            '<span class="grow"><b>' + esc(tit) + '</b>' +
+            '<span class="tiny">' + esc(txt) + '</span></span></div>';
+        })())}
 
         <button class="btn primary block" data-a="calendario" ${lista.length ? '' : 'disabled'}>
-          ${raw(icon('down'))} ${Alertas.calendarioDesfasado()
+          ${raw(icon('down'))} ${Alertas.calendarioDesfasado() || Alertas.calendarioCaduca()
             ? 'Volver a descargar' : 'Descargar para el calendario'}</button>
         <p class="tiny" style="margin-top:8px">Se crean como eventos semanales con aviso,
         llamados <b>«Training FR · …»</b>, y tocando uno se abre la app en la pantalla que
-        toca. Al volver a descargarlo, los que ya tengas se actualizan en vez de
-        duplicarse.</p>
+        toca. Antes de bajarlo eliges hasta cuándo quieres que suenen. Al volver a
+        descargarlo, los que ya tengas se actualizan en vez de duplicarse.</p>
 
         <!-- Lo que hace que esto sea administrable no es el archivo, es dónde
              se mete: en un calendario propio se apaga o se borra entero de un
@@ -1463,10 +1479,67 @@
       UI.toast(aviso);
     };
 
-    bind(root, '[data-a=calendario]', function () {
-      bajarICS(Alertas.ics(), '', 'Archivo descargado. Ábrelo para añadirlo al calendario.');
-      render();
-    });
+    /* ---------- hasta cuándo ----------
+       Se pregunta antes de bajarlo y no en una preferencia escondida: es una
+       decisión que solo tiene sentido en el momento de descargar, y que cambia
+       según para qué lo bajes. */
+    const plazoSheet = function () {
+      let elegido = Alertas.plazoActual().id;
+
+      const fin = function (id) {
+        const t = Alertas.finDe(id);
+        return t ? 'Hasta el ' + UI.fechaCorta(t) + ' de ' + new Date(t).getFullYear()
+          : 'Sin fecha de fin';
+      };
+
+      const opciones = function () {
+        return Alertas.PLAZOS.map(function (p) {
+          return '<button class="opcion ' + (elegido === p.id ? 'on' : '') +
+            '" data-plazo="' + esc(p.id) + '" style="--tono:var(--acc)">' +
+            '<span class="op-ico">' + icon(p.meses ? 'timer' : 'reloj') + '</span>' +
+            '<span class="grow"><span class="op-nom">' + esc(p.label) + '</span>' +
+            '<span class="op-sub">' + esc(p.sub) + ' · ' + esc(fin(p.id)) + '</span></span>' +
+            '<span class="op-marca">' + icon('check') + '</span></button>';
+        }).join('');
+      };
+
+      UI.modal(html`
+        <div class="conf-disco cambio">${raw(icon('timer'))}</div>
+        <h2 class="conf-tit">¿Hasta cuándo?</h2>
+        <p class="muted conf-txt">Los avisos se repiten cada semana. Dime hasta qué fecha
+        los quieres en el calendario; puedes volver a descargarlo cuando quieras para
+        estirarlos.</p>
+
+        <div class="opciones" id="pz-lista">${raw(opciones())}</div>
+
+        <div class="cb-acciones" style="margin-top:16px">
+          <button class="btn primary grow btn-arranque" data-x="ok">
+            ${raw(icon('down'))} Descargar</button>
+          <button class="btn vidrio" data-x="no">Cancelar</button>
+        </div>`,
+        function (el) {
+          /* El clic se escucha en la lista y no en cada botón: al repintarla
+             para mover la marca, los botones son otros y los manejadores que
+             tenían se van con los viejos. Enganchados uno a uno, la primera
+             elección quedaba clavada y las siguientes no hacían nada. */
+          const lista2 = el.querySelector('#pz-lista');
+          lista2.onclick = function (ev) {
+            const b = ev.target.closest('[data-plazo]');
+            if (!b) return;
+            elegido = b.dataset.plazo;
+            lista2.innerHTML = opciones();
+          };
+          el.querySelector('[data-x=no]').onclick = function () { UI.closeModal(); };
+          el.querySelector('[data-x=ok]').onclick = function () {
+            UI.closeModal();
+            bajarICS(Alertas.ics(elegido), '',
+              'Archivo descargado. Ábrelo para añadirlo al calendario.');
+            render();
+          };
+        });
+    };
+
+    bind(root, '[data-a=calendario]', plazoSheet);
 
     bind(root, '[data-a=quitarcal]', function () {
       UI.confirm('Quitarlos del calendario',

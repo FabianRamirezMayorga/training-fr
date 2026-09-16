@@ -464,6 +464,37 @@
 
   const FIN = String.fromCharCode(13, 10);
 
+  /* ---------- hasta cuándo ----------
+     Sin límite es lo cómodo hasta que dejas la app: entonces te quedan avisos
+     semanales para siempre en un calendario que ya no miras, y hay que ir a
+     quitarlos. Con un plazo corto se acaban solos, pero hay que renovarlos.
+
+     No hay una respuesta buena para todos, así que se pregunta. Lo que sí hace
+     la app es no dejar que se te pase la fecha sin avisar. */
+  const PLAZOS = [
+    { id: '1m', label: 'Un mes', meses: 1, sub: 'Para probar cómo queda' },
+    { id: '3m', label: 'Tres meses', meses: 3, sub: 'Un bloque de entrenamiento' },
+    { id: '6m', label: 'Seis meses', meses: 6, sub: 'Media temporada' },
+    { id: '1a', label: 'Un año', meses: 12, sub: 'Y renovar una vez al año' },
+    { id: 'siempre', label: 'Sin límite', meses: 0,
+      sub: 'Hasta que los quites tú. Ojo si dejas de usar la app' }
+  ];
+
+  function plazoDe(id) {
+    return PLAZOS.filter(function (x) { return x.id === id; })[0] || PLAZOS[2];
+  }
+
+  /* El final del plazo, contando desde hoy. Se corta al final del día para que
+     el último aviso de ese día sí suene. */
+  function finDe(id) {
+    const p = plazoDe(id);
+    if (!p.meses) return 0;
+    const d = new Date();
+    d.setMonth(d.getMonth() + p.meses);
+    d.setHours(23, 59, 59, 0);
+    return d.getTime();
+  }
+
   /* La misma cabecera para el archivo que los pone y el que los quita. El
      nombre va en X-WR-CALNAME: los calendarios que saben leerlo ofrecen meter
      todo esto en un calendario aparte, que es la única manera de poder
@@ -477,7 +508,20 @@
     ];
   }
 
-  function ics() {
+  function ics(plazoId) {
+    const plazo = plazoDe(plazoId || Store.settings().alertasPlazo || '6m');
+    const hasta = finDe(plazo.id);
+
+    /* El formato manda que UNTIL sea de la misma clase que DTSTART. Aquí las
+       fechas van en hora local y sin zona, así que el UNTIL también: con la Z
+       de UTC detrás, un cliente estricto lo rechaza y se queda sin repetir, o
+       corta el último día en el huso equivocado. */
+    const untilTxt = hasta ? ';UNTIL=' + (function (t) {
+      const d = new Date(t);
+      return d.getFullYear() + dosDigitos(d.getMonth() + 1) + dosDigitos(d.getDate()) +
+        'T' + dosDigitos(d.getHours()) + dosDigitos(d.getMinutes()) + '59';
+    })(hasta) : '';
+
     const NOMBRE_DIA = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
     const ahora = new Date();
     const sello = ahora.getUTCFullYear() + dosDigitos(ahora.getUTCMonth() + 1) +
@@ -527,7 +571,8 @@
           'DTSTAMP:' + sello,
           'DTSTART:' + fecha,
           'DURATION:PT15M',
-          'RRULE:FREQ=WEEKLY;BYDAY=' + a.dias.map(function (d) { return NOMBRE_DIA[d]; }).join(','),
+          'RRULE:FREQ=WEEKLY;BYDAY=' +
+            a.dias.map(function (d) { return NOMBRE_DIA[d]; }).join(',') + untilTxt,
           'SUMMARY:' + escaparICS(titulo),
           'DESCRIPTION:' + escaparICS(cuerpo),
           /* Para los calendarios de escritorio, que sí saben filtrar y buscar
@@ -557,6 +602,8 @@
     uids.forEach(function (u) { sabidos[u] = 1; });
     Store.setSetting('alertasExportadas', Object.keys(sabidos));
     Store.setSetting('alertasHuella', huella());
+    Store.setSetting('alertasPlazo', plazo.id);
+    Store.setSetting('alertasHasta', hasta);
 
     lineas.push('END:VCALENDAR');
     return lineas.map(plegar).join(FIN);
@@ -633,6 +680,23 @@
     return (Store.settings().alertasHuella || '') !== huella();
   }
 
+  /* ---------- ¿se están acabando? ----------
+     Un plazo que termina sin avisar es peor que no tener plazo: los avisos
+     dejan de sonar un martes cualquiera y uno tarda semanas en darse cuenta de
+     que lleva sin beber agua porque nadie se lo recuerda. Tres semanas de
+     margen dan tiempo de sobra a volver a bajarlo. */
+  function calendarioCaduca() {
+    const hasta = Number(Store.settings().alertasHasta) || 0;
+    if (!cuantosExportados() || !hasta) return null;
+    const dias = Math.ceil((hasta - Date.now()) / 864e5);
+    if (dias > 21) return null;
+    return { dias: dias, hasta: hasta, caducado: dias <= 0 };
+  }
+
+  function plazoActual() {
+    return plazoDe(Store.settings().alertasPlazo || '6m');
+  }
+
   function escaparICS(s) {
     return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;')
       .replace(/,/g, '\\,').replace(/\n/g, '\\n');
@@ -665,7 +729,8 @@
     soportado: soportado, permiso: permiso, pedirPermiso: pedirPermiso, avisar: avisar,
     pendientes: pendientes, arrancar: arrancar, parar: parar, marcarLanzada: marcarLanzada,
     ics: ics, icsCancelar: icsCancelar, cuantosExportados: cuantosExportados,
-    calendarioDesfasado: calendarioDesfasado,
+    calendarioDesfasado: calendarioDesfasado, calendarioCaduca: calendarioCaduca,
+    PLAZOS: PLAZOS, plazoActual: plazoActual, finDe: finDe,
     resumenDias: resumenDias, resumenHoras: resumenHoras,
     diagnostico: diagnostico, probar: probar,
     sugerencias: sugerencias, yaExiste: yaExiste, crearDesdeSugerencia: crearDesdeSugerencia,

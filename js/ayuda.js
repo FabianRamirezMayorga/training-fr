@@ -362,14 +362,16 @@
           d: 'En iPhone, Calendario › Calendarios › Añadir calendario. En Android, desde Google Calendar en el navegador: Configuración › Añadir otro calendario. Este paso es el que hace que luego puedas administrarlos: en un calendario propio los apagas, los escondes o los borras todos de una vez.' },
         { t: 'Entra en Perfil › Alertas y baja hasta *Que suenen con la app cerrada*.',
           ir: { ruta: 'alertas', label: 'Abrir Alertas' } },
-        { t: 'Toca *Descargar para el calendario*.',
-          d: 'Se baja un archivo .ics con un evento semanal por cada hora de cada recordatorio activo, con su aviso cinco minutos antes.' },
+        { t: 'Toca *Descargar para el calendario* y elige hasta cuándo.',
+          d: 'Un mes, tres, seis, un año o sin límite. Los avisos se repiten cada semana hasta esa fecha; te dice el día exacto en el que se acabarían. Con plazo se acaban solos el día que dejes de usar la app; sin límite no, y hay que quitarlos a mano.' },
+        { t: 'Se baja un archivo .ics.',
+          d: 'Lleva un evento semanal por cada hora de cada recordatorio activo, con su aviso cinco minutos antes.' },
         { t: 'Ábrelo y elige el calendario Training FR.',
           d: 'El móvil te pregunta a cuál añadirlos. Ahí es donde se decide si luego son fáciles de administrar o si quedan mezclados con el resto de tu agenda.' },
         { t: 'Compruébalo: se llaman *Training FR · algo*.',
           d: 'Ese prefijo va en todos, así que buscando «Training FR» en tu calendario salen todos aunque los hayas metido mezclados.' }
       ],
-      cierre: 'Si luego cambias horas o días, la pantalla de Alertas te avisa de que el calendario se quedó viejo y el botón pasa a decir «Volver a descargar». Los eventos que ya tienes se actualizan en vez de duplicarse, porque cada uno lleva su identificador.',
+      cierre: 'Si luego cambias horas o días, o si el plazo se está acabando, la pantalla de Alertas te avisa y el botón pasa a decir «Volver a descargar». Los eventos que ya tienes se actualizan en vez de duplicarse, porque cada uno lleva su identificador.',
       ver: ['c-quitarcal', 'p-calendario', 'p-calauto'] },
 
     { id: 'c-quitarcal', titulo: 'Quitar los recordatorios del calendario',
@@ -496,10 +498,16 @@
         'Y si los quieres quitar, no hace falta buscarlos: en Alertas hay un botón que descarga un archivo que los retira de golpe.'],
       ver: ['c-calendario', 'c-quitarcal'] },
 
+    { id: 'p-plazo', q: '¿Por cuánto tiempo se ponen los avisos en el calendario?',
+      a: ['Por el que tú elijas al descargarlo: un mes, tres, seis, un año o sin límite. La app te dice el día exacto en el que se acabarían con cada opción.',
+        'Con plazo, los avisos se apagan solos el día que dejes de usar la app, que es lo cómodo. Sin límite se repiten para siempre y hay que quitarlos a mano el día que sobren.',
+        'Cuando quedan tres semanas para que se acabe, la pantalla de Alertas te avisa y basta con volver a descargarlo: se estiran desde donde estaban, sin duplicar nada.'],
+      ver: ['c-calendario', 'p-calauto'] },
+
     { id: 'p-calauto', q: '¿El calendario se actualiza solo si cambio una alerta?',
       a: ['No. Lo que descargas es un archivo, y un archivo es una foto del momento: si mañana cambias la hora del agua, el calendario sigue avisando a la de antes hasta que lo vuelvas a bajar.',
         'Para que se actualizara solo haría falta una suscripción por URL, es decir, un servidor sirviendo esto todo el rato. Y aun así no valdría: los calendarios refrescan lo suscrito con mucha pereza —algunos una vez al día—, y un aviso que tarda un día en enterarse de que cambiaste la hora es peor que volver a bajar el archivo.',
-        'Lo que sí hace la app es no dejar que se te olvide: cuando lo que tienes en el calendario ya no coincide con tus recordatorios, la pantalla de Alertas te lo dice y el botón pasa a «Volver a descargar».',
+        'Lo que sí hace la app es no dejar que se te olvide: cuando lo que tienes en el calendario ya no coincide con tus recordatorios —o cuando el plazo que elegiste se está acabando—, la pantalla de Alertas te lo dice y el botón pasa a «Volver a descargar».',
         'Y volver a bajarlo es seguro: los eventos que ya tienes se actualizan en vez de duplicarse.'],
       ver: ['c-calendario', 'c-quitarcal'] },
 
