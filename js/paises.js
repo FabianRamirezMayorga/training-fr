@@ -69,6 +69,39 @@
     } catch (e) { return c; }
   }
 
+  /* ---------- el nombre, en el idioma de la app ----------
+     La lista de arriba está en español. En vez de escribirla otra vez en
+     inglés, se le pregunta al navegador: Intl.DisplayNames saca el nombre de
+     un país a partir de su ISO en el idioma que se le pida, y lo trae él, no
+     nosotros. Si no lo tiene —o si devuelve el propio código, que es lo que
+     hace cuando no conoce ese país— se usa el nombre escrito a mano.
+
+     Se guarda lo resuelto porque esto se llama una vez por país cada vez que
+     se pinta la lista, y son doscientos. */
+  const cache = {};
+  let cacheIdioma = null;
+
+  function nombreEnIdioma(iso, escrito) {
+    const id = (g.Idioma && g.Idioma.actual()) || 'es';
+    if (id === 'es') return escrito;
+    if (cacheIdioma !== id) { cacheIdioma = id; for (const k in cache) delete cache[k]; }
+    if (cache[iso]) return cache[iso];
+    let n = escrito;
+    try {
+      const dn = new Intl.DisplayNames([id], { type: 'region' });
+      const r = dn.of(iso);
+      if (r && r !== iso) n = r;
+    } catch (e) { /* navegador sin Intl.DisplayNames: se queda el escrito */ }
+    cache[iso] = n;
+    return n;
+  }
+
+  /* Lo que se pinta y sobre lo que se busca. La lista cruda no se toca: su
+     `nombre` es la clave estable con la que se guarda el país elegido. */
+  function conNombre(x) {
+    return { iso: x.iso, nombre: nombreEnIdioma(x.iso, x.nombre) };
+  }
+
   function porIso(iso) {
     const c = String(iso || '').toUpperCase();
     return LISTA.filter(function (x) { return x.iso === c; })[0] || null;
@@ -76,7 +109,7 @@
 
   function nombreDe(iso) {
     const p = porIso(iso);
-    return p ? p.nombre : '';
+    return p ? nombreEnIdioma(p.iso, p.nombre) : '';
   }
 
   /* Buscar sin tildes y sin mayúsculas: quien escribe «panama» con el teclado
@@ -90,15 +123,29 @@
 
   function buscar(texto) {
     const q = plano(texto).trim();
-    if (!q) return LISTA.slice();
+    /* La lista viene ordenada alfabeticamente en español, y en inglés eso deja
+       Germany entre Albania y Andorra. Se reordena por el nombre que se lee. */
+    if (!q) {
+      const todos = LISTA.map(conNombre);
+      const id = (g.Idioma && g.Idioma.actual()) || 'es';
+      if (id !== 'es') {
+        todos.sort(function (a, b) { return a.nombre.localeCompare(b.nombre, id); });
+      }
+      return todos;
+    }
     /* Los que empiezan por lo escrito, primero: buscando «per» interesa más
-       Perú que Liberia, aunque las dos lo contengan. */
+       Perú que Liberia, aunque las dos lo contengan.
+
+       Se busca sobre los DOS nombres, el de la app y el escrito en español:
+       con la app en inglés, quien teclea «España» tiene que encontrar Spain. */
     const empiezan = [];
     const contienen = [];
     LISTA.forEach(function (x) {
-      const n = plano(x.nombre);
-      if (n.indexOf(q) === 0) empiezan.push(x);
-      else if (n.indexOf(q) !== -1) contienen.push(x);
+      const y = conNombre(x);
+      const n = plano(y.nombre);
+      const otro = plano(x.nombre);
+      if (n.indexOf(q) === 0 || otro.indexOf(q) === 0) empiezan.push(y);
+      else if (n.indexOf(q) !== -1 || otro.indexOf(q) !== -1) contienen.push(y);
     });
     return empiezan.concat(contienen);
   }

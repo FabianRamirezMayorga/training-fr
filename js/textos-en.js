@@ -899,6 +899,90 @@
     /* ---------- tipos de trabajo y la cuenta de ejercicios ---------- */
     'No hay ninguno así': 'There are none like that',
     'Ver el ejercicio': 'See the exercise',
-    'Ver {n} ejercicios': 'See {n} exercises'
+    'Ver {n} ejercicios': 'See {n} exercises',
+
+    /* ---------- Datos y hábitos ---------- */
+    'A qué ritmo': 'At what rate',
+    'Alergias o alimentos que evito': 'Allergies or foods I avoid',
+    'Con esto reparto los recordatorios de agua y comidas por tus horas reales, no por unas por defecto, y saco cuánto duermes.':
+      'With this I spread your water and meal reminders across your real hours rather than default ones, and work out how much you sleep.',
+    'Con mis palabras': 'In my own words',
+    'Condiciones de salud': 'Health conditions',
+    'De estos cuatro campos salen los menús que te sugiero y los ejercicios que entran o no en tus rutinas. Si los dejas vacíos, te propongo lo de siempre para cualquiera; si los rellenas, te propongo lo tuyo.':
+      'These four fields decide the meal plans I suggest and which exercises make it into your routines. Leave them empty and you get the same as anyone else; fill them in and you get yours.',
+    'Duermo': 'I sleep',
+    'Déficit sobre tu gasto, con la proteína alta para no perder músculo':
+      'A deficit against your burn, with protein high so you do not lose muscle',
+    'El mío': 'Mine',
+    'Es tu gasto ajustado a lo que buscas y al ritmo que has elegido.':
+      'It is your burn adjusted to what you are after and the rate you chose.',
+    'Estimaciones para población general (Mifflin-St Jeor). Si tienes una condición médica, manda tu médico.':
+      'Estimates for the general population (Mifflin-St Jeor). If you have a medical condition, your doctor decides.',
+    'Esto es lo que más cambia lo que te propongo':
+      'This is what changes my suggestions most',
+    'Hombro derecho, rodilla…': 'Right shoulder, knee…',
+    'Hora a la que entreno': 'The time I train',
+    'Lactosa, frutos secos…': 'Lactose, nuts…',
+    'Lesiones o limitaciones': 'Injuries or limitations',
+    'Lo mío': 'What\'s mine',
+    'Lo pongo yo en kilos por semana': 'I set it myself in kilos a week',
+    'Lo que escribas aquí retira ejercicios de tus rutinas y de lo que te propone el entrenador. Es lo que evita que te ofrezca algo que te haga daño.':
+      'What you write here removes exercises from your routines and from what the coach suggests. It is what stops it offering you something that would hurt you.',
+    'Me acuesto': 'I go to bed',
+    'Me levanto': 'I get up',
+    'Metabolismo basal': 'Basal metabolism',
+    'Mi día': 'My day',
+    'Mi objetivo': 'My goal',
+    'Moverme, dormir y comer bien, sin una meta de báscula':
+      'Moving, sleeping and eating well, with no target on the scales',
+    'Ni subir ni bajar; sostener lo que ya tienes':
+      'Neither up nor down; holding on to what you have',
+    'Ningún menú te va a ofrecer algo que no comas.':
+      'No meal plan will offer you something you do not eat.',
+    'Objetivo diario': 'Daily target',
+    'Opcional. Lo lee el entrenador con IA para lo que te propone. Los números salen de la opción de arriba; esto es el matiz que ninguna lista recoge.':
+      'Optional. The AI coach reads it for what it suggests. The numbers come from the option above; this is the nuance no list captures.',
+    'Opcional. Si la dejas vacía, la deduzco de las horas a las que sueles entrenar.':
+      'Optional. Leave it empty and I work it out from the hours you usually train.',
+    'Para que el menú las tenga en cuenta. No sustituye a tu médico ni a un dietista.':
+      'So your meal plan takes them into account. It does not replace your doctor or a dietitian.',
+    'Perder grasa y ganar músculo a la vez: calorías de mantenimiento y mucha proteína':
+      'Losing fat and building muscle at once: maintenance calories and plenty of protein',
+    'Peso saludable': 'Healthy weight',
+    'Quedan fuera de todo lo que te proponga, y si salen en la foto de un plato te aviso.':
+      'They are left out of everything I suggest, and if they turn up in a photo of a plate I tell you.',
+    'Qué busco': 'What I am after',
+    'Sale de esas dos horas, no hace falta apuntarlo aparte.':
+      'It comes from those two times, there is nothing extra to log.',
+    'Con menos de 6 h cuesta recuperar entre sesiones.':
+      'On under 6 h it is hard to recover between sessions.',
+    'Pon las dos horas y calculo cuánto duermes.':
+      'Set both times and I work out how much you sleep.',
+    'Sin gluten': 'Gluten-free',
+    'Sin lactosa': 'Lactose-free',
+    'Sin restricciones': 'No restrictions',
+    'Sin tocar el peso: lo que sube son los kilos de la barra':
+      'Without touching your weight: what goes up is the kilos on the bar',
+    'Superávit controlado sobre tu gasto': 'A controlled surplus over your burn',
+    'Tensión alta, colesterol, diabetes…':
+      'High blood pressure, cholesterol, diabetes…',
+    'Unos {n} kg por semana más.': 'About {n} kg a week more.',
+    'Unos {n} kg por semana menos.': 'About {n} kg a week less.',
+    'Vegana': 'Vegan',
+    'Vegetariana': 'Vegetarian',
+    'Volver a correr 10 km, quitarme el dolor de espalda…':
+      'Run 10 km again, get rid of my back pain…',
+    'kg por semana': 'kg a week',
+    'Falta {que}': 'Missing: {que}',
+    'Sin el país el menú sale de un supermercado que no es el tuyo, con nombres que no usas.':
+      'Without your country the meal plan comes from a supermarket that is not yours, using names you do not use.',
+    'Sin tus datos no puedo calcular tus calorías ni ajustarte el entrenamiento, y sin el país el menú sale de otro supermercado.':
+      'Without your details I cannot work out your calories or tune your training, and without your country the meal plan comes from another supermarket.',
+    'Es lo único obligatorio; lo demás lo vas rellenando cuando quieras.':
+      'It is the only thing that is required; the rest you fill in whenever you like.',
+
+    /* ---------- peso e historial ---------- */
+    'Registra tu peso cada semana para ver la evolución.':
+      'Log your weight every week to see how it moves.'
   };
 })(window);

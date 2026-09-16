@@ -295,18 +295,25 @@
     const edita = editandoDatos;
     const ritmo = Perfil.ritmoActual(p);
 
+    /* Los cuatro ayudantes de aqui abajo son por donde pasa TODO el texto de
+       esta pantalla, asi que traducirlos aqui la cubre entera. */
     const grupo = function (titulo, contenido) {
-      return '<div class="list-title">' + esc(titulo) + '</div>' +
+      return '<div class="list-title">' + esc(T(titulo)) + '</div>' +
         '<div class="card tarjeta-premium campos">' + contenido + '</div>';
     };
 
     const campo = function (o) {
       return '<div class="campo">' +
         '<div class="campo-cab">' +
-        '<span class="campo-tit">' + esc(o.tit) + '</span>' +
+        '<span class="campo-tit">' + esc(T(o.tit)) + '</span>' +
         (o.control || '') +
         '</div>' +
-        (o.nota ? '<div class="campo-nota">' + o.nota + '</div>' : '') +
+        /* `nota` es la frase tal cual está escrita y se traduce aquí.
+           `notaHecha` es la que ya viene resuelta porque lleva un número
+           dentro: volver a pasarla por T() la buscaria con el numero puesto
+           y no la encontraria nunca. */
+        (o.nota ? '<div class="campo-nota">' + esc(T(o.nota)) + '</div>' : '') +
+        (o.notaHecha ? '<div class="campo-nota">' + esc(o.notaHecha) + '</div>' : '') +
         (o.abajo || '') +
         '</div>';
     };
@@ -334,8 +341,8 @@
         if (!edita && !on) return '';
         return '<button class="opt-fila' + (on ? ' on' : '') + '"' +
           (edita ? ' data-set="' + campoId + '" data-val="' + esc(k) + '"' : ' disabled') + '>' +
-          '<span class="grow"><span class="opt-tit">' + esc(label) + '</span>' +
-          (nota ? '<span class="opt-sub">' + esc(nota) + '</span>' : '') + '</span>' +
+          '<span class="grow"><span class="opt-tit">' + esc(T(label)) + '</span>' +
+          (nota ? '<span class="opt-sub">' + esc(T(nota)) + '</span>' : '') + '</span>' +
           '<span class="opt-check">' + (on ? icon('check') : '') + '</span>' +
           '</button>';
       }).join('') + '</div>';
@@ -343,10 +350,10 @@
 
     const largo = function (campoId, val, ph, lectura) {
       if (!edita) {
-        return '<div class="campo-leido">' + esc(val || lectura || 'Sin poner') + '</div>';
+        return '<div class="campo-leido">' + esc(val || lectura || T('Sin poner')) + '</div>';
       }
       return '<input class="campo-largo" value="' + esc(val) + '" data-txt="' + campoId +
-        '" placeholder="' + esc(ph) + '">';
+        '" placeholder="' + esc(T(ph)) + '">';
     };
 
     return html`
@@ -354,35 +361,35 @@
         ${raw(icon('back'))} ${T('Perfil')}</button>
 
       <div class="row between" style="align-items:flex-start;gap:12px">
-        <h1 style="margin:0">Datos y hábitos</h1>
+        <h1 style="margin:0">${T('Datos y hábitos')}</h1>
         ${raw(edita ? '' : '<button class="btn sm primary" data-a="editar">' +
-          icon('edit') + ' Editar</button>')}
+          icon('edit') + ' ' + esc(T('Editar')) + '</button>')}
       </div>
 
-      <p class="muted" style="margin-top:8px">Sirven para calcular tus calorías y ajustar lo
-      que te propongo. No salen de tu dispositivo salvo que actives la sincronización o el
-      entrenador con IA.</p>
+      <p class="muted" style="margin-top:8px">${T('Sirven para calcular tus calorías y ' +
+      'ajustar lo que te propongo. No salen de tu dispositivo salvo que actives la ' +
+      'sincronización o el entrenador con IA.')}</p>
 
       ${raw(faltan.length ? html`
         <div class="card tarjeta-premium" style="border-color:var(--warn)">
-          <b>Falta ${raw(listaEs(faltan))}</b>
+          <b>${Tn('Falta {que}', { que: listaEs(faltan) })}</b>
           <!-- Decia «sin eso no puedo calcular tus calorias» de todo, y con el pais
                dentro eso dejo de ser verdad: el pais no entra en ninguna formula,
                pero decide de que supermercado sale el menu. Cada cosa con su
                motivo, que un aviso que exagera se aprende a ignorar. -->
-          <p class="tiny" style="margin:6px 0 0">${raw(faltan.length === 1 && !p.pais
-            ? 'Sin el país el menú sale de un supermercado que no es el tuyo, con nombres ' +
-              'que no usas.'
-            : 'Sin tus datos no puedo calcular tus calorías ni ajustarte el entrenamiento, ' +
-              'y sin el país el menú sale de otro supermercado.')} Es lo único obligatorio;
-          lo demás lo vas rellenando cuando quieras.</p>
+          <p class="tiny" style="margin:6px 0 0">${raw(esc(faltan.length === 1 && !p.pais
+            ? T('Sin el país el menú sale de un supermercado que no es el tuyo, con ' +
+              'nombres que no usas.')
+            : T('Sin tus datos no puedo calcular tus calorías ni ajustarte el ' +
+              'entrenamiento, y sin el país el menú sale de otro supermercado.')))}
+          ${T('Es lo único obligatorio; lo demás lo vas rellenando cuando quieras.')}</p>
         </div>` : '')}
 
       ${raw(grupo('Quién soy',
         campo({
           tit: 'Mi nombre',
           control: valor('id="p-nombre" value="' + esc(Store.settings().name || '') +
-            '" placeholder="Tu nombre" autocomplete="given-name"', '', 132,
+            '" placeholder="' + esc(T('Tu nombre')) + '" autocomplete="given-name"', '', 132,
             Store.settings().name),
           nota: 'Para saludarte al abrir la app y para que el entrenador con IA te hable a ' +
             'ti, no a un usuario.'
@@ -405,7 +412,7 @@
                 '<span class="campo-fijo">' + esc(Paises.nombreDe(p.pais)) + '</span>'
               : '<span class="pais-bandera vacia">' + icon('mundo') + '</span>' +
                 '<span class="campo-fijo sin">' +
-                (edita ? 'Elegir' : 'Sin poner') + '</span>') +
+                esc(edita ? T('Elegir') : T('Sin poner')) + '</span>') +
             (edita ? '<span class="chevron">' + icon('chevron') + '</span>' : '') +
             '</button>'
         })))}
@@ -419,7 +426,7 @@
         campo({
           tit: 'Edad',
           control: valor('type="number" inputmode="numeric" min="14" max="99" value="' +
-            (p.edad || '') + '" data-num="edad" placeholder="—"', 'años', 68, p.edad)
+            (p.edad || '') + '" data-num="edad" placeholder="—"', T('años'), 68, p.edad)
         }) +
         campo({
           tit: 'Altura',
@@ -463,8 +470,9 @@
         ((Perfil.OBJETIVO[p.objetivo] || {}).signo !== 0
           ? campo({
               tit: 'A qué ritmo',
-              nota: 'Unos ' + UI.dec(ritmo.kgSemana) + ' kg por semana' +
-                ((Perfil.OBJETIVO[p.objetivo] || {}).signo < 0 ? ' menos' : ' más') + '.',
+              notaHecha: Tn((Perfil.OBJETIVO[p.objetivo] || {}).signo < 0
+                ? 'Unos {n} kg por semana menos.' : 'Unos {n} kg por semana más.',
+                { n: UI.dec(ritmo.kgSemana) }),
               abajo: filasOpcion('ritmo', Object.assign({}, Perfil.RITMO, {
                 propio: { label: 'El mío', note: 'Lo pongo yo en kilos por semana' }
               }), p.ritmo) +
@@ -476,7 +484,7 @@
                       (p.ritmoKg || 0.45) + '" data-num="ritmoKg">'
                     : '<span class="campo-fijo">' +
                       UI.dec(p.ritmoKg || 0.45) + '</span>') +
-                  '<span class="val-u">kg por semana</span></div>'
+                  '<span class="val-u">' + esc(T('kg por semana')) + '</span></div>'
                 : '')
             })
           : '')))}
@@ -498,10 +506,10 @@
           tit: 'Duermo',
           control: '<span class="campo-val"><span class="campo-fijo">' +
             (horas != null ? UI.dec(horas) + ' h' : '—') + '</span></span>',
-          nota: horas != null
-            ? 'Sale de esas dos horas, no hace falta apuntarlo aparte.' +
-              (horas < 6 ? ' Con menos de 6 h cuesta recuperar entre sesiones.' : '')
-            : 'Pon las dos horas y calculo cuánto duermes.'
+          notaHecha: horas != null
+            ? T('Sale de esas dos horas, no hace falta apuntarlo aparte.') +
+              (horas < 6 ? ' ' + T('Con menos de 6 h cuesta recuperar entre sesiones.') : '')
+            : T('Pon las dos horas y calculo cuánto duermes.')
         }) +
         campo({
           tit: 'Comidas al día',
@@ -512,15 +520,17 @@
           tit: 'Hora a la que entreno',
           nota: 'Opcional. Si la dejas vacía, la deduzco de las horas a las que sueles entrenar.',
           control: valor('type="time" value="' + (p.horaEntreno || '') +
-            '" data-txt="horaEntreno"', '', 142, p.horaEntreno || 'Sin poner')
+            '" data-txt="horaEntreno"', '', 142, p.horaEntreno || T('Sin poner'))
         })))}
 
       ${raw(grupo('Lo mío',
         '<div class="campo campo-aviso">' +
-        '<b style="font-size:.88rem">Esto es lo que más cambia lo que te propongo</b>' +
-        '<p class="tiny" style="margin:5px 0 0">De estos cuatro campos salen los menús que ' +
-        'te sugiero y los ejercicios que entran o no en tus rutinas. Si los dejas vacíos, ' +
-        'te propongo lo de siempre para cualquiera; si los rellenas, te propongo lo tuyo.</p>' +
+        '<b style="font-size:.88rem">' +
+        esc(T('Esto es lo que más cambia lo que te propongo')) + '</b>' +
+        '<p class="tiny" style="margin:5px 0 0">' + esc(T('De estos cuatro campos salen ' +
+        'los menús que te sugiero y los ejercicios que entran o no en tus rutinas. Si los ' +
+        'dejas vacíos, te propongo lo de siempre para cualquiera; si los rellenas, te ' +
+        'propongo lo tuyo.')) + '</p>' +
         '</div>' +
         campo({
           tit: 'Alimentación',
@@ -546,22 +556,22 @@
         })))}
 
       ${raw(Perfil.completo(p) ? html`
-        <div class="list-title">Mis números</div>
+        <div class="list-title">${T('Mis números')}</div>
         <div class="card tarjeta-premium campos">
           <div class="campo">
             <div class="campo-cab">
-              <span class="campo-tit">Objetivo diario</span>
+              <span class="campo-tit">${T('Objetivo diario')}</span>
               <span class="campo-val"><span class="pre-num">${UI.num(Perfil.calorias(p))}</span>
                 <span class="val-u">kcal</span></span>
             </div>
-            <div class="campo-nota">Es tu gasto ajustado a lo que buscas y al ritmo que has
-              elegido.</div>
+            <div class="campo-nota">${T('Es tu gasto ajustado a lo que buscas y al ' +
+              'ritmo que has elegido.')}</div>
           </div>
           ${raw([
-            { t: 'Metabolismo basal', v: UI.num(Math.round(Perfil.tmb(p))) + ' kcal' },
-            { t: 'Gasto diario estimado', v: UI.num(Math.round(Perfil.tdee(p))) + ' kcal' },
-            { t: 'Agua al día', v: Perfil.agua(p) + ' L' },
-            { t: 'Peso saludable', v: Perfil.pesoSaludable(p).min.toFixed(0) + '–' +
+            { t: T('Metabolismo basal'), v: UI.num(Math.round(Perfil.tmb(p))) + ' kcal' },
+            { t: T('Gasto diario estimado'), v: UI.num(Math.round(Perfil.tdee(p))) + ' kcal' },
+            { t: T('Agua al día'), v: UI.dec(Perfil.agua(p)) + ' L' },
+            { t: T('Peso saludable'), v: Perfil.pesoSaludable(p).min.toFixed(0) + '–' +
               Perfil.pesoSaludable(p).max.toFixed(0) + ' kg' }
           ].map(function (x) {
             return '<div class="campo"><div class="campo-cab">' +
@@ -569,8 +579,8 @@
               '<span class="campo-fijo">' + x.v + '</span></div></div>';
           }).join(''))}
         </div>
-        <p class="tiny" style="margin-top:10px">Estimaciones para población general
-        (Mifflin-St Jeor). Si tienes una condición médica, manda tu médico.</p>` : '')}
+        <p class="tiny" style="margin-top:10px">${T('Estimaciones para población ' +
+        'general (Mifflin-St Jeor). Si tienes una condición médica, manda tu médico.')}</p>` : '')}
 
       <div style="height:${edita ? 90 : 14}px"></div>
 
@@ -578,15 +588,16 @@
         <!-- La barra de guardar, fija abajo: editando, lo que uno busca con el
              pulgar es salir de aqui sin perder nada. -->
         <div class="barra-edicion">
-          <button class="btn grow" data-a="cancelar">Cancelar</button>
-          <button class="btn primary grow" data-a="guardar">${raw(icon('check'))} Guardar</button>
+          <button class="btn grow" data-a="cancelar">${T('Cancelar')}</button>
+          <button class="btn primary grow" data-a="guardar">${raw(icon('check'))} ${T('Guardar')}</button>
         </div>` : '')}`;
   };
 
   function pesoHistorial() {
     const lista = Perfil.pesajes();
     if (lista.length < 2) {
-      return '<p class="tiny" style="margin:10px 0 0">Registra tu peso cada semana para ver la evolución.</p>';
+      return '<p class="tiny" style="margin:10px 0 0">' +
+        esc(T('Registra tu peso cada semana para ver la evolución.')) + '</p>';
     }
     const ultimos = lista.slice(-12);
     const min = Math.min.apply(null, ultimos.map(function (x) { return x.peso; }));
@@ -666,8 +677,8 @@
 
     const filas = function (lista) {
       if (!lista.length) {
-        return '<p class="tiny" style="margin:14px 2px">Ninguno con ese nombre. ' +
-          'Prueba con menos letras.</p>';
+        return '<p class="tiny" style="margin:14px 2px">' +
+          esc(T('Ninguno con ese nombre. Prueba con menos letras.')) + '</p>';
       }
       return '<div class="list pais-lista">' + lista.map(function (x) {
         return '<button class="list-row tap pais-op' + (x.iso === actual ? ' on' : '') +
@@ -680,22 +691,23 @@
 
     UI.modal(html`
       <div class="conf-disco cambio">${raw(icon('mundo'))}</div>
-      <h2 class="conf-tit">¿De dónde eres?</h2>
-      <p class="muted conf-txt">Con esto el menú sale del supermercado que tienes al lado,
-      con los nombres que usas tú.</p>
+      <h2 class="conf-tit">${T('¿De dónde eres?')}</h2>
+      <p class="muted conf-txt">${T('Con esto el menú sale del supermercado que tienes ' +
+      'al lado, con los nombres que usas tú.')}</p>
 
       <div class="pais-buscar">
         ${raw(icon('search'))}
-        <input id="pa-q" type="search" placeholder="Busca tu país" autocomplete="off"
+        <input id="pa-q" type="search" placeholder="${T('Busca tu país')}" autocomplete="off"
                autocorrect="off" spellcheck="false">
       </div>
 
       ${raw(sugerido ? '<button class="pais-sug" data-pais="' + esc(sugerido) + '">' +
         '<span class="pais-bandera">' + esc(Paises.bandera(sugerido)) + '</span>' +
         '<span class="grow"><b>' + esc(Paises.nombreDe(sugerido)) + '</b>' +
-        '<i>Es lo que dice tu móvil. Tócalo si es correcto.</i></span></button>' : '')}
+        '<i>' + esc(T('Es lo que dice tu móvil. Tócalo si es correcto.')) +
+        '</i></span></button>' : '')}
 
-      <div id="pa-lista">${raw(filas(Paises.LISTA))}</div>`,
+      <div id="pa-lista">${raw(filas(Paises.buscar('')))}</div>`,
       function (el) {
         const caja = el.querySelector('#pa-lista');
         const q = el.querySelector('#pa-q');
@@ -729,7 +741,7 @@
       };
       editandoDatos = true;
       render();
-      UI.toast('Toca los campos para cambiarlos');
+      UI.toast(T('Toca los campos para cambiarlos'));
     });
 
     bind(root, '[data-a=guardar]', function () {
