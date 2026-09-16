@@ -6955,3 +6955,47 @@ html[data-theme="light"] .pais-buscar {
   border-color: color-mix(in srgb, #000 10%, transparent);
   background: color-mix(in srgb, #000 4%, transparent);
 }
+
+/* ---------- generar las alertas solas ----------
+   La cabecera pasa a cuatro controles y en un movil estrecho no caben en la
+   linea del titulo. Envuelve, y los botones bajan enteros en vez de encogerse
+   hasta que no se lean. */
+.al-cabecera { flex-wrap: wrap; gap: 10px; }
+
+/* Lo que va a crear, una linea por cosa. Con su icono del mismo color que
+   luego tendra la alerta: asi lo que se lee aqui es lo que se va a ver. */
+.ag-lista { display: flex; flex-direction: column; gap: 2px; margin-top: 14px; }
+.ag-fila {
+  display: flex; align-items: flex-start; gap: 11px; padding: 9px 2px;
+}
+.ag-fila + .ag-fila { border-top: 1px solid var(--line); }
+.ag-ico {
+  flex: none; width: 30px; height: 30px; border-radius: 10px; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dim2);
+  background: color-mix(in srgb, var(--card2) 78%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 11%, transparent);
+}
+.ag-ico svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ag-fila b { display: block; font-size: .89rem; font-weight: 700; letter-spacing: -.012em; }
+.ag-fila .tiny { display: block; margin-top: 2px; line-height: 1.35; }
+
+/* Lo que NO va a tocar. En verde y con el visto porque es la respuesta a la
+   pregunta que frena a cualquiera antes de pulsar: «¿y lo mio?». */
+.ag-nota {
+  display: flex; align-items: flex-start; gap: 10px; margin-top: 14px;
+  padding: 11px 12px; border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--acc) 34%, transparent);
+  background: color-mix(in srgb, var(--acc) 10%, transparent);
+}
+.ag-nota > svg { flex: none; width: 17px; height: 17px; margin-top: 1px; color: var(--acc);
+  fill: none; stroke: currentColor; stroke-width: 2.6;
+  stroke-linecap: round; stroke-linejoin: round; }
+.ag-nota b { display: block; font-size: .86rem; font-weight: 700; letter-spacing: -.012em; }
+.ag-nota .tiny { display: block; margin-top: 2px; line-height: 1.4; }
+
+html[data-theme="light"] .ag-ico {
+  background: color-mix(in srgb, #000 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 7%, transparent);
+}

@@ -241,20 +241,112 @@
     return out;
   }
 
-  /* ¿Ya existe un recordatorio parecido? Se mira el tipo y las horas. */
-  function yaExiste(sug) {
-    return lista().some(function (a) {
-      return a.tipo === sug.tipo && a.titulo === sug.titulo;
-    });
+  /* ---------- quién hizo cada alerta ----------
+     `auto` lleva la clave de la sugerencia que la generó, igual que `sup` lleva
+     el suplemento en las de suplementación. Sin esa marca, reconocer «la del
+     agua» había que hacerlo por el título, y eso se rompe en cuanto alguien le
+     cambia el nombre: se volvía a crear y acababas con dos.
+
+     Y lo que no tiene ninguna de las dos marcas lo has escrito tú, así que no
+     se toca nunca. */
+  function autoDe(a) { return a.auto || ''; }
+
+  function buscarAuto(clave, sug) {
+    const l = lista();
+    const porMarca = l.filter(function (a) { return autoDe(a) === clave; })[0];
+    if (porMarca) return porMarca;
+    /* Lo creado antes de que existiera la marca: se adopta en vez de duplicarlo.
+       Solo se mira lo que la app misma habría puesto —mismo tipo y mismo título
+       de fábrica—, para no secuestrar una alerta escrita a mano. */
+    return l.filter(function (a) {
+      return !autoDe(a) && !a.sup && a.tipo === sug.tipo && a.titulo === sug.titulo;
+    })[0] || null;
   }
+
+  /* ¿Ya existe un recordatorio parecido? */
+  function yaExiste(sug) { return !!buscarAuto(sug.clave, sug); }
 
   function crearDesdeSugerencia(sug) {
     const a = nueva(sug.tipo);
+    a.auto = sug.clave;
     a.titulo = sug.titulo;
     a.mensaje = sug.mensaje;
     a.dias = sug.dias.slice();
     a.horas = sug.horas.slice();
     return guardar(a);
+  }
+
+  /* ---------- generarlas todas de una vez ----------
+     Lo que había era «Crear todas», que solo creaba lo que faltaba: si cambiabas
+     de peso, de hora de levantarte o de rutina, las que ya tenías se quedaban
+     con las horas viejas y no había manera de ponerlas al día salvo borrarlas a
+     mano. Aquí se crea lo que falta Y se actualiza lo que ya está.
+
+     Lo que NO se toca, a propósito:
+     - Lo que has escrito tú, que no lleva marca.
+     - El interruptor: si apagaste la del agua, sigue apagada. Recalcular horas
+       no es motivo para volver a encenderte algo que decidiste callar.
+     - Lo ya lanzado hoy, que si no volvería a sonar todo de golpe. */
+  function generarTodo() {
+    const res = { creadas: 0, actualizadas: 0, suplementos: 0, tuyas: 0 };
+
+    sugerencias().forEach(function (sug) {
+      const ya = buscarAuto(sug.clave, sug);
+      if (!ya) {
+        crearDesdeSugerencia(sug);
+        res.creadas++;
+        return;
+      }
+      /* Con las mismas horas y los mismos días no hay nada que hacer: contarlo
+         como actualizada sería decirle que ha pasado algo que no ha pasado. */
+      const igual = ya.horas.join() === sug.horas.slice().sort().join() &&
+        ya.dias.join() === sug.dias.join() && ya.titulo === sug.titulo &&
+        ya.mensaje === sug.mensaje && autoDe(ya) === sug.clave;
+      ya.auto = sug.clave;
+      ya.titulo = sug.titulo;
+      ya.mensaje = sug.mensaje;
+      ya.dias = sug.dias.slice();
+      ya.horas = sug.horas.slice();
+      guardar(ya);
+      if (!igual) res.actualizadas++;
+    });
+
+    /* Las de suplementos se rehacen enteras desde la lista de botes, que ya es
+       idempotente: se reconocen por `sup` y se sustituyen sin tocar el resto.
+
+       Se compara antes y después porque rehacerlas siempre devuelve cuántas hay,
+       no cuántas han cambiado, y con eso el aviso decía «1 de suplementos» cada
+       vez aunque no hubiera pasado nada. Contar lo que no ha cambiado como si
+       hubiera cambiado enseña a no leer los avisos. */
+    if (g.Suplementos && Suplementos.sincronizarAlertas) {
+      const huella = function () {
+        return lista().filter(function (a) { return a.sup; })
+          .map(function (a) { return a.sup + '|' + a.horas.join() + '|' + a.dias.join() +
+            '|' + a.titulo + '|' + a.mensaje; }).sort().join('||');
+      };
+      const antes = huella();
+      Suplementos.sincronizarAlertas();
+      if (huella() !== antes) {
+        res.suplementos = lista().filter(function (a) { return a.sup; }).length;
+      }
+    }
+
+    res.tuyas = lista().filter(function (a) { return !autoDe(a) && !a.sup; }).length;
+    return res;
+  }
+
+  /* Lo que haría si lo pulsaras, para poder contarlo antes de hacerlo. */
+  function previoGenerar() {
+    const sug = sugerencias();
+    let nuevas = 0;
+    sug.forEach(function (x) { if (!buscarAuto(x.clave, x)) nuevas++; });
+    return {
+      total: sug.length,
+      nuevas: nuevas,
+      suplementos: g.Suplementos && Suplementos.lista
+        ? (Suplementos.alertasDe ? Suplementos.alertasDe().length : 0) : 0,
+      tuyas: lista().filter(function (a) { return !autoDe(a) && !a.sup; }).length
+    };
   }
 
   /* ---------- permiso y aviso del sistema ---------- */
@@ -852,6 +944,7 @@
     resumenDias: resumenDias, resumenHoras: resumenHoras,
     diagnostico: diagnostico, probar: probar,
     sugerencias: sugerencias, yaExiste: yaExiste, crearDesdeSugerencia: crearDesdeSugerencia,
+    generarTodo: generarTodo, previoGenerar: previoGenerar,
     repartir: repartir, enMinutos: enMinutos, aHora: aHora,
     horaHabitualDeEntreno: horaHabitualDeEntreno
   };

@@ -1133,7 +1133,10 @@
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Perfil</button>
-      <div class="row between">
+      <!-- Cuatro controles en una fila con el título no caben en un móvil
+           estrecho, así que la fila envuelve y los botones bajan enteros en vez
+           de encogerse hasta no leerse. -->
+      <div class="row between al-cabecera">
         <h1 style="margin:0">Alertas</h1>
         <span class="row" style="gap:8px">
           <!-- El estado de los avisos se gestiona desde aquí. Con su punto
@@ -1143,6 +1146,11 @@
             Alertas.diagnostico().permiso === 'granted' ? '' : ' pendiente')}"
             data-a="avisos" aria-label="Estado de los avisos"
             title="Estado de los avisos">${raw(icon('campana'))}</button>
+          <!-- «Automáticas» y no el nombre entero: el botón cabe, y lo que va a
+               hacer se cuenta con detalle en la hoja que abre, que es donde hay
+               sitio para contarlo y donde todavía se puede decir que no. -->
+          <button class="btn sm vidrio" data-a="autogen">
+            ${raw(icon('chispa'))} Automáticas</button>
           <button class="btn primary sm btn-arranque" data-a="nueva">
             ${raw(icon('plus'))} Nueva</button>
         </span>
@@ -1529,9 +1537,92 @@
     return 0;
   }
 
+  /* ---------- generar las alertas solas ----------
+     Antes esto era «Crear todas», abajo del todo y solo para lo que faltaba: si
+     cambiabas de peso, de hora de levantarte o de rutina, las que ya tenías se
+     quedaban con las horas viejas y no había forma de ponerlas al día salvo
+     borrarlas a mano.
+
+     Se pregunta antes de tocar nada porque es una acción que cambia varias
+     cosas de golpe, y se dice cuántas y cuáles: enseñar el número de las tuyas
+     que NO va a tocar es lo que quita el miedo a pulsarlo. */
+  function autoSheet() {
+    const prev = Alertas.previoGenerar();
+
+    const fila = function (ico, tit, sub) {
+      return '<div class="ag-fila"><span class="ag-ico">' + icon(ico) + '</span>' +
+        '<span class="grow"><b>' + esc(tit) + '</b>' +
+        '<span class="tiny">' + esc(sub) + '</span></span></div>';
+    };
+
+    const hayPerfil = Perfil.completo();
+    const sups = g.Suplementos ? Suplementos.lista().length : 0;
+
+    UI.modal(html`
+      <div class="conf-disco cambio">${raw(icon('chispa'))}</div>
+      <h2 class="conf-tit">Generar alertas automáticamente</h2>
+      <p class="muted conf-txt">Con lo que ya hay en la app: tu peso, tus horas, tus
+      rutinas y lo que tomas. Las horas salen calculadas, no son horas por defecto.</p>
+
+      <div class="ag-lista">
+        ${raw(hayPerfil
+          ? fila('vaso', 'Agua', 'Los vasos que te tocan por tu peso, repartidos entre ' +
+              'que te levantas y dos horas antes de dormir') +
+            fila('nutricion', 'Comidas', 'Una por cada comida que haces, con las calorías ' +
+              'y la proteína que le tocan a cada una') +
+            fila('dumbbell', 'Entrenamiento', 'Los días que tienen rutina asignada, a la ' +
+              'hora a la que entrenas de verdad') +
+            fila('perfil', 'Pesarte', 'Los lunes al levantarte, en ayunas')
+          : fila('aviso', 'Te falta el perfil', 'Sin tu peso, tu altura y tus horas no ' +
+              'puedo calcular ninguna. Complétalo y vuelve.'))}
+        ${raw(sups ? fila('bote', 'Suplementos', sups + (sups === 1 ? ' apuntado' :
+          ' apuntados') + ', agrupados por hora para no sonar tres veces seguidas') : '')}
+      </div>
+
+      <div class="ag-nota">
+        ${raw(icon('check'))}
+        <span class="grow"><b>No te duplica nada.</b>
+        <span class="tiny">Las que ya existen se actualizan con las horas nuevas.
+        ${raw(prev.tuyas === 1
+          ? 'La que has creado tú no se toca, y si apagaste alguna sigue apagada.'
+          : prev.tuyas
+            ? 'Las ' + prev.tuyas + ' que has creado tú no se tocan, y si apagaste ' +
+              'alguna sigue apagada.'
+            : 'Y si apagaste alguna, sigue apagada.')}</span></span>
+      </div>
+
+      <div class="cb-acciones" style="margin-top:16px">
+        <button class="btn primary grow btn-arranque" data-g="ok" ${raw(hayPerfil ? '' : 'disabled')}>
+          ${raw(icon('chispa'))} ${raw(prev.nuevas === prev.total
+            ? 'Generarlas' : 'Generar y poner al día')}</button>
+        <button class="btn vidrio" data-g="no">Ahora no</button>
+      </div>
+      ${raw(hayPerfil ? '' : '<button class="btn ghost block sm" data-g="perfil" ' +
+        'style="margin-top:9px">Completar mi perfil</button>')}`,
+      function (el) {
+        el.onclick = function (ev) {
+          const b = ev.target.closest('[data-g]');
+          if (!b) return;
+          if (b.dataset.g === 'no') { UI.closeModal(); return; }
+          if (b.dataset.g === 'perfil') { UI.closeModal(); go('datos'); return; }
+
+          const r = Alertas.generarTodo();
+          UI.closeModal();
+          render();
+
+          const partes = [];
+          if (r.creadas) partes.push(r.creadas + (r.creadas === 1 ? ' nueva' : ' nuevas'));
+          if (r.actualizadas) partes.push(r.actualizadas + ' al día');
+          if (r.suplementos) partes.push(r.suplementos + ' de suplementos');
+          UI.toast(partes.length ? partes.join(' · ') : 'Ya estaba todo al día');
+        };
+      });
+  }
+
   V.alertas.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=nueva]', function () { alertaSheet(null); });
+    bind(root, '[data-a=autogen]', autoSheet);
 
     bind(root, '[data-a=avisos]', avisosSheet);
 

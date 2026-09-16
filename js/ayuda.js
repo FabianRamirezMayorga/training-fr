@@ -412,6 +412,21 @@
       cierre: 'Si algo deja de funcionar, vuelve aquí antes que a ningún otro sitio: casi siempre es una clave caducada o sin saldo.',
       ver: ['g-ia', 'p-precio'] },
 
+    { id: 'c-autoalertas', titulo: 'Que la app te cree las alertas sola',
+      resumen: 'Todas de una vez, con tus horas calculadas',
+      pasos: [
+        { t: 'Entra en *Perfil › Alertas*.',
+          ir: { ruta: 'alertas', label: 'Abrir Alertas' } },
+        { t: 'Arriba, toca *Automáticas*.',
+          d: 'Está al lado de «Nueva». Se abre una hoja que te dice exactamente qué va a crear antes de tocar nada.' },
+        { t: 'Mira lo que te propone y confirma.',
+          d: 'El agua que te toca por tu peso repartida en vasos, una alerta por cada comida que haces con sus calorías y su proteína, el entrenamiento en los días que tienen rutina y a la hora a la que entrenas de verdad, pesarte los lunes en ayunas, y tus suplementos agrupados por hora.' },
+        { t: 'Ya está. Cámbialas si quieres.',
+          d: 'Son alertas normales: puedes tocarles la hora, los días o apagarlas, una a una.' }
+      ],
+      cierre: 'Vuelve a pulsarlo cuando cambies de peso, de horarios o de rutina: *no te duplica nada*, pone al día las que ya tienes.',
+      ver: ['p-autoalertas', 'c-suplementos', 'c-calendario'] },
+
     { id: 'c-calendario', titulo: 'Llevar los recordatorios al calendario',
       resumen: 'Para que suenen con la app cerrada',
       pasos: [
@@ -599,6 +614,13 @@
         'En *Perfil › Actualizaciones* sale la que llevas puesta. Si hay una nueva, ahí mismo aparece un botón que la baja: no hay que buscar nada más.',
         'Sin conexión la pantalla te enseña igual la versión que llevas, y te dice que no ha podido comprobar si hay otra en vez de callarse.',
         'Si algo se comporta raro justo después de actualizar, casi siempre es que el móvil se ha quedado con archivos de dos versiones mezclados. Para eso está *¿Algo va raro?*, debajo de la versión.'] },
+
+    { id: 'p-autoalertas', q: 'Si vuelvo a pulsar «Automáticas», ¿se me duplican las alertas?',
+      a: ['No. Cada alerta que crea la app lleva por dentro una marca de qué la generó: la del agua sabe que es la del agua aunque le cambies el nombre. Al volver a pulsarlo busca esa marca y *actualiza la que ya está* en vez de crear otra.',
+        'Las que has creado tú no llevan esa marca, así que *no se tocan nunca*: ni se cambian ni se borran. La hoja te dice cuántas son antes de que confirmes.',
+        'Y respeta dos cosas más: si apagaste una, sigue apagada —recalcular una hora no es motivo para volver a encenderte algo que decidiste callar—, y lo que ya sonó hoy no vuelve a sonar.',
+        'Por eso tiene sentido pulsarlo cada vez que cambies de peso, de hora de levantarte, de comidas o de rutina: las horas se recalculan solas.'],
+      ver: ['c-autoalertas'] },
 
     { id: 'p-medicacion', q: '¿Por qué me pregunta si tomo medicación al crear un menú?',
       a: ['Porque cambia a qué hora conviene comer. Hay tratamientos que se toman en ayunas y otros que piden comida delante, y algunos no se llevan bien con el café, con los lácteos o con un suplemento que ya tomas. Un menú montado sin saberlo puede ponerte justo lo que no toca donde no toca.',
