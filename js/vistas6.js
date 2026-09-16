@@ -415,7 +415,17 @@
   function mapaCalor(dias) {
     const max = Math.max.apply(null, dias.map(function (d) { return d.series; }).concat([1]));
     const hoyKey = Store.dayKey(Date.now());
-    const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    /* Los meses tambien los sabe decir el sistema, como los dias: una lista
+       por idioma es una lista mas que mantener. */
+    const MESES = [0,1,2,3,4,5,6,7,8,9,10,11].map(function (m) {
+      try {
+        return new Date(2024, m, 1).toLocaleDateString(
+          Idioma.actual() === 'en' ? 'en-US' : 'es-ES', { month: 'short' })
+          .replace('.', '');
+      } catch (e) {
+        return ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][m];
+      }
+    });
 
     /* Con una semana el mapa de cuadros no aporta: siete cuadrados enormes en
        los que cabria escribir lo que hiciste. Ahi se cambia por la tira de
@@ -464,9 +474,9 @@
         </div>
       </div>
       <div class="calor-pie">
-        <span>Menos</span>
+        <span>${T('Menos')}</span>
         <i class="n0"></i><i class="n1"></i><i class="n2"></i><i class="n3"></i><i class="n4"></i>
-        <span>Más</span>
+        <span>${T('Más')}</span>
       </div>`;
   }
 
@@ -506,11 +516,10 @@
 
     if (!sesiones.length) {
       return html`
-        <h1>Progreso</h1>
+        <h1>${T('Progreso')}</h1>
         <div class="empty" style="padding-top:40px">${raw(icon('grafica'))}
-          <p>Aquí verás tu evolución, tu constancia y qué músculos trabajas de más
-          y de menos. Aparece en cuanto termines tu primer entrenamiento.</p>
-          <button class="btn primary" data-a="ir">Elegir una rutina</button>
+          <p>${T('Aquí verás tu evolución, tu constancia y qué músculos trabajas de más y de menos. Aparece en cuanto termines tu primer entrenamiento.')}</p>
+          <button class="btn primary" data-a="ir">${T('Elegir una rutina')}</button>
         </div>`;
     }
 
@@ -554,7 +563,7 @@
     prs.sort(function (a, b) { return b.pr.weight - a.pr.weight; });
 
     return html`
-      <h1>Progreso</h1>
+      <h1>${T('Progreso')}</h1>
 
       <!-- El periodo manda sobre toda la pantalla, no solo sobre la grafica:
            tambien cambia el mapa de constancia y el reparto por zona. Debajo
@@ -563,7 +572,7 @@
       <div class="pill-scroll periodo-arriba">
         ${raw(RANGOS.map(function (x) {
           return '<button class="chip ' + (x.id === rango ? 'on' : '') +
-            '" data-rango="' + x.id + '">' + esc(x.label) + '</button>';
+            '" data-rango="' + x.id + '">' + esc(T(x.label)) + '</button>';
         }).join(''))}
       </div>
 
@@ -574,22 +583,23 @@
            esta pantalla. La racha se queda como esta: una racha es de hoy, no
            de un periodo. -->
       <div class="stats">
-        <div class="stat"><b>${resumen.sesiones}</b><span>Entrenos</span></div>
-        <div class="stat"><b>${resumen.porSemana}</b><span>Por semana</span></div>
-        <div class="stat"><b>${st.streak}</b><span>Racha</span></div>
+        <div class="stat"><b>${resumen.sesiones}</b><span>${T('Entrenos')}</span></div>
+        <div class="stat"><b>${resumen.porSemana}</b><span>${T('Por semana')}</span></div>
+        <div class="stat"><b>${st.streak}</b><span>${T('Racha')}</span></div>
         <div class="stat"><b>${resumen.minutos < 60 ? resumen.minutos + 'm'
-          : Math.round(resumen.minutos / 60) + 'h'}</b><span>Tiempo</span></div>
+          : Math.round(resumen.minutos / 60) + 'h'}</b><span>${T('Tiempo')}</span></div>
       </div>
 
-      <div class="list-title">${porSeries ? 'Series completadas' : 'Volumen levantado'}</div>
+      <div class="list-title">${porSeries ? T('Series completadas')
+        : T('Volumen levantado')}</div>
 
       <div class="card graf-caja tarjeta-premium">
         <div class="row between" style="align-items:flex-end;margin-bottom:6px">
           <div>
-            <div class="pre-encima">${porSeries ? 'Series' : 'Volumen'}</div>
+            <div class="pre-encima">${porSeries ? T('Series') : T('Volumen')}</div>
             <div class="graf-dato">${UI.num(total)}</div>
-            <div class="tiny">${porSeries ? 'series' : (Store.settings().unit || 'kg')}
-              en ${r.frase}</div>
+            <div class="tiny">${porSeries ? T('series') : (Store.settings().unit || 'kg')}
+              ${Tn('en {p}', { p: T(r.frase) })}</div>
           </div>
           <!-- La diferencia con el periodo anterior, al lado del numero y no
                en una etiqueta con seis palabras: es la segunda cosa que se mira
@@ -597,34 +607,36 @@
           ${raw(delta === null ? '' : html`
             <span class="delta ${delta >= 0 ? 'sube' : 'baja'}">
               ${delta >= 0 ? '▲' : '▼'} ${Math.abs(delta)}%
-              <span class="tiny">vs. antes</span></span>`)}
+              <span class="tiny">${T('vs. antes')}</span></span>`)}
         </div>
         ${raw(grafica(puntos, porSeries ? 'series' : 'kg'))}
         <div class="tiny" style="margin-top:8px">${r.paso === 'dia'
-          ? 'Un punto por día' : 'Un punto por semana'}</div>
+          ? T('Un punto por día') : T('Un punto por semana')}</div>
       </div>
 
-      <div class="list-title">Constancia</div>
+      <div class="list-title">${T('Constancia')}</div>
       <div class="card tarjeta-premium">
         <!-- El rotulo con la cuenta: el mapa dice como se reparten los dias,
              pero cuantos son hay que contarlos a ojo cuadro a cuadro. -->
-        <div class="pre-encima">Días entrenados</div>
+        <div class="pre-encima">${T('Días entrenados')}</div>
         <div class="pre-num" style="margin:1px 0 10px">${diasEntrenados(r.dias)}
-          <span class="tiny" style="font-weight:600">de ${r.dias}</span></div>
+          <span class="tiny" style="font-weight:600">${Tn('de {n}', { n: r.dias })}</span></div>
         ${raw(mapaCalor(porDia(r.dias)))}
         <p class="tiny" style="margin:10px 0 0">${r.dias <= 8
-          ? 'El número de abajo son las series de ese día.'
-          : 'Un cuadro por día.'} Los huecos también cuentan: el descanso forma
-        parte del plan.</p>
+          ? T('El número de abajo son las series de ese día.')
+          : T('Un cuadro por día.')} ${T('Los huecos también cuentan: el descanso forma parte del plan.')}</p>
       </div>
 
       ${raw(reparto.total || planPorZona().total ? html`
-        <div class="list-title">Reparto por zona (${Math.min(r.dias, 90)} días)</div>
+        <div class="list-title">${Tn('Reparto por zona ({n} días)',
+          { n: Math.min(r.dias, 90) })}</div>
         <div class="card tarjeta-premium">
-          ${raw(reparto.filas.length ? '<div class="pre-encima">Lo que m\u00e1s trabajas</div>' +
-            '<div class="pre-num" style="margin:1px 0 12px">' + esc(reparto.filas[0].label) +
+          ${raw(reparto.filas.length ? '<div class="pre-encima">' +
+            esc(T('Lo que más trabajas')) + '</div>' +
+            '<div class="pre-num" style="margin:1px 0 12px">' + esc(T(reparto.filas[0].label)) +
             ' <span class="tiny" style="font-weight:600">' +
-            Math.round(reparto.filas[0].series / reparto.total * 100) + '% de las series</span></div>'
+            esc(Tn('{n}% de las series',
+              { n: Math.round(reparto.filas[0].series / reparto.total * 100) })) + '</span></div>'
             : '')}
           ${raw(zonasHTML(reparto, r))}
         </div>` : '')}
@@ -645,7 +657,7 @@
            eran doce cajas iguales seguidas, y lo que se mira de un récord es el
            peso, no la caja. -->
       ${raw(prs.length ? html`
-        <div class="list-title">Récords personales${raw((function () {
+        <div class="list-title">${T('Récords personales')}${raw((function () {
           const nuevos = prs.filter(function (x) { return x.pr.date >= desdeT; }).length;
           return nuevos ? ' <span class="chip solid tiny-chip">' + nuevos +
             (nuevos === 1 ? ' nuevo' : ' nuevos') + '</span>' : '';

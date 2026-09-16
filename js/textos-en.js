@@ -446,6 +446,45 @@
     'Rodillo y terapia': 'Foam rolling and rehab',
     'Cardio': 'Cardio',
     'Yoga': 'Yoga',
-    'Pilates': 'Pilates'
+    'Pilates': 'Pilates',
+
+    /* ---------- Progreso ---------- */
+    'Aquí verás tu evolución, tu constancia y qué músculos trabajas de más y de menos. Aparece en cuanto termines tu primer entrenamiento.':
+      "Here you'll see how you're progressing, how consistent you are and which muscles you work too much or too little. It shows up as soon as you finish your first workout.",
+    'Elegir una rutina': 'Pick a routine',
+    'Semana': 'Week',
+    'Mes': 'Month',
+    '2 meses': '2 months',
+    '3 meses': '3 months',
+    'Año': 'Year',
+    'la última semana': 'the last week',
+    'el último mes': 'the last month',
+    'los últimos dos meses': 'the last two months',
+    'los últimos tres meses': 'the last three months',
+    'el último año': 'the last year',
+    'en {p}': 'in {p}',
+    'Por semana': 'Per week',
+    'Racha': 'Streak',
+    'Tiempo': 'Time',
+    'Series completadas': 'Sets completed',
+    'Volumen levantado': 'Volume lifted',
+    'Series': 'Sets',
+    'Volumen': 'Volume',
+    'vs. antes': 'vs. before',
+    'Un punto por día': 'One dot per day',
+    'Un punto por semana': 'One dot per week',
+    'Constancia': 'Consistency',
+    'Días entrenados': 'Days trained',
+    'de {n}': 'of {n}',
+    'El número de abajo son las series de ese día.': "The number below is that day's sets.",
+    'Un cuadro por día.': 'One square per day.',
+    'Los huecos también cuentan: el descanso forma parte del plan.':
+      'The gaps count too: rest is part of the plan.',
+    'Reparto por zona ({n} días)': 'Split by area ({n} days)',
+    'Lo que más trabajas': 'What you work most',
+    '{n}% de las series': '{n}% of your sets',
+    'Récords personales': 'Personal records',
+    'Menos': 'Less',
+    'Más': 'More'
   };
 })(window);
