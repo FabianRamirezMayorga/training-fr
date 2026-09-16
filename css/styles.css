@@ -6282,3 +6282,18 @@ html[data-theme="light"] .sh-pieza {
   background: color-mix(in srgb, #000 4%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 7%, transparent);
 }
+
+/* Lo que va a decir el aviso, en la propia tarjeta del recordatorio. Va en
+   pequeno y a una linea: tres lineas de menu aqui taparian las horas y los
+   dias, que es a lo que se viene a esta pantalla. */
+.rec-adelanto {
+  margin: 9px 13px 0; padding: 7px 10px; border-radius: 10px;
+  font-size: .74rem; line-height: 1.35; color: var(--dim2);
+  background: color-mix(in srgb, #000 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 6%, transparent);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+html[data-theme="light"] .rec-adelanto {
+  background: color-mix(in srgb, #000 4%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 7%, transparent);
+}

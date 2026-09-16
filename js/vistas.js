@@ -1294,7 +1294,9 @@
         if (!m) return;
         const min = Number(m[1]) * 60 + Number(m[2]);
         if (min < ahora) return;
-        if (!mejor || min < mejor.min) mejor = { min: min, hora: h, titulo: a.titulo };
+        if (!mejor || min < mejor.min) {
+          mejor = { min: min, hora: h, titulo: Alertas.tituloEn(a, h) };
+        }
       });
     });
 
@@ -1401,11 +1403,17 @@
       '<div class="rec-hora">' + esc(UI.hora(grande)) +
       (horas.length > 1
         ? '<i>+' + (horas.length - 1) + '</i>' : '') + '</div>' +
-      '<div class="rec-que">' + esc(a.titulo) + '</div>' +
+      '<div class="rec-que">' + esc(Alertas.tituloEn(a, grande)) + '</div>' +
       '<div class="rec-dias">' + esc(Alertas.resumenDias(a)) + '</div>' +
       '</div>' +
       o.control +
       '</div>' +
+      /* Lo que va a decir, en una línea y en pequeño. Sin esto hay que esperar
+         a que suene para saber si el recordatorio sabe de tu menú. */
+      (function () {
+        const ad = Alertas.adelantoEn ? Alertas.adelantoEn(a, grande) : '';
+        return ad ? '<div class="rec-adelanto">' + esc(ad) + '</div>' : '';
+      })() +
       tira +
       (o.pie || '') +
       '</div>';

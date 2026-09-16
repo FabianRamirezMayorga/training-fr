@@ -385,6 +385,33 @@
     return out;
   }
 
+  /* ---------- lo que va a decir, antes de que lo diga ----------
+     La tarjeta del recordatorio enseñaba «Hora de comer» y el aviso que sonaba
+     decía «Toca desayunar»: la app prometía una cosa y cumplía otra, y eso hace
+     dudar de si el que suena es el que creaste.
+
+     Estas dos se calculan igual que al lanzarlo, así que lista y aviso no
+     pueden separarse nunca. */
+  function tituloEn(a, hora) {
+    if (TIPOS[a.tipo] && TIPOS[a.tipo].segunLaHora) {
+      const c = comidaDeEsaHora(hora || (a.horas || [])[0]);
+      if (c) return c.titulo;
+    }
+    return a.titulo;
+  }
+
+  /* Un adelanto corto de lo que llevará el aviso. No es el texto entero: en una
+     tarjeta de lista, tres líneas de menú tapan las horas y los días, que es a
+     lo que se viene a esa pantalla. */
+  function adelantoEn(a, hora) {
+    if (!TIPOS[a.tipo] || !TIPOS[a.tipo].segunLaHora) return '';
+    const c = comidaDeEsaHora(hora || (a.horas || [])[0]);
+    if (!c) return '';
+    const n = c.kcal ? UI.num(c.kcal) + ' kcal' + (c.prot ? ' · ' + c.prot + ' g' : '') : '';
+    if (c.plato) return c.plato + (n ? ' · ' + n : '');
+    return n;
+  }
+
   function tituloDe(x) {
     if (TIPOS[x.alerta.tipo] && TIPOS[x.alerta.tipo].segunLaHora) {
       const c = comidaDeEsaHora(x.hora);
@@ -399,13 +426,16 @@
     if (TIPOS[x.alerta.tipo] && TIPOS[x.alerta.tipo].segunLaHora) {
       const c = comidaDeEsaHora(x.hora);
       if (c) {
+        /* El plato delante y los números detrás: con el móvil bloqueado se lee
+           media línea, y en esa media línea lo que sirve es qué comer. Las
+           calorías son el control, y el control va después de la acción. */
         const partes = [];
+        if (c.plato) partes.push(c.plato);
         if (c.kcal) {
           partes.push('Unas ' + UI.num(c.kcal) + ' kcal' +
             (c.prot ? ' y ' + c.prot + ' g de proteína' : '') +
             (c.aojo ? ' (a ojo, sin menú)' : ''));
         }
-        if (c.plato) partes.push(c.plato);
         /* Lo que el usuario escribiera a mano manda sobre lo calculado: si se
            molestó en poner un texto suyo, no se le pisa. */
         if (x.mensaje && x.mensaje !== TIPOS.comida.mensaje) partes.unshift(x.mensaje);
@@ -815,6 +845,7 @@
     lista: lista, nueva: nueva, guardar: guardar, borrar: borrar, desdeRutinas: desdeRutinas,
     soportado: soportado, permiso: permiso, pedirPermiso: pedirPermiso, avisar: avisar,
     pendientes: pendientes, arrancar: arrancar, parar: parar, marcarLanzada: marcarLanzada,
+    tituloEn: tituloEn, adelantoEn: adelantoEn,
     ics: ics, icsCancelar: icsCancelar, cuantosExportados: cuantosExportados,
     calendarioDesfasado: calendarioDesfasado, calendarioCaduca: calendarioCaduca,
     PLAZOS: PLAZOS, plazoActual: plazoActual, finDe: finDe,
