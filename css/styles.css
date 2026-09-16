@@ -166,12 +166,70 @@ a{color:var(--blue)}
 .btn.grande svg{width:20px;height:20px}
 .btn[disabled]{opacity:.4;pointer-events:none}
 
-.chip{display:inline-flex;align-items:center;gap:5px;padding:.34em .78em;border-radius:999px;
-  background:var(--card2);border:1px solid transparent;font-size:.83rem;font-weight:500;
-  color:var(--dim);white-space:nowrap;letter-spacing:-.01em;transition:transform .12s}
+/* ---------- la pastilla ----------
+   Es la pieza pequena mas repetida de la app —los rangos de Progreso, los dias
+   de una rutina, los pasos del generador, las opciones de un formulario— y era
+   la unica que no llevaba vidrio: un rectangulo gris plano con el borde
+   transparente. Junto a una tarjeta con rim y sombra, cantaba.
+
+   El vidrio hay que calibrarlo al tamano: en una pieza de 30 px de alto, el 7 %
+   de blanco del rim general no se ve. Aqui va al 14 % arriba y con sombra
+   interior abajo, que es lo que hace que parezca un cristal y no un tono mas
+   claro del fondo. */
+.chip{display:inline-flex;align-items:center;gap:5px;padding:.38em .82em;border-radius:999px;
+  border:1px solid color-mix(in srgb, #fff 9%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 7%, transparent), transparent 62%),
+    color-mix(in srgb, var(--card2) 74%, transparent);
+  backdrop-filter:blur(10px) saturate(1.4);
+  -webkit-backdrop-filter:blur(10px) saturate(1.4);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #000 14%, transparent),
+    0 2px 6px color-mix(in srgb, #000 16%, transparent);
+  font-size:.83rem;font-weight:550;
+  color:var(--dim);white-space:nowrap;letter-spacing:-.01em;
+  transition:transform .12s, border-color .18s ease, box-shadow .22s ease, color .18s ease}
 .chip:active{transform:scale(.95)}
-.chip.on{background:var(--acc-d);border-color:var(--acc);color:var(--acc)}
-.chip.solid{background:var(--acc-d);color:var(--acc);border-color:transparent}
+
+/* Elegida: el acento entra en el propio cristal —tinte, borde y un halo corto—
+   en vez de sustituirlo por un bloque de color. Asi se ve que es la misma pieza
+   encendida y no otra distinta. */
+.chip.on{
+  color:var(--acc);
+  border-color:color-mix(in srgb, var(--acc) 52%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 9%, transparent), transparent 60%),
+    color-mix(in srgb, var(--acc) 15%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #000 10%, transparent),
+    0 3px 12px color-mix(in srgb, var(--acc) 22%, transparent)}
+.chip.solid{
+  color:var(--acc);
+  border-color:color-mix(in srgb, var(--acc) 34%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 8%, transparent), transparent 60%),
+    color-mix(in srgb, var(--acc) 13%, transparent)}
+
+/* En claro el cristal se hace con negro: el rim blanco sobre fondo claro no
+   existe y la pastilla se queda sin borde de arriba. */
+html[data-theme="light"] .chip{
+  border-color:color-mix(in srgb, #000 11%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 80%, transparent), transparent 60%),
+    color-mix(in srgb, var(--card2) 88%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 85%, transparent),
+    0 1px 3px color-mix(in srgb, #000 9%, transparent)}
+html[data-theme="light"] .chip.on{
+  border-color:color-mix(in srgb, var(--acc) 55%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 55%, transparent), transparent 60%),
+    color-mix(in srgb, var(--acc) 13%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 55%, transparent),
+    0 2px 9px color-mix(in srgb, var(--acc) 20%, transparent)}
 /* El músculo que se trabaja, en color: entre el nombre en inglés y la lista de
    músculos todo era del mismo gris y no se distinguía de un vistazo. Es texto y
    no una pastilla: parecían botones y no lo son, no se pulsan. */
@@ -6199,12 +6257,15 @@ html[data-theme="light"] .sf-campo:focus-within {
 .sup-fila:active { transform: scale(.99); }
 .sup-fila.hoy-no { opacity: .5; }
 
-/* Ancho de sobra para «12:00 PM»: con 58 px partia en dos lineas y la fila
-   crecia solo en las horas de la tarde, que dejaba la lista con escalones. */
+/* Ancho de sobra para la hora mas larga que puede salir. Depende del movil:
+   unos escriben «12:00 PM» y otros «12:00 a.m.», que es tres caracteres mas
+   largo, y con 66 px ese partia en dos lineas y dejaba la lista con escalones.
+   Se le da sitio y se le baja el cuerpo, en vez de fiarse de un ancho fijo. */
 .sup-hora {
-  flex: none; width: 66px; display: flex; flex-direction: column; align-items: center;
+  flex: none; width: 78px; display: flex; flex-direction: column; align-items: center;
   gap: 1px;
 }
+.sup-hora b { font-size: .84rem; white-space: nowrap; }
 .sup-hora b {
   font-size: .92rem; font-weight: 800; letter-spacing: -.02em;
   font-variant-numeric: tabular-nums; color: var(--acc);
@@ -6244,20 +6305,45 @@ html[data-theme="light"] .sf-campo:focus-within {
 .sup-pie { margin: 11px 0 0; line-height: 1.45; }
 .sup-pie b { color: var(--txt); font-weight: 700; }
 
-/* La hora que sale de otro sitio, dicha donde se elige el momento. Elegir «con
-   el desayuno» sin ver que eso son las 6:00 deja la duda de si la app sabe a
-   que hora desayunas, y es lo que hace que la gente ponga horas a mano. */
-.sup-calc {
-  display: flex; align-items: baseline; gap: 9px; margin-top: 14px;
-  padding: 11px 13px; border-radius: 14px;
-  background: color-mix(in srgb, var(--acc) 10%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 26%, transparent);
+/* ---------- el que no es como los demas ----------
+   «Hora puntual» y «Varias veces al dia» no son una opcion mas de su fila: los
+   otros momentos son relativos a algo tuyo —tus comidas, tu entreno— y estos
+   dos cambian la naturaleza de lo que estas eligiendo. Distinta naturaleza,
+   distinto color, y se encuentran sin leer la fila entera. */
+.chip.chip-otro {
+  color: color-mix(in srgb, var(--agua) 86%, var(--txt));
+  border-color: color-mix(in srgb, var(--agua) 30%, transparent);
 }
-.sup-calc b {
-  flex: none; font-size: 1.15rem; font-weight: 800; letter-spacing: -.02em;
-  color: var(--acc); font-variant-numeric: tabular-nums;
+.chip.chip-otro.on {
+  color: var(--agua);
+  border-color: color-mix(in srgb, var(--agua) 56%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 9%, transparent), transparent 60%),
+    color-mix(in srgb, var(--agua) 16%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent),
+    0 3px 12px color-mix(in srgb, var(--agua) 24%, transparent);
 }
-.sup-calc span { font-size: .76rem; color: var(--dim2); line-height: 1.35; }
+
+/* El reparto abre su propia hoja, asi que aqui es una fila y no una pastilla:
+   lo que hay elegido puede ser largo —«Despues de cada comida»— y en pastilla
+   ocuparia la linea entera y dejaria de parecer una pastilla. */
+.sup-reparto {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  padding: 12px 13px; border-radius: 14px; cursor: pointer; font: inherit;
+  font-weight: 600; font-size: .92rem; color: var(--agua);
+  border: 1px solid color-mix(in srgb, var(--agua) 38%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 7%, transparent), transparent 60%),
+    color-mix(in srgb, var(--agua) 12%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent);
+  transition: transform .12s ease;
+}
+.sup-reparto:active { transform: scale(.985); }
+.sup-reparto .chevron { opacity: .6; }
+
+/* Varias tomas: el numero en vez de la hora, que no hay una sola */
+.sup-hora b em { font-style: normal; font-size: .68rem; opacity: .75; margin-left: 1px; }
 
 /* Ya lo tomas: marcado en el catalogo, para no anadirlo dos veces */
 .sup-ya {

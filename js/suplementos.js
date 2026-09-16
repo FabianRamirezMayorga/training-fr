@@ -63,8 +63,36 @@
     { id: 'alterno', label: 'Un día sí y otro no', corto: 'Día sí, día no',
       sub: 'Empezando hoy' },
     { id: 'semanal', label: 'Un día a la semana', corto: 'Un día/semana',
-      sub: 'El que elijas' }
+      sub: 'El que elijas' },
+    /* Lo que faltaba y no trae ninguna lista de frecuencias: media
+       suplementación se reparte en el día —magnesio en dos tomas, aminoácidos
+       cada pocas horas, enzimas con cada comida— y con «todos los días» solo se
+       podía apuntar una. */
+    { id: 'varias', label: 'Varias veces al día', corto: 'Varias al día',
+      sub: 'Repartido en el día', reparte: true }
   ];
+
+  /* ---------- cómo se reparte ----------
+     Las dos familias son distintas de raíz. «Cada tantas horas» es un reloj:
+     arranca a una hora y va sumando. «Con las comidas» no mira el reloj, mira
+     tus franjas, así que si mueves el almuerzo la toma se mueve con él.
+
+     Las de reloj se cortan en la cena y no siguen toda la noche: nadie quiere
+     que le suene el magnesio a las tres de la mañana por haber puesto «cada
+     seis horas». */
+  const PATRONES = [
+    { id: 'cada:4', label: 'Cada 4 horas', de: 'reloj', horas: 4 },
+    { id: 'cada:6', label: 'Cada 6 horas', de: 'reloj', horas: 6 },
+    { id: 'cada:8', label: 'Cada 8 horas', de: 'reloj', horas: 8 },
+    { id: 'cada:12', label: 'Cada 12 horas', de: 'reloj', horas: 12 },
+    { id: 'antes:comidas', label: 'Antes de cada comida', de: 'comidas', desfase: -15 },
+    { id: 'con:comidas', label: 'Con cada comida', de: 'comidas', desfase: 0 },
+    { id: 'tras:comidas', label: 'Después de cada comida', de: 'comidas', desfase: 30 }
+  ];
+
+  function patronDe(id) {
+    return PATRONES.filter(function (x) { return x.id === id; })[0] || PATRONES[2];
+  }
 
   /* ---------- en qué momento ----------
      Lo que se guarda es el momento, no la hora: así una sola cosa manda sobre
@@ -78,7 +106,7 @@
       de: 'entreno', desfase: -30 },
     { id: 'tras:entreno', label: 'Después de entrenar', corto: 'Post-entreno',
       de: 'entreno', desfase: 60 },
-    { id: 'fija', label: 'A una hora fija', corto: 'Hora fija', de: 'fija' }
+    { id: 'fija', label: 'A una hora puntual', corto: 'Hora puntual', de: 'fija' }
   ];
 
   function momentoDe(id) {
@@ -116,7 +144,35 @@
     return Alertas.aHora(Alertas.enMinutos(base) + (m.desfase || 0));
   }
 
+  /* ---------- todas las horas de un suplemento ----------
+     Dejó de poder ser una sola en cuanto entró «varias veces al día», y media
+     app preguntaba por la hora en singular. Se devuelve siempre una lista: con
+     una toma trae un elemento, y así nadie tiene que saber de qué caso es. */
+  function horasDe(s) {
+    if (s.frecuencia !== 'varias') return [horaDe(s)];
+
+    const p = patronDe(s.patron);
+    const min = function (h) { return g.Alertas ? Alertas.enMinutos(h) : 0; };
+    const txt = function (m) { return g.Alertas ? Alertas.aHora(m) : '08:00'; };
+
+    if (p.de === 'comidas') {
+      return (g.Perfil && Perfil.franjas ? Perfil.franjas() : [])
+        .map(function (f) { return txt(min(f.desde) + (p.desfase || 0)); });
+    }
+
+    /* De reloj: desde donde arranque hasta la cena, sin pasarse a la noche. */
+    const franjas = g.Perfil && Perfil.franjas ? Perfil.franjas() : [];
+    const arranque = min(s.hora || (franjas[0] && franjas[0].desde) || '08:00');
+    const ultima = franjas.length ? min(franjas[franjas.length - 1].desde) + 60
+      : 22 * 60;
+    const paso = (p.horas || 8) * 60;
+    const out = [];
+    for (let m = arranque; m <= ultima && out.length < 12; m += paso) out.push(txt(m));
+    return out.length ? out : [txt(arranque)];
+  }
+
   function etiquetaMomento(s) {
+    if (s.frecuencia === 'varias') return patronDe(s.patron).label;
     const m = momentoDe(s.momento);
     return m.id === 'fija' ? 'A las ' + (g.UI && UI.hora ? UI.hora(horaDe(s)) : horaDe(s))
       : m.label;
@@ -182,9 +238,11 @@
   }
 
   function tomasDeHoy() {
-    return lista().filter(tocaHoy).map(function (s) {
-      return { sup: s, hora: horaDe(s) };
-    }).sort(function (a, b) {
+    const out = [];
+    lista().filter(tocaHoy).forEach(function (s) {
+      horasDe(s).forEach(function (h) { out.push({ sup: s, hora: h }); });
+    });
+    return out.sort(function (a, b) {
       return (g.Alertas ? Alertas.enMinutos(a.hora) - Alertas.enMinutos(b.hora) : 0);
     });
   }
@@ -197,8 +255,11 @@
     let kcal = 0, prot = 0;
     lista().forEach(function (s) {
       if (!s.aporta || !tocaHoy(s)) return;
-      kcal += Number(s.aporta.kcal) || 0;
-      prot += Number(s.aporta.prot) || 0;
+      /* Por toma, no por bote: dos batidos al día son el doble de proteína, y
+         contarlo una vez dejaba la mitad sin descontar del menú. */
+      const veces = horasDe(s).length;
+      kcal += (Number(s.aporta.kcal) || 0) * veces;
+      prot += (Number(s.aporta.prot) || 0) * veces;
     });
     return { kcal: Math.round(kcal), prot: Math.round(prot) };
   }
@@ -214,10 +275,13 @@
       return f ? f.label.toLowerCase() : 'todos los días';
     };
     return l.map(function (s) {
+      const hs = horasDe(s);
+      const veces = hs.length;
       return '- ' + s.nombre + (s.dosis ? ', ' + s.dosis : '') +
         ', ' + frec(s) + ', ' + etiquetaMomento(s).toLowerCase() +
-        ' (sobre las ' + horaDe(s) + ')' +
-        (s.aporta ? ' [aporta ~' + s.aporta.kcal + ' kcal y ' + s.aporta.prot + ' g de proteína]' : '');
+        ' (sobre las ' + hs.join(', ') + ')' +
+        (s.aporta ? ' [aporta ~' + (s.aporta.kcal * veces) + ' kcal y ' +
+          (s.aporta.prot * veces) + ' g de proteína al día]' : '');
     }).join('\n');
   }
 
@@ -231,12 +295,13 @@
   function alertasDe() {
     const porHora = {};
     lista().forEach(function (s) {
-      const h = horaDe(s);
       /* Varios a la misma hora van en un solo aviso. Tres notificaciones
          seguidas a las ocho para tres botes que están en el mismo cajón es
          ruido, y el ruido se acaba silenciando entero. */
-      if (!porHora[h]) porHora[h] = [];
-      porHora[h].push(s);
+      horasDe(s).forEach(function (h) {
+        if (!porHora[h]) porHora[h] = [];
+        if (porHora[h].indexOf(s) === -1) porHora[h].push(s);
+      });
     });
 
     return Object.keys(porHora).map(function (h) {
@@ -272,7 +337,8 @@
     grupo.forEach(function (s) {
       /* Alterno cae en cualquier día de la semana, así que el aviso tiene que
          existir los siete; el que decide si hoy toca es tocaHoy(). */
-      if (s.frecuencia === 'diario' || s.frecuencia === 'alterno') { todos = true; return; }
+      if (s.frecuencia === 'diario' || s.frecuencia === 'alterno' ||
+        s.frecuencia === 'varias') { todos = true; return; }
       if (s.frecuencia === 'semanal') { dias[Number(s.dia) || 1] = 1; return; }
       if (s.frecuencia === 'entreno') {
         diasDeEntreno().forEach(function (d) { dias[d] = 1; });
@@ -326,7 +392,8 @@
     CATALOGO: CATALOGO, FRECUENCIAS: FRECUENCIAS, MOMENTOS: MOMENTOS,
     delCatalogo: delCatalogo, momentoDe: momentoDe,
     lista: lista, nuevo: nuevo, guardar: guardar, borrar: borrar,
-    horaDe: horaDe, etiquetaMomento: etiquetaMomento,
+    horaDe: horaDe, horasDe: horasDe, etiquetaMomento: etiquetaMomento,
+    PATRONES: PATRONES, patronDe: patronDe,
     tocaHoy: tocaHoy, tomasDeHoy: tomasDeHoy, aportaDiario: aportaDiario,
     resumenIA: resumenIA, alertasDe: alertasDe,
     sincronizarAlertas: sincronizarAlertas, hayAlertas: hayAlertas,

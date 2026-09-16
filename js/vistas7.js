@@ -24,15 +24,16 @@
   /* ---------- la lista ---------- */
 
   function filaHTML(s) {
-    const hora = S().horaDe(s);
+    const horas = S().horasDe(s);
     const f = S().FRECUENCIAS.filter(function (x) { return x.id === s.frecuencia; })[0];
     const toca = S().tocaHoy(s);
 
     return html`
       <button class="sup-fila ${toca ? '' : 'hoy-no'}" data-sup="${s.id}">
         <span class="sup-hora">
-          <b>${raw(UI.hora ? UI.hora(hora) : hora)}</b>
-          <i>${raw(toca ? 'hoy' : 'hoy no')}</i>
+          <b>${raw(horas.length > 1 ? horas.length + '<em>×</em>'
+            : (UI.hora ? UI.hora(horas[0]) : horas[0]))}</b>
+          <i>${raw(horas.length > 1 ? 'al día' : (toca ? 'hoy' : 'hoy no'))}</i>
         </span>
         <span class="grow">
           <span class="sup-nom">${s.nombre}</span>
@@ -97,7 +98,8 @@
              a nadie. -->
         <div class="sup-lista">
           ${raw(l.slice().sort(function (a, b) {
-            return Alertas.enMinutos(S().horaDe(a)) - Alertas.enMinutos(S().horaDe(b));
+            return Alertas.enMinutos(S().horasDe(a)[0]) -
+              Alertas.enMinutos(S().horasDe(b)[0]);
           }).map(filaHTML).join(''))}
         </div>
 
@@ -195,29 +197,35 @@
   }
 
   /* ---------- la ficha ----------
-     Eran once filas de lista apiladas —cuatro frecuencias y siete momentos, con
-     su icono y su subtítulo cada una— para rellenar cuatro datos. Con pastillas
-     cabe entero sin scroll y se lee de un vistazo qué hay elegido.
+     Sin la caja con la hora calculada. Enseñaba «7:00 PM» en grande al elegir
+     post-entreno, y esa hora es una suposición: si un día entrenas por la
+     mañana, la toma va después de ESE entreno. Un número grande y en color
+     promete una exactitud que ahí no existe. La hora de verdad se ve en la
+     lista, ya guardado.
 
-     Lo único que se queda grande es la hora calculada: elegir «con el desayuno»
-     sin ver que eso son las 6:00 deja la duda de si la app sabe a qué hora
-     desayunas, y es lo que hace que la gente acabe poniendo horas a mano. */
+     Lo que sí queda es el botón de hora puntual, y con color propio: los demás
+     momentos son relativos a algo tuyo —tus comidas, tu entreno— y ese es el
+     único absoluto. Distinta naturaleza, distinto color. */
   function fichaSheet(s, esNuevo) {
     const dat = JSON.parse(JSON.stringify(s));
     const DIAS = [[1, 'L'], [2, 'M'], [3, 'X'], [4, 'J'], [5, 'V'], [6, 'S'], [0, 'D']];
 
     const pintar = function (el) {
-      const caja = el.querySelector('#sf-hora');
-      const h = S().horaDe(dat);
       const m = S().momentoDe(dat.momento);
-      caja.innerHTML = '<b>' + esc(UI.hora ? UI.hora(h) : h) + '</b>' +
-        '<span>' + esc(m.de === 'franja'
-          ? 'sale de tus horas de comer, en Alimentación'
-          : m.de === 'entreno'
-            ? 'sale de la hora a la que sueles entrenar'
-            : 'la que has puesto') + '</span>';
-      el.querySelector('#sf-fija').hidden = m.de !== 'fija';
+      const reparte = dat.frecuencia === 'varias';
+
+      el.querySelector('#sf-fija').hidden = reparte || m.de !== 'fija';
       el.querySelector('#sf-semanal').hidden = dat.frecuencia !== 'semanal';
+      /* Repartido en el día, el momento suelto ya no manda: lo dice el patrón,
+         así que se aparta en vez de quedarse contradiciéndolo. */
+      el.querySelector('#sf-blmom').hidden = reparte;
+      el.querySelector('#sf-blrep').hidden = !reparte;
+
+      const rep = el.querySelector('#sf-repchip');
+      if (rep) rep.textContent = S().patronDe(dat.patron).label;
+
+      const ini2 = el.querySelector('#sf-inicio');
+      if (ini2) ini2.hidden = !reparte || S().patronDe(dat.patron).de !== 'reloj';
     };
 
     UI.modal(html`
@@ -239,7 +247,8 @@
       <div class="row wrap sup-pills" id="sf-frec">
         ${raw(S().FRECUENCIAS.map(function (f) {
           return '<button class="chip ' + (dat.frecuencia === f.id ? 'on' : '') +
-            '" data-frec="' + esc(f.id) + '">' + esc(f.corto || f.label) + '</button>';
+            (f.reparte ? ' chip-otro' : '') + '" data-frec="' + esc(f.id) + '">' +
+            esc(f.corto || f.label) + '</button>';
         }).join(''))}
       </div>
 
@@ -253,22 +262,35 @@
         </div>
       </div>
 
-      <label class="tiny sup-lbl">EN QUÉ MOMENTO</label>
-      <div class="row wrap sup-pills" id="sf-mom">
-        ${raw(S().MOMENTOS.map(function (m) {
-          return '<button class="chip ' + (dat.momento === m.id ? 'on' : '') +
-            '" data-mom="' + esc(m.id) + '">' + esc(m.corto || m.label) + '</button>';
-        }).join(''))}
+      <div id="sf-blrep" hidden>
+        <label class="tiny sup-lbl">CÓMO SE REPARTE</label>
+        <button class="sup-reparto" data-x="reparto">
+          <span class="grow" id="sf-repchip">Cada 8 horas</span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <div id="sf-inicio" hidden>
+          <label class="tiny sup-lbl">EMPEZANDO A LAS</label>
+          <input type="time" id="sf-horainicio" value="${dat.hora || '08:00'}">
+        </div>
       </div>
 
-      <div id="sf-fija" hidden>
-        <label class="tiny sup-lbl">A QUÉ HORA</label>
-        <input type="time" id="sf-horafija" value="${dat.hora || '08:00'}">
+      <div id="sf-blmom">
+        <label class="tiny sup-lbl">EN QUÉ MOMENTO</label>
+        <div class="row wrap sup-pills" id="sf-mom">
+          ${raw(S().MOMENTOS.map(function (m) {
+            return '<button class="chip ' + (dat.momento === m.id ? 'on' : '') +
+              (m.de === 'fija' ? ' chip-otro' : '') + '" data-mom="' + esc(m.id) + '">' +
+              esc(m.corto || m.label) + '</button>';
+          }).join(''))}
+        </div>
+
+        <div id="sf-fija" hidden>
+          <label class="tiny sup-lbl">A QUÉ HORA</label>
+          <input type="time" id="sf-horafija" value="${dat.hora || '08:00'}">
+        </div>
       </div>
 
-      <div class="sup-calc" id="sf-hora"></div>
-
-      <div class="cb-acciones" style="margin-top:14px">
+      <div class="cb-acciones" style="margin-top:16px">
         <button class="btn primary grow btn-arranque" data-x="ok">
           ${raw(icon('check'))} Guardar</button>
         <button class="btn vidrio" data-x="no">Cancelar</button>
@@ -276,33 +298,46 @@
       ${raw(esNuevo ? '' : '<button class="btn ghost block sm danger" data-x="borrar" ' +
         'style="margin-top:9px">Quitarlo de la lista</button>')}`,
       function (el) {
+        if (!dat.patron) dat.patron = 'cada:8';
         pintar(el);
 
         /* Un solo manejador por grupo: los botones se repintan al elegir, y
            enganchados uno a uno la primera elección se queda clavada. */
-        const grupo = function (sel, campo, num) {
+        const grupo = function (sel, attr, campo, num) {
           const caja = el.querySelector(sel);
           caja.onclick = function (ev) {
-            const b = ev.target.closest('[data-' + campo + ']');
+            const b = ev.target.closest('[data-' + attr + ']');
             if (!b) return;
-            dat[campo === 'frec' ? 'frecuencia' : campo === 'mom' ? 'momento' : 'dia'] =
-              num ? Number(b.dataset[campo]) : b.dataset[campo];
-            caja.querySelectorAll('[data-' + campo + ']').forEach(function (x) {
-              const suyo = num ? Number(x.dataset[campo]) : x.dataset[campo];
-              const actual = dat[campo === 'frec' ? 'frecuencia'
-                : campo === 'mom' ? 'momento' : 'dia'];
-              x.classList.toggle('on', suyo === actual);
+            dat[campo] = num ? Number(b.dataset[attr]) : b.dataset[attr];
+            caja.querySelectorAll('[data-' + attr + ']').forEach(function (x) {
+              const suyo = num ? Number(x.dataset[attr]) : x.dataset[attr];
+              x.classList.toggle('on', suyo === dat[campo]);
             });
             pintar(el);
           };
         };
-        grupo('#sf-frec', 'frec');
-        grupo('#sf-mom', 'mom');
-        grupo('#sf-semanal', 'dia', true);
+        grupo('#sf-frec', 'frec', 'frecuencia');
+        grupo('#sf-mom', 'mom', 'momento');
+        grupo('#sf-semanal', 'dia', 'dia', true);
 
         el.querySelector('#sf-horafija').oninput = function () {
           dat.hora = el.querySelector('#sf-horafija').value;
-          pintar(el);
+        };
+        el.querySelector('#sf-horainicio').oninput = function () {
+          dat.hora = el.querySelector('#sf-horainicio').value;
+        };
+
+        /* La hoja del reparto reemplaza a esta —UI.modal solo tiene un sitio—,
+           así que hay que guardar lo escrito antes de irse y volver a abrir la
+           ficha al elegir. Sin esto, elegir el reparto cerraba el formulario
+           entero y se perdía lo tecleado. */
+        el.querySelector('[data-x=reparto]').onclick = function () {
+          dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
+          dat.dosis = (el.querySelector('#sf-dosis').value || '').trim();
+          repartoSheet(dat.patron, function (id) {
+            dat.patron = id;
+            fichaSheet(dat, esNuevo);
+          });
         };
 
         el.querySelector('[data-x=no]').onclick = function () { UI.closeModal(); };
@@ -330,6 +365,57 @@
           UI.closeModal();
           render();
           UI.toast(esNuevo ? dat.nombre + ' añadido' : 'Guardado');
+        };
+      });
+  }
+
+  /* ---------- cómo se reparte en el día ----------
+     En su propia hoja y no en más pastillas dentro de la ficha: son siete
+     opciones de dos familias distintas —las de reloj y las que van con tus
+     comidas— y mezcladas en una fila de pastillas se leen como siete cosas
+     sueltas en vez de como dos maneras de repartir. */
+  function repartoSheet(actual, alElegir) {
+    let elegido = actual || 'cada:8';
+
+    const grupo = function (titulo, de, pie) {
+      const xs = S().PATRONES.filter(function (p) { return p.de === de; });
+      return '<div class="list-title" style="margin-top:12px">' + esc(titulo) + '</div>' +
+        '<div class="opciones">' + xs.map(function (p) {
+          const horas = S().horasDe({ frecuencia: 'varias', patron: p.id, hora: '08:00' });
+          return '<button class="opcion ' + (elegido === p.id ? 'on' : '') +
+            '" data-pat="' + esc(p.id) + '" style="--tono:var(--acc)">' +
+            '<span class="grow"><span class="op-nom">' + esc(p.label) + '</span>' +
+            '<span class="op-sub">' + horas.length +
+            (horas.length === 1 ? ' toma' : ' tomas') + ' al día · ' +
+            esc(horas.map(function (h) { return UI.hora ? UI.hora(h) : h; }).join(', ')) +
+            '</span></span><span class="op-marca">' + icon('check') + '</span></button>';
+        }).join('') + '</div>' +
+        (pie ? '<p class="tiny" style="margin:7px 2px 0">' + esc(pie) + '</p>' : '');
+    };
+
+    UI.modal(html`
+      <div class="conf-disco cambio">${raw(icon('reloj'))}</div>
+      <h2 class="conf-tit">¿Cómo lo repartes?</h2>
+      <p class="muted conf-txt">Debajo de cada opción van las horas que salen con tus
+      datos de ahora.</p>
+
+      <div id="rp-lista">
+        ${raw(grupo('Por reloj', 'reloj',
+          'Arrancan a la hora que elijas y se cortan en la cena: nadie quiere el ' +
+          'magnesio a las tres de la mañana.'))}
+        ${raw(grupo('Con tus comidas', 'comidas',
+          'Salen de tus horas de comer, así que si mueves una comida la toma se mueve ' +
+          'con ella.'))}
+      </div>`,
+      function (el) {
+        el.querySelector('#rp-lista').onclick = function (ev) {
+          const b = ev.target.closest('[data-pat]');
+          if (!b) return;
+          elegido = b.dataset.pat;
+          /* Se cierra y se reabre la ficha en el siguiente hueco: encadenar dos
+             modales en el mismo tic deja el de arriba a medio pintar. */
+          UI.closeModal();
+          setTimeout(function () { alElegir(elegido); }, 180);
         };
       });
   }

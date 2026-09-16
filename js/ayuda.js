@@ -153,7 +153,9 @@
         '*El momento no guarda una hora*, guarda que es «con el desayuno» o «después de entrenar». La hora sale de tus horas de comer y de la hora a la que entrenas de verdad, así que si mueves el desayuno de las ocho a las seis, la creatina se mueve sola.',
         '*Lo que aportan cuenta*: un batido de proteína son unas 120 kcal y 24 g, y el menú los descuenta en vez de pedírtelos otra vez en comida.',
         '*Y la IA lo sabe*: al montarte un menú no te propone lo que ya tomas, y si una toma va con una comida concreta la menciona ahí en vez de inventar otra.',
-        'Las frecuencias que hay: todos los días, los días que entrenas —sale de los días de tu plan—, un día sí y otro no, y un día a la semana.'
+        'Las frecuencias que hay: todos los días, los días que entrenas —sale de los días de tu plan—, un día sí y otro no, un día a la semana, y *varias veces al día*.',
+        'Lo de varias veces al día se reparte de dos maneras. *Por reloj*: cada 4, 6, 8 o 12 horas, arrancando a la hora que elijas y cortando en la cena, que nadie quiere el magnesio a las tres de la mañana. *Con tus comidas*: antes, con o después de cada una, y entonces las tomas se mueven si mueves una comida. Al elegir te enseña las horas que salen con tus datos de ahora.',
+        'Lo que aportan se cuenta por toma y no por bote: dos batidos al día son el doble de proteína, y el menú lo descuenta entero.'
       ],
       ver: ['c-suplementos', 'g-comida', 'p-suplerecet'] },
 
@@ -348,7 +350,9 @@
         { t: 'Di cada cuánto.',
           d: 'Todos los días, los días que entrenas, un día sí y otro no, o un día a la semana. «Los días que entreno» sale de los días que tengas asignados en tu plan.' },
         { t: 'Di en qué momento.',
-          d: 'Con el desayuno, el almuerzo, la merienda o la cena; antes o después de entrenar; o a una hora fija. Debajo verás la hora exacta que sale de eso, para que sepas que la app conoce tus horarios.' },
+          d: 'Con el desayuno, el almuerzo, la merienda o la cena; antes o después de entrenar; o a una *hora puntual*, que va en otro color porque es el único que no depende de nada tuyo.' },
+        { t: 'Si lo tomas varias veces al día, elige *Varias al día*.',
+          d: 'Se cambia la fila del momento por una de reparto: cada tantas horas, o con tus comidas. Debajo de cada opción verás las horas que salen con tus datos.' },
         { t: 'Guarda y, abajo, toca *Crear los recordatorios*.',
           d: 'Se crean con el nombre y la dosis. Solo toca los de suplementos: los recordatorios que hayas creado tú se quedan como están.' }
       ],
@@ -511,6 +515,12 @@
       a: ['Por una de tres: la hora de la foto cae fuera de todas las franjas, no tienes un menú activo para ese día, o las franjas no están puestas a tus horas.',
         'Lo que quedó sin cruzar se puede cruzar después, y también a mano eligiendo tú la comida.'],
       ver: ['c-franjas', 'g-comida'] },
+
+    { id: 'p-supvarias', q: '¿Y si tomo algo varias veces al día?',
+      a: ['En «cada cuánto» elige *Varias al día* y te preguntará cómo lo repartes.',
+        'Por reloj —cada 4, 6, 8 o 12 horas— arrancando a la hora que digas y cortando en la cena. O con tus comidas: antes, con o después de cada una, y entonces se mueven solas si cambias una hora de comer.',
+        'Se crea un recordatorio por cada hora, y lo que aporte se cuenta tantas veces como tomas tengas.'],
+      ver: ['g-suplementos', 'c-suplementos'] },
 
     { id: 'p-suplerecet', q: '¿La app me dice qué suplementos tomar?',
       a: ['No, y a propósito. La lista es para acordarte y para que las cuentas cuadren, no una recomendación.',
