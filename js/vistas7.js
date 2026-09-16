@@ -72,20 +72,22 @@
        listas de la misma app se deslizan distinto, la que se aprendió primero
        estorba para usar la otra.
 
-       Hacia la derecha sale Borrar y hacia la izquierda Editar. En iOS suele ser
-       al revés —borrar a la izquierda—, pero aquí manda lo que él ha pedido, y
-       la fila entera sigue abriendo la ficha de un toque para quien no deslice.
+       Borrar queda a la derecha y Editar a la izquierda, cada botón en el lado
+       que lleva su nombre. La fila entera sigue abriendo la ficha de un toque
+       para quien no deslice.
 
        Borrar lleva su color de peligro: el gesto es el mismo para las dos cosas
        y lo único que distingue una de otra antes de soltar es el color. */
     if (!App.deslizable) return cara;
 
+    /* El primer grupo es el panel de la derecha y el segundo el de la
+       izquierda, igual que en las rutinas y los menús. */
     return App.deslizable(cara, [
-      { icono: 'edit', texto: 'Editar', tono: 'suave',
-        attr: 'data-editarsup="' + esc(s.id) + '"' }
-    ], [
       { icono: 'trash', texto: 'Borrar', tono: 'malo',
         attr: 'data-borrarsup="' + esc(s.id) + '"' }
+    ], [
+      { icono: 'edit', texto: 'Editar', tono: 'suave',
+        attr: 'data-editarsup="' + esc(s.id) + '"' }
     ]);
   }
 
