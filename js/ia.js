@@ -31,8 +31,13 @@
   const CACHE_MODELOS = 'trainingfr.ia.modelos';
 
   const INSTRUCCIONES =
-    'Eres el entrenador personal de la aplicación Training FR. Respondes en español ' +
-    'de España, en segunda persona, con frases cortas y concretas. Nada de rodeos ni ' +
+    /* Decía «español de España» y es el mismo fallo que el del supermercado:
+       escrito desde la primera versión, cuando la app la usaba una persona que
+       vivía allí. A quien vive en Bogotá o en Lima, un entrenador que dice
+       «vale» y «coger» le suena a que le están leyendo el plan de otro. El
+       español que toca lo dice el bloque de su país, más abajo. */
+    'Eres el entrenador personal de la aplicación Training FR. Respondes en español, ' +
+    'en segunda persona, con frases cortas y concretas. Nada de rodeos ni ' +
     'de listas interminables. Te apoyas en los datos reales que te pasan y, si faltan, ' +
     'lo dices en lugar de inventarlos. No eres médico ni dietista titulado: cuando ' +
     'aparezca una condición de salud, una lesión, un embarazo o un trastorno de la ' +
@@ -968,7 +973,9 @@
     '"limpiar el organismo" ni plazos milagro.\n' +
     '- Lo que sea un riesgo para la salud va primero, y donde haga falta un ' +
     'médico o un fisio lo dices sin rodeos y sin asustar.\n' +
-    '- Español de España, de tú, frases cortas, sin relleno de cortesía.';
+    '- Tuteándole, frases cortas, sin relleno de cortesía. El español que usas es ' +
+    'el de SU país, que se dice más abajo: su vocabulario y sus expresiones ' +
+    'corrientes, sin giros que allí suenen de fuera.';
 
   /* ---------- lo que se le cuenta de la persona ----------
      Un perfil declarado —edad, peso, objetivo— lo tiene cualquiera, y con eso
@@ -1170,15 +1177,23 @@
     return (Math.round(Number(gramos) / kg * 10) / 10).toFixed(1).replace('.', ',');
   }
 
-  function dondeVive() {
+  function dondeVive(conComida) {
     /* Lo que dice él, primero. La zona horaria se queda de respaldo para quien
        no lo haya puesto todavía: acierta casi siempre, pero calla cuando se
        equivoca —quien viaja, o quien tiene el móvil en otra zona—, y por eso
        no manda sobre lo que la persona ha elegido a mano. */
     const iso = String(Perfil.datos().pais || '').trim();
     if (iso && g.Paises && Paises.nombreDe(iso)) {
-      return 'VIVE EN ' + Paises.nombreDe(iso).toUpperCase() + '. Esto lo ha dicho él, ' +
+      const pais = Paises.nombreDe(iso);
+      return 'VIVE EN ' + pais.toUpperCase() + '. Esto lo ha dicho él, ' +
         'no es una suposición.\n' +
+        /* El idioma va aquí y no en las normas generales: es la misma decisión
+           que la de los ingredientes, y separada se quedaba clavada en el
+           español de un país que no es el suyo. */
+        'ESCRIBE EN EL ESPAÑOL DE ' + pais.toUpperCase() + ': su vocabulario, sus ' +
+        'expresiones corrientes y sus nombres para las cosas. Nada de giros que allí ' +
+        'suenen de otro país, ni de España ni de ningún otro de América.' +
+        (conComida ? '\n' +
         'Todo lo que le propongas comer tiene que existir en el supermercado corriente ' +
         'de ' + Paises.nombreDe(iso) + ' y llamarse como se llama allí. Los cortes de ' +
         'carne, los pescados, las frutas, las verduras, los lácteos y las legumbres ' +
@@ -1187,7 +1202,7 @@
         'el otro entre paréntesis la primera vez. Las medidas caseras, las de allí. ' +
         'Y los platos: si hay una manera corriente de comer eso en su país, esa es la ' +
         'que le propones, no una versión de otro sitio. Un menú con ingredientes que no ' +
-        'encuentra no es un menú, por bien que cuadren los números.';
+        'encuentra no es un menú, por bien que cuadren los números.' : '');
     }
 
     let zona = '';
@@ -1196,15 +1211,18 @@
     try { idioma = navigator.language || ''; } catch (e) { idioma = ''; }
     if (!zona && !idioma) return '';
 
-    return 'DE DÓNDE ES: no lo ha dicho, así que hay que deducirlo. Su móvil está en la ' +
+    return 'ESCRIBE EN ESPAÑOL NEUTRO: el que se entiende en cualquier país de habla ' +
+      'hispana, sin giros propios de ninguno en concreto.\n' +
+      'DE DÓNDE ES: no lo ha dicho, así que hay que deducirlo. Su móvil está en la ' +
       'zona horaria ' + (zona || 'desconocida') + ' y su idioma es ' +
-      (idioma || 'desconocido') + '. De ahí sale su país, pero no es seguro. ' +
+      (idioma || 'desconocido') + '. De ahí sale su país, pero no es seguro.' +
+      (conComida ? ' ' +
       'Todo lo que le propongas comer tiene que existir en el supermercado corriente ' +
       'de ESE país y llamarse como se llama allí: los cortes de carne, los pescados, ' +
       'las frutas de temporada, los lácteos y las legumbres cambian de nombre y de ' +
       'disponibilidad de un país a otro, y un menú con ingredientes que no encuentra ' +
       'no es un menú. Si de ahí no puedes deducir el país con seguridad, usa nombres ' +
-      'que se entiendan en cualquier país de habla hispana y dilo en una frase.';
+      'que se entiendan en cualquier país de habla hispana y dilo en una frase.' : '');
   }
 
   function contexto(incluir) {
@@ -1217,6 +1235,12 @@
       trozos.push('SE LLAMA ' + nombre + '. Dirígete a ' + nombre + ' por su nombre al ' +
         'empezar y alguna vez más si encaja, sin repetirlo en cada frase.');
     }
+
+    /* De dónde es va en TODOS los prompts y no solo en los de comida: decide en
+       qué español se le habla, y eso vale igual para un plan de pesas. El
+       párrafo del supermercado, ese sí, solo donde hay comida de por medio. */
+    const donde = dondeVive(!!incluir.comida);
+    if (donde) trozos.push(donde);
 
     const p = Perfil.resumen();
     if (p) trozos.push('PERFIL: ' + p);
@@ -1341,9 +1365,6 @@
     }
 
     if (incluir.comida) {
-      const d = dondeVive();
-      if (d) trozos.push(d);
-
       /* ---------- la medicación ----------
          No vive en el perfil a propósito: no es un dato de forma física que se
          rellena una vez, es algo que se pregunta al montar el menú y que puede
