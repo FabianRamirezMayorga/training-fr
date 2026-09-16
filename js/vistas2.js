@@ -58,7 +58,8 @@
     const ahora = new Date();
     const desdeLunes = (ahora.getDay() + 6) % 7;
     const lunes = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - desdeLunes);
-    const INICIALES = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+    /* De lunes a domingo, que es como se mira una semana */
+    const INICIALES = [1, 2, 3, 4, 5, 6, 0].map(function (d) { return UI.inicialDia(d); });
 
     /* Lo apuntado, por clave de día, para no recorrer la lista siete veces */
     const porDia = {};

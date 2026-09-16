@@ -468,7 +468,7 @@
 
       const d = {
         t: t,
-        letra: ['D', 'L', 'M', 'X', 'J', 'V', 'S'][new Date(t).getDay()],
+        letra: UI.inicialDia(new Date(t).getDay()),
         num: new Date(t).getDate(),
         esHoy: i === 0,
         tocaba: tocaba,

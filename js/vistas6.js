@@ -398,12 +398,11 @@
   /* La semana, dia a dia: inicial, numero y una barra con lo que hiciste. Lo
      que en un mapa de calor de siete cuadros no se puede poner. */
   function tiraSemana(dias, max, hoyKey) {
-    const DIAS_SEM = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
     return '<div class="tira-sem">' + dias.map(function (d) {
       const nivel = !d.series ? 0 : Math.min(4, Math.ceil(d.series / max * 4));
       const f = new Date(d.t);
       return '<div class="ts-dia' + (d.k === hoyKey ? ' hoy' : '') + '">' +
-        '<span class="ts-letra">' + DIAS_SEM[(f.getDay() + 6) % 7] + '</span>' +
+        '<span class="ts-letra">' + UI.inicialDia(f.getDay()) + '</span>' +
         '<span class="ts-num">' + f.getDate() + '</span>' +
         '<i class="n' + nivel + '"></i>' +
         '<span class="ts-series">' + (d.series || '·') + '</span>' +
@@ -417,7 +416,6 @@
     const max = Math.max.apply(null, dias.map(function (d) { return d.series; }).concat([1]));
     const hoyKey = Store.dayKey(Date.now());
     const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-    const DIAS_SEM = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
     /* Con una semana el mapa de cuadros no aporta: siete cuadrados enormes en
        los que cabria escribir lo que hiciste. Ahi se cambia por la tira de
@@ -435,7 +433,7 @@
     let cabecera;
     if (enFila) {
       cabecera = dias.map(function (d) {
-        return DIAS_SEM[(new Date(d.t).getDay() + 6) % 7];
+        return UI.inicialDia(new Date(d.t).getDay());
       });
     } else {
       let mesAnterior = -1;

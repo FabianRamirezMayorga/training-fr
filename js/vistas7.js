@@ -395,13 +395,20 @@
     let u = dat.dosisU || 'toma';
 
     const paso = function () { return S().unidadDe(u).paso || 1; };
+    const enCasa = function (x) { return Math.max(paso(), Math.min(999, x || paso())); };
+    const escrito = function (x) { return String(Math.round(x * 10) / 10).replace('.', ','); };
 
-    const pintar = function (el) {
-      el.querySelector('#do-num').textContent =
-        String(Math.round(n * 10) / 10).replace('.', ',');
+    /* `escribe` manda cuándo se toca el campo. Con los botones sí, porque el
+       número lo cambian ellos; mientras se teclea no, porque reescribirlo a
+       cada tecla mueve el cursor al final y convierte «15» en «51». */
+    const pintar = function (el, escribe) {
+      const campo = el.querySelector('#do-num');
+      if (escribe) campo.value = escrito(n);
       el.querySelector('#do-uni').textContent = S().unidadDe(u)[n === 1 ? 'sing' : 'plur'];
       el.querySelectorAll('[data-uni]').forEach(function (x) {
-        x.classList.toggle('on', x.dataset.uni === u);
+        const suya = x.dataset.uni === u;
+        x.classList.toggle('on', suya);
+        x.setAttribute('aria-checked', suya ? 'true' : 'false');
       });
       el.querySelector('[data-d=menos]').disabled = n <= paso();
     };
@@ -412,16 +419,27 @@
       <p class="muted conf-txt">De una vez. Si lo repartes en el día, eso se dice
       después.</p>
 
+      <!-- El número se escribe además de subirlo y bajarlo. Con el más y el
+           menos solos, poner 30 g de proteína son veintinueve toques, y a quien
+           le cueste apuntar al botón le cuestan veintinueve. Es un campo de
+           texto y no un <input type=number> a propósito: así no salen las
+           flechitas del navegador encima del número, y el teclado que abre el
+           móvil es el de cifras con coma, que es como se escriben las dosis. -->
       <div class="do-caja">
         <button class="do-pm" data-d="menos" aria-label="Menos">${raw(icon('menos'))}</button>
-        <span class="do-val"><b id="do-num">1</b><i id="do-uni">toma</i></span>
+        <span class="do-val">
+          <input id="do-num" class="do-num" type="text" inputmode="decimal"
+                 value="1" maxlength="5" autocomplete="off" aria-label="Cuánto tomas">
+          <i id="do-uni">toma</i>
+        </span>
         <button class="do-pm" data-d="mas" aria-label="Más">${raw(icon('plus'))}</button>
       </div>
 
-      <div class="list-title" style="margin-top:16px">En qué se mide</div>
-      <div class="list do-unidades">
+      <div class="list-title" style="margin-top:16px" id="do-tit">En qué se mide</div>
+      <div class="list do-unidades" role="radiogroup" aria-labelledby="do-tit">
         ${raw(S().UNIDADES.map(function (x) {
-          return '<button class="list-row tap do-uni" data-uni="' + esc(x.id) + '">' +
+          return '<button class="list-row tap do-uni" role="radio" aria-checked="false"' +
+            ' data-uni="' + esc(x.id) + '">' +
             '<span class="grow"><span class="list-row-title">' + esc(x.lista) +
             '</span></span><span class="do-marca">' + icon('check') + '</span></button>';
         }).join(''))}
@@ -433,17 +451,45 @@
         <button class="btn vidrio" data-d="no">Cancelar</button>
       </div>`,
       function (el) {
-        pintar(el);
+        const campo = el.querySelector('#do-num');
+        pintar(el, true);
+
+        /* Al entrar, todo seleccionado: se viene a poner otra cantidad, no a
+           añadirle cifras a la que había. */
+        campo.onfocus = function () { setTimeout(function () { campo.select(); }, 0); };
+
+        campo.oninput = function () {
+          const v = parseFloat(String(campo.value).replace(',', '.'));
+          n = isNaN(v) ? 0 : Math.min(999, Math.abs(v));
+          pintar(el, false);
+        };
+
+        /* Al salir se cuadra: vacío, cero o algo que no es un número vuelve al
+           mínimo de esa unidad, y se reescribe con el formato de la app. */
+        campo.onblur = function () { n = enCasa(n); pintar(el, true); };
+
+        campo.onkeydown = function (ev) {
+          if (ev.key === 'Enter') { ev.preventDefault(); campo.blur(); }
+        };
+
         el.onclick = function (ev) {
           const uni = ev.target.closest('[data-uni]');
-          if (uni) { u = uni.dataset.uni; pintar(el); return; }
+          if (uni) {
+            u = uni.dataset.uni;
+            /* Cambiar de unidad cambia el paso, y 1 ml con paso de cinco se
+               queda descolgado del más y el menos. */
+            n = enCasa(n);
+            pintar(el, true);
+            return;
+          }
 
           const b = ev.target.closest('[data-d]');
           if (!b) return;
-          if (b.dataset.d === 'mas') { n = Math.min(999, n + paso()); pintar(el); return; }
-          if (b.dataset.d === 'menos') { n = Math.max(paso(), n - paso()); pintar(el); return; }
+          if (b.dataset.d === 'mas') { n = enCasa(n) + paso(); n = Math.min(999, n); pintar(el, true); return; }
+          if (b.dataset.d === 'menos') { n = Math.max(paso(), enCasa(n) - paso()); pintar(el, true); return; }
           if (b.dataset.d === 'no') { UI.closeModal(); alElegir(false); return; }
           if (b.dataset.d === 'ok') {
+            n = enCasa(n);
             dat.dosisN = n;
             dat.dosisU = u;
             dat.dosis = S().textoDosis(n, u);
@@ -466,7 +512,9 @@
      único absoluto. Distinta naturaleza, distinto color. */
   function fichaSheet(s, esNuevo) {
     const dat = JSON.parse(JSON.stringify(s));
-    const DIAS = [[1, 'L'], [2, 'M'], [3, 'X'], [4, 'J'], [5, 'V'], [6, 'S'], [0, 'D']];
+    const DIAS = [1, 2, 3, 4, 5, 6, 0].map(function (d) {
+      return [d, UI.inicialDia(d)];
+    });
 
     const pintar = function (el) {
       const m = S().momentoDe(dat.momento);
@@ -489,6 +537,10 @@
       const ini2 = el.querySelector('#sf-inicio');
       if (ini2) ini2.hidden = !reparte || !dat.patron ||
         S().patronDe(dat.patron).de !== 'reloj';
+
+      el.querySelectorAll('.sf-horatxt').forEach(function (x) {
+        x.textContent = UI.hora ? UI.hora(dat.hora || '08:00') : (dat.hora || '08:00');
+      });
     };
 
     UI.modal(html`
@@ -533,7 +585,10 @@
         </button>
         <div id="sf-inicio" hidden>
           <label class="tiny sup-lbl">EMPEZANDO A LAS</label>
-          <input type="time" id="sf-horainicio" value="${dat.hora || '08:00'}">
+          <button class="sup-reparto" data-x="hora">
+            <span class="grow sf-horatxt"></span>
+            <span class="chevron">${raw(icon('chevron'))}</span>
+          </button>
         </div>
       </div>
 
@@ -547,9 +602,15 @@
           }).join(''))}
         </div>
 
+        <!-- La misma rueda que el resto de la app, y no el campo de hora del
+             navegador: aqui es donde se pone una hora a mano, asi que se pone
+             como se ponen las horas en todas partes. -->
         <div id="sf-fija" hidden>
           <label class="tiny sup-lbl">A QUÉ HORA</label>
-          <input type="time" id="sf-horafija" value="${dat.hora || '08:00'}">
+          <button class="sup-reparto" data-x="hora">
+            <span class="grow sf-horatxt"></span>
+            <span class="chevron">${raw(icon('chevron'))}</span>
+          </button>
         </div>
       </div>
 
@@ -608,12 +669,22 @@
         grupo('#sf-mom', 'mom', 'momento');
         grupo('#sf-semanal', 'dia', 'dia', true);
 
-        el.querySelector('#sf-horafija').oninput = function () {
-          dat.hora = el.querySelector('#sf-horafija').value;
-        };
-        el.querySelector('#sf-horainicio').oninput = function () {
-          dat.hora = el.querySelector('#sf-horainicio').value;
-        };
+        el.querySelectorAll('[data-x=hora]').forEach(function (b) {
+          b.onclick = function () {
+            dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
+            const fija = S().momentoDe(dat.momento).de === 'fija' &&
+              dat.frecuencia !== 'varias';
+            horaSheet(dat.hora || '08:00',
+              fija ? '¿A qué hora?' : '¿A qué hora empiezas?',
+              fija ? 'La que tú digas. Es el único momento que no depende de tus ' +
+                'comidas ni de tu entreno.'
+                : 'De ahí salen las demás, contando hacia delante y cortando en la cena.',
+              function (h) {
+                if (h) dat.hora = h;
+                fichaSheet(dat, esNuevo);
+              });
+          };
+        });
 
         /* La hoja del reparto reemplaza a esta —UI.modal solo tiene un sitio—,
            así que hay que guardar lo escrito antes de irse y volver a abrir la
@@ -734,6 +805,102 @@
     return dosCifras(H) + ':' + dosCifras(RD_MINS[r.m]);
   }
 
+  /* Montar la rueda es ponerla donde toca y encender el desvanecido. Vive
+     fuera de las hojas porque la usan dos: la de «a qué hora» y la de las horas
+     a mano. */
+  function montarRueda(caja, r) {
+    caja.querySelectorAll('.rd-col').forEach(function (col) {
+      const id = col.dataset.col;
+      col.scrollTop = r[id] * RD_ALTO;
+      relieve(col);
+
+      /* La cifra elegida se apunta en el mismo momento del scroll, no dentro
+         del requestAnimationFrame. Estaba dentro, y el rAF no corre con la
+         pantalla apagada o la app en segundo plano: bastaba con que el movil
+         se bloqueara a media rueda para que el `if (t) return` se quedara
+         encallado y a partir de ahi la rueda girara sin cambiar la hora. Lo
+         que se difiere es solo el desvanecido, que es pintar. */
+      let t = 0;
+      col.addEventListener('scroll', function () {
+        r[id] = Math.max(0, Math.min(col.children.length - 1,
+          Math.round(col.scrollTop / RD_ALTO)));
+        if (t) return;
+        t = requestAnimationFrame(function () { t = 0; relieve(col); });
+      });
+    });
+  }
+
+  /* La hora buena se lee de la rueda en el momento de confirmarla, y no de lo
+     que fueran apuntando los eventos de scroll. Apuntarlos no basta: el evento
+     se entrega cuando el navegador pinta, y con la app en segundo plano o la
+     pantalla apagada a media rueda el ultimo no llega nunca. Entonces la rueda
+     se quedaba en una hora y se guardaba otra, que es la peor clase de fallo:
+     el que no se ve. La posicion en la que esta parada cada columna, en cambio,
+     siempre es verdad. */
+  function leerRueda(caja, r) {
+    const fin = { h: r.h, m: r.m, ap: r.ap };
+    caja.querySelectorAll('.rd-col').forEach(function (col) {
+      fin[col.dataset.col] = Math.max(0, Math.min(col.children.length - 1,
+        Math.round(col.scrollTop / RD_ALTO)));
+    });
+    return fin;
+  }
+
+  /* El desvanecido de arriba y abajo no es adorno: es lo que dice cuál está en
+     el centro cuando dos cifras seguidas se parecen. */
+  function relieve(col) {
+    const c = col.scrollTop / RD_ALTO;
+    const ops = col.children;
+    for (let i = 0; i < ops.length; i++) {
+      const d = Math.min(3, Math.abs(i - c));
+      ops[i].style.opacity = String(Math.max(.22, 1 - d * .3));
+      ops[i].style.transform = 'scale(' + (1 - d * .1).toFixed(3) + ')';
+    }
+  }
+
+  /* Girar la rueda con el dedo funciona solo, pero un clic en una cifra de
+     arriba o de abajo también la trae al centro: con ratón, y para quien no
+     arrastre bien, arrastrar una columna de doce es la parte difícil. */
+  function ruedaClic(ev) {
+    const op = ev.target.closest('.rd-op');
+    if (!op) return false;
+    op.parentNode.scrollTo({ top: Number(op.dataset.i) * RD_ALTO, behavior: 'smooth' });
+    return true;
+  }
+
+  /* ---------- a qué hora ----------
+     Una hoja con la rueda y nada más, para las horas sueltas de la ficha: la
+     de «hora puntual» y la de «empezando a las». Eran dos <input type="time">,
+     que en el móvil abren la rueda del sistema encima de todo y tapan la ficha
+     entera justo cuando hay que mirarla. */
+  function horaSheet(valor, titulo, texto, alElegir) {
+    const r = aRueda(valor || '08:00');
+
+    UI.modal(html`
+      <div class="conf-disco cambio">${raw(icon('reloj'))}</div>
+      <h2 class="conf-tit">${titulo}</h2>
+      <p class="muted conf-txt">${texto}</p>
+
+      ${raw(ruedaHTML(r))}
+
+      <div class="cb-acciones" style="margin-top:16px">
+        <button class="btn primary grow btn-arranque" data-h="ok">
+          ${raw(icon('check'))} Listo</button>
+        <button class="btn vidrio" data-h="no">Cancelar</button>
+      </div>`,
+      function (el) {
+        montarRueda(el, r);
+        el.onclick = function (ev) {
+          if (ruedaClic(ev)) return;
+          const b = ev.target.closest('[data-h]');
+          if (!b) return;
+          const elegida = b.dataset.h === 'ok' ? deRueda(leerRueda(el, r)) : null;
+          UI.closeModal();
+          setTimeout(function () { alElegir(elegida); }, 180);
+        };
+      });
+  }
+
   function ruedaHTML(r) {
     const col = function (id, valores, sel, ancho) {
       return '<div class="rd-col" data-col="' + id + '" style="--ancho:' + ancho + '">' +
@@ -761,11 +928,21 @@
         hora: dat.hora || '08:00', horasManuales: dat.horasManuales });
     };
 
-    /* ---------- el primer panel: por dónde ---------- */
+    /* ---------- el primer panel: por dónde ----------
+       «A mano» ya no se ofrece: era lo mismo que «hora puntual» del momento,
+       que es donde la gente lo busca, y tener las dos obligaba a elegir entre
+       dos puertas a la misma habitación. Solo sale si ya hay algo guardado
+       así, para poder cambiarlo; lo nuevo va por hora puntual. */
+    const familias = function () {
+      return FAMILIAS.filter(function (f) {
+        return f.de !== 'manual' || dat.patron === 'manual';
+      });
+    };
+
     const familiasHTML = function () {
       const suya = dat.patron ? S().patronDe(dat.patron).de : '';
       return '<div class="opciones" style="margin-top:14px">' +
-        FAMILIAS.map(function (f) {
+        familias().map(function (f) {
           let sub = f.sub;
           if (suya === f.de && f.de !== 'manual') {
             const hs = horasDelPatron(dat.patron);
@@ -856,8 +1033,9 @@
 
         const pintar = function () {
           if (!dentro) {
-            cabecera('reloj', '¿Cómo lo repartes?', 'Tres maneras. Elige una y dentro ' +
-              'verás las horas que salen con tus datos de ahora.');
+            const n = familias().length;
+            cabecera('reloj', '¿Cómo lo repartes?', (n === 2 ? 'Dos maneras' : 'Tres maneras') +
+              '. Elige una y dentro verás las horas que salen con tus datos de ahora.');
             caja.innerHTML = familiasHTML();
             return;
           }
@@ -866,7 +1044,7 @@
             cabecera(f.ico, 'Pon tus horas', 'Gira la rueda, añade, y repite hasta ' +
               'tenerlas todas. Se crea una alerta por cada una.');
             caja.innerHTML = manualHTML();
-            montarRueda();
+            montarRueda(caja, rueda);
             return;
           }
           cabecera(f.ico, f.nom, 'Debajo de cada una van las horas que salen con tus ' +
@@ -874,50 +1052,11 @@
           caja.innerHTML = dentroHTML(dentro);
         };
 
-        /* La rueda: cada columna es una lista que se para en su sitio sola
-           —scroll-snap—, y lo que esté en el centro es lo elegido. El desvanecido
-           de los de arriba y abajo no es adorno: es lo que dice cuál está en el
-           centro cuando dos cifras seguidas se parecen. */
-        const montarRueda = function () {
-          const cols = caja.querySelectorAll('.rd-col');
-          cols.forEach(function (col) {
-            const id = col.dataset.col;
-            col.scrollTop = rueda[id] * RD_ALTO;
-            relieve(col);
-
-            let t = 0;
-            col.addEventListener('scroll', function () {
-              if (t) return;
-              t = requestAnimationFrame(function () {
-                t = 0;
-                relieve(col);
-                rueda[id] = Math.max(0, Math.min(col.children.length - 1,
-                  Math.round(col.scrollTop / RD_ALTO)));
-              });
-            });
-          });
-        };
-
-        const relieve = function (col) {
-          const c = col.scrollTop / RD_ALTO;
-          const ops = col.children;
-          for (let i = 0; i < ops.length; i++) {
-            const d = Math.min(3, Math.abs(i - c));
-            ops[i].style.opacity = String(Math.max(.22, 1 - d * .3));
-            ops[i].style.transform = 'scale(' + (1 - d * .1).toFixed(3) + ')';
-          }
-        };
-
         caja.onclick = function (ev) {
           const fam = ev.target.closest('[data-fam]');
           if (fam) { dentro = fam.dataset.fam; pintar(); return; }
 
-          const op = ev.target.closest('.rd-op');
-          if (op) {
-            const col = op.parentNode;
-            col.scrollTo({ top: Number(op.dataset.i) * RD_ALTO, behavior: 'smooth' });
-            return;
-          }
+          if (ruedaClic(ev)) return;
 
           const pat = ev.target.closest('[data-pat]');
           if (pat) {
@@ -943,7 +1082,11 @@
           if (b.dataset.x === 'atras') { dentro = ''; pintar(); return; }
 
           if (b.dataset.x === 'add') {
-            const v = deRueda(rueda);
+            const puesta = leerRueda(caja, rueda);
+            /* La rueda se queda donde la dejo, que es lo que espera quien va a
+               poner la siguiente hora cerca de esta. */
+            rueda.h = puesta.h; rueda.m = puesta.m; rueda.ap = puesta.ap;
+            const v = deRueda(puesta);
             const hs = (dat.horasManuales || []).slice();
             if (hs.indexOf(v) !== -1) { UI.toast('Esa hora ya está'); return; }
             hs.push(v);

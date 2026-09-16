@@ -1667,7 +1667,7 @@
         ${raw([1, 2, 3, 4, 5, 6, 0].map(function (d) {
           return '<button class="al-dia' + (a.dias.indexOf(d) !== -1 ? ' on' : '') +
             '" data-dia="' + d + '" aria-label="' + esc(UI.diaLargo(Alertas.DIAS[d])) + '">' +
-            esc(['D', 'L', 'M', 'X', 'J', 'V', 'S'][d]) + '</button>';
+            esc(UI.inicialDia(d)) + '</button>';
         }).join(''))}
       </div>
 

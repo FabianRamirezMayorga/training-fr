@@ -373,6 +373,21 @@
 
   const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
+  /* ---------- el día en dos letras ----------
+     Donde no cabe «Miércoles» iba una sola letra, y ahí España y América no se
+     ponen de acuerdo: en España el miércoles es X para que no choque con el
+     martes, y en América esa X no se lee como un día, se lee como un error o
+     como una cruz de «esto está mal».
+
+     Dos letras lo arreglan sin elegir bando: se entienden en los dos sitios,
+     nunca se repiten entre sí y siguen cabiendo en un círculo. Y viven aquí,
+     en un solo sitio, porque estaban copiadas en seis módulos y basta con que
+     uno se quede atrás para que la app se contradiga a sí misma. */
+  const INICIALES = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
+
+  /* Recibe el día tal y como lo da Date.getDay(): 0 es domingo. */
+  function inicialDia(n) { return INICIALES[((Number(n) % 7) + 7) % 7]; }
+
   /* ---------- la hora, como la escribe su teléfono ----------
      Dentro se guarda siempre «HH:MM» de 24 h: es lo que entiende el campo de
      hora del navegador, lo que se ordena bien alfabéticamente y lo que no
@@ -673,6 +688,6 @@
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,
     num: num, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
     beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos,
-    hora: hora
+    hora: hora, INICIALES: INICIALES, inicialDia: inicialDia
   };
 })(window);

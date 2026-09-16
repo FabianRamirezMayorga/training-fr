@@ -6565,10 +6565,30 @@ html[data-theme="light"] .rec-adelanto {
 .do-val {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px;
 }
-.do-val b {
+/* El numero se escribe ademas de subirlo y bajarlo: con el mas y el menos
+   solos, poner 30 g de proteina son veintinueve toques. Se queda con la pinta
+   de antes —grande, verde y centrado— y solo lleva una raya fina debajo, que
+   es lo que dice que ahi se puede escribir sin convertirlo en un formulario. */
+.do-val b,
+.do-num {
   font-size: 2rem; font-weight: 800; letter-spacing: -.035em; line-height: 1;
   color: var(--acc); font-variant-numeric: tabular-nums;
 }
+.do-num {
+  width: 100%; max-width: 150px; padding: 0 6px 4px; text-align: center;
+  border: 0; border-bottom: 1.5px solid color-mix(in srgb, var(--acc) 26%, transparent);
+  border-radius: 3px; background: none; font-family: inherit;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color .16s ease, background .16s ease;
+}
+.do-num:focus {
+  outline: none;
+  border-bottom-color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 10%, transparent);
+}
+/* Tiene su propio hueco por debajo para la raya, asi que la unidad sube un
+   poco y el bloque queda a la misma altura que antes. */
+.do-val:has(.do-num) { gap: 3px; }
 .do-val i {
   font-style: normal; font-size: .76rem; font-weight: 600; color: var(--dim2);
 }
