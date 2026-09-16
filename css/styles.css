@@ -6842,3 +6842,18 @@ html[data-theme="light"] .rd-banda {
   background: color-mix(in srgb, var(--acc) 15%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 34%, transparent);
 }
+
+/* Cuando hace falta contestar antes de seguir. Un toast solo se lee si estas
+   mirando; esto senala donde hay que mirar, y se apaga solo. */
+.sup-pills.pide .chip {
+  animation: pide-ojo .45s ease-in-out 2;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warn) 55%, transparent);
+}
+@keyframes pide-ojo {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sup-pills.pide .chip { animation: none; }
+}

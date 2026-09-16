@@ -1124,6 +1124,24 @@
         <textarea id="nm-ordenes" rows="2"
           placeholder="Ej. nada de pescado; la cena siempre ligera">${p.ordenesComida || ''}</textarea>
 
+        <!-- Se pregunta aquí y no en el perfil: no es un dato de forma física
+             que se rellena una vez, es algo que cambia de un mes a otro y que
+             solo sirve para esto. Se acuerda de la respuesta para no
+             preguntarlo cada vez, y se puede cambiar justo aquí. -->
+        <label class="tiny" style="margin-top:16px;display:block">¿TOMAS ALGUNA MEDICACIÓN?</label>
+        <div class="row wrap sup-pills" id="nm-meds">
+          <button class="chip" data-med="no">No tomo ninguna</button>
+          <button class="chip" data-med="si">Sí, tomo</button>
+        </div>
+        <div id="nm-medcaja" hidden>
+          <textarea id="nm-med" rows="2" style="margin-top:8px"
+            placeholder="Cuál y a qué hora. Ej. levotiroxina en ayunas; metformina con la comida"></textarea>
+          <p class="tiny" style="margin:5px 0 0">Sirve para colocar las comidas y lo que
+          tomas alrededor, y para avisarte de lo que se pisa. La app no receta ni cambia
+          nada de tu tratamiento: para eso está tu médico. Se queda en tu móvil, no sale
+          en tu perfil y viaja al entrenador con tu propia clave.</p>
+        </div>
+
         <label class="tiny" style="margin-top:14px;display:block">Y PARA ESTE MENÚ EN CONCRETO</label>
         <textarea id="nm-extra" rows="2"
           placeholder="Ej. esta semana viajo y como fuera; cocino solo los domingos"></textarea>
@@ -1161,6 +1179,33 @@
             despensa: el.querySelector('#nm-despensa').value.trim(),
             ordenesComida: el.querySelector('#nm-ordenes').value.trim()
           });
+          /* Fuera de Perfil a propósito: así no entra en Perfil.resumen() y no
+             se cuela en los prompts de entrenamiento, donde no pinta nada. */
+          Store.setSetting('medicacionDicho', dicho);
+          Store.setSetting('medicacion',
+            dicho === 'si' ? el.querySelector('#nm-med').value.trim() : '');
+        };
+
+        /* ---------- la medicación ---------- */
+        const cajaMeds = el.querySelector('#nm-meds');
+        const cajaMed = el.querySelector('#nm-medcaja');
+        let dicho = Store.settings().medicacionDicho || '';
+
+        const pintarMeds = function () {
+          cajaMeds.querySelectorAll('[data-med]').forEach(function (b) {
+            b.classList.toggle('on', b.dataset.med === dicho);
+          });
+          cajaMed.hidden = dicho !== 'si';
+        };
+        el.querySelector('#nm-med').value = Store.settings().medicacion || '';
+        pintarMeds();
+
+        cajaMeds.onclick = function (ev) {
+          const b = ev.target.closest('[data-med]');
+          if (!b) return;
+          dicho = b.dataset.med;
+          pintarMeds();
+          if (dicho === 'si') el.querySelector('#nm-med').focus();
         };
 
         const pintarPaso2 = function () {
@@ -1227,6 +1272,21 @@
 
         const botonIA = el.querySelector('[data-x=ia]');
         if (botonIA) botonIA.onclick = function () {
+          /* Se pregunta una vez, no cada vez. Pero esa una vez se pregunta de
+             verdad: un menú montado sin saberlo puede ponerle el café justo
+             donde no toca, y eso no se arregla luego. */
+          if (!dicho) {
+            UI.toast('Dime si tomas medicación: cambia a qué hora conviene comer');
+            cajaMeds.classList.add('pide');
+            cajaMeds.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(function () { cajaMeds.classList.remove('pide'); }, 1400);
+            return;
+          }
+          if (dicho === 'si' && !el.querySelector('#nm-med').value.trim()) {
+            UI.toast('Escribe cuál y a qué hora');
+            el.querySelector('#nm-med').focus();
+            return;
+          }
           guardarPreferencias();
           botonIA.disabled = true;
           botonIA.textContent = 'Preparando el menú…';

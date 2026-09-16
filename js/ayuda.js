@@ -586,6 +586,19 @@
         'Sin conexión la pantalla te enseña igual la versión que llevas, y te dice que no ha podido comprobar si hay otra en vez de callarse.',
         'Si algo se comporta raro justo después de actualizar, casi siempre es que el móvil se ha quedado con archivos de dos versiones mezclados. Para eso está *¿Algo va raro?*, debajo de la versión.'] },
 
+    { id: 'p-medicacion', q: '¿Por qué me pregunta si tomo medicación al crear un menú?',
+      a: ['Porque cambia a qué hora conviene comer. Hay tratamientos que se toman en ayunas y otros que piden comida delante, y algunos no se llevan bien con el café, con los lácteos o con un suplemento que ya tomas. Un menú montado sin saberlo puede ponerte justo lo que no toca donde no toca.',
+        '*La app no receta ni cambia nada de tu tratamiento.* Lo único que hace es colocar las comidas y lo que tomas alrededor de tus tomas, y avisarte si algo se pisa. Cualquier cambio lo decide tu médico o tu farmacéutico.',
+        'No está en tu perfil a propósito: se pregunta al crear el menú, se acuerda de tu respuesta para no repetirlo cada vez, y se cambia ahí mismo. Se queda en tu móvil como el resto de tus datos y solo viaja al entrenador con tu propia clave.',
+        'Si dices que no tomas ninguna, no vuelve a preguntártelo y no te mete avisos de interacciones que no tienes.'],
+      ver: ['g-suplementos'] },
+
+    { id: 'p-comidapais', q: '¿Por qué me propone comida que no encuentro?',
+      a: ['Si eso te pasa, avísame: el menú tiene que salir del supermercado de tu país.',
+        'La app le dice al entrenador la zona horaria y el idioma de tu móvil, y de ahí sale dónde vives. Con eso los nombres, los cortes de carne, los pescados y la fruta son los de tu sitio y no los de otro.',
+        'Y lo que de verdad manda es lo que pones en *Con qué cuentas*: si el menú sale con cosas que no tienes, escribe ahí lo que sueles comprar y el siguiente se monta con eso.'],
+      ver: ['g-comida', 'c-franjas'] },
+
     { id: 'p-kcal', q: '¿Las calorías que me da son exactas?',
       a: ['Son una estimación calculada con tus datos —sexo, peso, altura, edad, actividad y objetivo— con las fórmulas habituales.',
         'Sirven como punto de partida, no como verdad absoluta: dos personas con los mismos números gastan distinto. Lo que manda es cómo responde tu peso a lo largo de varias semanas; si no se mueve como esperabas, ajusta.'],

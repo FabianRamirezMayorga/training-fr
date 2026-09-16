@@ -912,10 +912,21 @@
      el progreso, la comida, la técnica de un ejercicio— para que en cualquier
      pantalla hable como habla un profesional que responde de lo que dice. */
   const PERSONA =
-    'Eres un profesional del entrenamiento y la nutrición: preparador físico, ' +
-    'especialista en acondicionamiento y nutricionista deportivo, con veinte años ' +
-    'de consulta a tus espaldas. Hablas con alguien que te paga por que le digas ' +
-    'la verdad, no con un cliente al que hay que tener contento.\n' +
+    /* Antes era «un profesional» a secas. Un solo experto contesta con el sesgo
+       de su gremio: el preparador programa sin mirar la articulación que
+       protesta y el nutricionista cuadra macros sin mirar a qué hora entrena.
+       Deliberar entre tres oficios y luego hablar con una sola voz saca las
+       contradicciones a la luz ANTES de escribir, que es donde se arreglan. */
+    'Decides como decidiría un comité de tres que se sienta a discutir cada caso: ' +
+    'un metodólogo del entrenamiento y la fuerza, un fisioterapeuta que mira ' +
+    'articulaciones y patrones de movimiento, y un nutricionista clínico y ' +
+    'deportivo. Los tres tienen veinte años de consulta. Discuten entre ellos —el ' +
+    'fisio veta lo que el metodólogo programaría alegremente, el nutricionista ' +
+    'ajusta lo que los otros dos dan por hecho— y lo que sale es la respuesta. ' +
+    'Pero escribes con UNA sola voz: no menciones al comité, no repartas la ' +
+    'respuesta por especialidades ni firmes como nadie.\n' +
+    'Hablas con alguien que te paga por que le digas la verdad, no con un cliente ' +
+    'al que hay que tener contento.\n' +
     'CÓMO RESPONDES, SIEMPRE Y EN CUALQUIER APARTADO:\n' +
     '- Prohibido el halago y el ánimo de relleno: ni "buen trabajo", ni "vas por ' +
     'buen camino", ni "sigue así", ni felicitaciones. Si algo está bien, se ' +
@@ -932,6 +943,27 @@
     'sigue así.\n' +
     '- No te inventas nada. Si un dato no está, lo dices en vez de rellenarlo, y ' +
     'no des por bueno lo que no puedas ver.\n' +
+    /* «No te inventes nada» a secas se cumple con no mentir en lo grande y se
+       incumple en lo pequeño: el modelo estima un dato que falta, se lo cree y
+       sigue construyendo encima como si fuera un hecho. Lo que arregla eso no es
+       prohibirle estimar —a veces hay que hacerlo— sino obligarle a que la
+       estimación se vea, y a que el error quede del lado seguro. */
+    '- Cuando falte un dato que de verdad haga falta, no lo rellenes en silencio ' +
+    'ni pares de trabajar: haz el cálculo con el supuesto MÁS CONSERVADOR, escribe ' +
+    'cuál has supuesto y por qué, y sigue. «Supongo 20 % de grasa porque no lo ha ' +
+    'medido; si es más, las calorías bajan un poco» es una respuesta profesional. ' +
+    'Un número presentado como exacto cuando no lo es, no.\n' +
+    '- Distingue lo que está establecido de lo que se discute. Si algo que vas a ' +
+    'afirmar depende de la persona, es discutido o no lo sabes con certeza, dilo ' +
+    'en las mismas palabras («esto varía mucho», «no hay consenso», «esto habría ' +
+    'que medirlo») en vez de darlo por sentado con voz firme. Preferir lo bien ' +
+    'establecido a lo llamativo, siempre.\n' +
+    '- No te inventes mecanismos. Si no sabes POR QUÉ funciona algo, dilo o ' +
+    'cállatelo: una explicación fisiológica falsa hace más daño que ninguna, ' +
+    'porque se repite.\n' +
+    '- Tú no eres su médico y no recetas. No mandas tomar, dejar ni cambiar la ' +
+    'dosis de nada. Lo que sí haces es lo que sí es tuyo: colocar en el día lo que ' +
+    'ya toma y avisar de lo que se pisa entre sí.\n' +
     '- Sin jerga vacía ni promesas: nada de "quemar grasa localizada", "tonificar", ' +
     '"limpiar el organismo" ni plazos milagro.\n' +
     '- Lo que sea un riesgo para la salud va primero, y donde haga falta un ' +
@@ -1122,6 +1154,39 @@
 
   /* ---------- contexto que se envía ---------- */
 
+  /* ---------- de dónde es ----------
+     El prompt del menú decía literalmente «supermercado en España» y eso está
+     mal para cualquiera que no viva ahí: le proponía productos que no encuentra
+     y le llamaba a las cosas por un nombre que no usa. No hace falta
+     preguntárselo: el móvil ya lo sabe. Se le pasa el dato en crudo —zona
+     horaria e idioma— en vez de resolver aquí el país con una tabla, porque una
+     tabla de zonas horarias se queda corta y entonces miente con seguridad; el
+     modelo sabe de sobra que America/Bogota es Colombia, y si no lo sabe se lo
+     decimos y usa nombres neutros. */
+  /* Los gramos por kilo, con coma y un decimal: «1,8», no «1.7999999». */
+  function porKilo(gramos, peso) {
+    const kg = Number(peso) || 0;
+    if (!kg) return '?';
+    return (Math.round(Number(gramos) / kg * 10) / 10).toFixed(1).replace('.', ',');
+  }
+
+  function dondeVive() {
+    let zona = '';
+    let idioma = '';
+    try { zona = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { zona = ''; }
+    try { idioma = navigator.language || ''; } catch (e) { idioma = ''; }
+    if (!zona && !idioma) return '';
+
+    return 'DE DÓNDE ES: su móvil está en la zona horaria ' + (zona || 'desconocida') +
+      ' y su idioma es ' + (idioma || 'desconocido') + '. De ahí sale su país. ' +
+      'Todo lo que le propongas comer tiene que existir en el supermercado corriente ' +
+      'de ESE país y llamarse como se llama allí: los cortes de carne, los pescados, ' +
+      'las frutas de temporada, los lácteos y las legumbres cambian de nombre y de ' +
+      'disponibilidad de un país a otro, y un menú con ingredientes que no encuentra ' +
+      'no es un menú. Si de ahí no puedes deducir el país con seguridad, usa nombres ' +
+      'que se entiendan en cualquier país de habla hispana y dilo en una frase.';
+  }
+
   function contexto(incluir) {
     incluir = incluir || {};
     const trozos = [PERSONA];
@@ -1222,6 +1287,24 @@
           (an.cubre ? ' Cubre: ' + an.cubre.replace(/\.$/, '') + '.' : '') +
           (an.menu ? ' Para el menú: ' + an.menu : ''));
       }
+      /* ---------- lo que se pisa entre sí ----------
+         Esto ocupa el sitio que en una consulta ocuparía la medicación. Aquí no
+         hay fármacos apuntados a propósito, pero los suplementos también se
+         estorban unos a otros y con las comidas y el café, y eso SÍ se puede
+         arreglar sin recetar nada: no cambiando qué toma, sino a qué hora. Es
+         la única parte de la suplementación donde la app tiene algo que decir. */
+      trozos.push('CÓMO SE COLOCAN SUS SUPLEMENTOS EN EL DÍA: esto sí es cosa tuya, ' +
+        'porque no es recetar, es ordenar el horario de lo que ya toma. Mira si algo de ' +
+        'lo que toma se estorba entre sí o con lo que come: minerales que compiten por ' +
+        'absorberse si van juntos, lo que necesita grasa en la misma comida para ' +
+        'absorberse, lo que va mejor con el estómago lleno, y lo que le puede quitar el ' +
+        'sueño según a qué hora se acuesta. Si ves un choque, dilo con el arreglo ' +
+        'concreto y en una frase: «esos dos, separados por dos horas» o «ese, con la ' +
+        'comida que lleve grasa». No cambies la dosis, no le quites nada y no le añadas ' +
+        'nada: solo mueve horas. Y si de algo no estás seguro, dilo en vez de ' +
+        'inventarte una interacción: una interacción falsa le hace reorganizar el día ' +
+        'para nada.');
+
       trozos.push('SUPLEMENTOS QUE YA TOMA:\n' + Suplementos.resumenIA() +
         '\nNO se los vuelvas a proponer ni le sugieras nada que duplique lo que ya toma. ' +
         /* Los números van una sola vez. Cuando hay análisis, ya se han dicho
@@ -1238,6 +1321,44 @@
     }
 
     if (incluir.comida) {
+      const d = dondeVive();
+      if (d) trozos.push(d);
+
+      /* ---------- la medicación ----------
+         No vive en el perfil a propósito: no es un dato de forma física que se
+         rellena una vez, es algo que se pregunta al montar el menú y que puede
+         cambiar de un mes a otro. Y solo entra donde sirve de algo —lo que se
+         come y a qué hora—, no en el plan de pesas, donde sería ruido.
+
+         Lo que se hace con ella es muy concreto y muy corto: colocar horas y
+         avisar de lo que se pisa. Nada de recetar. Un fármaco tomado a la hora
+         equivocada respecto a una comida puede absorberse a medias, y eso sí es
+         algo que un menú puede arreglar sin tocar el tratamiento. */
+      const med = String(Store.settings().medicacion || '').trim();
+      if (med) {
+        trozos.push('MEDICACIÓN QUE TOMA: "' + med + '".\n' +
+          'Esto NO lo tocas: no le digas que cambie, deje, adelante ni retrase la toma de ' +
+          'ningún fármaco, y no le discutas la dosis. Lo que sí es tuyo:\n' +
+          '- Colocar las comidas alrededor de esas tomas cuando el fármaco lo pida: los ' +
+          'que van en ayunas, los que necesitan comida delante, los que no se llevan con ' +
+          'ciertos alimentos o con el café.\n' +
+          '- Avisar si algo del menú o de sus suplementos se pisa con eso, con el arreglo ' +
+          'en una frase: separarlos un par de horas, o pasarlo a otra comida.\n' +
+          '- Tener en cuenta lo que ese tratamiento cambie del cálculo. Si afecta al ' +
+          'apetito, a cómo absorbe algo o a lo que le conviene comer, ajusta el menú y ' +
+          'dilo en el resumen en vez de dar los números por buenos sin más.\n' +
+          'Si de una interacción no estás seguro, dilo en vez de inventártela: una ' +
+          'interacción falsa le hace reorganizar el día para nada. Y remítele a su médico ' +
+          'o a su farmacéutico para cualquier cambio: una vez, sin alarmismo y sin ' +
+          'repetirlo en cada apartado.');
+      } else if (Store.settings().medicacionDicho === 'no') {
+        trozos.push('MEDICACIÓN: ha dicho que no toma ninguna. No supongas que sí, ni le ' +
+          'metas avisos de interacciones con fármacos que no tiene.');
+      } else {
+        trozos.push('MEDICACIÓN: no lo ha dicho. No des por hecho que no toma nada ni te ' +
+          'inventes interacciones; si algo de lo que propongas dependiera de eso, dilo.');
+      }
+
       const c = comidaReal();
       if (c) trozos.push(c);
 
@@ -1298,6 +1419,11 @@
          en la clave: sin esto, apuntar la proteina y volver a pedir el menu
          devolvia el de antes, el que no la descontaba. */
       ':' + (g.Suplementos ? Suplementos.resumenIA() : '') +
+      /* La medicación cambia horarios y a veces el propio cálculo: si no entra
+         en la clave, apuntarla y volver a pedir el menú devuelve el de antes,
+         el que no la tenía en cuenta. */
+      ':' + (Store.settings().medicacion || '') +
+      ':' + (Store.settings().medicacionDicho || '') +
       ':' + (g.Perfil && Perfil.franjas ? Perfil.franjas().map(function (f) {
         return f.desde; }).join(',') : '') +
       ':' + (opciones.variante || 0);
@@ -1323,8 +1449,17 @@
       (extra ? 'PARA ESTE MENÚ EN CONCRETO PIDE: ' + extra + '. Manda sobre lo ' +
         'demás salvo sus alergias y sus condiciones de salud.' +
         String.fromCharCode(10) : '') +
-      'OBJETIVO DIARIO: ' + m.kcal + ' kcal, ' + m.prot + ' g de proteína, ' +
-      m.carbo + ' g de hidratos y ' + m.grasa + ' g de grasa, en ' + p.comidas + ' comidas.\n' +
+      /* En gramos y en g/kg. Los gramos son lo que hay que comer; los g/kg son
+         con lo que un dietista comprueba de un vistazo si la cifra tiene
+         sentido para esa persona, y sin ellos el modelo no tiene forma de
+         darse cuenta de que el reparto se le ha ido. */
+      'OBJETIVO DIARIO: ' + m.kcal + ' kcal, ' + m.prot + ' g de proteína (' +
+      porKilo(m.prot, p.peso) + ' g/kg), ' + m.carbo + ' g de hidratos (' +
+      porKilo(m.carbo, p.peso) + ' g/kg) y ' + m.grasa + ' g de grasa (' +
+      porKilo(m.grasa, p.peso) + ' g/kg), en ' + p.comidas + ' comidas.\n' +
+      'Esas cifras las ha calculado la app con sus datos y no se negocian: el menú ' +
+      'las cuadra. Si te parece que alguna no le encaja, cuadras el menú igual y lo ' +
+      'dices en el resumen; no la cambies por tu cuenta y sin avisar.\n' +
       'HORARIO: se levanta a las ' + (p.despertar || '07:00') + ' y se acuesta a las ' +
       (p.acostar || '23:00') + '.\n' +
       (diasEntreno.length ? 'ENTRENA: ' + diasEntreno.join(', ') +
@@ -1358,9 +1493,46 @@
       'lista de deseos: si con sus horarios o su objetivo hay algo que no cuadra, ' +
       'dilo en el resumen en lugar de maquillarlo.\n\n' +
       'CÓMO TIENE QUE SER:\n' +
-      '- Comida corriente de supermercado en España, fácil y rápida de preparar. ' +
-      'Nada de superalimentos, suplementos ni ingredientes de tienda especializada.\n' +
+      /* Decía «supermercado en España» y se quedó escrito de la primera
+         versión. Para quien no vive ahí, media lista de la compra no existe. */
+      '- Comida corriente del supermercado de SU país (arriba tienes de dónde es), ' +
+      'fácil y rápida de preparar. Nada de superalimentos, suplementos ni ' +
+      'ingredientes de tienda especializada.\n' +
       '- Enfocado de verdad a su objetivo y sus datos, no un menú genérico.\n' +
+
+      /* Un error de factor dos escondido en una palabra que no está: 80 g de
+         arroz crudo son unos 240 g cocido. «100 g de arroz» no dice nada, y
+         quien lo pesa cocido se come un tercio de lo que tocaba. */
+      '- CRUDO O COCIDO, siempre dicho. El arroz, la pasta, las legumbres, la avena ' +
+      'y la carne cambian mucho de peso al cocinarse. Por defecto se pesa en crudo y ' +
+      'se escribe así: «80 g de arroz en crudo (unos 240 g ya cocido)». Lo que se come ' +
+      'tal cual —fruta, yogur, pan, frutos secos— no necesita aclaración.\n' +
+
+      /* «Alternativas» daba cosas del mismo estilo pero no del mismo valor:
+         cambiar 150 g de pollo por 150 g de salmón son 200 kcal de más. */
+      '- Las alternativas son EQUIVALENTES de verdad, no parecidas: mismo papel en el ' +
+      'plato y macros parecidos, con la cantidad ya ajustada y sin que el que la coja ' +
+      'tenga que echar cuentas. Si el cambio mueve las grasas o los hidratos, se ' +
+      'compensa dentro de la propia alternativa y se dice: «170 g de merluza en vez de ' +
+      '150 g de pollo» o «140 g de salmón y quita la cucharada de aceite».\n' +
+
+      /* Sin esto el peri-entreno salía como una frase de buenas intenciones en
+         los consejos, no como qué comer y cuándo. */
+      '- PROTOCOLO ALREDEDOR DEL ENTRENO, con su hora real de entrenar: qué come ' +
+      'antes y cuánto tiempo antes, qué come después y dentro de qué rato, y si entre ' +
+      'una cosa y otra hace falta algo. Si entrena tan pronto que no le da tiempo a ' +
+      'comer, dilo y dale la versión que funcione en ayunas, sin pretender que se ' +
+      'levante una hora antes. Si entrena de noche, la cena es la comida de después: ' +
+      'no le montes una cena aparte.\n' +
+
+      '- Que se pueda digerir cuando toca. Lo de antes de entrenar, ligero y poca ' +
+      'grasa y poca fibra; lo pesado, lejos del entreno y lejos de la cama.\n' +
+
+      /* La app sabe a qué hora se acuesta, así que el corte de cafeína es un
+         número suyo y no un consejo de folleto. */
+      '- El café y el té cuentan: dile hasta qué hora puede tomarlos para que no le ' +
+      'toquen el sueño, contando desde la hora a la que se acuesta, y no le quites el ' +
+      'de la mañana.\n' +
       '- Flexible, no un régimen: cada comida lleva una o dos alternativas equivalentes ' +
       'para cuando no apetezca o no haya de eso, y las cantidades son orientativas.\n' +
       /* Aquí ponía «platos que se repitan de un día a otro, para no complicar la
@@ -1380,7 +1552,11 @@
       '- La hidratación también se planifica: cuánta agua y en qué momentos del día, ' +
       'con lo que suma el café o la infusión y qué cambia los días que entrena.\n\n' +
       'Devuelve JSON con esta forma exacta:\n' +
-      '{"resumen":"2 o 3 frases explicando el enfoque para SU caso concreto",' +
+      '{"resumen":"3 o 4 frases para SU caso. La primera dice de qué gasto se parte, ' +
+      'cuánto se le quita o se le suma y para qué; otra dice a cuántos g/kg de proteína ' +
+      'sale y por qué esa cifra le vale a él. Si has tenido que suponer algo que no ' +
+      'estaba, o si algo de lo que te pide no cuadra con sus números, se dice aquí ' +
+      'con todas las letras en vez de maquillarlo",' +
       '"hidratacion":{"total":"1,9 L","pauta":["momento del día: cuánto"],' +
       '"nota":"1 frase sobre entrenamiento o café"},' +
       '"dias":[{"dia":"Lunes","entreno":true,"comidas":[{"nombre":"Desayuno","hora":"08:00",' +
@@ -1389,7 +1565,11 @@
       '"total":{"kcal":000,"prot":00,"carbo":00,"grasa":00}}],' +
       '"compra":["item con cantidad semanal"],' +
       '"flexibilidad":"1 o 2 frases sobre hasta dónde se puede salir del plan sin romperlo",' +
-      '"consejos":["consejo breve"]}';
+      '"consejos":["consejo breve"]}\n\n' +
+      'En "consejos" van, si hay algo que decir: cómo se colocan en el día los ' +
+      'suplementos que ya toma y qué separar de qué, qué comprar que no tenga, y qué ' +
+      'no has podido calcular con rigor por faltarte un dato. Lo que no tenga nada que ' +
+      'decir, no se rellena por rellenar.';
 
     /* Suelto de temperatura a propósito: con la de por defecto el menú sale
        correcto y clavado al anterior, que es justo de lo que se quejaba. */
@@ -1721,17 +1901,77 @@
       'hacerlos y sabes por dónde va de fuerza.\n' +
       '- Si los días que dice que va a entrenar no cuadran con los que cumple de ' +
       'verdad, dilo en las razones sin sermonear.\n' +
+
+      /* Elegir ejercicio por «cuál es mejor» acaba poniendo peso libre en todo.
+         Lo que decide de verdad es cuánto cansa cada uno para lo que da, y eso
+         cambia con el sitio de la sesión: el mismo ejercicio que abre bien la
+         sesión es mala idea de octavo, cuando ya no se sostiene la técnica. */
+      '- Elige cada ejercicio por lo que estimula frente a lo que cansa, no por ' +
+      'prestigio. Delante, donde está fresco y la técnica aguanta, van los que piden ' +
+      'estabilidad y coordinación. Detrás, cuando ya está cansado, van los guiados y ' +
+      'los de máquina: ahí lo que hace falta es llegar al músculo sin pelearse con el ' +
+      'equilibrio. Un ejercicio que cansa el cuerpo entero para trabajar un músculo ' +
+      'pequeño no entra.\n' +
+
+      /* Lo que revienta un plan de cuatro o cinco días no suele ser el volumen
+         por músculo, que sale en la cuenta: es la suma de compresión sobre la
+         columna, que no sale en ninguna cuenta porque se reparte entre días. */
+      '- VIGILA LA CARGA SOBRE LA ESPALDA BAJA. Los ejercicios que comprimen la ' +
+      'columna con el peso encima o en las manos —sentadillas con barra, peso muerto, ' +
+      'remos de pie, prensas con el tronco cargado— cansan de una manera que no se ve ' +
+      'en la cuenta de series y que se acumula entre sesiones. Como mucho dos de esos ' +
+      'por sesión, nunca dos días seguidos, y el resto del volumen sale de versiones ' +
+      'apoyadas, tumbadas o de máquina. Si un día ya lleva uno pesado, el segundo ' +
+      'patrón de ese día no vuelve a cargar la columna.\n' +
+
+      /* «descanso: 90» sin más lo ponía a ojo y salía el mismo número para una
+         sentadilla pesada y un curl. */
+      '- El descanso de cada ejercicio sale de por qué cansa ese ejercicio, no de una ' +
+      'cifra por defecto: lo que agota el sistema nervioso y lo pesado a pocas ' +
+      'repeticiones necesita de dos a cuatro minutos y no se recorta; lo de aislamiento ' +
+      'a repeticiones altas se recupera en uno o minuto y medio. Si el tiempo de sesión ' +
+      'no da para los descansos que hacen falta, quita un ejercicio antes que recortar ' +
+      'el descanso de los básicos, y dilo en las razones.\n' +
+
       '- Los nombres de ejercicio, EXACTOS del catálogo. Lo que no esté ahí no existe.\n\n' +
       'Devuelve JSON, sin nada fuera de él:\n' +
       '{"nombre":"cómo llamarías a este plan, 2-4 palabras",\n' +
       '"razones":["4 a 6 frases. Cada una cita un dato suyo de arriba y explica una ' +
-      'decisión concreta del plan. Nada que valga para otra persona."],\n' +
+      'decisión concreta del plan. Nada que valga para otra persona. Si has tenido que ' +
+      'suponer algo que no estaba en sus datos, una de las frases lo dice."],\n' +
+
+      /* «porque» acaba siendo la nota del ejercicio, y esa nota se lee DENTRO
+         de la sesión, con la barra en la mano. Es el único sitio del plan que
+         se mira en el momento en el que puede doler algo, así que es ahí donde
+         tiene que estar la salida, y no en un aviso general del final que nadie
+         va a releer entre series. */
       '"sesiones":[{"dia":"Lun","nombre":"3-4 palabras, qué se trabaja",' +
       '"ejercicios":[{"ejercicio":"nombre EXACTO del catálogo","series":número,' +
-      '"reps":número,"descanso":segundos,"porque":"media frase"}]}],\n' +
-      '"progresion":[{"semana":"Semanas 1-2","texto":"qué hacer esas semanas, con números"}],\n' +
+      '"reps":número,"descanso":segundos,"porque":"media frase de por qué está ahí. ' +
+      'Si el ejercicio carga una zona en la que él ha dicho que tiene molestias o ' +
+      'lesión, aquí va además el cambio ya resuelto y con nombre del catálogo: «si te ' +
+      'pincha el hombro, cámbialo por X». Si lo que hace bueno a ese ejercicio es cómo ' +
+      'se ejecuta —bajar lento, parar abajo, no rebotar—, dilo aquí con el número de ' +
+      'segundos, que es donde lo va a leer"}]}],\n' +
+
+      /* Antes era prosa suelta del tipo «semanas 1-2: sube peso». Un mesociclo
+         es lo que convierte una semana en un plan: cuatro de acumulación y una
+         de descarga, con el esfuerzo subiendo por escalones nombrados. Sin
+         decirle cuántas repeticiones se deja en la recámara cada semana, «sube
+         peso» es una intención, no una instrucción. */
+      '"progresion":[{"semana":"Semana 1","texto":"qué hacer esa semana, con números"}],\n' +
+      'La progresión son CINCO entradas, una por semana, y forman un bloque de cuatro ' +
+      'semanas subiendo más una de descarga. Cada entrada dice tres cosas con números: ' +
+      'cuántas repeticiones debe dejarse sin hacer al acabar cada serie —es decir, a ' +
+      'cuánto del fallo se queda—, qué sube esa semana respecto a la anterior (peso, ' +
+      'repeticiones o series, una cosa, no tres) y en qué se nota que va bien. La ' +
+      'semana 1 se queda claramente lejos del fallo y la 4 es la más dura; la 5 es ' +
+      'descarga de verdad —alrededor de la mitad del volumen, con el mismo peso o algo ' +
+      'menos— y explica para qué sirve, que si no se la salta. Escríbelo en cristiano: ' +
+      '«déjate 3 repeticiones en la recámara», no «RIR 3».\n' +
       '"cardio":"1-2 frases sobre qué hacer los días que no entrena, o cadena vacía",\n' +
-      '"aviso":"lo que deba tener presente por sus limitaciones o su edad, o cadena vacía"}';
+      '"aviso":"lo que deba tener presente por sus limitaciones o su edad, y lo que no ' +
+      'hayas podido decidir con criterio por faltarte un dato suyo, o cadena vacía"}';
 
     return llamarJSON(prompt, { maxTokens: 8192, temperatura: 0.6 });
   }
