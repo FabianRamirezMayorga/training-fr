@@ -401,6 +401,7 @@
 
   /* Traduce un nombre de ejercicio del inglés al español. Best effort. */
   function translateName(name) {
+    if (enIngles()) return name;
     const exacto = I_EXACTO.get(norm(name));
     if (exacto) return exacto;
     const words = norm(name).split(' ').filter(Boolean);
@@ -481,8 +482,20 @@
     return '';
   }
 
+  /* ---------- con la app en inglés, no se traduce nada ----------
+     Este módulo existe para pasar el catálogo de ejercicios AL español: los
+     nombres, los músculos, el material y las categorías vienen en inglés en la
+     base de datos. Con la app puesta en inglés el trabajo ya está hecho de
+     origen, así que lo único que hay que hacer es no hacer nada.
+
+     Es la única parte de la traducción que sale gratis: mil cuatrocientos
+     ejercicios con sus músculos y su material, sin escribir una línea de
+     diccionario. */
+  function enIngles() { return !!(g.Idioma && g.Idioma.actual() === 'en'); }
+
   function t(map, key) {
     if (key == null || key === '') return '—';
+    if (enIngles()) return String(key);
     return map[String(key).toLowerCase()] || key;
   }
 

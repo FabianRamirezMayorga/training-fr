@@ -138,12 +138,12 @@
           <button class="crono-ir" data-c="ir">
             <span class="crono-pulso"></span>
             <span class="crono-txt">
-              <span>ENTRENANDO</span>
+              <span>${T('ENTRENANDO')}</span>
               <b data-crono-nombre>${a.routineName}</b>
             </span>
           </button>
           <b class="crono-t" data-crono-out>0:00</b>
-          <button class="crono-fin" data-c="fin">Finalizar</button>
+          <button class="crono-fin" data-c="fin">${T('Finalizar')}</button>
         </div>`;
       host.querySelector('[data-c=ir]').onclick = function () { g.App.go('entrenar'); };
       host.querySelector('[data-c=fin]').onclick = doFinish;
@@ -311,12 +311,12 @@
       <div class="wo-head">
         <div class="row between" style="margin-bottom:8px">
           <div class="grow" style="min-width:0">
-            <div class="tiny">ENTRENANDO</div>
+            <div class="tiny">${T('ENTRENANDO')}</div>
             <h2 style="margin:0;font-size:1.05rem">${a.routineName}</h2>
           </div>
           <div class="center nowrap">
             <b id="wo-clock" style="font-variant-numeric:tabular-nums">0:00</b>
-            <div class="tiny">en marcha</div>
+            <div class="tiny">${T('en marcha')}</div>
           </div>
         </div>
       </div>
@@ -331,7 +331,7 @@
         <button class="btn primary block" data-w="actividad">
           ${raw(icon('chispa'))} Cuéntame qué estoy haciendo</button>
         <button class="btn block" data-w="anadir" style="margin-top:8px">
-          ${raw(icon('plus'))} Añadir ejercicio</button>
+          ${raw(icon('plus'))} ${T('Añadir ejercicio')}</button>
         <button class="btn block" data-w="rutina" style="margin-top:8px">Cargar una rutina</button>
       </div>`)}
 
@@ -425,7 +425,7 @@
 
         <div class="row" style="margin-top:12px">
           <button class="btn sm grow" data-w="actividad">Cambiarlo</button>
-          <button class="btn sm grow" data-w="anadir">${raw(icon('plus'))} Añadir ejercicio</button>
+          <button class="btn sm grow" data-w="anadir">${raw(icon('plus'))} ${T('Añadir ejercicio')}</button>
         </div>
       </div>`;
   }
@@ -463,10 +463,10 @@
     /* Los dos en la misma línea: uno debajo del otro se comían el sitio de lo
        que de verdad se mira aquí, el peso y las repeticiones. */
     return '<div class="row ayuda-fila">'
-      + (hayAlt ? plegable('alt', 'Otra opción', icon('cambiar'))
-                : hoja('cambiar', 'Otra opción', icon('cambiar')))
-      + (guia ? plegable('guia', 'Cómo se hace', icon('search'))
-              : hoja('info', 'Cómo se hace', icon('search')))
+      + (hayAlt ? plegable('alt', T('Otra opción'), icon('cambiar'))
+                : hoja('cambiar', T('Otra opción'), icon('cambiar')))
+      + (guia ? plegable('guia', T('Cómo se hace'), icon('search'))
+              : hoja('info', T('Cómo se hace'), icon('search')))
       + '</div>'
       + (hayAlt ? '<div data-ayuda-caja="alt"' + (ayudaAbierta === 'alt' ? '' : ' hidden') + '></div>' : '')
       + (guia ? '<div data-ayuda-caja="guia"' + (ayudaAbierta === 'guia' ? '' : ' hidden') + '></div>' : '');
@@ -500,17 +500,18 @@
       return '<div class="row wrap" style="margin-top:10px;gap:6px">' +
         '<span class="chip solid">' + (hist.length === 1
           ? 'Lo has hecho una vez' : 'Lo has hecho ' + hist.length + ' veces') + '</span>' +
-        '<span class="chip">Última vez, ' + haceQue(hist[0].date) + '</span></div>';
+        '<span class="chip">' + UI.esc(Tn('Última vez, {c}',
+          { c: haceQue(hist[0].date) })) + '</span></div>';
     }
 
     const record = pr.best && Number(pr.best.weight) > 0
-      ? '<span class="chip solid">Récord: ' + UI.kg(pr.best.weight) + ' × ' +
+      ? '<span class="chip solid">' + UI.esc(T('Récord')) + ': ' + UI.kg(pr.best.weight) + ' × ' +
         pr.best.reps + '</span>' : '';
 
     let ultima = '';
     if (last && last.sets.length) {
       const conPeso = last.sets.some(function (x) { return Number(x.weight) > 0; });
-      ultima = '<span class="chip">Última vez: ' + (conPeso
+      ultima = '<span class="chip">' + UI.esc(T('Última vez')) + ': ' + (conPeso
         ? last.sets.map(function (x) { return UI.num(x.weight) + '×' + x.reps; }).join(' · ')
         : last.sets.map(function (x) { return x.reps; }).join(' · ') + ' reps') + '</span>';
     }
@@ -525,7 +526,8 @@
 
   function view() {
     const a = Store.active();
-    if (!a) return '<div class="empty">No hay ningún entrenamiento en curso.</div>';
+    if (!a) return '<div class="empty">' +
+      UI.esc(T('No hay ningún entrenamiento en curso.')) + '</div>';
 
     /* Un entrenamiento libre empieza sin ejercicios: solo corre el reloj */
     if (!a.entries.length) return vistaVacia(a);
@@ -552,12 +554,12 @@
       <div class="wo-head">
         <div class="row between" style="margin-bottom:8px">
           <div class="grow" style="min-width:0">
-            <div class="tiny">ENTRENANDO</div>
+            <div class="tiny">${T('ENTRENANDO')}</div>
             <h2 style="margin:0;font-size:1.05rem">${a.routineName}</h2>
           </div>
           <div class="center nowrap">
             <b id="wo-clock" style="font-variant-numeric:tabular-nums">0:00</b>
-            <div class="tiny"><span id="wo-count">${doneSets}</span>/${totalSets} series</div>
+            <div class="tiny"><span id="wo-count">${doneSets}</span>/${totalSets} ${T('series')}</div>
           </div>
         </div>
         <div class="prog"><i style="width:${pct}%"></i></div>
@@ -572,8 +574,16 @@
             ${raw(ex && g.Musculos && Musculos.siluetas
               ? Musculos.siluetas(ex.primaryMuscles, ex.secondaryMuscles) : '')}
             <div class="grow">
-              <h2 style="margin:0 0 2px">${entry.name}</h2>
-              <div class="tiny">${raw(ex ? UI.esc(ex.name) : '')}</div>
+              <!-- El nombre sale del catálogo y no del que se guardó en la
+                   sesión: ese se escribió al empezar el entrenamiento y se
+                   queda congelado en el idioma de ese momento. El de la sesión
+                   solo se usa si el ejercicio ya no está en el catálogo.
+
+                   Y debajo iba el nombre original en inglés, que con la app en
+                   inglés es el mismo dos veces. -->
+              <h2 style="margin:0 0 2px">${(ex && ex.nameEs) || entry.name}</h2>
+              <div class="tiny">${raw(ex && ex.name !== ((ex && ex.nameEs) || entry.name)
+                ? UI.esc(ex.name) : '')}</div>
               ${raw(ex && ex.primaryMuscles.length ? html`
                 <div class="musculos">
                   <b>${raw(ex.primaryMuscles.map(function (m) {
@@ -611,7 +621,7 @@
         <div class="card wo-solo ${hecho ? 'listo' : ''}">
           <div class="objetivo">
             <b>${entry.sets.length} × ${entry.targetReps}</b>
-            <span>lo que te propongo</span>
+            <span>${T('lo que te propongo')}</span>
           </div>
 
           <!-- Las dos, la misma pieza: casilla o icono a la izquierda, lo que
@@ -621,14 +631,15 @@
                que la de descansar. Fuera el subtitulo: se igualan solas. -->
           <button class="wo-accion wo-hecho ${hecho ? 'on' : ''}" data-w="hechoya">
             <span class="wa-ico">${raw(icon('check'))}</span>
-            <span class="wa-t">${hecho ? 'Hecho' : 'Marcar como hecho'}</span>
-            ${raw(hecho ? '<span class="wa-lado deshacer">deshacer</span>' : '')}
+            <span class="wa-t">${hecho ? T('Hecho') : T('Marcar como hecho')}</span>
+            ${raw(hecho ? '<span class="wa-lado deshacer">' + UI.esc(T('deshacer')) +
+              '</span>' : '')}
           </button>
 
           ${raw(entry.rest ? html`
             <button class="wo-accion wo-descanso" data-w="rest">
               <span class="wa-ico">${raw(icon('timer'))}</span>
-              <span class="wa-t">Descansar</span>
+              <span class="wa-t">${T('Descansar')}</span>
               <span class="wa-lado seg" data-seg="${entry.rest}">${entry.rest}<i>s</i></span>
             </button>` : '')}
         </div>` : html`
@@ -636,11 +647,13 @@
         ${raw(simple ? html`
           <div class="objetivo">
             <b>${entry.sets.length} × ${entry.targetReps}</b>
-            <span>series por repeticiones${raw(entry.rest ? ' · descanso ' + entry.rest + ' s' : '')}</span>
+            <span>${T('series por repeticiones')}${raw(entry.rest
+              ? ' · ' + UI.esc(Tn('descanso {n} s', { n: entry.rest })) : '')}</span>
           </div>` : html`
           <div class="objetivo">
             <b>${entry.sets.length} × ${entry.targetReps}</b>
-            <span>lo que te propongo${raw(entry.rest ? ' · descanso ' + entry.rest + ' s' : '')}</span>
+            <span>${T('lo que te propongo')}${raw(entry.rest
+              ? ' · ' + UI.esc(Tn('descanso {n} s', { n: entry.rest })) : '')}</span>
           </div>`)}
 
         <div class="stack" id="wo-sets">
@@ -665,7 +678,7 @@
                             aria-label="Una repetición menos en la serie ${i + 1}">
                       ${raw(icon('menos'))}</button>
                     <span class="sf-num ${cambiado ? 'cambiado' : ''}">
-                      <b>${s.reps}</b><i>reps</i></span>
+                      <b>${s.reps}</b><i>${T('reps')}</i></span>
                     <button class="sf-pm" data-f="mas"
                             aria-label="Una repetición más en la serie ${i + 1}">
                       ${raw(icon('plus'))}</button>
@@ -685,13 +698,15 @@
                 <span class="sf-n">${i + 1}</span>
                 <label class="sf-campo">
                   <input type="number" inputmode="decimal" step="0.5" min="0"
-                         value="${s.weight}" data-f="weight" aria-label="Peso de la serie ${i + 1}">
+                         value="${s.weight}" data-f="weight"
+                         aria-label="${Tn('Peso de la serie {n}', { n: i + 1 })}">
                   <span>${raw(Store.settings().unit === 'lb' ? 'lb' : 'kg')}</span>
                 </label>
                 <label class="sf-campo">
                   <input type="number" inputmode="numeric" step="1" min="0"
-                         value="${s.reps}" data-f="reps" aria-label="Repeticiones de la serie ${i + 1}">
-                  <span>reps</span>
+                         value="${s.reps}" data-f="reps"
+                         aria-label="${Tn('Repeticiones de la serie {n}', { n: i + 1 })}">
+                  <span>${T('reps')}</span>
                 </label>
                 <button class="sf-chk" data-f="done"
                         aria-label="Marcar serie ${i + 1} como hecha">
@@ -709,7 +724,7 @@
             <span class="tiny">${Store.settings().unit}</span>
           </div>` : '')}
         <div class="row" style="margin-top:11px">
-          <button class="btn sm grow" data-w="addset">${raw(icon('plus'))} Añadir serie</button>
+          <button class="btn sm grow" data-w="addset">${raw(icon('plus'))} ${T('Añadir serie')}</button>
           ${raw(entry.sets.length > 1
             ? html`<button class="btn sm" data-w="delset">${raw(icon('trash'))}</button>` : '')}
           <button class="btn sm" data-w="rest">${raw(icon('timer'))} ${entry.rest}s</button>
@@ -722,19 +737,19 @@
            verde se guarda para terminar, que sí cierra la sesión. -->
       <div class="wo-nav">
         <button class="wo-nav-b atras" data-w="prev" ${a.idx === 0 ? 'disabled' : ''}
-                aria-label="Ejercicio anterior">
-          ${raw(icon('back'))}<span>Anterior</span></button>
+                aria-label="${T('Ejercicio anterior')}">
+          ${raw(icon('back'))}<span>${T('Anterior')}</span></button>
         <button class="wo-nav-b sig ${a.idx === a.entries.length - 1
           ? (todoHecho ? 'fin listo' : 'fin') : ''}" data-w="next">
-          <span>${a.idx === a.entries.length - 1 ? 'Terminar' : 'Siguiente'}</span>
+          <span>${a.idx === a.entries.length - 1 ? T('Terminar') : T('Siguiente')}</span>
           ${raw(icon(a.idx === a.entries.length - 1 ? 'check' : 'chevron'))}</button>
       </div>
 
       <button class="btn ghost block" data-w="anadir" style="margin-top:10px">
-        ${raw(icon('plus'))} Añadir otro ejercicio a esta sesión
+        ${raw(icon('plus'))} ${T('Añadir otro ejercicio a esta sesión')}
       </button>
 
-      <div class="list-title">Ejercicios de hoy</div>
+      <div class="list-title">${T('Ejercicios de hoy')}</div>
       <div class="stack">
         ${raw(a.entries.map(function (e, i) {
           const exx = Data.get(e.exId);
@@ -744,8 +759,9 @@
                     style="${i === a.idx ? 'border-color:var(--acc)' : ''};width:100%;text-align:left">
               <img src="${exx ? Data.img(exx, 0) : Data.PLACEHOLDER}" alt="" loading="lazy">
               <div class="grow">
-                <div style="font-weight:600;font-size:.86rem">${e.name}</div>
-                <div class="tiny">${d}/${e.sets.length} series · objetivo ${e.targetReps} reps</div>
+                <div style="font-weight:600;font-size:.86rem">${(exx && exx.nameEs) || e.name}</div>
+                <div class="tiny">${Tn('{d}/{t} series · objetivo {r} reps',
+                  { d: d, t: e.sets.length, r: e.targetReps })}</div>
               </div>
               ${raw(d === e.sets.length ? '<span class="chip solid">Hecho</span>' : '')}
             </button>`;
@@ -1342,7 +1358,7 @@
     if (!h) return;
 
     UI.modal(UI.html`
-      <h2>Terminar entrenamiento</h2>
+      <h2>${T('Terminar entrenamiento')}</h2>
       <p class="muted">${resumen(h)}</p>
 
       <button class="btn primary block" data-f="guardar" style="margin-top:18px">

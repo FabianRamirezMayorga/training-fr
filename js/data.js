@@ -213,7 +213,22 @@
          corporal (flexiones, remo invertido, escalador, saltos). Sin esto
          ningún filtro los dejaba ver, ni siquiera el de "sin material". */
       if (!e.equipment) e.equipment = 'body only';
-      e.nameEs = ex.nameEs || I18N.name(ex.name);
+      /* ---------- el nombre, resuelto al leerlo ----------
+         El catálogo trae muchos nombres ya en español en `nameEs`, así que no
+         basta con que I18N deje de traducir: hay que elegir cuál se lee. Y se
+         elige al LEER, no al cargar, porque el idioma se cambia con la app
+         abierta y los ejercicios se construyen una sola vez al arrancar: con un
+         valor fijo habría que recargar la app para que los nombres cambiaran.
+
+         Sale enumerable a propósito, para que lo que se serialice —una rutina
+         compartida, una copia de seguridad— siga llevando su nombre. */
+      const nombreEs = ex.nameEs || I18N.name(ex.name);
+      Object.defineProperty(e, 'nameEs', {
+        enumerable: true, configurable: true,
+        get: function () {
+          return (g.Idioma && g.Idioma.actual() === 'en') ? ex.name : nombreEs;
+        }
+      });
       e._rank = rank(ex);
       e.groups = I18N.GROUPS
         .filter(function (gr) {

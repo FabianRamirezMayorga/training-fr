@@ -40,6 +40,10 @@ console.log('entradas leídas del archivo: ' + claves.length);
 console.log('entradas en el objeto:       ' + Object.keys(d).length);
 console.log('repetidas:      ' + (dup.length ? dup.join(' | ') : 'ninguna'));
 console.log('vacías:         ' + (vacias.length ? vacias.join(' | ') : 'ninguna'));
-console.log('sin traducir:   ' + (iguales.length ? iguales.join(' | ') : 'ninguna'));
+/* Algunas son iguales a proposito: «reps» se escribe igual en los dos idiomas.
+   Se avisa igual, porque una que se quedo sin traducir tiene esta misma pinta y
+   la unica forma de distinguirlas es mirandolas. */
+console.log('iguales al original (revisar): ' +
+  (iguales.length ? iguales.join(' | ') : 'ninguna'));
 
 if (dup.length || vacias.length) process.exit(1);
