@@ -154,9 +154,10 @@
         '*Lo que aportan cuenta*: un batido de proteína son unas 120 kcal y 24 g, y el menú los descuenta en vez de pedírtelos otra vez en comida.',
         '*Y la IA lo sabe*: al montarte un menú no te propone lo que ya tomas, y si una toma va con una comida concreta la menciona ahí en vez de inventar otra.',
         'Las frecuencias que hay: todos los días, los días que entrenas —sale de los días de tu plan—, un día sí y otro no, un día a la semana, y *varias veces al día*.',
-        'Lo de varias veces al día se reparte de dos maneras, y primero se elige por cuál: *por reloj* o *con tus comidas*. Dentro de cada una solo están las suyas, con las horas que salen con tus datos escritas debajo de cada opción, así que se ve lo que va a pasar antes de elegirlo.',
-        '*Por reloj* es cada 4, 6, 8 o 12 horas, arrancando a la hora que digas y cortando en la cena, que nadie quiere el magnesio a las tres de la mañana. *Con tus comidas* es antes, con o después de cada una, y entonces las tomas se mueven si mueves una comida.',
-        '*Las horas se ponen en una rueda*, como la del reloj del móvil: la de «hora puntual» y la de «empezando a las». Era el campo de hora del navegador, que en el móvil abre la rueda del sistema encima de todo y tapa la ficha justo cuando hay que mirarla.',
+        'Lo de varias veces al día se reparte de tres maneras, y primero se elige por cuál: *por reloj*, *con tus comidas* o *a mano*. Dentro de cada una solo están las suyas, con las horas que salen con tus datos escritas debajo de cada opción, así que se ve lo que va a pasar antes de elegirlo.',
+        '*Por reloj* es cada 4, 6, 8 o 12 horas, arrancando a la hora que digas y cortando en la cena, que nadie quiere el magnesio a las tres de la mañana. *Con tus comidas* es antes, con o después de cada una, y entonces las tomas se mueven si mueves una comida. *A mano* es para lo que no sigue ningún patrón —lo que manda una receta, o los turnos de quien no come a las mismas horas—: ahí pones cada hora una a una.',
+        'No confundir *a mano* con *hora puntual*: hora puntual es UNA hora, para algo que se toma una vez al día; a mano son VARIAS horas sueltas dentro del mismo día.',
+        '*Las horas se ponen siempre en una rueda*, como la del reloj del móvil: la de «a mano», la de «hora puntual» y la de «empezando a las». Antes eran el campo de hora del navegador, que en el móvil abre la rueda del sistema encima de todo y tapa la ficha justo cuando hay que mirarla.',
         '*Lo que aportan lo calcula el entrenador solo*, en cuanto apuntas algo, y lo verás en «Lo que suman a tu día». Sumarlo a mano salía mal: no contaba lo que escribes tú ni decía nada de vitaminas o minerales, que es justo para lo que se toma un multivitamínico. Lo que salga se descuenta solo de tu menú, así que no te pedirá en comida la proteína que ya te bebiste.',
         'La tarjeta de arriba dice lo que hay que tomar hoy, entero: la hora, qué es y cuánto. No hay nada que marcar ahí: es para acordarse, no un diario de cumplimiento.'
       ],
@@ -355,9 +356,11 @@
         { t: 'Di en qué momento.',
           d: 'Con el desayuno, el almuerzo, la merienda o la cena; antes o después de entrenar; o a una *hora puntual*, que va en otro color porque es el único que no depende de nada tuyo. Si eliges hora puntual, debajo aparece la hora: tócala y se abre una rueda, como la del reloj del móvil.' },
         { t: 'Si lo tomas varias veces al día, elige *Varias al día*.',
-          d: 'Te pregunta en el momento cómo lo repartes y te da dos caminos: *Por reloj* y *Con tus comidas*. Toca uno y dentro están solo sus opciones, cada una con las horas que salen con tus datos de ahora. Eliges y ya está: la hoja se cierra y vuelves a la ficha con el reparto puesto.' },
+          d: 'Te pregunta en el momento cómo lo repartes y te da tres caminos: *Por reloj*, *Con tus comidas* y *A mano*. Toca uno y dentro están solo sus opciones, cada una con las horas que salen con tus datos de ahora. En las dos primeras eliges y ya está: la hoja se cierra y vuelves a la ficha con el reparto puesto.' },
         { t: 'Si fuiste por reloj, di a qué hora empiezas.',
           d: 'Aparece *Empezando a las* debajo del reparto. Tócalo y pon la hora en la rueda: de ahí salen las demás, contando hacia delante y cortando en la cena.' },
+        { t: 'Y si vas *A mano*, pon cada hora en la rueda.',
+          d: 'Se abre un panel con la misma rueda. Gírala hasta la hora que quieras, toca *Añadir esta hora* y se queda abajo en «Tus horas». Repite hasta tenerlas todas —las que sobren se quitan tocando la × de cada una— y termina con *Listo*. Se crea una alerta por cada hora.' },
         { t: 'Guarda y, abajo, toca *Crear alertas*.',
           d: 'Se crean con el nombre y la dosis. Solo toca las de suplementos: las alertas que hayas creado tú se quedan como están.' }
       ],
@@ -530,8 +533,7 @@
 
     { id: 'p-supvarias', q: '¿Y si tomo algo varias veces al día?',
       a: ['En «cada cuánto» elige *Varias al día* y te pregunta ahí mismo cómo lo repartes.',
-        'Primero eliges por dónde: por reloj o con tus comidas. Por reloj es cada 4, 6, 8 o 12 horas, arrancando a la hora que digas y cortando en la cena. Con tus comidas es antes, con o después de cada una, y entonces se mueven solas si cambias una hora de comer.',
-        'Si lo que tomas no encaja en ninguna de las dos, lo suyo es apuntarlo dos veces con *hora puntual*: una por cada hora. Sale lo mismo y cada una se cambia por su lado.',
+        'Primero eliges por dónde: por reloj, con tus comidas o a mano. Por reloj es cada 4, 6, 8 o 12 horas, arrancando a la hora que digas y cortando en la cena. Con tus comidas es antes, con o después de cada una, y entonces se mueven solas si cambias una hora de comer. A mano abre la rueda y vas añadiendo las que quieras, una a una.',
         'Se crea una alerta por cada hora, y lo que aporte se cuenta tantas veces como tomas tengas.'],
       ver: ['g-suplementos', 'c-suplementos'] },
 

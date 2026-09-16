@@ -929,20 +929,15 @@
     };
 
     /* ---------- el primer panel: por dónde ----------
-       «A mano» ya no se ofrece: era lo mismo que «hora puntual» del momento,
-       que es donde la gente lo busca, y tener las dos obligaba a elegir entre
-       dos puertas a la misma habitación. Solo sale si ya hay algo guardado
-       así, para poder cambiarlo; lo nuevo va por hora puntual. */
-    const familias = function () {
-      return FAMILIAS.filter(function (f) {
-        return f.de !== 'manual' || dat.patron === 'manual';
-      });
-    };
-
+       «A mano» se quitó una versión por parecerse a «hora puntual», y volvió:
+       no son lo mismo. «Hora puntual» es UNA hora para algo que se toma una
+       vez al día; «a mano» son VARIAS horas sueltas que no siguen ningún
+       patrón. Sin él, dos tomas a las 7 y a las 22 había que apuntarlas como
+       dos suplementos distintos con el mismo nombre. */
     const familiasHTML = function () {
       const suya = dat.patron ? S().patronDe(dat.patron).de : '';
       return '<div class="opciones" style="margin-top:14px">' +
-        familias().map(function (f) {
+        FAMILIAS.map(function (f) {
           let sub = f.sub;
           if (suya === f.de && f.de !== 'manual') {
             const hs = horasDelPatron(dat.patron);
@@ -1033,9 +1028,8 @@
 
         const pintar = function () {
           if (!dentro) {
-            const n = familias().length;
-            cabecera('reloj', '¿Cómo lo repartes?', (n === 2 ? 'Dos maneras' : 'Tres maneras') +
-              '. Elige una y dentro verás las horas que salen con tus datos de ahora.');
+            cabecera('reloj', '¿Cómo lo repartes?', 'Tres maneras. Elige una y dentro ' +
+              'verás las horas que salen con tus datos de ahora.');
             caja.innerHTML = familiasHTML();
             return;
           }
