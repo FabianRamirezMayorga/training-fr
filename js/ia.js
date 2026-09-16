@@ -1224,9 +1224,14 @@
       }
       trozos.push('SUPLEMENTOS QUE YA TOMA:\n' + Suplementos.resumenIA() +
         '\nNO se los vuelvas a proponer ni le sugieras nada que duplique lo que ya toma. ' +
-        (aporta.kcal || aporta.prot
-          ? 'Hoy le aportan unas ' + aporta.kcal + ' kcal y ' + aporta.prot + ' g de ' +
-            'proteína: descuéntalas de lo que le pidas comer, no se las sumes encima. '
+        /* Los números van una sola vez. Cuando hay análisis, ya se han dicho
+           arriba y repetirlos aquí es darle dos cifras de lo mismo; cuando no lo
+           hay, lo que hay es una suma a mano de fichas del catálogo y se dice que
+           es aproximada, en vez de colarla como si fuera un total. */
+        (!an && (aporta.kcal || aporta.prot)
+          ? 'De forma aproximada le aportan unas ' + aporta.kcal + ' kcal y ' +
+            aporta.prot + ' g de proteína, sin contar lo que no esté en el catálogo: ' +
+            'descuéntalas de lo que le pidas comer, no se las sumes encima. '
           : '') +
         'Y no le receta nada nadie: si algo te parece de más o de menos, puedes decirlo ' +
         'en una frase y sin alarmismo, pero la decisión es suya y de quien le lleve la salud.');

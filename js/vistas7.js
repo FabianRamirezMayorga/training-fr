@@ -137,11 +137,13 @@
     const hayIA = g.IA && IA.activa && IA.activa();
 
     return html`
-      <details class="sup-plegable" ${raw(aportaAbierto ? 'open' : '')} data-det="aporta">
+      <details class="sup-plegable menor" ${raw(aportaAbierto ? 'open' : '')}
+               data-det="aporta">
         <summary>
           <span class="grow">Lo que suman a tu día</span>
           ${raw(a ? '<span class="sp-cuantos">' + a.kcal + ' kcal</span>'
-            : calculando ? '<span class="sp-cargando">calculando…</span>' : '')}
+            : calculando ? '<span class="sp-cargando">calculando…</span>'
+              : '<span class="sp-falta">sin calcular</span>')}
           <span class="sp-flecha">${raw(icon('chevron'))}</span>
         </summary>
 
@@ -158,8 +160,9 @@
             ${raw(a.cubre ? '<p class="tiny"><b>Cubre.</b> ' + esc(a.cubre) + '</p>' : '')}
             ${raw(a.menu ? '<p class="tiny"><b>En tu menú.</b> ' + esc(a.menu) + '</p>' : '')}
             ${raw(a.dudas ? '<p class="tiny"><b>Sin calcular.</b> ' + esc(a.dudas) + '</p>' : '')}
-            <p class="tiny sa-pie">Ya está contado en tu menú: no te pedirá en comida lo
-            que estos te dan.</p>
+            <p class="tiny sa-pie">Lo ha calculado el entrenador con tu lista, no es una
+            suma del catálogo. Ya está contado en tu menú: no te pedirá en comida lo que
+            estos te dan.</p>
             <button class="btn sm block" data-a="analizar" style="margin-top:10px">
               ${raw(icon('cambiar'))} Volver a calcularlo</button>` : calculando ? html`
             <p class="tiny" style="margin:0">Calculando lo que suman, con lo que tienes
@@ -265,8 +268,16 @@
 
     root.querySelectorAll('.sup-plegable').forEach(function (d) {
       d.addEventListener('toggle', function () {
-        if (d.dataset.det === 'aporta') aportaAbierto = d.open;
-        else listaAbierta = d.open;
+        if (d.dataset.det !== 'aporta') { listaAbierta = d.open; return; }
+        aportaAbierto = d.open;
+        /* Abrirlo es pedirlo. Si al entrar no se pudo calcular —sin conexión, o
+           la IA falló— quedarse mirando un bloque vacío no lleva a ningún
+           sitio: el gesto de desplegarlo ya dice que se quiere ver, así que se
+           vuelve a intentar ahí mismo. */
+        if (d.open && !S().analisis() && !calculando &&
+          g.IA && IA.activa && IA.activa()) {
+          pedirAnalisis(false);
+        }
       });
     });
 
