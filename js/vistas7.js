@@ -658,105 +658,271 @@
   }
 
   /* ---------- cómo se reparte en el día ----------
-     En su propia hoja y no en más pastillas dentro de la ficha: son ocho
-     opciones de tres familias distintas —las de reloj, las que van con tus
-     comidas y las que pones a mano— y mezcladas en una fila de pastillas se
-     leen como ocho cosas sueltas en vez de como tres maneras de repartir.
+     Ocho opciones de tres familias distintas puestas una debajo de otra se leen
+     como ocho cosas sueltas, y había que bajar por todas para ver la última.
+     Ahora se pregunta primero POR DÓNDE: reloj, comidas o a mano. Dentro de
+     cada una solo están las suyas, con las horas que salen con tus datos.
 
      Recibe el suplemento entero y no solo el patrón, porque la tercera familia
      necesita escribir horas dentro de él. Al cerrar avisa de si se eligió algo:
      quedarse en «varias veces al día» sin reparto es quedarse sin horas. */
+  const FAMILIAS = [
+    { de: 'reloj', ico: 'reloj', nom: 'Por reloj',
+      sub: 'Cada 4, 6, 8 o 12 horas',
+      pie: 'Arrancan a la hora que elijas y se cortan en la cena: nadie quiere el ' +
+        'magnesio a las tres de la mañana.' },
+    { de: 'comidas', ico: 'nutricion', nom: 'Con tus comidas',
+      sub: 'Antes, con o después de cada una',
+      pie: 'Salen de tus horas de comer, así que si mueves una comida la toma se ' +
+        'mueve con ella.' },
+    { de: 'manual', ico: 'edit', nom: 'A mano',
+      sub: 'Pones tú cada hora, una a una',
+      pie: 'Para lo que no encaja en ningún patrón: lo que manda una receta, o los ' +
+        'turnos de quien no come a las mismas horas.' }
+  ];
+
+  /* ---------- la rueda de la hora ----------
+     Era un <input type="time">. En el móvil abre la rueda del sistema, que está
+     bien, pero en un panel que existe solo para poner horas la rueda es el
+     panel: se ve lo que hay arriba y abajo de la hora elegida, se gira con el
+     dedo y no tapa lo que se estaba mirando.
+
+     Se guarda «HH:MM» de 24 h como en todo el resto, pero se enseña como lo
+     enseñe el teléfono: quien lo tenga en a. m./p. m. ve doce horas y la
+     columna de a. m./p. m., y quien lo tenga en 24 h ve veinticuatro y ninguna
+     columna de más. */
+  const RD_ALTO = 40;
+
+  const DOCE = (function () {
+    try {
+      return /[ap]/i.test(new Date(2020, 0, 1, 13, 0)
+        .toLocaleTimeString([], { hour: 'numeric' }));
+    } catch (e) { return false; }
+  })();
+
+  function rdMarca(h) {
+    try {
+      return new Date(2020, 0, 1, h, 0).toLocaleTimeString([], { hour: 'numeric' })
+        .replace(/[0-9]/g, '').replace(/[\u202f\u00a0]/g, ' ').trim() ||
+        (h < 12 ? 'AM' : 'PM');
+    } catch (e) { return h < 12 ? 'AM' : 'PM'; }
+  }
+
+  /* 12, 1, 2… como en el reloj de verdad, no 0, 1, 2. La cifra que sale en la
+     rueda es la que sale en la pantalla del móvil. */
+  const RD_HORAS = DOCE
+    ? [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+  const RD_MINS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+  const RD_AP = [rdMarca(9), rdMarca(21)];
+
+  function dosCifras(n) { return (n < 10 ? '0' : '') + n; }
+
+  function aRueda(hhmm) {
+    const m = String(hhmm || '08:00').match(/^(\d{1,2}):(\d{2})/) || [0, 8, 0];
+    const H = Number(m[1]) || 0;
+    const M = Number(m[2]) || 0;
+    return {
+      h: DOCE ? (H % 12) : H,
+      m: Math.round(M / 5) % 12,
+      ap: H >= 12 ? 1 : 0
+    };
+  }
+
+  function deRueda(r) {
+    const H = DOCE ? ((r.h % 12) + (r.ap ? 12 : 0)) : r.h;
+    return dosCifras(H) + ':' + dosCifras(RD_MINS[r.m]);
+  }
+
+  function ruedaHTML(r) {
+    const col = function (id, valores, sel, ancho) {
+      return '<div class="rd-col" data-col="' + id + '" style="--ancho:' + ancho + '">' +
+        valores.map(function (v, i) {
+          return '<button class="rd-op' + (i === sel ? ' aqui' : '') +
+            '" data-col="' + id + '" data-i="' + i + '">' + esc(String(v)) + '</button>';
+        }).join('') + '</div>';
+    };
+    return '<div class="rueda" id="rp-rueda">' +
+      '<div class="rd-banda"></div>' +
+      col('h', RD_HORAS, r.h, '2.1em') +
+      '<span class="rd-dos">:</span>' +
+      col('m', RD_MINS.map(dosCifras), r.m, '2.1em') +
+      (DOCE ? col('ap', RD_AP, r.ap, '3.2em') : '') +
+      '</div>';
+  }
+
   function repartoSheet(dat, alSalir) {
     let eligio = false;
+    let dentro = '';
+    const rueda = aRueda('08:00');
 
-    const filas = function (de) {
-      return S().PATRONES.filter(function (p) { return p.de === de; })
-        .map(function (p) {
-          const horas = S().horasDe({ frecuencia: 'varias', patron: p.id,
-            hora: dat.hora || '08:00', horasManuales: dat.horasManuales });
-          const sub = p.de === 'manual'
-            ? ((dat.horasManuales || []).length
-                ? (dat.horasManuales || []).length + ' horas puestas'
-                : 'Tú eliges las horas, una a una')
-            : horas.length + (horas.length === 1 ? ' toma' : ' tomas') + ' al día · ' +
-              horas.map(function (h) { return UI.hora ? UI.hora(h) : h; }).join(', ');
+    const horasDelPatron = function (id) {
+      return S().horasDe({ frecuencia: 'varias', patron: id,
+        hora: dat.hora || '08:00', horasManuales: dat.horasManuales });
+    };
+
+    /* ---------- el primer panel: por dónde ---------- */
+    const familiasHTML = function () {
+      const suya = dat.patron ? S().patronDe(dat.patron).de : '';
+      return '<div class="opciones" style="margin-top:14px">' +
+        FAMILIAS.map(function (f) {
+          let sub = f.sub;
+          if (suya === f.de && f.de !== 'manual') {
+            const hs = horasDelPatron(dat.patron);
+            sub = S().patronDe(dat.patron).label + ' · ' +
+              hs.map(function (h) { return UI.hora ? UI.hora(h) : h; }).join(', ');
+          } else if (f.de === 'manual' && (dat.horasManuales || []).length) {
+            sub = (dat.horasManuales || []).slice().sort().map(function (h) {
+              return UI.hora ? UI.hora(h) : h;
+            }).join(', ');
+          }
+          return '<button class="opcion ' + (suya === f.de ? 'on' : '') +
+            '" data-fam="' + esc(f.de) + '" style="--tono:var(--acc)">' +
+            '<span class="op-ico">' + icon(f.ico) + '</span>' +
+            '<span class="grow"><span class="op-nom">' + esc(f.nom) + '</span>' +
+            '<span class="op-sub">' + esc(sub) + '</span></span>' +
+            /* Sin el visto redondo de las otras listas: aqui la fila se abre,
+               y el visto mas la flecha mas el subtitulo con las horas dejaba el
+               nombre en dos renglones. Que esta elegida ya lo dicen el tinte y
+               el propio subtitulo, que en vez de la promesa ensena las horas. */
+            '<span class="op-flecha">' + icon('chevron') + '</span></button>';
+        }).join('') + '</div>';
+    };
+
+    /* ---------- dentro de una familia ---------- */
+    const dentroHTML = function (de) {
+      const f = FAMILIAS.filter(function (x) { return x.de === de; })[0];
+      return atrasHTML() +
+        '<div class="opciones" style="margin-top:12px">' +
+        S().PATRONES.filter(function (p) { return p.de === de; }).map(function (p) {
+          const hs = horasDelPatron(p.id);
           return '<button class="opcion ' + (dat.patron === p.id ? 'on' : '') +
             '" data-pat="' + esc(p.id) + '" style="--tono:var(--acc)">' +
             '<span class="grow"><span class="op-nom">' + esc(p.label) + '</span>' +
-            '<span class="op-sub">' + esc(sub) + '</span></span>' +
+            '<span class="op-sub">' + esc(hs.length +
+              (hs.length === 1 ? ' toma' : ' tomas') + ' al día · ' +
+              hs.map(function (h) { return UI.hora ? UI.hora(h) : h; }).join(', ')) +
+            '</span></span>' +
             '<span class="op-marca">' + icon('check') + '</span></button>';
-        }).join('');
+        }).join('') + '</div>' +
+        '<p class="tiny" style="margin:9px 2px 0">' + esc(f.pie) + '</p>';
     };
 
-    const listaHTML = function () {
-      return '<div class="list-title" style="margin-top:12px">Por reloj</div>' +
-        '<div class="opciones">' + filas('reloj') + '</div>' +
-        '<p class="tiny" style="margin:7px 2px 0">Arrancan a la hora que elijas y se ' +
-        'cortan en la cena: nadie quiere el magnesio a las tres de la mañana.</p>' +
-
-        '<div class="list-title" style="margin-top:14px">Con tus comidas</div>' +
-        '<div class="opciones">' + filas('comidas') + '</div>' +
-        '<p class="tiny" style="margin:7px 2px 0">Salen de tus horas de comer, así que ' +
-        'si mueves una comida la toma se mueve con ella.</p>' +
-
-        '<div class="list-title" style="margin-top:14px">A mano</div>' +
-        '<div class="opciones">' + filas('manual') + '</div>' +
-        '<p class="tiny" style="margin:7px 2px 0">Para lo que no encaja en ningún patrón: ' +
-        'lo que manda una receta, o los turnos de quien no come a las mismas horas.</p>';
-    };
-
-    /* El editor de horas vive en la misma hoja y no en una tercera: encadenar
-       tres modales para poner dos horas es perder el sitio a cada paso. */
-    const editorHTML = function () {
+    /* ---------- a mano: la rueda ---------- */
+    const manualHTML = function () {
       const hs = (dat.horasManuales || []).slice().sort();
-      return '<div class="list-title" style="margin-top:12px">Tus horas</div>' +
+      return atrasHTML() +
+        ruedaHTML(rueda) +
+        '<button class="btn primary block" data-x="add" style="margin-top:14px">' +
+        icon('plus') + ' Añadir esta hora</button>' +
+
+        '<div class="list-title" style="margin-top:16px">Tus horas' +
+        (hs.length ? ' <span class="rd-cuenta">' + hs.length + '</span>' : '') + '</div>' +
         (hs.length
-          ? '<div class="row wrap sup-pills" id="rp-horas">' + hs.map(function (h) {
+          ? '<div class="row wrap sup-pills" style="margin-top:7px">' + hs.map(function (h) {
               return '<button class="chip on" data-quitar="' + esc(h) + '">' +
                 esc(UI.hora ? UI.hora(h) : h) + ' ' + icon('close') + '</button>';
             }).join('') + '</div>'
-          : '<p class="tiny" style="margin:2px 2px 0">Todavía ninguna. Añade la primera ' +
-            'abajo.</p>') +
-        '<div class="row" style="margin-top:11px;gap:8px">' +
-        '<input type="time" id="rp-nueva" value="08:00" style="flex:1">' +
-        '<button class="btn primary" data-x="add">' + icon('plus') + ' Añadir</button>' +
-        '</div>' +
-        '<button class="btn block" data-x="listo" style="margin-top:12px">' +
-        icon('check') + ' Listo</button>' +
-        '<button class="btn ghost block sm" data-x="volver" style="margin-top:7px">' +
-        'Volver a los patrones</button>';
+          : '<p class="tiny" style="margin:4px 2px 0">Todavía ninguna. Gira la rueda y ' +
+            'añade la primera.</p>') +
+
+        '<button class="btn block btn-arranque" data-x="listo" style="margin-top:16px">' +
+        icon('check') + ' Listo</button>';
+    };
+
+    const atrasHTML = function () {
+      return '<button class="rp-atras" data-x="atras">' + icon('back') +
+        ' Cómo lo repartes</button>';
     };
 
     UI.modal(html`
-      <div class="conf-disco cambio">${raw(icon('reloj'))}</div>
-      <h2 class="conf-tit">¿Cómo lo repartes?</h2>
-      <p class="muted conf-txt" id="rp-txt">Debajo de cada opción van las horas que salen
-      con tus datos de ahora.</p>
+      <div class="conf-disco cambio" id="rp-disco">${raw(icon('reloj'))}</div>
+      <h2 class="conf-tit" id="rp-tit">¿Cómo lo repartes?</h2>
+      <p class="muted conf-txt" id="rp-txt">Tres maneras. Elige una y dentro verás las
+      horas que salen con tus datos de ahora.</p>
 
       <div id="rp-caja"></div>`,
       function (el) {
         const caja = el.querySelector('#rp-caja');
+        const disco = el.querySelector('#rp-disco');
+        const tit = el.querySelector('#rp-tit');
         const txt = el.querySelector('#rp-txt');
 
-        const pintarLista = function () {
-          txt.textContent = 'Debajo de cada opción van las horas que salen con tus datos ' +
-            'de ahora.';
-          caja.innerHTML = listaHTML();
+        const cabecera = function (ico, t, p) {
+          disco.innerHTML = icon(ico);
+          tit.textContent = t;
+          txt.textContent = p;
         };
-        const pintarEditor = function () {
-          txt.textContent = 'Añade cada hora a la que tomas esto. Se crea un recordatorio ' +
-            'por cada una.';
-          caja.innerHTML = editorHTML();
-          const n = caja.querySelector('#rp-nueva');
-          if (n) n.value = (dat.horasManuales || [])[0] ? '' : '08:00';
+
+        const pintar = function () {
+          if (!dentro) {
+            cabecera('reloj', '¿Cómo lo repartes?', 'Tres maneras. Elige una y dentro ' +
+              'verás las horas que salen con tus datos de ahora.');
+            caja.innerHTML = familiasHTML();
+            return;
+          }
+          const f = FAMILIAS.filter(function (x) { return x.de === dentro; })[0];
+          if (dentro === 'manual') {
+            cabecera(f.ico, 'Pon tus horas', 'Gira la rueda, añade, y repite hasta ' +
+              'tenerlas todas. Se crea una alerta por cada una.');
+            caja.innerHTML = manualHTML();
+            montarRueda();
+            return;
+          }
+          cabecera(f.ico, f.nom, 'Debajo de cada una van las horas que salen con tus ' +
+            'datos de ahora.');
+          caja.innerHTML = dentroHTML(dentro);
+        };
+
+        /* La rueda: cada columna es una lista que se para en su sitio sola
+           —scroll-snap—, y lo que esté en el centro es lo elegido. El desvanecido
+           de los de arriba y abajo no es adorno: es lo que dice cuál está en el
+           centro cuando dos cifras seguidas se parecen. */
+        const montarRueda = function () {
+          const cols = caja.querySelectorAll('.rd-col');
+          cols.forEach(function (col) {
+            const id = col.dataset.col;
+            col.scrollTop = rueda[id] * RD_ALTO;
+            relieve(col);
+
+            let t = 0;
+            col.addEventListener('scroll', function () {
+              if (t) return;
+              t = requestAnimationFrame(function () {
+                t = 0;
+                relieve(col);
+                rueda[id] = Math.max(0, Math.min(col.children.length - 1,
+                  Math.round(col.scrollTop / RD_ALTO)));
+              });
+            });
+          });
+        };
+
+        const relieve = function (col) {
+          const c = col.scrollTop / RD_ALTO;
+          const ops = col.children;
+          for (let i = 0; i < ops.length; i++) {
+            const d = Math.min(3, Math.abs(i - c));
+            ops[i].style.opacity = String(Math.max(.22, 1 - d * .3));
+            ops[i].style.transform = 'scale(' + (1 - d * .1).toFixed(3) + ')';
+          }
         };
 
         caja.onclick = function (ev) {
+          const fam = ev.target.closest('[data-fam]');
+          if (fam) { dentro = fam.dataset.fam; pintar(); return; }
+
+          const op = ev.target.closest('.rd-op');
+          if (op) {
+            const col = op.parentNode;
+            col.scrollTo({ top: Number(op.dataset.i) * RD_ALTO, behavior: 'smooth' });
+            return;
+          }
+
           const pat = ev.target.closest('[data-pat]');
           if (pat) {
             dat.patron = pat.dataset.pat;
             eligio = true;
-            if (S().patronDe(dat.patron).de === 'manual') { pintarEditor(); return; }
             UI.closeModal();
             setTimeout(function () { alSalir(true); }, 180);
             return;
@@ -767,32 +933,40 @@
             dat.horasManuales = (dat.horasManuales || []).filter(function (h) {
               return h !== quitar.dataset.quitar;
             });
-            pintarEditor();
+            pintar();
             return;
           }
 
           const b = ev.target.closest('[data-x]');
           if (!b) return;
 
+          if (b.dataset.x === 'atras') { dentro = ''; pintar(); return; }
+
           if (b.dataset.x === 'add') {
-            const v = caja.querySelector('#rp-nueva').value;
-            if (!v) { UI.toast('Elige una hora'); return; }
-            dat.horasManuales = (dat.horasManuales || []).slice();
-            if (dat.horasManuales.indexOf(v) === -1) dat.horasManuales.push(v);
-            else UI.toast('Esa hora ya está');
-            pintarEditor();
+            const v = deRueda(rueda);
+            const hs = (dat.horasManuales || []).slice();
+            if (hs.indexOf(v) !== -1) { UI.toast('Esa hora ya está'); return; }
+            hs.push(v);
+            dat.horasManuales = hs;
+            pintar();
+            UI.toast((UI.hora ? UI.hora(v) : v) + ' añadida');
             return;
           }
-          if (b.dataset.x === 'volver') { pintarLista(); return; }
+
           if (b.dataset.x === 'listo') {
-            if (!(dat.horasManuales || []).length) { UI.toast('Añade al menos una hora'); return; }
+            if (!(dat.horasManuales || []).length) {
+              UI.toast('Añade al menos una hora'); return;
+            }
+            dat.patron = 'manual';
+            eligio = true;
             UI.closeModal();
             setTimeout(function () { alSalir(true); }, 180);
           }
         };
 
         /* Si ya venía con horas puestas a mano, se abre donde lo dejó */
-        if (dat.patron === 'manual') pintarEditor(); else pintarLista();
+        if (dat.patron === 'manual') dentro = 'manual';
+        pintar();
 
         /* Cerrar con la X o el gesto cuenta como no haber elegido */
         const obs = new MutationObserver(function () {

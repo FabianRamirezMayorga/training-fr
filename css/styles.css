@@ -6632,7 +6632,7 @@ html[data-theme="light"] .do-pm {
 .sup-reparto .sin-elegir { opacity: .72; font-weight: 500; }
 
 /* Las horas puestas a mano se quitan tocandolas */
-#rp-horas .chip svg {
+#rp-caja .chip svg {
   width: 11px; height: 11px; opacity: .7; margin-left: 1px;
   fill: none; stroke: currentColor; stroke-width: 2.6;
   stroke-linecap: round; stroke-linejoin: round;
@@ -6699,3 +6699,106 @@ html[data-theme="light"] .do-pm {
 /* El .stack global es display:flex y le gana a la regla del navegador que
    pliega el contenido, asi que se pliega a mano, igual que en la boveda. */
 .sup-plegable:not([open]) > .sup-lista { display: none; }
+
+
+/* ---------- como se reparte: primero por donde ----------
+   Ocho opciones de tres familias seguidas se leian como ocho cosas sueltas y
+   habia que bajar por todas para ver la ultima. Ahora la hoja pregunta por la
+   familia y dentro solo estan las suyas. La flecha de cada fila es la que dice
+   que esto no elige, entra. */
+.op-flecha { flex: none; display: flex; color: var(--dim2); opacity: .55; }
+.op-flecha svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.opcion.on .op-flecha { color: var(--tono); opacity: .8; }
+
+/* Volver arriba y a la izquierda, con el nombre de donde se vuelve: una flecha
+   sola obliga a acordarse de por donde se entro. */
+.rp-atras {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin: 2px 0 0 -6px; padding: 5px 8px; border: 0; border-radius: 10px;
+  background: none; cursor: pointer;
+  font: inherit; font-size: .82rem; font-weight: 600; color: var(--acc);
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity .15s ease;
+}
+.rp-atras:active { opacity: .55; }
+.rp-atras svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- la rueda de la hora ----------
+   Era un <input type="time">, que en el movil abre la rueda del sistema encima
+   de todo y tapa las horas ya puestas justo cuando se esta anadiendo otra.
+   Aqui la rueda es el panel: se queda quieta, se ve lo que hay arriba y abajo
+   de la hora elegida, y debajo siguen viendose las que ya hay.
+
+   Lo de que se pare en su sitio lo hace scroll-snap, no JavaScript: el dedo
+   arrastra con la inercia del sistema y el navegador la frena en la cifra mas
+   cercana, que es exactamente lo que hace la de iOS. */
+.rueda {
+  position: relative; display: flex; justify-content: center; gap: 2px;
+  height: 200px; margin-top: 14px; border-radius: 18px; overflow: hidden;
+  border: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 55%),
+    color-mix(in srgb, var(--card2) 72%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent),
+              inset 0 -8px 16px -10px color-mix(in srgb, #000 55%, transparent);
+}
+
+/* La banda del centro: lo elegido es lo que cae dentro. Va debajo de las
+   cifras y sin capturar el dedo, que si no no se podria girar por el medio. */
+.rd-banda {
+  position: absolute; left: 10px; right: 10px; top: 50%; height: 40px;
+  transform: translateY(-50%); border-radius: 11px; pointer-events: none;
+  background: color-mix(in srgb, var(--acc) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 26%, transparent);
+}
+
+.rd-col {
+  width: var(--ancho); height: 100%; overflow-y: auto; overscroll-behavior: contain;
+  scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch;
+  padding: 80px 0; scrollbar-width: none;
+  /* El desvanecido de arriba y abajo no es adorno: sin el, la cifra que asoma
+     por el borde se lee igual de fuerte que la elegida. */
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent);
+}
+.rd-col::-webkit-scrollbar { display: none; }
+
+.rd-op {
+  display: block; width: 100%; height: 40px; line-height: 40px;
+  border: 0; background: none; cursor: pointer; padding: 0;
+  scroll-snap-align: center;
+  font: inherit; font-size: 1.32rem; font-weight: 600; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums; color: var(--txt);
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity .12s linear, transform .12s linear;
+}
+/* La columna de a. m./p. m. lleva palabras, no cifras: al mismo cuerpo que
+   «12» se sale de su carril. */
+.rd-col[data-col="ap"] .rd-op { font-size: .95rem; font-weight: 700; }
+
+.rd-dos {
+  align-self: center; margin-bottom: 2px; font-size: 1.32rem; font-weight: 600;
+  color: var(--dim2); opacity: .6;
+}
+
+/* Cuantas horas lleva puestas, al lado del titulo */
+.rd-cuenta {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px; margin-left: 2px;
+  border-radius: 999px; font-size: .68rem; font-weight: 800; letter-spacing: 0;
+  color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 26%, transparent);
+}
+
+html[data-theme="light"] .rueda {
+  border-color: color-mix(in srgb, #000 10%, transparent);
+  background: color-mix(in srgb, #000 3.5%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 70%, transparent);
+}
+html[data-theme="light"] .rd-banda {
+  background: color-mix(in srgb, var(--acc) 15%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 34%, transparent);
+}
