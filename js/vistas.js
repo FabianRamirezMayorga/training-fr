@@ -67,10 +67,10 @@
     const nombre = String(Store.settings().name || '').trim();
     const inicial = nombre ? nombre.charAt(0).toUpperCase() : '';
     const t = Perfil.tendencia(30);
-    const sexo = p.sexo === 'mujer' ? 'Mujer' : p.sexo === 'hombre' ? 'Hombre' : '';
+    const sexo = p.sexo === 'mujer' ? T('Mujer') : p.sexo === 'hombre' ? T('Hombre') : '';
 
     const partes = [];
-    if (p.edad) partes.push(p.edad + ' años');
+    if (p.edad) partes.push(Tn('{n} años', { n: p.edad }));
     if (sexo) partes.push(sexo);
     if (p.altura) partes.push(p.altura + ' cm');
 
@@ -79,8 +79,8 @@
         <div class="row" style="gap:12px;align-items:center">
           <span class="pc-avatar">${raw(inicial || icon('perfil'))}</span>
           <span class="grow" style="min-width:0">
-            <span class="pc-nombre">${nombre || 'Sin nombre'}</span>
-            <span class="pc-sub">${partes.join(' · ') || 'Completa tus datos'}</span>
+            <span class="pc-nombre">${nombre || T('Sin nombre')}</span>
+            <span class="pc-sub">${partes.join(' · ') || T('Completa tus datos')}</span>
           </span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </div>
@@ -90,16 +90,16 @@
             <b>${UI.num(p.peso)}<span class="pc-u">${Store.settings().unit || 'kg'}</span></b>
             <span class="tiny">${raw(t
               ? (t.dif > 0 ? '+' : '') + String(Math.round(t.dif * 10) / 10).replace('.', ',') +
-                ' en 30 d\u00edas'
-              : 'peso de hoy')}</span>
+                ' ' + T('en 30 días')
+              : T('peso de hoy'))}</span>
           </div>
           <div class="pc-dato">
             <b>${String(v.toFixed(1)).replace('.', ',')}</b>
-            <span class="tiny pc-imc ${esc(cat.tono)}">${esc(cat.label)}</span>
+            <span class="tiny pc-imc ${esc(cat.tono)}">${esc(T(cat.label))}</span>
           </div>
           <div class="pc-dato">
             <b>${m ? UI.num(m.kcal) : '—'}</b>
-            <span class="tiny">kcal al día</span>
+            <span class="tiny">${T('kcal al día')}</span>
           </div>
         </div>
       </div>`;
@@ -126,99 +126,100 @@
       { icono: 'dumbbell', tono: 'var(--acc)' };
 
     return html`
-      <h1>Perfil</h1>
+      <h1>${T('Perfil')}</h1>
 
       ${raw(listo ? cabeceraPerfil(p, m, v, cat) : html`
         <div class="card tarjeta-premium">
-          <div class="pre-encima">Falta lo principal</div>
-          <div class="pre-num" style="margin:2px 0 8px">Completa tus datos</div>
-          <p class="muted" style="margin-bottom:12px;font-size:.88rem">Con tu peso, altura,
-          edad y hábitos puedo calcular tus calorías, ajustar las rutinas y prepararte el
-          plan de comidas.</p>
-          <button class="btn primary block" data-a="datos">Empezar</button>
+          <div class="pre-encima">${T('Falta lo principal')}</div>
+          <div class="pre-num" style="margin:2px 0 8px">${T('Completa tus datos')}</div>
+          <p class="muted" style="margin-bottom:12px;font-size:.88rem">${T('Con tu peso, altura, edad y hábitos puedo calcular tus calorías, ajustar las rutinas y prepararte el plan de comidas.')}</p>
+          <button class="btn primary block" data-a="datos">${T('Empezar')}</button>
         </div>`)}
 
       ${raw(Modo.franjaInvitado())}
 
-      <div class="list-title">Tú</div>
+      <div class="list-title">${T('Tú')}</div>
       <div class="plan-acciones indice" style="margin:10px 0 0">
-        ${raw(filaPerfil({ icono: 'perfil', titulo: 'Datos y hábitos', accion: 'datos',
+        ${raw(filaPerfil({ icono: 'perfil', titulo: T('Datos y hábitos'), accion: 'datos',
           tono: 'var(--acc)', pendiente: !listo,
-          sub: !Store.settings().name ? 'Dime tu nombre para empezar'
-            : listo ? Store.settings().name + ' · ' + p.edad + ' años · ' +
-              Perfil.ACTIVIDAD[p.actividad].label
-            : 'Sin completar' }))}
+          sub: !Store.settings().name ? T('Dime tu nombre para empezar')
+            : listo ? Store.settings().name + ' · ' + Tn('{n} años', { n: p.edad }) + ' · ' +
+              T(Perfil.ACTIVIDAD[p.actividad].label)
+            : T('Sin completar') }))}
         <!-- El orden es el de la cadena, no el de cuándo se fue añadiendo cada
              cosa: tus datos mandan sobre tus calorías, tus calorías sobre lo
              que comes, lo que comes sobre lo que suplementas. Los objetivos y
              los recordatorios van después porque se apoyan en todo lo de
              arriba, no al revés. -->
-        ${raw(filaPerfil({ icono: 'nutricion', titulo: 'Alimentación', accion: 'nutricion',
+        ${raw(filaPerfil({ icono: 'nutricion', titulo: T('Alimentación'), accion: 'nutricion',
           tono: '#2fc4b2', pendiente: !m,
-          sub: m ? m.kcal + ' kcal · ' + m.prot + ' g de proteína' : 'Necesita tus datos' }))}
-        ${raw(filaPerfil({ icono: 'bote', titulo: 'Suplementación', accion: 'suplementos',
+          sub: m ? Tn('{k} kcal · {p} g de proteína', { k: m.kcal, p: m.prot })
+            : T('Necesita tus datos') }))}
+        ${raw(filaPerfil({ icono: 'bote', titulo: T('Suplementación'), accion: 'suplementos',
           tono: '#8e7cf0',
           sub: (function () {
-            if (!g.Suplementos) return 'Qué tomas y cuándo';
+            if (!g.Suplementos) return T('Qué tomas y cuándo');
             const n = Suplementos.lista().length;
-            if (!n) return 'Creatina, proteína, omega 3…';
+            if (!n) return T('Creatina, proteína, omega 3…');
             const hoy = Suplementos.tomasDeHoy().length;
-            return n + (n === 1 ? ' apuntado' : ' apuntados') + ' · ' +
-              (hoy ? hoy + (hoy === 1 ? ' toma hoy' : ' tomas hoy') : 'hoy ninguna');
+            return Tp(n, '{n} apuntado', '{n} apuntados') + ' · ' +
+              (hoy ? Tp(hoy, '{n} toma hoy', '{n} tomas hoy') : T('hoy ninguna'));
           })() }))}
-        ${raw(filaPerfil({ icono: 'trofeo', titulo: 'Objetivos', accion: 'objetivos',
+        ${raw(filaPerfil({ icono: 'trofeo', titulo: T('Objetivos'), accion: 'objetivos',
           tono: '#f0a23c',
-          sub: metas.length ? metas.length + ' en marcha · ' + cumplidas + ' cumplidos'
-            : 'Ninguno todavía' }))}
-        ${raw(filaPerfil({ icono: 'campana', titulo: 'Alertas', accion: 'alertas',
+          sub: metas.length
+            ? Tn('{n} en marcha · {c} cumplidos', { n: metas.length, c: cumplidas })
+            : T('Ninguno todavía') }))}
+        ${raw(filaPerfil({ icono: 'campana', titulo: T('Alertas'), accion: 'alertas',
           tono: '#e0679a',
-          sub: alertas ? alertas + (alertas === 1 ? ' recordatorio activo' : ' recordatorios activos')
-            : 'Sin recordatorios' }))}
+          sub: alertas ? Tp(alertas, '{n} recordatorio activo', '{n} recordatorios activos')
+            : T('Sin recordatorios') }))}
       </div>
 
-      <div class="list-title">Entrenamiento</div>
+      <div class="list-title">${T('Entrenamiento')}</div>
       <div class="plan-acciones indice" style="margin:10px 0 0">
-        ${raw(filaPerfil({ icono: 'chispa', titulo: 'Entrenador con IA', accion: 'entrenador',
+        ${raw(filaPerfil({ icono: 'chispa', titulo: T('Entrenador con IA'), accion: 'entrenador',
           tono: 'var(--acc)', pendiente: !IA.activa(),
-          sub: IA.activa() ? 'Listo para usar' : 'Sin configurar' }))}
-        ${raw(filaPerfil({ icono: 'musica', titulo: 'Música', accion: 'musica',
+          sub: IA.activa() ? T('Listo para usar') : T('Sin configurar') }))}
+        ${raw(filaPerfil({ icono: 'musica', titulo: T('Música'), accion: 'musica',
           tono: '#1db954', pendiente: !Spotify.activa(),
-          sub: Spotify.activa() ? 'Spotify conectado'
-            : Spotify.configurado() ? 'Sin conectar' : 'Sin configurar' }))}
-        ${raw(filaPerfil({ icono: cara.icono, titulo: 'Dónde entrenas', accion: 'lugar',
+          sub: Spotify.activa() ? T('Spotify conectado')
+            : Spotify.configurado() ? T('Sin conectar') : T('Sin configurar') }))}
+        ${raw(filaPerfil({ icono: cara.icono, titulo: T('Dónde entrenas'), accion: 'lugar',
           tono: cara.tono,
-          sub: sitio ? sitio.label + ' · ' + UI.num(App.cuantosEn(Store.settings().gear)) +
-            ' ejercicios a tu alcance' : 'Sin elegir' }))}
+          sub: sitio ? sitio.label + ' · ' +
+            Tn('{n} ejercicios a tu alcance', { n: UI.num(App.cuantosEn(Store.settings().gear)) })
+            : T('Sin elegir') }))}
       </div>
 
-      <div class="list-title">Aplicación</div>
+      <div class="list-title">${T('Aplicación')}</div>
       <div class="plan-acciones indice" style="margin:10px 0 0">
-        ${raw(filaPerfil({ icono: 'nube', titulo: 'Mi cuenta', accion: 'cuenta',
+        ${raw(filaPerfil({ icono: 'nube', titulo: T('Mi cuenta'), accion: 'cuenta',
           tono: '#4f8cf5', pendiente: !Sync.activa(),
-          sub: Sync.activa() ? Sync.email() : 'Sin sincronizar' }))}
-        ${raw(filaPerfil({ icono: 'ajustes', titulo: 'Ajustes', accion: 'ajustes',
+          sub: Sync.activa() ? Sync.email() : T('Sin sincronizar') }))}
+        ${raw(filaPerfil({ icono: 'ajustes', titulo: T('Ajustes'), accion: 'ajustes',
           tono: '#c06bf0',
-          sub: 'Unidades, tema, descanso y copias de seguridad' }))}
-        ${raw(filaPerfil({ icono: 'actualizar', titulo: 'Actualizaciones', accion: 'version',
+          sub: T('Unidades, tema, idioma y copias de seguridad') }))}
+        ${raw(filaPerfil({ icono: 'actualizar', titulo: T('Actualizaciones'), accion: 'version',
           tono: '#4f8cf5', pendiente: !!(ver && ver.local && !ver.alDia && !ver.sinRed),
           /* El punto naranja solo cuando se ha podido comprobar. Sin red el
              estado no es «hay una nueva», es «no se sabe», y marcar la fila
              manda al usuario a una pantalla que no puede contarle nada. */
-          sub: !ver ? 'Comprobando si estás al día…'
-            : ver.sinRed ? String(ver.local || '').replace('trainingfr-', '') +
-              ' · sin conexión para comprobar si hay otra'
+          sub: !ver ? T('Comprobando si estás al día…')
+            : ver.sinRed ? Tn('{v} · sin conexión para comprobar si hay otra',
+                { v: String(ver.local || '').replace('trainingfr-', '') })
             : ver.alDia || !ver.local
-              ? 'Al día · ' + String(ver.local || ver.servidor).replace('trainingfr-', '') +
-                ' · y lo descargado para usarla sin internet'
-              : 'Hay una versión nueva: ' +
-                String(ver.servidor).replace('trainingfr-', '') }))}
+              ? Tn('Al día · {v} · y lo descargado para usarla sin internet',
+                  { v: String(ver.local || ver.servidor).replace('trainingfr-', '') })
+              : Tn('Hay una versión nueva: {v}',
+                  { v: String(ver.servidor).replace('trainingfr-', '') }) }))}
         ${raw(g.Admin && Admin.administra()
-          ? filaPerfil({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
-              tono: '#f0a23c', sub: 'Crear, desactivar y borrar cuentas del proyecto' })
+          ? filaPerfil({ icono: 'llave', titulo: T('Cuentas'), accion: 'usuarios',
+              tono: '#f0a23c', sub: T('Crear, desactivar y borrar cuentas del proyecto') })
           : g.Admin && Admin.sinRespuesta()
-            ? filaPerfil({ icono: 'llave', titulo: 'Cuentas', accion: 'usuarios',
+            ? filaPerfil({ icono: 'llave', titulo: T('Cuentas'), accion: 'usuarios',
                 tono: '#f0a23c', pendiente: true,
-                sub: 'No he podido comprobar si administras' })
+                sub: T('No he podido comprobar si administras') })
             : '')}
       </div>
 
@@ -226,9 +227,9 @@
            parecia una opcion mas que configurar; aqui abajo es lo que es: el
            sitio al que se baja cuando algo no se entiende. -->
       <div class="plan-acciones indice" style="margin:22px 0 0">
-        ${raw(filaPerfil({ icono: 'ayuda', titulo: 'Ayuda', accion: 'ayuda',
+        ${raw(filaPerfil({ icono: 'ayuda', titulo: T('Ayuda'), accion: 'ayuda',
           tono: 'var(--dim2)',
-          sub: 'Cómo se hace cada cosa, cómo funciona y las dudas de siempre' }))}
+          sub: T('Cómo se hace cada cosa, cómo funciona y las dudas de siempre') }))}
       </div>
 
       <p class="tiny pie-marca">Training FR</p>`;

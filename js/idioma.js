@@ -59,6 +59,7 @@
     /* Para el navegador: de esto dependen la separación de palabras, el
        corrector y lo que lee un lector de pantalla. */
     try { document.documentElement.lang = id; } catch (e) { /* nada */ }
+    pintarEstaticos();
   }
 
   /* ---------- lo que falta por traducir ----------
@@ -100,10 +101,25 @@
     return Tn(Number(n) === 1 ? sing : plur, { n: n });
   }
 
+  /* ---------- lo que no pasa por render() ----------
+     La barra de abajo y el aviso de carga viven en index.html, no los pinta
+     ninguna vista, asi que T() no los ve nunca. Se marcan con data-t llevando
+     la frase en espanol y se repintan al arrancar y al cambiar de idioma.
+
+     El texto en espanol se queda ADEMAS escrito dentro de la etiqueta: asi la
+     barra dice algo desde el primer milisegundo, antes de que ningun script
+     haya corrido, en vez de parpadear vacia. */
+  function pintarEstaticos(root) {
+    const d = root || document;
+    d.querySelectorAll('[data-t]').forEach(function (el) {
+      el.textContent = T(el.dataset.t);
+    });
+  }
+
   g.Idioma = {
     IDIOMAS: IDIOMAS,
     actual: actual, es: es, poner: poner, datos: datos,
-    T: T, Tn: Tn, Tp: Tp,
+    T: T, Tn: Tn, Tp: Tp, pintarEstaticos: pintarEstaticos,
     faltan: function () { return Array.from(faltantes).sort(); },
     cuantasFaltan: function () { return faltantes.size; },
     olvidarFaltantes: function () { faltantes.clear(); }
@@ -116,4 +132,12 @@
   g.Tp = Tp;
 
   try { document.documentElement.lang = actual(); } catch (e) { /* nada */ }
+
+  /* Al arrancar. Este modulo se carga antes que el cuerpo del documento, asi
+     que se espera a que exista; si ya esta, se pinta y ya. */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { pintarEstaticos(); });
+  } else {
+    pintarEstaticos();
+  }
 })(window);

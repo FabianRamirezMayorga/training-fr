@@ -97,9 +97,8 @@
       <button class="card franja-invitado" data-a="irCuenta">
         <span class="row-icon">${raw(icon('nube'))}</span>
         <span class="grow" style="text-align:left">
-          <b style="display:block;font-size:.88rem">Modo invitado</b>
-          <span class="tiny">Tus datos están solo en este dispositivo. Toca para
-          guardarlos en tu cuenta.</span>
+          <b style="display:block;font-size:.88rem">${T('Modo invitado')}</b>
+          <span class="tiny">${T('Tus datos están solo en este dispositivo. Toca para guardarlos en tu cuenta.')}</span>
         </span>
         <span class="chevron">${raw(icon('chevron'))}</span>
       </button>`;

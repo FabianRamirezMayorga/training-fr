@@ -137,6 +137,105 @@
     'Ninguno con ese nombre. Prueba con menos letras.': 'Nothing by that name. Try fewer letters.',
     'Elige tu país': 'Choose your country',
     'seg': 'sec',
-    '{n} ejercicios a tu alcance': '{n} exercises within reach'
+    '{n} ejercicios a tu alcance': '{n} exercises within reach',
+
+    /* ---------- Perfil ---------- */
+    'Falta lo principal': 'The basics are missing',
+    'Completa tus datos': 'Fill in your details',
+    'Con tu peso, altura, edad y hábitos puedo calcular tus calorías, ajustar las rutinas y prepararte el plan de comidas.':
+      'With your weight, height, age and habits I can work out your calories, tune your routines and put together your meal plan.',
+    'Empezar': 'Get started',
+
+    'Tú': 'You',
+    'Entrenamiento': 'Training',
+    'Aplicación': 'App',
+
+    'Dime tu nombre para empezar': 'Tell me your name to get started',
+    '{n} años': '{n} years old',
+    'Sin completar': 'Not filled in',
+    '{k} kcal · {p} g de proteína': '{k} kcal · {p} g protein',
+    'Necesita tus datos': 'Needs your details',
+
+    'Suplementación': 'Supplements',
+    'Qué tomas y cuándo': 'What you take and when',
+    'Creatina, proteína, omega 3…': 'Creatine, protein, omega 3…',
+    '{n} apuntado': '{n} logged',
+    '{n} apuntados': '{n} logged',
+    '{n} toma hoy': '{n} dose today',
+    '{n} tomas hoy': '{n} doses today',
+    'hoy ninguna': 'none today',
+
+    '{n} en marcha · {c} cumplidos': '{n} in progress · {c} achieved',
+    'Ninguno todavía': 'None yet',
+    '{n} recordatorio activo': '{n} reminder on',
+    '{n} recordatorios activos': '{n} reminders on',
+    'Sin recordatorios': 'No reminders',
+
+    'Entrenador con IA': 'AI coach',
+    'Listo para usar': 'Ready to use',
+    'Sin configurar': 'Not set up',
+    'Música': 'Music',
+    'Spotify conectado': 'Spotify connected',
+    'Sin conectar': 'Not connected',
+
+    'Mi cuenta': 'My account',
+    'Sin sincronizar': 'Not syncing',
+    'Unidades, tema, idioma y copias de seguridad': 'Units, theme, language and backups',
+    'Comprobando si estás al día…': 'Checking whether you are up to date…',
+    '{v} · sin conexión para comprobar si hay otra':
+      '{v} · no connection to check for a newer one',
+    'Al día · {v} · y lo descargado para usarla sin internet':
+      'Up to date · {v} · plus what you downloaded for offline use',
+    'Hay una versión nueva: {v}': 'There is a new version: {v}',
+    'Cuentas': 'Accounts',
+    'Crear, desactivar y borrar cuentas del proyecto':
+      'Create, disable and delete project accounts',
+    'No he podido comprobar si administras': "I couldn't check whether you're an admin",
+    'Cómo se hace cada cosa, cómo funciona y las dudas de siempre':
+      'How to do each thing, how it works and the usual questions',
+
+    'Cargando catálogo de ejercicios…': 'Loading exercise catalogue…',
+
+    'Sin nombre': 'No name',
+    'en 30 días': 'in 30 days',
+    'peso de hoy': "today's weight",
+    'kcal al día': 'kcal a day',
+    'Modo invitado': 'Guest mode',
+    'Tus datos están solo en este dispositivo. Toca para guardarlos en tu cuenta.':
+      'Your data lives only on this device. Tap to save it to your account.',
+
+    /* ---------- las tablas de perfil.js ----------
+       Son datos, no interfaz, pero acaban en la pantalla: se traducen donde se
+       pintan, con T() sobre la etiqueta. Aquí solo van las etiquetas. */
+    'Sedentario': 'Sedentary',
+    'Trabajo de oficina, sin ejercicio': 'Desk job, no exercise',
+    'Ligero': 'Light',
+    'Ejercicio suave 1-3 días por semana': 'Gentle exercise 1-3 days a week',
+    'Moderado': 'Moderate',
+    'Ejercicio 3-5 días por semana': 'Exercise 3-5 days a week',
+    'Alto': 'High',
+    'Ejercicio intenso 6-7 días por semana': 'Hard exercise 6-7 days a week',
+    'Muy alto': 'Very high',
+    'Trabajo físico o doble sesión': 'Physical job or two sessions a day',
+
+    'Perder grasa': 'Lose fat',
+    'Recomponer': 'Recomposition',
+    'Ponerme fuerte': 'Get strong',
+    'Mantenerme': 'Maintain',
+    'Estar sano': 'Stay healthy',
+    'Ganar músculo': 'Build muscle',
+
+    'Suave': 'Gentle',
+    'Rápido': 'Fast',
+
+    'Bajo peso': 'Underweight',
+    'Peso normal': 'Healthy weight',
+    'Sobrepeso': 'Overweight',
+    'Obesidad': 'Obesity',
+
+    'Desayuno': 'Breakfast',
+    'Almuerzo': 'Lunch',
+    'Merienda': 'Afternoon snack',
+    'Cena': 'Dinner'
   };
 })(window);
