@@ -6453,42 +6453,158 @@ html[data-theme="light"] .rec-adelanto {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 7%, transparent);
 }
 
-/* ---------- elegir suplemento: rejilla, no lista ----------
-   Doce filas de lista para elegir un bote ocupaban tres pantallas de alto para
-   decir doce nombres, y obligaban a leerlas todas de arriba abajo. En rejilla
-   se ve casi todo de una vez y se elige senalando. */
+/* ---------- elegir suplemento ----------
+   Doce filas de lista para elegir un bote era tratar un catalogo como si fuera
+   configuracion. En rejilla se ve todo casi de una vez y se elige senalando.
+
+   Sin la dosis debajo: al elegir se decide QUE, no cuanto —eso va en el paso
+   siguiente—, y una segunda linea en cada ficha las hacia el doble de altas
+   para decir algo que nadie lee ahi. Lo que si ayuda es el dibujo de en que
+   viene: en una rejilla de doce nombres, distinguir el bote del blister pasa
+   antes de leer. */
 .sup-rejilla {
   display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;
 }
 .sup-chip {
-  display: flex; flex-direction: column; justify-content: center; gap: 2px;
-  min-height: 58px; padding: 9px 11px; border-radius: 14px;
+  position: relative; display: flex; align-items: center; gap: 10px;
+  min-height: 56px; padding: 10px 11px; border-radius: 15px;
   text-align: left; cursor: pointer; font: inherit; color: var(--txt);
   border: 1px solid color-mix(in srgb, #fff 9%, transparent);
   background:
-    linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 58%),
-    color-mix(in srgb, var(--card2) 78%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
-  transition: border-color .18s ease, transform .12s ease, background .18s ease;
+    linear-gradient(180deg, color-mix(in srgb, #fff 7%, transparent), transparent 58%),
+    color-mix(in srgb, var(--card2) 76%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #000 12%, transparent),
+    0 3px 10px color-mix(in srgb, #000 16%, transparent);
+  transition: border-color .18s ease, transform .12s ease, box-shadow .2s ease;
 }
 .sup-chip:active { transform: scale(.97); }
+
+.sc-ico {
+  flex: none; width: 32px; height: 32px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 24%, transparent);
+}
+.sc-ico svg {
+  width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.9;
+  stroke-linecap: round; stroke-linejoin: round;
+}
 .sc-nom {
-  display: block; font-weight: 650; font-size: .86rem; letter-spacing: -.012em;
+  flex: 1; min-width: 0; font-weight: 650; font-size: .86rem; letter-spacing: -.014em;
   line-height: 1.25;
 }
-.sc-dos { display: block; font-size: .7rem; color: var(--dim2); line-height: 1.2; }
 
-/* Ya lo tomas: no se esconde —puede querer un segundo bote— pero se apaga, y
-   asi el que busca algo nuevo no se para a leerlo. */
-.sup-chip.ya { opacity: .45; }
-.sup-chip.ya .sc-nom::after {
-  content: " · ya"; font-weight: 700; color: var(--acc); font-size: .7rem;
+/* Ya lo tomas: se apaga y lleva su marca. No se esconde —puede querer un
+   segundo bote— pero el que busca algo nuevo no se para a leerlo. */
+.sup-chip.ya { opacity: .42; }
+.sc-ya {
+  position: absolute; top: 7px; right: 8px; display: flex; color: var(--acc);
 }
-.sup-chip.otro {
-  border-style: dashed;
-  border-color: color-mix(in srgb, #fff 16%, transparent);
-  background: none;
-  box-shadow: none;
+.sc-ya svg { width: 13px; height: 13px; fill: none; stroke: currentColor;
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- el que no es un suplemento ----------
+   «Otro» no es uno mas de la lista, es la salida para lo que no esta en ella.
+   Dentro de la rejilla y con borde de puntos se perdia entre los doce, y en
+   claro no se veia: fuera, ancho entero y con su propio color. */
+.sup-otro {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  margin-top: 10px; padding: 12px 13px; border-radius: 15px;
+  cursor: pointer; font: inherit; color: var(--agua);
+  border: 1px solid color-mix(in srgb, var(--agua) 38%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 7%, transparent), transparent 58%),
+    color-mix(in srgb, var(--agua) 12%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 13%, transparent);
+  transition: transform .12s ease;
+}
+.sup-otro:active { transform: scale(.985); }
+.so-ico {
+  flex: none; width: 32px; height: 32px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--agua) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--agua) 30%, transparent);
+}
+.so-ico svg { width: 17px; height: 17px; fill: none; stroke: currentColor;
+  stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.sup-otro b { display: block; font-size: .92rem; font-weight: 700; letter-spacing: -.015em; }
+.sup-otro i {
+  display: block; margin-top: 1px; font-style: normal; font-size: .74rem;
+  color: var(--dim2);
+}
+.sup-otro .chevron { opacity: .55; }
+
+/* ---------- cuanto ----------
+   Era una caja de texto donde habia que escribir «1 capsula» a mano, y eso
+   daba «1 capsula», «una capsula», «1 cap» y «1capsula» en la misma lista.
+   Un contador y una lista cerrada: se toca dos veces y siempre se escribe
+   igual. */
+.do-caja {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 4px; padding: 12px; border-radius: 17px;
+  border: 1px solid color-mix(in srgb, #fff 9%, transparent);
+  background: color-mix(in srgb, #000 16%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+}
+.do-pm {
+  flex: none; width: 46px; height: 46px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  border: 0; cursor: pointer; color: var(--txt);
+  background: color-mix(in srgb, #fff 8%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
+  transition: background .15s ease, transform .12s ease, opacity .2s ease;
+}
+.do-pm:active { transform: scale(.9); background: color-mix(in srgb, var(--acc) 24%, transparent); }
+.do-pm[disabled] { opacity: .3; pointer-events: none; }
+.do-pm svg { width: 19px; height: 19px; fill: none; stroke: currentColor;
+  stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+.do-val {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.do-val b {
+  font-size: 2rem; font-weight: 800; letter-spacing: -.035em; line-height: 1;
+  color: var(--acc); font-variant-numeric: tabular-nums;
+}
+.do-val i {
+  font-style: normal; font-size: .76rem; font-weight: 600; color: var(--dim2);
+}
+
+/* La lista de unidades, al estilo de Ajustes: la marca solo en la elegida, que
+   ocho circulos vacios piden atencion a ocho cosas que no la necesitan. */
+.do-unidades { margin-top: 6px; max-height: 232px; overflow-y: auto; }
+.do-uni { width: 100%; background: none; border: 0; color: inherit; font: inherit; }
+.do-uni .list-row-title { font-weight: 500; }
+.do-marca { flex: none; display: flex; color: var(--acc); opacity: 0;
+  transition: opacity .18s ease; }
+.do-marca svg { width: 16px; height: 16px; fill: none; stroke: currentColor;
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.do-uni.on .do-marca { opacity: 1; }
+.do-uni.on .list-row-title { font-weight: 700; color: var(--acc); }
+
+/* La dosis en la ficha: una fila que abre la hoja, como el reparto */
+.sup-reparto.dosis {
+  color: var(--txt);
+  border-color: color-mix(in srgb, #fff 10%, transparent);
+  background: color-mix(in srgb, var(--card2) 76%, transparent);
+}
+
+html[data-theme="light"] .sup-chip {
+  border-color: color-mix(in srgb, #000 10%, transparent);
+  background: #fff;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 80%, transparent),
+              0 2px 7px color-mix(in srgb, #000 8%, transparent);
+}
+html[data-theme="light"] .do-caja {
+  border-color: color-mix(in srgb, #000 10%, transparent);
+  background: color-mix(in srgb, #000 4%, transparent);
+}
+html[data-theme="light"] .do-pm {
+  background: #fff;
+  box-shadow: 0 1px 3px color-mix(in srgb, #000 12%, transparent);
 }
 
 /* ---------- la ficha, compacta ----------

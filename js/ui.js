@@ -106,6 +106,17 @@
     chevron: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
     calendario: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/>'
       + '<path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14.5h2M14.5 14.5h2M7.5 17.5h2M14.5 17.5h2"/></svg>',
+    /* Las formas en que viene un suplemento. No es decoracion: en una rejilla
+       de doce nombres, el dibujo es lo que deja distinguir el bote del blister
+       antes de leer nada. */
+    polvo: '<svg viewBox="0 0 24 24"><path d="M8 3.2h8v3.4H8z"/>'
+      + '<path d="M6.6 6.6h10.8a1.6 1.6 0 011.6 1.6v11.2a1.6 1.6 0 01-1.6 1.6H6.6A1.6 1.6 0 015 19.4V8.2a1.6 1.6 0 011.6-1.6z"/>'
+      + '<path d="M8.6 12.4h6.8M8.6 15.6h4.4"/></svg>',
+    capsula: '<svg viewBox="0 0 24 24">'
+      + '<rect x="2.6" y="8.4" width="18.8" height="7.2" rx="3.6" transform="rotate(-32 12 12)"/>'
+      + '<path d="M9 15.4l6-6.8"/></svg>',
+    comprimido: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/>'
+      + '<path d="M6.1 6.1l11.8 11.8"/></svg>',
     bote: '<svg viewBox="0 0 24 24"><path d="M9 2.8h6v3H9z"/>'
       + '<path d="M6.8 5.8h10.4a1.8 1.8 0 011.8 1.8v11.6a1.8 1.8 0 01-1.8 1.8H6.8A1.8 1.8 0 015 19.2V7.6a1.8 1.8 0 011.8-1.8z"/>'
       + '<path d="M12 10.6v5.2M9.4 13.2h5.2"/></svg>',

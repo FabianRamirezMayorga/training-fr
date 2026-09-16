@@ -30,23 +30,77 @@
      `aporta` solo lo llevan los que de verdad suman al día. Un multivitamínico
      no cambia tus calorías; un batido de proteína, sí, y no contarlo hace que
      el menú te pida 30 g de proteína que ya te has tomado. */
+  /* ---------- en qué viene cada cosa ----------
+     La forma no es decoración: decide el icono de la ficha y, sobre todo, en
+     qué unidad se mide. Un polvo se mide en gramos o en cazos y una cápsula en
+     cápsulas, y ofrecer «gramos» para el omega 3 es pedirle a alguien que pese
+     una perla de aceite. */
+  const FORMAS = {
+    polvo: { icono: 'polvo', unidad: 'g' },
+    capsula: { icono: 'capsula', unidad: 'capsula' },
+    comprimido: { icono: 'comprimido', unidad: 'comprimido' },
+    liquido: { icono: 'gota', unidad: 'ml' }
+  };
+
+  /* Las unidades, en el orden en que la gente las mide. `paso` es lo que suma
+     el más y el menos: un gramo de gramo en gramo y cinco mililitros de golpe,
+     que nadie ajusta un jarabe de uno en uno. */
+  /* `sing` y `plur` son como se escribe en la lista de suplementos —«5 g»— y
+     `lista` como se llama al elegirla, que ahí «G» no es una palabra. */
+  const UNIDADES = [
+    { id: 'capsula', sing: 'cápsula', plur: 'cápsulas', lista: 'Cápsulas', paso: 1 },
+    { id: 'comprimido', sing: 'comprimido', plur: 'comprimidos',
+      lista: 'Comprimidos o pastillas', paso: 1 },
+    { id: 'cazo', sing: 'cazo', plur: 'cazos', lista: 'Cazos o scoops', paso: 1 },
+    { id: 'g', sing: 'g', plur: 'g', lista: 'Gramos', paso: 1 },
+    { id: 'ml', sing: 'ml', plur: 'ml', lista: 'Mililitros', paso: 5 },
+    { id: 'gota', sing: 'gota', plur: 'gotas', lista: 'Gotas', paso: 1 },
+    { id: 'sobre', sing: 'sobre', plur: 'sobres', lista: 'Sobres', paso: 1 },
+    { id: 'toma', sing: 'toma', plur: 'tomas', lista: 'Tomas', paso: 1 }
+  ];
+
+  function unidadDe(id) {
+    return UNIDADES.filter(function (u) { return u.id === id; })[0] || UNIDADES[7];
+  }
+
+  /* «2 cápsulas», «5 g», «1 cazo». El texto se compone aquí y no se escribe a
+     mano: así la lista de suplementos y los avisos dicen lo mismo, y el plural
+     nunca se queda cojo. */
+  function textoDosis(n, unidad) {
+    const u = unidadDe(unidad);
+    const cant = Number(n) || 0;
+    if (!cant) return '';
+    const num = String(Math.round(cant * 10) / 10).replace('.', ',');
+    return num + ' ' + (cant === 1 ? u.sing : u.plur);
+  }
+
   const CATALOGO = [
-    { id: 'creatina', nombre: 'Creatina', dosis: '5 g', momento: 'con:desayuno' },
-    { id: 'proteina', nombre: 'Proteína en polvo', dosis: '1 cazo (30 g)',
-      momento: 'tras:entreno', aporta: { kcal: 120, prot: 24 } },
-    { id: 'omega3', nombre: 'Omega 3', dosis: '1 cápsula', momento: 'con:almuerzo' },
-    { id: 'multi', nombre: 'Multivitamínico', dosis: '1 toma', momento: 'con:desayuno' },
-    { id: 'vitd', nombre: 'Vitamina D', dosis: '1 cápsula', momento: 'con:almuerzo' },
-    { id: 'magnesio', nombre: 'Magnesio', dosis: '1 toma', momento: 'con:cena' },
-    { id: 'cafeina', nombre: 'Cafeína o pre-entreno', dosis: '1 toma',
-      momento: 'antes:entreno' },
-    { id: 'colageno', nombre: 'Colágeno', dosis: '10 g', momento: 'con:desayuno',
-      aporta: { kcal: 36, prot: 9 } },
-    { id: 'aminos', nombre: 'Aminoácidos (EAA o BCAA)', dosis: '1 toma',
-      momento: 'antes:entreno' },
-    { id: 'glutamina', nombre: 'Glutamina', dosis: '5 g', momento: 'con:cena' },
-    { id: 'zinc', nombre: 'Zinc', dosis: '1 toma', momento: 'con:cena' },
-    { id: 'otro', nombre: 'Otro', dosis: '', momento: 'con:desayuno' }
+    { id: 'creatina', nombre: 'Creatina', forma: 'polvo',
+      dosisN: 5, dosisU: 'g', momento: 'con:desayuno' },
+    { id: 'proteina', nombre: 'Proteína en polvo', forma: 'polvo',
+      dosisN: 1, dosisU: 'cazo', momento: 'tras:entreno', aporta: { kcal: 120, prot: 24 } },
+    { id: 'omega3', nombre: 'Omega 3', forma: 'capsula',
+      dosisN: 1, dosisU: 'capsula', momento: 'con:almuerzo' },
+    { id: 'multi', nombre: 'Multivitamínico', forma: 'comprimido',
+      dosisN: 1, dosisU: 'comprimido', momento: 'con:desayuno' },
+    { id: 'vitd', nombre: 'Vitamina D', forma: 'capsula',
+      dosisN: 1, dosisU: 'capsula', momento: 'con:almuerzo' },
+    { id: 'magnesio', nombre: 'Magnesio', forma: 'comprimido',
+      dosisN: 1, dosisU: 'comprimido', momento: 'con:cena' },
+    { id: 'cafeina', nombre: 'Pre-entreno', forma: 'polvo',
+      dosisN: 1, dosisU: 'toma', momento: 'antes:entreno' },
+    { id: 'colageno', nombre: 'Colágeno', forma: 'polvo',
+      dosisN: 10, dosisU: 'g', momento: 'con:desayuno', aporta: { kcal: 36, prot: 9 } },
+    { id: 'aminos', nombre: 'Aminoácidos', forma: 'polvo',
+      dosisN: 1, dosisU: 'cazo', momento: 'antes:entreno' },
+    { id: 'glutamina', nombre: 'Glutamina', forma: 'polvo',
+      dosisN: 5, dosisU: 'g', momento: 'con:cena' },
+    { id: 'zinc', nombre: 'Zinc', forma: 'comprimido',
+      dosisN: 1, dosisU: 'comprimido', momento: 'con:cena' },
+    { id: 'probiotico', nombre: 'Probiótico', forma: 'capsula',
+      dosisN: 1, dosisU: 'capsula', momento: 'con:desayuno' },
+    { id: 'otro', nombre: 'Otro', forma: 'polvo',
+      dosisN: 1, dosisU: 'toma', momento: 'con:desayuno' }
   ];
 
   /* ---------- cada cuánto ----------
@@ -201,7 +255,14 @@
 
   function lista() {
     return (Store.settings().suplementos || []).map(function (s) {
-      return Object.assign({ frecuencia: 'diario', momento: 'con:desayuno', dosis: '' }, s);
+      const x = Object.assign({ frecuencia: 'diario', momento: 'con:desayuno',
+        dosis: '', forma: 'polvo' }, s);
+      /* La dosis se guardaba como texto libre y ahora son número y unidad. Lo
+         que se apuntó antes sigue valiendo tal cual: se enseña el texto viejo
+         hasta que se toque la ficha, en vez de intentar adivinar qué quiso
+         decir «1 cazo (30 g)». */
+      if (x.dosisN && x.dosisU) x.dosis = textoDosis(x.dosisN, x.dosisU);
+      return x;
     });
   }
 
@@ -210,7 +271,8 @@
   function nuevo(base) {
     return Object.assign({
       id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      nombre: '', dosis: '', frecuencia: 'diario', momento: 'con:desayuno',
+      nombre: '', dosis: '', dosisN: 1, dosisU: 'toma', forma: 'polvo',
+      frecuencia: 'diario', momento: 'con:desayuno',
       hora: '08:00', dia: 1, nota: '', aporta: null,
       patron: '', horasManuales: []
     }, base || {});
@@ -442,6 +504,7 @@
   g.Suplementos = {
     CATALOGO: CATALOGO, FRECUENCIAS: FRECUENCIAS, MOMENTOS: MOMENTOS,
     delCatalogo: delCatalogo, momentoDe: momentoDe,
+    FORMAS: FORMAS, UNIDADES: UNIDADES, unidadDe: unidadDe, textoDosis: textoDosis,
     lista: lista, nuevo: nuevo, guardar: guardar, borrar: borrar,
     horaDe: horaDe, horasDe: horasDe, etiquetaMomento: etiquetaMomento,
     PATRONES: PATRONES, patronDe: patronDe,

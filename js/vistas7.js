@@ -320,33 +320,48 @@
 
   /* ---------- elegir del catálogo ----------
      Doce filas de lista para elegir un bote era tratar un catálogo como si
-     fuera configuración: ocupaba tres pantallas de alto para decir doce
-     nombres, y elegir obligaba a leerlo entero de arriba abajo.
+     fuera configuración. En rejilla se ve todo casi de una vez y se elige
+     señalando, que es lo que de verdad se hace aquí.
 
-     En rejilla se ve todo casi de una vez y se elige señalando, que es lo que
-     de verdad se hace aquí. La dosis va debajo en pequeño porque no decide
-     nada: se cambia en el paso siguiente. */
+     Y sin la dosis debajo. Era información de más en el momento equivocado: al
+     elegir se está decidiendo QUÉ, no cuánto —eso se ajusta en el paso
+     siguiente—, y una segunda línea en cada ficha las hacía el doble de altas
+     para decir algo que nadie lee ahí. Lo que sí ayuda es el dibujo de en qué
+     viene: en una rejilla de doce nombres, distinguir el bote del blíster pasa
+     antes de leer. */
   function elegirSheet() {
     const ya = {};
     S().lista().forEach(function (x) { if (x.cat) ya[x.cat] = 1; });
 
     UI.modal(html`
       <div class="conf-disco cambio">${raw(icon('bote'))}</div>
-      <h2 class="conf-tit">¿Qué tomas?</h2>
-      <p class="muted conf-txt">Elige uno y ajustas el resto. Lo que sale puesto es lo que
-      suele traer la etiqueta, no una recomendación.</p>
+      <h2 class="conf-tit">Añadir suplemento</h2>
+      <p class="muted conf-txt">Elige cuál y en el paso siguiente pones la dosis, cada
+      cuánto y a qué hora.</p>
 
       <div class="sup-rejilla">
-        ${raw(S().CATALOGO.map(function (c) {
-          return '<button class="sup-chip' + (c.id === 'otro' ? ' otro' : '') +
-            (ya[c.id] ? ' ya' : '') + '" data-cat="' + esc(c.id) + '">' +
-            '<span class="sc-nom">' + esc(c.nombre) + '</span>' +
-            '<span class="sc-dos">' + esc(c.id === 'otro' ? 'Lo escribes tú'
-              : (c.dosis || '')) + '</span></button>';
-        }).join(''))}
-      </div>`,
+        ${raw(S().CATALOGO.filter(function (c) { return c.id !== 'otro'; })
+          .map(function (c) {
+            const f = S().FORMAS[c.forma] || S().FORMAS.polvo;
+            return '<button class="sup-chip' + (ya[c.id] ? ' ya' : '') +
+              '" data-cat="' + esc(c.id) + '">' +
+              '<span class="sc-ico">' + icon(f.icono) + '</span>' +
+              '<span class="sc-nom">' + esc(c.nombre) + '</span>' +
+              (ya[c.id] ? '<span class="sc-ya">' + icon('check') + '</span>' : '') +
+              '</button>';
+          }).join(''))}
+      </div>
+
+      <!-- Fuera de la rejilla y con su propio color: no es un suplemento más de
+           la lista, es la salida para lo que no está en ella. Dentro y con
+           borde de puntos se perdía entre los doce, y en claro no se veía. -->
+      <button class="sup-otro" data-cat="otro">
+        <span class="so-ico">${raw(icon('plus'))}</span>
+        <span class="grow"><b>Otro</b><i>El tuyo no está: lo escribes tú</i></span>
+        <span class="chevron">${raw(icon('chevron'))}</span>
+      </button>`,
       function (el) {
-        el.querySelector('.sup-rejilla').onclick = function (ev) {
+        el.onclick = function (ev) {
           const b = ev.target.closest('[data-cat]');
           if (!b) return;
           const c = S().delCatalogo(b.dataset.cat);
@@ -355,11 +370,86 @@
             fichaSheet(S().nuevo({
               cat: c.id === 'otro' ? '' : c.id,
               nombre: c.id === 'otro' ? '' : c.nombre,
-              dosis: c.dosis || '',
+              forma: c.forma || 'polvo',
+              dosisN: c.dosisN || 1,
+              dosisU: c.dosisU || 'toma',
               momento: c.momento || 'con:desayuno',
               aporta: c.aporta || null
             }), true);
           }, 180);
+        };
+      });
+  }
+
+  /* ---------- cuánto ----------
+     Era una caja de texto donde había que escribir «1 cápsula» a mano, y eso
+     daba «1 capsula», «una cápsula», «1 cap» y «1cápsula» en la misma lista.
+     Ahora es un número y una unidad de una lista cerrada: se toca dos veces y
+     lo que se guarda siempre se escribe igual.
+
+     Las unidades que salen las manda la forma del suplemento: ofrecerle gramos
+     a alguien para su omega 3 es pedirle que pese una perla de aceite. Están
+     todas, pero primero las que tienen sentido. */
+  function dosisSheet(dat, alElegir) {
+    let n = Number(dat.dosisN) || 1;
+    let u = dat.dosisU || 'toma';
+
+    const paso = function () { return S().unidadDe(u).paso || 1; };
+
+    const pintar = function (el) {
+      el.querySelector('#do-num').textContent =
+        String(Math.round(n * 10) / 10).replace('.', ',');
+      el.querySelector('#do-uni').textContent = S().unidadDe(u)[n === 1 ? 'sing' : 'plur'];
+      el.querySelectorAll('[data-uni]').forEach(function (x) {
+        x.classList.toggle('on', x.dataset.uni === u);
+      });
+      el.querySelector('[data-d=menos]').disabled = n <= paso();
+    };
+
+    UI.modal(html`
+      <div class="conf-disco cambio">${raw(icon('polvo'))}</div>
+      <h2 class="conf-tit">¿Cuánto tomas?</h2>
+      <p class="muted conf-txt">De una vez. Si lo repartes en el día, eso se dice
+      después.</p>
+
+      <div class="do-caja">
+        <button class="do-pm" data-d="menos" aria-label="Menos">${raw(icon('menos'))}</button>
+        <span class="do-val"><b id="do-num">1</b><i id="do-uni">toma</i></span>
+        <button class="do-pm" data-d="mas" aria-label="Más">${raw(icon('plus'))}</button>
+      </div>
+
+      <div class="list-title" style="margin-top:16px">En qué se mide</div>
+      <div class="list do-unidades">
+        ${raw(S().UNIDADES.map(function (x) {
+          return '<button class="list-row tap do-uni" data-uni="' + esc(x.id) + '">' +
+            '<span class="grow"><span class="list-row-title">' + esc(x.lista) +
+            '</span></span><span class="do-marca">' + icon('check') + '</span></button>';
+        }).join(''))}
+      </div>
+
+      <div class="cb-acciones" style="margin-top:16px">
+        <button class="btn primary grow btn-arranque" data-d="ok">
+          ${raw(icon('check'))} Listo</button>
+        <button class="btn vidrio" data-d="no">Cancelar</button>
+      </div>`,
+      function (el) {
+        pintar(el);
+        el.onclick = function (ev) {
+          const uni = ev.target.closest('[data-uni]');
+          if (uni) { u = uni.dataset.uni; pintar(el); return; }
+
+          const b = ev.target.closest('[data-d]');
+          if (!b) return;
+          if (b.dataset.d === 'mas') { n = Math.min(999, n + paso()); pintar(el); return; }
+          if (b.dataset.d === 'menos') { n = Math.max(paso(), n - paso()); pintar(el); return; }
+          if (b.dataset.d === 'no') { UI.closeModal(); alElegir(false); return; }
+          if (b.dataset.d === 'ok') {
+            dat.dosisN = n;
+            dat.dosisU = u;
+            dat.dosis = S().textoDosis(n, u);
+            UI.closeModal();
+            setTimeout(function () { alElegir(true); }, 180);
+          }
         };
       });
   }
@@ -405,16 +495,16 @@
       <div class="conf-disco cambio">${raw(icon('bote'))}</div>
       <h2 class="conf-tit">${esNuevo ? 'Nuevo suplemento' : dat.nombre || 'Suplemento'}</h2>
 
-      <div class="sup-campos">
-        <label class="sup-campo grow">
-          <span>Nombre</span>
-          <input id="sf-nombre" value="${dat.nombre}" placeholder="Creatina" autocomplete="off">
-        </label>
-        <label class="sup-campo dosis">
-          <span>Dosis</span>
-          <input id="sf-dosis" value="${dat.dosis}" placeholder="5 g" autocomplete="off">
-        </label>
-      </div>
+      <label class="sup-campo" style="display:block">
+        <span>Nombre</span>
+        <input id="sf-nombre" value="${dat.nombre}" placeholder="Creatina" autocomplete="off">
+      </label>
+
+      <label class="tiny sup-lbl">CUÁNTO</label>
+      <button class="sup-reparto dosis" data-x="dosis">
+        <span class="grow" id="sf-dosistxt">${dat.dosis || 'Elige la dosis'}</span>
+        <span class="chevron">${raw(icon('chevron'))}</span>
+      </button>
 
       <label class="tiny sup-lbl">CADA CUÁNTO</label>
       <div class="row wrap sup-pills" id="sf-frec">
@@ -507,7 +597,6 @@
 
           if (dat.frecuencia === 'varias' && !dat.patron) {
             dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
-            dat.dosis = (el.querySelector('#sf-dosis').value || '').trim();
             repartoSheet(dat, function (elegido) {
               /* Si se cierra sin elegir, la frecuencia vuelve a lo de antes:
                  dejarla en «varias» sin reparto es dejarla sin horas. */
@@ -530,9 +619,13 @@
            así que hay que guardar lo escrito antes de irse y volver a abrir la
            ficha al elegir. Sin esto, elegir el reparto cerraba el formulario
            entero y se perdía lo tecleado. */
+        el.querySelector('[data-x=dosis]').onclick = function () {
+          dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
+          dosisSheet(dat, function () { fichaSheet(dat, esNuevo); });
+        };
+
         el.querySelector('[data-x=reparto]').onclick = function () {
           dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
-          dat.dosis = (el.querySelector('#sf-dosis').value || '').trim();
           repartoSheet(dat, function () { fichaSheet(dat, esNuevo); });
         };
 
@@ -555,7 +648,6 @@
 
         el.querySelector('[data-x=ok]').onclick = function () {
           dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
-          dat.dosis = (el.querySelector('#sf-dosis').value || '').trim();
           if (!dat.nombre) { UI.toast('Ponle nombre'); return; }
           S().guardar(dat);
           UI.closeModal();
