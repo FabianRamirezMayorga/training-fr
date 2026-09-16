@@ -48,8 +48,18 @@
   /* Negritas sin meter HTML en el contenido: se escapa todo y luego se
      convierte *lo que va entre asteriscos*. Escribir <b> a mano en cada
      párrafo invita a que un día se cuele una etiqueta sin cerrar. */
+  /* ---------- el manual, traducido al leerlo ----------
+     Ocho mil palabras repartidas en cuerpos, pasos, cierres y respuestas. En
+     vez de envolver cada una en su plantilla —que son cuarenta sitios y basta
+     olvidar uno para que una pantalla salga a medias—, se traduce en las tres
+     funciones por las que pasa TODO el texto antes de pintarse: esta, la del
+     título y la del índice.
+
+     Los asteriscos del negrita van dentro de la frase, así que la traducción
+     los lleva también: si en inglés lo que hay que destacar es otra palabra, se
+     destaca otra palabra. */
   function fmt(s) {
-    return esc(s).replace(/\*([^*]+)\*/g, '<b>$1</b>');
+    return esc(T(s)).replace(/\*([^*]+)\*/g, '<b>$1</b>');
   }
 
   /* ---------- lo que la ayuda no se inventa ----------
@@ -699,19 +709,21 @@
   PASOS.forEach(function (x) { x.tipo = 'pasos'; TODO[x.id] = x; });
   PREGUNTAS.forEach(function (x) { x.tipo = 'preguntas'; TODO[x.id] = x; });
 
-  function titulo(x) { return x.titulo || x.q || ''; }
+  function titulo(x) { return T(x.titulo || x.q || ''); }
 
   /* Todo el texto de una entrada junto, ramas incluidas, para que buscar
      «guardar» encuentre el paso que lo explica aunque el título no lo diga. */
   function texto(x) {
-    const trozos = [titulo(x), x.resumen || '', x.intro || '', x.cierre || '']
-      .concat(x.cuerpo || [], x.a || []);
+    /* Se busca sobre lo que se LEE, no sobre el original: con la app en inglés,
+       escribir «weight» tiene que encontrar la entrada del peso. */
+    const trozos = [titulo(x), T(x.resumen || ''), T(x.intro || ''), T(x.cierre || '')]
+      .concat((x.cuerpo || []).map(T), (x.a || []).map(T));
     const depasos = function (ps) {
-      (ps || []).forEach(function (p) { trozos.push(p.t || '', p.d || ''); });
+      (ps || []).forEach(function (p) { trozos.push(T(p.t || ''), T(p.d || '')); });
     };
     depasos(x.pasos);
     (x.ramas || []).forEach(function (r) {
-      trozos.push(r.titulo || '', r.sub || '', r.cierre || '');
+      trozos.push(T(r.titulo || ''), T(r.sub || ''), T(r.cierre || ''));
       depasos(r.pasos);
     });
     return I18N.norm(trozos.join(' '));
@@ -731,19 +743,20 @@
   }
 
   const ETIQUETA = { guia: 'Cómo funciona', pasos: 'Cómo se hace', preguntas: 'Pregunta' };
+  function etiqueta(t) { return T(ETIQUETA[t] || ''); }
 
   /* ================= piezas ================= */
 
   function filaHTML(x) {
     return '<button class="list-row tap ay-fila" data-ay="' + esc(x.id) + '">' +
       '<span class="grow"><span class="list-row-title">' + esc(titulo(x)) + '</span>' +
-      (x.resumen ? '<span class="list-row-sub">' + esc(x.resumen) + '</span>' : '') +
+      (x.resumen ? '<span class="list-row-sub">' + esc(T(x.resumen)) + '</span>' : '') +
       '</span><span class="chevron">' + icon('chevron') + '</span></button>';
   }
 
   function grupoHTML(titulo2, xs) {
     if (!xs.length) return '';
-    return '<div class="list-title">' + esc(titulo2) + '</div>' +
+    return '<div class="list-title">' + esc(T(titulo2)) + '</div>' +
       '<div class="list ay-lista">' + xs.map(filaHTML).join('') + '</div>';
   }
 
@@ -752,7 +765,7 @@
     return '<button class="btn sm ay-ir" data-ir="' + esc(ir.ruta) + '"' +
       (ir.arg ? ' data-arg="' + esc(ir.arg) + '"' : '') +
       (ir.sel ? ' data-sel="' + esc(ir.sel) + '"' : '') + '>' +
-      esc(ir.label) + ' ' + icon('chevron') + '</button>';
+      esc(T(ir.label)) + ' ' + icon('chevron') + '</button>';
   }
 
   function pasosHTML(ps) {
@@ -767,7 +780,7 @@
     const xs = (ids || []).map(function (id) { return TODO[id]; })
       .filter(function (x) { return !!x; });
     if (!xs.length) return '';
-    return '<div class="list-title">Ver también</div>' +
+    return '<div class="list-title">' + esc(T('Ver también')) + '</div>' +
       '<div class="list ay-lista">' + xs.map(function (x) {
         return '<button class="list-row tap ay-fila" data-ay="' + esc(x.id) + '">' +
           '<span class="grow"><span class="list-row-title">' + esc(titulo(x)) + '</span>' +
@@ -786,11 +799,12 @@
 
     const cuerpo = hallados
       ? (hallados.length
-          ? grupoHTML(hallados.length === 1 ? '1 resultado' : hallados.length + ' resultados',
-              hallados)
-          : '<div class="card ay-nada"><p>No hay nada con «' + esc(busqueda) + '».</p>' +
-            '<p class="tiny">Prueba con una palabra suelta: peso, foto, días, copia, ' +
-            'internet, clave.</p></div>')
+          ? '<div class="list-title">' +
+            esc(Tp(hallados.length, '{n} resultado', '{n} resultados')) + '</div>' +
+            '<div class="list ay-lista">' + hallados.map(filaHTML).join('') + '</div>'
+          : '<div class="card ay-nada"><p>' +
+            esc(Tn('No hay nada con «{q}».', { q: busqueda })) + '</p>' +
+            '<p class="tiny">' + esc(T('Prueba con una palabra suelta: peso, foto, días, copia, internet, clave.')) + '</p></div>')
       : grupoHTML('Para empezar', PASOS.filter(function (x) { return x.primero; })) +
         grupoHTML('Cómo se hace', PASOS.filter(function (x) { return !x.primero; })) +
         grupoHTML('Cómo funciona', TEMAS) +
@@ -799,13 +813,12 @@
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Perfil</button>
-      <h1>Ayuda</h1>
-      <p class="muted">Cómo se hace cada cosa, cómo funciona por dentro y las dudas de
-      siempre. Escrito aquí dentro: no necesita conexión.</p>
+      <h1>${T('Ayuda')}</h1>
+      <p class="muted">${T('Cómo se hace cada cosa, cómo funciona por dentro y las dudas de siempre. Escrito aquí dentro: no necesita conexión.')}</p>
 
       <div class="search-wrap" style="margin:14px 0 4px">
         ${raw(icon('search'))}
-        <input id="ay-q" type="search" placeholder="Buscar en la ayuda"
+        <input id="ay-q" type="search" placeholder="${T('Buscar en la ayuda')}"
                value="${busqueda}" autocomplete="off">
       </div>
 
@@ -825,8 +838,8 @@
     if (!x) {
       return html`
         <button class="btn sm ghost" data-a="indice" style="margin-bottom:10px">
-          ${raw(icon('back'))} Ayuda</button>
-        <div class="empty"><p>Esa página de la ayuda ya no está.</p></div>`;
+          ${raw(icon('back'))} ${T('Ayuda')}</button>
+        <div class="empty"><p>${T('Esa página de la ayuda ya no está.')}</p></div>`;
     }
 
     const r = rama ? (x.ramas || []).filter(function (y) { return y.id === rama; })[0] : null;
@@ -834,15 +847,15 @@
     const arriba = html`
       <button class="btn sm ghost" data-a="${raw(r ? 'volverbase' : 'indice')}"
               data-base="${base}" style="margin-bottom:10px">
-        ${raw(icon('back'))} ${r ? esc(titulo(x)) : 'Ayuda'}</button>
-      <div class="ay-de">${ETIQUETA[x.tipo]}</div>
-      <h1>${r ? r.titulo : titulo(x)}</h1>`;
+        ${raw(icon('back'))} ${r ? esc(titulo(x)) : T('Ayuda')}</button>
+      <div class="ay-de">${etiqueta(x.tipo)}</div>
+      <h1>${r ? T(r.titulo) : titulo(x)}</h1>`;
 
     /* una rama concreta */
     if (r) {
       return html`
         ${raw(arriba)}
-        ${raw(r.sub ? '<p class="muted">' + esc(r.sub) + '</p>' : '')}
+        ${raw(r.sub ? '<p class="muted">' + esc(T(r.sub)) + '</p>' : '')}
         ${raw(pasosHTML(r.pasos))}
         ${raw(r.cierre ? '<div class="card ay-cierre"><p>' + fmt(r.cierre) + '</p></div>' : '')}
         ${raw(verTambienHTML(r.ver || x.ver))}`;
@@ -852,12 +865,12 @@
     if (x.ramas) {
       return html`
         ${raw(arriba)}
-        ${raw(x.intro ? '<p class="muted">' + esc(x.intro) + '</p>' : '')}
+        ${raw(x.intro ? '<p class="muted">' + esc(T(x.intro)) + '</p>' : '')}
         <div class="list ay-lista" style="margin-top:12px">
           ${raw(x.ramas.map(function (y) {
             return '<button class="list-row tap ay-fila" data-ay="' + esc(base + '.' + y.id) + '">' +
-              '<span class="grow"><span class="list-row-title">' + esc(y.titulo) + '</span>' +
-              '<span class="list-row-sub">' + esc(y.sub) + '</span></span>' +
+              '<span class="grow"><span class="list-row-title">' + esc(T(y.titulo)) + '</span>' +
+              '<span class="list-row-sub">' + esc(T(y.sub)) + '</span></span>' +
               '<span class="chevron">' + icon('chevron') + '</span></button>';
           }).join(''))}
         </div>
@@ -867,7 +880,7 @@
     /* pasos, o texto corrido */
     return html`
       ${raw(arriba)}
-      ${raw(x.resumen ? '<p class="muted">' + esc(x.resumen) + '</p>' : '')}
+      ${raw(x.resumen ? '<p class="muted">' + esc(T(x.resumen)) + '</p>' : '')}
       ${raw(x.pasos ? pasosHTML(x.pasos)
         : '<div class="ay-texto">' +
           (x.cuerpo || x.a).map(function (p) { return '<p>' + fmt(p) + '</p>'; }).join('') +
