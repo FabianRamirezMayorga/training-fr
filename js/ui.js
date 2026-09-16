@@ -83,6 +83,11 @@
     vaso: '<svg viewBox="0 0 24 24"><path d="M6 3h12l-1.3 17a1 1 0 01-1 .9H8.3a1 1 0 01-1-.9L6 3z"/><path d="M6.6 10.5h10.8"/></svg>',
     camara: '<svg viewBox="0 0 24 24"><path d="M9 8l1.2-2.4h3.6L15 8h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2z"/><circle cx="12" cy="14" r="3.4"/></svg>',
     chevron: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
+    calendario: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/>'
+      + '<path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14.5h2M14.5 14.5h2M7.5 17.5h2M14.5 17.5h2"/></svg>',
+    bote: '<svg viewBox="0 0 24 24"><path d="M9 2.8h6v3H9z"/>'
+      + '<path d="M6.8 5.8h10.4a1.8 1.8 0 011.8 1.8v11.6a1.8 1.8 0 01-1.8 1.8H6.8A1.8 1.8 0 015 19.2V7.6a1.8 1.8 0 011.8-1.8z"/>'
+      + '<path d="M12 10.6v5.2M9.4 13.2h5.2"/></svg>',
     ayuda: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'
       + '<path d="M9.4 9.3a2.7 2.7 0 015.2.9c0 1.8-2.6 2.3-2.6 4M12 17.2v.1"/></svg>',
     filtro: '<svg viewBox="0 0 24 24"><path d="M3 7h18M6 12h12M10 17h4"/></svg>',

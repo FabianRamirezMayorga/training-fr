@@ -145,6 +145,18 @@
       ],
       ver: ['c-foto', 'c-franjas'] },
 
+    { id: 'g-suplementos', titulo: 'Los suplementos',
+      resumen: 'Se apuntan una vez y lo usa toda la app',
+      cuerpo: [
+        'En Perfil › Suplementos apuntas qué tomas, cuánto, cada cuánto y en qué momento. A partir de ahí no hay que repetirlo en ningún otro sitio.',
+        '*Los recordatorios se crean solos*, con el nombre y la dosis puestos. Los que caen a la misma hora van en un solo aviso: tres notificaciones seguidas a las ocho para tres botes del mismo cajón es ruido, y el ruido acaba silenciándose entero.',
+        '*El momento no guarda una hora*, guarda que es «con el desayuno» o «después de entrenar». La hora sale de tus horas de comer y de la hora a la que entrenas de verdad, así que si mueves el desayuno de las ocho a las seis, la creatina se mueve sola.',
+        '*Lo que aportan cuenta*: un batido de proteína son unas 120 kcal y 24 g, y el menú los descuenta en vez de pedírtelos otra vez en comida.',
+        '*Y la IA lo sabe*: al montarte un menú no te propone lo que ya tomas, y si una toma va con una comida concreta la menciona ahí en vez de inventar otra.',
+        'Las frecuencias que hay: todos los días, los días que entrenas —sale de los días de tu plan—, un día sí y otro no, y un día a la semana.'
+      ],
+      ver: ['c-suplementos', 'g-comida', 'p-suplerecet'] },
+
     { id: 'g-lugar', titulo: 'Dónde entrenas',
       resumen: 'Por qué a veces un ejercicio no aparece',
       cuerpo: [
@@ -324,6 +336,25 @@
       ],
       ver: ['g-comida', 'c-franjas', 'p-foto'] },
 
+    { id: 'c-suplementos', titulo: 'Apuntar lo que tomas',
+      resumen: 'Y que se creen los recordatorios solos',
+      pasos: [
+        { t: 'Entra en *Perfil › Suplementos*.',
+          ir: { ruta: 'suplementos', label: 'Abrir Suplementos' } },
+        { t: 'Toca *Añadir* y elige de la lista.',
+          d: 'Creatina, proteína, omega 3, multivitamínico, magnesio… Sale con la dosis que suele traer la etiqueta, para no teclearla. Si el tuyo no está, elige *Otro* y lo escribes.' },
+        { t: 'Ajusta la dosis como la midas tú.',
+          d: '«5 g», «1 cazo», «2 cápsulas». Es texto libre porque cada bote se mide distinto.' },
+        { t: 'Di cada cuánto.',
+          d: 'Todos los días, los días que entrenas, un día sí y otro no, o un día a la semana. «Los días que entreno» sale de los días que tengas asignados en tu plan.' },
+        { t: 'Di en qué momento.',
+          d: 'Con el desayuno, el almuerzo, la merienda o la cena; antes o después de entrenar; o a una hora fija. Debajo verás la hora exacta que sale de eso, para que sepas que la app conoce tus horarios.' },
+        { t: 'Guarda y, abajo, toca *Crear los recordatorios*.',
+          d: 'Se crean con el nombre y la dosis. Solo toca los de suplementos: los recordatorios que hayas creado tú se quedan como están.' }
+      ],
+      cierre: 'Si luego cambias las horas de comer, los días de tu plan o los propios suplementos, la pantalla te avisa de que los recordatorios no coinciden y se rehacen con un toque.',
+      ver: ['g-suplementos', 'c-franjas', 'c-calendario'] },
+
     { id: 'c-franjas', titulo: 'Poner las horas de tus comidas',
       resumen: 'Para que el cruce acierte',
       pasos: [
@@ -480,6 +511,18 @@
       a: ['Por una de tres: la hora de la foto cae fuera de todas las franjas, no tienes un menú activo para ese día, o las franjas no están puestas a tus horas.',
         'Lo que quedó sin cruzar se puede cruzar después, y también a mano eligiendo tú la comida.'],
       ver: ['c-franjas', 'g-comida'] },
+
+    { id: 'p-suplerecet', q: '¿La app me dice qué suplementos tomar?',
+      a: ['No, y a propósito. La lista es para acordarte y para que las cuentas cuadren, no una recomendación.',
+        'Las dosis que salen puestas al elegir del catálogo son las que suele traer la etiqueta del bote, como relleno del formulario para no teclearlas; se cambian enteras.',
+        'Qué tomar, cuánto y si te conviene lo decides tú con quien te lleve la salud, sobre todo si tomas medicación.'],
+      ver: ['g-suplementos'] },
+
+    { id: 'p-avisocomida', q: '¿Por qué el aviso de comer dice «toca desayunar» y las calorías?',
+      a: ['Porque «hora de comer» a las ocho de la mañana no dice nada que no diga el reloj.',
+        'La app mira en qué franja cae esa hora —las mismas horas que usas para cruzar las fotos—, coge las calorías y la proteína que le tocan a esa comida, y si tienes un menú activo añade lo que te sugiere para ella.',
+        'Se calcula al lanzar el aviso, no al crear el recordatorio: el menú de hoy no es el de la semana que viene. En el calendario del móvil va el título y las calorías, pero no el plato, porque ese archivo se escribe hoy y el evento suena dentro de tres semanas.'],
+      ver: ['g-comida', 'c-franjas'] },
 
     { id: 'p-sinplan', q: '¿Puedo entrenar sin crear ningún plan?',
       a: ['Sí. El entrenamiento libre no necesita nada: abres, añades lo que vas haciendo y guardas.',

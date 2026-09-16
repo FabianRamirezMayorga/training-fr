@@ -1203,9 +1203,37 @@
       else if (!arrancando) trozos.push('Aún no ha registrado series con peso, así que no sabes qué cargas mueve.');
     }
 
+    /* ---------- lo que ya toma ----------
+       Va en todo y no solo en el menú: un plan de fuerza para quien toma
+       creatina no cambia, pero el consejo sí —y el menú, desde luego—. Sin
+       esto, la IA proponía un batido de proteína después de entrenar a alguien
+       que ya se toma uno, y le pedía la proteína entera en comida sin descontar
+       los 24 gramos que ya se había bebido. */
+    if (g.Suplementos && Suplementos.lista().length) {
+      const aporta = Suplementos.aportaDiario();
+      trozos.push('SUPLEMENTOS QUE YA TOMA:\n' + Suplementos.resumenIA() +
+        '\nNO se los vuelvas a proponer ni le sugieras nada que duplique lo que ya toma. ' +
+        (aporta.kcal || aporta.prot
+          ? 'Hoy le aportan unas ' + aporta.kcal + ' kcal y ' + aporta.prot + ' g de ' +
+            'proteína: descuéntalas de lo que le pidas comer, no se las sumes encima. '
+          : '') +
+        'Y no le receta nada nadie: si algo te parece de más o de menos, puedes decirlo ' +
+        'en una frase y sin alarmismo, pero la decisión es suya y de quien le lleve la salud.');
+    }
+
     if (incluir.comida) {
       const c = comidaReal();
       if (c) trozos.push(c);
+
+      /* A qué hora come de verdad. Un menú con el desayuno a las ocho para
+         quien desayuna a las seis y entrena a las siete de la tarde está mal
+         repartido aunque los números cuadren. */
+      if (g.Perfil && Perfil.franjas) {
+        trozos.push('A QUÉ HORA COME: ' + Perfil.franjas().map(function (f) {
+          return f.label.toLowerCase() + ' desde las ' + f.desde;
+        }).join(', ') + '. Reparte las comidas a esas horas y ponlas en el menú, no a ' +
+          'las horas de un horario estándar.');
+      }
       /* Con qué cocina de verdad. Vale para todo, no solo para el menú: un
          consejo con ingredientes que no tiene es un consejo que no va a seguir.
          Aquí arriba «p» es el resumen en texto, no los datos. */
@@ -1250,6 +1278,12 @@
     const p = Perfil.datos();
     const clave = 'nutricion:' + JSON.stringify(m) + ':' + p.dieta + ':' + p.comidas +
       ':' + p.alergias + ':' + p.condiciones + ':' + p.despensa + ':' + p.ordenesComida +
+      /* Los suplementos y las horas de comer entran en el menu, asi que entran
+         en la clave: sin esto, apuntar la proteina y volver a pedir el menu
+         devolvia el de antes, el que no la descontaba. */
+      ':' + (g.Suplementos ? Suplementos.resumenIA() : '') +
+      ':' + (g.Perfil && Perfil.franjas ? Perfil.franjas().map(function (f) {
+        return f.desde; }).join(',') : '') +
       ':' + (opciones.variante || 0);
     const guardado = leerCache(clave, 72);
     if (guardado && !opciones.forzar) return Promise.resolve(guardado);
@@ -1283,6 +1317,12 @@
       (p.dieta !== 'omnivora' ? 'DIETA: ' + Perfil.DIETA[p.dieta] + '. Todo el menú la respeta.\n' : '') +
       (p.alergias ? 'NO PUEDE COMER (innegociable: no aparece en ningún plato, en ninguna ' +
         'alternativa ni en la lista de la compra): ' + p.alergias + '.\n' : '') +
+      (g.Suplementos && Suplementos.lista().length
+        ? 'SUS SUPLEMENTOS YA ESTÁN CONTADOS ARRIBA: no metas batidos ni polvos que ya ' +
+          'toma, y si su proteína en polvo ya cubre parte del día, el menú pide el resto ' +
+          'en comida de verdad. Si una toma va con una comida concreta, menciónala en ' +
+          'esa comida en vez de inventar otra. '
+        : '') +
       (p.condiciones ? 'CONDICIONES DE SALUD: ' + p.condiciones + '. Adapta el menú a ' +
         'ellas (sal, azúcares, grasas saturadas, lo que corresponda) y dilo en el resumen, ' +
         'recordando que lo confirme con su médico o un dietista.\n' : '') +

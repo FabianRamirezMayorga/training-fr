@@ -21,14 +21,18 @@
     agua: { label: 'Beber agua', icono: 'vaso', titulo: 'Hidrátate',
       tono: 'var(--agua)',
       mensaje: 'Un vaso de agua ahora.' },
+    /* El título y el texto se escriben al lanzarlo, no al crearlo: a las ocho
+       toca desayunar y a las nueve de la noche cenar, y el menú de hoy no es el
+       de la semana que viene. Guardarlo al crear la alerta la dejaba diciendo
+       «Hora de comer» para siempre. */
     comida: { label: 'Comida', icono: 'nutricion', titulo: 'Hora de comer',
-      tono: '#f0a23c',
+      tono: '#f0a23c', segunLaHora: true,
       mensaje: 'Toca comida según tu plan.' },
     peso: { label: 'Pesarte', icono: 'perfil', titulo: 'Pésate',
       tono: '#2fc4b2',
       mensaje: 'Registra tu peso para seguir la evolución.' },
-    suplemento: { label: 'Suplemento', icono: 'proteina', titulo: 'Suplemento',
-      tono: '#e0679a',
+    suplemento: { label: 'Suplemento', icono: 'bote', titulo: 'Suplemento',
+      tono: '#8e7cf0',
       mensaje: 'Toca tu suplemento.' },
     /* La frase del entrenador, pero por escrito y a una hora. La app ya la
        escribe cada día y la dejaba dentro de la pantalla de inicio, donde solo
@@ -330,13 +334,84 @@
      de reserva: más vale un aviso genérico que ninguno. */
   /* El título del aviso, con su nombre. Un «Tu entrenador» en la pantalla de
      bloqueo, entre los avisos de otras veinte apps, no dice que sea para ti. */
+  /* ---------- la comida, dicha en concreto ----------
+     «Hora de comer» a las ocho de la mañana no dice nada que no diga el reloj.
+     La franja sale de tus horas de comer —las mismas que usa el cruce de las
+     fotos—, las calorías del reparto de tu menú, y el plato del menú activo si
+     lo hay. Todo eso ya está en la app; lo único que faltaba era juntarlo en la
+     línea que se lee con el móvil bloqueado. */
+  const VERBO = {
+    desayuno: 'Toca desayunar', almuerzo: 'Toca almorzar',
+    merienda: 'Toca merendar', cena: 'Toca cenar'
+  };
+
+  function comidaDeEsaHora(hora) {
+    if (!g.Perfil || !Perfil.franjaDe) return null;
+    const f = Perfil.franjaDe(hora);
+    if (!f) return null;
+
+    const out = { franja: f, titulo: VERBO[f.id] || ('Toca ' + f.label.toLowerCase()) };
+
+    /* Lo que le toca a esa comida según el menú de hoy. Se busca por nombre de
+       comida y, si el menú no la nombra igual, por la hora más cercana: los
+       menús de la IA no siempre escriben «Desayuno». */
+    const hoy = g.Menus && Menus.diaDeHoy ? Menus.diaDeHoy() : null;
+    const comidas = (hoy && hoy.comidas) || [];
+    if (comidas.length) {
+      let c = comidas.filter(function (x) {
+        return g.I18N && I18N.norm(String(x.nombre || '')) === I18N.norm(f.label);
+      })[0];
+      if (!c) {
+        let mejor = Infinity;
+        comidas.forEach(function (x) {
+          const d = Math.abs(enMinutos(x.hora || '') - enMinutos(hora));
+          if (x.hora && d < mejor) { mejor = d; c = x; }
+        });
+      }
+      if (c) { out.plato = c.plato; out.kcal = c.kcal; out.prot = c.prot; }
+    }
+
+    /* Sin menú, al menos los números: el reparto por comida sale de tus macros
+       y del número de comidas que haces al día. */
+    if (out.kcal == null && g.Perfil && Perfil.macros) {
+      const m = Perfil.macros();
+      const cuantas = Math.max(2, Number(Perfil.datos().comidas) || 4);
+      if (m) {
+        out.kcal = Math.round(m.kcal / cuantas);
+        out.prot = Math.round(m.prot / cuantas);
+        out.aojo = true;
+      }
+    }
+    return out;
+  }
+
   function tituloDe(x) {
+    if (TIPOS[x.alerta.tipo] && TIPOS[x.alerta.tipo].segunLaHora) {
+      const c = comidaDeEsaHora(x.hora);
+      if (c) return c.titulo;
+    }
     if (!esDeIA(x.alerta.tipo)) return x.titulo;
     const n = String(Store.settings().name || '').trim();
     return n ? n + ', un momento' : x.titulo;
   }
 
   function textoDe(x) {
+    if (TIPOS[x.alerta.tipo] && TIPOS[x.alerta.tipo].segunLaHora) {
+      const c = comidaDeEsaHora(x.hora);
+      if (c) {
+        const partes = [];
+        if (c.kcal) {
+          partes.push('Unas ' + UI.num(c.kcal) + ' kcal' +
+            (c.prot ? ' y ' + c.prot + ' g de proteína' : '') +
+            (c.aojo ? ' (a ojo, sin menú)' : ''));
+        }
+        if (c.plato) partes.push(c.plato);
+        /* Lo que el usuario escribiera a mano manda sobre lo calculado: si se
+           molestó en poner un texto suyo, no se le pisa. */
+        if (x.mensaje && x.mensaje !== TIPOS.comida.mensaje) partes.unshift(x.mensaje);
+        if (partes.length) return Promise.resolve(partes.join(' · '));
+      }
+    }
     if (!esDeIA(x.alerta.tipo)) return Promise.resolve(x.mensaje);
     if (!g.IA || !IA.activa || !IA.activa() || !IA.pildora) {
       return Promise.resolve(x.mensaje || TIPOS.motivacion.mensaje);
@@ -554,12 +629,24 @@
            formato no tiene ese campo, y el color que se ve en el calendario lo
            pone la app de calendario, no el archivo—, así que la única forma de
            que estos eventos se distingan de los demás es que lo digan. */
-        const titulo = 'Training FR · ' + a.titulo;
+        /* En el calendario también se dice en concreto: «Toca desayunar» y no
+           «Hora de comer». Lo que no va es el plato del menú —el archivo se
+           escribe hoy y el evento suena dentro de tres semanas—, pero las
+           calorías de esa comida salen de tus macros y no caducan. */
+        const deHora = TIPOS[a.tipo] && TIPOS[a.tipo].segunLaHora
+          ? comidaDeEsaHora(h) : null;
+        const titulo = 'Training FR · ' + ((deHora && deHora.titulo) || a.titulo);
 
         /* Y su enlace, para volver a la app desde el propio evento. Va en URL
            —que es donde lo espera el calendario— y también al final de la
            descripción, porque hay clientes que no enseñan el campo URL. */
-        const cuerpo = (a.mensaje ? a.mensaje + String.fromCharCode(10) +
+        const suyo = deHora && deHora.kcal
+          ? 'Unas ' + UI.num(deHora.kcal) + ' kcal' +
+            (deHora.prot ? ' y ' + deHora.prot + ' g de proteína' : '') +
+            '. Lo que toca hoy, en la app.'
+          : a.mensaje;
+
+        const cuerpo = (suyo ? suyo + String.fromCharCode(10) +
           String.fromCharCode(10) : '') + 'Abrir en Training FR: ' + enlace;
 
         const uid = a.id + '-' + n + '@trainingfr';

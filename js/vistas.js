@@ -155,6 +155,16 @@
         ${raw(filaPerfil({ icono: 'nutricion', titulo: 'Alimentación', accion: 'nutricion',
           tono: '#2fc4b2', pendiente: !m,
           sub: m ? m.kcal + ' kcal · ' + m.prot + ' g de proteína' : 'Necesita tus datos' }))}
+        ${raw(filaPerfil({ icono: 'bote', titulo: 'Suplementos', accion: 'suplementos',
+          tono: '#8e7cf0',
+          sub: (function () {
+            if (!g.Suplementos) return 'Qué tomas y cuándo';
+            const n = Suplementos.lista().length;
+            if (!n) return 'Creatina, proteína, omega 3…';
+            const hoy = Suplementos.tomasDeHoy().length;
+            return n + (n === 1 ? ' apuntado' : ' apuntados') + ' · ' +
+              (hoy ? hoy + (hoy === 1 ? ' toma hoy' : ' tomas hoy') : 'hoy ninguna');
+          })() }))}
         ${raw(filaPerfil({ icono: 'campana', titulo: 'Alertas', accion: 'alertas',
           tono: '#e0679a',
           sub: alertas ? alertas + (alertas === 1 ? ' recordatorio activo' : ' recordatorios activos')
@@ -217,7 +227,7 @@
     const ir = { datos: 'datos', objetivos: 'objetivos', nutricion: 'nutricion',
       alertas: 'alertas', entrenador: 'entrenador', musica: 'musica',
       cuenta: 'cuenta', ajustes: 'ajustes', usuarios: 'usuarios', version: 'version',
-      ayuda: 'ayuda' };
+      ayuda: 'ayuda', suplementos: 'suplementos' };
 
     /* La primera vez que se entra en Perfil se pregunta si hay versión nueva y
        se repinta con la respuesta. Después ya está sabida y no se vuelve a
@@ -1504,7 +1514,7 @@
       };
 
       UI.modal(html`
-        <div class="conf-disco cambio">${raw(icon('timer'))}</div>
+        <div class="conf-disco cambio">${raw(icon('calendario'))}</div>
         <h2 class="conf-tit">¿Hasta cuándo?</h2>
         <p class="muted conf-txt">Los avisos se repiten cada semana. Dime hasta qué fecha
         los quieres en el calendario; puedes volver a descargarlo cuando quieras para
