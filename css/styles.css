@@ -6297,30 +6297,29 @@ html[data-theme="light"] .sf-campo:focus-within {
   color: var(--acc); font-variant-numeric: tabular-nums;
 }
 
-/* Tres columnas alineadas: la hora manda a la izquierda porque es el orden en
-   que pasan las cosas, el nombre en medio y la dosis a la derecha, que leida
-   en vertical se compara sola. */
+/* Un bote por entrada y sus horas juntas debajo. Por tomas, un magnesio cada
+   seis horas daba tres renglones que decian «Magnesio» tres veces.
+
+   Las horas en color y el nombre no, al reves que en la lista de abajo: esta
+   tarjeta responde «cuando» y aquella responde «que». */
 .sh-lista { display: flex; flex-direction: column; }
-.sh-linea {
-  display: flex; align-items: baseline; gap: 10px;
-  padding: 7px 0; position: relative;
-}
+.sh-linea { padding: 8px 0; position: relative; }
 .sh-linea + .sh-linea::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
   background: var(--line); transform: scaleY(.5);
 }
-.sl-h {
-  flex: 0 0 74px; font-size: .8rem; font-weight: 800; letter-spacing: -.02em;
-  color: var(--acc); font-variant-numeric: tabular-nums; white-space: nowrap;
-}
+.sl-cab { display: flex; align-items: baseline; gap: 9px; }
 .sl-n {
-  flex: 1; min-width: 0; font-size: .88rem; font-weight: 600;
-  letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1; min-width: 0; font-size: .9rem; font-weight: 650; letter-spacing: -.012em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.sl-d {
-  flex: none; font-size: .78rem; color: var(--dim2); white-space: nowrap;
+.sl-d { flex: none; font-size: .76rem; color: var(--dim2); white-space: nowrap; }
+.sl-h {
+  display: block; margin-top: 2px;
+  font-size: .8rem; font-weight: 700; letter-spacing: -.01em;
+  color: var(--acc); font-variant-numeric: tabular-nums;
 }
+.sl-h i { font-style: normal; opacity: .4; margin: 0 5px; }
 
 .sup-pie { margin: 10px 0 0; line-height: 1.45; }
 .sup-pie b { color: var(--txt); font-weight: 700; }

@@ -57,18 +57,24 @@
 
   /* ---------- lo que hay que tomar hoy ----------
      Llegó a tener botón de «tomar» y casillas que se marcaban, y se ha quitado:
-     esto es para acordarse, no un diario de cumplimiento. Apuntar seis veces al
-     día que sí te tomaste algo es trabajo que nadie hace más de una semana, y
-     una lista de casillas sin marcar acaba siendo un reproche.
+     esto es para acordarse, no un diario de cumplimiento. Una lista de casillas
+     sin marcar acaba siendo un reproche.
 
-     Así que información y nada más, pero dicha entera: el nombre, la hora y
-     cuánto. Antes decía la hora y el nombre y había que abrir la ficha para
-     saber si eran cinco gramos o un cazo, que es justo el dato que se va de la
-     cabeza. Tres columnas, alineadas, y se lee de arriba abajo en dos segundos. */
+     Y va agrupado por bote, no por toma. Con un magnesio cada seis horas salían
+     tres renglones que decían «Magnesio» tres veces: la tarjeta crecía con las
+     repeticiones y lo que se lee en ella —qué tengo que tomar hoy— no cambiaba.
+     Un bote, una entrada, y sus horas juntas debajo.
+
+     Aquí las horas van en color y el nombre no, justo al revés que en la lista
+     de abajo: esta tarjeta responde «cuándo» y aquella responde «qué». */
   function hoyHTML(aporta) {
-    const hoy = S().tomasDeHoy();
+    const l = S().lista().filter(function (x) { return S().tocaHoy(x); })
+      .map(function (x) { return { sup: x, horas: S().horasDe(x) }; })
+      .sort(function (a, b) {
+        return Alertas.enMinutos(a.horas[0]) - Alertas.enMinutos(b.horas[0]);
+      });
 
-    if (!hoy.length) {
+    if (!l.length) {
       return html`
         <div class="card sup-hoy2" style="margin-top:14px">
           <div class="sh-cab"><span class="sh-et">Hoy no toca nada</span></div>
@@ -77,19 +83,24 @@
         </div>`;
     }
 
+    const tomas = l.reduce(function (n, x) { return n + x.horas.length; }, 0);
+
     return html`
       <div class="card sup-hoy2" style="margin-top:14px">
         <div class="sh-cab">
           <span class="sh-et">Que no se te olvide</span>
-          <span class="sh-cuenta">${hoy.length} ${hoy.length === 1 ? 'toma' : 'tomas'}</span>
+          <span class="sh-cuenta">${tomas} ${tomas === 1 ? 'toma' : 'tomas'}</span>
         </div>
 
         <div class="sh-lista">
-          ${raw(hoy.map(function (t) {
+          ${raw(l.map(function (x) {
             return '<div class="sh-linea">' +
-              '<span class="sl-h">' + esc(UI.hora ? UI.hora(t.hora) : t.hora) + '</span>' +
-              '<span class="sl-n">' + esc(t.sup.nombre) + '</span>' +
-              '<span class="sl-d">' + esc(t.sup.dosis || '') + '</span></div>';
+              '<span class="sl-cab"><span class="sl-n">' + esc(x.sup.nombre) + '</span>' +
+              (x.sup.dosis ? '<span class="sl-d">' + esc(x.sup.dosis) + '</span>' : '') +
+              '</span>' +
+              '<span class="sl-h">' + x.horas.map(function (h) {
+                return esc(UI.hora ? UI.hora(h) : h);
+              }).join('<i>·</i>') + '</span></div>';
           }).join(''))}
         </div>
 
