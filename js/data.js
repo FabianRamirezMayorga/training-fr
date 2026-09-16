@@ -123,9 +123,14 @@
   }
 
   /* Cómo se nombra el sitio dentro de una frase: "...que puedes hacer EN EL GIMNASIO" */
+  /* Las etiquetas del material son datos, pero se leen en pantalla. Se
+     traducen al pedirlas, no en la tabla: la tabla tambien la usan el filtro y
+     los prompts, y ahi tiene que seguir siendo la de siempre. */
   function gearFrase(gear) {
     const gset = GEAR[gear];
-    return gset ? (gset.frase || gset.label.toLowerCase()) : '';
+    if (!gset) return '';
+    const f = gset.frase || gset.label.toLowerCase();
+    return (g.Idioma ? Idioma.T(f) : f);
   }
 
   function gearAllows(gear, equipment) {

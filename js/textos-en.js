@@ -342,6 +342,110 @@
     'Añadir serie': 'Add set',
     'Peso de la serie {n}': 'Weight for set {n}',
     'Repeticiones de la serie {n}': 'Reps for set {n}',
-    '{d}/{t} series · objetivo {r} reps': '{d}/{t} sets · target {r} reps'
+    '{d}/{t} series · objetivo {r} reps': '{d}/{t} sets · target {r} reps',
+
+    /* ---------- Rutinas ---------- */
+    'Crear la mía': 'Build my own',
+    'la montas tú.': 'you put it together.',
+    'Generar programa': 'Generate a programme',
+    'te lo monto yo con tus datos y lo editas igual.':
+      'I build it from your data and you can still edit it.',
+
+    'Apuntar algo que ya hice': 'Log something I already did',
+    'Caminar una hora el domingo o la pachanga del sábado cuentan igual, aunque no salgan de una rutina.':
+      'An hour walking on Sunday or Saturday kickabout count the same, even if they come from no routine.',
+    'Hoy no pude: correr el plan un día': "Couldn't today: push the plan a day",
+    'Lo que tocaba hoy pasa a mañana, y así el resto, en vez de perder la sesión.':
+      "Today's session moves to tomorrow, and so on down the line, instead of losing it.",
+    'Traer una rutina que tengo en papel': 'Bring in a routine I have on paper',
+    'Una foto de la hoja del gimnasio o el PDF de tu entrenador: la leo y tú decides.':
+      "A photo of the gym sheet or your coach's PDF: I read it and you decide.",
+
+    'Tienes rutinas repetidas': 'You have duplicate routines',
+    'Hay {n} rutina que repite plan y día de otra, de haber generado el programa más de una vez. Se puede quitar de golpe.':
+      '{n} routine repeats another one’s plan and day, from generating the programme more than once. It can be removed in one go.',
+    'Hay {n} rutinas que repiten plan y día de otra, de haber generado el programa más de una vez. Se pueden quitar de golpe.':
+      '{n} routines repeat another one’s plan and day, from generating the programme more than once. They can be removed in one go.',
+    'Revisar y limpiar': 'Review and clean up',
+
+    'Mis rutinas': 'My routines',
+    'Ordena y borra lo que sobre': 'Reorder and delete what you don’t need',
+    'Editar lista': 'Edit list',
+    'Aún no tienes rutinas propias. Copia una plantilla de abajo para empezar.':
+      'No routines of your own yet. Copy a template below to get going.',
+    'Con las flechas las colocas a tu gusto y con la papelera las borras. El orden viaja a tus demás dispositivos, y al salir de aquí la rutina de hoy vuelve a ponerse la primera.':
+      'The arrows reorder them and the bin deletes them. The order syncs to your other devices, and when you leave this screen today’s routine goes back to the top.',
+    'Abre un plan para ver sus días. Toca una rutina para desplegar sus ejercicios y cambiarle el día, o pulsa Entrenar para hacerla ahora.':
+      'Open a plan to see its days. Tap a routine to unfold its exercises and change its day, or hit Train to do it now.',
+
+    'Rutinas de ejemplo': 'Example routines',
+    'Al usar una plantilla se copia a tus rutinas; puedes cambiar ejercicios, series y descansos sin límite.':
+      'Using a template copies it to your routines; you can change exercises, sets and rest as much as you like.',
+    'Estiramientos, pilates y terapia': 'Stretching, pilates and rehab',
+    'Se copian y se hacen igual que las demás, con su cronómetro y sus descansos. En estas las repeticiones son segundos.':
+      'They copy and run like any other, with their timer and rest. In these, reps are seconds.',
+
+    'Hoy es {d}, y esto es lo que toca': "Today is {d}, and here's what's on",
+    'Hoy es {d}': 'Today is {d}',
+    'Tu plan principal —{p}— no tiene nada para hoy. Otros planes sí: ábrelos abajo y entrena de ellos, o cambia de plan principal.':
+      'Your main plan —{p}— has nothing for today. Other plans do: open them below and train from those, or switch your main plan.',
+    'No tienes nada asignado a hoy. Abre un plan y toca los días de una rutina para moverla aquí.':
+      'Nothing is assigned to today. Open a plan and tap a routine’s days to move it here.',
+    'EN CURSO': 'ACTIVE',
+    'HOY': 'TODAY',
+    '{n} rutina': '{n} routine',
+    '{n} rutinas': '{n} routines',
+    '{n} ejercicios': '{n} exercises',
+    'sin día': 'no day',
+    'Analizar': 'Review',
+    'con IA': 'with AI',
+    'Duplicar': 'Duplicate',
+    'Compartir': 'Share',
+    'Mis planes de entrenamiento': 'My training plans',
+
+    /* ---------- Ejercicios ---------- */
+    'Filtro': 'Filter',
+    'catálogo completo': 'full catalogue',
+    'Buscar: pierna, femoral, peso muerto…': 'Search: leg, hamstring, deadlift…',
+    'SESIÓN COMPLETA': 'FULL SESSION',
+    'Entrenar {z} hoy': 'Train {z} today',
+    'Reparto la sesión entre {m}': 'I split the session across {m}',
+    'Crear': 'Create',
+    'Ver todos': 'See all',
+    'ver todos': 'see all',
+    'Ver más ({n} restantes)': 'See more ({n} left)',
+    'Has buscado una zona del cuerpo: te enseño {q}, no solo los que llevan esa palabra en el nombre.':
+      'You searched for a body area: I’m showing you {q}, not just the ones with that word in the name.',
+    'todos sus músculos por separado': 'every one of its muscles separately',
+    'todos los ejercicios de {m}': 'every {m} exercise',
+    'No existe ningún catálogo libre de pilates, así que estos están escogidos a mano del catálogo por lo que comparten con un mat de pilates: control del centro y trabajo de suelo.':
+      'There is no free pilates catalogue, so these are hand-picked from the catalogue for what they share with pilates mat work: core control and floor work.',
+
+    /* ---------- el material ---------- */
+    'en el gimnasio': 'at the gym',
+    'en casa con mancuernas': 'at home with dumbbells',
+    'en casa con bandas': 'at home with bands',
+    'sin material': 'with no equipment',
+    'con todo el material': 'with all the equipment',
+    'En el gimnasio': 'At the gym',
+    'En casa con mancuernas': 'At home with dumbbells',
+    'En casa con bandas': 'At home with bands',
+    'Sin material': 'No equipment',
+    'Ver todo': 'See everything',
+    'Barras, mancuernas, poleas y máquinas': 'Barbells, dumbbells, cables and machines',
+    'Mancuernas, kettlebells y peso corporal': 'Dumbbells, kettlebells and bodyweight',
+    'Bandas elásticas y peso corporal': 'Resistance bands and bodyweight',
+    'Solo tu peso corporal, en cualquier sitio': 'Just your bodyweight, anywhere',
+    'El catálogo completo, sin filtrar por material':
+      'The full catalogue, unfiltered by equipment',
+    'Fuerza': 'Strength',
+    'Calistenia': 'Calisthenics',
+    'Halterofilia': 'Weightlifting',
+    'Saltos y potencia': 'Plyometrics and power',
+    'Estiramientos': 'Stretching',
+    'Rodillo y terapia': 'Foam rolling and rehab',
+    'Cardio': 'Cardio',
+    'Yoga': 'Yoga',
+    'Pilates': 'Pilates'
   };
 })(window);

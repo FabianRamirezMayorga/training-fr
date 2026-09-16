@@ -1065,6 +1065,10 @@
   /* Una preferencia de sí o no, con su par de botones. Las de arriba son de
      elegir una de tres y se pintan solas; estas son interruptores, y meterlos
      en el mismo molde haría que un «no» pareciese una tercera opción. */
+  /* Del día abreviado que se guarda al 0-6 de Date.getDay(), para poder pedirle
+     a UI la versión en el idioma puesto. */
+  const DIA_A_NUM = { Dom: 0, Lun: 1, Mar: 2, 'Mié': 3, Jue: 4, Vie: 5, 'Sáb': 6 };
+
   function porPlanes(rutinas) {
     const hoy = UI.DAY_NAMES[new Date().getDay()];
     const deHoy = rutinasDeHoy();
@@ -1088,17 +1092,18 @@
     });
 
     const arriba = deHoy.length ? html`
-      <div class="list-title">Hoy es ${UI.diaLargo(hoy).toLowerCase()}, y esto es lo que toca</div>
+      <div class="list-title">${Tn('Hoy es {d}, y esto es lo que toca',
+        { d: UI.diaLargo(hoy).toLowerCase() })}</div>
       <div class="stack">${raw(deHoy.map(function (r) {
         return routineCard(r, 0, 0, false, 'dia');
       }).join(''))}</div>`
       : html`
-      <div class="list-title">Hoy es ${UI.diaLargo(hoy).toLowerCase()}</div>
+      <div class="list-title">${Tn('Hoy es {d}',
+        { d: UI.diaLargo(hoy).toLowerCase() })}</div>
       <p class="tiny" style="margin:-4px 0 4px">${raw(activo
-        ? 'Tu plan principal —' + esc(activo) + '— no tiene nada para hoy. Otros planes ' +
-          'sí: ábrelos abajo y entrena de ellos, o cambia de plan principal.'
-        : 'No tienes nada asignado a hoy. Abre un plan y toca los días de una rutina para ' +
-          'moverla aquí.')}</p>`;
+        ? esc(Tn('Tu plan principal —{p}— no tiene nada para hoy. Otros planes sí: ábrelos abajo y entrena de ellos, o cambia de plan principal.',
+            { p: activo }))
+        : esc(T('No tienes nada asignado a hoy. Abre un plan y toca los días de una rutina para moverla aquí.')))}</p>`;
 
     const bloques = orden.map(function (k, i) {
       const suyas = planes[k];
@@ -1118,16 +1123,22 @@
         <button class="dia-grupo" data-grupo="${k}">
           <div class="grow">
             <div class="rt-titulo">${k}
-              ${raw(k === activo ? '<span class="chip tiny-chip plan-marca">EN CURSO</span>' : '')}
-              ${raw(dias.indexOf(hoy) !== -1 ? '<span class="chip solid tiny-chip">HOY</span>' : '')}</div>
+              ${raw(k === activo ? '<span class="chip tiny-chip plan-marca">' +
+                esc(T('EN CURSO')) + '</span>' : '')}
+              ${raw(dias.indexOf(hoy) !== -1 ? '<span class="chip solid tiny-chip">' +
+                esc(T('HOY')) + '</span>' : '')}</div>
             <!-- En una linea: los seis dias de un plan completo se iban a dos
                  renglones y el cajon crecia veinte pixeles por nada. -->
-            <div class="tiny plan-meta">${suyas.length}
-              ${suyas.length === 1 ? 'rutina' : 'rutinas'} · ${ejercicios} ejercicios
-              · ${dias.length ? dias.join(', ') : 'sin día'}</div>
+            <!-- Los días van por UI.diaLargo, que los da en el idioma puesto:
+                 guardados son «Lun» y «Mié», y en inglés eso no se lee. -->
+            <div class="tiny plan-meta">${Tp(suyas.length, '{n} rutina', '{n} rutinas')}
+              · ${Tn('{n} ejercicios', { n: ejercicios })}
+              · ${dias.length ? dias.map(function (d) {
+                  return UI.inicialDia(DIA_A_NUM[d]);
+                }).join(', ') : T('sin día')}</div>
           </div>
           <span class="plegador ${abierto ? 'abierto' : ''}">
-            <span class="plegador-txt">${abierto ? 'Ocultar' : 'Ver'}</span>
+            <span class="plegador-txt">${abierto ? T('Ocultar') : T('Ver')}</span>
             ${raw(icon('chevron'))}</span>
         </button>`;
 
@@ -1140,10 +1151,11 @@
         <div class="plan-caja${raw(abierto ? ' abierta' : '')}"
              style="--tono:${tono}">
         ${raw(deslizable(cabecera, [
-          { icono: 'chispa', texto: 'Analizar' + BAJA + 'con IA', attr: 'data-iaplan="' + esc(k) + '"' },
-          { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicarplan="' + esc(k) + '"' },
-          { icono: 'compartir', texto: 'Compartir', attr: 'data-compartirplan="' + esc(k) + '"' },
-          { icono: 'trash', texto: 'Borrar', tono: 'malo',
+          { icono: 'chispa', texto: T('Analizar') + BAJA + T('con IA'),
+            attr: 'data-iaplan="' + esc(k) + '"' },
+          { icono: 'copiar', texto: T('Duplicar'), attr: 'data-duplicarplan="' + esc(k) + '"' },
+          { icono: 'compartir', texto: T('Compartir'), attr: 'data-compartirplan="' + esc(k) + '"' },
+          { icono: 'trash', texto: T('Borrar'), tono: 'malo',
             attr: 'data-borrarplan="' + esc(k) + '"' }
         ], [
           /* Marcar el plan principal estaba solo dentro del plan abierto, o sea
@@ -1164,7 +1176,7 @@
         </div>`;
     }).join('');
 
-    return arriba + html`<div class="list-title">Mis planes de entrenamiento</div>` + bloques;
+    return arriba + html`<div class="list-title">${T('Mis planes de entrenamiento')}</div>` + bloques;
   }
 
   /* Lo que se puede hacer con un plan entero.
@@ -1913,13 +1925,15 @@
       <div class="card zona-card">
         <div class="row between" style="align-items:flex-start">
           <div class="grow">
-            <div class="tiny" style="color:var(--acc)">SESIÓN COMPLETA</div>
-            <div style="font-weight:700;margin:2px 0">Entrenar ${region.label.toLowerCase()} hoy</div>
-            <div class="tiny">Reparto la sesión entre ${musculosSesion.map(function (m) {
-              return I18N.muscle(m).toLowerCase();
-            }).join(', ')}</div>
+            <div class="tiny" style="color:var(--acc)">${T('SESIÓN COMPLETA')}</div>
+            <div style="font-weight:700;margin:2px 0">${Tn('Entrenar {z} hoy',
+              { z: T(region.label).toLowerCase() })}</div>
+            <div class="tiny">${Tn('Reparto la sesión entre {m}',
+              { m: musculosSesion.map(function (m) {
+                  return I18N.muscle(m).toLowerCase();
+                }).join(', ') })}</div>
           </div>
-          <button class="btn primary sm" data-a="sesionzona">${raw(icon('play'))} Crear</button>
+          <button class="btn primary sm" data-a="sesionzona">${raw(icon('play'))} ${T('Crear')}</button>
         </div>
       </div>` : '';
 
@@ -1930,20 +1944,20 @@
 
     return html`
       <div class="row between">
-        <h1 style="margin:0">Ejercicios</h1>
+        <h1 style="margin:0">${T('Ejercicios')}</h1>
         <button class="btn-filtro${puestos ? ' on' : ''}" data-a="filtros">
-          ${raw(icon('filtro'))} Filtro${raw(puestos
+          ${raw(icon('filtro'))} ${T('Filtro')}${raw(puestos
             ? '<span class="bf-num">' + puestos + '</span>' : '')}
         </button>
       </div>
       <!-- Una línea y de las pequeñas: eran dos renglones de texto grande
            contando lo que se ve solo en cuanto bajas un dedo. -->
-      <p class="tiny ej-sub">${UI.num(res.length)} ejercicios · ${raw(sinFiltro
-        ? 'catálogo completo' : esc(lugar))}</p>
+      <p class="tiny ej-sub">${Tn('{n} ejercicios', { n: UI.num(res.length) })} · ${raw(sinFiltro
+        ? esc(T('catálogo completo')) : esc(lugar))}</p>
 
       <div class="search-wrap" style="margin-bottom:10px">
         ${raw(icon('search'))}
-        <input id="ex-q" type="search" placeholder="Buscar: pierna, femoral, peso muerto…"
+        <input id="ex-q" type="search" placeholder="${T('Buscar: pierna, femoral, peso muerto…')}"
                value="${exFilters.q}" autocomplete="off">
       </div>
 
@@ -1957,17 +1971,16 @@
         <a href="https://www.flaticon.com/free-icons/yoga" target="_blank" rel="noopener">Yoga icons de dDara</a>.</p>` : '')}
 
       ${raw(exFilters.tipo === 'pilates' ? html`
-        <p class="tiny" style="margin:-2px 0 12px">No existe ningún catálogo libre de
-        pilates, así que estos están escogidos a mano del catálogo por lo que comparten
-        con un mat de pilates: control del centro y trabajo de suelo.</p>` : '')}
+        <p class="tiny" style="margin:-2px 0 12px">${T('No existe ningún catálogo libre de pilates, así que estos están escogidos a mano del catálogo por lo que comparten con un mat de pilates: control del centro y trabajo de suelo.')}</p>` : '')}
 
 
       ${raw(zonaQ ? html`
-        <p class="tiny" style="margin:-2px 0 10px">Has buscado una zona del cuerpo:
-        te enseño ${raw(zonaQ.tipo === 'region'
-          ? 'todos sus músculos por separado'
-          : 'todos los ejercicios de ' + esc(I18N.muscle(musculo).toLowerCase()))}, no solo
-        los que llevan esa palabra en el nombre.</p>` : '')}
+        <p class="tiny" style="margin:-2px 0 10px">${raw(esc(Tn(
+          'Has buscado una zona del cuerpo: te enseño {q}, no solo los que llevan esa palabra en el nombre.',
+          { q: zonaQ.tipo === 'region'
+              ? T('todos sus músculos por separado')
+              : Tn('todos los ejercicios de {m}',
+                  { m: I18N.muscle(musculo).toLowerCase() }) })))}</p>` : '')}
 
 
       ${raw(tarjetaZona)}
@@ -1978,13 +1991,13 @@
           <div class="list-head">
             <span class="list-title">${I18N.muscle(s.muscle)}
               <span style="opacity:.6">${s.lista.length}</span></span>
-            <button class="btn sm ghost" data-vermusculo="${s.muscle}">Ver todos</button>
+            <button class="btn sm ghost" data-vermusculo="${s.muscle}">${T('Ver todos')}</button>
           </div>
           <div class="carousel">
             ${raw(s.lista.slice(0, 12).map(exCard).join(''))}
             ${raw(s.lista.length > 12
               ? '<button class="ex-card more" data-vermusculo="' + esc(s.muscle) + '">' +
-                '<b>+' + (s.lista.length - 12) + '</b><span>ver todos</span></button>'
+                '<b>+' + (s.lista.length - 12) + '</b><span>' + esc(T('ver todos')) + '</span></button>'
               : '')}
           </div>`;
       }).join('') : '')}
@@ -1992,8 +2005,8 @@
       ${raw(!segmentar ? (res.length ? html`
         <div class="grid">${raw(res.slice(0, exLimit).map(exCard).join(''))}</div>
         ${raw(res.length > exLimit
-          ? '<button class="btn block" data-a="mas" style="margin-top:14px">Ver más (' +
-            (res.length - exLimit) + ' restantes)</button>' : '')}`
+          ? '<button class="btn block" data-a="mas" style="margin-top:14px">' +
+            esc(Tn('Ver más ({n} restantes)', { n: res.length - exLimit })) + '</button>' : '')}`
       : html`<div class="empty">${raw(icon('search'))}
           <p>Ningún ejercicio coincide${raw(gear && !sinFiltro ? ' entre los que puedes hacer ' + esc(lugar) : '')}.</p>
           <div class="row" style="justify-content:center;gap:8px">
@@ -2677,16 +2690,16 @@
     const hayHoy = rutinas.some(function (r) { return (r.days || []).indexOf(hoy) !== -1; });
 
     return html`
-      <h1>Rutinas</h1>
+      <h1>${T('Rutinas')}</h1>
 
       <div class="row" style="margin:6px 0 4px">
         <button class="btn primary grow" data-a="nueva">
-          ${raw(icon('plus'))} Crear la mía</button>
+          ${raw(icon('plus'))} ${T('Crear la mía')}</button>
         <button class="btn grow" data-a="programa">
-          ${raw(icon('chispa'))} Generar programa</button>
+          ${raw(icon('chispa'))} ${T('Generar programa')}</button>
       </div>
-      <p class="tiny" style="margin:4px 0 0"><b>Crear la mía</b>: la montas tú.
-      <b>Generar programa</b>: te lo monto yo con tus datos y lo editas igual.</p>
+      <p class="tiny" style="margin:4px 0 0"><b>${T('Crear la mía')}</b>: ${T('la montas tú.')}
+      <b>${T('Generar programa')}</b>: ${T('te lo monto yo con tus datos y lo editas igual.')}</p>
 
       <!-- Las tres acciones sueltas, en filas de una sola pieza. Antes eran
            botón y párrafo, botón y párrafo: cuatro bloques de texto gris
@@ -2694,36 +2707,37 @@
            solo se lee. En una fila, el titulo dice que hace y el renglon de
            debajo por que, y toda ella se toca. -->
       <div class="card lista-acciones tarjeta-premium">
-        ${raw(filaAccion('actividad', 'plus', 'Apuntar algo que ya hice',
-          'Caminar una hora el domingo o la pachanga del sábado cuentan igual, ' +
-          'aunque no salgan de una rutina.'))}
+        ${raw(filaAccion('actividad', 'plus', T('Apuntar algo que ya hice'),
+          T('Caminar una hora el domingo o la pachanga del sábado cuentan igual, aunque no salgan de una rutina.')))}
 
         ${raw(Store.routines().some(function (r) { return (r.days || []).length; })
-          ? filaAccion('correr', 'cambiar', 'Hoy no pude: correr el plan un día',
-            'Lo que tocaba hoy pasa a mañana, y así el resto, en vez de perder la sesión.')
+          ? filaAccion('correr', 'cambiar', T('Hoy no pude: correr el plan un día'),
+            T('Lo que tocaba hoy pasa a mañana, y así el resto, en vez de perder la sesión.'))
           : '')}
 
-        ${raw(filaAccion('importar', 'camara', 'Traer una rutina que tengo en papel',
-          'Una foto de la hoja del gimnasio o el PDF de tu entrenador: la leo y tú decides.'))}
+        ${raw(filaAccion('importar', 'camara', T('Traer una rutina que tengo en papel'),
+          T('Una foto de la hoja del gimnasio o el PDF de tu entrenador: la leo y tú decides.')))}
       </div>
 
       ${raw((function () {
         const n = duplicados().length;
         if (!n) return '';
         return '<div class="card aviso-seguridad" style="margin-top:10px">' +
-          '<b>Tienes rutinas repetidas</b>' +
-          '<p style="margin:7px 0 0;font-size:.9rem">Hay ' + n + ' ' +
-          (n === 1 ? 'rutina que repite' : 'rutinas que repiten') + ' plan y día de otra, ' +
-          'de haber generado el programa más de una vez. Se pueden quitar de golpe.</p>' +
+          '<b>' + esc(T('Tienes rutinas repetidas')) + '</b>' +
+          '<p style="margin:7px 0 0;font-size:.9rem">' +
+          esc(Tp(n, 'Hay {n} rutina que repite plan y día de otra, de haber generado el programa más de una vez. Se puede quitar de golpe.',
+                 'Hay {n} rutinas que repiten plan y día de otra, de haber generado el programa más de una vez. Se pueden quitar de golpe.')) +
+          '</p>' +
           '<button class="btn block" data-a="limpiardup" style="margin-top:11px">' +
-          'Revisar y limpiar</button></div>';
+          esc(T('Revisar y limpiar')) + '</button></div>';
       })())}
 
       ${raw(rutinas.length ? html`
         <div class="list-head">
-          <span class="list-title">${ordenando ? 'Ordena y borra lo que sobre' : 'Mis rutinas'}</span>
+          <span class="list-title">${ordenando ? T('Ordena y borra lo que sobre')
+            : T('Mis rutinas')}</span>
           <button class="btn sm ${ordenando ? 'primary' : 'ghost'}" data-a="ordenar">
-            ${ordenando ? 'Hecho' : 'Editar lista'}</button>
+            ${ordenando ? T('Hecho') : T('Editar lista')}</button>
         </div>` : '')}
 
       ${raw(rutinas.length ? (ordenando
@@ -2731,25 +2745,20 @@
             return routineCard(r, i, rutinas.length);
           }).join('') + '</div>'
         : porPlanes(rutinas))
-      : '<p class="muted">Aún no tienes rutinas propias. Copia una plantilla de abajo para empezar.</p>')}
+      : '<p class="muted">' + esc(T('Aún no tienes rutinas propias. Copia una plantilla de abajo para empezar.')) + '</p>')}
 
-      ${raw(ordenando ? '<p class="tiny" style="margin-top:10px">Con las flechas las ' +
-        'colocas a tu gusto y con la papelera las borras. El orden viaja a tus demás ' +
-        'dispositivos, y al salir de aquí la rutina de hoy vuelve a ponerse la primera.</p>'
-        : '<p class="tiny" style="margin-top:10px">Abre un plan para ver sus días. ' +
-        'Toca una rutina para desplegar sus ejercicios y cambiarle el día, o pulsa ' +
-        'Entrenar para hacerla ahora.</p>')}
+      ${raw('<p class="tiny" style="margin-top:10px">' + esc(ordenando
+        ? T('Con las flechas las colocas a tu gusto y con la papelera las borras. El orden viaja a tus demás dispositivos, y al salir de aquí la rutina de hoy vuelve a ponerse la primera.')
+        : T('Abre un plan para ver sus días. Toca una rutina para desplegar sus ejercicios y cambiarle el día, o pulsa Entrenar para hacerla ahora.')) + '</p>')}
 
-      ${raw(seccionPlegable('fuerza', 'Rutinas de ejemplo',
+      ${raw(seccionPlegable('fuerza', T('Rutinas de ejemplo'),
         Templates.list.filter(function (t) { return (t.tipo || 'fuerza') === 'fuerza'; }).length,
-        'Al usar una plantilla se copia a tus rutinas; puedes cambiar ejercicios, ' +
-        'series y descansos sin límite.',
+        T('Al usar una plantilla se copia a tus rutinas; puedes cambiar ejercicios, series y descansos sin límite.'),
         plantillasHTML('fuerza')))}
 
-      ${raw(seccionPlegable('movilidad', 'Estiramientos, pilates y terapia',
+      ${raw(seccionPlegable('movilidad', T('Estiramientos, pilates y terapia'),
         Templates.list.filter(function (t) { return (t.tipo || 'fuerza') === 'movilidad'; }).length,
-        'Se copian y se hacen igual que las demás, con su cronómetro y sus descansos. ' +
-        'En estas las repeticiones son segundos.',
+        T('Se copian y se hacen igual que las demás, con su cronómetro y sus descansos. En estas las repeticiones son segundos.'),
         plantillasHTML('movilidad')))}`;
   }
 
