@@ -14,6 +14,8 @@ global.window = {};
 require('../js/textos-en.js');
 const soloInterfaz = Object.keys(global.window.TEXTOS_EN);
 require('../js/textos-en-ayuda.js');
+const conAyuda = Object.keys(global.window.TEXTOS_EN).length;
+require('../js/textos-en-tecnica.js');
 const d = global.window.TEXTOS_EN;
 
 /* Las claves tal y como están escritas en cada archivo, no las del objeto ya
@@ -29,7 +31,7 @@ function clavesDe(ruta) {
   return out;
 }
 
-const archivos = ['textos-en.js', 'textos-en-ayuda.js'];
+const archivos = ['textos-en.js', 'textos-en-ayuda.js', 'textos-en-tecnica.js'];
 const dup = [];
 const entre = [];
 const donde = Object.create(null);
@@ -52,7 +54,8 @@ const iguales = Object.keys(d).filter(function (k) {
 });
 
 console.log('interfaz: ' + soloInterfaz.length + '   manual: ' +
-  (Object.keys(d).length - soloInterfaz.length) + '   total: ' + Object.keys(d).length);
+  (conAyuda - soloInterfaz.length) + '   tecnica: ' + (Object.keys(d).length - conAyuda) +
+  '   total: ' + Object.keys(d).length);
 console.log('repetidas dentro de un archivo: ' + (dup.length ? dup.join(' | ') : 'ninguna'));
 console.log('en los dos archivos:            ' + (entre.length ? entre.join(' | ') : 'ninguna'));
 console.log('vacías:                         ' + (vacias.length ? vacias.join(' | ') : 'ninguna'));

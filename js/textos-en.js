@@ -52,6 +52,50 @@
     '¿Cómo te llamas?': "What's your name?",
 
     'Dónde entrenas': 'Where you train',
+
+    /* ---------- la pantalla de un ejercicio y su guía ---------- */
+    ' y ': ' and ',
+    'Ejercicio no encontrado.': 'Exercise not found.',
+    'Marcar como favorito': 'Mark as a favourite',
+    'Añadido a favoritos': 'Added to favourites',
+    'Quitado de favoritos': 'Removed from favourites',
+    'Añadir a rutina': 'Add to a routine',
+    'Buscar vídeo en YouTube': 'Search for a video on YouTube',
+    'El recorrido': 'The movement',
+    'Posición inicial': 'Starting position',
+    'Posición final': 'Finishing position',
+    'El movimiento va del punto 1 al 2 y vuelve controlando la bajada. Arriba lo ves animado.':
+      'The movement goes from point 1 to point 2 and comes back controlling the descent. You can see it animated above.',
+    'Cómo se ejecuta': 'How it is performed',
+    'Este ejercicio todavía no tiene guía propia. Abajo tienes las instrucciones del catálogo y el enlace a vídeos.':
+      'This exercise does not have a guide of its own yet. Below are the catalogue’s instructions and a link to videos.',
+    'Cómo se hace · {que}': 'How it is done · {que}',
+    'Errores frecuentes': 'Common mistakes',
+    'La clave': 'The key',
+    'Respiración': 'Breathing',
+    'Ritmo': 'Tempo',
+    'Seguridad': 'Safety',
+    'Cómo se hace, paso a paso': 'How it is done, step by step',
+    'Traduciendo del catálogo original…': 'Translating from the original catalogue…',
+    'No he podido traducirlas; las dejo como vienen.':
+      'I could not translate them; I am leaving them as they came.',
+    'Si está ocupado o no lo tienes': 'If it is taken or you do not have it',
+    'Entrenas el mismo músculo —{m}— con otra máquina, otro material u otro ejercicio.':
+      'You train the same muscle — {m} — with another machine, other kit or another exercise.',
+    'Entrenas el mismo músculo con otra máquina, otro material u otro ejercicio.':
+      'You train the same muscle with another machine, other kit or another exercise.',
+    'Con tu material no sale ninguno, así que estos son del catálogo completo.':
+      'None come up with your equipment, so these are from the whole catalogue.',
+    'Toca cualquiera para ver su técnica.': 'Tap any of them to see its technique.',
+    'Mismo movimiento': 'Same movement',
+    'Movimiento parecido': 'Similar movement',
+    'Mismo músculo': 'Same muscle',
+    'Trabajo parecido': 'Similar work',
+    'Tus marcas': 'Your records',
+    'Máx. {u}': 'Max {u}',
+    'Reps de esa serie': 'Reps on that set',
+    '1RM estimado': 'Estimated 1RM',
+
     'Gimnasio': 'Gym',
     'Con mancuernas': 'With dumbbells',
     'Con bandas': 'With bands',

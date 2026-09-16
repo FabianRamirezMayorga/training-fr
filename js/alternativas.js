@@ -153,15 +153,18 @@
     return s;
   }
 
+  /* Se traduce aquí y no al pintar porque el motivo también se ordena y se
+     compara: lo que sale de esta funcion es ya el texto que se lee. */
   function motivo(o, c) {
+    const T = (g.Idioma && g.Idioma.T) || function (x) { return x; };
     const po = patron(o), pc = patron(c);
-    if (po && po === pc) return 'Mismo movimiento';
-    if (familia(po) && familia(po) === familia(pc)) return 'Movimiento parecido';
+    if (po && po === pc) return T('Mismo movimiento');
+    if (familia(po) && familia(po) === familia(pc)) return T('Movimiento parecido');
     const comun = (o.primaryMuscles || []).filter(function (m) {
       return (c.primaryMuscles || []).indexOf(m) !== -1;
     });
-    if (comun.length) return 'Mismo músculo';
-    return 'Trabajo parecido';
+    if (comun.length) return T('Mismo músculo');
+    return T('Trabajo parecido');
   }
 
   /* Alternativas a un ejercicio, de más a menos parecida.

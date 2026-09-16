@@ -2251,11 +2251,13 @@
 
   /* ================= ficha de ejercicio ================= */
 
-  const FASES = ['Posición inicial', 'Posición final'];
+  /* Las dos etiquetas de la animación. Se leen al pintar, no al cargar el
+     archivo, para que sigan al idioma. */
+  function fases() { return [T('Posición inicial'), T('Posición final')]; }
 
   function viewEjercicio() {
     const ex = Data.get(route.arg);
-    if (!ex) return '<div class="empty"><p>Ejercicio no encontrado.</p></div>';
+    if (!ex) return '<div class="empty"><p>' + esc(T('Ejercicio no encontrado.')) + '</p></div>';
 
     const pr = Store.prOf(ex.id);
     const hist = Store.historyOf(ex.id).slice(0, 6);
@@ -2264,17 +2266,17 @@
     const marcos = Data.frames(ex);
 
     return html`
-      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">${raw(icon('back'))} Volver</button>
+      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">${raw(icon('back'))} ${T('Volver')}</button>
 
-      ${raw(UI.demoHTML(ex, { speed: 900, fases: marcos.length > 1 ? FASES : null }))}
+      ${raw(UI.demoHTML(ex, { speed: 900, fases: marcos.length > 1 ? fases() : null }))}
 
       <div class="row between" style="margin:14px 0 4px;align-items:flex-start">
         <div class="grow">
           <h1 style="margin-bottom:2px">${ex.nameEs}</h1>
-          <div class="tiny">${ex.name}</div>
+          ${raw(ex.nameEs === ex.name ? '' : '<div class="tiny">' + esc(ex.name) + '</div>')}
         </div>
         <button class="btn icon ${fav ? 'primary' : ''}" data-a="fav"
-                aria-label="Marcar como favorito">${raw(icon('star'))}</button>
+                aria-label="${T('Marcar como favorito')}">${raw(icon('star'))}</button>
       </div>
 
       <div class="row wrap" style="gap:6px;margin:10px 0 14px">
@@ -2290,9 +2292,9 @@
       </div>
 
       <div class="row">
-        <button class="btn primary grow" data-a="addrutina">${raw(icon('plus'))} Añadir a rutina</button>
+        <button class="btn primary grow" data-a="addrutina">${raw(icon('plus'))} ${T('Añadir a rutina')}</button>
         <a class="btn" href="${Data.youtube(ex)}" target="_blank" rel="noopener noreferrer"
-           aria-label="Buscar vídeo en YouTube">${raw(icon('youtube'))}</a>
+           aria-label="${T('Buscar vídeo en YouTube')}">${raw(icon('youtube'))}</a>
       </div>
 
       ${raw(g.Musculos ? Musculos.mapa(ex.primaryMuscles, ex.secondaryMuscles) : '')}
@@ -2300,39 +2302,41 @@
       ${raw(alternativasHTML(ex))}
 
       ${raw(marcos.length > 1 ? html`
-        <div class="list-title">El recorrido</div>
+        <div class="list-title">${T('El recorrido')}</div>
         <div class="marcos">
           <figure>
-            <img src="${marcos[0]}" alt="Posición inicial" loading="lazy">
-            <figcaption><b>1</b> Posición inicial</figcaption>
+            <img src="${marcos[0]}" alt="${T('Posición inicial')}" loading="lazy">
+            <figcaption><b>1</b> ${T('Posición inicial')}</figcaption>
           </figure>
           <figure>
-            <img src="${marcos[1]}" alt="Posición final" loading="lazy">
-            <figcaption><b>2</b> Posición final</figcaption>
+            <img src="${marcos[1]}" alt="${T('Posición final')}" loading="lazy">
+            <figcaption><b>2</b> ${T('Posición final')}</figcaption>
           </figure>
         </div>
-        <p class="tiny" style="margin-top:8px">El movimiento va del punto 1 al 2 y vuelve
-        controlando la bajada. Arriba lo ves animado.</p>` : '')}
+        <p class="tiny" style="margin-top:8px">${T('El movimiento va del punto 1 al 2 y ' +
+        'vuelve controlando la bajada. Arriba lo ves animado.')}</p>` : '')}
 
       ${raw(guia ? guiaHTML(guia) : html`
-        <div class="list-title">Cómo se ejecuta</div>
+        <div class="list-title">${T('Cómo se ejecuta')}</div>
         <div class="card">
-          <p class="muted">Este ejercicio todavía no tiene guía propia en español.
-          Abajo tienes las instrucciones originales y el enlace a vídeos.</p>
+          <p class="muted">${T('Este ejercicio todavía no tiene guía propia. Abajo ' +
+          'tienes las instrucciones del catálogo y el enlace a vídeos.')}</p>
         </div>`)}
 
       ${raw(instruccionesHTML(ex))}
 
       ${raw(pr.best ? html`
-        <div class="list-title">Tus marcas</div>
+        <div class="list-title">${T('Tus marcas')}</div>
         <div class="stats">
-          <div class="stat"><b>${UI.num(pr.best.weight)}</b><span>Máx. ${Store.settings().unit}</span></div>
-          <div class="stat"><b>${pr.best.reps}</b><span>Reps de esa serie</span></div>
-          ${raw(pr.orm ? '<div class="stat"><b>' + UI.num(pr.orm.orm) + '</b><span>1RM estimado</span></div>' : '')}
+          <div class="stat"><b>${UI.num(pr.best.weight)}</b><span>${Tn('Máx. {u}',
+            { u: Store.settings().unit })}</span></div>
+          <div class="stat"><b>${pr.best.reps}</b><span>${T('Reps de esa serie')}</span></div>
+          ${raw(pr.orm ? '<div class="stat"><b>' + UI.num(pr.orm.orm) + '</b><span>' +
+            esc(T('1RM estimado')) + '</span></div>' : '')}
         </div>` : '')}
 
       ${raw(hist.length ? html`
-        <div class="list-title">Historial</div>
+        <div class="list-title">${T('Historial')}</div>
         <div class="stack">
           ${raw(hist.map(function (h) {
             return html`<div class="card row between">
@@ -2366,15 +2370,17 @@
        si va a entrenar lo mismo, y la respuesta se le da con el nombre. */
     const musculos = (ex.primaryMuscles || []).map(function (m) {
       return I18N.muscle(m).toLowerCase();
-    }).join(' y ');
+    }).join(T(' y '));
 
     return html`
-      <div class="list-title">Si está ocupado o no lo tienes</div>
-      <p class="tiny" style="margin:-4px 0 10px">Entrenas el mismo músculo${raw(
-        musculos ? ' —' + esc(musculos) + '—' : '')} con otra máquina, otro material u otro
-        ejercicio. ${raw(fuera
-          ? 'Con tu material no sale ninguno, así que estos son del catálogo completo.'
-          : 'Toca cualquiera para ver su técnica.')}</p>
+      <div class="list-title">${T('Si está ocupado o no lo tienes')}</div>
+      <p class="tiny" style="margin:-4px 0 10px">${raw(esc(musculos
+        ? Tn('Entrenas el mismo músculo —{m}— con otra máquina, otro material u otro ' +
+             'ejercicio.', { m: musculos })
+        : T('Entrenas el mismo músculo con otra máquina, otro material u otro ejercicio.')))}
+        ${raw(esc(fuera
+          ? T('Con tu material no sale ninguno, así que estos son del catálogo completo.')
+          : T('Toca cualquiera para ver su técnica.')))}</p>
       <div class="carousel">
         ${raw(lista.map(function (a) {
           return html`
@@ -2393,75 +2399,86 @@
   }
 
   /* La guía de técnica, que es lo que de verdad explica el ejercicio */
+  /* Las guías de tecnica.js y calistenia.js están escritas en español y pasan
+     todas por aquí, así que es el único sitio donde hay que traducirlas. El
+     tempo —«2 s bajando · 1 s subiendo»— también, porque lleva palabras. */
   function guiaHTML(gu) {
     return html`
-      <div class="list-title">Cómo se hace · ${gu.titulo}</div>
+      <div class="list-title">${Tn('Cómo se hace · {que}', { que: T(gu.titulo) })}</div>
 
       <div class="card guia-bloque">
-        <h3 class="guia-h">${raw(icon('perfil'))} Posición inicial</h3>
+        <h3 class="guia-h">${raw(icon('perfil'))} ${T('Posición inicial')}</h3>
         <ol class="instr">
-          ${raw(gu.inicial.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join(''))}
+          ${raw(gu.inicial.map(function (p) { return '<li>' + esc(T(p)) + '</li>'; }).join(''))}
         </ol>
       </div>
 
       <div class="card guia-bloque">
-        <h3 class="guia-h">${raw(icon('grafica'))} El recorrido</h3>
+        <h3 class="guia-h">${raw(icon('grafica'))} ${T('El recorrido')}</h3>
         ${raw(gu.recorrido.map(function (f) {
-          return '<div class="fase-txt"><b>' + esc(f.fase) + '</b><p>' + esc(f.texto) + '</p></div>';
+          return '<div class="fase-txt"><b>' + esc(T(f.fase)) + '</b><p>' +
+            esc(T(f.texto)) + '</p></div>';
         }).join(''))}
       </div>
 
       <div class="card guia-bloque">
         <div class="guia-dato">
           <span class="row-icon">${raw(icon('gota'))}</span>
-          <div><b>Respiración</b><p>${gu.respiracion}</p></div>
+          <div><b>${T('Respiración')}</b><p>${T(gu.respiracion)}</p></div>
         </div>
         <div class="guia-dato">
           <span class="row-icon">${raw(icon('reloj'))}</span>
-          <div><b>Ritmo</b><p>${gu.tempo}</p></div>
+          <div><b>${T('Ritmo')}</b><p>${T(gu.tempo)}</p></div>
         </div>
       </div>
 
       <div class="card guia-bloque">
-        <h3 class="guia-h">${raw(icon('close'))} Errores frecuentes</h3>
+        <h3 class="guia-h">${raw(icon('close'))} ${T('Errores frecuentes')}</h3>
         ${raw(gu.errores.map(function (e) {
-          return '<div class="error-item"><b>' + esc(e.fallo) + '</b><p>' + esc(e.arreglo) + '</p></div>';
+          return '<div class="error-item"><b>' + esc(T(e.fallo)) + '</b><p>' +
+            esc(T(e.arreglo)) + '</p></div>';
         }).join(''))}
       </div>
 
       <div class="card destacado-clave">
-        <h3 class="guia-h">${raw(icon('chispa'))} La clave</h3>
-        <p style="margin:0">${gu.clave}</p>
+        <h3 class="guia-h">${raw(icon('chispa'))} ${T('La clave')}</h3>
+        <p style="margin:0">${T(gu.clave)}</p>
       </div>
 
       ${raw(gu.seguridad ? html`
         <div class="card aviso-seguridad">
-          <b>Seguridad</b>
-          <p style="margin:4px 0 0">${gu.seguridad}</p>
+          <b>${T('Seguridad')}</b>
+          <p style="margin:4px 0 0">${T(gu.seguridad)}</p>
         </div>` : '')}`;
   }
 
   /* Las instrucciones originales quedan como material de apoyo, plegadas */
   function instruccionesHTML(ex) {
     if (!ex.instructions || !ex.instructions.length) return '';
-    const traducidas = traduccionGuardada(ex);
+    /* El catálogo viene en inglés: con la app en inglés no hay nada que
+       traducir y se enseña tal cual, sin gastar una llamada a la IA. */
+    const yaVale = enIngles() || ex.yaEnEspanol;
+    const traducidas = yaVale ? null : traduccionGuardada(ex);
     const pasos = traducidas || ex.instructions;
 
     return html`
       <button class="guia-tit" data-a="verOriginal" style="margin-top:18px">
-        ${raw(icon('chevron'))} Cómo se hace, paso a paso
+        ${raw(icon('chevron'))} ${T('Cómo se hace, paso a paso')}
       </button>
       <div class="guia" id="orig" hidden>
         <div class="card">
           <ol class="instr" id="instr">
             ${raw(pasos.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join(''))}
           </ol>
-          ${raw(traducidas || ex.yaEnEspanol ? ''
+          ${raw(traducidas || yaVale ? ''
             : '<p class="tiny" id="tr-aviso" style="margin:10px 0 0">' +
-            'Traduciendo del catálogo original…</p>')}
+            esc(T('Traduciendo del catálogo original…')) + '</p>')}
         </div>
       </div>`;
   }
+
+  /* Con la app en inglés, el catálogo ya está en su idioma. */
+  function enIngles() { return !!(g.Idioma && Idioma.actual() === 'en'); }
 
   viewEjercicio.mount = function (root) {
     const ex = Data.get(route.arg);
@@ -2471,16 +2488,17 @@
     bind(root, '[data-a=fav]', function (el) {
       const on = Store.toggleFav(ex.id);
       el.classList.toggle('primary', on);
-      UI.toast(on ? 'Añadido a favoritos' : 'Quitado de favoritos');
+      UI.toast(on ? T('Añadido a favoritos') : T('Quitado de favoritos'));
     });
     bind(root, '[data-a=addrutina]', function () { pickRoutineSheet(ex); });
     bindAll(root, '[data-ex]', function (el) { go('ejercicio', el.dataset.ex); window.scrollTo(0, 0); });
     /* Se traduce sola al abrir: el botón estaba dentro de un bloque plegado y
        casi nadie llegaba a pulsarlo. */
+    if (enIngles() || ex.yaEnEspanol) return;
     asegurarTraduccion(ex).then(function (pasos) {
       if (!pasos) {
         const aviso = root.querySelector('#tr-aviso');
-        if (aviso) aviso.textContent = 'No he podido traducirlas; las dejo como vienen.';
+        if (aviso) aviso.textContent = T('No he podido traducirlas; las dejo como vienen.');
         return;
       }
       const lista = root.querySelector('#instr');
@@ -4075,7 +4093,7 @@
     const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
     return html`
-      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">${raw(icon('back'))} Volver</button>
+      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">${raw(icon('back'))} ${T('Volver')}</button>
       <h1>${draft.id ? 'Editar rutina' : 'Nueva rutina'}</h1>
 
       <div class="card">
@@ -6143,7 +6161,7 @@
     UI.modal(html`
       <h2 style="margin-bottom:2px">${ex.nameEs}</h2>
       <div class="tiny" style="margin-bottom:12px">${ex.primaryMuscles.map(I18N.muscle).join(', ')}</div>
-      ${raw(UI.demoHTML(ex, { speed: 800, fases: Data.frames(ex).length > 1 ? FASES : null }))}
+      ${raw(UI.demoHTML(ex, { speed: 800, fases: Data.frames(ex).length > 1 ? fases() : null }))}
 
       ${raw(guia ? html`
         <div class="guia-h" style="margin:16px 0 10px">${raw(icon('grafica'))} El recorrido</div>
