@@ -6441,3 +6441,14 @@ html[data-theme="light"] .rec-adelanto {
 .sup-pills { gap: 6px; }
 .sup-pills .chip { font-size: .8rem; }
 #sf-fija input[type=time] { margin-top: 0; }
+
+/* Sin elegir todavia: el boton no puede ensenar un valor que nadie ha puesto,
+   asi que pide lo que falta y se ve que falta. */
+.sup-reparto .sin-elegir { opacity: .72; font-weight: 500; }
+
+/* Las horas puestas a mano se quitan tocandolas */
+#rp-horas .chip svg {
+  width: 11px; height: 11px; opacity: .7; margin-left: 1px;
+  fill: none; stroke: currentColor; stroke-width: 2.6;
+  stroke-linecap: round; stroke-linejoin: round;
+}

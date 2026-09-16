@@ -222,10 +222,15 @@
       el.querySelector('#sf-blrep').hidden = !reparte;
 
       const rep = el.querySelector('#sf-repchip');
-      if (rep) rep.textContent = S().patronDe(dat.patron).label;
+      if (rep) {
+        rep.textContent = dat.patron
+          ? S().etiquetaMomento(dat) : 'Elige cómo lo repartes';
+        rep.classList.toggle('sin-elegir', !dat.patron);
+      }
 
       const ini2 = el.querySelector('#sf-inicio');
-      if (ini2) ini2.hidden = !reparte || S().patronDe(dat.patron).de !== 'reloj';
+      if (ini2) ini2.hidden = !reparte || !dat.patron ||
+        S().patronDe(dat.patron).de !== 'reloj';
     };
 
     UI.modal(html`
@@ -265,7 +270,7 @@
       <div id="sf-blrep" hidden>
         <label class="tiny sup-lbl">CÓMO SE REPARTE</label>
         <button class="sup-reparto" data-x="reparto">
-          <span class="grow" id="sf-repchip">Cada 8 horas</span>
+          <span class="grow" id="sf-repchip"></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
         <div id="sf-inicio" hidden>
@@ -298,7 +303,8 @@
       ${raw(esNuevo ? '' : '<button class="btn ghost block sm danger" data-x="borrar" ' +
         'style="margin-top:9px">Quitarlo de la lista</button>')}`,
       function (el) {
-        if (!dat.patron) dat.patron = 'cada:8';
+        /* Sin patrón por defecto: ponerle «cada 8 horas» de oficio era decidir
+           por él y que se lo llevara sin haberlo elegido. */
         pintar(el);
 
         /* Un solo manejador por grupo: los botones se repintan al elegir, y
@@ -316,7 +322,32 @@
             pintar(el);
           };
         };
-        grupo('#sf-frec', 'frec', 'frecuencia');
+        /* «Varias al día» no es una respuesta, es una pregunta: lo que hace
+           falta saber es cómo se reparte. Se abría la ficha con «Cada 8 horas»
+           puesto de oficio, y quien no se fijaba se lo llevaba sin haberlo
+           elegido. Ahora pregunta en el momento. */
+        const cajaF = el.querySelector('#sf-frec');
+        cajaF.onclick = function (ev) {
+          const b = ev.target.closest('[data-frec]');
+          if (!b) return;
+          const antes = dat.frecuencia;
+          dat.frecuencia = b.dataset.frec;
+          cajaF.querySelectorAll('[data-frec]').forEach(function (x) {
+            x.classList.toggle('on', x.dataset.frec === dat.frecuencia);
+          });
+          pintar(el);
+
+          if (dat.frecuencia === 'varias' && !dat.patron) {
+            dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
+            dat.dosis = (el.querySelector('#sf-dosis').value || '').trim();
+            repartoSheet(dat, function (elegido) {
+              /* Si se cierra sin elegir, la frecuencia vuelve a lo de antes:
+                 dejarla en «varias» sin reparto es dejarla sin horas. */
+              if (!elegido) dat.frecuencia = antes;
+              fichaSheet(dat, esNuevo);
+            });
+          }
+        };
         grupo('#sf-mom', 'mom', 'momento');
         grupo('#sf-semanal', 'dia', 'dia', true);
 
@@ -334,10 +365,7 @@
         el.querySelector('[data-x=reparto]').onclick = function () {
           dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
           dat.dosis = (el.querySelector('#sf-dosis').value || '').trim();
-          repartoSheet(dat.patron, function (id) {
-            dat.patron = id;
-            fichaSheet(dat, esNuevo);
-          });
+          repartoSheet(dat, function () { fichaSheet(dat, esNuevo); });
         };
 
         el.querySelector('[data-x=no]').onclick = function () { UI.closeModal(); };
@@ -370,53 +398,149 @@
   }
 
   /* ---------- cómo se reparte en el día ----------
-     En su propia hoja y no en más pastillas dentro de la ficha: son siete
-     opciones de dos familias distintas —las de reloj y las que van con tus
-     comidas— y mezcladas en una fila de pastillas se leen como siete cosas
-     sueltas en vez de como dos maneras de repartir. */
-  function repartoSheet(actual, alElegir) {
-    let elegido = actual || 'cada:8';
+     En su propia hoja y no en más pastillas dentro de la ficha: son ocho
+     opciones de tres familias distintas —las de reloj, las que van con tus
+     comidas y las que pones a mano— y mezcladas en una fila de pastillas se
+     leen como ocho cosas sueltas en vez de como tres maneras de repartir.
 
-    const grupo = function (titulo, de, pie) {
-      const xs = S().PATRONES.filter(function (p) { return p.de === de; });
-      return '<div class="list-title" style="margin-top:12px">' + esc(titulo) + '</div>' +
-        '<div class="opciones">' + xs.map(function (p) {
-          const horas = S().horasDe({ frecuencia: 'varias', patron: p.id, hora: '08:00' });
-          return '<button class="opcion ' + (elegido === p.id ? 'on' : '') +
+     Recibe el suplemento entero y no solo el patrón, porque la tercera familia
+     necesita escribir horas dentro de él. Al cerrar avisa de si se eligió algo:
+     quedarse en «varias veces al día» sin reparto es quedarse sin horas. */
+  function repartoSheet(dat, alSalir) {
+    let eligio = false;
+
+    const filas = function (de) {
+      return S().PATRONES.filter(function (p) { return p.de === de; })
+        .map(function (p) {
+          const horas = S().horasDe({ frecuencia: 'varias', patron: p.id,
+            hora: dat.hora || '08:00', horasManuales: dat.horasManuales });
+          const sub = p.de === 'manual'
+            ? ((dat.horasManuales || []).length
+                ? (dat.horasManuales || []).length + ' horas puestas'
+                : 'Tú eliges las horas, una a una')
+            : horas.length + (horas.length === 1 ? ' toma' : ' tomas') + ' al día · ' +
+              horas.map(function (h) { return UI.hora ? UI.hora(h) : h; }).join(', ');
+          return '<button class="opcion ' + (dat.patron === p.id ? 'on' : '') +
             '" data-pat="' + esc(p.id) + '" style="--tono:var(--acc)">' +
             '<span class="grow"><span class="op-nom">' + esc(p.label) + '</span>' +
-            '<span class="op-sub">' + horas.length +
-            (horas.length === 1 ? ' toma' : ' tomas') + ' al día · ' +
-            esc(horas.map(function (h) { return UI.hora ? UI.hora(h) : h; }).join(', ')) +
-            '</span></span><span class="op-marca">' + icon('check') + '</span></button>';
-        }).join('') + '</div>' +
-        (pie ? '<p class="tiny" style="margin:7px 2px 0">' + esc(pie) + '</p>' : '');
+            '<span class="op-sub">' + esc(sub) + '</span></span>' +
+            '<span class="op-marca">' + icon('check') + '</span></button>';
+        }).join('');
+    };
+
+    const listaHTML = function () {
+      return '<div class="list-title" style="margin-top:12px">Por reloj</div>' +
+        '<div class="opciones">' + filas('reloj') + '</div>' +
+        '<p class="tiny" style="margin:7px 2px 0">Arrancan a la hora que elijas y se ' +
+        'cortan en la cena: nadie quiere el magnesio a las tres de la mañana.</p>' +
+
+        '<div class="list-title" style="margin-top:14px">Con tus comidas</div>' +
+        '<div class="opciones">' + filas('comidas') + '</div>' +
+        '<p class="tiny" style="margin:7px 2px 0">Salen de tus horas de comer, así que ' +
+        'si mueves una comida la toma se mueve con ella.</p>' +
+
+        '<div class="list-title" style="margin-top:14px">A mano</div>' +
+        '<div class="opciones">' + filas('manual') + '</div>' +
+        '<p class="tiny" style="margin:7px 2px 0">Para lo que no encaja en ningún patrón: ' +
+        'lo que manda una receta, o los turnos de quien no come a las mismas horas.</p>';
+    };
+
+    /* El editor de horas vive en la misma hoja y no en una tercera: encadenar
+       tres modales para poner dos horas es perder el sitio a cada paso. */
+    const editorHTML = function () {
+      const hs = (dat.horasManuales || []).slice().sort();
+      return '<div class="list-title" style="margin-top:12px">Tus horas</div>' +
+        (hs.length
+          ? '<div class="row wrap sup-pills" id="rp-horas">' + hs.map(function (h) {
+              return '<button class="chip on" data-quitar="' + esc(h) + '">' +
+                esc(UI.hora ? UI.hora(h) : h) + ' ' + icon('close') + '</button>';
+            }).join('') + '</div>'
+          : '<p class="tiny" style="margin:2px 2px 0">Todavía ninguna. Añade la primera ' +
+            'abajo.</p>') +
+        '<div class="row" style="margin-top:11px;gap:8px">' +
+        '<input type="time" id="rp-nueva" value="08:00" style="flex:1">' +
+        '<button class="btn primary" data-x="add">' + icon('plus') + ' Añadir</button>' +
+        '</div>' +
+        '<button class="btn block" data-x="listo" style="margin-top:12px">' +
+        icon('check') + ' Listo</button>' +
+        '<button class="btn ghost block sm" data-x="volver" style="margin-top:7px">' +
+        'Volver a los patrones</button>';
     };
 
     UI.modal(html`
       <div class="conf-disco cambio">${raw(icon('reloj'))}</div>
       <h2 class="conf-tit">¿Cómo lo repartes?</h2>
-      <p class="muted conf-txt">Debajo de cada opción van las horas que salen con tus
-      datos de ahora.</p>
+      <p class="muted conf-txt" id="rp-txt">Debajo de cada opción van las horas que salen
+      con tus datos de ahora.</p>
 
-      <div id="rp-lista">
-        ${raw(grupo('Por reloj', 'reloj',
-          'Arrancan a la hora que elijas y se cortan en la cena: nadie quiere el ' +
-          'magnesio a las tres de la mañana.'))}
-        ${raw(grupo('Con tus comidas', 'comidas',
-          'Salen de tus horas de comer, así que si mueves una comida la toma se mueve ' +
-          'con ella.'))}
-      </div>`,
+      <div id="rp-caja"></div>`,
       function (el) {
-        el.querySelector('#rp-lista').onclick = function (ev) {
-          const b = ev.target.closest('[data-pat]');
-          if (!b) return;
-          elegido = b.dataset.pat;
-          /* Se cierra y se reabre la ficha en el siguiente hueco: encadenar dos
-             modales en el mismo tic deja el de arriba a medio pintar. */
-          UI.closeModal();
-          setTimeout(function () { alElegir(elegido); }, 180);
+        const caja = el.querySelector('#rp-caja');
+        const txt = el.querySelector('#rp-txt');
+
+        const pintarLista = function () {
+          txt.textContent = 'Debajo de cada opción van las horas que salen con tus datos ' +
+            'de ahora.';
+          caja.innerHTML = listaHTML();
         };
+        const pintarEditor = function () {
+          txt.textContent = 'Añade cada hora a la que tomas esto. Se crea un recordatorio ' +
+            'por cada una.';
+          caja.innerHTML = editorHTML();
+          const n = caja.querySelector('#rp-nueva');
+          if (n) n.value = (dat.horasManuales || [])[0] ? '' : '08:00';
+        };
+
+        caja.onclick = function (ev) {
+          const pat = ev.target.closest('[data-pat]');
+          if (pat) {
+            dat.patron = pat.dataset.pat;
+            eligio = true;
+            if (S().patronDe(dat.patron).de === 'manual') { pintarEditor(); return; }
+            UI.closeModal();
+            setTimeout(function () { alSalir(true); }, 180);
+            return;
+          }
+
+          const quitar = ev.target.closest('[data-quitar]');
+          if (quitar) {
+            dat.horasManuales = (dat.horasManuales || []).filter(function (h) {
+              return h !== quitar.dataset.quitar;
+            });
+            pintarEditor();
+            return;
+          }
+
+          const b = ev.target.closest('[data-x]');
+          if (!b) return;
+
+          if (b.dataset.x === 'add') {
+            const v = caja.querySelector('#rp-nueva').value;
+            if (!v) { UI.toast('Elige una hora'); return; }
+            dat.horasManuales = (dat.horasManuales || []).slice();
+            if (dat.horasManuales.indexOf(v) === -1) dat.horasManuales.push(v);
+            else UI.toast('Esa hora ya está');
+            pintarEditor();
+            return;
+          }
+          if (b.dataset.x === 'volver') { pintarLista(); return; }
+          if (b.dataset.x === 'listo') {
+            if (!(dat.horasManuales || []).length) { UI.toast('Añade al menos una hora'); return; }
+            UI.closeModal();
+            setTimeout(function () { alSalir(true); }, 180);
+          }
+        };
+
+        /* Si ya venía con horas puestas a mano, se abre donde lo dejó */
+        if (dat.patron === 'manual') pintarEditor(); else pintarLista();
+
+        /* Cerrar con la X o el gesto cuenta como no haber elegido */
+        const obs = new MutationObserver(function () {
+          const caja2 = document.getElementById('modal');
+          if (caja2 && caja2.hidden) { obs.disconnect(); if (!eligio) alSalir(false); }
+        });
+        const host = document.getElementById('modal');
+        if (host) obs.observe(host, { attributes: true, attributeFilter: ['hidden'] });
       });
   }
 })(window);

@@ -87,7 +87,12 @@
     { id: 'cada:12', label: 'Cada 12 horas', de: 'reloj', horas: 12 },
     { id: 'antes:comidas', label: 'Antes de cada comida', de: 'comidas', desfase: -15 },
     { id: 'con:comidas', label: 'Con cada comida', de: 'comidas', desfase: 0 },
-    { id: 'tras:comidas', label: 'Después de cada comida', de: 'comidas', desfase: 30 }
+    { id: 'tras:comidas', label: 'Después de cada comida', de: 'comidas', desfase: 30 },
+    /* Y el que no entra en ningún patrón. Hay pautas que no son «cada tantas
+       horas» ni van con las comidas —las que manda una receta, o las de quien
+       trabaja a turnos—, y sin esto había que forzarlas a la opción más
+       parecida y luego vivir con un aviso a deshora. */
+    { id: 'manual', label: 'Las pongo yo', de: 'manual' }
   ];
 
   function patronDe(id) {
@@ -152,6 +157,11 @@
     if (s.frecuencia !== 'varias') return [horaDe(s)];
 
     const p = patronDe(s.patron);
+
+    if (p.de === 'manual') {
+      const hs = (s.horasManuales || []).filter(Boolean);
+      return hs.length ? hs.slice().sort() : ['08:00'];
+    }
     const min = function (h) { return g.Alertas ? Alertas.enMinutos(h) : 0; };
     const txt = function (m) { return g.Alertas ? Alertas.aHora(m) : '08:00'; };
 
@@ -172,7 +182,16 @@
   }
 
   function etiquetaMomento(s) {
-    if (s.frecuencia === 'varias') return patronDe(s.patron).label;
+    if (s.frecuencia === 'varias') {
+      const p = patronDe(s.patron);
+      /* A mano, la etiqueta son las horas: «las pongo yo» no dice ninguna. */
+      if (p.de === 'manual') {
+        return horasDe(s).map(function (h) {
+          return g.UI && UI.hora ? UI.hora(h) : h;
+        }).join(', ');
+      }
+      return p.label;
+    }
     const m = momentoDe(s.momento);
     return m.id === 'fija' ? 'A las ' + (g.UI && UI.hora ? UI.hora(horaDe(s)) : horaDe(s))
       : m.label;
@@ -192,7 +211,8 @@
     return Object.assign({
       id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       nombre: '', dosis: '', frecuencia: 'diario', momento: 'con:desayuno',
-      hora: '08:00', dia: 1, nota: '', aporta: null
+      hora: '08:00', dia: 1, nota: '', aporta: null,
+      patron: '', horasManuales: []
     }, base || {});
   }
 
