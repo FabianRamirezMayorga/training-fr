@@ -6513,11 +6513,15 @@ html[data-theme="light"] .rec-adelanto {
    Lo que se mira a diario es la tarjeta de arriba; la lista completa es para el
    dia que se cambia algo, y eso pasa una vez al mes. Con cinco botes
    desplegados habia que pasar media pantalla para llegar a los recordatorios. */
+/* El titulo del plegable es un titulo de seccion como los demas, no una
+   cabecera propia: con su tamano y su color, «lo que tomas» se leia de otra
+   familia que «que no se te olvide», y son dos secciones de la misma pantalla.
+   Lo unico que anade es la flecha. */
 .sup-plegable > summary {
   display: flex; align-items: center; gap: 9px;
-  padding: 14px 2px 8px; cursor: pointer; list-style: none;
-  font-size: .72rem; font-weight: 800; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--dim2);
+  padding: 22px 0 8px; cursor: pointer; list-style: none;
+  font-size: .84rem; font-weight: 800; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--txt);
   -webkit-tap-highlight-color: transparent;
 }
 .sup-plegable > summary::-webkit-details-marker { display: none; }
@@ -6531,7 +6535,15 @@ html[data-theme="light"] .rec-adelanto {
   background: color-mix(in srgb, var(--acc) 14%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 26%, transparent);
 }
-.sp-flecha { flex: none; display: flex; transition: transform .2s ease; }
+.sp-flecha { flex: none; display: flex; color: var(--dim2);
+  transition: transform .2s ease; }
+
+/* Mientras la IA lo calcula: en el sitio donde luego iran las kcal, para que
+   el cambio no mueva nada de sitio. */
+.sp-cargando {
+  flex: none; font-size: .68rem; font-weight: 700; letter-spacing: .02em;
+  text-transform: none; color: var(--dim2); font-style: italic;
+}
 .sp-flecha svg {
   width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4;
   stroke-linecap: round; stroke-linejoin: round;

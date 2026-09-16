@@ -149,13 +149,13 @@
       resumen: 'Se apuntan una vez y lo usa toda la app',
       cuerpo: [
         'En Perfil › Suplementación apuntas qué tomas, cuánto, cada cuánto y en qué momento. A partir de ahí no hay que repetirlo en ningún otro sitio.',
-        '*Los recordatorios se crean solos*, con el nombre y la dosis puestos. Los que caen a la misma hora van en un solo aviso: tres notificaciones seguidas a las ocho para tres botes del mismo cajón es ruido, y el ruido acaba silenciándose entero.',
+        '*Las alertas se crean solas*, con el nombre y la dosis puestos. Las que caen a la misma hora van en un solo aviso: tres notificaciones seguidas a las ocho para tres botes del mismo cajón es ruido, y el ruido acaba silenciándose entero.',
         '*El momento no guarda una hora*, guarda que es «con el desayuno» o «después de entrenar». La hora sale de tus horas de comer y de la hora a la que entrenas de verdad, así que si mueves el desayuno de las ocho a las seis, la creatina se mueve sola.',
         '*Lo que aportan cuenta*: un batido de proteína son unas 120 kcal y 24 g, y el menú los descuenta en vez de pedírtelos otra vez en comida.',
         '*Y la IA lo sabe*: al montarte un menú no te propone lo que ya tomas, y si una toma va con una comida concreta la menciona ahí en vez de inventar otra.',
         'Las frecuencias que hay: todos los días, los días que entrenas —sale de los días de tu plan—, un día sí y otro no, un día a la semana, y *varias veces al día*.',
         'Lo de varias veces al día se reparte de tres maneras. *Por reloj*: cada 4, 6, 8 o 12 horas, arrancando a la hora que elijas y cortando en la cena, que nadie quiere el magnesio a las tres de la mañana. *Con tus comidas*: antes, con o después de cada una, y entonces las tomas se mueven si mueves una comida. *A mano*: pones tú cada hora, una a una, para lo que no encaja en ningún patrón —lo que manda una receta, o los turnos de quien no come a las mismas horas—. En las dos primeras te enseña las horas que salen con tus datos antes de elegir.',
-        '*Lo que aportan lo calcula el entrenador*, en «Lo que suman a tu día». Sumarlo a mano salía mal: no contaba lo que escribes tú ni decía nada de vitaminas o minerales, que es justo para lo que se toma un multivitamínico. Lo que salga se descuenta solo de tu menú, así que no te pedirá en comida la proteína que ya te bebiste.',
+        '*Lo que aportan lo calcula el entrenador solo*, en cuanto apuntas algo, y lo verás en «Lo que suman a tu día». Sumarlo a mano salía mal: no contaba lo que escribes tú ni decía nada de vitaminas o minerales, que es justo para lo que se toma un multivitamínico. Lo que salga se descuenta solo de tu menú, así que no te pedirá en comida la proteína que ya te bebiste.',
         'La tarjeta de arriba dice lo que hay que tomar hoy, entero: la hora, qué es y cuánto. No hay nada que marcar ahí: es para acordarse, no un diario de cumplimiento.'
       ],
       ver: ['c-suplementos', 'g-comida', 'p-suplerecet'] },
@@ -354,10 +354,10 @@
           d: 'Con el desayuno, el almuerzo, la merienda o la cena; antes o después de entrenar; o a una *hora puntual*, que va en otro color porque es el único que no depende de nada tuyo.' },
         { t: 'Si lo tomas varias veces al día, elige *Varias al día*.',
           d: 'Te pregunta en el momento cómo lo repartes: por reloj, con tus comidas, o poniendo tú las horas una a una. Debajo de cada opción verás las horas que salen con tus datos.' },
-        { t: 'Guarda y, abajo, toca *Crear los recordatorios*.',
-          d: 'Se crean con el nombre y la dosis. Solo toca los de suplementos: los recordatorios que hayas creado tú se quedan como están.' }
+        { t: 'Guarda y, abajo, toca *Crear alertas*.',
+          d: 'Se crean con el nombre y la dosis. Solo toca las de suplementos: las alertas que hayas creado tú se quedan como están.' }
       ],
-      cierre: 'Si luego cambias las horas de comer, los días de tu plan o los propios suplementos, la pantalla te avisa de que los recordatorios no coinciden y se rehacen con un toque.',
+      cierre: 'Si luego cambias las horas de comer, los días de tu plan o los propios suplementos, la pantalla te avisa de que las alertas no coinciden y se rehacen con un toque.',
       ver: ['g-suplementos', 'c-franjas', 'c-calendario'] },
 
     { id: 'c-franjas', titulo: 'Poner las horas de tus comidas',
@@ -518,7 +518,7 @@
       ver: ['c-franjas', 'g-comida'] },
 
     { id: 'p-supaporta', q: '¿La app cuenta lo que me aportan los suplementos?',
-      a: ['Sí, pero no a ojo. En Suplementación, abajo del todo, hay un bloque plegado —«Lo que suman a tu día»— con un botón para que lo calcule el entrenador.',
+      a: ['Sí, y se calcula solo: en cuanto apuntas o cambias algo, el entrenador lo mira y el resultado queda en el bloque plegado «Lo que suman a tu día».',
         'Lo hace él y no la app porque una suma a mano no cuenta lo que escribes tú, ni las vitaminas, ni los minerales. Te dice las calorías y los macros que suman todas las tomas juntas, qué micronutrientes quedan cubiertos, y qué debería tener en cuenta tu menú.',
         'Y eso entra en el menú automáticamente: si tus batidos ya te dan 48 g de proteína, el menú te pide el resto en comida, no el total otra vez.',
         'Se guarda con la lista que analizó: si cambias un bote, hay que volver a pedirlo.'],

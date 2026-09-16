@@ -27,6 +27,12 @@
      los recordatorios. Como render() repinta entero, el estado vive fuera. */
   let listaAbierta = false;
   let aportaAbierto = false;
+  /* Se calcula solo al entrar, pero una sola vez por lista: si la IA falla y se
+     reintenta en cada repintado, se gasta la clave en bucle sin que nadie haya
+     pedido nada. El fallo se recuerda por huella, así que cambiar un bote vuelve
+     a darle una oportunidad. */
+  let calculando = false;
+  let falloEn = '';
 
   /* ---------- la lista ----------
      La hora iba en una columna propia, en verde y con un «HOY» debajo, y
@@ -134,7 +140,8 @@
       <details class="sup-plegable" ${raw(aportaAbierto ? 'open' : '')} data-det="aporta">
         <summary>
           <span class="grow">Lo que suman a tu día</span>
-          ${raw(a ? '<span class="sp-cuantos">' + a.kcal + ' kcal</span>' : '')}
+          ${raw(a ? '<span class="sp-cuantos">' + a.kcal + ' kcal</span>'
+            : calculando ? '<span class="sp-cargando">calculando…</span>' : '')}
           <span class="sp-flecha">${raw(icon('chevron'))}</span>
         </summary>
 
@@ -154,12 +161,14 @@
             <p class="tiny sa-pie">Ya está contado en tu menú: no te pedirá en comida lo
             que estos te dan.</p>
             <button class="btn sm block" data-a="analizar" style="margin-top:10px">
-              ${raw(icon('cambiar'))} Volver a calcularlo</button>` : html`
+              ${raw(icon('cambiar'))} Volver a calcularlo</button>` : calculando ? html`
+            <p class="tiny" style="margin:0">Calculando lo que suman, con lo que tienes
+            apuntado…</p>` : html`
             <p class="tiny" style="margin:0 0 10px">Sumar esto a mano sale mal: no cuenta
-            lo que escribes tú, ni las vitaminas ni los minerales. Que lo mire el
+            lo que escribes tú, ni las vitaminas ni los minerales. Lo calcula el
             entrenador, y lo que salga se descuenta solo de tu menú.</p>
             <button class="btn sm primary block" data-a="analizar" ${raw(hayIA ? '' : 'disabled')}>
-              ${raw(icon('chispa'))} Calcularlo con el entrenador</button>
+              ${raw(icon('chispa'))} ${raw(hayIA ? 'Calcularlo ahora' : 'Calcularlo')}</button>
             ${raw(hayIA ? '' : '<p class="tiny" style="margin:8px 0 0">Necesita el ' +
               'entrenador con IA configurado, en Perfil.</p>')}`)}
         </div>
@@ -176,9 +185,8 @@
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} Perfil</button>
       <h1>Suplementos</h1>
-      <p class="muted">Lo que tomas, cuánto y cuándo. Con esto la app te crea los
-      recordatorios sola, deja de proponerte en el menú lo que ya tomas y cuenta lo que
-      aportan.</p>
+      <p class="muted">Lo que tomas, cuánto y cuándo. Con esto la app te crea las alertas
+      sola, deja de proponerte en el menú lo que ya tomas y cuenta lo que aportan.</p>
 
       ${raw(!l.length ? html`
         <div class="card tarjeta-premium" style="margin-top:14px">
@@ -192,6 +200,8 @@
         </div>` : html`
 
         ${raw(hoyHTML())}
+
+        ${raw(aportanHTML())}
 
         <!-- Plegable y cerrada de entrada: lo que se mira a diario es la
              tarjeta de arriba, y la lista completa es para el día que se cambia
@@ -217,9 +227,7 @@
         <button class="btn block" data-a="nuevo" style="margin-top:12px">
           ${raw(icon('plus'))} Añadir otro</button>
 
-        ${raw(aportanHTML())}
-
-        <div class="list-title">Recordatorios</div>
+        <div class="list-title">Alertas</div>
         <div class="card">
           <p class="muted" style="margin:0 0 12px;font-size:.88rem">Se crean con el nombre y
           la dosis puestos, y a la hora que salga de cada momento. Si cambias las horas de
@@ -228,16 +236,16 @@
           ${raw(desfase ? html`
             <div class="cal-viejo" style="margin-bottom:12px">
               <span class="cv-ico">${raw(icon('aviso'))}</span>
-              <span class="grow"><b>Tus recordatorios no coinciden</b>
+              <span class="grow"><b>Tus alertas no coinciden</b>
               <span class="tiny">Has cambiado suplementos, horas de comer o días de
               entreno desde la última vez.</span></span>
             </div>` : '')}
 
           <button class="btn ${desfase ? 'primary' : ''} block" data-a="sincronizar">
             ${raw(icon('campana'))} ${raw(S().hayAlertas()
-              ? 'Rehacer los recordatorios' : 'Crear los recordatorios')}</button>
-          <p class="tiny" style="margin-top:8px">Solo toca los de suplementos: los
-          recordatorios que hayas creado tú se quedan como están.</p>
+              ? 'Rehacer las alertas' : 'Crear alertas')}</button>
+          <p class="tiny" style="margin-top:8px">Solo toca las de suplementos: las alertas
+          que hayas creado tú se quedan como están.</p>
         </div>`)}
 
       <!-- Una vez, y no en cada aviso. Repetirlo en cada pantalla es lo que
@@ -262,26 +270,42 @@
       });
     });
 
-    bind(root, '[data-a=analizar]', function (el) {
-      if (!g.IA || !IA.analizarSuplementos) return;
-      el.disabled = true;
-      el.textContent = 'Calculando…';
-      IA.analizarSuplementos({ forzar: true })
-        .then(function () { aportaAbierto = true; render(); })
-        .catch(function (e) {
-          el.disabled = false;
-          render();
-          UI.toast(e.message || 'No he podido calcularlo');
-        });
-    });
+    bind(root, '[data-a=analizar]', function () { pedirAnalisis(true); });
+
+    /* Nada más entrar, si hay algo que contar y no está contado. Nadie va a
+       tocar un botón para que le cuadren los números de su menú: o se hace
+       solo, o no se hace. */
+    const l = S().lista();
+    if (l.length && !S().analisis() && !calculando &&
+      falloEn !== S().resumenIA() && g.IA && IA.activa && IA.activa()) {
+      pedirAnalisis(false);
+    }
 
     bind(root, '[data-a=sincronizar]', function () {
       const n = S().sincronizarAlertas();
       render();
-      UI.toast(n ? n + (n === 1 ? ' recordatorio listo' : ' recordatorios listos')
+      UI.toast(n ? n + (n === 1 ? ' alerta lista' : ' alertas listas')
         : 'No hay nada que recordar');
     });
   };
+
+  function pedirAnalisis(aMano) {
+    if (!g.IA || !IA.analizarSuplementos || calculando) return;
+    calculando = true;
+    render();
+    IA.analizarSuplementos({ forzar: !!aMano })
+      .then(function () {
+        calculando = false;
+        if (aMano) aportaAbierto = true;
+        render();
+      })
+      .catch(function (e) {
+        calculando = false;
+        falloEn = S().resumenIA();
+        render();
+        if (aMano) UI.toast(e.message || 'No he podido calcularlo');
+      });
+  }
 
   /* ---------- elegir del catálogo ----------
      Doce filas de lista para elegir un bote era tratar un catálogo como si
