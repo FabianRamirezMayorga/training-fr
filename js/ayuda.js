@@ -619,6 +619,13 @@
         'Sin conexión la pantalla te enseña igual la versión que llevas, y te dice que no ha podido comprobar si hay otra en vez de callarse.',
         'Si algo se comporta raro justo después de actualizar, casi siempre es que el móvil se ha quedado con archivos de dos versiones mezclados. Para eso está *¿Algo va raro?*, debajo de la versión.'] },
 
+    { id: 'p-menudiario', q: '¿El aviso de comer cambia cada día con el menú?',
+      a: ['Sí. El plato no se guarda dentro de la alerta: *se busca en el momento de sonar*, en el menú que tengas activo y en el día que toque. Por eso el martes te dice el plato del martes.',
+        'Lo mismo en la tarjeta de la lista: lo que ves ahí es lo de hoy, y mañana enseñará lo de mañana.',
+        'Si cambias de menú o creas otro, los avisos siguen al nuevo sin que tengas que rehacer nada.',
+        'Lo único que no cambia solo es *la hora*, que sale de tus horas de comer. Y en el calendario del móvil no va el plato, porque ese archivo se escribe hoy y el evento suena dentro de tres semanas; ahí van el título y las calorías, que no caducan.'],
+      ver: ['c-autoalertas', 'p-avisocomida'] },
+
     { id: 'p-calagrupadas', q: 'Si llevo al calendario una alerta con varias horas, ¿suena en todas?',
       a: ['Sí. En el archivo del calendario *cada hora va como un evento suyo*, con su repetición semanal y su aviso cinco minutos antes.',
         'Los diez vasos de agua son diez eventos, y un suplemento que tomas a las diez y a las dos son dos. Dentro de la app se ven como una sola tarjeta porque son una sola cosa; en el calendario tienen que ir sueltos porque el calendario no entiende de «diez veces al día».',
@@ -641,6 +648,7 @@
       a: ['No. Cada alerta que crea la app lleva por dentro una marca de qué la generó: la del agua sabe que es la del agua aunque le cambies el nombre. Al volver a pulsarlo busca esa marca y *actualiza la que ya está* en vez de crear otra.',
         'Las que has creado tú no llevan esa marca, así que *no se tocan nunca*: ni se cambian ni se borran. La hoja te dice cuántas son antes de que confirmes.',
         'Y respeta dos cosas más: si apagaste una, sigue apagada —recalcular una hora no es motivo para volver a encenderte algo que decidiste callar—, y lo que ya sonó hoy no vuelve a sonar.',
+        '*Sí retira* las que creó la app y que ya no tienen sentido: si dejas de tener rutinas, o si una comida pasa a pisarse con otra, esa alerta se va. Te dice cuántas antes de que confirmes, y nunca toca una tuya.',
         'Por eso tiene sentido pulsarlo cada vez que cambies de peso, de horas de comer o de rutina: las horas se recalculan solas.',
         'Lo de comer sale de las horas que tienes puestas en *Perfil › Ajustes*, no de un reparto inventado: si desayunas a las 8:15, el aviso es a las 8:15 y dice «es hora de desayunar».'],
       ver: ['c-autoalertas'] },

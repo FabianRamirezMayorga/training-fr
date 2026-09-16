@@ -158,6 +158,8 @@
                 }).join(''))}
             </div>
             ${raw(a.cubre ? '<p class="tiny"><b>Cubre.</b> ' + esc(a.cubre) + '</p>' : '')}
+            ${raw(a.horario ? '<p class="tiny"><b>Horarios.</b> ' + esc(a.horario) + '</p>' : '')}
+            ${raw(a.solapa ? '<p class="tiny"><b>Se pisan.</b> ' + esc(a.solapa) + '</p>' : '')}
             ${raw(a.menu ? '<p class="tiny"><b>En tu menú.</b> ' + esc(a.menu) + '</p>' : '')}
             ${raw(a.dudas ? '<p class="tiny"><b>Sin calcular.</b> ' + esc(a.dudas) + '</p>' : '')}
             <p class="tiny sa-pie">Lo ha calculado el entrenador con tu lista, no es una

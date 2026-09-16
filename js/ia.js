@@ -2549,19 +2549,45 @@
       'que llevan comida dentro (proteína en polvo, colágeno, ganadores, barritas).\n' +
       '- No te inventes precisión: una dosis típica del mercado basta. Si no sabes qué ' +
       'es algo que ha escrito, ponlo a cero y dilo en "dudas".\n\n' +
-      '- "cubre": una frase corta con los micronutrientes que sí quedan cubiertos con ' +
-      'lo que toma (vitaminas, minerales, omega 3). Solo lo que se deduzca de la lista, ' +
-      'sin suponer dosis que no ha escrito.\n' +
-      '- "menu": una o dos frases sobre qué debería tener en cuenta su menú por esto. ' +
-      'Concreto y accionable: qué descontar, qué no hace falta repetir. Nada de ' +
-      'generalidades.\n' +
+      /* Lo que salía antes se podía copiar y pegar en la ficha de cualquiera:
+         «cubre vitaminas y minerales», «complementa tu dieta». Una frase que le
+         vale a todo el mundo no le sirve a nadie, y encima ocupa el sitio de la
+         que sí serviría. Las tres reglas que la matan: nombrar el bote del que
+         se habla, decir un número, y prohibir por escrito las muletillas. */
+      'LAS FRASES, CON NOMBRE Y CON NÚMERO. Cada una nombra el suplemento concreto del ' +
+      'que habla —«tu multivitamínico», no «tus suplementos»— y lleva una cifra. Una ' +
+      'frase que le valdría a cualquier otra persona está mal: bórrala y escribe otra.\n' +
+      'PROHIBIDAS, porque no dicen nada: «complementa tu dieta», «ayuda al rendimiento», ' +
+      '«apoya la recuperación», «favorece el bienestar», «consulta a un profesional» y ' +
+      'cualquier variante. Si lo único que se te ocurre es una de esas, deja el campo ' +
+      'vacío: mejor nada que relleno.\n\n' +
+
+      '- "cubre": qué queda cubierto Y QUÉ NO. Lo cubierto, con el bote que lo cubre y ' +
+      'aproximadamente cuánto del día («la vitamina D de tu multivitamínico ronda un día ' +
+      'entero»). Lo que no, solo si es algo que a ÉL le haga falta por lo que entrena o ' +
+      'por su objetivo, y dicho sin recomendarle comprarlo. Lo segundo es más útil que ' +
+      'lo primero: lo que ya está cubierto no le pide ninguna decisión.\n' +
+
+      '- "solapa": si dos de los suyos dan lo mismo y se pisan, dilo con los dos nombres ' +
+      'y con la cifra que suman entre los dos. Si no se pisa nada, cadena vacía. No ' +
+      'fuerces un solape que no existe.\n' +
+
+      '- "horario": lo que se estorba en el día por la hora a la que lo toma, con el ' +
+      'arreglo concreto: qué separar de qué y cuánto, o con qué comida va mejor. Mira ' +
+      'sus horas reales, que las tienes arriba. Sin cambiarle dosis ni quitarle nada, ' +
+      'solo mover horas. Si no hay nada que mover, cadena vacía; y si de una interacción ' +
+      'no estás seguro, no la escribas.\n' +
+
+      '- "menu": qué cambia en su menú por esto, con la cifra. «Descuenta 24 g de ' +
+      'proteína de la cena» sirve; «ten en cuenta la proteína» no.\n' +
       '- "dudas": lo que no has podido calcular y por qué, o cadena vacía.\n\n' +
       'NO le recomiendes tomar nada, ni quitar nada, ni le digas si las dosis están ' +
       'bien o mal: no es tu decisión ni te lo ha preguntado. Esto es una cuenta, no un ' +
       'consejo médico. Si algo te parece llamativo, cabe en "dudas" en una frase seca y ' +
       'sin alarmismo.\n\n' +
       'Devuelve SOLO este JSON:\n' +
-      '{"kcal":0,"prot":0,"carbo":0,"grasa":0,"cubre":"","menu":"","dudas":""}';
+      '{"kcal":0,"prot":0,"carbo":0,"grasa":0,"cubre":"","solapa":"","horario":"",' +
+      '"menu":"","dudas":""}';
 
     return llamarJSON(prompt, { temperatura: 0.2 }).then(function (r) {
       if (!r) throw new Error('No he podido calcularlo.');
@@ -2569,6 +2595,7 @@
       const out = {
         kcal: n(r.kcal), prot: n(r.prot), carbo: n(r.carbo), grasa: n(r.grasa),
         cubre: String(r.cubre || ''), menu: String(r.menu || ''),
+        solapa: String(r.solapa || ''), horario: String(r.horario || ''),
         dudas: String(r.dudas || ''),
         t: Date.now(), huella: resumen
       };

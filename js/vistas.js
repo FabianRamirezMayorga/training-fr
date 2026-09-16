@@ -1590,6 +1590,10 @@
         ${raw(icon('check'))}
         <span class="grow"><b>No te duplica nada.</b>
         <span class="tiny">Las que ya existen se actualizan con las horas nuevas.
+        ${raw(prev.retiradas ? (prev.retiradas === 1
+          ? 'Se retira 1 que la app creó y que ya no tiene sentido con tus datos de ahora. '
+          : 'Se retiran ' + prev.retiradas + ' que creó la app y que ya no tienen sentido ' +
+            'con tus datos de ahora. ') : '')}
         ${raw(prev.tuyas === 1
           ? 'La que has creado tú no se toca, y si apagaste alguna sigue apagada.'
           : prev.tuyas
@@ -1620,6 +1624,8 @@
           const partes = [];
           if (r.creadas) partes.push(r.creadas + (r.creadas === 1 ? ' nueva' : ' nuevas'));
           if (r.actualizadas) partes.push(r.actualizadas + ' al día');
+          if (r.retiradas) partes.push(r.retiradas + (r.retiradas === 1
+            ? ' retirada' : ' retiradas'));
           if (r.suplementos) partes.push(r.suplementos + ' de suplementos');
           UI.toast(partes.length ? partes.join(' · ') : 'Ya estaba todo al día');
         };

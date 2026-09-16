@@ -324,15 +324,33 @@
      tuyo no se toca ni aunque se llame igual. */
   const RETIRADAS = ['comida'];
 
-  function generarTodo() {
-    const res = { creadas: 0, actualizadas: 0, suplementos: 0, tuyas: 0 };
+  /* Lo que la app generó y hoy ya no generaría. Pasa de verdad: al dejar de
+     crear la comida de antes de entrenar cuando se pisa con una comida tuya, la
+     que ya estaba puesta se quedaba ahí para siempre —seguía sonando a las
+     16:10 al lado de la merienda de las 16:00— porque generar solo creaba y
+     actualizaba, nunca quitaba. Una alerta cuyo motivo ha desaparecido no es
+     una alerta, es un resto.
 
-    const viejas = lista().filter(function (a) {
-      return RETIRADAS.indexOf(autoDe(a)) !== -1;
+     Solo lo que lleva marca de la app. Lo que has escrito tú no se toca aunque
+     se llame igual, y se dice en el aviso cuántas se han retirado: quitar cosas
+     en silencio es peor que no quitarlas. */
+  function sobrantes(claves) {
+    return lista().filter(function (a) {
+      const c = autoDe(a);
+      if (!c) return false;
+      if (RETIRADAS.indexOf(c) !== -1) return true;
+      return claves.indexOf(c) === -1;
     });
-    viejas.forEach(function (a) { borrar(a.id); });
+  }
 
-    sugerencias().forEach(function (sug) {
+  function generarTodo() {
+    const res = { creadas: 0, actualizadas: 0, retiradas: 0, suplementos: 0, tuyas: 0 };
+
+    const sugs = sugerencias();
+    const claves = sugs.map(function (x) { return x.clave; });
+    sobrantes(claves).forEach(function (a) { borrar(a.id); res.retiradas++; });
+
+    sugs.forEach(function (sug) {
       const ya = buscarAuto(sug.clave, sug);
       if (!ya) {
         crearDesdeSugerencia(sug);
@@ -386,6 +404,7 @@
     return {
       total: sug.length,
       nuevas: nuevas,
+      retiradas: sobrantes(sug.map(function (x) { return x.clave; })).length,
       suplementos: g.Suplementos && Suplementos.lista
         ? (Suplementos.alertasDe ? Suplementos.alertasDe().length : 0) : 0,
       tuyas: lista().filter(function (a) { return !autoDe(a) && !a.sup; }).length
@@ -527,8 +546,14 @@
 
      Estas dos se calculan igual que al lanzarlo, así que lista y aviso no
      pueden separarse nunca. */
+  /* El nombre que has escrito tú manda. Renombrar «Comida antes de entrenar»
+     como «Es hora de merendar» porque cae en esa franja es cambiarle el nombre a
+     algo que nombraste a propósito. El renombrado por franja es para las que
+     genera la app, que nacen con un título de fábrica. */
+  function mio(a) { return !a.auto && !a.sup; }
+
   function tituloEn(a, hora) {
-    if (a.sinFranja) return a.titulo;
+    if (a.sinFranja || mio(a)) return a.titulo;
     if (TIPOS[a.tipo] && TIPOS[a.tipo].segunLaHora) {
       const c = comidaDeEsaHora(hora || (a.horas || [])[0]);
       if (c) return c.titulo;
@@ -550,7 +575,7 @@
   }
 
   function tituloDe(x) {
-    if (x.alerta.sinFranja) return x.titulo;
+    if (x.alerta.sinFranja || mio(x.alerta)) return x.titulo;
     if (TIPOS[x.alerta.tipo] && TIPOS[x.alerta.tipo].segunLaHora) {
       const c = comidaDeEsaHora(x.hora);
       if (c) return c.titulo;
