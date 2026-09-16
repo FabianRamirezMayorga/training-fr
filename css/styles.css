@@ -6255,28 +6255,17 @@ html[data-theme="light"] .sf-campo:focus-within {
   transition: border-color .2s ease, opacity .2s ease, transform .12s ease;
 }
 .sup-fila:active { transform: scale(.99); }
-.sup-fila.hoy-no { opacity: .5; }
 
 /* Ancho de sobra para la hora mas larga que puede salir. Depende del movil:
    unos escriben «12:00 PM» y otros «12:00 a.m.», que es tres caracteres mas
    largo, y con 66 px ese partia en dos lineas y dejaba la lista con escalones.
    Se le da sitio y se le baja el cuerpo, en vez de fiarse de un ancho fijo. */
-.sup-hora {
-  flex: none; width: 78px; display: flex; flex-direction: column; align-items: center;
-  gap: 1px;
+/* El nombre manda y va en el color de la app: es lo que se busca al mirar la
+   lista, y antes se lo comia la hora en verde de la columna de al lado. */
+.sup-nom {
+  display: block; font-weight: 700; font-size: .95rem; letter-spacing: -.015em;
+  color: var(--acc);
 }
-.sup-hora b { font-size: .84rem; white-space: nowrap; }
-.sup-hora b {
-  font-size: .92rem; font-weight: 800; letter-spacing: -.02em;
-  font-variant-numeric: tabular-nums; color: var(--acc);
-}
-.sup-hora i {
-  font-style: normal; font-size: .6rem; font-weight: 700; letter-spacing: .05em;
-  text-transform: uppercase; color: var(--dim2);
-}
-.sup-fila.hoy-no .sup-hora b { color: var(--dim2); }
-
-.sup-nom { display: block; font-weight: 650; font-size: .93rem; letter-spacing: -.01em; }
 .sup-sub { display: block; margin-top: 2px; font-size: .74rem; color: var(--dim2);
   line-height: 1.35; }
 
@@ -6383,8 +6372,7 @@ html[data-theme="light"] .vista-suplementos [data-a="nuevo"] {
 .sup-reparto:active { transform: scale(.985); }
 .sup-reparto .chevron { opacity: .6; }
 
-/* Varias tomas: el numero en vez de la hora, que no hay una sola */
-.sup-hora b em { font-style: normal; font-size: .68rem; opacity: .75; margin-left: 1px; }
+
 
 /* Ya lo tomas: marcado en el catalogo, para no anadirlo dos veces */
 .sup-ya {

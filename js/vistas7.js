@@ -21,24 +21,34 @@
 
   const S = function () { return g.Suplementos; };
 
-  /* ---------- la lista ---------- */
+  /* ---------- la lista ----------
+     La hora iba en una columna propia, en verde y con un «HOY» debajo, y
+     robaba el sitio y la mirada a lo que de verdad identifica la fila: el
+     nombre. Con cuatro botes uno busca «el magnesio», no «el de las ocho».
 
+     Ahora manda el nombre, en el color de la app, y debajo van los tres datos
+     que hacen falta para saber si hay que tocar algo: cuánto, a qué hora y cada
+     cuánto. En ese orden, que es el de la etiqueta del bote. */
   function filaHTML(s) {
     const horas = S().horasDe(s);
     const f = S().FRECUENCIAS.filter(function (x) { return x.id === s.frecuencia; })[0];
-    const toca = S().tocaHoy(s);
+
+    /* Con reparto, lo que dice «cada cuánto» es el patrón y no la frecuencia:
+       «varias veces al día» ya se ve en que hay varias horas. */
+    const cada = s.frecuencia === 'varias'
+      ? S().patronDe(s.patron).label
+      : (f ? f.label : '');
+
+    const cuando = horas.map(function (h) {
+      return UI.hora ? UI.hora(h) : h;
+    }).join(', ');
 
     return html`
-      <button class="sup-fila ${toca ? '' : 'hoy-no'}" data-sup="${s.id}">
-        <span class="sup-hora">
-          <b>${raw(horas.length > 1 ? horas.length + '<em>×</em>'
-            : (UI.hora ? UI.hora(horas[0]) : horas[0]))}</b>
-          <i>${raw(horas.length > 1 ? 'al día' : (toca ? 'hoy' : 'hoy no'))}</i>
-        </span>
+      <button class="sup-fila" data-sup="${s.id}">
         <span class="grow">
           <span class="sup-nom">${s.nombre}</span>
-          <span class="sup-sub">${raw(esc([s.dosis, S().etiquetaMomento(s),
-            (f ? f.label.toLowerCase() : '')].filter(Boolean).join(' · '))) }</span>
+          <span class="sup-sub">${raw(esc([s.dosis, cuando, cada]
+            .filter(Boolean).join(' · ')))}</span>
         </span>
         ${raw(s.aporta ? '<span class="sup-aporta">' + s.aporta.prot + '<i>g</i></span>' : '')}
         <span class="chevron">${raw(icon('chevron'))}</span>
