@@ -267,6 +267,75 @@
     });
   }
 
+  /* ---------- lo que ya te has tomado ----------
+     La tarjeta de hoy era un cartel: decía las horas y ahí se quedaba, así que
+     a media tarde uno no sabe si se tomó el magnesio de las cuatro o se le pasó
+     —que es justo la pregunta que se hace al abrirla.
+
+     Se guarda por día y por toma, no por suplemento: con cuatro tomas del mismo
+     bote hace falta saber cuál de las cuatro. Y se tiran los días viejos: esto
+     es para saber cómo va hoy, no un historial, y una lista que solo crece
+     acaba pesando en cada arranque. */
+  function clave(cuando) {
+    const d = cuando ? new Date(cuando) : new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') +
+      '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function tomasDelDia(dia) {
+    const todo = Store.settings().supTomas || {};
+    return (todo[dia || clave()] || []).slice();
+  }
+
+  function hecha(supId, hora, dia) {
+    return tomasDelDia(dia).indexOf(supId + '@' + hora) !== -1;
+  }
+
+  function marcar(supId, hora, dia) {
+    const d = dia || clave();
+    const todo = Object.assign({}, Store.settings().supTomas || {});
+    const marca = supId + '@' + hora;
+    const hoy = (todo[d] || []).slice();
+
+    const i = hoy.indexOf(marca);
+    if (i === -1) hoy.push(marca); else hoy.splice(i, 1);
+    todo[d] = hoy;
+
+    /* Catorce días es de sobra para cualquier cosa que mire hacia atrás, y
+       evita que el ajuste crezca sin fin. */
+    const corte = clave(Date.now() - 14 * 864e5);
+    Object.keys(todo).forEach(function (k) { if (k < corte) delete todo[k]; });
+
+    Store.setSetting('supTomas', todo);
+    return i === -1;
+  }
+
+  /* La agenda de hoy, cada toma con su estado. `pasada` es la que ya debería
+     estar tomada y no lo está: ni hecha ni pendiente, que son cosas distintas y
+     en la pantalla tienen que verse distintas. */
+  function agendaDeHoy() {
+    const ahora = new Date();
+    const min = ahora.getHours() * 60 + ahora.getMinutes();
+    return tomasDeHoy().map(function (t) {
+      const ok = hecha(t.sup.id, t.hora);
+      const suyo = g.Alertas ? Alertas.enMinutos(t.hora) : 0;
+      return {
+        sup: t.sup, hora: t.hora, hecha: ok,
+        pasada: !ok && suyo < min,
+        proxima: false
+      };
+    });
+  }
+
+  /* La siguiente que toca: la primera sin hacer, empezando por las que ya se
+     han pasado. Lo atrasado va antes que lo que aún no toca. */
+  function proximaDeHoy() {
+    const l = agendaDeHoy().filter(function (x) { return !x.hecha; });
+    if (!l.length) return null;
+    const pasadas = l.filter(function (x) { return x.pasada; });
+    return pasadas.length ? pasadas[pasadas.length - 1] : l[0];
+  }
+
   /* ---------- lo que suman al día ----------
      Solo los que aportan de verdad. Sin esto, el menú te pide la proteína
      entera en comida y acabas pasándote todos los días por el batido que no
@@ -415,6 +484,7 @@
     horaDe: horaDe, horasDe: horasDe, etiquetaMomento: etiquetaMomento,
     PATRONES: PATRONES, patronDe: patronDe,
     tocaHoy: tocaHoy, tomasDeHoy: tomasDeHoy, aportaDiario: aportaDiario,
+    hecha: hecha, marcar: marcar, agendaDeHoy: agendaDeHoy, proximaDeHoy: proximaDeHoy,
     resumenIA: resumenIA, alertasDe: alertasDe,
     sincronizarAlertas: sincronizarAlertas, hayAlertas: hayAlertas,
     alertasDesfasadas: alertasDesfasadas, diasDeEntreno: diasDeEntreno

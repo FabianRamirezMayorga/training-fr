@@ -45,6 +45,73 @@
       </button>`;
   }
 
+  /* ---------- la agenda de hoy ----------
+     Era un cartel: la palabra HOY, el número de tomas en grande y las horas
+     debajo. Decía cuántas son y ahí se quedaba, así que a media tarde uno
+     seguía sin saber si se tomó el magnesio de las cuatro —que es justo la
+     pregunta que se hace al abrir esta pantalla.
+
+     Ahora es lo que tenía que ser: la agenda del día, y se toca. Arriba la
+     siguiente que toca con su botón; debajo la tira de todas, cada una con su
+     estado, y tocando cualquiera se marca o se desmarca. Tres líneas en vez de
+     media pantalla, y el número grande se va: «6 tomas» no vale nada al lado de
+     «2 de 6», que es lo que de verdad se pregunta. */
+  function hoyHTML(aporta) {
+    const ag = S().agendaDeHoy();
+
+    if (!ag.length) {
+      return html`
+        <div class="card sup-hoy2" style="margin-top:14px">
+          <div class="sh-cab"><span class="sh-et">Hoy</span></div>
+          <p class="tiny" style="margin:6px 0 0">Ninguno de los que tomas cae hoy. Los de
+          «los días que entreno» y «un día sí y otro no» se saltan solos.</p>
+        </div>`;
+    }
+
+    const hechas = ag.filter(function (x) { return x.hecha; }).length;
+    const todo = hechas === ag.length;
+    const sig = S().proximaDeHoy();
+
+    return html`
+      <div class="card sup-hoy2 ${todo ? 'listo' : ''}" style="margin-top:14px">
+        <div class="sh-cab">
+          <span class="sh-et">${todo ? 'Hoy' : (sig && sig.pasada ? 'Se te pasó' : 'Ahora')}</span>
+          <span class="sh-cuenta">${hechas} de ${ag.length}</span>
+        </div>
+
+        ${raw(todo ? html`
+          <div class="sh-sig hecho">
+            <span class="sh-ico">${raw(icon('check'))}</span>
+            <span class="grow"><b>Todo tomado</b><i>No queda nada para hoy</i></span>
+          </div>` : html`
+          <div class="sh-sig ${sig.pasada ? 'tarde' : ''}">
+            <span class="sh-ico">${raw(icon(sig.pasada ? 'aviso' : 'reloj'))}</span>
+            <span class="grow">
+              <b>${sig.sup.nombre}</b>
+              <i>${raw(esc((UI.hora ? UI.hora(sig.hora) : sig.hora) +
+                (sig.sup.dosis ? ' · ' + sig.sup.dosis : '')))}</i>
+            </span>
+            <button class="sh-tomar" data-toma="${sig.sup.id}|${sig.hora}">Tomar</button>
+          </div>`)}
+
+        <!-- La tira: el día entero de un vistazo y tocable. Los puntos van en
+             orden de reloj, así que se ve dónde estás sin leer ninguna hora. -->
+        <div class="sh-tira">
+          ${raw(ag.map(function (x) {
+            return '<button class="sh-punto' + (x.hecha ? ' ok' : '') +
+              (x.pasada ? ' tarde' : '') + '" data-toma="' + esc(x.sup.id + '|' + x.hora) +
+              '" title="' + esc(x.sup.nombre) + '">' +
+              '<span class="sp-h">' + esc(UI.hora ? UI.hora(x.hora) : x.hora) + '</span>' +
+              '<span class="sp-n">' + esc(x.sup.nombre) + '</span></button>';
+          }).join(''))}
+        </div>
+
+        ${raw(aporta.kcal || aporta.prot ? html`
+          <p class="tiny sup-pie">Suman <b>${aporta.kcal} kcal</b> y
+          <b>${aporta.prot} g de proteína</b> al día, y el menú lo descuenta.</p>` : '')}
+      </div>`;
+  }
+
   V.suplementos = function () {
     if (!g.Suplementos) return '<div class="empty"><p>Módulo no disponible.</p></div>';
 
@@ -72,25 +139,7 @@
             ${raw(icon('plus'))} Añadir el primero</button>
         </div>` : html`
 
-        <div class="card tarjeta-premium" style="margin-top:14px">
-          <div class="pre-encima">Hoy</div>
-          <div class="pre-num" style="margin:1px 0 10px">${raw(hoy.length
-            ? hoy.length + (hoy.length === 1 ? ' toma' : ' tomas')
-            : 'Ninguna')}</div>
-          ${raw(hoy.length ? html`
-            <div class="sup-hoy">
-              ${raw(hoy.map(function (t) {
-                return '<span class="sh-pieza"><b>' +
-                  esc(UI.hora ? UI.hora(t.hora) : t.hora) + '</b>' +
-                  esc(t.sup.nombre) + '</span>';
-              }).join(''))}
-            </div>` : html`
-            <p class="tiny" style="margin:0">Ninguno de los que tomas cae hoy. Los de «los
-            días que entreno» y «un día sí y otro no» se saltan solos.</p>`)}
-          ${raw(aporta.kcal || aporta.prot ? html`
-            <p class="tiny sup-pie">Suman <b>${aporta.kcal} kcal</b> y
-            <b>${aporta.prot} g de proteína</b> al día de hoy, y el menú lo descuenta.</p>` : '')}
-        </div>
+        ${raw(hoyHTML(aporta))}
 
         <div class="list-title">Lo que tomas</div>
         <!-- Por hora y no por orden de alta: la lista se lee como la agenda del
@@ -140,6 +189,23 @@
     bindAll(root, '[data-sup]', function (el) {
       const s = S().lista().filter(function (x) { return x.id === el.dataset.sup; })[0];
       if (s) fichaSheet(s);
+    });
+
+    /* Marcar no repinta la pantalla entera: se toca un punto y repintar aquí
+       es perder el sitio en la lista y la animación a medias. */
+    bindAll(root, '[data-toma]', function (el) {
+      const p = String(el.dataset.toma).split('|');
+      S().marcar(p[0], p[1]);
+      const caja = root.querySelector('.sup-hoy2');
+      if (caja) {
+        const nueva = document.createElement('div');
+        nueva.innerHTML = hoyHTML(S().aportaDiario());
+        const hija = nueva.firstElementChild;
+        if (hija) {
+          caja.replaceWith(hija);
+          V.suplementos.mount(root);
+        }
+      }
     });
 
     bind(root, '[data-a=sincronizar]', function () {

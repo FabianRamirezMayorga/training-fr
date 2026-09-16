@@ -155,7 +155,8 @@
         '*Y la IA lo sabe*: al montarte un menú no te propone lo que ya tomas, y si una toma va con una comida concreta la menciona ahí en vez de inventar otra.',
         'Las frecuencias que hay: todos los días, los días que entrenas —sale de los días de tu plan—, un día sí y otro no, un día a la semana, y *varias veces al día*.',
         'Lo de varias veces al día se reparte de tres maneras. *Por reloj*: cada 4, 6, 8 o 12 horas, arrancando a la hora que elijas y cortando en la cena, que nadie quiere el magnesio a las tres de la mañana. *Con tus comidas*: antes, con o después de cada una, y entonces las tomas se mueven si mueves una comida. *A mano*: pones tú cada hora, una a una, para lo que no encaja en ningún patrón —lo que manda una receta, o los turnos de quien no come a las mismas horas—. En las dos primeras te enseña las horas que salen con tus datos antes de elegir.',
-        'Lo que aportan se cuenta por toma y no por bote: dos batidos al día son el doble de proteína, y el menú lo descuenta entero.'
+        'Lo que aportan se cuenta por toma y no por bote: dos batidos al día son el doble de proteína, y el menú lo descuenta entero.',
+        'Y la tarjeta de arriba es la agenda del día, no un cartel: dice cuántas llevas —*2 de 6*—, cuál toca ahora, y se marca tocando. Lo tomado se tacha, lo que se te pasó se pone en ámbar, y así a media tarde sabes si te tomaste el de las cuatro.'
       ],
       ver: ['c-suplementos', 'g-comida', 'p-suplerecet'] },
 
@@ -354,7 +355,9 @@
         { t: 'Si lo tomas varias veces al día, elige *Varias al día*.',
           d: 'Te pregunta en el momento cómo lo repartes: por reloj, con tus comidas, o poniendo tú las horas una a una. Debajo de cada opción verás las horas que salen con tus datos.' },
         { t: 'Guarda y, abajo, toca *Crear los recordatorios*.',
-          d: 'Se crean con el nombre y la dosis. Solo toca los de suplementos: los recordatorios que hayas creado tú se quedan como están.' }
+          d: 'Se crean con el nombre y la dosis. Solo toca los de suplementos: los recordatorios que hayas creado tú se quedan como están.' },
+        { t: 'Ve marcando las tomas según las haces.',
+          d: 'En la tarjeta de arriba: el botón *Tomar* para la que toca, o tocando cualquiera de la tira. Se guarda por día, así que mañana empieza de cero.' }
       ],
       cierre: 'Si luego cambias las horas de comer, los días de tu plan o los propios suplementos, la pantalla te avisa de que los recordatorios no coinciden y se rehacen con un toque.',
       ver: ['g-suplementos', 'c-franjas', 'c-calendario'] },
@@ -515,6 +518,12 @@
       a: ['Por una de tres: la hora de la foto cae fuera de todas las franjas, no tienes un menú activo para ese día, o las franjas no están puestas a tus horas.',
         'Lo que quedó sin cruzar se puede cruzar después, y también a mano eligiendo tú la comida.'],
       ver: ['c-franjas', 'g-comida'] },
+
+    { id: 'p-supmarcar', q: '¿Puedo ir marcando lo que ya me he tomado?',
+      a: ['Sí, en la tarjeta de arriba de Suplementación. El botón *Tomar* marca la que toca ahora, y tocando cualquiera de la tira la marcas o la desmarcas.',
+        'Lo tomado se tacha y se apaga; lo que ya debería estar tomado y no lo está se pone en ámbar. La cuenta de arriba dice cuántas llevas de cuántas.',
+        'Se guarda por día y mañana empieza de cero: esto es para saber cómo va hoy, no un historial.'],
+      ver: ['g-suplementos', 'c-suplementos'] },
 
     { id: 'p-supvarias', q: '¿Y si tomo algo varias veces al día?',
       a: ['En «cada cuánto» elige *Varias al día* y te pregunta ahí mismo cómo lo repartes.',
