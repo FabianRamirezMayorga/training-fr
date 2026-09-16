@@ -220,9 +220,20 @@
                 'lo ajusto a tu hora real.')
       });
 
-      /* comida antes de entrenar: hora y media antes, solo esos días */
+      /* ---------- comida antes de entrenar ----------
+         Hora y media antes, y solo si a esa hora no come ya. Con el entreno a
+         las 17:40 esto cae a las 16:10, y con la merienda puesta a las 16:00
+         salían dos avisos con diez minutos de diferencia mandando hacer lo
+         mismo: esa merienda YA es la comida de antes de entrenar. Dos avisos
+         para una comida no es el doble de ayuda, es la mitad de credibilidad.
+
+         Tres cuartos de hora de margen: más cerca que eso es la misma comida
+         movida, no otra distinta. */
       const antes = aHora(enMinutos(horaE) - 90);
-      out.push({
+      const pegada = franjas.some(function (f) {
+        return Math.abs(enMinutos(f.desde) - enMinutos(antes)) <= 45;
+      });
+      if (!pegada) out.push({
         /* Esta no se renombra con la franja en la que caiga. Es de tipo
            comida para heredar su color y su icono, pero no ES una comida del
            día: con la merienda a las 16:00 y el entreno a las 18:00, la de

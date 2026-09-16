@@ -447,8 +447,10 @@
 
       return {
         /* El id sale de los botes y no de la hora: así cambiar la hora de una
-           toma actualiza la alerta que ya había en vez de dejar la vieja. */
-        id: 'sup:' + firma,
+           toma actualiza la alerta que ya había en vez de dejar la vieja. Sin
+           comas: este id acaba siendo el UID de los eventos del calendario, y
+           ahí la coma es el separador de valores del formato. */
+        id: 'sup:' + firma.replace(/[^A-Za-z0-9]+/g, '-'),
         sup: firma,
         tipo: 'suplemento',
         titulo: grupo.length === 1 ? grupo[0].nombre : 'Tus suplementos',

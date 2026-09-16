@@ -619,6 +619,18 @@
         'Sin conexión la pantalla te enseña igual la versión que llevas, y te dice que no ha podido comprobar si hay otra en vez de callarse.',
         'Si algo se comporta raro justo después de actualizar, casi siempre es que el móvil se ha quedado con archivos de dos versiones mezclados. Para eso está *¿Algo va raro?*, debajo de la versión.'] },
 
+    { id: 'p-calagrupadas', q: 'Si llevo al calendario una alerta con varias horas, ¿suena en todas?',
+      a: ['Sí. En el archivo del calendario *cada hora va como un evento suyo*, con su repetición semanal y su aviso cinco minutos antes.',
+        'Los diez vasos de agua son diez eventos, y un suplemento que tomas a las diez y a las dos son dos. Dentro de la app se ven como una sola tarjeta porque son una sola cosa; en el calendario tienen que ir sueltos porque el calendario no entiende de «diez veces al día».',
+        'Por eso el archivo trae más eventos que alertas tienes, y está bien que así sea.'],
+      ver: ['c-calendario', 'p-autoalertas'] },
+
+    { id: 'p-doscomidas', q: '¿Por qué ya no me sale la alerta de comer antes de entrenar?',
+      a: ['Porque a esa hora ya comes. La de antes de entrenar va hora y media antes de tu entrenamiento, y si eso cae a menos de tres cuartos de hora de una de tus comidas, *esa comida ya es la de antes de entrenar*.',
+        'Antes salían las dos: con el entreno a las 17:40 y la merienda a las 16:00, tenías un aviso a las 16:00 y otro a las 16:10 mandándote hacer lo mismo. Dos avisos para una comida no son el doble de ayuda, son la mitad de credibilidad.',
+        'Si mueves el entrenamiento o la hora de esa comida y dejan de pisarse, vuelve a aparecer al pulsar «Automáticas».'],
+      ver: ['c-autoalertas', 'c-franjas'] },
+
     { id: 'p-menualerta', q: '¿Por qué el aviso de comer me sale cortado?',
       a: ['Porque un plato entero no cabe en una línea, y tres líneas de menú taparían las horas y los días, que es a lo que se viene a esa pantalla.',
         '*Tócalo y se abre entero.* La flecha del lado derecho es la que dice que hay más debajo; vuelve a tocarlo y se cierra.',
