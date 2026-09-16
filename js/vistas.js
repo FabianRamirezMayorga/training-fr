@@ -389,18 +389,22 @@
         /* No es papeleo: de aquí sale si lo que te propongo comer existe en tu
            supermercado y cómo se llama. Antes se deducía de la zona horaria del
            móvil, que acierta casi siempre pero no avisa cuando falla. */
+        /* En la misma linea que el titulo y a la derecha, igual que el nombre:
+           en una tarjeta de dos campos, uno con el valor al lado y el otro con
+           una fila entera debajo se ve desordenado aunque cada uno por separado
+           este bien. Lo que manda es la tarjeta, no el campo. */
         campo({
           tit: 'País',
           nota: 'De aquí salen el menú y la lista de la compra: los nombres, los cortes ' +
             'de carne y lo que hay en el súper cambian de un país a otro.',
-          abajo: '<button class="pais-fila' + (edita ? '' : ' fijo') + '"' +
+          control: '<button class="campo-val pais-val' + (edita ? '' : ' fijo') + '"' +
             (edita ? ' data-a="pais"' : ' disabled') + '>' +
             (p.pais
               ? '<span class="pais-bandera">' + esc(Paises.bandera(p.pais)) + '</span>' +
-                '<span class="grow pais-nom">' + esc(Paises.nombreDe(p.pais)) + '</span>'
+                '<span class="campo-fijo">' + esc(Paises.nombreDe(p.pais)) + '</span>'
               : '<span class="pais-bandera vacia">' + icon('mundo') + '</span>' +
-                '<span class="grow pais-nom sin">' +
-                (edita ? 'Elige tu país' : 'Sin poner') + '</span>') +
+                '<span class="campo-fijo sin">' +
+                (edita ? 'Elegir' : 'Sin poner') + '</span>') +
             (edita ? '<span class="chevron">' + icon('chevron') + '</span>' : '') +
             '</button>'
         })))}

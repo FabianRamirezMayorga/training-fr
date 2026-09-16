@@ -6862,20 +6862,41 @@ html[data-theme="light"] .rd-banda {
    La bandera hace el trabajo del ojo: en una lista de doscientos nombres se
    reconoce un dibujo antes que una palabra. Sale del codigo ISO convertido a
    indicadores regionales, asi que la pinta el sistema y no pesa nada. */
-.pais-fila {
-  display: flex; align-items: center; gap: 11px; width: 100%; margin-top: 9px;
-  padding: 10px 12px; border-radius: 14px; cursor: pointer; font: inherit;
-  text-align: left; color: var(--txt);
-  border: 1px solid color-mix(in srgb, #fff 9%, transparent);
-  background: color-mix(in srgb, var(--card2) 74%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 11%, transparent);
-  transition: border-color .16s ease, transform .12s ease;
+/* En la linea del titulo y a la derecha, como el nombre: los dos campos de la
+   misma tarjeta tienen que leerse en la misma columna. Editando lleva su
+   pastilla y su flecha, para que se vea que se toca; en lectura es texto a
+   secas, igual que el nombre. */
+.pais-val {
+  align-items: center; gap: 8px; max-width: 58%; min-width: 0;
+  border: 0; background: none; font: inherit; color: var(--txt); padding: 0;
 }
-.pais-fila:active { transform: scale(.99); }
-.pais-fila.fijo { cursor: default; opacity: 1; }
-.pais-fila.fijo:active { transform: none; }
+/* `.campo-fijo` viene con `flex: none` porque los demas valores son cifras
+   cortas que nunca sobran. Un nombre de pais si: «San Vicente y las
+   Granadinas» empujaba la flecha fuera de la tarjeta. Aqui si encoge, y lo que
+   no cabe se corta con puntos suspensivos en vez de desbordar. */
+.pais-val .campo-fijo {
+  flex: 1 1 auto; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-variant-numeric: normal;
+}
+.pais-val .campo-fijo.sin { font-weight: 500; color: var(--dim2); }
+
+button.pais-val:not(.fijo) {
+  cursor: pointer; padding: 5px 9px; border-radius: 11px;
+  background: color-mix(in srgb, var(--card2) 80%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 11%, transparent);
+  transition: transform .12s ease;
+}
+button.pais-val:not(.fijo):active { transform: scale(.97); }
+.pais-val .pais-bandera { font-size: 1.2rem; width: auto; }
+.pais-val .chevron { flex: none; opacity: .5; display: flex; }
+.pais-val .chevron svg { width: 13px; height: 13px; fill: none; stroke: currentColor;
+  stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 
 /* El cuerpo grande es a proposito: una bandera a 14 px es una mancha. */
+/* En la lista y en la sugerencia va grande y con ancho fijo: asi las banderas
+   forman columna y el ojo baja por ellas sin leer. En el valor del perfil va al
+   cuerpo del texto que acompana, que es una linea, no una lista. */
 .pais-bandera {
   flex: none; font-size: 1.5rem; line-height: 1; width: 30px; text-align: center;
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
@@ -6886,9 +6907,6 @@ html[data-theme="light"] .rd-banda {
 .pais-bandera.vacia svg { width: 20px; height: 20px; fill: none; stroke: currentColor;
   stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-.pais-nom { font-weight: 600; font-size: .95rem; letter-spacing: -.012em; }
-.pais-nom.sin { font-weight: 500; color: var(--dim2); }
-.pais-fila .chevron { opacity: .5; }
 
 /* El buscador, arriba y con lupa dentro: sin el hay que bajar un minuto para
    llegar a Venezuela. */
@@ -6929,10 +6947,9 @@ html[data-theme="light"] .rd-banda {
 .pais-op.on .list-row-title { font-weight: 700; color: var(--acc); }
 .pais-op.on .do-marca { opacity: 1; }
 
-html[data-theme="light"] .pais-fila {
-  border-color: color-mix(in srgb, #000 10%, transparent);
-  background: #fff;
-  box-shadow: 0 1px 3px color-mix(in srgb, #000 8%, transparent);
+html[data-theme="light"] button.pais-val:not(.fijo) {
+  background: color-mix(in srgb, #000 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 8%, transparent);
 }
 html[data-theme="light"] .pais-buscar {
   border-color: color-mix(in srgb, #000 10%, transparent);
