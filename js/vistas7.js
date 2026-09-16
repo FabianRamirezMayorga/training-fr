@@ -149,62 +149,65 @@
   };
 
   /* ---------- elegir del catálogo ----------
-     Escribir «creatina» y «5 g» en un móvil es justo lo que hace que nadie
-     apunte nada, así que primero se elige de la lista y luego se corrige lo que
-     no cuadre. «Otro» abre la ficha en blanco. */
+     Doce filas de lista para elegir un bote era tratar un catálogo como si
+     fuera configuración: ocupaba tres pantallas de alto para decir doce
+     nombres, y elegir obligaba a leerlo entero de arriba abajo.
+
+     En rejilla se ve todo casi de una vez y se elige señalando, que es lo que
+     de verdad se hace aquí. La dosis va debajo en pequeño porque no decide
+     nada: se cambia en el paso siguiente. */
   function elegirSheet() {
     const ya = {};
-    S().lista().forEach(function (s) { if (s.cat) ya[s.cat] = 1; });
+    S().lista().forEach(function (x) { if (x.cat) ya[x.cat] = 1; });
 
     UI.modal(html`
       <div class="conf-disco cambio">${raw(icon('bote'))}</div>
       <h2 class="conf-tit">¿Qué tomas?</h2>
-      <p class="muted conf-txt">Elige uno y luego ajustas la dosis, cada cuánto y en qué
-      momento. Lo que sale puesto es lo que suele traer la etiqueta, no una recomendación.</p>
+      <p class="muted conf-txt">Elige uno y ajustas el resto. Lo que sale puesto es lo que
+      suele traer la etiqueta, no una recomendación.</p>
 
-      <div class="opciones">
+      <div class="sup-rejilla">
         ${raw(S().CATALOGO.map(function (c) {
-          return '<button class="opcion" data-cat="' + esc(c.id) + '" style="--tono:var(--acc)">' +
-            '<span class="op-ico">' + icon(c.id === 'otro' ? 'plus' : 'bote') + '</span>' +
-            '<span class="grow"><span class="op-nom">' + esc(c.nombre) +
-            (ya[c.id] ? ' <i class="sup-ya">ya lo tomas</i>' : '') + '</span>' +
-            '<span class="op-sub">' + esc(c.dosis || 'Lo escribes tú') +
-            (c.aporta ? ' · ' + c.aporta.prot + ' g de proteína' : '') + '</span></span>' +
-            '</button>';
+          return '<button class="sup-chip' + (c.id === 'otro' ? ' otro' : '') +
+            (ya[c.id] ? ' ya' : '') + '" data-cat="' + esc(c.id) + '">' +
+            '<span class="sc-nom">' + esc(c.nombre) + '</span>' +
+            '<span class="sc-dos">' + esc(c.id === 'otro' ? 'Lo escribes tú'
+              : (c.dosis || '')) + '</span></button>';
         }).join(''))}
       </div>`,
       function (el) {
-        el.querySelectorAll('[data-cat]').forEach(function (b) {
-          b.onclick = function () {
-            const c = S().delCatalogo(b.dataset.cat);
-            UI.closeModal();
-            setTimeout(function () {
-              fichaSheet(S().nuevo({
-                cat: c.id === 'otro' ? '' : c.id,
-                nombre: c.id === 'otro' ? '' : c.nombre,
-                dosis: c.dosis || '',
-                momento: c.momento || 'con:desayuno',
-                aporta: c.aporta || null
-              }), true);
-            }, 180);
-          };
-        });
+        el.querySelector('.sup-rejilla').onclick = function (ev) {
+          const b = ev.target.closest('[data-cat]');
+          if (!b) return;
+          const c = S().delCatalogo(b.dataset.cat);
+          UI.closeModal();
+          setTimeout(function () {
+            fichaSheet(S().nuevo({
+              cat: c.id === 'otro' ? '' : c.id,
+              nombre: c.id === 'otro' ? '' : c.nombre,
+              dosis: c.dosis || '',
+              momento: c.momento || 'con:desayuno',
+              aporta: c.aporta || null
+            }), true);
+          }, 180);
+        };
       });
   }
 
   /* ---------- la ficha ----------
-     Con la hora de verdad calculada debajo del momento: elegir «con el
-     desayuno» sin ver que eso son las 6:00 deja la duda de si la app sabe a qué
-     hora desayunas, y es justo lo que hace que la gente ponga horas a mano. */
+     Eran once filas de lista apiladas —cuatro frecuencias y siete momentos, con
+     su icono y su subtítulo cada una— para rellenar cuatro datos. Con pastillas
+     cabe entero sin scroll y se lee de un vistazo qué hay elegido.
+
+     Lo único que se queda grande es la hora calculada: elegir «con el desayuno»
+     sin ver que eso son las 6:00 deja la duda de si la app sabe a qué hora
+     desayunas, y es lo que hace que la gente acabe poniendo horas a mano. */
   function fichaSheet(s, esNuevo) {
     const dat = JSON.parse(JSON.stringify(s));
+    const DIAS = [[1, 'L'], [2, 'M'], [3, 'X'], [4, 'J'], [5, 'V'], [6, 'S'], [0, 'D']];
 
-    const DIAS = [['1', 'Lunes'], ['2', 'Martes'], ['3', 'Miércoles'], ['4', 'Jueves'],
-      ['5', 'Viernes'], ['6', 'Sábado'], ['0', 'Domingo']];
-
-    const pintarHora = function (el) {
+    const pintar = function (el) {
       const caja = el.querySelector('#sf-hora');
-      if (!caja) return;
       const h = S().horaDe(dat);
       const m = S().momentoDe(dat.momento);
       caja.innerHTML = '<b>' + esc(UI.hora ? UI.hora(h) : h) + '</b>' +
@@ -213,65 +216,59 @@
           : m.de === 'entreno'
             ? 'sale de la hora a la que sueles entrenar'
             : 'la que has puesto') + '</span>';
-      const fija = el.querySelector('#sf-fija');
-      if (fija) fija.hidden = m.de !== 'fija';
-      const sem = el.querySelector('#sf-semanal');
-      if (sem) sem.hidden = dat.frecuencia !== 'semanal';
+      el.querySelector('#sf-fija').hidden = m.de !== 'fija';
+      el.querySelector('#sf-semanal').hidden = dat.frecuencia !== 'semanal';
     };
 
     UI.modal(html`
       <div class="conf-disco cambio">${raw(icon('bote'))}</div>
       <h2 class="conf-tit">${esNuevo ? 'Nuevo suplemento' : dat.nombre || 'Suplemento'}</h2>
 
-      <label class="tiny">NOMBRE</label>
-      <input id="sf-nombre" value="${dat.nombre}" placeholder="Creatina, proteína…"
-             style="margin:5px 0 12px" autocomplete="off">
+      <div class="sup-campos">
+        <label class="sup-campo grow">
+          <span>Nombre</span>
+          <input id="sf-nombre" value="${dat.nombre}" placeholder="Creatina" autocomplete="off">
+        </label>
+        <label class="sup-campo dosis">
+          <span>Dosis</span>
+          <input id="sf-dosis" value="${dat.dosis}" placeholder="5 g" autocomplete="off">
+        </label>
+      </div>
 
-      <label class="tiny">DOSIS</label>
-      <div class="tiny" style="margin:2px 0 0">Como la midas tú: «5 g», «1 cazo», «2 cápsulas».</div>
-      <input id="sf-dosis" value="${dat.dosis}" placeholder="5 g"
-             style="margin:6px 0 14px" autocomplete="off">
-
-      <label class="tiny">CADA CUÁNTO</label>
-      <div class="opciones" id="sf-frec">
+      <label class="tiny sup-lbl">CADA CUÁNTO</label>
+      <div class="row wrap sup-pills" id="sf-frec">
         ${raw(S().FRECUENCIAS.map(function (f) {
-          return '<button class="opcion ' + (dat.frecuencia === f.id ? 'on' : '') +
-            '" data-frec="' + esc(f.id) + '" style="--tono:var(--acc)">' +
-            '<span class="grow"><span class="op-nom">' + esc(f.label) + '</span>' +
-            '<span class="op-sub">' + esc(f.sub) + '</span></span>' +
-            '<span class="op-marca">' + icon('check') + '</span></button>';
+          return '<button class="chip ' + (dat.frecuencia === f.id ? 'on' : '') +
+            '" data-frec="' + esc(f.id) + '">' + esc(f.corto || f.label) + '</button>';
         }).join(''))}
       </div>
 
-      <div id="sf-semanal" hidden style="margin-top:10px">
-        <label class="tiny">QUÉ DÍA</label>
-        <div class="row wrap" style="gap:6px;margin-top:6px">
+      <div id="sf-semanal" hidden>
+        <label class="tiny sup-lbl">QUÉ DÍA</label>
+        <div class="row wrap sup-pills">
           ${raw(DIAS.map(function (d) {
-            return '<button class="chip ' + (String(dat.dia) === d[0] ? 'on' : '') +
-              '" data-dia="' + d[0] + '">' + d[1].slice(0, 3) + '</button>';
+            return '<button class="chip ' + (Number(dat.dia) === d[0] ? 'on' : '') +
+              '" data-dia="' + d[0] + '">' + d[1] + '</button>';
           }).join(''))}
         </div>
       </div>
 
-      <label class="tiny" style="display:block;margin:16px 0 0">EN QUÉ MOMENTO</label>
-      <div class="opciones" id="sf-mom">
+      <label class="tiny sup-lbl">EN QUÉ MOMENTO</label>
+      <div class="row wrap sup-pills" id="sf-mom">
         ${raw(S().MOMENTOS.map(function (m) {
-          return '<button class="opcion ' + (dat.momento === m.id ? 'on' : '') +
-            '" data-mom="' + esc(m.id) + '" style="--tono:var(--acc)">' +
-            '<span class="grow"><span class="op-nom">' + esc(m.label) + '</span></span>' +
-            '<span class="op-marca">' + icon('check') + '</span></button>';
+          return '<button class="chip ' + (dat.momento === m.id ? 'on' : '') +
+            '" data-mom="' + esc(m.id) + '">' + esc(m.corto || m.label) + '</button>';
         }).join(''))}
       </div>
 
-      <div id="sf-fija" hidden style="margin-top:10px">
-        <label class="tiny">A QUÉ HORA</label>
-        <input type="time" id="sf-horafija" value="${dat.hora || '08:00'}"
-               style="margin-top:6px">
+      <div id="sf-fija" hidden>
+        <label class="tiny sup-lbl">A QUÉ HORA</label>
+        <input type="time" id="sf-horafija" value="${dat.hora || '08:00'}">
       </div>
 
       <div class="sup-calc" id="sf-hora"></div>
 
-      <div class="cb-acciones" style="margin-top:16px">
+      <div class="cb-acciones" style="margin-top:14px">
         <button class="btn primary grow btn-arranque" data-x="ok">
           ${raw(icon('check'))} Guardar</button>
         <button class="btn vidrio" data-x="no">Cancelar</button>
@@ -279,42 +276,34 @@
       ${raw(esNuevo ? '' : '<button class="btn ghost block sm danger" data-x="borrar" ' +
         'style="margin-top:9px">Quitarlo de la lista</button>')}`,
       function (el) {
-        pintarHora(el);
+        pintar(el);
 
-        el.querySelector('#sf-frec').onclick = function (ev) {
-          const b = ev.target.closest('[data-frec]');
-          if (!b) return;
-          dat.frecuencia = b.dataset.frec;
-          el.querySelectorAll('[data-frec]').forEach(function (x) {
-            x.classList.toggle('on', x.dataset.frec === dat.frecuencia);
-          });
-          pintarHora(el);
-        };
-
-        el.querySelector('#sf-mom').onclick = function (ev) {
-          const b = ev.target.closest('[data-mom]');
-          if (!b) return;
-          dat.momento = b.dataset.mom;
-          el.querySelectorAll('[data-mom]').forEach(function (x) {
-            x.classList.toggle('on', x.dataset.mom === dat.momento);
-          });
-          pintarHora(el);
-        };
-
-        const sem = el.querySelector('#sf-semanal');
-        if (sem) {
-          sem.onclick = function (ev) {
-            const b = ev.target.closest('[data-dia]');
+        /* Un solo manejador por grupo: los botones se repintan al elegir, y
+           enganchados uno a uno la primera elección se queda clavada. */
+        const grupo = function (sel, campo, num) {
+          const caja = el.querySelector(sel);
+          caja.onclick = function (ev) {
+            const b = ev.target.closest('[data-' + campo + ']');
             if (!b) return;
-            dat.dia = Number(b.dataset.dia);
-            sem.querySelectorAll('[data-dia]').forEach(function (x) {
-              x.classList.toggle('on', Number(x.dataset.dia) === dat.dia);
+            dat[campo === 'frec' ? 'frecuencia' : campo === 'mom' ? 'momento' : 'dia'] =
+              num ? Number(b.dataset[campo]) : b.dataset[campo];
+            caja.querySelectorAll('[data-' + campo + ']').forEach(function (x) {
+              const suyo = num ? Number(x.dataset[campo]) : x.dataset[campo];
+              const actual = dat[campo === 'frec' ? 'frecuencia'
+                : campo === 'mom' ? 'momento' : 'dia'];
+              x.classList.toggle('on', suyo === actual);
             });
+            pintar(el);
           };
-        }
+        };
+        grupo('#sf-frec', 'frec');
+        grupo('#sf-mom', 'mom');
+        grupo('#sf-semanal', 'dia', true);
 
-        const hf = el.querySelector('#sf-horafija');
-        if (hf) hf.oninput = function () { dat.hora = hf.value; pintarHora(el); };
+        el.querySelector('#sf-horafija').oninput = function () {
+          dat.hora = el.querySelector('#sf-horafija').value;
+          pintar(el);
+        };
 
         el.querySelector('[data-x=no]').onclick = function () { UI.closeModal(); };
 

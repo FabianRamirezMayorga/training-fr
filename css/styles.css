@@ -6297,3 +6297,61 @@ html[data-theme="light"] .rec-adelanto {
   background: color-mix(in srgb, #000 4%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 7%, transparent);
 }
+
+/* ---------- elegir suplemento: rejilla, no lista ----------
+   Doce filas de lista para elegir un bote ocupaban tres pantallas de alto para
+   decir doce nombres, y obligaban a leerlas todas de arriba abajo. En rejilla
+   se ve casi todo de una vez y se elige senalando. */
+.sup-rejilla {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;
+}
+.sup-chip {
+  display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  min-height: 58px; padding: 9px 11px; border-radius: 14px;
+  text-align: left; cursor: pointer; font: inherit; color: var(--txt);
+  border: 1px solid color-mix(in srgb, #fff 9%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 6%, transparent), transparent 58%),
+    color-mix(in srgb, var(--card2) 78%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
+  transition: border-color .18s ease, transform .12s ease, background .18s ease;
+}
+.sup-chip:active { transform: scale(.97); }
+.sc-nom {
+  display: block; font-weight: 650; font-size: .86rem; letter-spacing: -.012em;
+  line-height: 1.25;
+}
+.sc-dos { display: block; font-size: .7rem; color: var(--dim2); line-height: 1.2; }
+
+/* Ya lo tomas: no se esconde —puede querer un segundo bote— pero se apaga, y
+   asi el que busca algo nuevo no se para a leerlo. */
+.sup-chip.ya { opacity: .45; }
+.sup-chip.ya .sc-nom::after {
+  content: " · ya"; font-weight: 700; color: var(--acc); font-size: .7rem;
+}
+.sup-chip.otro {
+  border-style: dashed;
+  border-color: color-mix(in srgb, #fff 16%, transparent);
+  background: none;
+  box-shadow: none;
+}
+
+/* ---------- la ficha, compacta ----------
+   Once filas de lista con icono y subtitulo para rellenar cuatro datos. Con
+   pastillas cabe entero sin scroll y se lee de un vistazo que hay elegido. */
+.sup-campos { display: flex; gap: 8px; margin-top: 2px; }
+.sup-campo { display: block; min-width: 0; }
+.sup-campo.dosis { flex: 0 0 34%; }
+.sup-campo > span {
+  display: block; font-size: .66rem; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--dim2); margin: 0 0 5px 2px;
+}
+.sup-campo input { width: 100%; }
+
+.sup-lbl {
+  display: block; margin: 14px 0 7px 2px;
+  font-weight: 700; letter-spacing: .06em;
+}
+.sup-pills { gap: 6px; }
+.sup-pills .chip { font-size: .8rem; }
+#sf-fija input[type=time] { margin-top: 0; }

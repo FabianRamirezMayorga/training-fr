@@ -53,24 +53,32 @@
      «Los días que entreno» es el que más falta hacía y el que ninguna lista de
      frecuencias trae: media suplementación de gimnasio va atada al entreno, no
      al calendario. */
+  /* El `corto` es para las pastillas del formulario y el `label` para leerlo en
+     la lista. Una pastilla con «Los días que entreno» dentro ocupa una línea
+     entera y deja de parecer una pastilla. */
   const FRECUENCIAS = [
-    { id: 'diario', label: 'Todos los días', sub: 'Los siete' },
-    { id: 'entreno', label: 'Los días que entreno', sub: 'Sale de los días de tu plan' },
-    { id: 'alterno', label: 'Un día sí y otro no', sub: 'Empezando hoy' },
-    { id: 'semanal', label: 'Un día a la semana', sub: 'El que elijas' }
+    { id: 'diario', label: 'Todos los días', corto: 'Cada día', sub: 'Los siete' },
+    { id: 'entreno', label: 'Los días que entreno', corto: 'Días que entreno',
+      sub: 'Sale de los días de tu plan' },
+    { id: 'alterno', label: 'Un día sí y otro no', corto: 'Día sí, día no',
+      sub: 'Empezando hoy' },
+    { id: 'semanal', label: 'Un día a la semana', corto: 'Un día/semana',
+      sub: 'El que elijas' }
   ];
 
   /* ---------- en qué momento ----------
      Lo que se guarda es el momento, no la hora: así una sola cosa manda sobre
      las dos. La hora se resuelve al preguntarla. */
   const MOMENTOS = [
-    { id: 'con:desayuno', label: 'Con el desayuno', de: 'franja' },
-    { id: 'con:almuerzo', label: 'Con el almuerzo', de: 'franja' },
-    { id: 'con:merienda', label: 'Con la merienda', de: 'franja' },
-    { id: 'con:cena', label: 'Con la cena', de: 'franja' },
-    { id: 'antes:entreno', label: 'Antes de entrenar', de: 'entreno', desfase: -30 },
-    { id: 'tras:entreno', label: 'Después de entrenar', de: 'entreno', desfase: 60 },
-    { id: 'fija', label: 'A una hora fija', de: 'fija' }
+    { id: 'con:desayuno', label: 'Con el desayuno', corto: 'Desayuno', de: 'franja' },
+    { id: 'con:almuerzo', label: 'Con el almuerzo', corto: 'Almuerzo', de: 'franja' },
+    { id: 'con:merienda', label: 'Con la merienda', corto: 'Merienda', de: 'franja' },
+    { id: 'con:cena', label: 'Con la cena', corto: 'Cena', de: 'franja' },
+    { id: 'antes:entreno', label: 'Antes de entrenar', corto: 'Pre-entreno',
+      de: 'entreno', desfase: -30 },
+    { id: 'tras:entreno', label: 'Después de entrenar', corto: 'Post-entreno',
+      de: 'entreno', desfase: 60 },
+    { id: 'fija', label: 'A una hora fija', corto: 'Hora fija', de: 'fija' }
   ];
 
   function momentoDe(id) {
