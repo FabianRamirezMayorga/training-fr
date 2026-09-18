@@ -563,7 +563,7 @@
             { t: 'Ya fuera, sigue los pasos de tu móvil de aquí arriba.' }
           ] }
       ],
-      cierre: 'Se instale como se instale, es la misma app y los mismos datos: no se descarga nada de ninguna tienda, solo se crea el acceso.',
+      cierre: 'Se instale como se instale, es la misma app y los mismos datos: no se descarga nada de ninguna tienda, solo se crea el acceso. Si ya la tienes en la pantalla de inicio y aun así te sale el aviso, es que abriste el enlace en el navegador: desde ahí Safari no puede saberlo. Pulsa «Ya la tengo» y no vuelve a salir.',
       ver: ['c-offline', 'p-noinstala'] }
   ];
 

@@ -934,8 +934,8 @@
       'Choose *Open in Safari* or *Open in browser*.',
     'Ya fuera, sigue los pasos de tu móvil de aquí arriba.':
       'Once outside, follow the steps for your phone above.',
-    'Se instale como se instale, es la misma app y los mismos datos: no se descarga nada de ninguna tienda, solo se crea el acceso.':
-      'However it gets installed, it is the same app and the same data: nothing is downloaded from any store, it just creates the shortcut.',
+    'Se instale como se instale, es la misma app y los mismos datos: no se descarga nada de ninguna tienda, solo se crea el acceso. Si ya la tienes en la pantalla de inicio y aun así te sale el aviso, es que abriste el enlace en el navegador: desde ahí Safari no puede saberlo. Pulsa «Ya la tengo» y no vuelve a salir.':
+      'However it gets installed, it is the same app and the same data: nothing is downloaded from any store, it just creates the shortcut. If you already have it on your home screen and the prompt still shows up, it is because you opened the link in the browser: from there Safari has no way of knowing. Tap “I already have it” and it will not come back.',
     '¿Por qué no me sale el botón de instalar?': 'Why is there no install button?',
     'Porque no todos los navegadores lo tienen. El botón que instala de una vez lo dan Chrome y Edge, en Android y en el ordenador; ahí la app te lo ofrece sola.':
       'Because not every browser has one. The button that installs in one go comes from Chrome and Edge, on Android and on the computer; there the app offers it on its own.',

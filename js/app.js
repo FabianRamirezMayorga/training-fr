@@ -126,10 +126,13 @@
       render();
     };
 
-    document.querySelectorAll('.tabbar').forEach(function (t) {
-      t.hidden = route.name === 'bienvenida' ||
-        (route.name === 'ver' && !Store.settings().gear);
-    });
+    const sinBarra = route.name === 'bienvenida' ||
+      (route.name === 'ver' && !Store.settings().gear);
+    document.querySelectorAll('.tabbar').forEach(function (t) { t.hidden = sinBarra; });
+    /* Lo que flota va colocado esquivando la barra de pestañas. Cuando no
+       está, esos 64 px lo dejan suelto en mitad de la pantalla —y en Safari,
+       encima de su propia barra—, así que el CSS tiene que saberlo. */
+    document.body.classList.toggle('sin-barra', sinBarra);
 
     document.querySelectorAll('.tab').forEach(function (t) {
       const target = t.dataset.nav;

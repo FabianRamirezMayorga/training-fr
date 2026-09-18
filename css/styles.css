@@ -334,6 +334,13 @@ html[data-theme="light"] .chip.on{
   padding:0 16px;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .hud>*{pointer-events:auto}
 .hud:empty{display:none}
+/* En la bienvenida no hay barra de pestañas, así que lo flotante baja al
+   borde: los 64 px que la esquivan lo dejaban suelto en mitad de la nada, y en
+   Safari justo encima de su barra. */
+body.sin-barra .hud{bottom:calc(14px + var(--safe-b))}
+/* En Safari del iPhone la barra del navegador flota sobre la página y no entra
+   en el área segura, así que pegarse al borde es quedarse debajo de ella. */
+body.sin-barra.ios-navegador .hud{bottom:calc(68px + var(--safe-b))}
 .rest{padding:0}
 .rest-in{max-width:900px;margin:0 auto;background:var(--acc);color:var(--on-acc);border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 28px rgba(0,0,0,.4);animation:up .3s}
 @keyframes up{from{transform:translateY(20px);opacity:0}}
@@ -7077,6 +7084,12 @@ html[data-theme="light"] .ag-ico {
 .ia-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .ia-txt b{font-size:.88rem;line-height:1.2}
 .ia-txt span{font-size:.76rem;color:var(--dim);line-height:1.3}
+/* Un enlace, no un botón: es la salida discreta, no la acción principal. */
+.ia-ya{display:block;margin-top:4px;padding:0;background:none;border:0;
+  color:var(--dim2);font-size:.74rem;text-decoration:underline;
+  text-underline-offset:2px;cursor:pointer;font-family:inherit}
+.ia-ya:hover{color:var(--txt)}
+
 .ia-icono{grid-area:1/1}
 .ia-txt{grid-area:1/2}
 .ia-ok{grid-area:1/3}

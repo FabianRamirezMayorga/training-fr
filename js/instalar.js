@@ -118,6 +118,15 @@
     parar();
   }
 
+  /* Lo dice la persona, no el navegador. Vale igual: lo que se quería saber
+     era si le sirve de algo que se lo ofrezcan, y acaba de contestar que no. */
+  function yaEsta() {
+    apuntarInstalada();
+    esconder();
+    parar();
+    if (UI.toast) UI.toast(T('No te lo vuelvo a ofrecer'));
+  }
+
   function apuntarInstalada() {
     const e = estado();
     e.instalada = true;
@@ -247,11 +256,16 @@
     caja.className = 'instalar-aviso';
     caja.setAttribute('role', 'region');
     caja.setAttribute('aria-label', T('Instalar la aplicación'));
+    /* Solo en el iPhone: es el único sitio donde el navegador no puede saber
+       si ya hay un icono puesto, así que se pregunta en vez de insistir. */
+    const yaLaTengo = v === 'ios'
+      ? '<button class="ia-ya" data-ia="ya">' + esc(T('Ya la tengo')) + '</button>' : '';
+
     caja.innerHTML =
       '<img class="ia-icono" src="icons/icon-180.png" alt="" width="44" height="44">' +
       '<div class="ia-txt">' +
         '<b>' + esc(t.titulo) + '</b>' +
-        '<span>' + esc(t.sub) + '</span>' +
+        '<span>' + esc(t.sub) + yaLaTengo + '</span>' +
       '</div>' +
       '<button class="btn sm primary ia-ok" data-ia="ok">' + esc(t.accion) + '</button>' +
       '<button class="btn icon sm ia-no" data-ia="no" aria-label="' +
@@ -262,6 +276,8 @@
     requestAnimationFrame(function () { caja.classList.add('vista'); });
 
     caja.querySelector('[data-ia=no]').onclick = descartar;
+    const ya = caja.querySelector('[data-ia=ya]');
+    if (ya) ya.onclick = function () { yaEsta(); };
     caja.querySelector('[data-ia=ok]').onclick = function () {
       if (v === 'nativa') {
         lanzar().then(function (ok) { if (ok) esconder(); });
@@ -330,8 +346,15 @@
       '</ol>' +
       '<p class="tiny" style="margin:12px 0 0">' +
         esc(T('Desde ahí arranca a pantalla completa, sin la barra del navegador, y funciona sin conexión.')) +
-      '</p>',
-      null);
+      '</p>' +
+      '<button class="btn ghost block" data-ia="ya" style="margin-top:14px">' +
+        esc(T('Ya la tengo instalada, no me lo vuelvas a decir')) + '</button>',
+      function (el) {
+        el.querySelector('[data-ia=ya]').onclick = function () {
+          UI.closeModal();
+          yaEsta();
+        };
+      });
   }
 
   function copiarEnlace() {
@@ -380,17 +403,6 @@
     if (instalada()) return false;
     if (estado().instalada) return false;
     if (Date.now() < calladoHasta()) return false;
-    /* Durante la bienvenida, no: son las dos primeras decisiones de la app y
-       sin contestarlas no hay catálogo ni rutinas. Meterle encima una oferta
-       de instalar es interrumpir justo lo único que hace falta para que la app
-       sirva de algo.
-
-       Se mira si hay barra de pestañas, que es la señal que ya usa la app para
-       decir «esta pantalla se lo queda todo», y además es la condición que le
-       importa a este aviso: sin barra, flotaría en mitad de la nada. Mirar el
-       lugar guardado no bastaba, porque se elige en la primera de las dos. */
-    const barra = document.getElementById('tabbar');
-    if (!barra || barra.hidden) return false;
     if (!via()) return false;
     return true;
   }
@@ -413,6 +425,13 @@
   function arrancar() {
     if (arrancado) return;
     arrancado = true;
+
+    /* Safari en el iPhone deja su barra flotando por encima de la página
+       cuando se hace scroll, y no la declara en el área segura: `safe-area`
+       vale cero ahí. Así que lo que se pegue al borde inferior le queda
+       detrás. Se marca el caso —iPhone y todavía en el navegador— y el CSS
+       le da la holgura. Instalada ya no hace falta: entonces no hay barra. */
+    if (esIOS && !instalada()) document.body.classList.add('ios-navegador');
 
     if (instalada()) { apuntarInstalada(); return; }
 

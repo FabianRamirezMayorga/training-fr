@@ -4105,6 +4105,12 @@
     'Toca el botón de Compartir {ico}, arriba a la derecha.':
       'Tap the Share button {ico}, at the top right.',
     'Toca el botón de Compartir {ico}, en la barra de abajo.':
-      'Tap the Share button {ico}, in the bar at the bottom.'
+      'Tap the Share button {ico}, in the bar at the bottom.',
+
+    /* ---------- Ya la tengo instalada ---------- */
+    'No te lo vuelvo a ofrecer': 'I will not offer it again',
+    'Ya la tengo': 'I already have it',
+    'Ya la tengo instalada, no me lo vuelvas a decir':
+      'I already have it installed, stop telling me'
   };
 })(window);
