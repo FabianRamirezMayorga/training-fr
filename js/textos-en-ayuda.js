@@ -900,8 +900,8 @@
     'Cambia todo lo que pone la app: botones, manual, guías de técnica, avisos y el entrenador. Lo que has escrito tú se queda como está.':
       'Everything the app puts there changes: buttons, manual, technique guides, reminders and the coach. What you wrote yourself stays as it is.',
     /* ---------- instalar la app ---------- */
-    'La app te lo ofrece sola cuando lleva un rato abierta, con un aviso abajo. Si lo cerraste o quieres hacerlo ahora, el camino depende de dónde la hayas abierto:':
-      'The app offers it on its own once you have had it open for a while, with a prompt at the bottom. If you closed it or want to do it now, the route depends on where you opened the app:',
+    'La app te lo ofrece sola al poco de abrirla, con un aviso abajo. Si lo cerraste o quieres hacerlo ahora, el camino depende de dónde la hayas abierto:':
+      'The app offers it on its own shortly after you open it, with a prompt at the bottom. If you closed it or want to do it now, the route depends on where you opened the app:',
     'Android o el ordenador': 'Android or the computer',
     'Hay un botón que lo hace de una vez': 'There is a button that does it in one go',
     'Pulsa *Instalar* en el aviso de abajo.': 'Tap *Install* in the prompt at the bottom.',

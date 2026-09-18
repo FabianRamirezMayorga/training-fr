@@ -359,27 +359,21 @@
   }
 
   /* ---------- cuándo aparece ----------
-     No en el primer segundo. Un aviso de instalar antes de que la app haya
-     hecho nada por ti se descarta por reflejo, y ese «no» cuenta: el diálogo
-     nativo solo se puede lanzar una vez, y encima Chrome deja de ofrecerlo un
-     tiempo. Así que se espera a que la persona haya llegado a alguna parte.
+     Pronto, pero no en el mismo fotograma. La app se reparte por enlace, así
+     que quien llega viene justo a verla: esperarle cuarenta segundos era
+     esconderle lo que venía buscando.
 
-     Dos condiciones, la que llegue antes:
-     - un rato de uso seguido en esta visita, o
-     - que no sea la primera vez que abre la app. */
+     Descartarlo no cuesta caro, que es lo que hace que esto se pueda permitir:
+     el diálogo de Chrome no se gasta al cerrar este aviso, porque solo se lanza
+     cuando se pulsa Instalar. Un «ahora no» solo pone en marcha la espera de
+     aquí arriba.
 
-  const ESPERA_PRIMERA = 40000;     /* ms de uso antes de ofrecerlo en la 1.ª visita */
-  const CLAVE_VISITAS = 'trainingfr.visitas';
+     Los dos segundos son para que no salte encima del arranque: la portada
+     todavía se está pintando y una pieza que aparece sobre otra que se mueve se
+     lee como un fallo. Y si en ese momento sigue en la bienvenida, el reloj de
+     más abajo lo recoge en cuanto termina. */
 
-  function visitas() {
-    let n = 0;
-    try { n = Number(localStorage.getItem(CLAVE_VISITAS)) || 0; } catch (e) { /* nada */ }
-    return n;
-  }
-
-  function apuntarVisita() {
-    try { localStorage.setItem(CLAVE_VISITAS, String(visitas() + 1)); } catch (e) { /* nada */ }
-  }
+  const ESPERA_PRIMERA = 2000;      /* ms antes de ofrecerlo */
 
   function toca() {
     if (caja) return false;                     /* ya está puesto */
@@ -419,19 +413,18 @@
   function arrancar() {
     if (arrancado) return;
     arrancado = true;
-    apuntarVisita();
 
     if (instalada()) { apuntarInstalada(); return; }
 
-    /* Segunda visita o más: ya conoce la app, se le puede ofrecer en cuanto
-       haya algo que ofrecer. Un respiro corto para no pisar el arranque. */
-    const espera = visitas() > 1 ? 6000 : ESPERA_PRIMERA;
     setTimeout(function () {
       quizaEnsenar();
       if (caja) return;
-      reloj = setInterval(quizaEnsenar, 5000);
+      /* Cada segundo y medio, que es lo que tarda en notarse: si estaba en la
+         bienvenida, el aviso sale casi pegado a terminarla en vez de hacerle
+         esperar a la siguiente vuelta del reloj. */
+      reloj = setInterval(quizaEnsenar, 1500);
       setTimeout(parar, 300000);
-    }, espera);
+    }, ESPERA_PRIMERA);
   }
 
   /* Si se instala mientras la app está abierta —o se abre ya instalada en otra

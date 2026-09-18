@@ -534,7 +534,7 @@
     { id: 'c-instalar', titulo: 'Instalar la app en el móvil',
       resumen: 'Para que arranque como una app y no como una página',
       primero: true,
-      intro: 'La app te lo ofrece sola cuando lleva un rato abierta, con un aviso abajo. Si lo cerraste o quieres hacerlo ahora, el camino depende de dónde la hayas abierto:',
+      intro: 'La app te lo ofrece sola al poco de abrirla, con un aviso abajo. Si lo cerraste o quieres hacerlo ahora, el camino depende de dónde la hayas abierto:',
       ramas: [
         { id: 'android', titulo: 'Android o el ordenador', sub: 'Hay un botón que lo hace de una vez',
           pasos: [
