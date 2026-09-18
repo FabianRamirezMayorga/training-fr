@@ -495,7 +495,13 @@
 
   function t(map, key) {
     if (key == null || key === '') return '—';
-    if (enIngles()) return String(key);
+    /* En ingles el catalogo ya viene en ingles, pero en minusculas: «chest»,
+       «middle back». Se pone la inicial en mayuscula para que se lea igual que
+       el espanol, que va con nombre propio. */
+    if (enIngles()) {
+      const x = String(key);
+      return x.charAt(0).toUpperCase() + x.slice(1);
+    }
     return map[String(key).toLowerCase()] || key;
   }
 

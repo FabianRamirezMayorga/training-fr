@@ -3196,6 +3196,467 @@
     'La otra mitad: cadena posterior y cadera, en el suelo y sin material. Va bien en los días que no se entrena fuerte, o el día después de pierna.':
       'The other half: posterior chain and hips, on the floor and with no equipment. It works well on days you do not train hard, or the day after legs.',
     'Usar': 'Use',
-    'Rutina copiada. Ya puedes editarla.': 'Routine copied. You can edit it now.'
+    'Rutina copiada. Ya puedes editarla.': 'Routine copied. You can edit it now.',
+
+    /* ---------- La portada y el arranque ---------- */
+    'Dispositivo enlazado. Entra con tu correo.':
+      'Device linked. Sign in with your email.',
+    'Ese enlace de configuración no es válido.': 'That setup link is not valid.',
+    'Listo. Puedes crear la cuenta cuando quieras desde Perfil.':
+      'Done. You can create the account whenever you like from Profile.',
+    'lo de hoy': 'today\'s session',
+    '{lista} y {ultimo}': '{lista} and {ultimo}',
+    'Mixta': 'Mixed',
+    'Sin ejercicios': 'No exercises',
+    'Rutina sin nombre': 'Unnamed routine',
+    'Hoy · hecho': 'Today · done',
+    '{rutina} se queda sin día': '{rutina} is left without a day',
+    'Cronómetro en marcha': 'Timer running',
+    'Tú tienes la {v}. Toca para actualizar; tus datos no se tocan.':
+      'You have {v}. Tap to update; your data is not touched.',
+    'Actualizando…': 'Updating…',
+    'Añade ejercicios a la rutina antes de entrenar':
+      'Add exercises to the routine before training',
+    '«{que}» añadida al entrenamiento en curso':
+      '«{que}» added to the workout in progress',
+    'Rutina': 'Routine',
+    'Ya hay un entrenamiento en curso': 'There is already a workout in progress',
+    'Si empiezas otro, se descartará el que tienes a medias.':
+      'If you start another, the half-finished one is discarded.',
+    'Empezar de nuevo': 'Start again',
+    'Hay una versión nueva': 'There is a new version',
+    'Se instala sola en un momento. Tus datos no se tocan.':
+      'It installs itself in a moment. Your data is not touched.',
+    'Recarga cuando termines. Tus datos no se tocan.':
+      'Reload when you are done. Your data is not touched.',
+    'Actualizar ya': 'Update now',
+    'Ya estás en la versión nueva': 'You are on the new version',
+    'Spotify conectado. Ya puedes activar el reproductor.':
+      'Spotify connected. You can turn the player on now.',
+    'Objetivo cumplido: {que}': 'Goal achieved: {que}',
+    'Objetivo cumplido': 'Goal achieved',
+    'Actualizado desde otro dispositivo': 'Updated from another device',
+    'No se pudo descargar el catálogo de ejercicios. Comprueba tu conexión.':
+      'The exercise catalogue could not be downloaded. Check your connection.',
+
+    /* ---------- Los planes de rutinas ---------- */
+    'Dejar de ser el plan principal': 'Stop being the main plan',
+    'Ahora manda este: en «hoy» solo salen sus rutinas.':
+      'This one is in charge: only its routines show under «today».',
+    'Usar este como plan principal': 'Use this as the main plan',
+    'En «hoy» solo saldrán las suyas. Los demás siguen aquí.':
+      'Only its routines will show under «today». The others stay here.',
+    'Revisar el plan con IA': 'Review the plan with AI',
+    'Lee los {n} días juntos: el reparto entre músculos, lo que se repite y lo que falta.':
+      'It reads the {n} days together: the split across muscles, what repeats and what is missing.',
+    'Duplicar el plan entero': 'Duplicate the whole plan',
+    'Una copia con sus rutinas, para probar cambios sin tocar este.':
+      'A copy with its routines, to try changes without touching this one.',
+    'Compartir el plan': 'Share the plan',
+    'Un enlace con las {n} rutinas dentro.': 'A link with the {n} routines inside.',
+    'Borrar el plan entero': 'Delete the whole plan',
+    '{n} rutina. No se puede deshacer.': '{n} routine. It cannot be undone.',
+    '{n} rutinas. No se puede deshacer.': '{n} routines. It cannot be undone.',
+    'Revisar esta rutina con IA': 'Review this routine with AI',
+    'Colócalas con las flechas o bórralas con la papelera':
+      'Place them with the arrows or delete them with the bin',
+    'esta rutina': 'this routine',
+    'Se quita de tu lista. Los entrenamientos que ya hiciste con ella se conservan en tu historial.':
+      'It goes from your list. The workouts you already did with it stay in your history.',
+    'Rutina borrada': 'Routine deleted',
+    'Plan principal: {que}': 'Main plan: {que}',
+    'Ya no hay plan principal': 'There is no main plan now',
+    'Duplicar rutina': 'Duplicate routine',
+    'Copias {rutina} con sus {ejercicios}, series y descansos. La original no se toca.':
+      'You copy {rutina} with its {ejercicios}, sets and rests. The original is not touched.',
+    'A QUÉ PLAN VA': 'WHICH PLAN IT GOES TO',
+    'Plan nuevo': 'New plan',
+    'Nombre del plan nuevo': 'Name of the new plan',
+    'QUÉ DÍA LA HAGO': 'WHICH DAY I DO IT',
+    'Puedes dejarla sin día y ponérselo luego. Si le das un día que ya tiene otra rutina, tendrás dos para ese día y la portada solo puede enseñar una.':
+      'You can leave it without a day and set one later. If you give it a day another routine already has, you will have two for that day and the home screen can only show one.',
+    'Ponle nombre al plan nuevo': 'Give the new plan a name',
+    'Duplicada en «{que}»': 'Duplicated into «{que}»',
+    'Duplicar «{que}»': 'Duplicate «{que}»',
+    'Se copia {n} rutina con sus mismos días. El plan original se queda como está.':
+      '{n} routine is copied with the same days. The original plan stays as it is.',
+    'Se copian las {n} rutinas con sus mismos días. El plan original se queda como está.':
+      'The {n} routines are copied with the same days. The original plan stays as it is.',
+    'CÓMO SE LLAMA LA COPIA': 'WHAT THE COPY IS CALLED',
+    'Tendrás dos rutinas para cada día —la del plan viejo y la del nuevo—. Borra el que no uses cuando decidas, o quítale los días al que dejes aparcado.':
+      'You will have two routines for each day —the old plan’s and the new one’s—. Delete the one you do not use once you decide, or take the days off whichever you park.',
+    'Duplicar las {n}': 'Duplicate all {n}',
+    'Ponle un nombre distinto al original':
+      'Give it a different name from the original',
+    'Plan «{que}» creado': 'Plan «{que}» created',
+    'Renombrar plan': 'Rename plan',
+    'Se cambia en la {n} rutina del plan. Los días y los ejercicios no se tocan.':
+      'It changes on the plan’s {n} routine. The days and the exercises are not touched.',
+    'Se cambia en las {n} rutinas del plan. Los días y los ejercicios no se tocan.':
+      'It changes on the plan’s {n} routines. The days and the exercises are not touched.',
+    'Lo verás aquí, en el banner del entrenamiento en curso y en tu historial.':
+      'You will see it here, on the workout-in-progress banner and in your history.',
+    'Ya tienes un plan con ese nombre': 'You already have a plan with that name',
+    'Ahora se llama «{que}»': 'It is now called «{que}»',
+    'Renombrar rutina': 'Rename routine',
+    '{rutina} — ahora está en el plan «{plan}». El día se mantiene delante solo.':
+      '{rutina} — it is currently in the «{plan}» plan. The day stays in front on its own.',
+    'A QUÉ PLAN PERTENECE': 'WHICH PLAN IT BELONGS TO',
+    'Si le pones un nombre distinto al de sus compañeras, esta rutina se va sola a un plan nuevo.':
+      'If you give it a different name from its siblings, this routine goes off into a new plan on its own.',
+    'Ahora está en «{que}»': 'It is now in «{que}»',
+    'Se va esta {n} rutina y el plan desaparece de tu lista.':
+      'This {n} routine goes and the plan disappears from your list.',
+    'Se van estas {n} rutinas y el plan desaparece de tu lista.':
+      'These {n} routines go and the plan disappears from your list.',
+    'Los {n} entrenamientos que ya hiciste con ellas se quedan en tu historial: esto no borra nada de Progreso.':
+      'The {n} workouts you already did with them stay in your history: this deletes nothing from Progress.',
+    'Tu historial de entrenamientos no se toca.':
+      'Your workout history is not touched.',
+    'Borrar las {n}': 'Delete all {n}',
+    'Dejarlo como está': 'Leave it as it is',
+    'Plan «{que}» borrado': 'Plan «{que}» deleted',
+    'No hay rutinas repetidas': 'There are no duplicate routines',
+    'sin fecha': 'no date',
+    'Rutinas repetidas': 'Duplicate routines',
+    'Tienes {n} rutina repetida: mismo plan y mismo día que otra. Se va esta y se queda la más reciente.':
+      'You have {n} duplicate routine: same plan and same day as another. This one goes and the most recent stays.',
+    'Tienes {n} rutinas repetidas: mismo plan y mismo día que otra. Se van estas y se queda la más reciente de cada una.':
+      'You have {n} duplicate routines: same plan and same day as another. These go and the most recent of each stays.',
+    'Tu historial de entrenamientos no se toca: lo que hiciste con ellas se queda en Progreso.':
+      'Your workout history is not touched: what you did with them stays in Progress.',
+    'Borrar las {n} repetidas': 'Delete the {n} duplicates',
+    '{n} rutina borrada': '{n} routine deleted',
+    '{n} rutinas borradas': '{n} routines deleted',
+    'Ninguna rutina tiene día asignado': 'No routine has a day assigned',
+    'Correr el plan de día': 'Shift the plan by a day',
+    'Hoy no has podido ir, pero la semana no se tira: se empuja. Lo del lunes pasa al martes, lo del martes al miércoles, y así con todo.':
+      'You could not go today, but the week is not wasted: it gets pushed along. Monday’s moves to Tuesday, Tuesday’s to Wednesday, and so on.',
+    'Correr un día adelante': 'Shift one day forward',
+    'Adelantarlo un día en vez de eso': 'Shift it one day back instead',
+    'Solo cambia el día en el que te toca cada rutina. Los ejercicios, las series y tu historial no se tocan.':
+      'It only changes which day each routine falls on. The exercises, the sets and your history are not touched.',
+    '{n} rutina corrida': '{n} routine shifted',
+    '{n} rutinas corridas': '{n} routines shifted',
+    'un día adelante': 'one day forward',
+    'un día atrás': 'one day back',
+
+    /* ---------- El catálogo de ejercicios ---------- */
+    'Ningún ejercicio coincide entre los que puedes hacer {donde}.':
+      'No exercise matches among the ones you can do {donde}.',
+    'Ningún ejercicio coincide.': 'No exercise matches.',
+    'Limpiar filtros': 'Clear filters',
+    'Buscar en todo el catálogo': 'Search the whole catalogue',
+    'No hay ejercicios para este filtro.': 'There are no exercises for this filter.',
+    'Mostrando solo lo que puedes hacer donde entrenas':
+      'Showing only what you can do where you train',
+    'No hay ejercicios de esa zona con tu material':
+      'There are no exercises for that area with your equipment',
+    'Sesión añadida al entrenamiento en curso':
+      'Session added to the workout in progress',
+    'Sesión de {zona} generada automáticamente.':
+      '{zona} session generated automatically.',
+    'Traduciendo…': 'Translating…',
+    'Instrucciones traducidas': 'Instructions translated',
+    'Traducir': 'Translate',
+    'No se pudo traducir ahora. Prueba más tarde.':
+      'It could not be translated now. Try later.',
+    'Añadir «{que}»': 'Add «{que}»',
+    'Elige a qué rutina quieres añadirlo.': 'Pick which routine to add it to.',
+    '{n} ej.': '{n} ex.',
+    'Crear rutina nueva': 'Create a new routine',
+    'Nueva rutina': 'New routine',
+    'Añadido a «{que}»': 'Added to «{que}»',
+    'rutina': 'routine',
+    'Sin resultados': 'No results',
+
+    /* ---------- El editor de una rutina ---------- */
+    'Rutina no encontrada.': 'Routine not found.',
+    'Editar rutina': 'Edit routine',
+    'NOMBRE DE LA RUTINA': 'ROUTINE NAME',
+    'El que te sirva a ti para reconocerla de un vistazo: «Pierna dura», «Lunes de espalda», «La corta de casa»…':
+      'Whatever helps you recognise it at a glance: «Hard legs», «Monday back», «The short one at home»…',
+    'NOTAS (opcional)': 'NOTES (optional)',
+    'Objetivo, progresión, recordatorios…': 'Goal, progression, reminders…',
+    'DÍAS DE LA SEMANA': 'DAYS OF THE WEEK',
+    'Apagado, la rutina se queda en su zona{zona} y avisa si metes un ejercicio de otra. Enciéndelo para mezclar tren superior e inferior.':
+      'Off, the routine stays in its area{zona} and warns you if you put in an exercise from another. Turn it on to mix upper and lower body.',
+    'Ejercicios ({n})': 'Exercises ({n})',
+    'Te faltan {n} para llegar al mínimo de {min}.':
+      'You are {n} short of the minimum of {min}.',
+    'Puedes añadir los que quieras y cambiar cualquiera por otro. Quitar, hasta dejarla en {min}.':
+      'You can add as many as you like and swap any of them. You can remove down to {min}.',
+    'Reps': 'Reps',
+    'Descanso (s)': 'Rest (s)',
+    'Esta rutina todavía no tiene ejercicios.': 'This routine has no exercises yet.',
+    'Guardar y entrenar ahora': 'Save and train now',
+    'Guárdala antes de pasarla por la IA': 'Save it before running it past the AI',
+    'Esa propuesta ya no se puede aplicar.': 'That proposal can no longer be applied.',
+    'Se sustituyen los {ahora} ejercicios de ahora por los {luego} que propone. Lo que ya entrenaste sigue en tu historial.':
+      'The {ahora} current exercises are replaced by the {luego} it proposes. What you already trained stays in your history.',
+    'Reemplazar': 'Replace',
+    'Rutina rehecha con {n} ejercicios': 'Routine rebuilt with {n} exercises',
+    'Una rutina no baja de {n} ejercicios. Cámbialo por otro en vez de quitarlo.':
+      'A routine does not go below {n} exercises. Swap it for another instead of removing it.',
+    'Cambiado por {que}': 'Swapped for {que}',
+    'Eso es de otra zona': 'That belongs to another area',
+    '«{que}» no es de {zona}. Puedo marcar la rutina como mixta y meterlo igual.':
+      '«{que}» is not {zona}. I can mark the routine as mixed and put it in anyway.',
+    'esta zona': 'this area',
+    'Marcar mixta y añadir': 'Mark as mixed and add',
+    'Rutina guardada': 'Routine saved',
+    'Rutina duplicada': 'Routine duplicated',
+    'Se eliminará «{que}». Los entrenamientos ya registrados se conservan.':
+      '«{que}» will be deleted. The workouts already logged are kept.',
+
+    /* ---------- La auditoría de una rutina ---------- */
+    'Con {dias} te propongo: {split}': 'With {dias} I suggest: {split}',
+    'Elige al menos un día.': 'Pick at least one day.',
+    'Auditando esta rutina…': 'Auditing this routine…',
+    'Que la IA revise esta rutina': 'Have the AI review this routine',
+    'La lee con tu perfil y tu historial delante, le pone nota y propone cambios que aplicas de un toque.':
+      'It reads it with your profile and your history in front of it, scores it and proposes changes you apply with one tap.',
+    'Necesita un proveedor de IA con su clave, en Ajustes → Bóveda de claves.':
+      'It needs an AI provider with its key, under Settings → Key vault.',
+    'Nota que le pone a esta rutina tal y como está.':
+      'The score it gives this routine exactly as it stands.',
+    'Los cambios, para aplicarlos de uno en uno': 'The changes, to apply one at a time',
+    'Cambiar': 'Change',
+    '{que} a {n}s': '{que} to {n}s',
+    'Se comprueba antes de aplicarlo: si el ejercicio no existe, no cabe con tu material o choca con tus limitaciones, se descarta. Lo que apliques se guarda en la rutina al momento.':
+      'It is checked before being applied: if the exercise does not exist, does not fit your equipment or clashes with your limitations, it is dropped. Whatever you apply is saved to the routine right away.',
+    'Analizar otra vez': 'Analyse again',
+    'Con los cambios que acabas de aplicar delante, el dictamen cambia. Cada pulsación es una llamada a la IA.':
+      'With the changes you just applied in front of it, the verdict changes. Each press is one AI call.',
+    '{que} (choca con tus limitaciones)': '{que} (clashes with your limitations)',
+    'Cómo la dejaría él': 'How he would leave it',
+    'La rutina entera rehecha, en el orden en que hay que hacerla. Sustituye a la de arriba de una vez.':
+      'The whole routine rebuilt, in the order it should be done. It replaces the one above in one go.',
+    'descanso {n}s': '{n}s rest',
+    'Se ha descartado: {lista}.': 'Dropped: {lista}.',
+    'Dejar la rutina así': 'Leave the routine like this',
+    'Se reemplazan los ejercicios de esta rutina y se guarda. Tu historial no se toca.':
+      'The exercises in this routine are replaced and it is saved. Your history is not touched.',
+    'Sesión reordenada': 'Session reordered',
+    'Ya no está «{que}» en la rutina.': '«{que}» is no longer in the routine.',
+    '{que} pasa al {n}.º': '{que} moves to position {n}',
+    'La rutina se quedaría por debajo del mínimo de {n} ejercicios.':
+      'The routine would drop below the minimum of {n} exercises.',
+    'Fuera {que}': '{que} removed',
+    'No encuentro «{que}» en el catálogo.': 'I cannot find «{que}» in the catalogue.',
+    '«{que}» no encaja con tus limitaciones.': '«{que}» does not fit your limitations.',
+    '«{que}» ya está en la rutina.': '«{que}» is already in the routine.',
+    'Pedía «{pedido}»; he puesto {puesto}':
+      'It asked for «{pedido}»; I put in {puesto}',
+    'Entra {que}': '{que} goes in',
+
+    /* ---------- Actualizaciones y uso sin internet ---------- */
+    'Si hay una versión nueva, y qué llevas descargado para usar la app sin internet.':
+      'Whether there is a new version, and what you have downloaded to use the app offline.',
+    'Tu versión': 'Your version',
+    'Comprobando si hay una nueva…': 'Checking whether there is a new one…',
+    '¿Algo va raro?': 'Something off?',
+    'Borra los archivos que hayan quedado mezclados de dos versiones y vuelve a bajar la app. Tus datos no se tocan.':
+      'It deletes any files left mixed from two versions and downloads the app again. Your data is not touched.',
+    'Descarga las imágenes de los ejercicios y la app funciona entera sin conexión: en el gimnasio sin cobertura, en el metro o sin datos.':
+      'Download the exercise images and the whole app works offline: in a gym with no signal, on the underground, or with no data.',
+    'Comprobando lo que ya tienes guardado…': 'Checking what you already have saved…',
+    'Solo los ejercicios que usas. Lo más rápido.':
+      'Only the exercises you use. The fastest option.',
+    'Los ejercicios principales': 'The main exercises',
+    'Los más usados del catálogo': 'The most used ones in the catalogue',
+    'El catálogo completo': 'The whole catalogue',
+    'Todo. Ocupa bastante y tarda un rato.':
+      'Everything. It takes up a fair amount of space and a while to do.',
+    'Liberar espacio': 'Free up space',
+    'Borra las imágenes guardadas. Se vuelven a bajar solas con internet.':
+      'It deletes the saved images. They download again by themselves when you are online.',
+    '{n} imágenes guardadas (~{mb} MB). Esos ejercicios ya funcionan sin internet.':
+      '{n} images saved (~{mb} MB). Those exercises already work offline.',
+    'Todavía no has guardado ninguna imagen.': 'You have not saved any images yet.',
+    'Este navegador no permite guardar contenido sin conexión.':
+      'This browser does not allow saving content for offline use.',
+    'Se borrarán las imágenes guardadas. La app seguirá funcionando con internet.':
+      'The saved images will be deleted. The app will keep working online.',
+    'Liberar': 'Free up',
+    'Espacio liberado': 'Space freed up',
+    'Aún no tienes rutinas que descargar': 'You have no routines to download yet',
+    'Nada que descargar': 'Nothing to download',
+    'Descargar el catálogo completo': 'Download the whole catalogue',
+    '{n} imágenes, unos {mb} MB. Mejor con wifi.':
+      '{n} images, about {mb} MB. Best on wifi.',
+    'Descargando {hechas} de {total}…': 'Downloading {hechas} of {total}…',
+    'Descarga terminada ({n} no se pudieron guardar)':
+      'Download finished ({n} could not be saved)',
+    'Listo: ya puedes entrenar sin internet': 'Done: you can train offline now',
+    'No se pudo completar la descarga': 'The download could not be completed',
+    'Esta es la que llevas. No he podido preguntar si hay otra: hace falta conexión.':
+      'This is the one you have. I could not ask whether there is another: that needs a connection.',
+    'Recién instalada. Es la última que hay publicada.':
+      'Freshly installed. It is the latest one published.',
+    'Volver a comprobar': 'Check again',
+    'Estás en la última versión.': 'You are on the latest version.',
+    'Nueva versión. Tú llevas la {v}.': 'New version. You have {v}.',
+    'Actualizar ahora': 'Update now',
+
+    /* ---------- Los ajustes que quedaban ---------- */
+    'Ahora solo marcarás las series como hechas':
+      'From now on you will just tick sets as done',
+    'Ahora marcas el ejercicio entero de un toque':
+      'From now on you tick the whole exercise with one tap',
+    'Ahora anotarás peso y repeticiones': 'From now on you will log weight and reps',
+    'Lo irás marcando': 'You will tick it off',
+    'Sin casillas de por medio': 'No boxes in the way',
+    'Memoria de frases borrada': 'Phrase memory cleared',
+    'Copia descargada': 'Backup downloaded',
+    'Importar copia': 'Import backup',
+    'Se reemplazarán las rutinas y el historial actuales por los del archivo.':
+      'Your current routines and history will be replaced by the ones in the file.',
+    'Datos importados': 'Data imported',
+    'El archivo no es válido': 'The file is not valid',
+    'Borrar todo': 'Delete everything',
+    'Se eliminarán rutinas, entrenamientos y ajustes de este dispositivo. No se puede deshacer.':
+      'Routines, workouts and settings will be deleted from this device. It cannot be undone.',
+    'Datos borrados': 'Data deleted',
+
+    /* ---------- Mi cuenta y la sincronización ---------- */
+    'Tu cuenta': 'Your account',
+    'Sesión abierta en este dispositivo': 'Signed in on this device',
+    'Qué se sincroniza': 'What gets synced',
+    'Entrenamientos': 'Workouts',
+    'Menús de comida': 'Meal plans',
+    'Perfil y hábitos': 'Profile and habits',
+    'Completo': 'Complete',
+    'A medias': 'Half done',
+    'Claves de IA y Spotify': 'AI and Spotify keys',
+    'Incluidas': 'Included',
+    'Solo en este dispositivo': 'This device only',
+    'No hay que pulsar nada: lo que cambies sube solo unos segundos después, y lo que cambies en otro dispositivo baja al abrir la app, al volver a ella y cada minuto y medio mientras la tengas delante. Si falla, se reintenta solo.':
+      'There is nothing to press: what you change goes up a few seconds later on its own, and what you change on another device comes down when you open the app, when you come back to it, and every minute and a half while you have it in front of you. If it fails, it retries by itself.',
+    'Cambiar contraseña': 'Change password',
+    'Poner contraseña': 'Set a password',
+    'Ya tienes una: con ella entras en cualquier dispositivo':
+      'You already have one: with it you sign in on any device',
+    'Sin contraseña solo puedes entrar con enlaces por correo':
+      'Without a password you can only sign in with email links',
+    'NUEVA CONTRASEÑA': 'NEW PASSWORD',
+    'REPÍTELA': 'REPEAT IT',
+    'La misma otra vez': 'The same one again',
+    'Guardar contraseña': 'Save password',
+    'Solo viaja a tu proyecto de Supabase, que la guarda cifrada.':
+      'It only travels to your Supabase project, which stores it encrypted.',
+    'Cerrar sesión aquí': 'Sign out here',
+    'Lo que ya subió se queda en la nube. Este dispositivo deja de sincronizar.':
+      'What already went up stays in the cloud. This device stops syncing.',
+    'Si algo no cuadra': 'If something does not add up',
+    'Traer lo de la nube': 'Bring down what is in the cloud',
+    'Reemplaza lo de este dispositivo por lo guardado':
+      'Replaces what is on this device with what is stored',
+    'Subir lo de este dispositivo': 'Upload what is on this device',
+    'Reemplaza lo de la nube por lo de aquí':
+      'Replaces what is in the cloud with what is here',
+    'Úsalos solo si la sincronización automática se ha quedado con la versión equivocada.':
+      'Only use these if automatic syncing has ended up with the wrong version.',
+    'hace un momento': 'a moment ago',
+    'hace {n} min': '{n} min ago',
+    'hace {n} h': '{n} h ago',
+    'Subiendo tus cambios…': 'Uploading your changes…',
+    'Buscando cambios de otros dispositivos…':
+      'Looking for changes from other devices…',
+    'Cambios pendientes de subir': 'Changes waiting to upload',
+    'No se pudo sincronizar': 'It could not sync',
+    'Todo al día': 'All up to date',
+    'Esperando el primer cambio': 'Waiting for the first change',
+    'Última sincronización completa {cuando}.': 'Last full sync {cuando}.',
+    'Comprobar': 'Check',
+    'Hay cambios de este dispositivo esperando a subir. Se reintenta solo.':
+      'There are changes from this device waiting to upload. It retries by itself.',
+    'Ya estaba todo al día': 'It was all up to date already',
+    'Tus cambios están en la nube': 'Your changes are in the cloud',
+    'Comprobado hace un momento': 'Checked a moment ago',
+    'Datos actualizados': 'Data updated',
+    'Activar la sincronización': 'Turn on syncing',
+    'Se hace una vez y es gratis. Guarda tus datos en tu propia base de datos.':
+      'You do it once and it is free. It stores your data in your own database.',
+    'Entra en {enlace}, crea una cuenta y pulsa {boton}. Elige cualquier nombre y contraseña.':
+      'Go to {enlace}, create an account and press {boton}. Pick any name and password.',
+    'Cuando termine, ve a <b>Project Settings → API</b> y copia la <b>Project URL</b> y la clave <b>anon public</b>.':
+      'When it finishes, go to <b>Project Settings → API</b> and copy the <b>Project URL</b> and the <b>anon public</b> key.',
+    'Ve a <b>SQL Editor</b>, pega el bloque de abajo y pulsa <b>Run</b>. Crea la tabla donde se guardan tus datos, protegida para que solo tú puedas verlos.':
+      'Go to <b>SQL Editor</b>, paste the block below and press <b>Run</b>. It creates the table your data is stored in, protected so only you can see it.',
+    'Ve a <b>Authentication → URL Configuration</b> y añade esta dirección en <b>Redirect URLs</b>:':
+      'Go to <b>Authentication → URL Configuration</b> and add this address under <b>Redirect URLs</b>:',
+    'CLAVE ANON PUBLIC': 'ANON PUBLIC KEY',
+    'Guardar y continuar': 'Save and continue',
+    'Volver a la conexión que trae la app':
+      'Go back to the connection the app ships with',
+    'Configuración guardada. Ahora entra con tu correo.':
+      'Settings saved. Now sign in with your email.',
+    'Volver a la conexión de la app': 'Go back to the app’s connection',
+    'Se borrará la configuración propia de este dispositivo y su sesión. Tus datos locales y los de la nube no se tocan.':
+      'This device’s own configuration and its session will be deleted. Your local data and your cloud data are not touched.',
+    'Desconectado': 'Disconnected',
+    'Las cuentas las crea quien administra':
+      'Accounts are created by whoever administers',
+    'Pídele que te dé de alta con tu correo y te pase una contraseña. Luego entras aquí arriba con esos datos y ya puedes cambiarla desde Mi cuenta.':
+      'Ask them to sign you up with your email and give you a password. Then you sign in above with those details and can change it from My account.',
+    'Crear tu base de datos': 'Create your database',
+    'Es gratis y se hace una sola vez. Tus datos quedan en tu propia cuenta de Supabase, no en un servidor mío ni de nadie.':
+      'It is free and you do it once. Your data stays in your own Supabase account, not on a server of mine or anyone else’s.',
+    'Entra en {enlace}, crea una cuenta y pulsa {boton}. Nombre y contraseña, los que quieras; elige la región más cercana.':
+      'Go to {enlace}, create an account and press {boton}. Any name and password you like; pick the nearest region.',
+    'Cuando termine, ve a <b>SQL Editor</b>, pega el bloque que te da la bóveda y pulsa <b>Run</b>. Crea la tabla de tus datos.':
+      'When it finishes, go to <b>SQL Editor</b>, paste the block the vault gives you and press <b>Run</b>. It creates your data table.',
+    'En <b>Authentication → URL Configuration</b>, pon esta dirección en <b>Site URL</b> y en <b>Redirect URLs</b>.':
+      'Under <b>Authentication → URL Configuration</b>, put this address in <b>Site URL</b> and in <b>Redirect URLs</b>.',
+    'En <b>Project Settings → API Keys</b> copia la <b>Publishable key</b>, y la <b>Project URL</b> de <b>Data API</b>.':
+      'Under <b>Project Settings → API Keys</b> copy the <b>Publishable key</b>, and the <b>Project URL</b> from <b>Data API</b>.',
+    'Pega los dos valores en la bóveda y vuelve aquí a entrar con tu correo.':
+      'Paste both values into the vault and come back here to sign in with your email.',
+    'Abrir el paso a paso completo': 'Open the full step by step',
+    'Ese enlace no es válido. Cópialo entero.':
+      'That link is not valid. Copy the whole thing.',
+    'Dispositivo conectado. Ahora entra con tu correo.':
+      'Device connected. Now sign in with your email.',
+    'Guardado. Ahora entra con tu correo.': 'Saved. Now sign in with your email.',
+    'Enviando…': 'Sending…',
+    'Revisa tu correo': 'Check your email',
+    'Hemos enviado un enlace de acceso a {correo}. Ábrelo en este mismo dispositivo y entrarás automáticamente.':
+      'We have sent a sign-in link to {correo}. Open it on this same device and you will be signed in automatically.',
+    'Si no aparece en unos minutos, mira en spam.':
+      'If it does not turn up in a few minutes, check your spam.',
+    'Entendido': 'Got it',
+    'No se pudo enviar el enlace': 'The link could not be sent',
+    'Entrando…': 'Signing in…',
+    'Datos traídos de la nube': 'Data brought down from the cloud',
+    'Datos subidos a la nube': 'Data uploaded to the cloud',
+    'Lo que tengas en este dispositivo se reemplaza por lo guardado en la nube.':
+      'Whatever is on this device is replaced by what is stored in the cloud.',
+    'Lo guardado en la nube se reemplaza por lo que tengas en este dispositivo.':
+      'What is stored in the cloud is replaced by whatever is on this device.',
+    'Las dos contraseñas no coinciden': 'The two passwords do not match',
+    'Guardando…': 'Saving…',
+    'Contraseña guardada. Ya puedes entrar con ella en otros dispositivos.':
+      'Password saved. You can sign in with it on other devices now.',
+    'Sincronizando…': 'Syncing…',
+    'Datos actualizados desde la nube': 'Data updated from the cloud',
+    'Tus datos están guardados en la nube': 'Your data is stored in the cloud',
+    'Cerrar sesión': 'Sign out',
+    'Tus datos siguen guardados en la nube y volverán al entrar de nuevo. Elige qué hacer con la copia de este dispositivo.':
+      'Your data stays stored in the cloud and comes back when you sign in again. Choose what to do with this device’s copy.',
+    'Cerrar y conservarlos aquí': 'Sign out and keep it here',
+    'Cerrar y borrarlos de este dispositivo': 'Sign out and delete it from this device',
+    'Borrarlos es lo apropiado si el dispositivo no es tuyo o lo va a usar otra persona con su cuenta.':
+      'Deleting is the right call if the device is not yours or someone else will use it with their account.',
+    'Sesión cerrada y datos borrados': 'Signed out and data deleted',
+    'Sesión cerrada': 'Signed out',
+    'Ahora estás como {correo}': 'You are now {correo}',
+    'Has entrado como {correo}': 'You signed in as {correo}',
+    '{n} entrenamiento': '{n} workout',
+    '{n} entrenamientos': '{n} workouts',
+    'tus claves': 'your keys',
+    'Listo: {lista} en este dispositivo': 'Done: {lista} on this device',
+    'Entraste, pero no se pudo sincronizar todavía':
+      'You signed in, but it could not sync yet'
   };
 })(window);

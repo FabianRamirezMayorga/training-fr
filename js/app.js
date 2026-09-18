@@ -57,8 +57,8 @@
       history.replaceState(null, '', location.pathname + '#/ajustes');
       route = { name: ok ? 'ajustes' : 'inicio', arg: null };
       setTimeout(function () {
-        UI.toast(ok ? 'Dispositivo enlazado. Entra con tu correo.'
-          : 'Ese enlace de configuración no es válido.');
+        UI.toast(ok ? T('Dispositivo enlazado. Entra con tu correo.')
+          : T('Ese enlace de configuración no es válido.'));
       }, 400);
     }
 
@@ -186,6 +186,7 @@
      cifra va sobre una barra que enseña de un vistazo cuánto abarca cada uno.
      Elegir pasa de leer a mirar. */
   const CARAS_LUGAR = {
+    /* El texto se traduce al pintarlo, que es cuando ya se sabe el idioma. */
     gym: { icono: 'dumbbell', tono: 'var(--acc)', corto: 'Gimnasio' },
     dumbbell: { icono: 'casa', tono: '#4f8cf5', corto: 'Con mancuernas' },
     bands: { icono: 'banda', tono: '#c06bf0', corto: 'Con bandas' },
@@ -331,7 +332,7 @@
       if (el.dataset.modo === 'cuenta') { go('cuenta'); return; }
       Modo.avisarInvitado(function () {
         go('inicio');
-        UI.toast('Listo. Puedes crear la cuenta cuando quieras desde Perfil.');
+        UI.toast(T('Listo. Puedes crear la cuenta cuando quieras desde Perfil.'));
       });
     });
   };
@@ -575,18 +576,19 @@
             return '<div class="menu-fila' + (esAhora ? ' ahora' : '') +
               (hecha ? ' es-hecha' : '') + '">' +
               '<div class="row between" style="gap:10px">' +
-              '<b style="font-size:.86rem">' + esc(c.nombre || 'Comida') +
+              '<b style="font-size:.86rem">' + esc(T(c.nombre) || T('Comida')) +
               (c.hora ? ' <span class="tiny">' + esc(c.hora) + '</span>' : '') + '</b>' +
-              '<span class="tiny nowrap">' + UI.num(c.kcal || 0) + ' kcal · ' +
-              (c.prot || 0) + ' g</span></div>' +
-              '<p style="margin:2px 0 0;font-size:.85rem">' + esc(c.plato || '') + '</p>' +
+              '<span class="tiny nowrap">' +
+              esc(Tn('{kcal} kcal · {prot} g',
+                { kcal: UI.num(c.kcal || 0), prot: c.prot || 0 })) + '</span></div>' +
+              '<p style="margin:2px 0 0;font-size:.85rem">' + esc(T(c.plato || '')) + '</p>' +
               /* Y aquí mismo se marca. Tenerlo delante y tener que bajar a
                  Alimentación para decir que te lo comiste no tiene sentido. */
               (r ? Marcar.comidaHTML(r, c, true) : '') +
               '</div>';
           }).join(''))}
           <button class="btn sm block" data-a="irnutricion" style="margin-top:9px">
-            Ver la semana entera</button>
+            ${T('Ver la semana entera')}</button>
         </div>
       </details>`;
   }
@@ -594,11 +596,11 @@
   /* Cómo llamar en un botón a lo que toca hoy: la zona que más se trabaja,
      que es como uno lo tiene en la cabeza («hoy toca pecho»). */
   function queEsHoy(deHoy) {
-    if (deHoy.length !== 1) return 'lo de hoy';
+    if (deHoy.length !== 1) return T('lo de hoy');
     const r = deHoy[0];
-    if (r.mixta) return 'lo de hoy';
+    if (r.mixta) return T('lo de hoy');
     const zona = zonaDeRutina(r);
-    return zona ? zona.label.toLowerCase() : 'lo de hoy';
+    return zona ? T(zona.label).toLowerCase() : T('lo de hoy');
   }
 
   /* Lo que ya se ha entrenado hoy. La portada empuja a entrenar, y empujar a
@@ -770,7 +772,7 @@
           <span class="grow">
             <span class="dc-rotulo">${Tn('Hoy, {d}',
               { d: UI.diaLargo(hoy).toLowerCase() })}${raw(
-              deHoy.length === 1 && queEsHoy(deHoy) !== 'lo de hoy'
+              deHoy.length === 1 && queEsHoy(deHoy) !== T('lo de hoy')
                 ? ' · ' + esc(queEsHoy(deHoy)) : '')}</span>
             <span class="dc-tit">${T('Entrenar')}</span>
             <span class="dc-sub">${deHoy.length === 1
@@ -928,14 +930,15 @@
   function listaDias(dias) {
     if (!dias.length) return '';
     if (dias.length === 1) return dias[0];
-    return dias.slice(0, -1).join(', ') + ' y ' + dias[dias.length - 1];
+    return Tn('{lista} y {ultimo}',
+      { lista: dias.slice(0, -1).join(', '), ultimo: dias[dias.length - 1] });
   }
 
   /* Título de la tarjeta: el día y lo que se trabaja, que es lo que uno busca */
   function tituloRutina(r) {
     const zona = zonaDeRutina(r);
     const dias = (r.days || []).map(UI.diaLargo);
-    const que = r.mixta ? 'Mixta' : (zona ? zona.label : 'Sin ejercicios');
+    const que = r.mixta ? T('Mixta') : (zona ? T(zona.label) : T('Sin ejercicios'));
     if (!dias.length) return que;
     return listaDias(dias) + ' · ' + que;
   }
@@ -1027,7 +1030,7 @@
 
   function nombreRutina(r) {
     const n = String(r.name || '').trim();
-    if (!n) return 'Rutina sin nombre';
+    if (!n) return T('Rutina sin nombre');
     const corte = n.indexOf(' · ');
     if (corte === -1) return n;
 
@@ -1210,25 +1213,25 @@
     return '<div class="plan-acciones">' +
       (esActivo
         ? fila('data-planactivo=""', 'check', 'var(--tono)',
-            'Dejar de ser el plan principal',
-            'Ahora manda este: en \u00abhoy\u00bb solo salen sus rutinas.', ' es-principal')
+            T('Dejar de ser el plan principal'),
+            T('Ahora manda este: en «hoy» solo salen sus rutinas.'), ' es-principal')
         : fila('data-planactivo="' + id + '"', 'check', 'var(--tono)',
-            'Usar este como plan principal',
-            'En \u00abhoy\u00bb solo saldr\u00e1n las suyas. Los dem\u00e1s siguen aqu\u00ed.')) +
+            T('Usar este como plan principal'),
+            T('En «hoy» solo saldrán las suyas. Los demás siguen aquí.'))) +
 
-      fila('data-iaplan="' + id + '"', 'chispa', '#c06bf0', 'Revisar el plan con IA',
-        'Lee los ' + cuantas + ' d\u00edas juntos: el reparto entre m\u00fasculos, lo que se ' +
-        'repite y lo que falta.') +
+      fila('data-iaplan="' + id + '"', 'chispa', '#c06bf0', T('Revisar el plan con IA'),
+        Tn('Lee los {n} días juntos: el reparto entre músculos, lo que se repite y lo ' +
+          'que falta.', { n: cuantas })) +
 
-      fila('data-duplicarplan="' + id + '"', 'copiar', '#4f8cf5', 'Duplicar el plan entero',
-        'Una copia con sus rutinas, para probar cambios sin tocar este.') +
+      fila('data-duplicarplan="' + id + '"', 'copiar', '#4f8cf5', T('Duplicar el plan entero'),
+        T('Una copia con sus rutinas, para probar cambios sin tocar este.')) +
 
-      fila('data-compartirplan="' + id + '"', 'compartir', '#2fc4b2', 'Compartir el plan',
-        'Un enlace con las ' + cuantas + ' rutinas dentro.') +
+      fila('data-compartirplan="' + id + '"', 'compartir', '#2fc4b2', T('Compartir el plan'),
+        Tn('Un enlace con las {n} rutinas dentro.', { n: cuantas })) +
 
       fila('data-borrarplan="' + id + '"', 'trash', 'var(--bad)',
-        'Borrar el plan entero',
-        cuantas + (cuantas === 1 ? ' rutina' : ' rutinas') + '. No se puede deshacer.',
+        T('Borrar el plan entero'),
+        Tp(cuantas, '{n} rutina. No se puede deshacer.', '{n} rutinas. No se puede deshacer.'),
         ' es-peligro') +
       '</div>';
   }
@@ -1301,8 +1304,8 @@
       /* Arriba, que se trabaja; debajo, que dias. Poner los dias en los dos
          sitios —que es lo que pasaba cuando la rutina no era de hoy— dejaba la
          tarjeta diciendo «Lunes y Miércoles» dos veces. */
-      const que = r.mixta ? 'Mixta' : zona ? zona.label : 'Sin ejercicios';
-      const encima = hechaHoy ? 'Hoy · hecho' : (esDeHoy ? 'Hoy · ' : '') + que;
+      const que = r.mixta ? T('Mixta') : zona ? T(zona.label) : T('Sin ejercicios');
+      const encima = hechaHoy ? T('Hoy · hecho') : (esDeHoy ? T('Hoy') + ' · ' : '') + que;
 
       return html`
         <div class="hoy-fila">
@@ -1402,7 +1405,7 @@
               <button class="btn sm block" data-compartir="${r.id}" style="margin-top:8px">
                 ${raw(icon('compartir'))} Compartir esta rutina</button>
               <button class="btn sm block" data-iarutina="${r.id}" style="margin-top:8px">
-                ${raw(icon('chispa'))} Revisar esta rutina con IA</button>
+                ${raw(icon('chispa'))} ${T('Revisar esta rutina con IA')}</button>
             </div>`)}
           </div>`;
     }
@@ -1411,12 +1414,12 @@
     if (!total && !sinPlan) return tarjeta;
 
     return deslizable(tarjeta, [
-      { icono: 'chispa', texto: 'Analizar' + BAJA + 'con IA', attr: 'data-iarutina="' + r.id + '"' },
-      { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicar="' + r.id + '"' },
-      { icono: 'compartir', texto: 'Compartir', attr: 'data-compartir="' + r.id + '"' },
-      { icono: 'trash', texto: 'Borrar', tono: 'malo', attr: 'data-borrar="' + r.id + '"' }
+      { icono: 'chispa', texto: T('Analizar') + BAJA + T('con IA'), attr: 'data-iarutina="' + r.id + '"' },
+      { icono: 'copiar', texto: T('Duplicar'), attr: 'data-duplicar="' + r.id + '"' },
+      { icono: 'compartir', texto: T('Compartir'), attr: 'data-compartir="' + r.id + '"' },
+      { icono: 'trash', texto: T('Borrar'), tono: 'malo', attr: 'data-borrar="' + r.id + '"' }
     ], [
-      { icono: 'edit', texto: 'Renombrar', tono: 'suave',
+      { icono: 'edit', texto: T('Renombrar'), tono: 'suave',
         attr: 'data-renombrarrutina="' + r.id + '"' },
       { icono: 'lista', texto: 'Editar', tono: 'suave',
         attr: 'data-open="' + r.id + '"' }
@@ -1459,8 +1462,9 @@
       const pos = window.scrollY;
       render();
       window.scrollTo(0, pos);
-      UI.toast(dias.length ? nombreRutina(r) + ': ' + UI.diasLargos(dias)
-        : nombreRutina(r) + ' se queda sin dia');
+      UI.toast(dias.length
+        ? nombreRutina(r) + ': ' + UI.diasLargos(dias)
+        : Tn('{rutina} se queda sin día', { rutina: nombreRutina(r) }));
     });
   }
 
@@ -1476,7 +1480,7 @@
     bind(root, '[data-a=empezarlibre]', function () {
       Workout.startLibre();
       go('entrenar');
-      UI.toast('Cronómetro en marcha');
+      UI.toast(T('Cronómetro en marcha'));
     });
 
     /* El botón grande arrancaba siempre un entrenamiento libre, aunque hubiera
@@ -1555,11 +1559,12 @@
         const corto = function (x) { return String(x).replace('trainingfr-', ''); };
         pie.hidden = false;
         pie.className = 'pie-version hay-nueva';
-        pie.innerHTML = '<b>Hay una versión nueva: ' + esc(corto(v.servidor)) + '</b>' +
-          '<span>Tú tienes la ' + esc(corto(v.local)) + '. Toca para actualizar; ' +
-          'tus datos no se tocan.</span>';
+        pie.innerHTML = '<b>' + esc(Tn('Hay una versión nueva: {v}',
+          { v: corto(v.servidor) })) + '</b>' +
+          '<span>' + esc(Tn('Tú tienes la {v}. Toca para actualizar; tus datos no se tocan.',
+          { v: corto(v.local) })) + '</span>';
         pie.onclick = function () {
-          pie.innerHTML = '<b>Actualizando…</b>';
+          pie.innerHTML = '<b>' + esc(T('Actualizando…')) + '</b>';
           forzarActualizacion();
         };
       });
@@ -1581,7 +1586,7 @@
   function empezar(routineId) {
     const r = Store.routine(routineId);
     if (!r) return;
-    if (!r.exercises.length) { UI.toast('Añade ejercicios a la rutina antes de entrenar'); return; }
+    if (!r.exercises.length) { UI.toast(T('Añade ejercicios a la rutina antes de entrenar')); return; }
 
     const run = function () { Workout.start(r); go('entrenar'); };
 
@@ -1591,13 +1596,14 @@
     if (activa && activa.libre) {
       Workout.cargar(r);
       go('entrenar');
-      UI.toast('«' + (r.name || 'Rutina') + '» añadida al entrenamiento en curso');
+      UI.toast(Tn('«{que}» añadida al entrenamiento en curso',
+        { que: r.name || T('Rutina') }));
       return;
     }
 
     if (Workout.isActive()) {
-      UI.confirm('Ya hay un entrenamiento en curso',
-        'Si empiezas otro, se descartará el que tienes a medias.', 'Empezar de nuevo', true)
+      UI.confirm(T('Ya hay un entrenamiento en curso'),
+        T('Si empiezas otro, se descartará el que tienes a medias.'), T('Empezar de nuevo'), true)
         .then(function (ok) { if (ok) { Workout.discard(); run(); } });
     } else run();
   }
@@ -2018,15 +2024,20 @@
           ? '<button class="btn block" data-a="mas" style="margin-top:14px">' +
             esc(Tn('Ver más ({n} restantes)', { n: res.length - exLimit })) + '</button>' : '')}`
       : html`<div class="empty">${raw(icon('search'))}
-          <p>Ningún ejercicio coincide${raw(gear && !sinFiltro ? ' entre los que puedes hacer ' + esc(lugar) : '')}.</p>
+          <p>${gear && !sinFiltro
+            ? Tn('Ningún ejercicio coincide entre los que puedes hacer {donde}.',
+                { donde: lugar })
+            : T('Ningún ejercicio coincide.')}</p>
           <div class="row" style="justify-content:center;gap:8px">
-            <button class="btn sm" data-a="limpiar">Limpiar filtros</button>
-            ${raw(gear && !sinFiltro ? '<button class="btn sm primary" data-a="togglegear">Buscar en todo el catálogo</button>' : '')}
+            <button class="btn sm" data-a="limpiar">${T('Limpiar filtros')}</button>
+            ${raw(gear && !sinFiltro ? '<button class="btn sm primary" data-a="togglegear">' +
+              esc(T('Buscar en todo el catálogo')) + '</button>' : '')}
           </div>
         </div>`) : '')}
 
       ${raw(segmentar && !secciones.length
-        ? '<div class="empty"><p>No hay ejercicios para este filtro.</p></div>' : '')}`;
+        ? '<div class="empty"><p>' + esc(T('No hay ejercicios para este filtro.')) +
+          '</p></div>' : '')}`;
   }
 
   function exCard(ex) {
@@ -2086,8 +2097,8 @@
     bindAll(root, '[data-a=togglegear]', function () {
       exFilters.todo = !exFilters.todo; exLimit = 40; render();
       UI.toast(exFilters.todo
-        ? 'Mostrando el catálogo completo'
-        : 'Mostrando solo lo que puedes hacer donde entrenas');
+        ? T('Mostrando el catálogo completo')
+        : T('Mostrando solo lo que puedes hacer donde entrenas'));
     });
     bind(root, '[data-a=mas]', function () {
       exLimit += 40;
@@ -2178,7 +2189,7 @@
         el.querySelector('[data-a=crear]').onclick = function () {
           const ejercicios = generarSesion(region, []);
           if (!ejercicios.length) {
-            UI.toast('No hay ejercicios de esa zona con tu material');
+            UI.toast(T('No hay ejercicios de esa zona con tu material'));
             return;
           }
           previewSesionSheet(region, ejercicios);
@@ -2231,13 +2242,14 @@
             UI.closeModal();
             Workout.cargar(rutina);
             go('entrenar');
-            UI.toast('Sesión añadida al entrenamiento en curso');
+            UI.toast(T('Sesión añadida al entrenamiento en curso'));
             return;
           }
 
           if (Workout.isActive()) {
-            UI.confirm('Ya hay un entrenamiento en curso',
-              'Si empiezas otro, se descartará el que tienes a medias.', 'Empezar de nuevo', true)
+            UI.confirm(T('Ya hay un entrenamiento en curso'),
+              T('Si empiezas otro, se descartará el que tienes a medias.'),
+              T('Empezar de nuevo'), true)
               .then(function (ok) { if (ok) { Workout.discard(); lanzar(); } });
           } else lanzar();
         };
@@ -2245,7 +2257,8 @@
         el.querySelector('[data-a=guardar]').onclick = function () {
           const r = Store.saveRoutine({
             id: null, name: nombre,
-            note: 'Sesión de ' + region.label.toLowerCase() + ' generada automáticamente.',
+            note: Tn('Sesión de {zona} generada automáticamente.',
+              { zona: T(region.label).toLowerCase() }),
             days: [],
             exercises: ejercicios.map(function (e) {
               return { exId: e.exId, sets: e.sets, reps: e.reps, weight: 0, rest: e.rest, note: e.note };
@@ -2616,7 +2629,7 @@
      Si falla, el texto original en inglés sigue visible. */
   function traducirInstrucciones(ex, btn) {
     btn.disabled = true;
-    btn.textContent = 'Traduciendo…';
+    btn.textContent = T('Traduciendo…');
 
     const peticiones = ex.instructions.map(function (frase) {
       const url = 'https://api.mymemory.translated.net/get?q=' +
@@ -2635,11 +2648,11 @@
       const ol = document.getElementById('instr');
       if (ol) ol.innerHTML = frases.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
       btn.remove();
-      UI.toast('Instrucciones traducidas');
+      UI.toast(T('Instrucciones traducidas'));
     }).catch(function () {
       btn.disabled = false;
-      btn.textContent = 'Traducir';
-      UI.toast('No se pudo traducir ahora. Prueba más tarde.');
+      btn.textContent = T('Traducir');
+      UI.toast(T('No se pudo traducir ahora. Prueba más tarde.'));
     });
   }
 
@@ -2647,15 +2660,15 @@
   function pickRoutineSheet(ex) {
     const rutinas = Store.routines();
     UI.modal(html`
-      <h2>Añadir «${ex.nameEs}»</h2>
-      <p class="muted">Elige a qué rutina quieres añadirlo.</p>
+      <h2>${Tn('Añadir «{que}»', { que: ex.nameEs })}</h2>
+      <p class="muted">${T('Elige a qué rutina quieres añadirlo.')}</p>
       <div class="stack">
         ${raw(rutinas.map(function (r) {
           return html`<button class="btn block" data-r="${r.id}" style="justify-content:space-between">
-            <span>${r.name || 'Sin nombre'}</span>
-            <span class="tiny">${r.exercises.length} ej.</span></button>`;
+            <span>${r.name || T('Sin nombre')}</span>
+            <span class="tiny">${Tn('{n} ej.', { n: r.exercises.length })}</span></button>`;
         }).join(''))}
-        <button class="btn primary block" data-r="nueva">${raw(icon('plus'))} Crear rutina nueva</button>
+        <button class="btn primary block" data-r="nueva">${raw(icon('plus'))} ${T('Crear rutina nueva')}</button>
       </div>`,
       function (el) {
         el.querySelectorAll('[data-r]').forEach(function (btn) {
@@ -2663,7 +2676,7 @@
             const id = btn.dataset.r;
             if (id === 'nueva') {
               const r = Store.saveRoutine(Object.assign(Store.newRoutine(), {
-                name: 'Nueva rutina', exercises: [Store.newRoutineExercise(ex.id)]
+                name: T('Nueva rutina'), exercises: [Store.newRoutineExercise(ex.id)]
               }));
               UI.closeModal();
               go('rutina', r.id);
@@ -2673,7 +2686,7 @@
             r.exercises.push(Store.newRoutineExercise(ex.id));
             Store.saveRoutine(r);
             UI.closeModal();
-            UI.toast('Añadido a «' + (r.name || 'rutina') + '»');
+            UI.toast(Tn('Añadido a «{que}»', { que: r.name || T('rutina') }));
           };
         });
       });
@@ -2871,20 +2884,20 @@
     bind(root, '[data-a=ordenar]', function () {
       ordenando = !ordenando;
       render();
-      if (ordenando) UI.toast('Colócalas con las flechas o bórralas con la papelera');
+      if (ordenando) UI.toast(T('Colócalas con las flechas o bórralas con la papelera'));
     });
 
     bindAll(root, '[data-borrar]', function (el) {
       const r = Store.routine(el.dataset.borrar);
       if (!r) return;
-      UI.confirm('Borrar «' + (r.name || 'esta rutina') + '»',
-        'Se quita de tu lista. Los entrenamientos que ya hiciste con ella se conservan ' +
-        'en tu historial.', 'Borrar', true).then(function (ok) {
+      UI.confirm(Tn('Borrar «{que}»', { que: r.name || T('esta rutina') }),
+        T('Se quita de tu lista. Los entrenamientos que ya hiciste con ella se conservan ' +
+        'en tu historial.'), T('Borrar'), true).then(function (ok) {
         if (!ok) return;
         Store.deleteRoutine(r.id);
         if (!Store.routines().length) ordenando = false;
         render();
-        UI.toast('Rutina borrada');
+        UI.toast(T('Rutina borrada'));
       });
     });
 
@@ -2903,7 +2916,7 @@
       const n = el.dataset.planactivo;
       marcarPlanActivo(n);
       render();
-      UI.toast(n ? 'Plan principal: ' + n : 'Ya no hay plan principal');
+      UI.toast(n ? Tn('Plan principal: {que}', { que: n }) : T('Ya no hay plan principal'));
     });
 
     bindAll(root, '[data-grupo]', function (el) {
@@ -2967,6 +2980,7 @@
      Las calorías salen del MET de cada actividad por el peso y el tiempo, que es
      la misma cuenta que hace cualquier reloj y no pretende ser exacta. */
   const ACTIVIDADES = [
+    /* El texto se traduce al pintarlo: la tabla se arma al cargar el archivo. */
     { id: 'caminar', label: 'Caminar', met: 3.5 },
     { id: 'correr', label: 'Correr', met: 9 },
     { id: 'bici', label: 'Bici', met: 7 },
@@ -3033,7 +3047,7 @@
 
   function duplicarRutinaSheet(id) {
     const r = Store.routine(id);
-    if (!r) { UI.toast('Esa rutina ya no está'); return; }
+    if (!r) { UI.toast(T('Esa rutina ya no está')); return; }
 
     const planes = [];
     Store.routines().forEach(function (x) {
@@ -3046,34 +3060,36 @@
     let dias = [];
 
     UI.modal(html`
-      <h2>Duplicar rutina</h2>
-      <p class="muted">Copias ${tituloRutina(r)} con sus
-        ${r.exercises.length} ${r.exercises.length === 1 ? 'ejercicio' : 'ejercicios'},
-        series y descansos. La original no se toca.</p>
+      <h2>${T('Duplicar rutina')}</h2>
+      <p class="muted">${Tn('Copias {rutina} con sus {ejercicios}, series y descansos. ' +
+        'La original no se toca.',
+        { rutina: tituloRutina(r),
+          ejercicios: Tp(r.exercises.length, '{n} ejercicio', '{n} ejercicios') })}</p>
 
-      <div class="tiny" style="margin:14px 0 6px">A QUÉ PLAN VA</div>
+      <div class="tiny" style="margin:14px 0 6px">${T('A QUÉ PLAN VA')}</div>
       <div class="row wrap" id="dr-planes" style="gap:6px">
         ${raw(planes.map(function (n) {
           return '<button class="chip ' + (n === suyo ? 'on' : '') + '" data-dplan="' +
             esc(n) + '">' + esc(n) + '</button>';
         }).join(''))}
-        <button class="chip" data-dplan="__nuevo">+ Plan nuevo</button>
+        <button class="chip" data-dplan="__nuevo">+ ${T('Plan nuevo')}</button>
       </div>
-      <input id="dr-nombre" class="input" placeholder="Nombre del plan nuevo"
+      <input id="dr-nombre" class="input" placeholder="${T('Nombre del plan nuevo')}"
              style="margin-top:8px;display:none" maxlength="40">
 
-      <div class="tiny" style="margin:14px 0 6px">QUÉ DÍA LA HAGO</div>
+      <div class="tiny" style="margin:14px 0 6px">${T('QUÉ DÍA LA HAGO')}</div>
       <div class="row wrap" id="dr-dias" style="gap:6px">
         ${raw(DIAS.map(function (d) {
-          return '<button class="chip" data-ddia="' + d + '">' + d + '</button>';
+          return '<button class="chip" data-ddia="' + d + '">' +
+            esc(UI.diaLargo(d).slice(0, 3)) + '</button>';
         }).join(''))}
       </div>
-      <p class="tiny" style="margin:7px 0 0">Puedes dejarla sin día y ponérselo
-        luego. Si le das un día que ya tiene otra rutina, tendrás dos para ese
-        día y la portada solo puede enseñar una.</p>
+      <p class="tiny" style="margin:7px 0 0">${T('Puedes dejarla sin día y ponérselo ' +
+        'luego. Si le das un día que ya tiene otra rutina, tendrás dos para ese día y ' +
+        'la portada solo puede enseñar una.')}</p>
 
-      <button class="btn primary block" id="dr-ok" style="margin-top:16px">Duplicar</button>
-      <button class="btn ghost block" id="dr-no" style="margin-top:8px">Cancelar</button>`,
+      <button class="btn primary block" id="dr-ok" style="margin-top:16px">${T('Duplicar')}</button>
+      <button class="btn ghost block" id="dr-no" style="margin-top:8px">${T('Cancelar')}</button>`,
       function (el) {
         const campo = el.querySelector('#dr-nombre');
 
@@ -3101,7 +3117,7 @@
           let destino = plan;
           if (destino === '__nuevo') {
             destino = String(campo.value || '').trim();
-            if (!destino) { UI.toast('Ponle nombre al plan nuevo'); campo.focus(); return; }
+            if (!destino) { UI.toast(T('Ponle nombre al plan nuevo')); campo.focus(); return; }
           }
 
           const copia = copiaDe(r);
@@ -3113,7 +3129,7 @@
           rutinaAbierta.rutinas = nueva.id;
           gruposAbiertos[destino] = true;
           render();
-          UI.toast('Duplicada en «' + destino + '»');
+          UI.toast(Tn('Duplicada en «{que}»', { que: destino }));
         };
       });
   }
@@ -3137,10 +3153,10 @@
     }
 
     UI.modal(html`
-      <h2>Duplicar «${nombre}»</h2>
-      <p class="muted">Se copian las ${suyas.length}
-        ${suyas.length === 1 ? 'rutina' : 'rutinas'} con sus mismos días. El plan
-        original se queda como está.</p>
+      <h2>${Tn('Duplicar «{que}»', { que: nombre })}</h2>
+      <p class="muted">${Tp(suyas.length,
+        'Se copia {n} rutina con sus mismos días. El plan original se queda como está.',
+        'Se copian las {n} rutinas con sus mismos días. El plan original se queda como está.')}</p>
       <div class="card">
         ${raw(suyas.map(function (r) {
           return '<div class="row between" style="padding:4px 0;gap:10px">' +
@@ -3149,21 +3165,21 @@
         }).join(''))}
       </div>
 
-      <div class="tiny" style="margin:14px 0 6px">CÓMO SE LLAMA LA COPIA</div>
+      <div class="tiny" style="margin:14px 0 6px">${T('CÓMO SE LLAMA LA COPIA')}</div>
       <input id="dp-nombre" class="input" value="${propuesto}" maxlength="40">
-      <p class="tiny" style="margin:7px 0 0">Tendrás dos rutinas para cada día
-        —la del plan viejo y la del nuevo—. Borra el que no uses cuando decidas,
-        o quítale los días al que dejes aparcado.</p>
+      <p class="tiny" style="margin:7px 0 0">${T('Tendrás dos rutinas para cada día ' +
+        '—la del plan viejo y la del nuevo—. Borra el que no uses cuando decidas, o ' +
+        'quítale los días al que dejes aparcado.')}</p>
 
       <button class="btn primary block" id="dp-ok" style="margin-top:16px">
-        Duplicar las ${suyas.length}</button>
-      <button class="btn ghost block" id="dp-no" style="margin-top:8px">Cancelar</button>`,
+        ${Tn('Duplicar las {n}', { n: suyas.length })}</button>
+      <button class="btn ghost block" id="dp-no" style="margin-top:8px">${T('Cancelar')}</button>`,
       function (el) {
         el.querySelector('#dp-no').onclick = function () { UI.closeModal(); };
         el.querySelector('#dp-ok').onclick = function () {
           const destino = String(el.querySelector('#dp-nombre').value || '').trim();
-          if (!destino) { UI.toast('Ponle un nombre'); return; }
-          if (destino === nombre) { UI.toast('Ponle un nombre distinto al original'); return; }
+          if (!destino) { UI.toast(T('Ponle un nombre')); return; }
+          if (destino === nombre) { UI.toast(T('Ponle un nombre distinto al original')); return; }
 
           suyas.forEach(function (r) {
             const copia = copiaDe(r);
@@ -3175,7 +3191,7 @@
           UI.closeModal();
           gruposAbiertos[destino] = true;
           render();
-          UI.toast('Plan «' + destino + '» creado');
+          UI.toast(Tn('Plan «{que}» creado', { que: destino }));
         };
       });
   }
@@ -3191,18 +3207,18 @@
     if (!suyas.length) { UI.toast('Ese plan ya no está'); return; }
 
     UI.modal(html`
-      <h2>Renombrar plan</h2>
-      <p class="muted">Se cambia en las ${suyas.length}
-        ${suyas.length === 1 ? 'rutina' : 'rutinas'} del plan. Los días y los
-        ejercicios no se tocan.</p>
+      <h2>${T('Renombrar plan')}</h2>
+      <p class="muted">${Tp(suyas.length,
+        'Se cambia en la {n} rutina del plan. Los días y los ejercicios no se tocan.',
+        'Se cambia en las {n} rutinas del plan. Los días y los ejercicios no se tocan.')}</p>
 
-      <div class="tiny" style="margin:14px 0 6px">CÓMO SE LLAMA</div>
+      <div class="tiny" style="margin:14px 0 6px">${T('CÓMO SE LLAMA')}</div>
       <input id="rn-nombre" class="input" value="${nombre}" maxlength="40">
-      <p class="tiny" style="margin:7px 0 0">Lo verás aquí, en el banner del
-        entrenamiento en curso y en tu historial.</p>
+      <p class="tiny" style="margin:7px 0 0">${T('Lo verás aquí, en el banner del ' +
+        'entrenamiento en curso y en tu historial.')}</p>
 
-      <button class="btn primary block" id="rn-ok" style="margin-top:16px">Guardar</button>
-      <button class="btn ghost block" id="rn-no" style="margin-top:8px">Cancelar</button>`,
+      <button class="btn primary block" id="rn-ok" style="margin-top:16px">${T('Guardar')}</button>
+      <button class="btn ghost block" id="rn-no" style="margin-top:8px">${T('Cancelar')}</button>`,
       function (el) {
         const campo = el.querySelector('#rn-nombre');
         campo.focus();
@@ -3213,7 +3229,7 @@
           if (!nuevo) { UI.toast('Ponle un nombre'); return; }
           if (nuevo === nombre) { UI.closeModal(); return; }
           if (Store.routines().some(function (r) { return App.nombreRutina(r) === nuevo; })) {
-            UI.toast('Ya tienes un plan con ese nombre');
+            UI.toast(T('Ya tienes un plan con ese nombre'));
             return;
           }
           suyas.forEach(function (r) {
@@ -3224,7 +3240,7 @@
           UI.closeModal();
           gruposAbiertos[nuevo] = gruposAbiertos[nombre];
           render();
-          UI.toast('Ahora se llama «' + nuevo + '»');
+          UI.toast(Tn('Ahora se llama «{que}»', { que: nuevo }));
         };
       });
   }
@@ -3238,17 +3254,17 @@
     const actual = nombreRutina(r);
 
     UI.modal(html`
-      <h2>Renombrar rutina</h2>
-      <p class="muted">${tituloRutina(r)} — ahora está en el plan
-        «${actual}». El día se mantiene delante solo.</p>
+      <h2>${T('Renombrar rutina')}</h2>
+      <p class="muted">${Tn('{rutina} — ahora está en el plan «{plan}». El día se ' +
+        'mantiene delante solo.', { rutina: tituloRutina(r), plan: actual })}</p>
 
-      <div class="tiny" style="margin:14px 0 6px">A QUÉ PLAN PERTENECE</div>
+      <div class="tiny" style="margin:14px 0 6px">${T('A QUÉ PLAN PERTENECE')}</div>
       <input id="rr-nombre" class="input" value="${actual}" maxlength="40">
-      <p class="tiny" style="margin:7px 0 0">Si le pones un nombre distinto al de
-        sus compañeras, esta rutina se va sola a un plan nuevo.</p>
+      <p class="tiny" style="margin:7px 0 0">${T('Si le pones un nombre distinto al de ' +
+        'sus compañeras, esta rutina se va sola a un plan nuevo.')}</p>
 
-      <button class="btn primary block" id="rr-ok" style="margin-top:16px">Guardar</button>
-      <button class="btn ghost block" id="rr-no" style="margin-top:8px">Cancelar</button>`,
+      <button class="btn primary block" id="rr-ok" style="margin-top:16px">${T('Guardar')}</button>
+      <button class="btn ghost block" id="rr-no" style="margin-top:8px">${T('Cancelar')}</button>`,
       function (el) {
         const campo = el.querySelector('#rr-nombre');
         campo.focus();
@@ -3265,7 +3281,7 @@
           gruposAbiertos[nuevo] = true;
           rutinaAbierta.rutinas = r.id;
           render();
-          UI.toast('Ahora está en «' + nuevo + '»');
+          UI.toast(Tn('Ahora está en «{que}»', { que: nuevo }));
         };
       });
   }
@@ -3285,9 +3301,10 @@
     }).length;
 
     UI.modal(html`
-      <h2>Borrar «${nombre}»</h2>
-      <p class="muted">Se van estas ${suyas.length}
-        ${suyas.length === 1 ? 'rutina' : 'rutinas'} y el plan desaparece de tu lista.</p>
+      <h2>${Tn('Borrar «{que}»', { que: nombre })}</h2>
+      <p class="muted">${Tp(suyas.length,
+        'Se va esta {n} rutina y el plan desaparece de tu lista.',
+        'Se van estas {n} rutinas y el plan desaparece de tu lista.')}</p>
       <div class="card">
         ${raw(suyas.map(function (r) {
           return '<div class="row between" style="padding:4px 0;gap:10px">' +
@@ -3296,52 +3313,55 @@
         }).join(''))}
       </div>
       <p class="tiny" style="margin:10px 0 0">${hechas
-        ? 'Los ' + hechas + ' entrenamientos que ya hiciste con ellas se quedan en tu ' +
-          'historial: esto no borra nada de Progreso.'
-        : 'Tu historial de entrenamientos no se toca.'}</p>
+        ? Tn('Los {n} entrenamientos que ya hiciste con ellas se quedan en tu historial: ' +
+          'esto no borra nada de Progreso.', { n: hechas })
+        : T('Tu historial de entrenamientos no se toca.')}</p>
       <button class="btn danger block" id="bp-ok" style="margin-top:14px">
-        Borrar las ${suyas.length}</button>
-      <button class="btn ghost block" id="bp-no" style="margin-top:8px">Dejarlo como está</button>`,
+        ${Tn('Borrar las {n}', { n: suyas.length })}</button>
+      <button class="btn ghost block" id="bp-no" style="margin-top:8px">${T('Dejarlo como está')}</button>`,
       function (el) {
         el.querySelector('#bp-no').onclick = function () { UI.closeModal(); };
         el.querySelector('#bp-ok').onclick = function () {
           suyas.forEach(function (r) { Store.deleteRoutine(r.id); });
           UI.closeModal();
           render();
-          UI.toast('Plan «' + nombre + '» borrado');
+          UI.toast(Tn('Plan «{que}» borrado', { que: nombre }));
         };
       });
   }
 
   function limpiarDuplicadosSheet() {
     const sobran = duplicados();
-    if (!sobran.length) { UI.toast('No hay rutinas repetidas'); return; }
+    if (!sobran.length) { UI.toast(T('No hay rutinas repetidas')); return; }
 
     const lista = sobran.map(function (r) {
       return '<div class="row between" style="padding:4px 0;gap:10px">' +
         '<span style="font-size:.86rem">' + esc(tituloRutina(r)) + '</span>' +
-        '<span class="tiny">' + r.exercises.length + ' ejercicios \u00b7 ' +
-        (r.updatedAt ? UI.fechaCorta(r.updatedAt) : 'sin fecha') + '</span></div>';
+        '<span class="tiny">' +
+        esc(Tp(r.exercises.length, '{n} ejercicio', '{n} ejercicios')) + ' \u00b7 ' +
+        esc(r.updatedAt ? UI.fechaCorta(r.updatedAt) : T('sin fecha')) + '</span></div>';
     }).join('');
 
     UI.modal(html`
-      <h2>Rutinas repetidas</h2>
-      <p class="muted">Tienes ${sobran.length} ${sobran.length === 1 ? 'rutina repetida'
-        : 'rutinas repetidas'}: mismo plan y mismo día que otra. Se van estas y se queda
-      la más reciente de cada una.</p>
+      <h2>${T('Rutinas repetidas')}</h2>
+      <p class="muted">${Tp(sobran.length,
+        'Tienes {n} rutina repetida: mismo plan y mismo día que otra. Se va esta y se ' +
+        'queda la más reciente.',
+        'Tienes {n} rutinas repetidas: mismo plan y mismo día que otra. Se van estas y se ' +
+        'queda la más reciente de cada una.')}</p>
       <div class="card">${raw(lista)}</div>
-      <p class="tiny" style="margin:10px 0 0">Tu historial de entrenamientos no se toca:
-      lo que hiciste con ellas se queda en Progreso.</p>
+      <p class="tiny" style="margin:10px 0 0">${T('Tu historial de entrenamientos no se ' +
+      'toca: lo que hiciste con ellas se queda en Progreso.')}</p>
       <button class="btn danger block" id="dup-ok" style="margin-top:14px">
-        Borrar las ${sobran.length} repetidas</button>
-      <button class="btn ghost block" id="dup-no" style="margin-top:8px">Dejarlo como está</button>`,
+        ${Tn('Borrar las {n} repetidas', { n: sobran.length })}</button>
+      <button class="btn ghost block" id="dup-no" style="margin-top:8px">${T('Dejarlo como está')}</button>`,
       function (el) {
         el.querySelector('#dup-no').onclick = function () { UI.closeModal(); };
         el.querySelector('#dup-ok').onclick = function () {
           sobran.forEach(function (r) { Store.deleteRoutine(r.id); });
           UI.closeModal();
           render();
-          UI.toast(sobran.length + (sobran.length === 1 ? ' rutina borrada' : ' rutinas borradas'));
+          UI.toast(Tp(sobran.length, '{n} rutina borrada', '{n} rutinas borradas'));
         };
       });
   }
@@ -3371,7 +3391,7 @@
 
   function correrPlanSheet() {
     const rutinas = Store.routines().filter(function (r) { return (r.days || []).length; });
-    if (!rutinas.length) { UI.toast('Ninguna rutina tiene día asignado'); return; }
+    if (!rutinas.length) { UI.toast(T('Ninguna rutina tiene día asignado')); return; }
 
     const previa = function (pasos) {
       return rutinas.map(function (r) {
@@ -3386,23 +3406,23 @@
     };
 
     UI.modal(html`
-      <h2>Correr el plan de día</h2>
-      <p class="muted">Hoy no has podido ir, pero la semana no se tira: se empuja. Lo del
-      lunes pasa al martes, lo del martes al miércoles, y así con todo.</p>
+      <h2>${T('Correr el plan de día')}</h2>
+      <p class="muted">${T('Hoy no has podido ir, pero la semana no se tira: se empuja. ' +
+      'Lo del lunes pasa al martes, lo del martes al miércoles, y así con todo.')}</p>
       <div class="card" id="cp-previa">${raw(previa(1))}</div>
       <button class="btn primary block" id="cp-mas" style="margin-top:14px">
-        Correr un día adelante</button>
+        ${T('Correr un día adelante')}</button>
       <button class="btn block sm" id="cp-menos" style="margin-top:8px">
-        Adelantarlo un día en vez de eso</button>
-      <p class="tiny" style="margin-top:10px">Solo cambia el día en el que te toca cada
-      rutina. Los ejercicios, las series y tu historial no se tocan.</p>`,
+        ${T('Adelantarlo un día en vez de eso')}</button>
+      <p class="tiny" style="margin-top:10px">${T('Solo cambia el día en el que te toca ' +
+      'cada rutina. Los ejercicios, las series y tu historial no se tocan.')}</p>`,
       function (el) {
         const hacer = function (pasos) {
           const n = correrPlan(pasos);
           UI.closeModal();
           render();
-          UI.toast(n + (n === 1 ? ' rutina corrida ' : ' rutinas corridas ') +
-            (pasos > 0 ? 'un día adelante' : 'un día atrás'));
+          UI.toast(Tp(n, '{n} rutina corrida', '{n} rutinas corridas') + ' ' +
+            (pasos > 0 ? T('un día adelante') : T('un día atrás')));
         };
         el.querySelector('#cp-mas').onclick = function () { hacer(1); };
         el.querySelector('#cp-menos').onclick = function () { hacer(-1); };
@@ -3677,11 +3697,12 @@
       const n = Math.min(6, Math.max(1, p.days.length));
       const split = Planner.SPLITS[n];
       el.innerHTML = p.days.length
-        ? 'Con ' + p.days.length + (p.days.length === 1 ? ' día' : ' días') + ' te propongo: ' +
-          esc(split.map(function (s) { return s.name; }).join(' · '))
-        : 'Elige al menos un día.';
+        ? esc(Tn('Con {dias} te propongo: {split}',
+            { dias: Tp(p.days.length, '{n} día', '{n} días'),
+              split: split.map(function (s) { return T(s.name); }).join(' · ') }))
+        : esc(T('Elige al menos un día.'));
       const chip = root.querySelector('#p-ndias');
-      if (chip) chip.textContent = p.days.length + (p.days.length === 1 ? ' día' : ' días');
+      if (chip) chip.textContent = Tp(p.days.length, '{n} día', '{n} días');
     }
     refrescarSplit();
 
@@ -3689,7 +3710,7 @@
       const d = el.dataset.pday;
       const i = p.days.indexOf(d);
       if (i === -1) {
-        if (p.days.length >= 6) { UI.toast('Seis días es el máximo recomendable'); return; }
+        if (p.days.length >= 6) { UI.toast(T('Seis días es el máximo recomendable')); return; }
         p.days.push(d);
         p.days.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
       } else p.days.splice(i, 1);
@@ -3747,7 +3768,7 @@
   let auditarAlEntrar = null;
 
   function auditarDesdeLista(id) {
-    if (!IA.activa()) { go('claves'); UI.toast('Elige proveedor de IA y pon su clave'); return; }
+    if (!IA.activa()) { go('claves'); UI.toast(T('Elige proveedor de IA y pon su clave')); return; }
     auditarAlEntrar = id;
     go('rutina', id);
   }
@@ -3759,7 +3780,7 @@
       return html`
         <div class="card center" style="margin-top:16px">
           <div class="spinner" style="margin:6px auto"></div>
-          <p class="tiny" style="margin:8px 0 0">Auditando esta rutina…</p>
+          <p class="tiny" style="margin:8px 0 0">${T('Auditando esta rutina…')}</p>
         </div>`;
     }
 
@@ -3767,18 +3788,18 @@
     if (!r) {
       return html`
         <button class="btn block" data-a="auditar" style="margin-top:16px">
-          ${raw(icon('chispa'))} Que la IA revise esta rutina
+          ${raw(icon('chispa'))} ${T('Que la IA revise esta rutina')}
         </button>
         <p class="tiny" style="margin:7px 0 0">${IA.activa()
-          ? 'La lee con tu perfil y tu historial delante, le pone nota y propone cambios que aplicas de un toque.'
-          : 'Necesita un proveedor de IA con su clave, en Ajustes → Bóveda de claves.'}</p>`;
+          ? T('La lee con tu perfil y tu historial delante, le pone nota y propone cambios que aplicas de un toque.')
+          : T('Necesita un proveedor de IA con su clave, en Ajustes → Bóveda de claves.')}</p>`;
     }
 
     const nota = Number(r.nota);
     return html`
       <div class="list-head">
-        <span class="list-title">Lo que dice el entrenador</span>
-        <button class="btn sm ghost" data-a="olvidarAuditoria">Descartar</button>
+        <span class="list-title">${T('Lo que dice el entrenador')}</span>
+        <button class="btn sm ghost" data-a="olvidarAuditoria">${T('Descartar')}</button>
       </div>
       <div class="card">
         ${raw(nota > 0 ? html`
@@ -3786,7 +3807,7 @@
             <div style="flex:none;font-size:1.9rem;font-weight:700;line-height:1;color:${raw(
               nota >= 8 ? 'var(--acc)' : nota >= 6 ? 'var(--warn)' : 'var(--bad)')}">${nota}<span
                  style="font-size:.9rem;color:var(--dim2)">/10</span></div>
-            <div class="tiny grow">Nota que le pone a esta rutina tal y como está.</div>
+            <div class="tiny grow">${T('Nota que le pone a esta rutina tal y como está.')}</div>
           </div>` : '')}
         <p style="margin:0 0 10px">${r.veredicto || ''}</p>
         ${raw((r.puntos || []).map(function (x) {
@@ -3799,20 +3820,22 @@
 
       ${raw((r.cambios || []).length ? html`
         <div class="card">
-          <b>Los cambios, para aplicarlos de uno en uno</b>
+          <b>${T('Los cambios, para aplicarlos de uno en uno')}</b>
           <div class="stack" style="margin-top:9px">
             ${raw(r.cambios.map(function (c, i) {
               const acc = accionRutina(c);
-              const etiqueta = { quitar: 'Quitar', anadir: 'Añadir', cambiar: 'Sustituir',
-                orden: 'Reordenar', descanso: 'Descanso', series: 'Series' }[acc] || 'Cambiar';
+              const etiqueta = T({ quitar: 'Quitar', anadir: 'Añadir', cambiar: 'Sustituir',
+                orden: 'Reordenar', descanso: 'Descanso', series: 'Series' }[acc] || 'Cambiar');
               const que = acc === 'quitar' ? c.quitar
                 : acc === 'anadir' ? c.poner
                 : acc === 'orden' ? ((c.lista || []).length
-                    ? 'Los básicos delante en ' + c.sobre
-                    : c.sobre + ' al ' + (c.posicion || 1) + '.º')
-                : acc === 'descanso' ? c.sobre + ' a ' + (c.rest || 0) + 's'
-                : acc === 'series' ? c.sobre + ' a ' + (c.series || 0) + ' series'
-                : c.poner + ' en lugar de ' + c.quitar;
+                    ? Tn('Los básicos delante en {que}', { que: c.sobre })
+                    : Tn('{que} al {n}.º', { que: c.sobre, n: c.posicion || 1 }))
+                : acc === 'descanso'
+                  ? Tn('{que} a {n}s', { que: c.sobre, n: c.rest || 0 })
+                : acc === 'series'
+                  ? Tn('{que} a {n} series', { que: c.sobre, n: c.series || 0 })
+                : Tn('{nuevo} en lugar de {viejo}', { nuevo: c.poner, viejo: c.quitar });
               return html`
                 <div class="row between" style="gap:10px;align-items:flex-start">
                   <div class="grow">
@@ -3822,28 +3845,28 @@
                     <div class="tiny">${c.porque || ''}</div>
                   </div>
                   <div class="row" style="gap:6px;flex:none">
-                    <button class="btn sm" data-rcambio="${i}">Aplicar</button>
+                    <button class="btn sm" data-rcambio="${i}">${T('Aplicar')}</button>
                     <button class="btn sm ghost" data-rnocambio="${i}"
                             aria-label="${T('Descartar')}">✕</button>
                   </div>
                 </div>`;
             }).join(''))}
           </div>
-          <p class="tiny" style="margin:10px 0 0">Se comprueba antes de aplicarlo: si el
-          ejercicio no existe, no cabe con tu material o choca con tus limitaciones, se
-          descarta. Lo que apliques se guarda en la rutina al momento.</p>
+          <p class="tiny" style="margin:10px 0 0">${T('Se comprueba antes de aplicarlo: ' +
+          'si el ejercicio no existe, no cabe con tu material o choca con tus ' +
+          'limitaciones, se descarta. Lo que apliques se guarda en la rutina al momento.')}</p>
         </div>` : '')}
 
       ${raw(r.consejo ? html`
         <div class="card destacado-clave">
-          <h3 class="guia-h">${raw(icon('chispa'))} Si solo haces una cosa</h3>
+          <h3 class="guia-h">${raw(icon('chispa'))} ${T('Si solo haces una cosa')}</h3>
           <p style="margin:0">${r.consejo}</p>
         </div>` : '')}
 
       <button class="btn block" data-a="auditar" style="margin-top:12px">
-        ${raw(icon('chispa'))} Analizar otra vez</button>
-      <p class="tiny" style="margin:7px 0 0">Con los cambios que acabas de aplicar
-      delante, el dictamen cambia. Cada pulsación es una llamada a la IA.</p>`;
+        ${raw(icon('chispa'))} ${T('Analizar otra vez')}</button>
+      <p class="tiny" style="margin:7px 0 0">${T('Con los cambios que acabas de aplicar ' +
+      'delante, el dictamen cambia. Cada pulsación es una llamada a la IA.')}</p>`;
   }
 
   /* La rutina entera ya corregida, no solo los parches. Es lo que uno quiere
@@ -3864,14 +3887,17 @@
       const nombre = String(f.ejercicio || f.nombre || '').trim();
       const ex = Data.porNombreEs(nombre) ||
         (Data.search({ q: nombre, gear: gear }) || [])[0];
-      if (!ex) { fuera.push(nombre + ' (no está en el catálogo)'); return; }
+      if (!ex) { fuera.push(Tn('{que} (no está en el catálogo)', { que: nombre })); return; }
       if (vistos[ex.id]) return;
 
       const patron = Alt.patron(ex);
       const prohibido = claves.some(function (k) {
         return (Programa.LESIONES[k].patronesFuera || []).indexOf(patron) !== -1;
       });
-      if (prohibido) { fuera.push(ex.nameEs + ' (choca con tus limitaciones)'); return; }
+      if (prohibido) {
+        fuera.push(Tn('{que} (choca con tus limitaciones)', { que: ex.nameEs }));
+        return;
+      }
 
       vistos[ex.id] = true;
       dentro.push({
@@ -3898,9 +3924,9 @@
 
     return html`
       <div class="card" style="border-color:var(--acc)">
-        <b>Cómo la dejaría él</b>
-        <p class="tiny" style="margin:5px 0 10px">La rutina entera rehecha, en el orden en
-        que hay que hacerla. Sustituye a la de arriba de una vez.</p>
+        <b>${T('Cómo la dejaría él')}</b>
+        <p class="tiny" style="margin:5px 0 10px">${T('La rutina entera rehecha, en el ' +
+        'orden en que hay que hacerla. Sustituye a la de arriba de una vez.')}</p>
 
         <div class="stack" style="gap:0">
           ${raw(prop.dentro.map(function (x, i) {
@@ -3909,22 +3935,21 @@
                 <img src="${Data.img(x.ex, 0)}" alt="" loading="lazy">
                 <div class="grow">
                   <div style="font-weight:600;font-size:.86rem">${i + 1}. ${x.ex.nameEs}</div>
-                  <div class="tiny">${x.fila.sets} × ${x.fila.reps} · descanso
-                    ${x.fila.rest}s${raw(x.porque
+                  <div class="tiny">${x.fila.sets} × ${x.fila.reps} ·
+                    ${Tn('descanso {n}s', { n: x.fila.rest })}${raw(x.porque
                       ? ' · <span style="color:var(--acc)">' + esc(x.porque) + '</span>' : '')}</div>
                 </div>
               </div>`;
           }).join(''))}
         </div>
 
-        ${raw(prop.fuera.length ? '<p class="tiny" style="margin:10px 0 0">Se ha descartado: ' +
-          esc(prop.fuera.join('; ')) + '.</p>' : '')}
+        ${raw(prop.fuera.length ? '<p class="tiny" style="margin:10px 0 0">' +
+          esc(Tn('Se ha descartado: {lista}.', { lista: prop.fuera.join('; ') })) + '</p>' : '')}
 
         <button class="btn primary block" data-a="aplicartoda" style="margin-top:12px">
-          ${raw(icon('check'))} Dejar la rutina así</button>
-        <p class="tiny" style="margin:7px 0 0">Se reemplazan los
-        ${prop.dentro.length === 1 ? 'ejercicios' : 'ejercicios'} de esta rutina y se guarda.
-        Tu historial no se toca.</p>
+          ${raw(icon('check'))} ${T('Dejar la rutina así')}</button>
+        <p class="tiny" style="margin:7px 0 0">${T('Se reemplazan los ejercicios de esta ' +
+        'rutina y se guarda. Tu historial no se toca.')}</p>
       </div>`;
   }
 
@@ -3991,14 +4016,15 @@
       /* lo que no venga nombrado se queda detrás, no se pierde */
       draft.exercises = puestos.concat(quedan);
       guardar();
-      fuera('Sesión reordenada');
+      fuera(T('Sesión reordenada'));
       return;
     }
 
     if (acc === 'orden' || acc === 'descanso' || acc === 'series') {
       const k = dondeEsta(c.sobre || c.quitar || c.poner);
       if (k === -1) {
-        fuera('Ya no está «' + (c.sobre || c.quitar || '') + '» en la rutina.');
+        fuera(Tn('Ya no está «{que}» en la rutina.',
+          { que: c.sobre || c.quitar || '' }));
         return;
       }
       const nombre = (Data.get(draft.exercises[k].exId) || {}).nameEs || '';
@@ -4009,46 +4035,52 @@
         const movido = draft.exercises.splice(k, 1)[0];
         draft.exercises.splice(destino, 0, movido);
         guardar();
-        fuera(nombre + ' pasa al ' + (destino + 1) + '.º');
+        fuera(Tn('{que} pasa al {n}.º', { que: nombre, n: destino + 1 }));
         return;
       }
 
       if (acc === 'descanso') {
         const seg = Math.max(0, Math.min(600, Number(c.rest) || 0));
-        if (!seg) { fuera('Ese cambio no dice cuánto descanso poner.'); return; }
+        if (!seg) { fuera(T('Ese cambio no dice cuánto descanso poner.')); return; }
         draft.exercises[k].rest = seg;
         guardar();
-        fuera(nombre + ': descanso a ' + seg + 's');
+        fuera(Tn('{que}: descanso a {n}s', { que: nombre, n: seg }));
         return;
       }
 
       const series = Math.max(1, Math.min(15, Number(c.series) || 0));
-      if (!series) { fuera('Ese cambio no dice cuántas series poner.'); return; }
+      if (!series) { fuera(T('Ese cambio no dice cuántas series poner.')); return; }
       draft.exercises[k].sets = series;
       guardar();
-      fuera(nombre + ': ' + series + ' series');
+      fuera(Tn('{que}: {n} series', { que: nombre, n: series }));
       return;
     }
 
     if (acc === 'quitar') {
       const k = dondeEsta(c.quitar);
-      if (k === -1) { fuera('Ya no está «' + (c.quitar || '') + '» en la rutina.'); return; }
+      if (k === -1) {
+        fuera(Tn('Ya no está «{que}» en la rutina.', { que: c.quitar || '' }));
+        return;
+      }
       if (draft.exercises.length <= Store.MINIMO_EJERCICIOS) {
-        UI.toast('La rutina se quedaría por debajo del mínimo de ' +
-          Store.MINIMO_EJERCICIOS + ' ejercicios.');
+        UI.toast(Tn('La rutina se quedaría por debajo del mínimo de {n} ejercicios.',
+          { n: Store.MINIMO_EJERCICIOS }));
         return;
       }
       const nombre = (Data.get(draft.exercises[k].exId) || {}).nameEs || '';
       draft.exercises.splice(k, 1);
       guardar();
-      fuera('Fuera ' + nombre);
+      fuera(Tn('Fuera {que}', { que: nombre }));
       return;
     }
 
     /* por nombre exacto, que es como se le ofreció; el buscador solo de red */
     const nuevo = Data.porNombreEs(c.poner) ||
       (Data.search({ q: String(c.poner || ''), gear: Store.settings().gear }) || [])[0];
-    if (!nuevo) { fuera('No encuentro «' + (c.poner || '') + '» en el catálogo.'); return; }
+    if (!nuevo) {
+      fuera(Tn('No encuentro «{que}» en el catálogo.', { que: c.poner || '' }));
+      return;
+    }
     const aOjo = I18N.norm(nuevo.nameEs) !== I18N.norm(String(c.poner || ''));
 
     const claves = Programa.lesionesDe(Perfil.datos().lesiones);
@@ -4057,13 +4089,13 @@
       return (Programa.LESIONES[k].patronesFuera || []).indexOf(patron) !== -1;
     });
     if (prohibido) {
-      fuera('«' + nuevo.nameEs + '» no encaja con tus limitaciones.');
+      fuera(Tn('«{que}» no encaja con tus limitaciones.', { que: nuevo.nameEs }));
       return;
     }
 
     if (acc === 'anadir') {
       if (draft.exercises.some(function (e) { return e.exId === nuevo.id; })) {
-        fuera('«' + nuevo.nameEs + '» ya está en la rutina.');
+        fuera(Tn('«{que}» ya está en la rutina.', { que: nuevo.nameEs }));
         return;
       }
       const modelo = draft.exercises[draft.exercises.length - 1] || {};
@@ -4073,29 +4105,37 @@
         reps: Math.min(200, Number(c.reps) || modelo.reps || 12),
         weight: 0,
         rest: modelo.rest || 75,
-        note: 'Lo mete el entrenador: ' + (c.porque || '')
+        note: Tn('Lo mete el entrenador: {porque}', { porque: c.porque || '' })
       });
       guardar();
-      fuera(aOjo ? 'Pedía «' + c.poner + '»; he puesto ' + nuevo.nameEs
-        : 'Entra ' + nuevo.nameEs);
+      fuera(aOjo
+        ? Tn('Pedía «{pedido}»; he puesto {puesto}',
+            { pedido: c.poner, puesto: nuevo.nameEs })
+        : Tn('Entra {que}', { que: nuevo.nameEs }));
       return;
     }
 
     const k = dondeEsta(c.quitar);
-    if (k === -1) { fuera('Ya no está «' + (c.quitar || '') + '» en la rutina.'); return; }
+    if (k === -1) {
+      fuera(Tn('Ya no está «{que}» en la rutina.', { que: c.quitar || '' }));
+      return;
+    }
     const antes = (Data.get(draft.exercises[k].exId) || {}).nameEs || '';
     draft.exercises[k].exId = nuevo.id;
-    draft.exercises[k].note = 'Cambiado a propuesta del entrenador: ' + (c.porque || '');
+    draft.exercises[k].note = Tn('Cambiado a propuesta del entrenador: {porque}',
+      { porque: c.porque || '' });
     guardar();
-    fuera(aOjo ? 'Pedía «' + c.poner + '»; he puesto ' + nuevo.nameEs
-      : nuevo.nameEs + ' en lugar de ' + antes);
+    fuera(aOjo
+      ? Tn('Pedía «{pedido}»; he puesto {puesto}',
+          { pedido: c.poner, puesto: nuevo.nameEs })
+      : Tn('{nuevo} en lugar de {viejo}', { nuevo: nuevo.nameEs, viejo: antes }));
   }
 
   function viewRutina() {
     if (route.arg === 'nueva') draft = Store.newRoutine();
     else {
       const r = Store.routine(route.arg);
-      if (!r) return '<div class="empty"><p>Rutina no encontrada.</p></div>';
+      if (!r) return '<div class="empty"><p>' + esc(T('Rutina no encontrada.')) + '</p></div>';
       draft = JSON.parse(JSON.stringify(r));
     }
 
@@ -4103,18 +4143,19 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">${raw(icon('back'))} ${T('Volver')}</button>
-      <h1>${draft.id ? 'Editar rutina' : 'Nueva rutina'}</h1>
+      <h1>${draft.id ? T('Editar rutina') : T('Nueva rutina')}</h1>
 
       <div class="card">
-        <label class="tiny">NOMBRE DE LA RUTINA</label>
-        <div class="tiny" style="margin:2px 0 0">El que te sirva a ti para reconocerla de un
-        vistazo: «Pierna dura», «Lunes de espalda», «La corta de casa»…</div>
-        <input id="r-name" value="${draft.name}" placeholder="Ponle nombre"
+        <label class="tiny">${T('NOMBRE DE LA RUTINA')}</label>
+        <div class="tiny" style="margin:2px 0 0">${T('El que te sirva a ti para ' +
+        'reconocerla de un vistazo: «Pierna dura», «Lunes de espalda», «La corta de ' +
+        'casa»…')}</div>
+        <input id="r-name" value="${draft.name}" placeholder="${T('Ponle nombre')}"
                style="margin:6px 0 12px">
-        <label class="tiny">NOTAS (opcional)</label>
-        <textarea id="r-note" rows="2" placeholder="Objetivo, progresión, recordatorios…"
+        <label class="tiny">${T('NOTAS (opcional)')}</label>
+        <textarea id="r-note" rows="2" placeholder="${T('Objetivo, progresión, recordatorios…')}"
                   style="margin:5px 0 12px">${draft.note || ''}</textarea>
-        <label class="tiny">DÍAS DE LA SEMANA</label>
+        <label class="tiny">${T('DÍAS DE LA SEMANA')}</label>
         <div class="row wrap" style="gap:6px;margin-top:6px">
           ${raw(dias.map(function (d) {
             return '<button class="chip ' + ((draft.days || []).indexOf(d) !== -1 ? 'on' : '') +
@@ -4125,10 +4166,12 @@
         <div class="hr"></div>
         <div class="row between" style="align-items:flex-start;gap:12px">
           <div class="grow">
-            <b style="font-size:.92rem">Rutina mixta</b>
-            <div class="tiny">Apagado, la rutina se queda en su zona${raw(zonaBorrador()
-              ? ' (' + esc(zonaBorrador().label.toLowerCase()) + ')' : '')} y avisa si metes
-              un ejercicio de otra. Enciéndelo para mezclar tren superior e inferior.</div>
+            <b style="font-size:.92rem">${T('Rutina mixta')}</b>
+            <div class="tiny">${Tn('Apagado, la rutina se queda en su zona{zona} y avisa ' +
+              'si metes un ejercicio de otra. Enciéndelo para mezclar tren superior e ' +
+              'inferior.',
+              { zona: zonaBorrador()
+                ? ' (' + T(zonaBorrador().label).toLowerCase() + ')' : '' })}</div>
           </div>
           <button class="sw ${draft.mixta ? 'on' : ''}" data-a="mixta"
                   role="switch" aria-checked="${!!draft.mixta}" aria-label="${T('Rutina mixta')}"></button>
@@ -4136,14 +4179,15 @@
       </div>
 
       <div class="list-head">
-        <span class="list-title">Ejercicios (${draft.exercises.length})</span>
-        <button class="btn sm primary" data-a="add">${raw(icon('plus'))} Añadir</button>
+        <span class="list-title">${Tn('Ejercicios ({n})', { n: draft.exercises.length })}</span>
+        <button class="btn sm primary" data-a="add">${raw(icon('plus'))} ${T('Añadir')}</button>
       </div>
-      <p class="tiny" style="margin:-4px 0 10px">${raw(draft.exercises.length < Store.MINIMO_EJERCICIOS
-        ? 'Te faltan ' + (Store.MINIMO_EJERCICIOS - draft.exercises.length) +
-          ' para llegar al mínimo de ' + Store.MINIMO_EJERCICIOS + '.'
-        : 'Puedes añadir los que quieras y cambiar cualquiera por otro. Quitar, hasta ' +
-          'dejarla en ' + Store.MINIMO_EJERCICIOS + '.')}</p>
+      <p class="tiny" style="margin:-4px 0 10px">${draft.exercises.length < Store.MINIMO_EJERCICIOS
+        ? Tn('Te faltan {n} para llegar al mínimo de {min}.',
+            { n: Store.MINIMO_EJERCICIOS - draft.exercises.length,
+              min: Store.MINIMO_EJERCICIOS })
+        : Tn('Puedes añadir los que quieras y cambiar cualquiera por otro. Quitar, hasta ' +
+            'dejarla en {min}.', { min: Store.MINIMO_EJERCICIOS })}</p>
 
       ${raw(draft.exercises.length ? html`
         <div class="stack">
@@ -4171,13 +4215,13 @@
                   </div>
                 </div>
                 <div class="row" style="margin-top:10px;gap:8px">
-                  <div class="grow"><div class="tiny">Series</div>
+                  <div class="grow"><div class="tiny">${T('Series')}</div>
                     <input type="number" min="1" max="15" value="${re.sets}" data-i="${i}" data-f="sets"
                            style="text-align:center"></div>
-                  <div class="grow"><div class="tiny">Reps</div>
+                  <div class="grow"><div class="tiny">${T('Reps')}</div>
                     <input type="number" min="1" max="200" value="${re.reps}" data-i="${i}" data-f="reps"
                            style="text-align:center"></div>
-                  <div class="grow"><div class="tiny">Descanso (s)</div>
+                  <div class="grow"><div class="tiny">${T('Descanso (s)')}</div>
                     <input type="number" min="0" max="600" step="15" value="${re.rest}" data-i="${i}" data-f="rest"
                            style="text-align:center"></div>
                 </div>
@@ -4185,19 +4229,19 @@
           }).join(''))}
         </div>` : html`
         <div class="card center">
-          <p class="muted">Esta rutina todavía no tiene ejercicios.</p>
-          <button class="btn primary" data-a="add">${raw(icon('plus'))} Añadir el primero</button>
+          <p class="muted">${T('Esta rutina todavía no tiene ejercicios.')}</p>
+          <button class="btn primary" data-a="add">${raw(icon('plus'))} ${T('Añadir el primero')}</button>
         </div>`)}
 
       <div class="row" style="margin-top:16px">
-        <button class="btn primary grow" data-a="guardar">${raw(icon('check'))} Guardar</button>
+        <button class="btn primary grow" data-a="guardar">${raw(icon('check'))} ${T('Guardar')}</button>
         ${raw(draft.id ? html`
           <button class="btn icon" data-a="dup" aria-label="${T('Duplicar')}">${raw(icon('copy'))}</button>
           <button class="btn icon danger" data-a="borrar" aria-label="${T('Borrar')}">${raw(icon('trash'))}</button>` : '')}
       </div>
       ${raw(draft.id && draft.exercises.length ? html`
         <button class="btn block" data-a="entrenar" style="margin-top:8px">
-          ${raw(icon('play'))} Guardar y entrenar ahora</button>` : '')}
+          ${raw(icon('play'))} ${T('Guardar y entrenar ahora')}</button>` : '')}
 
       <div id="auditoria">${raw(auditoriaHTML())}</div>`;
   }
@@ -4221,7 +4265,7 @@
     }
     function guardar() {
       leerCampos();
-      if (!draft.name) draft.name = 'Rutina sin nombre';
+      if (!draft.name) draft.name = T('Rutina sin nombre');
       const r = Store.saveRoutine(draft);
       refrescarActiva(r);
       return r;
@@ -4233,7 +4277,7 @@
     function autoguardar() {
       leerCampos();
       if (!draft.id && !draft.name && !draft.exercises.length) return null;
-      if (!draft.name) draft.name = 'Rutina sin nombre';
+      if (!draft.name) draft.name = T('Rutina sin nombre');
 
       /* si no ha cambiado nada, no se toca: guardar por guardar dispara una
          subida a la nube cada vez que se entra y se sale de una rutina */
@@ -4263,9 +4307,9 @@
 
     /* ---- la lectura de la IA sobre esta rutina ---- */
     const auditar = function () {
-      if (!IA.activa()) { go('claves'); UI.toast('Elige proveedor de IA y pon su clave'); return; }
+      if (!IA.activa()) { go('claves'); UI.toast(T('Elige proveedor de IA y pon su clave')); return; }
       const r = autoguardar();
-      if (!r) { UI.toast('Guárdala antes de pasarla por la IA'); return; }
+      if (!r) { UI.toast(T('Guárdala antes de pasarla por la IA')); return; }
       revIA = { id: r.id, cargando: true, datos: null };
       render();
       const caja = document.getElementById('auditoria');
@@ -4303,11 +4347,12 @@
 
     bind(root, '[data-a=aplicartoda]', function () {
       const prop = rutinaPropuesta(revIA.datos);
-      if (!prop) { UI.toast('Esa propuesta ya no se puede aplicar.'); return; }
-      UI.confirm('Dejar la rutina así',
-        'Se sustituyen los ' + draft.exercises.length + ' ejercicios de ahora por los ' +
-        prop.dentro.length + ' que propone. Lo que ya entrenaste sigue en tu historial.',
-        'Reemplazar').then(function (ok) {
+      if (!prop) { UI.toast(T('Esa propuesta ya no se puede aplicar.')); return; }
+      UI.confirm(T('Dejar la rutina así'),
+        Tn('Se sustituyen los {ahora} ejercicios de ahora por los {luego} que propone. ' +
+        'Lo que ya entrenaste sigue en tu historial.',
+        { ahora: draft.exercises.length, luego: prop.dentro.length }),
+        T('Reemplazar')).then(function (ok) {
         if (!ok) return;
         draft.exercises = prop.dentro.map(function (x) { return x.fila; });
         autoguardar();
@@ -4315,7 +4360,7 @@
         const pos = window.scrollY;
         render();
         window.scrollTo(0, pos);
-        UI.toast('Rutina rehecha con ' + prop.dentro.length + ' ejercicios');
+        UI.toast(Tn('Rutina rehecha con {n} ejercicios', { n: prop.dentro.length }));
       });
     });
 
@@ -4370,8 +4415,8 @@
     });
     bindAll(root, '[data-del]', function (el) {
       if (draft.exercises.length <= Store.MINIMO_EJERCICIOS) {
-        UI.toast('Una rutina no baja de ' + Store.MINIMO_EJERCICIOS +
-          ' ejercicios. Cámbialo por otro en vez de quitarlo.');
+        UI.toast(Tn('Una rutina no baja de {n} ejercicios. Cámbialo por otro en vez ' +
+          'de quitarlo.', { n: Store.MINIMO_EJERCICIOS }));
         return;
       }
       draft.exercises.splice(Number(el.dataset.del), 1);
@@ -4393,16 +4438,16 @@
       draft.exercises[i].exId = ex.id;
       const saved = Store.saveRoutine(draft);
       go('rutina', saved.id);
-      UI.toast('Cambiado por ' + ex.nameEs);
+      UI.toast(Tn('Cambiado por {que}', { que: ex.nameEs }));
     }
 
     /* Una rutina de brazo con un ejercicio de pierna: o es mixta, o no entra */
     function preguntarMixta(ex, alSeguir) {
       const zona = zonaDeRutina(draft);
-      UI.confirm('Eso es de otra zona',
-        '«' + ex.nameEs + '» no es de ' + (zona ? zona.label.toLowerCase() : 'esta zona') +
-        '. Puedo marcar la rutina como mixta y meterlo igual.',
-        'Marcar mixta y añadir').then(function (ok) {
+      UI.confirm(T('Eso es de otra zona'),
+        Tn('«{que}» no es de {zona}. Puedo marcar la rutina como mixta y meterlo igual.',
+          { que: ex.nameEs, zona: zona ? T(zona.label).toLowerCase() : T('esta zona') }),
+        T('Marcar mixta y añadir')).then(function (ok) {
         if (!ok) return;
         draft.mixta = true;
         alSeguir();
@@ -4434,7 +4479,7 @@
 
     bind(root, '[data-a=guardar]', function () {
       guardar();
-      UI.toast('Rutina guardada');
+      UI.toast(T('Rutina guardada'));
       go('rutinas');
     });
 
@@ -4446,15 +4491,16 @@
     bind(root, '[data-a=dup]', function () {
       guardar();
       const copia = Store.duplicateRoutine(draft.id);
-      UI.toast('Rutina duplicada');
+      UI.toast(T('Rutina duplicada'));
       go('rutina', copia.id);
     });
 
     bind(root, '[data-a=borrar]', function () {
-      UI.confirm('Borrar rutina',
-        'Se eliminará «' + (draft.name || 'esta rutina') + '». Los entrenamientos ya registrados se conservan.',
-        'Borrar', true).then(function (ok) {
-        if (ok) { Store.deleteRoutine(draft.id); UI.toast('Rutina borrada'); go('rutinas'); }
+      UI.confirm(T('Borrar rutina'),
+        Tn('Se eliminará «{que}». Los entrenamientos ya registrados se conservan.',
+          { que: draft.name || T('esta rutina') }),
+        T('Borrar'), true).then(function (ok) {
+        if (ok) { Store.deleteRoutine(draft.id); UI.toast(T('Rutina borrada')); go('rutinas'); }
       });
     });
   };
@@ -4477,7 +4523,7 @@
               <div class="tiny">${ex.primaryMuscles.map(I18N.muscle).join(', ')} · ${I18N.equip(ex.equipment)}</div>
             </div>
           </button>`;
-      }).join('') || '<p class="muted">Sin resultados</p>';
+      }).join('') || '<p class="muted">' + esc(T('Sin resultados')) + '</p>';
 
       el.querySelectorAll('[data-p]').forEach(function (b) {
         b.onclick = function () { onPick(Data.get(b.dataset.p)); };
@@ -4637,6 +4683,7 @@
      mientras entrenas. «Anotas cada serie» y «60 kg × 12» dicen lo mismo, pero
      lo segundo se entiende sin leerlo. */
   const FORMAS_REGISTRO = [
+    /* El texto se traduce al pintarlo: la tabla se arma al cargar el archivo. */
     { v: 'detallado', ico: 'grafica', tono: 'var(--acc)', t: 'Peso y repeticiones',
       sub: 'Anotas cada serie. Necesario para los récords, el volumen y las gráficas.',
       muestra: '<span class="mu-dato">60 <i>kg</i></span><span class="mu-x">×</span>' +
@@ -4844,10 +4891,11 @@
     function pintarEstado() {
       Offline.estado().then(function (e) {
         estadoEl.textContent = e.guardadas
-          ? e.guardadas + ' imágenes guardadas (~' + e.mb + ' MB). Esos ejercicios ya funcionan sin internet.'
-          : 'Todavía no has guardado ninguna imagen.';
+          ? Tn('{n} imágenes guardadas (~{mb} MB). Esos ejercicios ya funcionan sin internet.',
+              { n: e.guardadas, mb: e.mb })
+          : T('Todavía no has guardado ninguna imagen.');
       }).catch(function () {
-        estadoEl.textContent = 'Este navegador no permite guardar contenido sin conexión.';
+        estadoEl.textContent = T('Este navegador no permite guardar contenido sin conexión.');
       });
     }
     pintarEstado();
@@ -4856,10 +4904,10 @@
       const modo = el.dataset.dl;
 
       if (modo === 'vaciar') {
-        UI.confirm('Liberar espacio',
-          'Se borrarán las imágenes guardadas. La app seguirá funcionando con internet.',
-          'Liberar', true).then(function (ok) {
-          if (ok) Offline.vaciar().then(pintarEstado).then(function () { UI.toast('Espacio liberado'); });
+        UI.confirm(T('Liberar espacio'),
+          T('Se borrarán las imágenes guardadas. La app seguirá funcionando con internet.'),
+          T('Liberar'), true).then(function (ok) {
+          if (ok) Offline.vaciar().then(pintarEstado).then(function () { UI.toast(T('Espacio liberado')); });
         });
         return;
       }
@@ -4869,14 +4917,15 @@
       const urls = Offline.urlsDe(exs);
 
       if (!urls.length) {
-        UI.toast(modo === 'rutinas' ? 'Aún no tienes rutinas que descargar' : 'Nada que descargar');
+        UI.toast(modo === 'rutinas' ? T('Aún no tienes rutinas que descargar') : T('Nada que descargar'));
         return;
       }
 
       const mb = Math.round(urls.length * 55 / 1024);
       const seguir = modo === 'todos'
-        ? UI.confirm('Descargar el catálogo completo',
-            urls.length + ' imágenes, unos ' + mb + ' MB. Mejor con wifi.', 'Descargar')
+        ? UI.confirm(T('Descargar el catálogo completo'),
+            Tn('{n} imágenes, unos {mb} MB. Mejor con wifi.',
+              { n: urls.length, mb: mb }), T('Descargar'))
         : Promise.resolve(true);
 
       seguir.then(function (ok) {
@@ -4888,17 +4937,18 @@
 
         Offline.descargar(urls, function (hechas, total) {
           relleno.style.width = Math.round(hechas / total * 100) + '%';
-          estadoEl.textContent = 'Descargando ' + hechas + ' de ' + total + '…';
+          estadoEl.textContent = Tn('Descargando {hechas} de {total}…',
+            { hechas: hechas, total: total });
         }).then(function (r) {
           UI.toast(r.fallos
-            ? 'Descarga terminada (' + r.fallos + ' no se pudieron guardar)'
-            : 'Listo: ya puedes entrenar sin internet');
+            ? Tn('Descarga terminada ({n} no se pudieron guardar)', { n: r.fallos })
+            : T('Listo: ya puedes entrenar sin internet'));
           barra.hidden = true;
           relleno.style.width = '0%';
           botones.forEach(function (b) { b.disabled = false; });
           pintarEstado();
         }).catch(function () {
-          UI.toast('No se pudo completar la descarga');
+          UI.toast(T('No se pudo completar la descarga'));
           barra.hidden = true;
           botones.forEach(function (b) { b.disabled = false; });
         });
@@ -4918,9 +4968,9 @@
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Perfil')}</button>
-      <h1>Actualizaciones</h1>
-      <p class="muted">Si hay una versión nueva, y qué llevas descargado para usar la app
-      sin internet.</p>
+      <h1>${T('Actualizaciones')}</h1>
+      <p class="muted">${T('Si hay una versión nueva, y qué llevas descargado para usar ' +
+      'la app sin internet.')}</p>
 
       <!-- La versión que llevas se sabe sin preguntarle a nadie, así que se
            escribe de una vez. Antes ponía «Comprobando…» en el hueco del número
@@ -4929,12 +4979,12 @@
            único que faltaba era la mitad de la respuesta. Ahora falta solo el
            veredicto, y se dice dónde falta. -->
       <div class="card tarjeta-premium ver-caja ver-mirando" id="ver-caja">
-        <div class="pre-encima">Tu versión</div>
+        <div class="pre-encima">${T('Tu versión')}</div>
         <div class="ver-fila">
           <span class="ver-disco" id="ver-disco">${raw(icon('nube'))}</span>
           <span class="grow">
             <span class="ver-num" id="ver-num">${raw(esc(g.APP_VERSION || '—'))}</span>
-            <span class="tiny" id="ver-sub">Comprobando si hay una nueva…</span>
+            <span class="tiny" id="ver-sub">${T('Comprobando si hay una nueva…')}</span>
           </span>
         </div>
         <!-- Un solo botón, y dice lo que va a pasar. Cuando había una versión
@@ -4949,45 +4999,45 @@
       <div class="plan-acciones" style="margin:10px 0 0">
         <button class="fila-plan" data-a="actualizarApp" style="--fp:var(--dim2)">
           <span class="fp-ico">${raw(icon('actualizar'))}</span>
-          <span class="grow"><span class="fp-tit">¿Algo va raro?</span>
-            <span class="fp-sub">Borra los archivos que hayan quedado mezclados de dos
-            versiones y vuelve a bajar la app. Tus datos no se tocan.</span></span>
+          <span class="grow"><span class="fp-tit">${T('¿Algo va raro?')}</span>
+            <span class="fp-sub">${T('Borra los archivos que hayan quedado mezclados de ' +
+            'dos versiones y vuelve a bajar la app. Tus datos no se tocan.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
 
-      <div class="list-title">Entrenar sin internet</div>
+      <div class="list-title">${T('Entrenar sin internet')}</div>
       <div class="card">
-        <p class="muted" style="margin-top:0;font-size:.88rem">Descarga las imágenes de los
-        ejercicios y la app funciona entera sin conexión: en el gimnasio sin cobertura, en
-        el metro o sin datos.</p>
-        <div class="tiny" id="dl-estado">Comprobando lo que ya tienes guardado…</div>
+        <p class="muted" style="margin-top:0;font-size:.88rem">${T('Descarga las imágenes ' +
+        'de los ejercicios y la app funciona entera sin conexión: en el gimnasio sin ' +
+        'cobertura, en el metro o sin datos.')}</p>
+        <div class="tiny" id="dl-estado">${T('Comprobando lo que ya tienes guardado…')}</div>
         <div class="dl" id="dl-barra" hidden><i></i></div>
       </div>
       <div class="plan-acciones" style="margin:10px 0 0">
         <button class="fila-plan" data-dl="rutinas" style="--fp:var(--acc)">
           <span class="fp-ico">${raw(icon('dumbbell'))}</span>
-          <span class="grow"><span class="fp-tit">Mis rutinas</span>
-            <span class="fp-sub">Solo los ejercicios que usas. Lo más rápido.</span></span>
+          <span class="grow"><span class="fp-tit">${T('Mis rutinas')}</span>
+            <span class="fp-sub">${T('Solo los ejercicios que usas. Lo más rápido.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
         <button class="fila-plan" data-dl="esenciales" style="--fp:#4f8cf5">
           <span class="fp-ico">${raw(icon('star'))}</span>
-          <span class="grow"><span class="fp-tit">Los ejercicios principales</span>
-            <span class="fp-sub">Los más usados del catálogo</span></span>
+          <span class="grow"><span class="fp-tit">${T('Los ejercicios principales')}</span>
+            <span class="fp-sub">${T('Los más usados del catálogo')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
         <button class="fila-plan" data-dl="todos" style="--fp:#c06bf0">
           <span class="fp-ico">${raw(icon('catalogo'))}</span>
-          <span class="grow"><span class="fp-tit">El catálogo completo</span>
-            <span class="fp-sub">Todo. Ocupa bastante y tarda un rato.</span></span>
+          <span class="grow"><span class="fp-tit">${T('El catálogo completo')}</span>
+            <span class="fp-sub">${T('Todo. Ocupa bastante y tarda un rato.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
         <button class="fila-plan es-peligro" data-dl="vaciar" style="--fp:var(--bad)">
           <span class="fp-ico">${raw(icon('trash'))}</span>
-          <span class="grow"><span class="fp-tit">Liberar espacio</span>
-            <span class="fp-sub">Borra las imágenes guardadas. Se vuelven a bajar solas
-            con internet.</span></span>
+          <span class="grow"><span class="fp-tit">${T('Liberar espacio')}</span>
+            <span class="fp-sub">${T('Borra las imágenes guardadas. Se vuelven a bajar ' +
+            'solas con internet.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>`;
@@ -5006,7 +5056,7 @@
 
     const bajar = function () {
       btn.disabled = true;
-      btn.innerHTML = 'Actualizando…';
+      btn.innerHTML = T('Actualizando…');
       caja.classList.add('ver-bajando');
       forzarActualizacion();
     };
@@ -5026,7 +5076,7 @@
       caja.classList.remove('ver-ok', 'ver-nueva', 'ver-sinred');
       caja.classList.add('ver-mirando');
       disco.innerHTML = icon('nube');
-      sub.textContent = 'Comprobando si hay una nueva…';
+      sub.textContent = T('Comprobando si hay una nueva…');
       boton('', '');
       /* El número, en cuanto se sepa, sin esperar al servidor: no depende de él
          y es lo primero que se viene a mirar aquí. */
@@ -5041,9 +5091,9 @@
         caja.classList.add('ver-sinred');
         disco.innerHTML = icon('aviso');
         num.textContent = corto((v && v.local) || g.APP_VERSION || '—');
-        sub.textContent = 'Esta es la que llevas. No he podido preguntar si hay otra: '
-          + 'hace falta conexión.';
-        boton('vidrio', 'Reintentar', 'cambiar', mirar);
+        sub.textContent = T('Esta es la que llevas. No he podido preguntar si hay otra: '
+          + 'hace falta conexión.');
+        boton('vidrio', T('Reintentar'), 'cambiar', mirar);
         return;
       }
 
@@ -5054,8 +5104,8 @@
         caja.classList.add('ver-ok');
         disco.innerHTML = icon('nube');
         num.textContent = corto(v.servidor);
-        sub.textContent = 'Recién instalada. Es la última que hay publicada.';
-        boton('ghost', 'Volver a comprobar', 'cambiar', mirar);
+        sub.textContent = T('Recién instalada. Es la última que hay publicada.');
+        boton('ghost', T('Volver a comprobar'), 'cambiar', mirar);
         return;
       }
 
@@ -5063,8 +5113,8 @@
         caja.classList.add('ver-ok');
         disco.innerHTML = icon('check');
         num.textContent = corto(v.local);
-        sub.textContent = 'Estás en la última versión.';
-        boton('ghost', 'Volver a comprobar', 'cambiar', mirar);
+        sub.textContent = T('Estás en la última versión.');
+        boton('ghost', T('Volver a comprobar'), 'cambiar', mirar);
         return;
       }
 
@@ -5074,8 +5124,8 @@
       caja.classList.add('ver-nueva');
       disco.innerHTML = icon('down');
       num.textContent = corto(v.servidor);
-      sub.textContent = 'Nueva versión. Tú llevas la ' + corto(v.local) + '.';
-      boton('primary btn-arranque', 'Actualizar ahora', 'down', bajar);
+      sub.textContent = Tn('Nueva versión. Tú llevas la {v}.', { v: corto(v.local) });
+      boton('primary btn-arranque', T('Actualizar ahora'), 'down', bajar);
     };
 
     mirar();
@@ -5083,7 +5133,7 @@
     bind(root, '[data-a=actualizarApp]', function (el) {
       el.disabled = true;
       const tit = el.querySelector('.fp-tit');
-      if (tit) tit.textContent = 'Actualizando…';
+      if (tit) tit.textContent = T('Actualizando…');
       forzarActualizacion();
     });
   };
@@ -5109,14 +5159,14 @@
     bindAll(root, '[data-reg]', function (el) {
       Store.setSetting('registro', el.dataset.reg);
       render();
-      UI.toast(el.dataset.reg === 'simple' ? 'Ahora solo marcarás las series como hechas'
-        : el.dataset.reg === 'ejercicio' ? 'Ahora marcas el ejercicio entero de un toque'
-        : 'Ahora anotarás peso y repeticiones');
+      UI.toast(el.dataset.reg === 'simple' ? T('Ahora solo marcarás las series como hechas')
+        : el.dataset.reg === 'ejercicio' ? T('Ahora marcas el ejercicio entero de un toque')
+        : T('Ahora anotarás peso y repeticiones'));
     });
     bindAll(root, '[data-sino]', function (el) {
       Store.setSetting(el.dataset.sino, el.dataset.val);
       render();
-      UI.toast(el.dataset.val === 'si' ? 'Lo irás marcando' : 'Sin casillas de por medio');
+      UI.toast(el.dataset.val === 'si' ? T('Lo irás marcando') : T('Sin casillas de por medio'));
     });
     /* La marca se corre y la pantalla se rehace despues. Si se repintara de
        golpe, la marca aparecería ya puesta en la otra posición y el movimiento
@@ -5144,7 +5194,7 @@
     bind(root, '[data-a=olvidarfrases]', function () {
       if (g.IA && IA.olvidarFrases) IA.olvidarFrases();
       render();
-      UI.toast('Memoria de frases borrada');
+      UI.toast(T('Memoria de frases borrada'));
     });
 
     bind(root, '[data-a=sound]', function () {
@@ -5159,7 +5209,7 @@
       a.download = 'training-fr-' + Store.dayKey(Date.now()) + '.json';
       a.click();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-      UI.toast('Copia descargada');
+      UI.toast(T('Copia descargada'));
     });
 
     const file = root.querySelector('#s-file');
@@ -5169,17 +5219,17 @@
       if (!f) return;
       const reader = new FileReader();
       reader.onload = function () {
-        UI.confirm('Importar copia',
-          'Se reemplazarán las rutinas y el historial actuales por los del archivo.',
-          'Importar', true).then(function (ok) {
+        UI.confirm(T('Importar copia'),
+          T('Se reemplazarán las rutinas y el historial actuales por los del archivo.'),
+          T('Importar'), true).then(function (ok) {
           if (!ok) return;
           try {
             Store.importJSON(reader.result);
             aplicarTema();
-            UI.toast('Datos importados');
+            UI.toast(T('Datos importados'));
             go('inicio');
           } catch (e) {
-            UI.toast('El archivo no es válido');
+            UI.toast(T('El archivo no es válido'));
           }
         });
       };
@@ -5187,10 +5237,10 @@
     };
 
     bind(root, '[data-a=wipe]', function () {
-      UI.confirm('Borrar todo',
-        'Se eliminarán rutinas, entrenamientos y ajustes de este dispositivo. No se puede deshacer.',
-        'Borrar todo', true).then(function (ok) {
-        if (ok) { Store.wipe(); aplicarTema(); go('inicio'); UI.toast('Datos borrados'); }
+      UI.confirm(T('Borrar todo'),
+        T('Se eliminarán rutinas, entrenamientos y ajustes de este dispositivo. No se puede deshacer.'),
+        T('Borrar todo'), true).then(function (ok) {
+        if (ok) { Store.wipe(); aplicarTema(); go('inicio'); UI.toast(T('Datos borrados')); }
       });
     });
 
@@ -5329,44 +5379,44 @@
        en la misma tarjeta, con el punto vivo justo debajo del correo. */
     return html`
       <div class="card tarjeta-premium cuenta-cab">
-        <div class="pre-encima">Tu cuenta</div>
+        <div class="pre-encima">${T('Tu cuenta')}</div>
         <div class="cc-quien">
           <span class="pc-avatar">${raw(inicial || icon('perfil'))}</span>
           <span class="grow">
             <span class="pc-nombre">${correo}</span>
-            <span class="pc-sub">Sesión abierta en este dispositivo</span>
+            <span class="pc-sub">${T('Sesión abierta en este dispositivo')}</span>
           </span>
         </div>
         <div id="sync-estado" class="cc-estado"></div>
       </div>
 
-      <div class="list-title">Qué se sincroniza</div>
+      <div class="list-title">${T('Qué se sincroniza')}</div>
       <div class="sync-rejilla">
-        ${raw(fichaSync('dumbbell', 'Rutinas', Store.routines().length))}
-        ${raw(fichaSync('grafica', 'Entrenamientos', Store.sessions().length))}
-        ${raw(fichaSync('trofeo', 'Objetivos', Objetivos.lista().length))}
-        ${raw(fichaSync('campana', 'Alertas', Alertas.lista().length))}
-        ${raw(fichaSync('nutricion', 'Menús de comida',
+        ${raw(fichaSync('dumbbell', T('Rutinas'), Store.routines().length))}
+        ${raw(fichaSync('grafica', T('Entrenamientos'), Store.sessions().length))}
+        ${raw(fichaSync('trofeo', T('Objetivos'), Objetivos.lista().length))}
+        ${raw(fichaSync('campana', T('Alertas'), Alertas.lista().length))}
+        ${raw(fichaSync('nutricion', T('Menús de comida'),
           (g.Menus && Menus.lista().length) || 0))}
-        ${raw(fichaSync('perfil', 'Perfil y hábitos',
-          Perfil.completo() ? 'Completo' : 'A medias', true))}
+        ${raw(fichaSync('perfil', T('Perfil y hábitos'),
+          Perfil.completo() ? T('Completo') : T('A medias'), true))}
       </div>
-      ${raw(filaSync('llave', 'Claves de IA y Spotify',
-        Sync.sincronizaClaves() ? 'Incluidas' : 'Solo en este dispositivo'))}
-      <p class="tiny" style="margin-top:10px">No hay que pulsar nada: lo que cambies sube
-      solo unos segundos después, y lo que cambies en otro dispositivo baja al abrir la app,
-      al volver a ella y cada minuto y medio mientras la tengas delante. Si falla, se
-      reintenta solo.</p>
+      ${raw(filaSync('llave', T('Claves de IA y Spotify'),
+        Sync.sincronizaClaves() ? T('Incluidas') : T('Solo en este dispositivo')))}
+      <p class="tiny" style="margin-top:10px">${T('No hay que pulsar nada: lo que cambies ' +
+      'sube solo unos segundos después, y lo que cambies en otro dispositivo baja al ' +
+      'abrir la app, al volver a ella y cada minuto y medio mientras la tengas delante. ' +
+      'Si falla, se reintenta solo.')}</p>
 
-      <div class="list-title">Tu cuenta</div>
+      <div class="list-title">${T('Tu cuenta')}</div>
       <div class="plan-acciones" style="margin:10px 0 0">
         <button class="fila-plan" data-a="verClave" style="--fp:var(--acc)">
           <span class="fp-ico">${raw(icon('llave'))}</span>
           <span class="grow">
-            <span class="fp-tit">${tieneClave ? 'Cambiar contraseña' : 'Poner contraseña'}</span>
-            <span class="fp-sub">${raw(tieneClave
-              ? 'Ya tienes una: con ella entras en cualquier dispositivo'
-              : 'Sin contraseña solo puedes entrar con enlaces por correo')}</span></span>
+            <span class="fp-tit">${tieneClave ? T('Cambiar contraseña') : T('Poner contraseña')}</span>
+            <span class="fp-sub">${tieneClave
+              ? T('Ya tienes una: con ella entras en cualquier dispositivo')
+              : T('Sin contraseña solo puedes entrar con enlaces por correo')}</span></span>
           <span class="chevron down">${raw(icon('chevron'))}</span>
         </button>
 
@@ -5375,54 +5425,54 @@
              abrirla parecía que se hubiera colado de otra pantalla: nada decía
              que fuera de esa fila. -->
         <div class="clave-panel" id="caja-clave" hidden>
-          <label class="tiny">${tieneClave ? 'NUEVA CONTRASEÑA' : 'CONTRASEÑA'}</label>
+          <label class="tiny">${tieneClave ? T('NUEVA CONTRASEÑA') : T('CONTRASEÑA')}</label>
           <div class="secreto">
             <input id="pass-nueva" type="password" autocomplete="new-password"
-                   placeholder="Al menos 8 caracteres">
+                   placeholder="${T('Al menos 8 caracteres')}">
             <button class="btn sm" data-ver="pass-nueva" aria-label="${T('Mostrar u ocultar')}">
               ${raw(icon('ojo'))}</button>
           </div>
 
-          <label class="tiny" style="display:block;margin-top:11px">REPÍTELA</label>
+          <label class="tiny" style="display:block;margin-top:11px">${T('REPÍTELA')}</label>
           <div class="secreto">
             <input id="pass-repe" type="password" autocomplete="new-password"
-                   placeholder="La misma otra vez">
+                   placeholder="${T('La misma otra vez')}">
             <button class="btn sm" data-ver="pass-repe" aria-label="${T('Mostrar u ocultar')}">
               ${raw(icon('ojo'))}</button>
           </div>
 
           <button class="btn primary block" data-a="guardarClave" style="margin-top:13px">
-            Guardar contraseña</button>
-          <p class="tiny" style="margin:9px 0 0">Solo viaja a tu proyecto de Supabase, que la
-          guarda cifrada.</p>
+            ${T('Guardar contraseña')}</button>
+          <p class="tiny" style="margin:9px 0 0">${T('Solo viaja a tu proyecto de Supabase, ' +
+          'que la guarda cifrada.')}</p>
         </div>
 
         <button class="fila-plan es-peligro" data-a="salir" style="--fp:var(--bad)">
           <span class="fp-ico">${raw(icon('salir'))}</span>
-          <span class="grow"><span class="fp-tit">Cerrar sesión aquí</span>
-            <span class="fp-sub">Lo que ya subió se queda en la nube. Este dispositivo deja
-            de sincronizar.</span></span>
+          <span class="grow"><span class="fp-tit">${T('Cerrar sesión aquí')}</span>
+            <span class="fp-sub">${T('Lo que ya subió se queda en la nube. Este ' +
+            'dispositivo deja de sincronizar.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
 
-      <div class="list-title">Si algo no cuadra</div>
+      <div class="list-title">${T('Si algo no cuadra')}</div>
       <div class="plan-acciones" style="margin:10px 0 0">
         <button class="fila-plan" data-a="forzarBajar" style="--fp:#4f8cf5">
           <span class="fp-ico">${raw(icon('down'))}</span>
-          <span class="grow"><span class="fp-tit">Traer lo de la nube</span>
-            <span class="fp-sub">Reemplaza lo de este dispositivo por lo guardado</span></span>
+          <span class="grow"><span class="fp-tit">${T('Traer lo de la nube')}</span>
+            <span class="fp-sub">${T('Reemplaza lo de este dispositivo por lo guardado')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
         <button class="fila-plan" data-a="forzarSubir" style="--fp:#f0a23c">
           <span class="fp-ico">${raw(icon('up'))}</span>
-          <span class="grow"><span class="fp-tit">Subir lo de este dispositivo</span>
-            <span class="fp-sub">Reemplaza lo de la nube por lo de aquí</span></span>
+          <span class="grow"><span class="fp-tit">${T('Subir lo de este dispositivo')}</span>
+            <span class="fp-sub">${T('Reemplaza lo de la nube por lo de aquí')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
-      <p class="tiny" style="margin-top:8px">Úsalos solo si la sincronización automática se
-      ha quedado con la versión equivocada.</p>`;
+      <p class="tiny" style="margin-top:8px">${T('Úsalos solo si la sincronización ' +
+      'automática se ha quedado con la versión equivocada.')}</p>`;
   }
 
   function viewCuenta() {
@@ -5455,11 +5505,11 @@
   function estadoSyncHTML() {
     const e = Sync.estado();
     const hace = function (t) {
-      if (!t) return 'nunca';
+      if (!t) return T('nunca');
       const s = Math.round((Date.now() - t) / 1000);
-      if (s < 60) return 'hace un momento';
-      if (s < 3600) return 'hace ' + Math.round(s / 60) + ' min';
-      if (s < 86400) return 'hace ' + Math.round(s / 3600) + ' h';
+      if (s < 60) return T('hace un momento');
+      if (s < 3600) return Tn('hace {n} min', { n: Math.round(s / 60) });
+      if (s < 86400) return Tn('hace {n} h', { n: Math.round(s / 3600) });
       return UI.fecha(t);
     };
 
@@ -5468,12 +5518,12 @@
        «terminó hace media hora»: los dos eran un punto verde. Los dos estados
        que están pasando ahora laten; los que ya terminaron, no. */
     const mapa = {
-      subiendo: { txt: 'Subiendo tus cambios…', tono: 'var(--acc)', vivo: true },
-      bajando: { txt: 'Buscando cambios de otros dispositivos…', tono: 'var(--acc)', vivo: true },
-      pendiente: { txt: 'Cambios pendientes de subir', tono: 'var(--warn)', vivo: true },
-      error: { txt: 'No se pudo sincronizar', tono: 'var(--bad)' },
-      ok: { txt: 'Todo al día', tono: 'var(--acc)' },
-      inactivo: { txt: 'Esperando el primer cambio', tono: 'var(--dim2)' }
+      subiendo: { txt: T('Subiendo tus cambios…'), tono: 'var(--acc)', vivo: true },
+      bajando: { txt: T('Buscando cambios de otros dispositivos…'), tono: 'var(--acc)', vivo: true },
+      pendiente: { txt: T('Cambios pendientes de subir'), tono: 'var(--warn)', vivo: true },
+      error: { txt: T('No se pudo sincronizar'), tono: 'var(--bad)' },
+      ok: { txt: T('Todo al día'), tono: 'var(--acc)' },
+      inactivo: { txt: T('Esperando el primer cambio'), tono: 'var(--dim2)' }
     };
     const m = mapa[e.fase] || mapa.inactivo;
 
@@ -5482,13 +5532,14 @@
         <span class="cce-punto${raw(m.vivo ? ' vivo' : '')}"></span>
         <span class="grow">
           <b class="cce-txt">${m.txt}</b>
-          <span class="tiny">Última sincronización completa ${hace(e.ultimo)}.</span>
+          <span class="tiny">${Tn('Última sincronización completa {cuando}.',
+            { cuando: hace(e.ultimo) })}</span>
         </span>
-        <button class="btn sm vidrio" data-a="sincronizarYa">Comprobar</button>
+        <button class="btn sm vidrio" data-a="sincronizarYa">${T('Comprobar')}</button>
       </div>
       ${raw(e.error ? '<p class="cce-nota mal">' + esc(e.error) + '</p>' : '')}
-      ${raw(e.pendiente ? '<p class="cce-nota">Hay cambios de este dispositivo esperando ' +
-        'a subir. Se reintenta solo.</p>' : '')}`;
+      ${raw(e.pendiente ? '<p class="cce-nota">' + esc(T('Hay cambios de este dispositivo ' +
+        'esperando a subir. Se reintenta solo.')) + '</p>' : '')}`;
   }
 
   /* Siete filas idénticas con la cifra al final: para saber cuánto hay guardado
@@ -5561,10 +5612,10 @@
       b.disabled = true;
       Sync.ciclo(true).then(function (r) {
         pintarEstadoSync();
-        UI.toast(r === 'igual' ? 'Ya estaba todo al día'
-          : r === 'subido' ? 'Tus cambios están en la nube'
-          : r === 'muy pronto' ? 'Comprobado hace un momento'
-          : 'Datos actualizados');
+        UI.toast(r === 'igual' ? T('Ya estaba todo al día')
+          : r === 'subido' ? T('Tus cambios están en la nube')
+          : r === 'muy pronto' ? T('Comprobado hace un momento')
+          : T('Datos actualizados'));
         if (r === 'bajado' || r === 'fusionado') { aplicarTema(); render(); }
       }).catch(function (e) { pintarEstadoSync(); UI.toast(e.message); });
     };
@@ -5574,58 +5625,62 @@
   function configSyncSheet() {
     const c = Sync.config() || {};
     UI.modal(html`
-      <h2>Activar la sincronización</h2>
-      <p class="muted">Se hace una vez y es gratis. Guarda tus datos en tu propia base de datos.</p>
+      <h2>${T('Activar la sincronización')}</h2>
+      <p class="muted">${T('Se hace una vez y es gratis. Guarda tus datos en tu propia ' +
+      'base de datos.')}</p>
 
       <ol class="instr" style="margin:14px 0">
-        <li>Entra en <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">supabase.com</a>,
-          crea una cuenta y pulsa <b>New project</b>. Elige cualquier nombre y contraseña.</li>
-        <li>Cuando termine, ve a <b>Project Settings → API</b> y copia la <b>Project URL</b>
-          y la clave <b>anon public</b>.</li>
-        <li>Ve a <b>SQL Editor</b>, pega el bloque de abajo y pulsa <b>Run</b>. Crea la tabla
-          donde se guardan tus datos, protegida para que solo tú puedas verlos.</li>
-        <li>Ve a <b>Authentication → URL Configuration</b> y añade esta dirección en
-          <b>Redirect URLs</b>:<br><code class="tiny">${Sync.urlRetorno()}</code></li>
+        <li>${raw(Tn('Entra en {enlace}, crea una cuenta y pulsa {boton}. Elige cualquier ' +
+          'nombre y contraseña.',
+          { enlace: '<a href="https://supabase.com" target="_blank" ' +
+            'rel="noopener noreferrer">supabase.com</a>', boton: '<b>New project</b>' }))}</li>
+        <li>${raw(T('Cuando termine, ve a <b>Project Settings → API</b> y copia la ' +
+          '<b>Project URL</b> y la clave <b>anon public</b>.'))}</li>
+        <li>${raw(T('Ve a <b>SQL Editor</b>, pega el bloque de abajo y pulsa <b>Run</b>. ' +
+          'Crea la tabla donde se guardan tus datos, protegida para que solo tú puedas ' +
+          'verlos.'))}</li>
+        <li>${raw(T('Ve a <b>Authentication → URL Configuration</b> y añade esta ' +
+          'dirección en <b>Redirect URLs</b>:'))}<br><code class="tiny">${Sync.urlRetorno()}</code></li>
       </ol>
 
       <div class="row between" style="margin-bottom:6px">
-        <span class="tiny">SQL PARA CREAR LA TABLA</span>
-        <button class="btn sm" data-a="copiarsql">${raw(icon('copy'))} Copiar</button>
+        <span class="tiny">${T('SQL PARA CREAR LA TABLA')}</span>
+        <button class="btn sm" data-a="copiarsql">${raw(icon('copy'))} ${T('Copiar')}</button>
       </div>
       <pre id="sql-box">${Sync.SQL}</pre>
 
       <label class="tiny">PROJECT URL</label>
       <input id="cfg-url" placeholder="https://xxxxxxxx.supabase.co" value="${c.url || ''}"
              autocomplete="off" spellcheck="false" style="margin:5px 0 10px">
-      <label class="tiny">CLAVE ANON PUBLIC</label>
+      <label class="tiny">${T('CLAVE ANON PUBLIC')}</label>
       <input id="cfg-key" placeholder="eyJhbGciOi..." value="${c.key || ''}"
              autocomplete="off" spellcheck="false" style="margin:5px 0 12px">
 
-      <button class="btn primary block" data-a="guardarcfg">Guardar y continuar</button>
+      <button class="btn primary block" data-a="guardarcfg">${T('Guardar y continuar')}</button>
       ${raw(Sync.configPropia() ? '<button class="btn danger block sm" data-a="borrarcfg" style="margin-top:8px">' +
-        'Volver a la conexión que trae la app</button>' : '')}`,
+        esc(T('Volver a la conexión que trae la app')) + '</button>' : '')}`,
       function (el) {
         el.querySelector('[data-a=copiarsql]').onclick = function () {
           const t = el.querySelector('#sql-box').textContent;
           if (navigator.clipboard) navigator.clipboard.writeText(t);
-          UI.toast('SQL copiado');
+          UI.toast(T('SQL copiado'));
         };
         el.querySelector('[data-a=guardarcfg]').onclick = function () {
           try {
             Sync.guardarConfig(el.querySelector('#cfg-url').value, el.querySelector('#cfg-key').value);
             UI.closeModal();
             render();
-            UI.toast('Configuración guardada. Ahora entra con tu correo.');
+            UI.toast(T('Configuración guardada. Ahora entra con tu correo.'));
           } catch (e) {
             UI.toast(e.message);
           }
         };
         const borrar = el.querySelector('[data-a=borrarcfg]');
         if (borrar) borrar.onclick = function () {
-          UI.confirm('Volver a la conexión de la app',
-            'Se borrará la configuración propia de este dispositivo y su sesión. ' +
-            'Tus datos locales y los de la nube no se tocan.', 'Continuar', true).then(function (ok) {
-            if (ok) { Sync.borrarConfig(); UI.closeModal(); render(); UI.toast('Desconectado'); }
+          UI.confirm(T('Volver a la conexión de la app'),
+            T('Se borrará la configuración propia de este dispositivo y su sesión. ' +
+            'Tus datos locales y los de la nube no se tocan.'), T('Continuar'), true).then(function (ok) {
+            if (ok) { Sync.borrarConfig(); UI.closeModal(); render(); UI.toast(T('Desconectado')); }
           });
         };
       });
@@ -5668,40 +5723,41 @@
     if (!Sync.puedeConfigurar()) {
       return html`
         <button class="btn sm ghost" data-alta="" style="margin-bottom:10px">
-          ${raw(icon('back'))} Volver</button>
+          ${raw(icon('back'))} ${T('Volver')}</button>
         <div class="card">
-          <div style="font-weight:600;margin-bottom:4px">Las cuentas las crea quien administra</div>
-          <p class="muted" style="margin:0">Pídele que te dé de alta con tu correo y te
-          pase una contraseña. Luego entras aquí arriba con esos datos y ya puedes
-          cambiarla desde Mi cuenta.</p>
+          <div style="font-weight:600;margin-bottom:4px">${T('Las cuentas las crea quien administra')}</div>
+          <p class="muted" style="margin:0">${T('Pídele que te dé de alta con tu correo ' +
+          'y te pase una contraseña. Luego entras aquí arriba con esos datos y ya puedes ' +
+          'cambiarla desde Mi cuenta.')}</p>
         </div>`;
     }
 
     return html`
       <button class="btn sm ghost" data-alta="" style="margin-bottom:10px">
-        ${raw(icon('back'))} Volver</button>
+        ${raw(icon('back'))} ${T('Volver')}</button>
 
       <div class="card">
-        <div style="font-weight:600;margin-bottom:4px">Crear tu base de datos</div>
-        <p class="muted" style="margin:0">Es gratis y se hace una sola vez. Tus datos quedan
-        en tu propia cuenta de Supabase, no en un servidor mío ni de nadie.</p>
+        <div style="font-weight:600;margin-bottom:4px">${T('Crear tu base de datos')}</div>
+        <p class="muted" style="margin:0">${T('Es gratis y se hace una sola vez. Tus datos ' +
+        'quedan en tu propia cuenta de Supabase, no en un servidor mío ni de nadie.')}</p>
       </div>
 
       <div class="card">
         <ol class="instr">
-          <li>Entra en <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">supabase.com</a>,
-            crea una cuenta y pulsa <b>New project</b>. Nombre y contraseña, los que quieras;
-            elige la región más cercana.</li>
-          <li>Cuando termine, ve a <b>SQL Editor</b>, pega el bloque que te da la bóveda y
-            pulsa <b>Run</b>. Crea la tabla de tus datos.</li>
-          <li>En <b>Authentication → URL Configuration</b>, pon esta dirección en
-            <b>Site URL</b> y en <b>Redirect URLs</b>.</li>
-          <li>En <b>Project Settings → API Keys</b> copia la <b>Publishable key</b>, y la
-            <b>Project URL</b> de <b>Data API</b>.</li>
-          <li>Pega los dos valores en la bóveda y vuelve aquí a entrar con tu correo.</li>
+          <li>${raw(Tn('Entra en {enlace}, crea una cuenta y pulsa {boton}. Nombre y ' +
+            'contraseña, los que quieras; elige la región más cercana.',
+            { enlace: '<a href="https://supabase.com" target="_blank" ' +
+              'rel="noopener noreferrer">supabase.com</a>', boton: '<b>New project</b>' }))}</li>
+          <li>${raw(T('Cuando termine, ve a <b>SQL Editor</b>, pega el bloque que te da la ' +
+            'bóveda y pulsa <b>Run</b>. Crea la tabla de tus datos.'))}</li>
+          <li>${raw(T('En <b>Authentication → URL Configuration</b>, pon esta dirección ' +
+            'en <b>Site URL</b> y en <b>Redirect URLs</b>.'))}</li>
+          <li>${raw(T('En <b>Project Settings → API Keys</b> copia la <b>Publishable ' +
+            'key</b>, y la <b>Project URL</b> de <b>Data API</b>.'))}</li>
+          <li>${T('Pega los dos valores en la bóveda y vuelve aquí a entrar con tu correo.')}</li>
         </ol>
         <button class="btn primary block" data-a="pasoapaso">
-          ${raw(icon('chevron'))} Abrir el paso a paso completo</button>
+          ${raw(icon('chevron'))} ${T('Abrir el paso a paso completo')}</button>
       </div>`;
   }
 
@@ -5717,12 +5773,12 @@
       const v = (root.querySelector('#alta-enlace').value || '').trim();
       const trozo = v.split('#/enlazar/')[1];
       if (!trozo || !Sync.aplicarEnlace(trozo)) {
-        UI.toast('Ese enlace no es válido. Cópialo entero.');
+        UI.toast(T('Ese enlace no es válido. Cópialo entero.'));
         return;
       }
       altaModo = '';
       render();
-      UI.toast('Dispositivo conectado. Ahora entra con tu correo.');
+      UI.toast(T('Dispositivo conectado. Ahora entra con tu correo.'));
     });
 
     bind(root, '[data-a=usarManual]', function () {
@@ -5731,7 +5787,7 @@
           root.querySelector('#alta-key').value);
         altaModo = '';
         render();
-        UI.toast('Guardado. Ahora entra con tu correo.');
+        UI.toast(T('Guardado. Ahora entra con tu correo.'));
       } catch (e) { UI.toast(e.message); }
     });
 
@@ -5740,17 +5796,18 @@
     bind(root, '[data-a=enviarenlace]', function (btn) {
       const campo = root.querySelector('#mail-enlace') || root.querySelector('#sync-mail');
       btn.disabled = true;
-      btn.textContent = 'Enviando…';
+      btn.textContent = T('Enviando…');
       Sync.enviarEnlace(campo.value).then(function (dir) {
         UI.modal(html`
-          <h2>Revisa tu correo</h2>
-          <p class="muted">Hemos enviado un enlace de acceso a <b>${dir}</b>.
-          Ábrelo en este mismo dispositivo y entrarás automáticamente.</p>
-          <p class="tiny">Si no aparece en unos minutos, mira en spam.</p>
-          <button class="btn primary block" data-x="ok">Entendido</button>`,
+          <h2>${T('Revisa tu correo')}</h2>
+          <p class="muted">${raw(Tn('Hemos enviado un enlace de acceso a {correo}. Ábrelo ' +
+          'en este mismo dispositivo y entrarás automáticamente.',
+          { correo: '<b>' + esc(dir) + '</b>' }))}</p>
+          <p class="tiny">${T('Si no aparece en unos minutos, mira en spam.')}</p>
+          <button class="btn primary block" data-x="ok">${T('Entendido')}</button>`,
           function (el) { el.querySelector('[data-x=ok]').onclick = UI.closeModal; });
       }).catch(function (e) {
-        UI.toast(e.message || 'No se pudo enviar el enlace');
+        UI.toast(e.message || T('No se pudo enviar el enlace'));
       }).then(function () {
         render();
       });
@@ -5810,7 +5867,7 @@
           Store.setSetting('tieneClave', true);
           return r;
         });
-      }, 'Entrando…');
+      }, T('Entrando…'));
     });
 
     bind(root, '[data-a=crearCuenta]', function (btn) {
@@ -5819,7 +5876,7 @@
           if (r && r.ok) Store.setSetting('tieneClave', true);
           return r;
         });
-      }, 'Creando…');
+      }, T('Creando…'));
     });
 
     bind(root, '[data-a=verPegar]', function (el) {
@@ -5830,12 +5887,12 @@
     bind(root, '[data-a=usarLinkAcceso]', function (btn) {
       const campo = root.querySelector('#link-acceso');
       btn.disabled = true;
-      btn.textContent = 'Entrando…';
+      btn.textContent = T('Entrando…');
       Sync.entrarConEnlace(campo.value).then(function (r) {
         trasEntrar(r);
       }).catch(function (e) {
         btn.disabled = false;
-        btn.textContent = 'Entrar con ese enlace';
+        btn.textContent = T('Entrar con ese enlace');
         UI.toast(e.message);
       });
     });
@@ -5851,36 +5908,36 @@
 
     const forzar = function (sentido, titulo, aviso) {
       return function () {
-        UI.confirm(titulo, aviso, 'Continuar', true).then(function (ok) {
+        UI.confirm(titulo, aviso, T('Continuar'), true).then(function (ok) {
           if (!ok) return;
           Sync.sincronizar(sentido).then(function () {
             aplicarTema();
             render();
-            UI.toast(sentido === 'bajar' ? 'Datos traídos de la nube' : 'Datos subidos a la nube');
+            UI.toast(sentido === 'bajar' ? T('Datos traídos de la nube') : T('Datos subidos a la nube'));
           }).catch(function (e) { UI.toast(e.message); });
         });
       };
     };
 
-    bind(root, '[data-a=forzarBajar]', forzar('bajar', 'Traer lo de la nube',
-      'Lo que tengas en este dispositivo se reemplaza por lo guardado en la nube.'));
-    bind(root, '[data-a=forzarSubir]', forzar('subir', 'Subir lo de este dispositivo',
-      'Lo guardado en la nube se reemplaza por lo que tengas en este dispositivo.'));
+    bind(root, '[data-a=forzarBajar]', forzar('bajar', T('Traer lo de la nube'),
+      T('Lo que tengas en este dispositivo se reemplaza por lo guardado en la nube.')));
+    bind(root, '[data-a=forzarSubir]', forzar('subir', T('Subir lo de este dispositivo'),
+      T('Lo guardado en la nube se reemplaza por lo que tengas en este dispositivo.')));
 
     bind(root, '[data-a=guardarClave]', function (btn) {
       const nueva = (root.querySelector('#pass-nueva') || {}).value || '';
       const repe = (root.querySelector('#pass-repe') || {}).value || '';
-      if (nueva !== repe) { UI.toast('Las dos contraseñas no coinciden'); return; }
+      if (nueva !== repe) { UI.toast(T('Las dos contraseñas no coinciden')); return; }
 
       btn.disabled = true;
-      btn.textContent = 'Guardando…';
+      btn.textContent = T('Guardando…');
       Sync.establecerClave(nueva).then(function () {
         Store.setSetting('tieneClave', true);
         render();
-        UI.toast('Contraseña guardada. Ya puedes entrar con ella en otros dispositivos.');
+        UI.toast(T('Contraseña guardada. Ya puedes entrar con ella en otros dispositivos.'));
       }).catch(function (e) {
         btn.disabled = false;
-        btn.textContent = 'Guardar contraseña';
+        btn.textContent = T('Guardar contraseña');
         UI.toast(e.message);
       });
     });
@@ -5888,39 +5945,39 @@
     bind(root, '[data-a=sincronizar]', function (btn) {
       btn.disabled = true;
       const antes = btn.innerHTML;
-      btn.textContent = 'Sincronizando…';
+      btn.textContent = T('Sincronizando…');
       Sync.sincronizar().then(function (r) {
-        UI.toast(r === 'bajado' ? 'Datos actualizados desde la nube'
-          : r === 'subido' ? 'Tus datos están guardados en la nube'
-          : 'Ya estaba todo al día');
+        UI.toast(r === 'bajado' ? T('Datos actualizados desde la nube')
+          : r === 'subido' ? T('Tus datos están guardados en la nube')
+          : T('Ya estaba todo al día'));
         aplicarTema();
         render();
       }).catch(function (e) {
         btn.disabled = false;
         btn.innerHTML = antes;
-        UI.toast(e.message || 'No se pudo sincronizar');
+        UI.toast(e.message || T('No se pudo sincronizar'));
       });
     });
 
     bind(root, '[data-a=salir]', function () {
       UI.modal(html`
-        <h2>Cerrar sesión</h2>
-        <p class="muted">Tus datos siguen guardados en la nube y volverán al entrar de nuevo.
-        Elige qué hacer con la copia de este dispositivo.</p>
+        <h2>${T('Cerrar sesión')}</h2>
+        <p class="muted">${T('Tus datos siguen guardados en la nube y volverán al entrar ' +
+        'de nuevo. Elige qué hacer con la copia de este dispositivo.')}</p>
         <div class="stack" style="margin-top:14px">
-          <button class="btn block" data-x="conservar">Cerrar y conservarlos aquí</button>
-          <button class="btn danger block" data-x="borrar">Cerrar y borrarlos de este dispositivo</button>
+          <button class="btn block" data-x="conservar">${T('Cerrar y conservarlos aquí')}</button>
+          <button class="btn danger block" data-x="borrar">${T('Cerrar y borrarlos de este dispositivo')}</button>
         </div>
-        <p class="tiny" style="margin-top:10px">Borrarlos es lo apropiado si el dispositivo
-        no es tuyo o lo va a usar otra persona con su cuenta.</p>
-        <button class="btn ghost block sm" data-x="cancelar" style="margin-top:8px">Cancelar</button>`,
+        <p class="tiny" style="margin-top:10px">${T('Borrarlos es lo apropiado si el ' +
+        'dispositivo no es tuyo o lo va a usar otra persona con su cuenta.')}</p>
+        <button class="btn ghost block sm" data-x="cancelar" style="margin-top:8px">${T('Cancelar')}</button>`,
         function (el) {
           const cerrar = function (borrar) {
             UI.closeModal();
             Sync.salir(borrar).then(function () {
               aplicarTema();
               render();
-              UI.toast(borrar ? 'Sesión cerrada y datos borrados' : 'Sesión cerrada');
+              UI.toast(borrar ? T('Sesión cerrada y datos borrados') : T('Sesión cerrada'));
             });
           };
           el.querySelector('[data-x=conservar]').onclick = function () { cerrar(false); };
@@ -5943,11 +6000,11 @@
       }).then(function () {
         aplicarTema();
         go('cuenta');
-        UI.toast('Ahora estás como ' + Sync.email());
+        UI.toast(Tn('Ahora estás como {correo}', { correo: Sync.email() }));
       }).catch(function () {
         aplicarTema();
         render();
-        UI.toast('Has entrado como ' + Sync.email());
+        UI.toast(Tn('Has entrado como {correo}', { correo: Sync.email() }));
       });
     }
 
@@ -5957,17 +6014,21 @@
       aplicarTema();
       go('cuenta');
       const piezas = [];
-      if (Store.routines().length) piezas.push(Store.routines().length + ' rutinas');
-      if (Store.sessions().length) piezas.push(Store.sessions().length + ' entrenamientos');
+      if (Store.routines().length) {
+        piezas.push(Tp(Store.routines().length, '{n} rutina', '{n} rutinas'));
+      }
+      if (Store.sessions().length) {
+        piezas.push(Tp(Store.sessions().length, '{n} entrenamiento', '{n} entrenamientos'));
+      }
       if (Sync.sincronizaClaves() && (IA.activa() || Spotify.configurado())) {
-        piezas.push('tus claves');
+        piezas.push(T('tus claves'));
       }
       UI.toast(piezas.length
-        ? 'Listo: ' + piezas.join(', ') + ' en este dispositivo'
-        : 'Has entrado como ' + Sync.email());
+        ? Tn('Listo: {lista} en este dispositivo', { lista: piezas.join(', ') })
+        : Tn('Has entrado como {correo}', { correo: Sync.email() }));
     }).catch(function (e) {
       render();
-      UI.toast(e.message || 'Entraste, pero no se pudo sincronizar todavía');
+      UI.toast(e.message || T('Entraste, pero no se pudo sincronizar todavía'));
     });
   }
 
@@ -5985,12 +6046,12 @@
     caja.innerHTML = html`
       <span class="row-icon">${raw(icon('down'))}</span>
       <div class="grow">
-        <div style="font-weight:600;font-size:.95rem">Hay una versión nueva</div>
+        <div style="font-weight:600;font-size:.95rem">${T('Hay una versión nueva')}</div>
         <div class="tiny">${seRecargaSola
-          ? 'Se instala sola en un momento. Tus datos no se tocan.'
-          : 'Recarga cuando termines. Tus datos no se tocan.'}</div>
+          ? T('Se instala sola en un momento. Tus datos no se tocan.')
+          : T('Recarga cuando termines. Tus datos no se tocan.')}</div>
       </div>
-      <button class="btn sm primary" data-recargar>Actualizar ya</button>`;
+      <button class="btn sm primary" data-recargar>${T('Actualizar ya')}</button>`;
     caja.innerHTML = '<div class="aviso">' + caja.innerHTML + '</div>';
     host.parentNode.insertBefore(caja, host);
     caja.querySelector('[data-recargar]').onclick = function () { location.reload(); };
@@ -6366,7 +6427,7 @@
         } catch (e) { /* modo privado */ }
         if (veniaDeActualizar) {
           versionDelSW().then(function (v) {
-            UI.toast('Ya estás en la versión nueva' +
+            UI.toast(T('Ya estás en la versión nueva') +
               (v ? ' (' + v.replace('trainingfr-', '') + ')' : '') + '.');
           });
         }
@@ -6431,7 +6492,7 @@
         /* vuelve a donde estaba, que es Música: aterrizar en la portada parece
            que no ha pasado nada */
         if (sp.volver && location.hash !== sp.volver) location.hash = sp.volver;
-        UI.toast('Spotify conectado. Ya puedes activar el reproductor.');
+        UI.toast(T('Spotify conectado. Ya puedes activar el reproductor.'));
       } else if (sp.error) {
         /* el detalle queda escrito en la pantalla de Música, que un aviso corto
            no da tiempo a leerlo */
@@ -6448,8 +6509,9 @@
       const logradas = Objetivos.revisar();
       if (logradas.length) {
         setTimeout(function () {
-          UI.toast('Objetivo cumplido: ' + Objetivos.etiqueta(logradas[0]));
-          Alertas.avisar('Objetivo cumplido', Objetivos.etiqueta(logradas[0]));
+          UI.toast(Tn('Objetivo cumplido: {que}',
+            { que: Objetivos.etiqueta(logradas[0]) }));
+          Alertas.avisar(T('Objetivo cumplido'), Objetivos.etiqueta(logradas[0]));
         }, 1200);
       }
 
@@ -6460,14 +6522,14 @@
       Sync.arrancarAuto(function () {
         aplicarTema();
         render();
-        UI.toast('Actualizado desde otro dispositivo');
+        UI.toast(T('Actualizado desde otro dispositivo'));
       });
 
       /* en segundo plano se guardan las imágenes de lo que ya tienes planificado */
       setTimeout(function () { Offline.precargarRutinas(); }, 2500);
     }).catch(function (err) {
       console.error(err);
-      fallo('No se pudo descargar el catálogo de ejercicios. Comprueba tu conexión.');
+      fallo(T('No se pudo descargar el catálogo de ejercicios. Comprueba tu conexión.'));
     });
   }
 
