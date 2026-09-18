@@ -500,12 +500,19 @@
     const hora = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     if (mismoDia) return T('Hoy') + ' · ' + hora;
     if (ayer) return T('Ayer') + ' · ' + hora;
-    return diaCorto(d) + ' ' + d.getDate() + ' ' + mesCorto(d) + ' · ' + hora;
+    return diaCorto(d) + ' ' + diaYMes(d) + ' · ' + hora;
   }
 
   function fechaCorta(ts) {
-    const d = new Date(ts);
-    return d.getDate() + ' ' + mesCorto(d);
+    return diaYMes(new Date(ts));
+  }
+
+  /* El día y el mes en el orden de cada idioma: en español '18 sep', en
+     inglés 'Sep 18'. Si no, la fecha se lee como si estuviera al revés. */
+  function diaYMes(d) {
+    return (g.Idioma && Idioma.actual() === 'en')
+      ? mesCorto(d) + ' ' + d.getDate()
+      : d.getDate() + ' ' + mesCorto(d);
   }
 
   /* ---------- sonido y vibración ---------- */

@@ -1205,10 +1205,10 @@
                 : Tn('Tus avisos del calendario se acaban en {n} días', { n: caduca.dias }))
             : T('Tu calendario está desfasado');
           const txt = caduca
-            ? 'Los generaste con un plazo y ese plazo termina. Vuelve a descargarlo y ' +
-              'siguen sonando desde donde estaban.'
-            : 'Has cambiado recordatorios desde la última descarga. El calendario sigue ' +
-              'avisando con lo de antes hasta que vuelvas a bajarlo.';
+            ? T('Los generaste con un plazo y ese plazo termina. Vuelve a descargarlo y ' +
+              'siguen sonando desde donde estaban.')
+            : T('Has cambiado recordatorios desde la última descarga. El calendario sigue ' +
+              'avisando con lo de antes hasta que vuelvas a bajarlo.');
 
           return '<div class="cal-viejo">' +
             '<span class="cv-ico">' + icon('aviso') + '</span>' +
@@ -1218,11 +1218,12 @@
 
         <button class="btn primary block" data-a="calendario" ${lista.length ? '' : 'disabled'}>
           ${raw(icon('down'))} ${Alertas.calendarioDesfasado() || Alertas.calendarioCaduca()
-            ? 'Volver a descargar' : 'Descargar para el calendario'}</button>
-        <p class="tiny" style="margin-top:8px">Se crean como eventos semanales con aviso,
-        llamados <b>«Training FR · …»</b>, y tocando uno se abre la app en la pantalla que
-        toca. Antes de bajarlo eliges hasta cuándo quieres que suenen. Al volver a
-        descargarlo, los que ya tengas se actualizan en vez de duplicarse.</p>
+            ? T('Volver a descargar') : T('Descargar para el calendario')}</button>
+        <p class="tiny" style="margin-top:8px">${raw(Tn('Se crean como eventos semanales ' +
+        'con aviso, llamados {nombre}, y tocando uno se abre la app en la pantalla que ' +
+        'toca. Antes de bajarlo eliges hasta cuándo quieres que suenen. Al volver a ' +
+        'descargarlo, los que ya tengas se actualizan en vez de duplicarse.',
+        { nombre: '<b>«Training FR · …»</b>' }))}</p>
 
         <!-- Lo que hace que esto sea administrable no es el archivo, es dónde
              se mete: en un calendario propio se apaga o se borra entero de un
@@ -1230,18 +1231,22 @@
              lo decide el .ics, lo decide quien lo importa, así que se dice. -->
         <div class="cal-truco">
           <span class="ct-ico">${raw(icon('aviso'))}</span>
-          <span class="grow"><b>Mételos en un calendario aparte</b>
-          <span class="tiny">Crea antes un calendario llamado <b>Training FR</b> en tu móvil
-          y elígelo al importar. Así los apagas, los escondes o los borras todos de una vez,
-          sin tocar el resto de tu agenda.</span></span>
+          <span class="grow"><b>${T('Mételos en un calendario aparte')}</b>
+          <span class="tiny">${raw(Tn('Crea antes un calendario llamado {nombre} en tu ' +
+          'móvil y elígelo al importar. Así los apagas, los escondes o los borras todos de ' +
+          'una vez, sin tocar el resto de tu agenda.',
+          { nombre: '<b>Training FR</b>' }))}</span></span>
         </div>
 
         ${raw(Alertas.cuantosExportados() ? html`
           <button class="btn block sm" data-a="quitarcal" style="margin-top:10px">
-            ${raw(icon('trash'))} Quitarlos del calendario</button>
-          <p class="tiny" style="margin-top:7px">Descarga un archivo que los retira. Ábrelo
-          igual que el otro: el calendario borra los ${Alertas.cuantosExportados()} avisos
-          que le pusiste desde aquí, incluidos los de horas que ya cambiaste.</p>` : '')}
+            ${raw(icon('trash'))} ${T('Quitarlos del calendario')}</button>
+          <p class="tiny" style="margin-top:7px">${Tp(Alertas.cuantosExportados(),
+            'Descarga un archivo que lo retira. Ábrelo igual que el otro: el calendario ' +
+            'borra el aviso que le pusiste desde aquí, aunque ya le cambiaras la hora.',
+            'Descarga un archivo que los retira. Ábrelo igual que el otro: el calendario ' +
+            'borra los {n} avisos que le pusiste desde aquí, incluidos los de horas que ya ' +
+            'cambiaste.')}</p>` : '')}
       </div>`;
   };
 
@@ -1330,44 +1335,43 @@
     const d = Alertas.diagnostico();
 
     UI.modal(html`
-      <h2>Los avisos</h2>
+      <h2>${T('Los avisos')}</h2>
 
       <div class="card tarjeta-premium" style="margin-top:12px">
-        <div class="pre-encima">${d.permiso === 'granted' ? 'Activados'
-          : d.permiso === 'denied' ? 'Bloqueados' : 'Sin activar'}</div>
-        <p class="muted" style="margin:6px 0 0;font-size:.88rem">${raw(
+        <div class="pre-encima">${d.permiso === 'granted' ? T('Activados')
+          : d.permiso === 'denied' ? T('Bloqueados') : T('Sin activar')}</div>
+        <p class="muted" style="margin:6px 0 0;font-size:.88rem">${raw(esc(
           d.permiso === 'granted'
             ? (d.ultimoAviso
-                ? 'El último salió ' + esc(UI.fechaCorta(d.ultimoAviso)) + '.'
-                : 'Todavía no ha salido ninguno.')
-            : 'Ahora mismo no va a sonar nada. Cierra esto y mira la tarjeta de ' +
-              'arriba: ahí están los pasos.')}</p>
+                ? Tn('El último salió {cuando}.', { cuando: UI.fechaCorta(d.ultimoAviso) })
+                : T('Todavía no ha salido ninguno.'))
+            : T('Ahora mismo no va a sonar nada. Cierra esto y mira la tarjeta de ' +
+              'arriba: ahí están los pasos.')))}</p>
         ${raw(d.permiso === 'granted'
           ? '<button class="btn block btn-arranque" data-x="probar" style="margin-top:12px">' +
-            icon('campana') + ' Lanzar uno de prueba</button>'
+            icon('campana') + ' ' + esc(T('Lanzar uno de prueba')) + '</button>'
           : '')}
       </div>
 
-      <div class="list-title">Qué funciona y qué no</div>
+      <div class="list-title">${T('Qué funciona y qué no')}</div>
       <div class="list">
-        ${raw(filaEstado('Con la app abierta', true,
-          'Suenan a su hora, aunque la tengas en segundo plano.'))}
-        ${raw(filaEstado('Con la app cerrada', false,
-          'Una página web no ejecuta nada cerrada. Para eso está el calendario, ' +
-          'abajo del todo.'))}
-        ${raw(filaEstado('En la pantalla de inicio', d.instalada || !d.esIOS,
+        ${raw(filaEstado(T('Con la app abierta'), true,
+          T('Suenan a su hora, aunque la tengas en segundo plano.')))}
+        ${raw(filaEstado(T('Con la app cerrada'), false,
+          T('Una página web no ejecuta nada cerrada. Para eso está el calendario, ' +
+          'abajo del todo.')))}
+        ${raw(filaEstado(T('En la pantalla de inicio'), d.instalada || !d.esIOS,
           d.esIOS
-            ? (d.instalada ? 'Instalada, que es donde el iPhone permite los avisos.'
-                : 'En el iPhone hacen falta desde la app instalada, no desde el navegador.')
-            : 'No hace falta instalarla en este dispositivo.'))}
+            ? (d.instalada ? T('Instalada, que es donde el iPhone permite los avisos.')
+                : T('En el iPhone hacen falta desde la app instalada, no desde el navegador.'))
+            : T('No hace falta instalarla en este dispositivo.')))}
       </div>
 
-      <p class="tiny" style="margin-top:12px">${raw(d.activas
-        ? esc(d.activas + (d.activas === 1 ? ' recordatorio encendido.' :
-            ' recordatorios encendidos.'))
-        : 'No tienes ninguno encendido, así que no hay nada que pueda sonar.')}</p>
+      <p class="tiny" style="margin-top:12px">${raw(esc(d.activas
+        ? Tp(d.activas, '{n} recordatorio encendido.', '{n} recordatorios encendidos.')
+        : T('No tienes ninguno encendido, así que no hay nada que pueda sonar.')))}</p>
 
-      <button class="btn ghost block sm" data-x="cerrar" style="margin-top:12px">Cerrar</button>`,
+      <button class="btn ghost block sm" data-x="cerrar" style="margin-top:12px">${T('Cerrar')}</button>`,
       function (el) {
         el.querySelector('[data-x=cerrar]').onclick = UI.closeModal;
         const probar = el.querySelector('[data-x=probar]');
@@ -1477,7 +1481,7 @@
       activa: !!a.activa,
       control: '<button class="sw ' + (a.activa ? 'on' : '') + '" data-tog="' + a.id + '" ' +
         'role="switch" aria-checked="' + a.activa + '" ' +
-        'aria-label="' + esc(Tn('Activar {que}', { que: a.titulo })) + '"></button>'
+        'aria-label="' + esc(Tn('Activar {que}', { que: Alertas.tituloEn(a) })) + '"></button>'
     });
   }
 
@@ -1509,7 +1513,7 @@
       '<div class="rec-hora">' + esc(UI.hora(grande)) +
       (horas.length > 1
         ? '<i>+' + (horas.length - 1) + '</i>' : '') + '</div>' +
-      '<div class="rec-que">' + esc(Alertas.tituloEn(a, grande)) + '</div>' +
+      '<div class="rec-que">' + esc(a.tituloHecho || Alertas.tituloEn(a, grande)) + '</div>' +
       '<div class="rec-dias">' + esc(Alertas.resumenDias(a)) + '</div>' +
       '</div>' +
       o.control +
@@ -1566,49 +1570,49 @@
 
     UI.modal(html`
       <div class="conf-disco cambio">${raw(icon('chispa'))}</div>
-      <h2 class="conf-tit">Generar alertas automáticamente</h2>
-      <p class="muted conf-txt">Con lo que ya hay en la app: tu peso, tus horas, tus
-      rutinas y lo que tomas. Las horas salen calculadas, no son horas por defecto.</p>
+      <h2 class="conf-tit">${T('Generar alertas automáticamente')}</h2>
+      <p class="muted conf-txt">${T('Con lo que ya hay en la app: tu peso, tus horas, tus ' +
+      'rutinas y lo que tomas. Las horas salen calculadas, no son horas por defecto.')}</p>
 
       <div class="ag-lista">
         ${raw(hayPerfil
-          ? fila('vaso', 'Agua', 'Los vasos que te tocan por tu peso, repartidos entre ' +
-              'que te levantas y dos horas antes de dormir') +
-            fila('nutricion', 'Comidas', 'Una por cada comida que haces, con las calorías ' +
-              'y la proteína que le tocan a cada una') +
-            fila('dumbbell', 'Entrenamiento', 'Los días que tienen rutina asignada, a la ' +
-              'hora a la que entrenas de verdad') +
-            fila('perfil', 'Pesarte', 'Los lunes al levantarte, en ayunas')
-          : fila('aviso', 'Te falta el perfil', 'Sin tu peso, tu altura y tus horas no ' +
-              'puedo calcular ninguna. Complétalo y vuelve.'))}
-        ${raw(sups ? fila('bote', 'Suplementos', sups + (sups === 1 ? ' apuntado' :
-          ' apuntados') + ', agrupados por hora para no sonar tres veces seguidas') : '')}
+          ? fila('vaso', T('Agua'), T('Los vasos que te tocan por tu peso, repartidos ' +
+              'entre que te levantas y dos horas antes de dormir')) +
+            fila('nutricion', T('Comidas'), T('Una por cada comida que haces, con las ' +
+              'calorías y la proteína que le tocan a cada una')) +
+            fila('dumbbell', T('Entrenamiento'), T('Los días que tienen rutina asignada, ' +
+              'a la hora a la que entrenas de verdad')) +
+            fila('perfil', T('Pesarte'), T('Los lunes al levantarte, en ayunas'))
+          : fila('aviso', T('Te falta el perfil'), T('Sin tu peso, tu altura y tus horas ' +
+              'no puedo calcular ninguna. Complétalo y vuelve.')))}
+        ${raw(sups ? fila('bote', T('Suplementos'), Tp(sups,
+          '{n} apuntado, agrupados por hora para no sonar tres veces seguidas',
+          '{n} apuntados, agrupados por hora para no sonar tres veces seguidas')) : '')}
       </div>
 
       <div class="ag-nota">
         ${raw(icon('check'))}
-        <span class="grow"><b>No te duplica nada.</b>
-        <span class="tiny">Las que ya existen se actualizan con las horas nuevas.
-        ${raw(prev.retiradas ? (prev.retiradas === 1
-          ? 'Se retira 1 que la app creó y que ya no tiene sentido con tus datos de ahora. '
-          : 'Se retiran ' + prev.retiradas + ' que creó la app y que ya no tienen sentido ' +
-            'con tus datos de ahora. ') : '')}
-        ${raw(prev.tuyas === 1
-          ? 'La que has creado tú no se toca, y si apagaste alguna sigue apagada.'
-          : prev.tuyas
-            ? 'Las ' + prev.tuyas + ' que has creado tú no se tocan, y si apagaste ' +
-              'alguna sigue apagada.'
-            : 'Y si apagaste alguna, sigue apagada.')}</span></span>
+        <span class="grow"><b>${T('No te duplica nada.')}</b>
+        <span class="tiny">${T('Las que ya existen se actualizan con las horas nuevas.')}
+        ${raw(esc(prev.retiradas ? Tp(prev.retiradas,
+          'Se retira {n} que la app creó y que ya no tiene sentido con tus datos de ahora.',
+          'Se retiran {n} que creó la app y que ya no tienen sentido con tus datos de ' +
+          'ahora.') + ' ' : ''))}
+        ${raw(esc(prev.tuyas
+          ? Tp(prev.tuyas,
+              'La que has creado tú no se toca, y si apagaste alguna sigue apagada.',
+              'Las {n} que has creado tú no se tocan, y si apagaste alguna sigue apagada.')
+          : T('Y si apagaste alguna, sigue apagada.')))}</span></span>
       </div>
 
       <div class="cb-acciones" style="margin-top:16px">
         <button class="btn primary grow btn-arranque" data-g="ok" ${raw(hayPerfil ? '' : 'disabled')}>
-          ${raw(icon('chispa'))} ${raw(prev.nuevas === prev.total
-            ? 'Generarlas' : 'Generar y poner al día')}</button>
-        <button class="btn vidrio" data-g="no">Ahora no</button>
+          ${raw(icon('chispa'))} ${prev.nuevas === prev.total
+            ? T('Generarlas') : T('Generar y poner al día')}</button>
+        <button class="btn vidrio" data-g="no">${T('Ahora no')}</button>
       </div>
       ${raw(hayPerfil ? '' : '<button class="btn ghost block sm" data-g="perfil" ' +
-        'style="margin-top:9px">Completar mi perfil</button>')}`,
+        'style="margin-top:9px">' + esc(T('Completar mi perfil')) + '</button>')}`,
       function (el) {
         el.onclick = function (ev) {
           const b = ev.target.closest('[data-g]');
@@ -1652,7 +1656,7 @@
         if (r === 'granted') {
           Alertas.avisar('Avisos activados', 'Así te avisaré cuando toque entrenar.');
         } else if (r === 'denied') {
-          UI.toast('Has bloqueado los avisos');
+          UI.toast(T('Has bloqueado los avisos'));
         }
       });
     });
@@ -1678,28 +1682,29 @@
       if (!s) return;
       Alertas.crearDesdeSugerencia(s);
       render();
-      UI.toast('«' + s.titulo + '» creado con ' + s.horas.length +
-        (s.horas.length === 1 ? ' aviso' : ' avisos'));
+      UI.toast(Tn(s.horas.length === 1 ? '«{que}» creado con {n} aviso'
+        : '«{que}» creado con {n} avisos',
+        { que: T(s.titulo), n: s.horas.length }));
     });
 
     bind(root, '[data-a=crearTodas]', function () {
       const sug = Alertas.sugerencias().filter(function (x) { return !Alertas.yaExiste(x); });
       sug.forEach(Alertas.crearDesdeSugerencia);
       render();
-      UI.toast(sug.length + ' recordatorios creados');
+      UI.toast(Tp(sug.length, '{n} recordatorio creado', '{n} recordatorios creados'));
     });
 
     bind(root, '[data-a=desdeRutinas]', function () {
       const a = Alertas.desdeRutinas();
-      if (!a) { UI.toast('Antes asigna días a alguna rutina'); return; }
+      if (!a) { UI.toast(T('Antes asigna días a alguna rutina')); return; }
       render();
-      UI.toast('Recordatorio creado para tus días de entrenamiento');
+      UI.toast(T('Recordatorio creado para tus días de entrenamiento'));
     });
 
     /* Con la fecha en el nombre: de otra manera, la tercera descarga se llama
        «training-fr-alertas (2).ics» y no hay forma de saber cuál es la buena. */
     const bajarICS = function (texto, sufijo, aviso) {
-      if (!texto) { UI.toast('No hay nada que llevar al calendario'); return; }
+      if (!texto) { UI.toast(T('No hay nada que llevar al calendario')); return; }
       const d = new Date();
       const dd = function (n) { return String(n).padStart(2, '0'); };
       const blob = new Blob([texto], { type: 'text/calendar;charset=utf-8' });
@@ -1721,8 +1726,9 @@
 
       const fin = function (id) {
         const t = Alertas.finDe(id);
-        return t ? 'Hasta el ' + UI.fechaCorta(t) + ' de ' + new Date(t).getFullYear()
-          : 'Sin fecha de fin';
+        return t ? Tn('Hasta el {fecha} de {ano}',
+            { fecha: UI.fechaCorta(t), ano: new Date(t).getFullYear() })
+          : T('Sin fecha de fin');
       };
 
       const opciones = function () {
@@ -1730,25 +1736,25 @@
           return '<button class="opcion ' + (elegido === p.id ? 'on' : '') +
             '" data-plazo="' + esc(p.id) + '" style="--tono:var(--acc)">' +
             '<span class="op-ico">' + icon(p.meses ? 'timer' : 'reloj') + '</span>' +
-            '<span class="grow"><span class="op-nom">' + esc(p.label) + '</span>' +
-            '<span class="op-sub">' + esc(p.sub) + ' · ' + esc(fin(p.id)) + '</span></span>' +
+            '<span class="grow"><span class="op-nom">' + esc(T(p.label)) + '</span>' +
+            '<span class="op-sub">' + esc(T(p.sub)) + ' · ' + esc(fin(p.id)) + '</span></span>' +
             '<span class="op-marca">' + icon('check') + '</span></button>';
         }).join('');
       };
 
       UI.modal(html`
         <div class="conf-disco cambio">${raw(icon('calendario'))}</div>
-        <h2 class="conf-tit">¿Hasta cuándo?</h2>
-        <p class="muted conf-txt">Los avisos se repiten cada semana. Dime hasta qué fecha
-        los quieres en el calendario; puedes volver a descargarlo cuando quieras para
-        estirarlos.</p>
+        <h2 class="conf-tit">${T('¿Hasta cuándo?')}</h2>
+        <p class="muted conf-txt">${T('Los avisos se repiten cada semana. Dime hasta qué ' +
+        'fecha los quieres en el calendario; puedes volver a descargarlo cuando quieras ' +
+        'para estirarlos.')}</p>
 
         <div class="opciones" id="pz-lista">${raw(opciones())}</div>
 
         <div class="cb-acciones" style="margin-top:16px">
           <button class="btn primary grow btn-arranque" data-x="ok">
-            ${raw(icon('down'))} Descargar</button>
-          <button class="btn vidrio" data-x="no">Cancelar</button>
+            ${raw(icon('down'))} ${T('Descargar')}</button>
+          <button class="btn vidrio" data-x="no">${T('Cancelar')}</button>
         </div>`,
         function (el) {
           /* El clic se escucha en la lista y no en cada botón: al repintarla
@@ -1766,7 +1772,7 @@
           el.querySelector('[data-x=ok]').onclick = function () {
             UI.closeModal();
             bajarICS(Alertas.ics(elegido), '',
-              'Archivo descargado. Ábrelo para añadirlo al calendario.');
+              T('Archivo descargado. Ábrelo para añadirlo al calendario.'));
             render();
           };
         });
@@ -1775,13 +1781,13 @@
     bind(root, '[data-a=calendario]', plazoSheet);
 
     bind(root, '[data-a=quitarcal]', function () {
-      UI.confirm('Quitarlos del calendario',
-        'Se descarga un archivo que retira los avisos de Training FR de tu calendario. ' +
-        'Ábrelo y acéptalo igual que el otro. Tus recordatorios de la app no se tocan.',
-        'Descargar').then(function (ok) {
+      UI.confirm(T('Quitarlos del calendario'),
+        T('Se descarga un archivo que retira los avisos de Training FR de tu calendario. ' +
+        'Ábrelo y acéptalo igual que el otro. Tus recordatorios de la app no se tocan.'),
+        T('Descargar')).then(function (ok) {
         if (!ok) return;
         bajarICS(Alertas.icsCancelar(), '-quitar',
-          'Archivo descargado. Ábrelo para retirarlos del calendario.');
+          T('Archivo descargado. Ábrelo para retirarlos del calendario.'));
       });
     });
   };
@@ -1800,21 +1806,29 @@
 
      Un formulario que enseña el resultado mientras lo rellenas no necesita
      explicar casi nada. */
+  /* Si el campo sigue diciendo lo mismo que ensenamos —lo guardado, traducido—
+     se devuelve lo guardado tal cual. Solo cuando escribes de verdad se cambia,
+     y entonces se guarda con tus palabras. */
+  function sinTocar(escrito, guardado) {
+    const t = String(escrito || '').trim();
+    return t === T(guardado || '').trim() ? (guardado || '') : t;
+  }
+
   function alertaSheet(existente) {
     const a = existente ? JSON.parse(JSON.stringify(existente)) : Alertas.nueva('entreno');
 
     UI.modal(html`
-      <h2>${existente ? 'Editar recordatorio' : 'Nuevo recordatorio'}</h2>
+      <h2>${existente ? T('Editar recordatorio') : T('Nuevo recordatorio')}</h2>
 
       <!-- Con su rotulo. Uno nuevo nace con los valores por defecto del tipo
            —«Toca entrenar», 18:00, de lunes a viernes— que son justo los del
            que ya suele tener creado, asi que la vista previa se lee como si
            hubieras abierto ese. Decir que es una vista previa lo desambigua. -->
-      <div class="al-previo">${existente ? 'Así queda' : 'Así va a quedar'}</div>
+      <div class="al-previo">${existente ? T('Así queda') : T('Así va a quedar')}</div>
       <div id="al-vista" class="al-vista"></div>
       <p class="tiny al-repe" id="al-repe" hidden></p>
 
-      <label class="tiny">QUÉ ES</label>
+      <label class="tiny">${T('QUÉ ES')}</label>
       <div class="al-tipos">
         ${raw(Object.keys(Alertas.TIPOS).map(function (k) {
           const t = Alertas.TIPOS[k];
@@ -1825,49 +1839,49 @@
         }).join(''))}
       </div>
 
-      <label class="tiny">QUÉ DICE</label>
+      <label class="tiny">${T('QUÉ DICE')}</label>
       <div class="al-campos">
         <div class="al-campo">
-          <span class="alc-et">Título</span>
-          <input id="al-tit" value="${a.titulo}" placeholder="Toca entrenar">
+          <span class="alc-et">${T('Título')}</span>
+          <input id="al-tit" value="${T(a.titulo)}" placeholder="${T('Toca entrenar')}">
         </div>
         <div class="al-campo">
-          <span class="alc-et">Debajo</span>
-          <input id="al-msg" value="${a.mensaje}" placeholder="Opcional">
+          <span class="alc-et">${T('Debajo')}</span>
+          <input id="al-msg" value="${T(a.mensaje)}" placeholder="${T('Opcional')}">
         </div>
       </div>
-      <p class="tiny" id="al-nota-ia" style="margin:7px 0 0">El texto lo escribe tu
-      entrenador cada día con lo que llevas hecho, así que el de aquí arriba solo sale
-      si la IA no está disponible a esa hora.</p>
+      <p class="tiny" id="al-nota-ia" style="margin:7px 0 0">${T('El texto lo escribe tu ' +
+      'entrenador cada día con lo que llevas hecho, así que el de aquí arriba solo sale ' +
+      'si la IA no está disponible a esa hora.')}</p>
 
-      <label class="tiny" style="margin-top:16px;display:block">A QUÉ HORA</label>
+      <label class="tiny" style="margin-top:16px;display:block">${T('A QUÉ HORA')}</label>
       <div class="al-horas" id="al-horas"></div>
       <div class="row" style="gap:8px;margin-top:9px">
         <input id="al-hora" type="time" value="${a.horas[0]}" class="grow">
-        <button class="btn sm" data-x="addhora">${raw(icon('plus'))} Añadir</button>
+        <button class="btn sm" data-x="addhora">${raw(icon('plus'))} ${T('Añadir')}</button>
       </div>
 
       <details class="al-repartir" id="al-repartir">
-        <summary>${raw(icon('chevron'))} Repartir varias veces al día</summary>
-        <p class="tiny" style="margin:9px 0">Para el agua o las comidas: dime cuántas veces
-        y entre qué horas, y las coloco repartidas.</p>
+        <summary>${raw(icon('chevron'))} ${T('Repartir varias veces al día')}</summary>
+        <p class="tiny" style="margin:9px 0">${T('Para el agua o las comidas: dime cuántas ' +
+        'veces y entre qué horas, y las coloco repartidas.')}</p>
         <div class="row" style="gap:8px">
-          <div class="grow"><div class="tiny">VECES</div>
+          <div class="grow"><div class="tiny">${T('VECES')}</div>
             <input id="rep-n" type="number" inputmode="numeric" min="2" max="12" value="8"
                    style="text-align:center;margin-top:4px"></div>
-          <div class="grow"><div class="tiny">DESDE</div>
+          <div class="grow"><div class="tiny">${T('DESDE')}</div>
             <input id="rep-a" type="time" value="08:00" style="margin-top:4px"></div>
-          <div class="grow"><div class="tiny">HASTA</div>
+          <div class="grow"><div class="tiny">${T('HASTA')}</div>
             <input id="rep-b" type="time" value="21:00" style="margin-top:4px"></div>
         </div>
-        <button class="btn block sm" data-x="repartir" style="margin-top:10px">Repartir</button>
+        <button class="btn block sm" data-x="repartir" style="margin-top:10px">${T('Repartir')}</button>
       </details>
 
       <div class="row between" style="margin-top:16px;align-items:baseline">
-        <label class="tiny" style="margin:0">QUÉ DÍAS</label>
+        <label class="tiny" style="margin:0">${T('QUÉ DÍAS')}</label>
         <span class="row" style="gap:6px">
-          <button class="btn sm ghost" data-dias="todos">Todos</button>
-          <button class="btn sm ghost" data-dias="semana">L-V</button>
+          <button class="btn sm ghost" data-dias="todos">${T('Todos')}</button>
+          <button class="btn sm ghost" data-dias="semana">${T('L-V')}</button>
         </span>
       </div>
       <!-- Siete circulos y no siete pastillas con el nombre entero: los dias de
@@ -1882,9 +1896,9 @@
       </div>
 
       <button class="btn primary block btn-arranque" data-x="guardar"
-              style="margin-top:18px">Guardar</button>
+              style="margin-top:18px">${T('Guardar')}</button>
       ${raw(existente ? '<button class="btn danger block sm" data-x="borrar" ' +
-        'style="margin-top:8px">Borrar recordatorio</button>' : '')}`,
+        'style="margin-top:8px">' + esc(T('Borrar recordatorio')) + '</button>' : '')}`,
       function (el) {
         /* La vista previa: la misma tarjeta que va a salir en la lista, rehecha
            cada vez que cambia algo. Es lo que convierte el formulario en algo
@@ -1901,8 +1915,8 @@
           })[0];
           aviso.hidden = !choca;
           if (choca) {
-            aviso.textContent = 'Ya tienes «' + choca.titulo + '» a esa hora. Si lo ' +
-              'guardas, sonarán los dos.';
+            aviso.textContent = Tn('Ya tienes «{titulo}» a esa hora. Si lo ' +
+              'guardas, sonarán los dos.', { titulo: T(choca.titulo) });
           }
         };
 
@@ -1910,8 +1924,8 @@
           avisarRepetido();
           el.querySelector('#al-vista').innerHTML = cajaAlerta({
             tipo: a.tipo,
-            titulo: el.querySelector('#al-tit').value.trim() ||
-              (Alertas.TIPOS[a.tipo] || {}).titulo || 'Recordatorio',
+            tituloHecho: el.querySelector('#al-tit').value.trim() ||
+              T((Alertas.TIPOS[a.tipo] || {}).titulo || 'Recordatorio'),
             horas: a.horas.slice().sort(),
             dias: a.dias.slice()
           }, { activa: true, control: '' });
@@ -1923,8 +1937,8 @@
             const t = Alertas.TIPOS[a.tipo];
             el.querySelectorAll('[data-tipo]').forEach(function (x) { x.classList.remove('on'); });
             b.classList.add('on');
-            el.querySelector('#al-tit').value = t.titulo;
-            el.querySelector('#al-msg').value = t.mensaje;
+            el.querySelector('#al-tit').value = T(t.titulo);
+            el.querySelector('#al-msg').value = T(t.mensaje);
             notaIA();
             pintarVista();
           };
@@ -1970,13 +1984,13 @@
           const desde = el.querySelector('#rep-a').value || '08:00';
           const hasta = el.querySelector('#rep-b').value || '21:00';
           if (Alertas.enMinutos(hasta) <= Alertas.enMinutos(desde)) {
-            UI.toast('La hora de fin tiene que ser posterior');
+            UI.toast(T('La hora de fin tiene que ser posterior'));
             return;
           }
           a.horas = Alertas.repartir(desde, hasta, Math.max(2, Math.min(12, n)));
           pintarHoras();
           el.querySelector('#al-repartir').open = false;
-          UI.toast(a.horas.length + ' avisos repartidos');
+          UI.toast(Tp(a.horas.length, '{n} aviso repartido', '{n} avisos repartidos'));
         };
 
         const pintarDias = function () {
@@ -2003,14 +2017,14 @@
         });
 
         el.querySelector('[data-x=guardar]').onclick = function () {
-          a.titulo = el.querySelector('#al-tit').value.trim() || 'Recordatorio';
-          a.mensaje = el.querySelector('#al-msg').value.trim();
-          if (!a.horas.length) { UI.toast('Añade al menos una hora'); return; }
-          if (!a.dias.length) { UI.toast('Elige al menos un día'); return; }
+          a.titulo = sinTocar(el.querySelector('#al-tit').value, a.titulo) || 'Recordatorio';
+          a.mensaje = sinTocar(el.querySelector('#al-msg').value, a.mensaje);
+          if (!a.horas.length) { UI.toast(T('Añade al menos una hora')); return; }
+          if (!a.dias.length) { UI.toast(T('Elige al menos un día')); return; }
           Alertas.guardar(a);
           UI.closeModal();
           render();
-          UI.toast('Recordatorio guardado');
+          UI.toast(T('Recordatorio guardado'));
         };
 
         const borrar = el.querySelector('[data-x=borrar]');
@@ -2018,7 +2032,7 @@
           Alertas.borrar(a.id);
           UI.closeModal();
           render();
-          UI.toast('Recordatorio borrado');
+          UI.toast(T('Recordatorio borrado'));
         };
       });
   }

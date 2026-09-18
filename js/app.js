@@ -5210,7 +5210,7 @@
     if (g.IA && IA.activa()) puestas.push(IA.proveedorActual().label);
     if (g.Spotify && Spotify.configurado()) puestas.push('Spotify');
     if (Sync.configurado()) puestas.push('Supabase');
-    return puestas.length ? puestas.join(' · ') : 'IA, Spotify y sincronización';
+    return puestas.length ? puestas.join(' · ') : T('IA, Spotify y sincronización');
   }
 
   /* ================= cuenta y sincronización ================= */
@@ -5229,24 +5229,24 @@
 
       return html`
         <div class="card tarjeta-premium">
-          <div class="pre-encima">Se hace una vez</div>
-          <p class="muted" style="margin:6px 0 0;font-size:.88rem">Entra con tu correo y tus
-          rutinas, tu historial y tus marcas estarán en todos tus dispositivos. Sin
-          contraseñas: recibes un enlace y ya está.</p>
+          <div class="pre-encima">${T('Se hace una vez')}</div>
+          <p class="muted" style="margin:6px 0 0;font-size:.88rem">${T('Entra con tu correo ' +
+          'y tus rutinas, tu historial y tus marcas estarán en todos tus dispositivos. Sin ' +
+          'contraseñas: recibes un enlace y ya está.')}</p>
         </div>
 
-        <div class="list-title">¿Por dónde empezamos?</div>
+        <div class="list-title">${T('¿Por dónde empezamos?')}</div>
         <div class="plan-acciones" style="margin:10px 0 0">
           <button class="fila-plan" data-alta="tengo" style="--fp:var(--acc)">
             <span class="fp-ico">${raw(icon('correo'))}</span>
-            <span class="grow"><span class="fp-tit">Ya tengo cuenta</span>
-              <span class="fp-sub">Uso la app en otro dispositivo. Conecto este y listo.</span></span>
+            <span class="grow"><span class="fp-tit">${T('Ya tengo cuenta')}</span>
+              <span class="fp-sub">${T('Uso la app en otro dispositivo. Conecto este y listo.')}</span></span>
             <span class="chevron">${raw(icon('chevron'))}</span>
           </button>
           <button class="fila-plan" data-alta="nueva" style="--fp:#4f8cf5">
             <span class="fp-ico">${raw(icon('nube'))}</span>
-            <span class="grow"><span class="fp-tit">Es mi primera vez</span>
-              <span class="fp-sub">Creo la base de datos gratuita. Una vez, cinco minutos.</span></span>
+            <span class="grow"><span class="fp-tit">${T('Es mi primera vez')}</span>
+              <span class="fp-sub">${T('Creo la base de datos gratuita. Una vez, cinco minutos.')}</span></span>
             <span class="chevron">${raw(icon('chevron'))}</span>
           </button>
         </div>`;
@@ -5263,57 +5263,59 @@
             <span class="mando-marca"${raw(accesoModo === 'crear'
               ? ' style="transform:translateX(100%)"' : '')}></span>
             <button class="mando-op${raw(accesoModo === 'entrar' ? ' on' : '')}"
-                    data-acceso="entrar">Entrar</button>
+                    data-acceso="entrar">${T('Entrar')}</button>
             <button class="mando-op${raw(accesoModo === 'crear' ? ' on' : '')}"
-                    data-acceso="crear">Crear cuenta</button>
+                    data-acceso="crear">${T('Crear cuenta')}</button>
           </div>
 
-          <label class="tiny" style="display:block;margin-top:15px">CORREO</label>
+          <label class="tiny" style="display:block;margin-top:15px">${T('CORREO')}</label>
           <input id="sync-mail" type="email" inputmode="email" autocomplete="email"
                  placeholder="tucorreo@ejemplo.com" style="margin:5px 0 10px">
 
-          <label class="tiny">CONTRASEÑA</label>
+          <label class="tiny">${T('CONTRASEÑA')}</label>
           <div class="secreto">
             <input id="sync-pass" type="password"
                    autocomplete="${accesoModo === 'crear' ? 'new-password' : 'current-password'}"
-                   placeholder="${accesoModo === 'crear' ? 'Al menos 8 caracteres' : 'Tu contraseña'}">
+                   placeholder="${accesoModo === 'crear' ? T('Al menos 8 caracteres') : T('Tu contraseña')}">
             <button class="btn sm" data-ver="sync-pass" aria-label="${T('Mostrar u ocultar')}">
               ${raw(icon('ojo'))}</button>
           </div>
 
           <button class="btn primary block" data-a="${accesoModo === 'crear' ? 'crearCuenta' : 'entrarClave'}"
                   style="margin-top:14px">
-            ${accesoModo === 'crear' ? 'Crear cuenta y sincronizar' : 'Entrar'}
+            ${accesoModo === 'crear' ? T('Crear cuenta y sincronizar') : T('Entrar')}
           </button>
 
-          <p class="tiny" style="margin-top:10px">${raw(accesoModo === 'crear'
-            ? 'Usa el mismo correo y contraseña en tus demás dispositivos y tendrás lo mismo en todos.'
-            : 'Si es tu primera vez, pulsa Crear cuenta.')}</p>
+          <p class="tiny" style="margin-top:10px">${raw(esc(accesoModo === 'crear'
+            ? T('Usa el mismo correo y contraseña en tus demás dispositivos y tendrás lo ' +
+              'mismo en todos.')
+            : T('Si es tu primera vez, pulsa Crear cuenta.')))}</p>
         </div>
 
         <button class="guia-tit" data-a="verCorreo">${raw(icon('chevron'))}
-          Prefiero entrar con un enlace al correo</button>
+          ${T('Prefiero entrar con un enlace al correo')}</button>
         <div class="guia" id="via-correo" hidden>
           <div class="card">
-            <p class="tiny">Sin contraseña: te llega un enlace y entras al pulsarlo.
-            El correo que trae Supabase de serie solo permite <b>dos mensajes por hora</b>,
-            así que si lo agotas tendrás que esperar.</p>
+            <p class="tiny">${raw(Tn('Sin contraseña: te llega un enlace y entras al ' +
+            'pulsarlo. El correo que trae Supabase de serie solo permite {limite}, así que ' +
+            'si lo agotas tendrás que esperar.',
+            { limite: '<b>' + esc(T('dos mensajes por hora')) + '</b>' }))}</p>
             <input id="mail-enlace" type="email" inputmode="email" placeholder="tucorreo@ejemplo.com"
                    autocomplete="email" style="margin:10px 0">
             <button class="btn block" data-a="enviarenlace">
-              ${raw(icon('correo'))} Enviarme el enlace</button>
+              ${raw(icon('correo'))} ${T('Enviarme el enlace')}</button>
 
             <div class="hr"></div>
-            <p class="tiny">Si el enlace se abre en otro navegador en vez de en la app,
-            cópialo del correo y pégalo aquí.</p>
-            <input id="link-acceso" placeholder="Pega el enlace del correo" autocomplete="off"
+            <p class="tiny">${T('Si el enlace se abre en otro navegador en vez de en la ' +
+            'app, cópialo del correo y pégalo aquí.')}</p>
+            <input id="link-acceso" placeholder="${T('Pega el enlace del correo')}" autocomplete="off"
                    spellcheck="false" style="margin:8px 0 10px">
-            <button class="btn block sm" data-a="usarLinkAcceso">Entrar con ese enlace</button>
+            <button class="btn block sm" data-a="usarLinkAcceso">${T('Entrar con ese enlace')}</button>
           </div>
         </div>
 
         <button class="btn ghost sm block" data-a="configsync" style="margin-top:12px">
-          Cambiar la configuración de Supabase</button>`;
+          ${T('Cambiar la configuración de Supabase')}</button>`;
     }
 
     /* 3. sesión abierta */
@@ -5427,9 +5429,9 @@
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Perfil')}</button>
-      <h1>Mi cuenta</h1>
-      <p class="muted">Entra con tu correo y la app queda igual en todos tus dispositivos:
-      rutinas, historial, perfil, objetivos, alertas y ajustes.</p>
+      <h1>${T('Mi cuenta')}</h1>
+      <p class="muted">${T('Entra con tu correo y la app queda igual en todos tus ' +
+      'dispositivos: rutinas, historial, perfil, objetivos, alertas y ajustes.')}</p>
 
       ${raw(vistaCuenta())}
 
@@ -5437,14 +5439,14 @@
         <div id="aviso-alta"></div>
 
         <div class="card" style="margin-top:12px">
-          <div style="font-weight:600;margin-bottom:4px">Cómo funciona</div>
+          <div style="font-weight:600;margin-bottom:4px">${T('Cómo funciona')}</div>
           <ol class="instr" style="margin-top:8px">
-            <li>Escribes tu correo y tu contraseña, los mismos en todos tus dispositivos.</li>
-            <li>Al entrar se descarga lo que tengas en la nube y se une con lo de aquí.</li>
-            <li>A partir de ahí, cada cambio sube solo unos segundos después.</li>
+            <li>${T('Escribes tu correo y tu contraseña, los mismos en todos tus dispositivos.')}</li>
+            <li>${T('Al entrar se descarga lo que tengas en la nube y se une con lo de aquí.')}</li>
+            <li>${T('A partir de ahí, cada cambio sube solo unos segundos después.')}</li>
           </ol>
-          <p class="tiny" style="margin:0">Si prefieres entrar sin contraseña, tienes la
-          opción del enlace por correo debajo.</p>
+          <p class="tiny" style="margin:0">${T('Si prefieres entrar sin contraseña, tienes ' +
+          'la opción del enlace por correo debajo.')}</p>
         </div>` : '')}`;
   }
 
@@ -5522,18 +5524,18 @@
       const propia = Sync.configPropia();
       caja.innerHTML = html`
         <div class="card aviso-seguridad" style="margin-top:12px">
-          <b>Aquí no se pueden crear cuentas nuevas</b>
+          <b>${T('Aquí no se pueden crear cuentas nuevas')}</b>
           <p style="margin:8px 0 0;font-size:.9rem">${propia
-            ? 'Tu proyecto de Supabase tiene cerrada el alta. Ábrela un momento en '
+            ? T('Tu proyecto de Supabase tiene cerrada el alta. Ábrela un momento en '
               + 'Authentication → Sign In / Providers → Allow new users to sign up, '
-              + 'regístrate, y vuelve a cerrarla.'
-            : 'La conexión que trae la app es la mía y está cerrada a propósito: si '
+              + 'regístrate, y vuelve a cerrarla.')
+            : T('La conexión que trae la app es la mía y está cerrada a propósito: si '
               + 'ya tienes cuenta, entra con tu correo aquí abajo. Si no la tienes, '
               + 'monta la tuya —es gratis, son diez minutos y los datos quedan en tu '
-              + 'propia base de datos, no en la mía.'}</p>
+              + 'propia base de datos, no en la mía.')}</p>
           ${raw(propia ? '' :
             '<button class="btn primary block" data-a="montarbd" style="margin-top:11px">' +
-            'Montar mi base de datos</button>')}
+            UI.esc(T('Montar mi base de datos')) + '</button>')}
         </div>`;
       const b = caja.querySelector('[data-a=montarbd]');
       if (b) b.onclick = function () { go('basedatos'); };

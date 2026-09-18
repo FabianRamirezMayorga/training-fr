@@ -27,7 +27,8 @@
        pega de usar la frase como clave: una frase que significa dos cosas tiene
        que conformarse con una traducción. Cuando no valga, se cambia la frase
        española para que sean dos. */
-    'Cómo funciona': 'How it works',
+    /* «Cómo funciona» vive ahora en el diccionario de la interfaz, que es el
+       que manda al fusionar. Se quita de aquí para que haya una sola. */
     'Preguntas frecuentes': 'Common questions',
     'Pregunta': 'Question',
     'Ver también': 'See also',

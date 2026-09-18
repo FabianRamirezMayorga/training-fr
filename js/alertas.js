@@ -162,10 +162,11 @@
       out.push({
         clave: 'agua', tipo: 'agua', dias: todos, horas: horas,
         titulo: 'Hidrátate', mensaje: 'Un vaso de agua (250 ml).',
-        porque: 'Te tocan ' + UI.dec(litros) +
-          ' L al día por tu peso y tu actividad: son ' + vasos +
-          ' vasos de 250 ml repartidos entre las ' + horas[0] + ' y las ' +
-          horas[horas.length - 1] + '. De una sentada no se bebe.'
+        porque: traducirCon('Te tocan {litros} L al día por tu peso y tu actividad: ' +
+          'son {vasos} vasos de 250 ml repartidos entre las {desde} y las {hasta}. ' +
+          'De una sentada no se bebe.',
+          { litros: UI.dec(litros), vasos: vasos,
+            desde: horas[0], hasta: horas[horas.length - 1] })
       });
     }
 
@@ -187,13 +188,12 @@
       out.push({
         clave: 'comida:' + f.id, tipo: 'comida', dias: todos, horas: [f.desde],
         titulo: VERBO[f.id] || ('Es hora de ' + f.label.toLowerCase()),
-        mensaje: m ? 'Unas ' + Math.round(m.kcal / cuantas) + ' kcal y ' +
-          Math.round(m.prot / cuantas) + ' g de proteína.' : 'Toca comida según tu plan.',
-        porque: 'A las ' + f.desde + ', que es la hora que has puesto para ' +
-          f.label.toLowerCase() + ' en Ajustes' + (m
-            ? '. Le tocan unas ' + Math.round(m.kcal / cuantas) + ' kcal y ' +
-              Math.round(m.prot / cuantas) + ' g de proteína'
-            : '') + '. Si tienes menú, el aviso trae el plato de ese día.'
+        mensaje: TIPOS.comida.mensaje,
+        porque: traducirCon('A las {hora}, que es la hora que has puesto para ' +
+          '{comida} en Ajustes', { hora: f.desde, comida: traduce(f.label).toLowerCase() }) +
+          (m ? traducirCon('. Le tocan unas {kcal} kcal y {prot} g de proteína',
+            { kcal: Math.round(m.kcal / cuantas), prot: Math.round(m.prot / cuantas) }) : '') +
+          traduce('. Si tienes menú, el aviso trae el plato de ese día.')
       });
     });
 
@@ -210,14 +210,15 @@
       out.push({
         clave: 'entreno', tipo: 'entreno', dias: nums, horas: [horaE],
         titulo: 'Toca entrenar', mensaje: 'Tu rutina de hoy te está esperando.',
-        porque: 'Tus rutinas tienen días asignados (' +
-          nums.map(function (d) { return UI.diaLargo(DIAS[d]); }).join(', ') + ') y ' +
+        porque: traducirCon('Tus rutinas tienen días asignados ({dias}) y ',
+          { dias: nums.map(function (d) { return UI.diaLargo(DIAS[d]); }).join(', ') }) +
           (Perfil.datos().horaEntreno
-            ? 'la hora es la que has puesto en tu perfil.'
+            ? traduce('la hora es la que has puesto en tu perfil.')
             : Store.sessions().length >= 3
-              ? 'sueles entrenar sobre las ' + horaE + ', según tus últimas sesiones.'
-              : 'de momento propongo las ' + horaE + '; cuando entrenes unas cuantas veces ' +
-                'lo ajusto a tu hora real.')
+              ? traducirCon('sueles entrenar sobre las {hora}, según tus últimas sesiones.',
+                  { hora: horaE })
+              : traducirCon('de momento propongo las {hora}; cuando entrenes unas cuantas ' +
+                  'veces lo ajusto a tu hora real.', { hora: horaE }))
       });
 
       /* ---------- comida antes de entrenar ----------
@@ -243,8 +244,8 @@
         sinFranja: true,
         titulo: 'Comida antes de entrenar',
         mensaje: 'Algo con hidratos y proteína, ligero.',
-        porque: 'Hora y media antes de tu entrenamiento: da tiempo a digerir y llegas con ' +
-          'energía en vez de vacío.'
+        porque: traduce('Hora y media antes de tu entrenamiento: da tiempo a digerir y ' +
+          'llegas con energía en vez de vacío.')
       });
     }
 
@@ -252,8 +253,8 @@
     out.push({
       clave: 'peso', tipo: 'peso', dias: [1], horas: [aHora(enMinutos(despierta) + 15)],
       titulo: 'Pésate', mensaje: 'En ayunas y después del baño, para que sea comparable.',
-      porque: 'Los lunes al levantarte. Pesarse siempre en las mismas condiciones es lo ' +
-        'único que hace comparable la báscula de una semana a otra.'
+      porque: traduce('Los lunes al levantarte. Pesarse siempre en las mismas ' +
+        'condiciones es lo único que hace comparable la báscula de una semana a otra.')
     });
 
     /* --- dormir: solo si duerme poco --- */
@@ -262,8 +263,9 @@
         clave: 'dormir', tipo: 'libre', dias: todos,
         horas: [aHora(enMinutos(acuesta) - 45)],
         titulo: 'Empieza a apagar el día', mensaje: 'Pantallas fuera y a preparar la cama.',
-        porque: 'Duermes ' + p.sueño + ' h y por debajo de 7 el entrenamiento rinde menos. ' +
-          'Un aviso 45 min antes de acostarte es lo que más suele mover la aguja.'
+        porque: traducirCon('Duermes {h} h y por debajo de 7 el entrenamiento rinde ' +
+          'menos. Un aviso 45 min antes de acostarte es lo que más suele mover la aguja.',
+          { h: p.sueño })
       });
     }
 
@@ -594,6 +596,11 @@
 
   function traduce(t) { return g.Idioma ? Idioma.T(t) : t; }
 
+  /* Lo mismo con huecos dentro. Se usa para todo lo que lleva una cifra o una
+     hora: la frase entera es la clave y el número entra después, que es la
+     única forma de que se pueda traducir de una pieza. */
+  function traducirCon(t, valores) { return g.Idioma ? Idioma.Tn(t, valores) : t; }
+
   /* Un adelanto corto de lo que llevará el aviso. No es el texto entero: en una
      tarjeta de lista, tres líneas de menú tapan las horas y los días, que es a
      lo que se viene a esa pantalla. */
@@ -615,7 +622,7 @@
     }
     if (!esDeIA(x.alerta.tipo)) return traduce(x.titulo);
     const n = String(Store.settings().name || '').trim();
-    return n ? n + ', un momento' : x.titulo;
+    return n ? traducirCon('{nombre}, un momento', { nombre: n }) : x.titulo;
   }
 
   function textoDe(x) {
@@ -628,23 +635,25 @@
         const partes = [];
         if (c.plato) partes.push(c.plato);
         if (c.kcal) {
-          partes.push('Unas ' + UI.num(c.kcal) + ' kcal' +
-            (c.prot ? ' y ' + c.prot + ' g de proteína' : '') +
-            (c.aojo ? ' (a ojo, sin menú)' : ''));
+          partes.push((c.prot
+            ? traducirCon('Unas {kcal} kcal y {prot} g de proteína',
+                { kcal: UI.num(c.kcal), prot: c.prot })
+            : traducirCon('Unas {kcal} kcal', { kcal: UI.num(c.kcal) })) +
+            (c.aojo ? traduce(' (a ojo, sin menú)') : ''));
         }
         /* Lo que el usuario escribiera a mano manda sobre lo calculado: si se
            molestó en poner un texto suyo, no se le pisa. */
-        if (x.mensaje && x.mensaje !== TIPOS.comida.mensaje) partes.unshift(x.mensaje);
+        if (x.mensaje && x.mensaje !== TIPOS.comida.mensaje) partes.unshift(traduce(x.mensaje));
         if (partes.length) return Promise.resolve(partes.join(' · '));
       }
     }
-    if (!esDeIA(x.alerta.tipo)) return Promise.resolve(x.mensaje);
-    if (!g.IA || !IA.activa || !IA.activa() || !IA.pildora) {
-      return Promise.resolve(x.mensaje || TIPOS.motivacion.mensaje);
-    }
+    const suyo = traduce(x.mensaje);
+    if (!esDeIA(x.alerta.tipo)) return Promise.resolve(suyo);
+    const reserva = suyo || traduce(TIPOS.motivacion.mensaje);
+    if (!g.IA || !IA.activa || !IA.activa() || !IA.pildora) return Promise.resolve(reserva);
     return IA.pildora()
-      .then(function (p) { return (p && p.frase) || x.mensaje || TIPOS.motivacion.mensaje; })
-      .catch(function () { return x.mensaje || TIPOS.motivacion.mensaje; });
+      .then(function (p) { return (p && p.frase) || reserva; })
+      .catch(function () { return reserva; });
   }
 
   let temporizador = null;
@@ -705,15 +714,15 @@
      lo demás son suposiciones sobre permisos y ajustes del sistema. */
   function probar() {
     if (!soportado()) {
-      return Promise.reject(new Error('Este navegador no sabe mostrar avisos.'));
+      return Promise.reject(new Error(traduce('Este navegador no sabe mostrar avisos.')));
     }
     if (Notification.permission !== 'granted') {
-      return Promise.reject(new Error('Primero hay que dar permiso a los avisos.'));
+      return Promise.reject(new Error(traduce('Primero hay que dar permiso a los avisos.')));
     }
-    const ok = avisar('Prueba de Training FR',
-      'Si ves esto, los avisos funcionan con la app abierta.');
+    const ok = avisar(traduce('Prueba de Training FR'),
+      traduce('Si ves esto, los avisos funcionan con la app abierta.'));
     return ok ? Promise.resolve(true)
-      : Promise.reject(new Error('El sistema no ha dejado mostrarlo.'));
+      : Promise.reject(new Error(traduce('El sistema no ha dejado mostrarlo.')));
   }
 
   /* ---------- exportar al calendario ---------- */
@@ -805,7 +814,7 @@
       'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Training FR//ES', 'CALSCALE:GREGORIAN',
       'METHOD:' + metodo,
       'X-WR-CALNAME:Training FR',
-      'X-WR-CALDESC:' + escaparICS('Recordatorios creados por la app Training FR')
+      'X-WR-CALDESC:' + escaparICS(traduce('Recordatorios creados por la app Training FR'))
     ];
   }
 
@@ -867,13 +876,16 @@
            —que es donde lo espera el calendario— y también al final de la
            descripción, porque hay clientes que no enseñan el campo URL. */
         const suyo = deHora && deHora.kcal
-          ? 'Unas ' + UI.num(deHora.kcal) + ' kcal' +
-            (deHora.prot ? ' y ' + deHora.prot + ' g de proteína' : '') +
-            '. Lo que toca hoy, en la app.'
-          : a.mensaje;
+          ? (deHora.prot
+              ? traducirCon('Unas {kcal} kcal y {prot} g de proteína. Lo que toca hoy, ' +
+                  'en la app.', { kcal: UI.num(deHora.kcal), prot: deHora.prot })
+              : traducirCon('Unas {kcal} kcal. Lo que toca hoy, en la app.',
+                  { kcal: UI.num(deHora.kcal) }))
+          : traduce(a.mensaje);
 
         const cuerpo = (suyo ? suyo + String.fromCharCode(10) +
-          String.fromCharCode(10) : '') + 'Abrir en Training FR: ' + enlace;
+          String.fromCharCode(10) : '') +
+          traducirCon('Abrir en Training FR: {enlace}', { enlace: enlace });
 
         const uid = a.id + '-' + n + '@trainingfr';
         uids.push(uid);
@@ -1032,7 +1044,8 @@
     const paso = (enMinutos(bruto[bruto.length - 1]) - enMinutos(bruto[0])) / (bruto.length - 1);
     const hh = Math.floor(paso / 60), mm = Math.round(paso % 60);
     const cada = hh ? hh + ' h' + (mm ? ' ' + mm : '') : mm + ' min';
-    return h.length + ' avisos · de ' + h[0] + ' a ' + h[h.length - 1] + ' cada ' + cada;
+    return traducirCon('{n} avisos · de {desde} a {hasta} cada {cada}',
+      { n: h.length, desde: h[0], hasta: h[h.length - 1], cada: cada });
   }
 
   g.Alertas = {

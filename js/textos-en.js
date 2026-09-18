@@ -1225,6 +1225,276 @@
 
     /* ---------- pistas de las claves ---------- */
     'sin guardar': 'not saved',
-    'sin prefijo fijo': 'no fixed prefix'
+    'sin prefijo fijo': 'no fixed prefix',
+
+    /* ---------- Mi cuenta ---------- */
+    'IA, Spotify y sincronización': 'AI, Spotify and sync',
+    'Se hace una vez': 'You do this once',
+    'Entra con tu correo y tus rutinas, tu historial y tus marcas estarán en todos tus dispositivos. Sin contraseñas: recibes un enlace y ya está.':
+      'Sign in with your email and your routines, history and records will be on every device. No passwords: you get a link and that is it.',
+    '¿Por dónde empezamos?': 'Where do we start?',
+    'Ya tengo cuenta': 'I already have an account',
+    'Uso la app en otro dispositivo. Conecto este y listo.':
+      'I use the app on another device. I connect this one and I am done.',
+    'Es mi primera vez': 'This is my first time',
+    'Creo la base de datos gratuita. Una vez, cinco minutos.':
+      'I create the free database. Once, five minutes.',
+    'Entrar': 'Sign in',
+    'Crear cuenta': 'Create account',
+    'CORREO': 'EMAIL',
+    'CONTRASEÑA': 'PASSWORD',
+    'Al menos 8 caracteres': 'At least 8 characters',
+    'Tu contraseña': 'Your password',
+    'Crear cuenta y sincronizar': 'Create account and sync',
+    'Usa el mismo correo y contraseña en tus demás dispositivos y tendrás lo mismo en todos.':
+      'Use the same email and password on your other devices and you will have the same everywhere.',
+    'Si es tu primera vez, pulsa Crear cuenta.':
+      'If this is your first time, press Create account.',
+    'Prefiero entrar con un enlace al correo':
+      'I would rather sign in with an emailed link',
+    'Sin contraseña: te llega un enlace y entras al pulsarlo. El correo que trae Supabase de serie solo permite {limite}, así que si lo agotas tendrás que esperar.':
+      'No password: a link arrives and you are in when you tap it. The email Supabase ships with only allows {limite}, so if you use them up you will have to wait.',
+    'dos mensajes por hora': 'two messages an hour',
+    'Enviarme el enlace': 'Send me the link',
+    'Si el enlace se abre en otro navegador en vez de en la app, cópialo del correo y pégalo aquí.':
+      'If the link opens in another browser instead of the app, copy it from the email and paste it here.',
+    'Pega el enlace del correo': 'Paste the link from the email',
+    'Entrar con ese enlace': 'Sign in with that link',
+    'Cambiar la configuración de Supabase': 'Change the Supabase setup',
+    'Cómo funciona': 'How it works',
+    'Escribes tu correo y tu contraseña, los mismos en todos tus dispositivos.':
+      'You type your email and password, the same on every device.',
+    'Al entrar se descarga lo que tengas en la nube y se une con lo de aquí.':
+      'When you sign in, whatever you have in the cloud comes down and joins what is here.',
+    'A partir de ahí, cada cambio sube solo unos segundos después.':
+      'From then on, every change goes up by itself a few seconds later.',
+    'Si prefieres entrar sin contraseña, tienes la opción del enlace por correo debajo.':
+      'If you would rather sign in without a password, the emailed-link option is below.',
+    'Aquí no se pueden crear cuentas nuevas': 'New accounts cannot be created here',
+    'Tu proyecto de Supabase tiene cerrada el alta. Ábrela un momento en Authentication → Sign In / Providers → Allow new users to sign up, regístrate, y vuelve a cerrarla.':
+      'Your Supabase project has sign-ups closed. Open it for a moment under Authentication → Sign In / Providers → Allow new users to sign up, register, then close it again.',
+    'La conexión que trae la app es la mía y está cerrada a propósito: si ya tienes cuenta, entra con tu correo aquí abajo. Si no la tienes, monta la tuya —es gratis, son diez minutos y los datos quedan en tu propia base de datos, no en la mía.':
+      'The connection the app ships with is mine and it is closed on purpose: if you already have an account, sign in with your email below. If you do not, set up your own — it is free, it takes ten minutes and your data stays in your own database, not mine.',
+    'Montar mi base de datos': 'Set up my database',
+
+    /* ---------- cabecera de Mi cuenta ---------- */
+    'Entra con tu correo y la app queda igual en todos tus dispositivos: rutinas, historial, perfil, objetivos, alertas y ajustes.':
+      'Sign in with your email and the app looks the same on every device: routines, history, profile, goals, reminders and settings.',
+
+    /* ---------- Alertas: el calendario ---------- */
+    'Los generaste con un plazo y ese plazo termina. Vuelve a descargarlo y siguen sonando desde donde estaban.':
+      'You set an end date when you made them, and it\'s running out. Download it again and they carry on from where they were.',
+    'Has cambiado recordatorios desde la última descarga. El calendario sigue avisando con lo de antes hasta que vuelvas a bajarlo.':
+      'You\'ve changed reminders since the last download. Your calendar keeps using the old ones until you download it again.',
+    'Volver a descargar': 'Download again',
+    'Descargar para el calendario': 'Download for your calendar',
+    'Se crean como eventos semanales con aviso, llamados {nombre}, y tocando uno se abre la app en la pantalla que toca. Antes de bajarlo eliges hasta cuándo quieres que suenen. Al volver a descargarlo, los que ya tengas se actualizan en vez de duplicarse.':
+      'They go in as weekly events with an alert, named {nombre}, and tapping one opens the app on the right screen. Before you download it you choose how long they should keep ringing. Download it again and the ones you already have are updated instead of duplicated.',
+    'Mételos en un calendario aparte': 'Put them in a calendar of their own',
+    'Crea antes un calendario llamado {nombre} en tu móvil y elígelo al importar. Así los apagas, los escondes o los borras todos de una vez, sin tocar el resto de tu agenda.':
+      'Create a calendar called {nombre} on your phone first and pick it when you import. That way you can mute them, hide them or delete them all at once, without touching the rest of your schedule.',
+    'Quitarlos del calendario': 'Remove them from your calendar',
+    'Descarga un archivo que lo retira. Ábrelo igual que el otro: el calendario borra el aviso que le pusiste desde aquí, aunque ya le cambiaras la hora.':
+      'Downloads a file that takes it out. Open it like the other one: your calendar deletes the alert you put there from here, even if you changed its time afterwards.',
+    'Descarga un archivo que los retira. Ábrelo igual que el otro: el calendario borra los {n} avisos que le pusiste desde aquí, incluidos los de horas que ya cambiaste.':
+      'Downloads a file that takes them out. Open it like the other one: your calendar deletes the {n} alerts you put there from here, including the ones whose time you already changed.',
+
+    /* ---------- Alertas: la hoja de los avisos ---------- */
+    'Los avisos': 'Notifications',
+    'Activados': 'On',
+    'Sin activar': 'Not turned on',
+    'El último salió {cuando}.': 'The last one went out {cuando}.',
+    'Todavía no ha salido ninguno.': 'None have gone out yet.',
+    'Ahora mismo no va a sonar nada. Cierra esto y mira la tarjeta de arriba: ahí están los pasos.':
+      'Nothing is going to ring right now. Close this and look at the card above: the steps are there.',
+    'Lanzar uno de prueba': 'Send a test one',
+    'Qué funciona y qué no': 'What works and what doesn\'t',
+    'Con la app abierta': 'With the app open',
+    'Suenan a su hora, aunque la tengas en segundo plano.':
+      'They ring on time, even with the app in the background.',
+    'Con la app cerrada': 'With the app closed',
+    'Una página web no ejecuta nada cerrada. Para eso está el calendario, abajo del todo.':
+      'A web page runs nothing once it\'s closed. That\'s what the calendar at the bottom is for.',
+    'En la pantalla de inicio': 'On the home screen',
+    'Instalada, que es donde el iPhone permite los avisos.':
+      'Installed, which is where the iPhone allows notifications.',
+    'En el iPhone hacen falta desde la app instalada, no desde el navegador.':
+      'On the iPhone they only work from the installed app, not from the browser.',
+    'No hace falta instalarla en este dispositivo.':
+      'You don\'t need to install it on this device.',
+    '{n} recordatorio encendido.': '{n} reminder on.',
+    '{n} recordatorios encendidos.': '{n} reminders on.',
+    'No tienes ninguno encendido, así que no hay nada que pueda sonar.':
+      'You don\'t have any turned on, so there\'s nothing that could ring.',
+    'Recordatorio creado para tus días de entrenamiento':
+      'Reminder created for your training days',
+
+    /* ---------- Alertas: generarlas automáticamente ---------- */
+    'Generar alertas automáticamente': 'Generate reminders automatically',
+    'Con lo que ya hay en la app: tu peso, tus horas, tus rutinas y lo que tomas. Las horas salen calculadas, no son horas por defecto.':
+      'From what\'s already in the app: your weight, your hours, your routines and what you take. The times are worked out, they aren\'t defaults.',
+    'Agua': 'Water',
+    'Los vasos que te tocan por tu peso, repartidos entre que te levantas y dos horas antes de dormir':
+      'The glasses you need for your weight, spread between getting up and two hours before bed',
+    'Comidas': 'Meals',
+    'Una por cada comida que haces, con las calorías y la proteína que le tocan a cada una':
+      'One for each meal you eat, with the calories and protein each one gets',
+    'Los días que tienen rutina asignada, a la hora a la que entrenas de verdad':
+      'The days with a routine assigned, at the time you actually train',
+    'Los lunes al levantarte, en ayunas': 'Mondays when you get up, before eating',
+    'Te falta el perfil': 'Your profile is missing',
+    'Sin tu peso, tu altura y tus horas no puedo calcular ninguna. Complétalo y vuelve.':
+      'Without your weight, your height and your hours I can\'t work any of them out. Fill it in and come back.',
+    '{n} apuntado, agrupados por hora para no sonar tres veces seguidas':
+      '{n} logged, grouped by time so it doesn\'t ring three times in a row',
+    '{n} apuntados, agrupados por hora para no sonar tres veces seguidas':
+      '{n} logged, grouped by time so it doesn\'t ring three times in a row',
+    'No te duplica nada.': 'Nothing gets duplicated.',
+    'Las que ya existen se actualizan con las horas nuevas.':
+      'The ones that already exist are updated with the new times.',
+    'Se retira {n} que la app creó y que ya no tiene sentido con tus datos de ahora.':
+      '{n} that the app created and no longer fits your current data is removed.',
+    'Se retiran {n} que creó la app y que ya no tienen sentido con tus datos de ahora.':
+      '{n} that the app created and no longer fit your current data are removed.',
+    'La que has creado tú no se toca, y si apagaste alguna sigue apagada.':
+      'The one you made yourself isn\'t touched, and if you turned any off it stays off.',
+    'Las {n} que has creado tú no se tocan, y si apagaste alguna sigue apagada.':
+      'The {n} you made yourself aren\'t touched, and if you turned any off they stay off.',
+    'Y si apagaste alguna, sigue apagada.': 'And if you turned any off, it stays off.',
+    'Generarlas': 'Generate them',
+    'Generar y poner al día': 'Generate and update',
+
+    /* ---------- Alertas: hasta cuándo ---------- */
+    '¿Hasta cuándo?': 'Until when?',
+    'Los avisos se repiten cada semana. Dime hasta qué fecha los quieres en el calendario; puedes volver a descargarlo cuando quieras para estirarlos.':
+      'The alerts repeat every week. Tell me how long you want them in your calendar; you can download it again whenever you like to stretch them out.',
+    'Hasta el {fecha} de {ano}': 'Until {fecha}, {ano}',
+    'Sin fecha de fin': 'No end date',
+    'Descargar': 'Download',
+    'Archivo descargado. Ábrelo para añadirlo al calendario.':
+      'File downloaded. Open it to add it to your calendar.',
+    'Se descarga un archivo que retira los avisos de Training FR de tu calendario. Ábrelo y acéptalo igual que el otro. Tus recordatorios de la app no se tocan.':
+      'This downloads a file that takes the Training FR alerts out of your calendar. Open it and accept it like the other one. Your reminders in the app aren\'t touched.',
+    'Archivo descargado. Ábrelo para retirarlos del calendario.':
+      'File downloaded. Open it to take them out of your calendar.',
+    'Un mes': 'One month',
+    'Para probar cómo queda': 'To see how it looks',
+    'Tres meses': 'Three months',
+    'Un bloque de entrenamiento': 'One training block',
+    'Seis meses': 'Six months',
+    'Media temporada': 'Half a season',
+    'Un año': 'One year',
+    'Y renovar una vez al año': 'And renew once a year',
+    'Sin límite': 'No limit',
+    'Hasta que los quites tú. Ojo si dejas de usar la app':
+      'Until you take them out yourself. Careful if you stop using the app',
+
+    /* ---------- Alertas: crear y editar un recordatorio ---------- */
+    'Editar recordatorio': 'Edit reminder',
+    'Nuevo recordatorio': 'New reminder',
+    'Así queda': 'How it looks',
+    'Así va a quedar': 'How it will look',
+    'QUÉ ES': 'WHAT IT IS',
+    'QUÉ DICE': 'WHAT IT SAYS',
+    'Título': 'Title',
+    'Debajo': 'Below',
+    'Opcional': 'Optional',
+    'El texto lo escribe tu entrenador cada día con lo que llevas hecho, así que el de aquí arriba solo sale si la IA no está disponible a esa hora.':
+      'Your coach writes the text each day from what you\'ve done, so the one above only shows up if the AI isn\'t available at that time.',
+    'A QUÉ HORA': 'WHAT TIME',
+    'Repartir varias veces al día': 'Spread it over the day',
+    'Para el agua o las comidas: dime cuántas veces y entre qué horas, y las coloco repartidas.':
+      'For water or meals: tell me how many times and between which hours, and I\'ll space them out.',
+    'VECES': 'TIMES',
+    'DESDE': 'FROM',
+    'HASTA': 'TO',
+    'Repartir': 'Spread them',
+    'QUÉ DÍAS': 'WHICH DAYS',
+    'Todos': 'All',
+    'L-V': 'M-F',
+    'Borrar recordatorio': 'Delete reminder',
+
+    /* ---------- suelto ---------- */
+    'Historial': 'History',
+
+    /* ---------- Alertas: aviso de repetido ---------- */
+    'Ya tienes «{titulo}» a esa hora. Si lo guardas, sonarán los dos.':
+      'You already have «{titulo}» at that time. If you save this, both will ring.',
+
+    /* ---------- Alertas: avisos de la pantalla ---------- */
+    'Has bloqueado los avisos': 'You have blocked notifications',
+    '«{que}» creado con {n} aviso': '«{que}» created with {n} alert',
+    '«{que}» creado con {n} avisos': '«{que}» created with {n} alerts',
+    '{n} recordatorio creado': '{n} reminder created',
+    '{n} recordatorios creados': '{n} reminders created',
+    'Antes asigna días a alguna rutina': 'Assign days to a routine first',
+    'No hay nada que llevar al calendario': 'There is nothing to take to your calendar',
+    'La hora de fin tiene que ser posterior': 'The end time has to be later',
+    '{n} aviso repartido': '{n} alert spread out',
+    '{n} avisos repartidos': '{n} alerts spread out',
+    'Añade al menos una hora': 'Add at least one time',
+    'Elige al menos un día': 'Pick at least one day',
+    'Recordatorio guardado': 'Reminder saved',
+    'Recordatorio borrado': 'Reminder deleted',
+
+    /* ---------- Alertas: los mensajes de cada tipo ---------- */
+    'Tu rutina de hoy te está esperando.': 'Today\'s routine is waiting for you.',
+    'Un vaso de agua ahora.': 'A glass of water now.',
+    'Un vaso de agua (250 ml).': 'A glass of water (250 ml).',
+    'Toca comida según tu plan.': 'Time to eat, according to your plan.',
+    'Registra tu peso para seguir la evolución.': 'Log your weight to keep track.',
+    'Toca tu suplemento.': 'Time for your supplement.',
+    'Hoy toca. Abre y dale.': 'Today\'s the day. Open up and go.',
+    'Algo con hidratos y proteína, ligero.': 'Something light, with carbs and protein.',
+    'En ayunas y después del baño, para que sea comparable.':
+      'On an empty stomach and after the bathroom, so it compares.',
+    'Pantallas fuera y a preparar la cama.': 'Screens off and get ready for bed.',
+
+    /* ---------- Alertas: por qué te propongo cada una ---------- */
+    'Te tocan {litros} L al día por tu peso y tu actividad: son {vasos} vasos de 250 ml repartidos entre las {desde} y las {hasta}. De una sentada no se bebe.':
+      'You need {litros} L a day for your weight and activity: that comes to {vasos} glasses of 250 ml spread between {desde} and {hasta}. You can’t drink it in one go.',
+    'A las {hora}, que es la hora que has puesto para {comida} en Ajustes':
+      'At {hora}, which is the time you set for {comida} in Settings',
+    '. Le tocan unas {kcal} kcal y {prot} g de proteína':
+      '. It gets about {kcal} kcal and {prot} g of protein',
+    '. Si tienes menú, el aviso trae el plato de ese día.':
+      '. If you have a meal plan, the alert brings that day\'s dish.',
+    'Tus rutinas tienen días asignados ({dias}) y ':
+      'Your routines have days assigned ({dias}) and ',
+    'la hora es la que has puesto en tu perfil.':
+      'the time is the one you set in your profile.',
+    'sueles entrenar sobre las {hora}, según tus últimas sesiones.':
+      'you usually train around {hora}, going by your last sessions.',
+    'de momento propongo las {hora}; cuando entrenes unas cuantas veces lo ajusto a tu hora real.':
+      'for now I\'m suggesting {hora}; once you\'ve trained a few times I\'ll adjust it to your real time.',
+    'Hora y media antes de tu entrenamiento: da tiempo a digerir y llegas con energía en vez de vacío.':
+      'An hour and a half before you train: time enough to digest, so you turn up with energy instead of empty.',
+    'Los lunes al levantarte. Pesarse siempre en las mismas condiciones es lo único que hace comparable la báscula de una semana a otra.':
+      'Mondays when you get up. Weighing yourself in the same conditions every time is the only thing that makes the scale comparable week to week.',
+    'Duermes {h} h y por debajo de 7 el entrenamiento rinde menos. Un aviso 45 min antes de acostarte es lo que más suele mover la aguja.':
+      'You sleep {h} h, and under 7 your training suffers. An alert 45 min before bed is usually what moves the needle most.',
+
+    /* ---------- Alertas: el texto que llega al móvil ---------- */
+    '{nombre}, un momento': '{nombre}, one moment',
+    'Unas {kcal} kcal y {prot} g de proteína':
+      'About {kcal} kcal and {prot} g of protein',
+    'Unas {kcal} kcal': 'About {kcal} kcal',
+    ' (a ojo, sin menú)': ' (rough guess, no meal plan)',
+    'Este navegador no sabe mostrar avisos.': 'This browser can\'t show notifications.',
+    'Primero hay que dar permiso a los avisos.':
+      'You have to allow notifications first.',
+    'Prueba de Training FR': 'Training FR test',
+    'Si ves esto, los avisos funcionan con la app abierta.':
+      'If you can see this, notifications work with the app open.',
+    'El sistema no ha dejado mostrarlo.': 'Your system wouldn\'t show it.',
+    'Recordatorios creados por la app Training FR':
+      'Reminders created by the Training FR app',
+    'Unas {kcal} kcal y {prot} g de proteína. Lo que toca hoy, en la app.':
+      'About {kcal} kcal and {prot} g of protein. Today\'s is in the app.',
+    'Unas {kcal} kcal. Lo que toca hoy, en la app.':
+      'About {kcal} kcal. Today\'s is in the app.',
+    'Abrir en Training FR: {enlace}': 'Open in Training FR: {enlace}',
+    '{n} avisos · de {desde} a {hasta} cada {cada}':
+      '{n} alerts · from {desde} to {hasta} every {cada}'
   };
 })(window);
