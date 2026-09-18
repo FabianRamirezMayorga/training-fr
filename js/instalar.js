@@ -115,6 +115,7 @@
     e.cuando = Date.now();
     guardar(e);
     esconder();
+    parar();
   }
 
   function apuntarInstalada() {
@@ -381,9 +382,21 @@
   }
 
   function toca() {
+    if (caja) return false;                     /* ya está puesto */
     if (instalada()) return false;
     if (estado().instalada) return false;
     if (Date.now() < calladoHasta()) return false;
+    /* Durante la bienvenida, no: son las dos primeras decisiones de la app y
+       sin contestarlas no hay catálogo ni rutinas. Meterle encima una oferta
+       de instalar es interrumpir justo lo único que hace falta para que la app
+       sirva de algo.
+
+       Se mira si hay barra de pestañas, que es la señal que ya usa la app para
+       decir «esta pantalla se lo queda todo», y además es la condición que le
+       importa a este aviso: sin barra, flotaría en mitad de la nada. Mirar el
+       lugar guardado no bastaba, porque se elige en la primera de las dos. */
+    const barra = document.getElementById('tabbar');
+    if (!barra || barra.hidden) return false;
     if (!via()) return false;
     return true;
   }
@@ -391,7 +404,15 @@
   function quizaEnsenar() {
     if (!toca()) return;
     ensenar(via());
+    parar();
   }
+
+  /* Una sola cita no vale: cuando llega puede que siga en la bienvenida, o que
+     Chrome no haya mandado todavía su evento. Se vuelve a mirar de tanto en
+     tanto, y se deja de mirar a los cinco minutos: si a esas alturas no hay
+     nada que ofrecer, es que no lo va a haber en esta visita. */
+  let reloj = null;
+  function parar() { if (reloj) { clearInterval(reloj); reloj = null; } }
 
   let arrancado = false;
 
@@ -405,7 +426,12 @@
     /* Segunda visita o más: ya conoce la app, se le puede ofrecer en cuanto
        haya algo que ofrecer. Un respiro corto para no pisar el arranque. */
     const espera = visitas() > 1 ? 6000 : ESPERA_PRIMERA;
-    setTimeout(quizaEnsenar, espera);
+    setTimeout(function () {
+      quizaEnsenar();
+      if (caja) return;
+      reloj = setInterval(quizaEnsenar, 5000);
+      setTimeout(parar, 300000);
+    }, espera);
   }
 
   /* Si se instala mientras la app está abierta —o se abre ya instalada en otra
