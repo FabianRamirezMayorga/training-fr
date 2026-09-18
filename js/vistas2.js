@@ -585,9 +585,9 @@
         </div>` : '')}
 
       ${raw((plan.consejos || []).length ? html`
-        <div class="list-title">Consejos</div>
+        <div class="list-title">${T('Consejos')}</div>
         <div class="card"><ol class="instr">
-          ${raw(plan.consejos.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join(''))}
+          ${raw(plan.consejos.map(function (x) { return '<li>' + esc(T(x)) + '</li>'; }).join(''))}
         </ol></div>` : '')}
 
       <div class="list-title">¿No te encaja?</div>

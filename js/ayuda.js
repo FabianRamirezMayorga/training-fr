@@ -223,7 +223,21 @@
         'Se hace desde Perfil › Actualizaciones, y te dice cuánto ocupa antes de empezar y cuánto llevas ya guardado.',
         'Lo que sí necesita conexión: el entrenador con IA, sincronizar con tu cuenta y actualizar la app.'
       ],
-      ver: ['c-offline'] }
+      ver: ['c-offline'] },
+
+    /* El cambio de idioma es de los pocos ajustes que se ven en toda la app a
+       la vez, así que va aquí y no escondido en una pregunta suelta. */
+    { id: 'g-idioma', titulo: 'La app en dos idiomas',
+      resumen: 'Español o inglés, de un toque y sin perder nada',
+      cuerpo: [
+        'La app entera está en español y en inglés: los botones, este manual, las guías de técnica, los avisos y lo que te escribe el entrenador.',
+        'Se cambia con el botón *ES / EN* de arriba a la derecha, al lado del que cambia el tema, o desde Ajustes › Idioma. Igual que el del tema, dice el idioma al que te lleva, no el que tienes puesto.',
+        'No hay nada que descargar ni que esperar: el cambio es inmediato y funciona sin conexión en los dos idiomas, porque las traducciones viajan dentro de la app.',
+        'Lo que has escrito tú no se toca: el nombre de tus rutinas, tus notas, tus comidas y tus suplementos se quedan tal y como los escribiste. Lo que cambia de idioma es lo que pone la app.',
+        'El catálogo de ejercicios es caso aparte: viene en inglés de origen. Con la app en inglés ves los nombres y las instrucciones originales, y en español los ves traducidos.',
+        'Al entrenador con IA se le habla en el idioma que tengas puesto, y contesta en ese mismo.'
+      ],
+      ver: ['p-idioma', 'g-ia'] }
   ];
 
   /* ================= cómo se hace ================= */
@@ -534,6 +548,11 @@
   /* ================= preguntas ================= */
 
   const PREGUNTAS = [
+    { id: 'p-idioma', q: '¿Puedo poner la app en inglés?',
+      a: ['Sí, entera. El botón *ES / EN* de arriba a la derecha la cambia de un toque, y también está en Ajustes › Idioma.',
+        'Cambia todo lo que pone la app: botones, manual, guías de técnica, avisos y el entrenador. Lo que has escrito tú se queda como está.'],
+      ver: ['g-idioma'] },
+
     { id: 'p-offline', q: '¿Funciona sin internet?',
       a: ['Sí, entera. Las rutinas, el entrenamiento, el cronómetro, el historial y las estadísticas no necesitan conexión.',
         'Solo necesitan internet tres cosas: el entrenador con IA, sincronizar con tu cuenta y actualizar la app. Las imágenes de los ejercicios hay que bajarlas una vez.'],

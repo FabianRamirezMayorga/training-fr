@@ -149,7 +149,7 @@
           <div class="row between">
             <div class="row" style="gap:9px;align-items:center">
               <span class="row-icon" style="color:var(--agua)">${raw(icon('vaso'))}</span>
-              <b>Hidratación</b>
+              <b>${T('Hidratación')}</b>
             </div>
             <span class="chip solid">${h.total || (Perfil.agua() + ' L')}</span>
           </div>` : '')}
@@ -157,9 +157,9 @@
         ${raw(marcable ? html`
           <div class="agua-hoy"${raw(conCabecera ? '' : ' style="margin-top:0"')}>
             <div class="row between" style="align-items:baseline">
-              <span class="tiny">Llevas hoy</span>
+              <span class="tiny">${T('Llevas hoy')}</span>
               <span class="ah-cif">${UI.dec(llevo.litros)}<i>
-                de ${UI.dec(metaL)} L</i></span>
+                ${Tn('de {n} L', { n: UI.dec(metaL) })}</i></span>
             </div>
             <div class="nu-barra"><i style="width:${metaL
               ? Math.min(100, Math.round(llevo.litros / metaL * 100)) : 0}%;--bc:var(--agua)"></i></div>

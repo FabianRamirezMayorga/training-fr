@@ -77,13 +77,13 @@
     url = String(url || '').trim().replace(/\/+$/, '');
     key = String(key || '').trim();
     if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)) {
-      throw new Error('La URL debe tener la forma https://xxxxx.supabase.co');
+      throw new Error(T('La URL debe tener la forma https://xxxxx.supabase.co'));
     }
     /* vale tanto la clave publishable actual como la anon de los proyectos antiguos */
     const formatoOk = /^sb_publishable_[A-Za-z0-9_-]{10,}$/.test(key) ||
       /^eyJ[A-Za-z0-9._-]{30,}$/.test(key);
     if (!formatoOk) {
-      throw new Error('Esa clave no parece la publishable ni la anon. Cópiala de Project Settings, API Keys.');
+      throw new Error(T('Esa clave no parece la publishable ni la anon. Cópiala de Project Settings, API Keys.'));
     }
     guardar(CFG_KEY, { url: url, key: key });
   }
@@ -106,10 +106,10 @@
 
   function pedir(ruta, opciones) {
     const c = config();
-    if (!c) return Promise.reject(new Error('Falta configurar la sincronización.'));
+    if (!c) return Promise.reject(new Error(T('Falta configurar la sincronización.')));
     return fetch(c.url + ruta, opciones).catch(function () {
       /* fetch solo falla así cuando no hay red o la URL del proyecto no existe */
-      throw new Error('No se pudo conectar. Revisa tu conexión y la URL del proyecto.');
+      throw new Error(T('No se pudo conectar. Revisa tu conexión y la URL del proyecto.'));
     }).then(function (r) {
       if (r.status === 204) return null;
       return r.text().then(function (t) {
@@ -124,13 +124,13 @@
              que se entienda: habla de una relación que no existe. */
           if (/does not exist|schema cache|PGRST205|42P01/i.test(msg) &&
               /estado/i.test(msg + ' ' + String(ruta))) {
-            throw new Error('En ese proyecto de Supabase falta la tabla donde van los datos. '
+            throw new Error(T('En ese proyecto de Supabase falta la tabla donde van los datos. '
               + 'Ve a Ajustes → Bóveda de claves, copia el SQL que hay bajo la conexión de '
-              + 'Supabase y ejecútalo una vez en el SQL Editor de tu proyecto.');
+              + 'Supabase y ejecútalo una vez en el SQL Editor de tu proyecto.'));
           }
           if (/invalid api key|no api key/i.test(msg)) {
-            throw new Error('Esa clave no vale para este proyecto. Copia otra vez la '
-              + 'Publishable key en Project Settings → API Keys.');
+            throw new Error(T('Esa clave no vale para este proyecto. Copia otra vez la '
+              + 'Publishable key en Project Settings → API Keys.'));
           }
           throw new Error(msg);
         }
@@ -158,10 +158,10 @@
   function conMotivo(mensaje) {
     return ajustesProyecto().then(function (a) {
       if (a && a.disable_signup) {
-        throw new Error(mensaje + ' Ojo: este proyecto tiene cerrado el alta de cuentas ' +
-          'nuevas, así que si intentaste registrarte, la cuenta no llegó a crearse. ' +
-          'Ábrelo en Supabase (Authentication → Sign In / Providers → Allow new users ' +
-          'to sign up), regístrate y vuelve a cerrarlo.');
+        throw new Error(mensaje + ' ' + T('Ojo: este proyecto tiene cerrado el alta de ' +
+          'cuentas nuevas, así que si intentaste registrarte, la cuenta no llegó a ' +
+          'crearse. Ábrelo en Supabase (Authentication → Sign In / Providers → Allow ' +
+          'new users to sign up), regístrate y vuelve a cerrarlo.'));
       }
       throw new Error(mensaje);
     });
@@ -177,7 +177,7 @@
   function enviarEnlace(dir) {
     dir = String(dir || '').trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(dir)) {
-      return Promise.reject(new Error('Escribe un correo válido.'));
+      return Promise.reject(new Error(T('Escribe un correo válido.')));
     }
     return pedir('/auth/v1/otp?redirect_to=' + encodeURIComponent(urlRetorno()), {
       method: 'POST',
@@ -186,8 +186,8 @@
     }).then(function () { return dir; })
       .catch(function (e) {
         if (/rate limit/i.test(String(e.message || ''))) {
-          throw new Error('Supabase solo deja enviar un par de correos por hora en el plan ' +
-            'gratuito y ya se han agotado. Entra con contraseña, que no tiene ese límite.');
+          throw new Error(T('Supabase solo deja enviar un par de correos por hora en el plan ' +
+            'gratuito y ya se han agotado. Entra con contraseña, que no tiene ese límite.'));
         }
         throw e;
       });
@@ -202,10 +202,10 @@
   function validarCredenciales(correo, clave) {
     correo = String(correo || '').trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)) {
-      throw new Error('Escribe un correo válido.');
+      throw new Error(T('Escribe un correo válido.'));
     }
     if (String(clave || '').length < 8) {
-      throw new Error('La contraseña necesita al menos 8 caracteres.');
+      throw new Error(T('La contraseña necesita al menos 8 caracteres.'));
     }
     return correo;
   }
@@ -228,27 +228,27 @@
       return {
         ok: false,
         pendiente: true,
-        error: 'Cuenta creada. Tu proyecto pide confirmar el correo: ábrelo y pulsa el ' +
-          'enlace, o desactiva esa confirmación en Supabase (Authentication, Sign In, ' +
-          'Confirm email) para entrar directamente.'
+        error: T('Cuenta creada. Tu proyecto pide confirmar el correo: ábrelo y pulsa ' +
+          'el enlace, o desactiva esa confirmación en Supabase (Authentication, Sign In, ' +
+          'Confirm email) para entrar directamente.')
       };
     }).catch(function (e) {
       const t = String(e.message || '');
       if (/already registered|already been registered/i.test(t)) {
-        throw new Error('Ese correo ya tiene cuenta. Usa "Ya tengo contraseña" para entrar.');
+        throw new Error(T('Ese correo ya tiene cuenta. Usa "Ya tengo contraseña" para entrar.'));
       }
       if (/rate limit/i.test(t)) {
-        throw new Error('Supabase ha limitado los correos por ahora. Desactiva la ' +
-          'confirmación por correo en tu proyecto y vuelve a intentarlo.');
+        throw new Error(T('Supabase ha limitado los correos por ahora. Desactiva la ' +
+          'confirmación por correo en tu proyecto y vuelve a intentarlo.'));
       }
       /* El proyecto tiene cerrado el alta de cuentas nuevas, que es lo
          recomendable una vez creadas las tuyas */
       if (/signup.{0,12}disabled|signups not allowed/i.test(t)) {
-        throw new Error('Tu proyecto tiene cerrado el registro de cuentas nuevas. ' +
+        throw new Error(T('Tu proyecto tiene cerrado el registro de cuentas nuevas. ' +
           'Entra con tu correo y tu contraseña de siempre. Si de verdad quieres otra ' +
-          'cuenta, ábrelo en Supabase: Authentication, Sign In, Allow new users to sign up.');
+          'cuenta, ábrelo en Supabase: Authentication, Sign In, Allow new users to sign up.'));
       }
-      return conMotivo(t || 'No se pudo crear la cuenta.');
+      return conMotivo(t || T('No se pudo crear la cuenta.'));
     });
   }
 
@@ -257,7 +257,7 @@
      no pueden entrar en otro dispositivo sin gastar otro correo. */
   function establecerClave(clave) {
     if (String(clave || '').length < 8) {
-      return Promise.reject(new Error('La contraseña necesita al menos 8 caracteres.'));
+      return Promise.reject(new Error(T('La contraseña necesita al menos 8 caracteres.')));
     }
     return conSesion(function () {
       return pedir('/auth/v1/user', {
@@ -269,12 +269,12 @@
       .catch(function (e) {
         const t = String(e.message || '');
         if (/same.*password|should be different/i.test(t)) {
-          throw new Error('Esa ya es tu contraseña actual.');
+          throw new Error(T('Esa ya es tu contraseña actual.'));
         }
         if (/weak|password/i.test(t) && /short|length/i.test(t)) {
-          throw new Error('La contraseña es demasiado corta para tu proyecto.');
+          throw new Error(T('La contraseña es demasiado corta para tu proyecto.'));
         }
-        throw new Error(t || 'No se pudo guardar la contraseña.');
+        throw new Error(t || T('No se pudo guardar la contraseña.'));
       });
   }
 
@@ -288,20 +288,20 @@
       headers: cabeceras(false),
       body: JSON.stringify({ email: dir, password: clave })
     }).then(function (r) {
-      if (!r || !r.access_token) throw new Error('No se pudo iniciar sesión.');
+      if (!r || !r.access_token) throw new Error(T('No se pudo iniciar sesión.'));
       return abrirSesion(r.access_token, r.refresh_token, r.expires_in);
     }).catch(function (e) {
       const t = String(e.message || '');
       if (/invalid login credentials/i.test(t)) {
-        return conMotivo('Correo o contraseña incorrectos. Si creaste la cuenta con el ' +
-          'enlace del correo, todavía no tiene contraseña: entra con el enlace en el ' +
-          'dispositivo de siempre y pónsela desde la pantalla de cuenta.');
+        return conMotivo(T('Correo o contraseña incorrectos. Si creaste la cuenta con ' +
+          'el enlace del correo, todavía no tiene contraseña: entra con el enlace en el ' +
+          'dispositivo de siempre y pónsela desde la pantalla de cuenta.'));
       }
       if (/email not confirmed/i.test(t)) {
-        throw new Error('Falta confirmar el correo. Ábrelo y pulsa el enlace, o desactiva ' +
-          'esa confirmación en Supabase.');
+        throw new Error(T('Falta confirmar el correo. Ábrelo y pulsa el enlace, o desactiva ' +
+          'esa confirmación en Supabase.'));
       }
-      throw new Error(t || 'No se pudo iniciar sesión.');
+      throw new Error(t || T('No se pudo iniciar sesión.'));
     });
   }
 
@@ -349,7 +349,7 @@
       return { ok: true, cambioDeCuenta: false };
     }).catch(function (e) {
       guardar(SES_KEY, null);
-      return { ok: false, error: e.message || 'No se pudo abrir la sesión.' };
+      return { ok: false, error: e.message || T('No se pudo abrir la sesión.') };
     });
   }
 
@@ -360,7 +360,7 @@
       headers: cabeceras(false),
       body: JSON.stringify({ type: tipo || 'magiclink', token_hash: token })
     }).then(function (r) {
-      if (!r || !r.access_token) throw new Error('El enlace no devolvió una sesión.');
+      if (!r || !r.access_token) throw new Error(T('El enlace no devolvió una sesión.'));
       return abrirSesion(r.access_token, r.refresh_token, r.expires_in);
     });
   }
@@ -377,7 +377,7 @@
       headers: cabeceras(false),
       body: JSON.stringify(cuerpo)
     }).then(function (r) {
-      if (!r || !r.access_token) throw new Error('El código no devolvió una sesión.');
+      if (!r || !r.access_token) throw new Error(T('El código no devolvió una sesión.'));
       return abrirSesion(r.access_token, r.refresh_token, r.expires_in);
     });
   }
@@ -430,18 +430,18 @@
   function descifrarError(msg) {
     const t = String(msg || '');
     if (/expired|caduc/i.test(t)) {
-      return 'El enlace ha caducado. Pide uno nuevo: solo valen unos minutos y un único uso.';
+      return T('El enlace ha caducado. Pide uno nuevo: solo valen unos minutos y un único uso.');
     }
     if (/already been used|used/i.test(t)) {
-      return 'Ese enlace ya se usó. Pide uno nuevo desde la app.';
+      return T('Ese enlace ya se usó. Pide uno nuevo desde la app.');
     }
     if (/redirect|not allowed/i.test(t)) {
-      return 'La dirección de retorno no está autorizada en Supabase. Añádela en Authentication, URL Configuration.';
+      return T('La dirección de retorno no está autorizada en Supabase. Añádela en Authentication, URL Configuration.');
     }
     if (/invalid|not found/i.test(t)) {
-      return 'El enlace no es válido. Pide uno nuevo desde este mismo dispositivo.';
+      return T('El enlace no es válido. Pide uno nuevo desde este mismo dispositivo.');
     }
-    return t || 'No se pudo completar el acceso.';
+    return t || T('No se pudo completar el acceso.');
   }
 
   function capturarRedireccion() {
@@ -452,7 +452,7 @@
      un navegador distinto del que tiene la app instalada. */
   function entrarConEnlace(url) {
     url = String(url || '').trim();
-    if (!url) return Promise.reject(new Error('Pega el enlace que te llegó al correo.'));
+    if (!url) return Promise.reject(new Error(T('Pega el enlace que te llegó al correo.')));
 
     let limpio = url;
     /* si es el enlace directo de Supabase, se le quita el redirect para que
@@ -465,12 +465,12 @@
       }
       limpio = u.href;
     } catch (e) {
-      return Promise.reject(new Error('Eso no parece un enlace. Cópialo entero desde el correo.'));
+      return Promise.reject(new Error(T('Eso no parece un enlace. Cópialo entero desde el correo.')));
     }
 
     return procesarRetorno(limpio).then(function (r) {
       if (!r.ok && !r.error) {
-        throw new Error('Ese enlace no lleva ningún acceso. Copia el del botón del correo.');
+        throw new Error(T('Ese enlace no lleva ningún acceso. Copia el del botón del correo.'));
       }
       if (!r.ok) throw new Error(r.error);
       return r;
@@ -500,7 +500,7 @@
     if (renovando) return renovando;
 
     const s = sesion();
-    if (!s || !s.refresh_token) return Promise.reject(new Error('No hay sesión.'));
+    if (!s || !s.refresh_token) return Promise.reject(new Error(T('No hay sesión.')));
     const usado = s.refresh_token;
 
     renovando = pedir('/auth/v1/token?grant_type=refresh_token', {
@@ -531,8 +531,8 @@
          unico que la arregla. Antes se quedaba reintentando con un token muerto
          y repitiendo un error de Supabase que no le dice nada a nadie. */
       guardar(SES_KEY, null);
-      throw new Error('Tu sesión caducó en este dispositivo. Entra otra vez con tu ' +
-        'correo y contraseña; lo que tienes aquí no se pierde.');
+      throw new Error(T('Tu sesión caducó en este dispositivo. Entra otra vez con tu ' +
+        'correo y contraseña; lo que tienes aquí no se pierde.'));
     });
 
     /* El candado se suelta pase lo que pase, o la primera renovacion fallida
@@ -552,7 +552,7 @@
   /* Renueva el token si le queda menos de un minuto */
   function conSesion(fn) {
     const s = sesion();
-    if (!s) return Promise.reject(new Error('Entra con tu correo primero.'));
+    if (!s) return Promise.reject(new Error(T('Entra con tu correo primero.')));
     if (s.expires_at && s.expires_at - Date.now() < 60000) {
       return refrescar().then(fn);
     }
@@ -662,7 +662,7 @@
 
   function enlaceConfiguracion() {
     const c = config();
-    if (!c || !c.url || !c.key) throw new Error('Configura antes la sincronización.');
+    if (!c || !c.url || !c.key) throw new Error(T('Configura antes la sincronización.'));
     const dato = btoa(JSON.stringify({ u: c.url, k: c.key }))
       .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     return location.origin + location.pathname + '#/enlazar/' + dato;
@@ -673,7 +673,7 @@
     try {
       const json = atob(String(dato).replace(/-/g, '+').replace(/_/g, '/'));
       const d = JSON.parse(json);
-      if (!d.u || !d.k) throw new Error('faltan datos');
+      if (!d.u || !d.k) throw new Error(T('faltan datos'));
       guardarConfig(d.u, d.k);
       return true;
     } catch (e) {
@@ -827,7 +827,7 @@
 
     return bajar().then(function (remoto) {
       if (forzar === 'bajar') {
-        if (!remoto) throw new Error('No hay nada guardado en la nube todavía.');
+        if (!remoto) throw new Error(T('No hay nada guardado en la nube todavía.'));
         aplicar(remoto);
         return 'bajado';
       }
@@ -899,19 +899,19 @@
     /* Este ya viene explicado desde refrescar(), y explicado mejor que aqui. */
     if (/Tu sesión caducó en este dispositivo/.test(t)) return t;
     if (/already used|refresh token not found|invalid refresh token|invalid_grant/i.test(t)) {
-      return 'Tu sesión caducó en este dispositivo. Entra otra vez con tu correo y ' +
-        'contraseña; lo que tienes aquí no se pierde.';
+      return T('Tu sesión caducó en este dispositivo. Entra otra vez con tu correo y ' +
+        'contraseña; lo que tienes aquí no se pierde.');
     }
     if (/JWT|jwt expired|invalid token|401|no autorizado|unauthorized/i.test(t)) {
-      return 'Tu sesión ha caducado. Entra otra vez con tu correo y contraseña.';
+      return T('Tu sesión ha caducado. Entra otra vez con tu correo y contraseña.');
     }
     if (/No se pudo conectar|Failed to fetch|NetworkError/i.test(t)) {
-      return 'Sin conexión ahora mismo. Lo intento solo cuando vuelva.';
+      return T('Sin conexión ahora mismo. Lo intento solo cuando vuelva.');
     }
     if (/row-level security|permission denied|42501/i.test(t)) {
-      return 'La base de datos rechazó el guardado. Revisa la política de seguridad de la tabla.';
+      return T('La base de datos rechazó el guardado. Revisa la política de seguridad de la tabla.');
     }
-    return t || 'No se pudo sincronizar';
+    return t || T('No se pudo sincronizar');
   }
 
   function fijarEstado(fase, error) {
@@ -959,7 +959,7 @@
       fijarEstado('ok');
       return r;
     }).catch(function (e) {
-      fijarEstado('error', e.message || 'No se pudo sincronizar');
+      fijarEstado('error', e.message || T('No se pudo sincronizar'));
       /* solo se insiste si hay algo propio esperando; una bajada fallida ya se
          reintenta en el siguiente latido */
       /* Con la sesion caida no se reintenta: sin entrar otra vez, insistir

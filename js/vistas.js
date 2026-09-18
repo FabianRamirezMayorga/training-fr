@@ -187,7 +187,7 @@
             : Spotify.configurado() ? T('Sin conectar') : T('Sin configurar') }))}
         ${raw(filaPerfil({ icono: cara.icono, titulo: T('Dónde entrenas'), accion: 'lugar',
           tono: cara.tono,
-          sub: sitio ? sitio.label + ' · ' +
+          sub: sitio ? T(sitio.label) + ' · ' +
             Tn('{n} ejercicios a tu alcance', { n: UI.num(App.cuantosEn(Store.settings().gear)) })
             : T('Sin elegir') }))}
       </div>

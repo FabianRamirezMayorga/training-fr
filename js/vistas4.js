@@ -761,7 +761,8 @@
                   <span class="ejer-nom">${ex ? ex.nameEs : e.exId}</span>
                   <span class="ejer-meta">${e.sets} × ${e.reps}
                     <i>·</i> ${Tn('{n}s de descanso', { n: e.rest })}</span>
-                  ${raw(e.note ? '<span class="ejer-nota">' + esc(e.note) + '</span>' : '')}
+                  ${raw(e.note
+                    ? '<span class="ejer-nota">' + esc(T(e.note)) + '</span>' : '')}
                 </span>
                 <span class="ejer-mus">${I18N.muscle(e.musculo)}</span>
               </button>`;

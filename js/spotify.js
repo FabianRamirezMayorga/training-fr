@@ -49,7 +49,7 @@
   function guardarConfig(clientId, playlist) {
     clientId = String(clientId || '').trim();
     if (!/^[a-f0-9]{32}$/i.test(clientId)) {
-      throw new Error('El Client ID son 32 caracteres. Cópialo del panel de Spotify.');
+      throw new Error(T('El Client ID son 32 caracteres. Cópialo del panel de Spotify.'));
     }
     escribir(CFG, {
       clientId: clientId, playlist: String(playlist || '').trim(), _ts: Date.now()
@@ -122,13 +122,13 @@
   /* Lleva al usuario a Spotify a dar permiso */
   function entrar() {
     const c = config();
-    if (!c.clientId) return Promise.reject(new Error('Falta el Client ID de Spotify.'));
+    if (!c.clientId) return Promise.reject(new Error(T('Falta el Client ID de Spotify.')));
 
     /* PKCE necesita SHA-256 del navegador, que solo existe en páginas seguras.
        Sin esto el botón se quedaba mudo y parecía que no hacía nada. */
     if (!window.crypto || !crypto.subtle || !crypto.subtle.digest) {
-      return Promise.reject(new Error('Este navegador no permite la conexión segura con ' +
-        'Spotify. Abre la app en https, no en una copia local.'));
+      return Promise.reject(new Error(T('Este navegador no permite la conexión segura con ' +
+        'Spotify. Abre la app en https, no en una copia local.')));
     }
 
     const verificador = aleatorio(64);
@@ -137,7 +137,7 @@
     /* Si esto deja de ser una cadena, el error aparece a los dos redirecciones
        y disfrazado de otra cosa. Mejor cortar aquí. */
     if (typeof verificador !== 'string' || typeof estado !== 'string') {
-      return Promise.reject(new Error('Fallo interno preparando la conexión con Spotify.'));
+      return Promise.reject(new Error(T('Fallo interno preparando la conexión con Spotify.')));
     }
 
     /* Se guardan los últimos intentos, no solo el último.
@@ -171,7 +171,7 @@
       });
       location.href = 'https://accounts.spotify.com/authorize?' + q.toString();
     }).catch(function (e) {
-      throw new Error(e.message || 'No se pudo iniciar la conexión con Spotify.');
+      throw new Error(e.message || T('No se pudo iniciar la conexión con Spotify.'));
     });
   }
 
@@ -230,20 +230,21 @@
          apuntan los datos para poder verlo, no para adivinarlo. */
       const guardados = intentos();
       const texto = hayIntentos
-        ? 'La vuelta de Spotify no encaja con ningún intento guardado aquí. Suele pasar ' +
+        ? T('La vuelta de Spotify no encaja con ningún intento guardado aquí. Suele pasar ' +
           'cuando se empieza en la app instalada y se vuelve en el navegador, o al revés: ' +
-          'cada uno guarda sus datos por separado.'
-        : 'La conexión con Spotify se interrumpió por el camino: en este navegador no ' +
-          'queda constancia de la petición.';
+          'cada uno guarda sus datos por separado.')
+        : T('La conexión con Spotify se interrumpió por el camino: en este navegador no ' +
+          'queda constancia de la petición.');
       apuntarFallo(texto, {
-        detalle: 'state recibido: ' + estado + SALTO +
-          'intentos guardados aquí: ' + (guardados.length
+        detalle: Tn('state recibido: {state}', { state: estado }) + SALTO +
+          Tn('intentos guardados aquí: {lista}', { lista: guardados.length
             ? guardados.map(function (x) {
-                return x.s + ' (hace ' + Math.round((Date.now() - (x.t || 0)) / 60000) + ' min)';
+                return Tn('{state} (hace {n} min)',
+                  { state: x.s, n: Math.round((Date.now() - (x.t || 0)) / 60000) });
               }).join(', ')
-            : 'ninguno') + SALTO +
-          'contexto: ' + (window.matchMedia('(display-mode: standalone)').matches ||
-            window.navigator.standalone ? 'app instalada' : 'navegador')
+            : T('ninguno') }) + SALTO +
+          Tn('contexto: {donde}', { donde: window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone ? T('app instalada') : T('navegador') })
       });
       olvidarIntentos();
       return Promise.resolve({ ok: false, error: texto, volver: '#/musica' });
@@ -273,7 +274,7 @@
       apuntarFallo(null);
       return { ok: true, volver: guardado.volver || '#/musica' };
     }).catch(function (e) {
-      apuntarFallo('Al canjear el código: ' + e.message);
+      apuntarFallo(Tn('Al canjear el código: {fallo}', { fallo: e.message }));
       return { ok: false, error: e.message, volver: guardado.volver };
     });
   }
@@ -291,19 +292,19 @@
   /* Los errores de Spotify vienen en inglés y en clave */
   function traducirError(error, detalle) {
     const e = String(error || '');
-    if (/access_denied/i.test(e)) return 'No diste permiso a la app en la pantalla de Spotify.';
+    if (/access_denied/i.test(e)) return T('No diste permiso a la app en la pantalla de Spotify.');
     if (/invalid_client/i.test(e)) {
-      return 'Spotify no reconoce el Client ID. Cópialo otra vez del panel de desarrollador.';
+      return T('Spotify no reconoce el Client ID. Cópialo otra vez del panel de desarrollador.');
     }
     if (/invalid_redirect_uri|redirect/i.test(e)) {
-      return 'La dirección de retorno no está dada de alta en tu app de Spotify. Añade ' +
-        urlRetorno() + ' en Redirect URIs.';
+      return Tn('La dirección de retorno no está dada de alta en tu app de Spotify. ' +
+        'Añade {url} en Redirect URIs.', { url: urlRetorno() });
     }
-    if (/invalid_scope/i.test(e)) return 'Spotify ha rechazado alguno de los permisos pedidos.';
+    if (/invalid_scope/i.test(e)) return T('Spotify ha rechazado alguno de los permisos pedidos.');
     if (/unsupported_response_type|invalid_request/i.test(e)) {
-      return 'Spotify ha rechazado la petición: ' + (detalle || e);
+      return Tn('Spotify ha rechazado la petición: {porque}', { porque: detalle || e });
     }
-    return 'Spotify respondió: ' + e + (detalle ? ' (' + detalle + ')' : '');
+    return Tn('Spotify respondió: {que}', { que: e }) + (detalle ? ' (' + detalle + ')' : '');
   }
 
   function limpiarURL(destino) {
@@ -319,10 +320,10 @@
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(params).toString()
     }).catch(function () {
-      throw new Error('No se pudo conectar con Spotify.');
+      throw new Error(T('No se pudo conectar con Spotify.'));
     }).then(function (r) {
       return r.json().then(function (j) {
-        if (!r.ok) throw new Error(j.error_description || j.error || 'Error de autorización.');
+        if (!r.ok) throw new Error(j.error_description || j.error || T('Error de autorización.'));
         const previo = sesion() || {};
         escribir(SES, {
           access_token: j.access_token,
@@ -346,7 +347,7 @@
 
   function refrescar() {
     const s = sesion();
-    if (!s || !s.refresh_token) return Promise.reject(new Error('Vuelve a conectar Spotify.'));
+    if (!s || !s.refresh_token) return Promise.reject(new Error(T('Vuelve a conectar Spotify.')));
     return token({ grant_type: 'refresh_token', refresh_token: s.refresh_token });
   }
 
@@ -356,7 +357,7 @@
 
   function pedir(ruta, opciones, reintento) {
     const s = sesion();
-    if (!s) return Promise.reject(new Error('Conecta Spotify primero.'));
+    if (!s) return Promise.reject(new Error(T('Conecta Spotify primero.')));
 
     if (s.expires_at - Date.now() < 60000 && !reintento) {
       return refrescar().then(function () { return pedir(ruta, opciones, true); });
@@ -373,8 +374,8 @@
 
     return fetch(API + ruta, opciones).catch(function (e) {
       clearTimeout(reloj);
-      if (e && e.name === 'AbortError') throw new Error('Spotify ha tardado demasiado en responder.');
-      throw new Error('Sin conexión con Spotify.');
+      if (e && e.name === 'AbortError') throw new Error(T('Spotify ha tardado demasiado en responder.'));
+      throw new Error(T('Sin conexión con Spotify.'));
     }).then(function (r) { clearTimeout(reloj); return r; }).then(function (r) {
       if (r.status === 401 && !reintento) {
         return refrescar().then(function () { return pedir(ruta, opciones, true); });
@@ -389,10 +390,10 @@
           const dice = String(e.reason || '') + ' ' + String(e.message || '');
           if (/PREMIUM/i.test(dice)) {
             sinPremium = true;
-            throw new Error('Spotify solo permite controlar la reproducción con Premium.');
+            throw new Error(T('Spotify solo permite controlar la reproducción con Premium.'));
           }
           if (/Restriction|NO_PREV|NO_NEXT|UNKNOWN/i.test(dice)) {
-            throw new Error('Esa orden no la admite el aparato donde suena la música.');
+            throw new Error(T('Esa orden no la admite el aparato donde suena la música.'));
           }
           const suyo = e.message ? ' Spotify dice: "' + e.message + '".' : '';
           if (ruta.indexOf('/me/player') !== 0) {
@@ -403,24 +404,24 @@
                se renueva solo pero conserva los permisos del día que se dio, y
                los que la app pidió después nunca llegan. */
             if (!faltan.length && sesionSinApuntar()) {
-              throw new Error('Tu conexión con Spotify es anterior a esta función y no ' +
+              throw new Error(T('Tu conexión con Spotify es anterior a esta función y no ' +
                 'incluye el permiso para crear listas. Los permisos no se amplían solos ' +
-                'al renovar: hay que reconectar la cuenta una vez.' + suyo +
+                'al renovar: hay que reconectar la cuenta una vez.') + suyo +
                 ' [403 ' + ruta.split('?')[0] + ']');
             }
-            throw new Error('Spotify no ha autorizado esta acción'
-              + (faltan.length ? ' (falta el permiso ' + faltan[0] + ')' : '')
+            throw new Error(T('Spotify no ha autorizado esta acción')
+              + (faltan.length ? Tn(' (falta el permiso {cual})', { cual: faltan[0] }) : '')
               + '.' + suyo + ' [403 ' + ruta.split('?')[0] + ']');
           }
-          throw new Error((e.message || 'Spotify ha rechazado la orden.')
+          throw new Error((e.message || T('Spotify ha rechazado la orden.'))
             + ' [403 ' + ruta.split('?')[0] + ']');
         });
       }
-      if (r.status === 404) throw new Error('No hay ningún dispositivo de Spotify activo.');
+      if (r.status === 404) throw new Error(T('No hay ningún dispositivo de Spotify activo.'));
       if (r.status === 204) return null;
       if (!r.ok) {
         return r.json().catch(function () { return {}; }).then(function (j) {
-          throw new Error((j.error && j.error.message) || ('Error ' + r.status));
+          throw new Error((j.error && j.error.message) || Tn('Error {n}', { n: r.status }));
         });
       }
       return r.status === 204 ? null : r.json().catch(function () { return null; });
@@ -564,7 +565,7 @@
   function ponerUri(uri) {
     const u = String(uri || '');
     const tipo = u.split(':')[1] || '';
-    if (!tipo) return Promise.reject(new Error('No sé qué es eso.'));
+    if (!tipo) return Promise.reject(new Error(T('No sé qué es eso.')));
 
     const suelta = tipo === 'track' || tipo === 'episode';
     const cuerpo = suelta ? { uris: [u] } : { context_uri: u };
@@ -591,7 +592,7 @@
 
   function ponerPlaylist(uri) {
     const id = idDePlaylist(uri || config().playlist);
-    if (!id) return Promise.reject(new Error('Guarda antes una lista de reproducción.'));
+    if (!id) return Promise.reject(new Error(T('Guarda antes una lista de reproducción.')));
 
     const lanzar = function (dev) {
       return pedir('/me/player/play' + (dev ? '?device_id=' + encodeURIComponent(dev) : ''), {
@@ -730,7 +731,7 @@
           return [];
         });
     })).then(function (partes) {
-      if (fallos.length === pide.length) throw (motivo || new Error('No se pudo buscar.'));
+      if (fallos.length === pide.length) throw (motivo || new Error(T('No se pudo buscar.')));
       const fuera = [];
       partes.forEach(function (p) { p.forEach(function (x) { fuera.push(x); }); });
       /* lo que no se pudo buscar viaja con el resultado, para poder decirlo */
@@ -946,7 +947,7 @@
   }
 
   function marcarFavorita(id, si) {
-    if (!id) return Promise.reject(new Error('No hay ninguna canción sonando.'));
+    if (!id) return Promise.reject(new Error(T('No hay ninguna canción sonando.')));
     /* Spotify acepta el id en el cuerpo o en la ruta, y no siempre trata
        igual a los dos. Se prueba primero por el cuerpo y, si lo rechaza, por
        la ruta, antes de dar el corazón por roto. */
@@ -1015,16 +1016,16 @@
         recuperarGlobal();
         if (previo) { try { previo(); } catch (e) { /* nada */ } }
         if (PlayerSDK) resolve();
-        else reject(new Error('El reproductor de Spotify no se cargó bien.'));
+        else reject(new Error(T('El reproductor de Spotify no se cargó bien.')));
       };
 
       const s = document.createElement('script');
       s.src = SDK_URL;
       s.async = true;
-      s.onerror = function () { reject(new Error('No se pudo cargar el reproductor de Spotify.')); };
+      s.onerror = function () { reject(new Error(T('No se pudo cargar el reproductor de Spotify.'))); };
       document.head.appendChild(s);
 
-      setTimeout(function () { reject(new Error('El reproductor de Spotify tardó demasiado.')); }, 15000);
+      setTimeout(function () { reject(new Error(T('El reproductor de Spotify tardó demasiado.'))); }, 15000);
     });
     return sdkListo;
   }
@@ -1032,7 +1033,7 @@
   /* Arranca el reproductor y devuelve el identificador del dispositivo */
   function iniciarReproductor() {
     if (deviceId && player) return Promise.resolve(deviceId);
-    if (!sesion()) return Promise.reject(new Error('Conecta Spotify primero.'));
+    if (!sesion()) return Promise.reject(new Error(T('Conecta Spotify primero.')));
 
     return cargarSDK().then(function () {
       return new Promise(function (resolve, reject) {
@@ -1069,11 +1070,11 @@
             const msg = (ev && ev.message) || '';
             if (tipo === 'account') {
               sinPremium = true;
-              reject(new Error('Reproducir dentro de la app requiere Spotify Premium.'));
+              reject(new Error(T('Reproducir dentro de la app requiere Spotify Premium.')));
             } else if (tipo === 'authentication') {
-              reject(new Error('La sesión de Spotify caducó. Vuelve a conectar.'));
+              reject(new Error(T('La sesión de Spotify caducó. Vuelve a conectar.')));
             } else {
-              reject(new Error(msg || 'El reproductor de Spotify falló.'));
+              reject(new Error(msg || T('El reproductor de Spotify falló.')));
             }
           };
         };
@@ -1082,11 +1083,11 @@
         player.addListener('account_error', fallo('account'));
 
         player.connect().then(function (ok) {
-          if (!ok) reject(new Error('No se pudo conectar el reproductor.'));
+          if (!ok) reject(new Error(T('No se pudo conectar el reproductor.')));
         });
 
         setTimeout(function () {
-          if (!deviceId) reject(new Error('El reproductor no llegó a estar listo.'));
+          if (!deviceId) reject(new Error(T('El reproductor no llegó a estar listo.')));
         }, 12000);
       });
     });
@@ -1247,7 +1248,7 @@
   }
 
   function reproducirUris(uris) {
-    if (!uris || !uris.length) return Promise.reject(new Error('No hay canciones que reproducir.'));
+    if (!uris || !uris.length) return Promise.reject(new Error(T('No hay canciones que reproducir.')));
 
     const lanzar = function (id) {
       return pedir('/me/player/play' + (id ? '?device_id=' + encodeURIComponent(id) : ''), {
@@ -1289,7 +1290,7 @@
         })
       });
     }).then(function (pl) {
-      if (!pl || !pl.id) throw new Error('No se pudo crear la lista.');
+      if (!pl || !pl.id) throw new Error(T('No se pudo crear la lista.'));
       /* Meter las canciones va por /playlists/{id}/tracks, que es justo la
          puerta que algunas cuentas tienen cerrada. Si falla ahí, la lista ya
          está creada y vacía: se deshace antes de avisar, que si no le queda
@@ -1302,8 +1303,8 @@
         return pedir('/playlists/' + pl.id + '/followers', { method: 'DELETE' })
           .catch(function () { /* si no se puede deshacer, tampoco se insiste */ })
           .then(function () {
-            throw new Error('Spotify ha creado la lista pero no deja meterle las '
-              + 'canciones, así que se ha deshecho. (' + e.message + ')');
+            throw new Error(T('Spotify ha creado la lista pero no deja meterle las '
+              + 'canciones, así que se ha deshecho.') + ' (' + e.message + ')');
           });
       });
     });

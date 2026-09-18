@@ -615,13 +615,17 @@
     return salida;
   }
 
+  /* Sin traducir: la nota se guarda con la rutina y vive años. Traducida aquí
+     se quedaba en el idioma del día en que se generó el plan, así que un plan
+     hecho en inglés seguía en inglés con la app en castellano. La frase en
+     castellano es la clave; quien la pinta la pasa por T(). */
   function notaDeEjercicio(hueco, ex, edad, r, estatico) {
-    if (estatico) return T('Aguanta la posición: las repeticiones son segundos.');
+    if (estatico) return 'Aguanta la posición: las repeticiones son segundos.';
     if (hueco.rol === 'principal') {
-      return T('Es el ejercicio fuerte del día: haz dos series de aproximación con ' +
-        'poco peso antes de la primera seria.');
+      return 'Es el ejercicio fuerte del día: haz dos series de aproximación con ' +
+        'poco peso antes de la primera seria.';
     }
-    if (r.conApoyo[hueco.patron]) return T('Recorrido cómodo, sin bajar a donde molesta.');
+    if (r.conApoyo[hueco.patron]) return 'Recorrido cómodo, sin bajar a donde molesta.';
     return '';
   }
 

@@ -602,7 +602,8 @@
                 </div>` : '')}
             </div>
           </div>
-          ${raw(entry.note ? html`<p class="muted" style="margin:8px 0 0">${entry.note}</p>` : '')}
+          ${raw(entry.note
+            ? html`<p class="muted" style="margin:8px 0 0">${T(entry.note)}</p>` : '')}
           ${raw(historialHTML(entry.exId, pr, last, soloEjercicio))}
 
           <!-- Qué peso poner hoy y por qué. Iba en la casilla y en silencio:

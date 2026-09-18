@@ -33,6 +33,7 @@
 
   /* Los seis movimientos que un plan de cuerpo entero debería tocar. Si falta
      uno, falta de verdad: no es cuestión de gustos. */
+  /* El texto se traduce al leerlo, que es cuando ya se sabe el idioma. */
   const BASICOS = {
     'empuje horizontal': 'empujar por delante (press de banca y parecidos)',
     'empuje vertical': 'empujar por encima de la cabeza',
@@ -83,7 +84,7 @@
   }
 
   function tituloSesion(s, i) {
-    return s.nombre || s.name || ('sesión ' + (i + 1));
+    return s.nombre || s.name || Tn('sesión {n}', { n: i + 1 });
   }
 
   /* ---------- las reglas ----------
@@ -111,6 +112,7 @@
 
     const lista = function (xs) {
       return xs.map(function (x) { return I18N.muscle(x.m).toLowerCase() + ' ' + x.n; }).join(', ');
+      /* El nombre del musculo ya sale en el idioma puesto; el numero es numero. */
     };
 
     if (cortos.length) {
@@ -120,10 +122,10 @@
         id: 'poco', gravedad: (cortos.length >= 3 || hondo >= 2) ? 2 : 1,
         peso: Math.min(2.5, 0.5 + cortos.length * 0.25 + hondo * 0.15),
         titulo: cortos.length === 1
-          ? I18N.muscle(cortos[0].m) + ' se queda corto'
-          : cortos.length + ' músculos por debajo del mínimo',
-        dato: 'series directas a la semana: ' + lista(cortos) + '; por debajo de ' +
-          MINIMO + ' cuesta que crezcan',
+          ? Tn('{que} se queda corto', { que: I18N.muscle(cortos[0].m) })
+          : Tn('{n} músculos por debajo del mínimo', { n: cortos.length }),
+        dato: Tn('series directas a la semana: {lista}; por debajo de {min} cuesta que ' +
+          'crezcan', { lista: lista(cortos), min: MINIMO }),
         arreglo: { tipo: 'anadir', musculos: cortos.map(function (x) { return x.m; }) }
       });
     }
@@ -133,10 +135,10 @@
         id: 'mucho', gravedad: pasados.length >= 3 ? 2 : 1,
         peso: Math.min(2.5, 0.5 + pasados.length * 0.35),
         titulo: pasados.length === 1
-          ? 'Demasiado ' + I18N.muscle(pasados[0].m).toLowerCase()
-          : pasados.length + ' músculos pasados de volumen',
-        dato: 'series directas a la semana: ' + lista(pasados) + '; por encima de ' +
-          MAXIMO + ' se acumula fatiga sin más músculo',
+          ? Tn('Demasiado {que}', { que: I18N.muscle(pasados[0].m).toLowerCase() })
+          : Tn('{n} músculos pasados de volumen', { n: pasados.length }),
+        dato: Tn('series directas a la semana: {lista}; por encima de {max} se acumula ' +
+          'fatiga sin más músculo', { lista: lista(pasados), max: MAXIMO }),
         arreglo: { tipo: 'quitar', musculos: pasados.map(function (x) { return x.m; }) }
       });
     }
@@ -147,8 +149,9 @@
       if (patrones[p]) return;
       hallazgos.push({
         id: 'falta:' + p, gravedad: 2,
-        titulo: 'No hay nada de ' + p,
-        dato: 'en toda la semana no aparece ningún ejercicio de ' + BASICOS[p],
+        titulo: Tn('No hay nada de {patron}', { patron: T(p) }),
+        dato: Tn('en toda la semana no aparece ningún ejercicio de {que}',
+          { que: T(BASICOS[p]) }),
         arreglo: { tipo: 'anadir', patron: p }
       });
     });
@@ -161,8 +164,8 @@
         if (vistos[e.exId]) {
           hallazgos.push({
             id: 'repe:' + i + ':' + e.exId, gravedad: 3,
-            titulo: nombre(e) + ', dos veces el mismo día',
-            dato: 'sale repetido en ' + tituloSesion(s, i),
+            titulo: Tn('{que}, dos veces el mismo día', { que: nombre(e) }),
+            dato: Tn('sale repetido en {donde}', { donde: tituloSesion(s, i) }),
             arreglo: { tipo: 'quitar', exId: e.exId, dia: i }
           });
         }
@@ -182,9 +185,10 @@
       if (pesados.length >= 2) {
         hallazgos.push({
           id: 'axial:' + i, gravedad: 3,
-          titulo: 'Dos básicos pesados el mismo día',
-          dato: pesados.map(nombre).join(' y ') + ' caen juntos en ' +
-            tituloSesion(s, i) + ', y el segundo se hace con la espalda baja ya cargada',
+          titulo: T('Dos básicos pesados el mismo día'),
+          dato: Tn('{lista} caen juntos en {donde}, y el segundo se hace con la espalda ' +
+            'baja ya cargada',
+            { lista: pesados.map(nombre).join(T(' y ')), donde: tituloSesion(s, i) }),
           arreglo: { tipo: 'mover', exId: pesados[1].exId, dia: i }
         });
       }
@@ -222,11 +226,13 @@
       hallazgos.push({
         id: 'orden:' + i, gravedad: 2,
         titulo: tarde.length === 1
-          ? nombre(tarde[0].e) + ' va demasiado tarde'
-          : tarde.length + ' básicos van demasiado tarde',
-        dato: 'en ' + tituloSesion(s, i) + ', ' + tarde.map(function (t) {
-          return nombre(t.e) + ' es el ' + (t.k + 1) + '.º, detrás de ' + nombre(t.tras);
-        }).join('; ') + ': llegas cansado a lo que más peso mueve',
+          ? Tn('{que} va demasiado tarde', { que: nombre(tarde[0].e) })
+          : Tn('{n} básicos van demasiado tarde', { n: tarde.length }),
+        dato: Tn('en {donde}, {lista}: llegas cansado a lo que más peso mueve',
+          { donde: tituloSesion(s, i), lista: tarde.map(function (t) {
+            return Tn('{que} es el {n}.º, detrás de {tras}',
+              { que: nombre(t.e), n: t.k + 1, tras: nombre(t.tras) });
+          }).join('; ') }),
         arreglo: { tipo: 'orden', dia: i }
       });
     });
@@ -253,7 +259,7 @@
     pecho: 'arriba', espalda: 'arriba', hombro: 'arriba', brazo: 'arriba',
     pierna: 'abajo'
   };
-  const NOMBRE_MITAD = { arriba: 'tren superior', abajo: 'tren inferior' };
+  const NOMBRE_MITAD = { arriba: 'tren superior', abajo: 'tren inferior' };   /* se traducen al leer */
 
   /* El core no cuenta para ningún lado, y lo que toca las dos mitades —un peso
      muerto es espalda y pierna a la vez— tampoco: ahí no hay intruso posible,
@@ -323,11 +329,11 @@
       const primero = intrusos[0];
       hallazgos.push({
         id: 'intruso:' + i, gravedad: 2,
-        titulo: nombre(primero.e) + ' no es de ese día',
-        dato: 'en ' + tituloSesion(s, i) + ' va el ' + (primero.k + 1) +
-          '.º, y es un movimiento pesado de ' + NOMBRE_MITAD[primero.m] +
-          ' en una sesión de ' + NOMBRE_MITAD[dominante] +
-          ': se lleva la fuerza que necesitas para lo principal',
+        titulo: Tn('{que} no es de ese día', { que: nombre(primero.e) }),
+        dato: Tn('en {donde} va el {n}.º, y es un movimiento pesado de {suyo} en una ' +
+          'sesión de {dia}: se lleva la fuerza que necesitas para lo principal',
+          { donde: tituloSesion(s, i), n: primero.k + 1,
+            suyo: T(NOMBRE_MITAD[primero.m]), dia: T(NOMBRE_MITAD[dominante]) }),
         arreglo: { tipo: 'mover', exId: primero.e.exId, dia: i, motivo: 'mitad' }
       });
     });
@@ -366,12 +372,14 @@
       id: 'frec', gravedad: solos.length >= 3 ? 2 : 1,
       peso: Math.min(2, 0.5 + solos.length * 0.4),
       titulo: solos.length === 1
-        ? I18N.muscle(solos[0]) + ', un solo día a la semana'
-        : solos.length + ' músculos entrenados un solo día',
-      dato: solos.map(function (m) {
-        return I18N.muscle(m).toLowerCase() + ' ' + (directas[m] || 0) + ' series en 1 día';
-      }).join(', ') + '; repartidas en dos días rinden más, porque el estímulo de ' +
-        'una sesión dura unas 48 horas',
+        ? Tn('{que}, un solo día a la semana', { que: I18N.muscle(solos[0]) })
+        : Tn('{n} músculos entrenados un solo día', { n: solos.length }),
+      dato: Tn('{lista}; repartidas en dos días rinden más, porque el estímulo de una ' +
+        'sesión dura unas 48 horas',
+        { lista: solos.map(function (m) {
+          return Tn('{mus} {n} series en 1 día',
+            { mus: I18N.muscle(m).toLowerCase(), n: directas[m] || 0 });
+        }).join(', ') }),
       arreglo: { tipo: 'repartir', musculos: solos }
     });
   }
@@ -388,10 +396,11 @@
     hallazgos.push({
       id: 'equilibrio', gravedad: 1,
       peso: Math.min(1.5, 0.4 + (max - min) * 0.25),
-      titulo: 'Los días están muy desiguales',
-      dato: tituloSesion(sesiones[iMin], iMin) + ' lleva ' + min + ' ejercicios y ' +
-        tituloSesion(sesiones[iMax], iMax) + ' lleva ' + max + ': el corto se queda ' +
+      titulo: T('Los días están muy desiguales'),
+      dato: Tn('{corto} lleva {min} ejercicios y {largo} lleva {max}: el corto se queda ' +
         'flojo y el largo se hace eterno',
+        { corto: tituloSesion(sesiones[iMin], iMin), min: min,
+          largo: tituloSesion(sesiones[iMax], iMax), max: max }),
       arreglo: { tipo: 'equilibrar', de: iMax, a: iMin }
     });
   }
@@ -412,12 +421,13 @@
       id: 'rest', gravedad: 1,
       peso: Math.min(1.2, 0.4 + (cortos.length - 1) * 0.2),
       titulo: cortos.length === 1
-        ? 'Poco descanso en ' + nombre(cortos[0].e)
-        : 'Poco descanso en ' + cortos.length + ' básicos',
-      dato: cortos.map(function (x) {
-        return nombre(x.e) + ' ' + (x.e.rest || 0) + 's';
-      }).join(', ') + '; con menos de 120 en un básico pesado la serie siguiente ' +
-        'sale corta de fuerza',
+        ? Tn('Poco descanso en {que}', { que: nombre(cortos[0].e) })
+        : Tn('Poco descanso en {n} básicos', { n: cortos.length }),
+      dato: Tn('{lista}; con menos de 120 en un básico pesado la serie siguiente sale ' +
+        'corta de fuerza',
+        { lista: cortos.map(function (x) {
+          return nombre(x.e) + ' ' + (x.e.rest || 0) + 's';
+        }).join(', ') }),
       arreglo: { tipo: 'descanso', donde: cortos.map(function (x) {
         return { exId: x.e.exId, dia: x.dia }; }), valor: 150 }
     });
@@ -431,9 +441,9 @@
         if (!ex || Data.permiteNombre(gear, ex.nameEs)) return;
         hallazgos.push({
           id: 'sitio:' + i + ':' + e.exId, gravedad: 3,
-          titulo: nombre(e) + ' no lo puedes hacer',
-          dato: 'entrenas ' + Data.gearFrase(gear) + ' y ese ejercicio necesita material ' +
-            'que no tienes',
+          titulo: Tn('{que} no lo puedes hacer', { que: nombre(e) }),
+          dato: Tn('entrenas {donde} y ese ejercicio necesita material que no tienes',
+            { donde: Data.gearFrase(gear) }),
           arreglo: { tipo: 'cambiar', exId: e.exId, dia: i }
         });
       });
@@ -458,8 +468,8 @@
         if (!mala) return;
         hallazgos.push({
           id: 'lesion:' + i + ':' + e.exId, gravedad: 3,
-          titulo: nombre(e) + ' choca con tus limitaciones',
-          dato: 'está desaconsejado con lo que has apuntado en tu perfil',
+          titulo: Tn('{que} choca con tus limitaciones', { que: nombre(e) }),
+          dato: T('está desaconsejado con lo que has apuntado en tu perfil'),
           arreglo: { tipo: 'cambiar', exId: e.exId, dia: i }
         });
       });
@@ -753,8 +763,8 @@
           accion: 'orden', sobre: tituloSesion(ses, a.dia), poner: '', quitar: '',
           dia: a.dia + 1,
           lista: nuevo.map(function (e) { return (Data.get(e.exId) || {}).nameEs || ''; }),
-          porque: 'los básicos delante y el aislamiento al final, para llegar ' +
-            'descansado a lo que más peso mueve'
+          porque: T('los básicos delante y el aislamiento al final, para llegar ' +
+            'descansado a lo que más peso mueve')
         });
         return;
       }
@@ -765,8 +775,8 @@
           if (!ex) return;
           cambios.push({ accion: 'descanso', sobre: ex.nameEs, poner: '', quitar: '',
             dia: d.dia + 1, rest: a.valor,
-            porque: 'subir el descanso a ' + a.valor + ' segundos, que es lo que ' +
-              'necesita un básico pesado para repetir la serie con fuerza' });
+            porque: Tn('subir el descanso a {n} segundos, que es lo que necesita un ' +
+              'básico pesado para repetir la serie con fuerza', { n: a.valor }) });
         });
         return;
       }
@@ -793,8 +803,8 @@
         if (dia === -1 || suyo.indexOf(dia) !== -1) return;
         cambios.push(Object.assign({ accion: 'anadir', quitar: '', poner: ex.nameEs,
           dia: dia + 1,
-          porque: 'un segundo día de ' + I18N.muscle(m).toLowerCase() +
-            ', que ahora solo entrenas uno' }, comoEntra(ex)));
+          porque: Tn('un segundo día de {mus}, que ahora solo entrenas uno',
+            { mus: I18N.muscle(m).toLowerCase() }) }, comoEntra(ex)));
         dentro[ex.id] = true;
         return;
       }
@@ -830,19 +840,19 @@
           cambios.push({ accion: 'quitar', quitar: ex.nameEs, poner: '', dia: a.dia + 1,
             series: 0, reps: 0,
             porque: porMitad
-              ? 'no encaja en ese día y no hay otro donde llevarlo, así que sale'
-              : 'dos básicos pesados el mismo día; no hay otro día libre donde ' +
-                'colocarlo, así que sale' });
+              ? T('no encaja en ese día y no hay otro donde llevarlo, así que sale')
+              : T('dos básicos pesados el mismo día; no hay otro día libre donde ' +
+                'colocarlo, así que sale') });
           return;
         }
         cambios.push({ accion: 'quitar', quitar: ex.nameEs, poner: '', dia: a.dia + 1,
           series: 0, reps: 0,
           porque: porMitad
-            ? 'sacarlo de un día que es de la otra mitad del cuerpo'
-            : 'sacarlo del día en que choca con el otro básico pesado' });
+            ? T('sacarlo de un día que es de la otra mitad del cuerpo')
+            : T('sacarlo del día en que choca con el otro básico pesado') });
         cambios.push(Object.assign({ accion: 'anadir', quitar: '', poner: ex.nameEs,
           dia: destino + 1,
-          porque: 'llevarlo a un día que ya trabaja esa zona y llegas descansado' },
+          porque: T('llevarlo a un día que ya trabaja esa zona y llegas descansado') },
           comoEntra(ex)));
         return;
       }
@@ -866,7 +876,7 @@
         const dia = diaAfin(sesiones, ex, -1, AXIALES.indexOf(a.patron) !== -1);
         if (dia === -1) return;
         cambios.push(Object.assign({ accion: 'anadir', quitar: '', poner: ex.nameEs,
-          dia: dia + 1, porque: 'cubrir el patrón que falta en toda la semana' },
+          dia: dia + 1, porque: T('cubrir el patrón que falta en toda la semana') },
           comoEntra(ex)));
         dentro[ex.id] = true;
         return;
@@ -896,9 +906,10 @@
               Math.max(1, MINIMO - (rev.directas[m] || 0)));
             cambios.push({ accion: 'series', sobre: flojo.ex.nameEs, poner: '', quitar: '',
               dia: flojo.dia + 1, series: suben,
-              porque: 'de ' + flojo.e.sets + ' a ' + suben + ' series para subir ' +
-                I18N.muscle(m).toLowerCase() + ', que está en ' + (rev.directas[m] || 0) +
-                ' y el mínimo es ' + MINIMO });
+              porque: Tn('de {antes} a {luego} series para subir {mus}, que está en ' +
+                '{tiene} y el mínimo es {min}',
+                { antes: flojo.e.sets, luego: suben, mus: I18N.muscle(m).toLowerCase(),
+                  tiene: rev.directas[m] || 0, min: MINIMO }) });
             return;
           }
 
@@ -911,8 +922,9 @@
           const faltan = Math.max(1, Math.min(5, MINIMO - (rev.directas[m] || 0)));
           cambios.push(Object.assign({ accion: 'anadir', quitar: '', poner: ex.nameEs,
             dia: dia + 1,
-            porque: 'subir las series de ' + I18N.muscle(m).toLowerCase() +
-              ', que está en ' + (rev.directas[m] || 0) + ' y el mínimo es ' + MINIMO },
+            porque: Tn('subir las series de {mus}, que está en {tiene} y el mínimo ' +
+              'es {min}', { mus: I18N.muscle(m).toLowerCase(),
+                tiene: rev.directas[m] || 0, min: MINIMO }) },
             comoEntra(ex), { series: faltan }));
           dentro[ex.id] = true;
         });
@@ -936,8 +948,8 @@
         if (!cand) return;
         cambios.push({ accion: 'quitar', quitar: cand.ex.nameEs, poner: '', dia: cand.dia + 1,
           series: 0, reps: 0,
-          porque: 'bajar las series de ' + I18N.muscle(m).toLowerCase() +
-            ', que está en ' + (rev.directas[m] || 0) });
+          porque: Tn('bajar las series de {mus}, que está en {tiene}',
+            { mus: I18N.muscle(m).toLowerCase(), tiene: rev.directas[m] || 0 }) });
       }
     });
 
@@ -1004,47 +1016,48 @@
   function porQueGana(filas) {
     if (!filas.length) return '';
     const g = filas[0];
-    if (filas.length === 1) return 'Es el único que tienes.';
+    if (filas.length === 1) return T('Es el único que tienes.');
 
     const otro = filas[1];
     const razones = [];
     if (g.nota > otro.nota) {
-      razones.push('saca ' + g.nota + ' frente a ' + otro.nota + ', y la nota sale de ' +
-        'los fallos encontrados');
+      razones.push(Tn('saca {a} frente a {b}, y la nota sale de los fallos encontrados',
+        { a: g.nota, b: otro.nota }));
     }
     if (g.dosDias > otro.dosDias) {
-      razones.push('reparte ' + g.dosDias + ' músculos en dos o más días, frente a ' +
-        otro.dosDias);
+      razones.push(Tn('reparte {a} músculos en dos o más días, frente a {b}',
+        { a: g.dosDias, b: otro.dosDias }));
     }
     if (!g.cortos && otro.cortos) {
-      razones.push('no deja ningún músculo por debajo del mínimo y el otro deja ' +
-        otro.cortos);
+      razones.push(Tn('no deja ningún músculo por debajo del mínimo y el otro deja {n}',
+        { n: otro.cortos }));
     }
     const dg = g.maxEjercicios - g.minEjercicios;
     const dOtro = otro.maxEjercicios - otro.minEjercicios;
     if (dg < dOtro) {
-      razones.push('tiene los días más parejos (de ' + g.minEjercicios + ' a ' +
-        g.maxEjercicios + ' ejercicios, frente a ' + otro.minEjercicios + ' a ' +
-        otro.maxEjercicios + ')');
+      razones.push(Tn('tiene los días más parejos (de {a} a {b} ejercicios, frente a ' +
+        '{c} a {d})', { a: g.minEjercicios, b: g.maxEjercicios,
+          c: otro.minEjercicios, d: otro.maxEjercicios }));
     }
     if (!razones.length) {
-      return 'Van muy igualados: quédate con el que te apetezca más entrenar, que ' +
-        'es el que acabarás cumpliendo.';
+      return T('Van muy igualados: quédate con el que te apetezca más entrenar, que ' +
+        'es el que acabarás cumpliendo.');
     }
-    return 'Frente a «' + otro.nombre + '», ' + razones.join('; ') + '.';
+    return Tn('Frente a «{otro}», {razones}.',
+      { otro: otro.nombre, razones: razones.join('; ') });
   }
 
   /* Para meterlo en el prompt: los fallos ya encontrados, numerados. */
   function comoTexto(rev) {
     if (!rev.hallazgos.length) {
-      return 'FALLOS ENCONTRADOS AL REVISAR EL PLAN: ninguno. Las comprobaciones ' +
+      return T('FALLOS ENCONTRADOS AL REVISAR EL PLAN: ninguno. Las comprobaciones ' +
         '—volumen por músculo, patrones, repeticiones, orden, descansos, material y ' +
-        'limitaciones— salen todas limpias.\n';
+        'limitaciones— salen todas limpias.') + '\n';
     }
-    return 'FALLOS ENCONTRADOS AL REVISAR EL PLAN (calculados sobre el propio plan, ' +
-      'no son opiniones):\n' + rev.hallazgos.map(function (h, i) {
-        return (i + 1) + ') ' + h.titulo + ' — ' + h.dato +
-          ' [gravedad ' + h.gravedad + ' sobre 3]';
+    return T('FALLOS ENCONTRADOS AL REVISAR EL PLAN (calculados sobre el propio plan, ' +
+      'no son opiniones):') + '\n' + rev.hallazgos.map(function (h, i) {
+        return (i + 1) + ') ' + h.titulo + ' — ' + h.dato + ' ' +
+          Tn('[gravedad {n} sobre 3]', { n: h.gravedad });
       }).join('\n') + '\n';
   }
 

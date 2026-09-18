@@ -876,7 +876,29 @@
     'Ordena.':
       'Put them in order.',
     'Pruébala.':
-      'Give it a go.'
+      'Give it a go.',
+
+    /* ---------- la app en dos idiomas ---------- */
+    'La app en dos idiomas': 'The app in two languages',
+    'Español o inglés, de un toque y sin perder nada':
+      'Spanish or English, one tap, nothing lost',
+    'La app entera está en español y en inglés: los botones, este manual, las guías de técnica, los avisos y lo que te escribe el entrenador.':
+      'The whole app is in Spanish and English: the buttons, this manual, the technique guides, the reminders and whatever the coach writes you.',
+    'Se cambia con el botón *ES / EN* de arriba a la derecha, al lado del que cambia el tema, o desde Ajustes › Idioma. Igual que el del tema, dice el idioma al que te lleva, no el que tienes puesto.':
+      'You switch with the *ES / EN* button at the top right, next to the one that changes the theme, or from Settings › Language. Like the theme one, it names the language it takes you to, not the one you are on.',
+    'No hay nada que descargar ni que esperar: el cambio es inmediato y funciona sin conexión en los dos idiomas, porque las traducciones viajan dentro de la app.':
+      'There is nothing to download and nothing to wait for: the switch is immediate and works offline in both languages, because the translations travel inside the app.',
+    'Lo que has escrito tú no se toca: el nombre de tus rutinas, tus notas, tus comidas y tus suplementos se quedan tal y como los escribiste. Lo que cambia de idioma es lo que pone la app.':
+      'What you wrote yourself is left alone: your routine names, your notes, your meals and your supplements stay exactly as you typed them. What changes language is what the app puts there.',
+    'El catálogo de ejercicios es caso aparte: viene en inglés de origen. Con la app en inglés ves los nombres y las instrucciones originales, y en español los ves traducidos.':
+      'The exercise catalogue is its own case: it comes in English to begin with. With the app in English you see the original names and instructions; in Spanish you see them translated.',
+    'Al entrenador con IA se le habla en el idioma que tengas puesto, y contesta en ese mismo.':
+      'The AI coach is spoken to in whichever language you have set, and it answers in that one.',
+    '¿Puedo poner la app en inglés?': 'Can I switch the app to English?',
+    'Sí, entera. El botón *ES / EN* de arriba a la derecha la cambia de un toque, y también está en Ajustes › Idioma.':
+      'Yes, all of it. The *ES / EN* button at the top right switches it with one tap, and it is also in Settings › Language.',
+    'Cambia todo lo que pone la app: botones, manual, guías de técnica, avisos y el entrenador. Lo que has escrito tú se queda como está.':
+      'Everything the app puts there changes: buttons, manual, technique guides, reminders and the coach. What you wrote yourself stays as it is.'
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

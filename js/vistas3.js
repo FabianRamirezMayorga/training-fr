@@ -289,7 +289,8 @@
         </div>
 
         ${raw(campoClave(Tn('Clave de {prov}', { prov: prov.label }),
-          'k-ia', claveProv, T(prov.pista)))}
+          'k-ia', claveProv, prov.pista === 'sin prefijo fijo'
+            ? T(prov.pista) : prov.pista))}
 
         <div class="clave-bloque">
           <div class="cb-cab">

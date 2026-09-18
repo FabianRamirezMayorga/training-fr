@@ -666,8 +666,8 @@
     }, 0);
     const partes = [];
     if (r.name) partes.push(r.name);
-    partes.push(n + (n === 1 ? ' ejercicio' : ' ejercicios'));
-    if (series) partes.push(series + (series === 1 ? ' serie' : ' series'));
+    partes.push(Tp(n, '{n} ejercicio', '{n} ejercicios'));
+    if (series) partes.push(Tp(series, '{n} serie', '{n} series'));
     return partes.join(' · ');
   }
 
@@ -871,7 +871,7 @@
     if (h.nombres.length) partes.push(esc(h.nombres.join(' · ')));
     if (h.series) partes.push(Tp(h.series, '{n} serie', '{n} series'));
     if (h.volumen) partes.push(Tn('{v} levantados', { v: UI.kg(h.volumen) }));
-    if (h.minutos >= 1) partes.push(h.minutos + ' min');
+    if (h.minutos >= 1) partes.push(Tn('{n} min', { n: h.minutos }));
     return partes.length ? partes.join(' · ') : T('Queda apuntado en tu historial.');
   }
 
@@ -1647,15 +1647,15 @@
      solo se ve lo que está puesto, y si no hay nada puesto no se ve nada. */
   function chipsActivosHTML() {
     const fichas = [];
-    if (exFilters.favs) fichas.push(['favs', 'Favoritos']);
+    if (exFilters.favs) fichas.push(['favs', T('Favoritos')]);
     if (exFilters.group) {
       const gr = I18N.GROUPS.filter(function (x) { return x.id === exFilters.group; })[0];
-      if (gr) fichas.push(['group', gr.label]);
+      if (gr) fichas.push(['group', T(gr.label)]);
     }
     if (exFilters.muscle) fichas.push(['muscle', I18N.muscle(exFilters.muscle)]);
     if (exFilters.tipo) {
       const t = Data.TIPOS.filter(function (x) { return x.id === exFilters.tipo; })[0];
-      if (t) fichas.push(['tipo', t.label]);
+      if (t) fichas.push(['tipo', T(t.label)]);
     }
     if (exFilters.equipment) fichas.push(['equipment', I18N.equip(exFilters.equipment)]);
     if (exFilters.level) fichas.push(['level', I18N.level(exFilters.level)]);
@@ -1667,7 +1667,8 @@
           ' <span style="opacity:.65">\u00d7</span></button>';
       }).join('') +
       (fichas.length > 1
-        ? '<button class="chip" data-a="limpiar">Quitar todo</button>' : '') +
+        ? '<button class="chip" data-a="limpiar">' + esc(T('Quitar todo')) +
+          '</button>' : '') +
       '</div>';
   }
 
@@ -2144,33 +2145,34 @@
 
   function sesionZonaSheet(region) {
     UI.modal(html`
-      <h2>Entrenar ${region.label.toLowerCase()}</h2>
-      <p class="muted">Monto una sesión equilibrada entre
-      ${(region.entreno || region.muscles).map(function (m) {
-        return I18N.muscle(m).toLowerCase();
-      }).join(', ')}. Empiezo por lo pesado y termino con lo accesorio.</p>
+      <h2>${Tn('Entrenar {zona}', { zona: T(region.label).toLowerCase() })}</h2>
+      <p class="muted">${Tn('Monto una sesión equilibrada entre {musculos}. Empiezo ' +
+        'por lo pesado y termino con lo accesorio.',
+        { musculos: (region.entreno || region.muscles).map(function (m) {
+          return I18N.muscle(m).toLowerCase();
+        }).join(', ') })}</p>
 
       <div class="card">
-        <b>¿Cuánto tiempo tienes?</b>
+        <b>${T('¿Cuánto tiempo tienes?')}</b>
         <div class="row wrap" style="gap:6px;margin-top:9px">
           ${raw(SESION_MIN.map(function (m) {
             return '<button class="chip ' + (sesionOpts.minutes === m ? 'on' : '') +
-              '" data-smin="' + m + '">' + m + ' min</button>';
+              '" data-smin="' + m + '">' + esc(Tn('{n} min', { n: m })) + '</button>';
           }).join(''))}
         </div>
       </div>
 
       <div class="card">
-        <b>¿Con qué objetivo?</b>
+        <b>${T('¿Con qué objetivo?')}</b>
         <div class="row wrap" style="gap:6px;margin-top:9px">
           ${raw(Object.keys(Planner.GOALS).map(function (k) {
             return '<button class="chip ' + (sesionOpts.goal === k ? 'on' : '') +
-              '" data-sgoal="' + k + '">' + esc(Planner.GOALS[k].label) + '</button>';
+              '" data-sgoal="' + k + '">' + esc(T(Planner.GOALS[k].label)) + '</button>';
           }).join(''))}
         </div>
       </div>
 
-      <button class="btn primary block" data-a="crear">Ver la sesión</button>`,
+      <button class="btn primary block" data-a="crear">${T('Ver la sesión')}</button>`,
       function (el) {
         const elegir = function (attr, campo) {
           el.querySelectorAll('[' + attr + ']').forEach(function (b) {
@@ -2198,13 +2200,14 @@
   }
 
   function previewSesionSheet(region, ejercicios) {
-    const nombre = region.label + ' · ' + sesionOpts.minutes + ' min';
+    const nombre = T(region.label) + ' · ' + Tn('{n} min', { n: sesionOpts.minutes });
     const minutos = Planner.estimate({ exercises: ejercicios });
 
     UI.modal(html`
       <h2>${nombre}</h2>
-      <p class="muted">${ejercicios.length} ejercicios · unos ${minutos} min ·
-      ${Planner.GOALS[sesionOpts.goal].label.toLowerCase()}</p>
+      <p class="muted">${Tn('{n} ejercicios · unos {min} min · {objetivo}',
+        { n: ejercicios.length, min: minutos,
+          objetivo: T(Planner.GOALS[sesionOpts.goal].label).toLowerCase() })}</p>
 
       <div class="stack">
         ${raw(ejercicios.map(function (e) {
@@ -2222,10 +2225,10 @@
       </div>
 
       <div class="row" style="margin-top:14px">
-        <button class="btn grow" data-a="otra">Otra propuesta</button>
-        <button class="btn primary grow" data-a="empezar">${raw(icon('play'))} Empezar</button>
+        <button class="btn grow" data-a="otra">${T('Otra propuesta')}</button>
+        <button class="btn primary grow" data-a="empezar">${raw(icon('play'))} ${T('Empezar')}</button>
       </div>
-      <button class="btn ghost block" data-a="guardar" style="margin-top:8px">Guardar como rutina</button>`,
+      <button class="btn ghost block" data-a="guardar" style="margin-top:8px">${T('Guardar como rutina')}</button>`,
       function (el) {
         el.querySelector('[data-a=otra]').onclick = function () {
           const otra = generarSesion(region, ejercicios.map(function (e) { return e.exId; }));
@@ -2266,7 +2269,7 @@
           });
           UI.closeModal();
           go('rutina', r.id);
-          UI.toast('Guardada como rutina');
+          UI.toast(T('Guardada como rutina'));
         };
       });
   }
@@ -3141,7 +3144,7 @@
     const suyas = Store.routines().filter(function (r) {
       return (r.days || []).length && nombreRutina(r) === nombre;
     });
-    if (!suyas.length) { UI.toast('Ese plan ya no está'); return; }
+    if (!suyas.length) { UI.toast(T('Ese plan ya no está')); return; }
 
     suyas.sort(function (a, b) {
       return DIAS.indexOf((a.days || [])[0]) - DIAS.indexOf((b.days || [])[0]);
@@ -3161,7 +3164,8 @@
         ${raw(suyas.map(function (r) {
           return '<div class="row between" style="padding:4px 0;gap:10px">' +
             '<span style="font-size:.86rem">' + esc(tituloRutina(r)) + '</span>' +
-            '<span class="tiny">' + r.exercises.length + ' ejercicios</span></div>';
+            '<span class="tiny">' + esc(Tp(r.exercises.length,
+              '{n} ejercicio', '{n} ejercicios')) + '</span></div>';
         }).join(''))}
       </div>
 
@@ -3204,7 +3208,7 @@
     const suyas = Store.routines().filter(function (r) {
       return App.nombreRutina(r) === nombre;
     });
-    if (!suyas.length) { UI.toast('Ese plan ya no está'); return; }
+    if (!suyas.length) { UI.toast(T('Ese plan ya no está')); return; }
 
     UI.modal(html`
       <h2>${T('Renombrar plan')}</h2>
@@ -3226,7 +3230,7 @@
         el.querySelector('#rn-no').onclick = function () { UI.closeModal(); };
         el.querySelector('#rn-ok').onclick = function () {
           const nuevo = String(campo.value || '').trim();
-          if (!nuevo) { UI.toast('Ponle un nombre'); return; }
+          if (!nuevo) { UI.toast(T('Ponle un nombre')); return; }
           if (nuevo === nombre) { UI.closeModal(); return; }
           if (Store.routines().some(function (r) { return App.nombreRutina(r) === nuevo; })) {
             UI.toast(T('Ya tienes un plan con ese nombre'));
@@ -3250,7 +3254,7 @@
      saca del grupo en el que estaba. */
   function renombrarRutinaSheet(id) {
     const r = Store.routine(id);
-    if (!r) { UI.toast('Esa rutina ya no está'); return; }
+    if (!r) { UI.toast(T('Esa rutina ya no está')); return; }
     const actual = nombreRutina(r);
 
     UI.modal(html`
@@ -3272,7 +3276,7 @@
         el.querySelector('#rr-no').onclick = function () { UI.closeModal(); };
         el.querySelector('#rr-ok').onclick = function () {
           const nuevo = String(campo.value || '').trim();
-          if (!nuevo) { UI.toast('Ponle un nombre'); return; }
+          if (!nuevo) { UI.toast(T('Ponle un nombre')); return; }
           if (nuevo === actual) { UI.closeModal(); return; }
           r.name = nombreConDia(nuevo, r.days);
           Store.saveRoutine(r);
@@ -3290,7 +3294,7 @@
     const suyas = Store.routines().filter(function (r) {
       return (r.days || []).length && nombreRutina(r) === nombre;
     });
-    if (!suyas.length) { UI.toast('Ese plan ya no está'); return; }
+    if (!suyas.length) { UI.toast(T('Ese plan ya no está')); return; }
 
     suyas.sort(function (a, b) {
       return DIAS.indexOf((a.days || [])[0]) - DIAS.indexOf((b.days || [])[0]);
@@ -3309,7 +3313,8 @@
         ${raw(suyas.map(function (r) {
           return '<div class="row between" style="padding:4px 0;gap:10px">' +
             '<span style="font-size:.86rem">' + esc(tituloRutina(r)) + '</span>' +
-            '<span class="tiny">' + r.exercises.length + ' ejercicios</span></div>';
+            '<span class="tiny">' + esc(Tp(r.exercises.length,
+              '{n} ejercicio', '{n} ejercicios')) + '</span></div>';
         }).join(''))}
       </div>
       <p class="tiny" style="margin:10px 0 0">${hechas
@@ -3442,51 +3447,52 @@
     const diasHTML = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(Date.now() - i * 86400000);
-      const et = i === 0 ? 'Hoy' : i === 1 ? 'Ayer' : UI.diaLargo(UI.DAY_NAMES[d.getDay()]);
+      const et = i === 0 ? T('Hoy') : i === 1 ? T('Ayer') : UI.diaLargo(UI.DAY_NAMES[d.getDay()]);
       diasHTML.push('<button class="chip ' + (i === 0 ? 'on' : '') + '" data-cuando="' +
         i + '">' + esc(et) + '</button>');
     }
 
     UI.modal(html`
-      <h2>Apuntar algo que ya hice</h2>
-      <p class="muted" style="margin:0 0 12px">Entra en tu historial y en tu racha como un
-      entrenamiento más. Las calorías son una estimación por tu peso y el tiempo.</p>
+      <h2>${T('Apuntar algo que ya hice')}</h2>
+      <p class="muted" style="margin:0 0 12px">${T('Entra en tu historial y en tu racha ' +
+      'como un entrenamiento más. Las calorías son una estimación por tu peso y el ' +
+      'tiempo.')}</p>
 
-      <label class="tiny">QUÉ HICE</label>
-      <input id="ac-nombre" placeholder="Escríbelo tú: pickleball, mudanza, subir al pueblo…"
+      <label class="tiny">${T('QUÉ HICE')}</label>
+      <input id="ac-nombre" placeholder="${T('Escríbelo tú: pickleball, mudanza, subir al pueblo…')}"
              autocomplete="off" style="margin-top:6px">
       <div class="row wrap" style="gap:6px;margin-top:8px" id="ac-tipos">
         ${raw(ACTIVIDADES.map(function (a) {
           return '<button class="chip ' + (a.id === 'caminar' ? 'on' : '') +
-            '" data-act="' + a.id + '">' + esc(a.label) + '</button>';
+            '" data-act="' + a.id + '">' + esc(T(a.label)) + '</button>';
         }).join(''))}
       </div>
-      <p class="tiny" style="margin:6px 0 0">Si lo escribes tú, elige abajo lo que más se le
-      parezca en esfuerzo: de ahí salen las calorías.</p>
+      <p class="tiny" style="margin:6px 0 0">${T('Si lo escribes tú, elige abajo lo que ' +
+      'más se le parezca en esfuerzo: de ahí salen las calorías.')}</p>
 
-      <label class="tiny" style="display:block;margin-top:14px">CUÁNDO</label>
+      <label class="tiny" style="display:block;margin-top:14px">${T('CUÁNDO')}</label>
       <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-dias">${raw(diasHTML.join(''))}</div>
 
-      <label class="tiny" style="display:block;margin-top:14px">CUÁNTO TIEMPO</label>
+      <label class="tiny" style="display:block;margin-top:14px">${T('CUÁNTO TIEMPO')}</label>
       <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-mins">
         ${raw([15, 30, 45, 60, 90, 120].map(function (m) {
           return '<button class="chip ' + (m === 60 ? 'on' : '') + '" data-min="' + m +
-            '">' + m + ' min</button>';
+            '">' + esc(Tn('{n} min', { n: m })) + '</button>';
         }).join(''))}
       </div>
       <input id="ac-otro" type="number" inputmode="numeric" min="1" max="600"
-             placeholder="u otro número de minutos" style="margin-top:8px">
+             placeholder="${T('u otro número de minutos')}" style="margin-top:8px">
 
       <div class="card" style="margin-top:14px">
-        <div class="tiny">ESTIMACIÓN</div>
+        <div class="tiny">${T('ESTIMACIÓN')}</div>
         <div id="ac-kcal" style="font-weight:700;font-size:1.15rem;margin-top:3px"></div>
       </div>
 
-      <button class="btn primary block" id="ac-ok" style="margin-top:14px">Apuntar</button>`,
+      <button class="btn primary block" id="ac-ok" style="margin-top:14px">${T('Apuntar')}</button>`,
       function (el) {
         const pintarKcal = function () {
-          el.querySelector('#ac-kcal').textContent = '~' + UI.num(kcalDe()) + ' kcal en ' +
-            elegido.min + ' min';
+          el.querySelector('#ac-kcal').textContent = Tn('~{kcal} kcal en {min} min',
+            { kcal: UI.num(kcalDe()), min: elegido.min });
         };
         const marcar = function (caja, sel) {
           el.querySelectorAll(caja + ' .chip').forEach(function (c) {
@@ -3537,7 +3543,7 @@
         el.querySelector('#ac-ok').onclick = function () {
           const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
           const fin = Date.now() - elegido.atras * 86400000;
-          const comoSeLlama = elegido.nombre || a.label;
+          const comoSeLlama = elegido.nombre || T(a.label);
           Store.addSession({
             routineName: comoSeLlama,
             start: fin - elegido.min * 60000,
@@ -3552,7 +3558,8 @@
           });
           UI.closeModal();
           render();
-          UI.toast(comoSeLlama + ' apuntado: ' + elegido.min + ' min');
+          UI.toast(Tn('{que} apuntado: {min} min',
+            { que: comoSeLlama, min: elegido.min }));
         };
       });
   }
@@ -3578,14 +3585,14 @@
     if (p.preview) return planPreview(p);
 
     return html`
-      <h1>Crea tu plan semanal</h1>
-      <p class="muted">Responde cuatro cosas y te organizo la semana: qué grupo muscular
-      toca cada día y con qué ejercicios, ajustado al tiempo que tengas.</p>
+      <h1>${T('Crea tu plan semanal')}</h1>
+      <p class="muted">${T('Responde cuatro cosas y te organizo la semana: qué grupo ' +
+      'muscular toca cada día y con qué ejercicios, ajustado al tiempo que tengas.')}</p>
 
       <div class="card">
         <div class="row between" style="margin-bottom:9px">
-          <b>¿Qué días entrenas?</b>
-          <span class="chip solid" id="p-ndias">${p.days.length} días</span>
+          <b>${T('¿Qué días entrenas?')}</b>
+          <span class="chip solid" id="p-ndias">${Tp(p.days.length, '{n} día', '{n} días')}</span>
         </div>
         <div class="row wrap" style="gap:6px">
           ${raw(DIAS.map(function (d) {
@@ -3597,11 +3604,11 @@
       </div>
 
       <div class="card">
-        <b>¿Cuánto dura cada sesión?</b>
+        <b>${T('¿Cuánto dura cada sesión?')}</b>
         <div class="row wrap" style="gap:6px;margin-top:9px">
           ${raw([30, 45, 60, 75, 90].map(function (m) {
             return '<button class="chip ' + (p.minutes === m ? 'on' : '') +
-                   '" data-pmin="' + m + '">' + m + ' min</button>';
+                   '" data-pmin="' + m + '">' + esc(Tn('{n} min', { n: m })) + '</button>';
           }).join(''))}
         </div>
       </div>
@@ -3609,23 +3616,24 @@
       <div class="card">
         <div class="row between">
           <div class="grow">
-            <b>Entrenas ${Data.gearFrase(Data.GEAR[p.gear] ? p.gear : 'gym')}</b>
-            <div class="tiny">Solo usaré ejercicios que puedas hacer ahí</div>
+            <b>${Tn('Entrenas {donde}',
+              { donde: Data.gearFrase(Data.GEAR[p.gear] ? p.gear : 'gym') })}</b>
+            <div class="tiny">${T('Solo usaré ejercicios que puedas hacer ahí')}</div>
           </div>
-          <button class="btn sm" data-a="cambiarlugar">Cambiar</button>
+          <button class="btn sm" data-a="cambiarlugar">${T('Cambiar')}</button>
         </div>
       </div>
 
       <div class="card">
-        <b>¿Cuál es tu objetivo?</b>
+        <b>${T('¿Cuál es tu objetivo?')}</b>
         <div class="row wrap" style="gap:6px;margin-top:9px">
           ${raw(Object.keys(Planner.GOALS).map(function (k) {
             return '<button class="chip ' + (p.goal === k ? 'on' : '') +
-                   '" data-pgoal="' + k + '">' + esc(Planner.GOALS[k].label) + '</button>';
+                   '" data-pgoal="' + k + '">' + esc(T(Planner.GOALS[k].label)) + '</button>';
           }).join(''))}
         </div>
         <div class="hr"></div>
-        <b>¿Qué experiencia tienes?</b>
+        <b>${T('¿Qué experiencia tienes?')}</b>
         <div class="row wrap" style="gap:6px;margin-top:9px">
           ${raw(Object.keys(I18N.LEVEL).map(function (k) {
             return '<button class="chip ' + (p.level === k ? 'on' : '') +
@@ -3635,7 +3643,7 @@
       </div>
 
       <button class="btn primary block" data-a="generar" style="margin-top:16px">
-        ${raw(icon('flag'))} Generar mi plan
+        ${raw(icon('flag'))} ${T('Generar mi plan')}
       </button>`;
   }
 
@@ -3643,10 +3651,10 @@
     const plan = p.preview;
     return html`
       <button class="btn sm ghost" data-a="volver" style="margin-bottom:10px">
-        ${raw(icon('back'))} Cambiar respuestas</button>
-      <h1>Tu plan de ${plan.length} días</h1>
-      <p class="muted">Así queda tu semana. Al guardarlo se crea una rutina por día,
-      y podrás editarlas como quieras.</p>
+        ${raw(icon('back'))} ${T('Cambiar respuestas')}</button>
+      <h1>${Tn('Tu plan de {n} días', { n: plan.length })}</h1>
+      <p class="muted">${T('Así queda tu semana. Al guardarlo se crea una rutina por ' +
+      'día, y podrás editarlas como quieras.')}</p>
 
       <div class="stack">
         ${raw(plan.map(function (r, i) {
@@ -3655,7 +3663,8 @@
               <div class="row between" style="align-items:flex-start">
                 <div class="grow">
                   <div style="font-weight:700">${r.name}</div>
-                  <div class="tiny">${r.exercises.length} ejercicios · ~${Planner.estimate(r)} min ·
+                  <div class="tiny">${Tn('{n} ejercicios · ~{min} min',
+                    { n: r.exercises.length, min: Planner.estimate(r) })} ·
                     ${r.muscles.map(I18N.muscle).join(' · ')}</div>
                 </div>
                 <button class="btn icon sm" data-pdet="${i}" aria-label="${T('Ver ejercicios')}">
@@ -3670,7 +3679,8 @@
                       <img src="${ex ? Data.img(ex, 0) : Data.PLACEHOLDER}" alt="" loading="lazy">
                       <div class="grow">
                         <div style="font-weight:600;font-size:.84rem">${ex ? ex.nameEs : re.exId}</div>
-                        <div class="tiny">${re.sets} × ${re.reps} · descanso ${re.rest}s ·
+                        <div class="tiny">${re.sets} × ${re.reps} · ${Tn('descanso {n}s',
+                          { n: re.rest })} ·
                           ${ex ? I18N.muscle(ex.primaryMuscles[0]) : ''}</div>
                       </div>
                     </div>`;
@@ -3681,11 +3691,11 @@
       </div>
 
       <div class="row" style="margin-top:16px">
-        <button class="btn grow" data-a="otra">${raw(icon('copy'))} Otra propuesta</button>
-        <button class="btn primary grow" data-a="guardarplan">${raw(icon('check'))} Guardar plan</button>
+        <button class="btn grow" data-a="otra">${raw(icon('copy'))} ${T('Otra propuesta')}</button>
+        <button class="btn primary grow" data-a="guardarplan">${raw(icon('check'))} ${T('Guardar plan')}</button>
       </div>
-      <p class="tiny" style="margin-top:10px">Guardar añade ${plan.length} rutinas nuevas;
-      no se borra nada de lo que ya tengas.</p>`;
+      <p class="tiny" style="margin-top:10px">${Tn('Guardar añade {n} rutinas nuevas; ' +
+      'no se borra nada de lo que ya tengas.', { n: plan.length })}</p>`;
   }
 
   viewPlan.mount = function (root) {
@@ -3724,7 +3734,7 @@
     bindAll(root, '[data-plevel]', function (el) { p.level = el.dataset.plevel; render(); });
 
     bind(root, '[data-a=generar]', function () {
-      if (!p.days.length) { UI.toast('Elige al menos un día de entrenamiento'); return; }
+      if (!p.days.length) { UI.toast(T('Elige al menos un día de entrenamiento')); return; }
       p.preview = Planner.generate(p);
       render();
       window.scrollTo(0, 0);
@@ -3734,7 +3744,7 @@
     bind(root, '[data-a=otra]', function () {
       p.preview = Planner.generate(p);
       render();
-      UI.toast('Nueva propuesta generada');
+      UI.toast(T('Nueva propuesta generada'));
     });
 
     bindAll(root, '[data-pdet]', function (el) {
@@ -3748,7 +3758,7 @@
       });
       const n = p.preview.length;
       p.preview = null;
-      UI.toast('Plan guardado: ' + n + ' rutinas creadas');
+      UI.toast(Tn('Plan guardado: {n} rutinas creadas', { n: n }));
       go('rutinas');
       Offline.precargarRutinas();
     });
@@ -4546,20 +4556,20 @@
     }
 
     UI.modal(html`
-      <h2>Añadir ejercicio</h2>
+      <h2>${T('Añadir ejercicio')}</h2>
       <div class="search-wrap" style="margin-bottom:10px">
         ${raw(icon('search'))}
-        <input id="pick-q" type="search" placeholder="Buscar ejercicio…" autocomplete="off">
+        <input id="pick-q" type="search" placeholder="${T('Buscar ejercicio…')}" autocomplete="off">
       </div>
       <div class="pill-scroll" style="padding-left:0;margin-left:0">
-        <button class="chip on" data-g="">Todos</button>
+        <button class="chip on" data-g="">${T('Todos')}</button>
         ${raw(I18N.GROUPS.map(function (gr) {
-          return '<button class="chip" data-g="' + gr.id + '">' + esc(gr.label) + '</button>';
+          return '<button class="chip" data-g="' + gr.id + '">' + esc(T(gr.label)) + '</button>';
         }).join(''))}
       </div>
       <div class="row between" style="margin:2px 0 8px">
         <span class="tiny" id="pick-info"></span>
-        <button class="chip" data-pickall>Ver todo</button>
+        <button class="chip" data-pickall>${T('Ver todo')}</button>
       </div>
       <div class="stack" id="pick-list"></div>`,
       function (el) {
@@ -4587,8 +4597,8 @@
   function viewEntrenar() {
     if (!Workout.isActive()) {
       return html`<div class="empty">${raw(icon('dumbbell'))}
-        <p>No hay ningún entrenamiento en curso.</p>
-        <button class="btn primary" data-a="ir">Elegir una rutina</button></div>`;
+        <p>${T('No hay ningún entrenamiento en curso.')}</p>
+        <button class="btn primary" data-a="ir">${T('Elegir una rutina')}</button></div>`;
     }
     return Workout.view();
   }
@@ -4661,7 +4671,7 @@
       '<span class="op-ico">' + icon(o.ico) + '</span>' +
       '<span class="grow"><span class="op-nom">' + esc(T(o.t)) + '</span>' +
       '<span class="op-sub">' + esc(T(o.sub)) + '</span>' +
-      '<span class="op-muestra">' + o.muestra + '</span></span>' +
+      '<span class="op-muestra">' + o.muestra() + '</span></span>' +
       '<span class="op-marca">' + icon('check') + '</span></button>';
   }
 
@@ -4683,19 +4693,26 @@
      mientras entrenas. «Anotas cada serie» y «60 kg × 12» dicen lo mismo, pero
      lo segundo se entiende sin leerlo. */
   const FORMAS_REGISTRO = [
-    /* El texto se traduce al pintarlo: la tabla se arma al cargar el archivo. */
+    /* El texto se traduce al pintarlo, y por eso la muestra es una función: la
+       tabla se arma al cargar el archivo, cuando todavía no se sabe el idioma. */
     { v: 'detallado', ico: 'grafica', tono: 'var(--acc)', t: 'Peso y repeticiones',
       sub: 'Anotas cada serie. Necesario para los récords, el volumen y las gráficas.',
-      muestra: '<span class="mu-dato">60 <i>kg</i></span><span class="mu-x">×</span>' +
-        '<span class="mu-dato">12 <i>reps</i></span>' },
+      muestra: function () {
+        return '<span class="mu-dato">60 <i>kg</i></span><span class="mu-x">×</span>' +
+          '<span class="mu-dato">12 <i>' + UI.esc(T('reps')) + '</i></span>';
+      } },
     { v: 'simple', ico: 'check', tono: '#4f8cf5', t: 'Marcar cada serie',
       sub: 'Te propongo el objetivo (3 × 12) y solo marcas las que vas haciendo.',
-      muestra: '<span class="mu-serie hecha"></span><span class="mu-serie hecha"></span>' +
-        '<span class="mu-serie"></span><span class="mu-txt">' +
-        UI.esc(Tn('{a} de {b}', { a: 2, b: 3 })) + '</span>' },
+      muestra: function () {
+        return '<span class="mu-serie hecha"></span><span class="mu-serie hecha"></span>' +
+          '<span class="mu-serie"></span><span class="mu-txt">' +
+          UI.esc(Tn('{a} de {b}', { a: 2, b: 3 })) + '</span>';
+      } },
     { v: 'ejercicio', ico: 'flag', tono: '#c06bf0', t: 'Marcar el ejercicio y ya',
       sub: 'Un botón por ejercicio. Ni peso, ni repeticiones, ni series.',
-      muestra: '<span class="mu-hecho">' + UI.esc(T('Hecho')) + '</span>' }
+      muestra: function () {
+        return '<span class="mu-hecho">' + UI.esc(T('Hecho')) + '</span>';
+      } }
   ];
 
   function viewAjustes() {

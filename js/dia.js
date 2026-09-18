@@ -14,9 +14,6 @@
   const html = UI.html, raw = UI.raw, icon = UI.icon, esc = UI.esc;
   const V = g.VISTAS = g.VISTAS || {};
 
-  const DIAS_LARGOS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves',
-    'Viernes', 'Sábado'];
-
   /* La frase del entrenador tarda en llegar; se guarda aquí para no pedirla otra
      vez en cada repintado de la pantalla. */
   let frase = '';
@@ -68,7 +65,7 @@
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Inicio')}</button>
 
-      <h1 style="margin-bottom:2px">${T(DIAS_LARGOS[hoy.getDay()])}</h1>
+      <h1 style="margin-bottom:2px">${UI.diaLargo(UI.DAY_NAMES[hoy.getDay()])}</h1>
       <p class="muted" style="margin-top:0">${hoy.toLocaleDateString(
         Idioma.actual() === 'en' ? 'en-GB' : 'es-ES',
         { day: 'numeric', month: 'long' })}${nombre ? ' · ' + nombre : ''}</p>
@@ -311,7 +308,7 @@
         <div class="card">
           <div class="row" style="gap:14px">
             <div class="grow">
-              <div class="tiny">CALORÍAS</div>
+              <div class="tiny">${T('CALORÍAS')}</div>
               <div style="font-weight:700;font-size:1.15rem">${UI.num(h.kcal)}<span
                 class="tiny"> / ${UI.num(m.kcal)}</span></div>
               ${raw(barra(h.kcal, m.kcal))}

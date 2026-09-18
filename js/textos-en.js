@@ -3657,6 +3657,373 @@
     'tus claves': 'your keys',
     'Listo: {lista} en este dispositivo': 'Done: {lista} on this device',
     'Entraste, pero no se pudo sincronizar todavía':
-      'You signed in, but it could not sync yet'
+      'You signed in, but it could not sync yet',
+
+    /* ---------- La conexión con Spotify ---------- */
+    'El Client ID son 32 caracteres. Cópialo del panel de Spotify.':
+      'The Client ID is 32 characters long. Copy it from the Spotify panel.',
+    'Falta el Client ID de Spotify.': 'The Spotify Client ID is missing.',
+    'Este navegador no permite la conexión segura con Spotify. Abre la app en https, no en una copia local.':
+      'This browser does not allow a secure connection with Spotify. Open the app over https, not from a local copy.',
+    'Fallo interno preparando la conexión con Spotify.':
+      'Internal failure while preparing the connection with Spotify.',
+    'No se pudo iniciar la conexión con Spotify.':
+      'The connection with Spotify could not be started.',
+    'La vuelta de Spotify no encaja con ningún intento guardado aquí. Suele pasar cuando se empieza en la app instalada y se vuelve en el navegador, o al revés: cada uno guarda sus datos por separado.':
+      'Spotify came back with something that matches no attempt saved here. It usually happens when you start in the installed app and come back in the browser, or the other way round: each one stores its data separately.',
+    'La conexión con Spotify se interrumpió por el camino: en este navegador no queda constancia de la petición.':
+      'The connection with Spotify was interrupted along the way: this browser has no record of the request.',
+    'state recibido: {state}': 'state received: {state}',
+    'intentos guardados aquí: {lista}': 'attempts saved here: {lista}',
+    '{state} (hace {n} min)': '{state} ({n} min ago)',
+    'ninguno': 'none',
+    'contexto: {donde}': 'context: {donde}',
+    'app instalada': 'installed app',
+    'navegador': 'browser',
+    'Al canjear el código: {fallo}': 'While redeeming the code: {fallo}',
+    'No diste permiso a la app en la pantalla de Spotify.':
+      'You did not give the app permission on the Spotify screen.',
+    'Spotify no reconoce el Client ID. Cópialo otra vez del panel de desarrollador.':
+      'Spotify does not recognise the Client ID. Copy it again from the developer panel.',
+    'La dirección de retorno no está dada de alta en tu app de Spotify. Añade {url} en Redirect URIs.':
+      'The return address is not registered in your Spotify app. Add {url} under Redirect URIs.',
+    'Spotify ha rechazado alguno de los permisos pedidos.':
+      'Spotify rejected one of the permissions requested.',
+    'Spotify ha rechazado la petición: {porque}':
+      'Spotify rejected the request: {porque}',
+    'Spotify respondió: {que}': 'Spotify replied: {que}',
+    'No se pudo conectar con Spotify.': 'Spotify could not be reached.',
+    'Error de autorización.': 'Authorisation error.',
+    'Vuelve a conectar Spotify.': 'Connect Spotify again.',
+    'Conecta Spotify primero.': 'Connect Spotify first.',
+    'Spotify ha tardado demasiado en responder.': 'Spotify took too long to answer.',
+    'Sin conexión con Spotify.': 'No connection with Spotify.',
+    'Spotify solo permite controlar la reproducción con Premium.':
+      'Spotify only allows playback control with Premium.',
+    'Esa orden no la admite el aparato donde suena la música.':
+      'The device the music is playing on does not accept that command.',
+    'Tu conexión con Spotify es anterior a esta función y no incluye el permiso para crear listas. Los permisos no se amplían solos al renovar: hay que reconectar la cuenta una vez.':
+      'Your Spotify connection predates this feature and does not include permission to create playlists. Permissions do not widen on their own when the session renews: the account has to be reconnected once.',
+    'Spotify no ha autorizado esta acción': 'Spotify did not authorise this action',
+    ' (falta el permiso {cual})': ' (the {cual} permission is missing)',
+    'Spotify ha rechazado la orden.': 'Spotify rejected the command.',
+    'No hay ningún dispositivo de Spotify activo.':
+      'There is no active Spotify device.',
+    'Error {n}': 'Error {n}',
+    'No sé qué es eso.': 'I do not know what that is.',
+    'Guarda antes una lista de reproducción.': 'Save a playlist first.',
+    'No se pudo buscar.': 'The search could not be run.',
+    'No hay ninguna canción sonando.': 'No song is playing.',
+    'El reproductor de Spotify no se cargó bien.':
+      'The Spotify player did not load properly.',
+    'No se pudo cargar el reproductor de Spotify.':
+      'The Spotify player could not be loaded.',
+    'El reproductor de Spotify tardó demasiado.': 'The Spotify player took too long.',
+    'Reproducir dentro de la app requiere Spotify Premium.':
+      'Playing inside the app requires Spotify Premium.',
+    'La sesión de Spotify caducó. Vuelve a conectar.':
+      'The Spotify session expired. Connect again.',
+    'El reproductor de Spotify falló.': 'The Spotify player failed.',
+    'No se pudo conectar el reproductor.': 'The player could not be connected.',
+    'El reproductor no llegó a estar listo.': 'The player never became ready.',
+    'No hay canciones que reproducir.': 'There are no songs to play.',
+    'No se pudo crear la lista.': 'The playlist could not be created.',
+    'Spotify ha creado la lista pero no deja meterle las canciones, así que se ha deshecho.':
+      'Spotify created the playlist but will not let the songs in, so it has been undone.',
+    'Canción': 'Song',
+    'Lista': 'Playlist',
+    'Álbum': 'Album',
+    'Artista': 'Artist',
+    'un álbum': 'an album',
+    'una canción': 'a song',
+    'un artista': 'an artist',
+    'un pódcast': 'a podcast',
+    'un episodio': 'an episode',
+    'un perfil': 'a profile',
+    'canciones': 'songs',
+    'listas': 'playlists',
+    'álbumes': 'albums',
+    'artistas': 'artists',
+    'pódcast': 'podcasts',
+
+    /* ---------- La sincronización con Supabase ---------- */
+    'La URL debe tener la forma https://xxxxx.supabase.co':
+      'The URL has to look like https://xxxxx.supabase.co',
+    'Esa clave no parece la publishable ni la anon. Cópiala de Project Settings, API Keys.':
+      'That key looks like neither the publishable nor the anon one. Copy it from Project Settings, API Keys.',
+    'Falta configurar la sincronización.': 'Sync has not been set up yet.',
+    'No se pudo conectar. Revisa tu conexión y la URL del proyecto.':
+      'It could not connect. Check your connection and the project URL.',
+    'En ese proyecto de Supabase falta la tabla donde van los datos. Ve a Ajustes → Bóveda de claves, copia el SQL que hay bajo la conexión de Supabase y ejecútalo una vez en el SQL Editor de tu proyecto.':
+      'That Supabase project is missing the table the data goes into. Go to Settings → Key vault, copy the SQL under the Supabase connection and run it once in your project’s SQL Editor.',
+    'Esa clave no vale para este proyecto. Copia otra vez la Publishable key en Project Settings → API Keys.':
+      'That key is not valid for this project. Copy the Publishable key again from Project Settings → API Keys.',
+    'Ojo: este proyecto tiene cerrado el alta de cuentas nuevas, así que si intentaste registrarte, la cuenta no llegó a crearse. Ábrelo en Supabase (Authentication → Sign In / Providers → Allow new users to sign up), regístrate y vuelve a cerrarlo.':
+      'Careful: this project has sign-ups closed, so if you tried to register, the account was never created. Open it in Supabase (Authentication → Sign In / Providers → Allow new users to sign up), register and close it again.',
+    'Escribe un correo válido.': 'Type a valid email address.',
+    'Supabase solo deja enviar un par de correos por hora en el plan gratuito y ya se han agotado. Entra con contraseña, que no tiene ese límite.':
+      'Supabase only allows a couple of emails per hour on the free plan and they are used up. Sign in with a password, which has no such limit.',
+    'La contraseña necesita al menos 8 caracteres.':
+      'The password needs at least 8 characters.',
+    'Cuenta creada. Tu proyecto pide confirmar el correo: ábrelo y pulsa el enlace, o desactiva esa confirmación en Supabase (Authentication, Sign In, Confirm email) para entrar directamente.':
+      'Account created. Your project asks you to confirm the email: open it and tap the link, or turn that confirmation off in Supabase (Authentication, Sign In, Confirm email) to sign in straight away.',
+    'Ese correo ya tiene cuenta. Usa "Ya tengo contraseña" para entrar.':
+      'That email already has an account. Use “I already have a password” to sign in.',
+    'Supabase ha limitado los correos por ahora. Desactiva la confirmación por correo en tu proyecto y vuelve a intentarlo.':
+      'Supabase has rate-limited emails for now. Turn email confirmation off in your project and try again.',
+    'Tu proyecto tiene cerrado el registro de cuentas nuevas. Entra con tu correo y tu contraseña de siempre. Si de verdad quieres otra cuenta, ábrelo en Supabase: Authentication, Sign In, Allow new users to sign up.':
+      'Your project has sign-ups closed. Sign in with your usual email and password. If you really want another account, open it in Supabase: Authentication, Sign In, Allow new users to sign up.',
+    'No se pudo crear la cuenta.': 'The account could not be created.',
+    'Esa ya es tu contraseña actual.': 'That is already your current password.',
+    'La contraseña es demasiado corta para tu proyecto.':
+      'The password is too short for your project.',
+    'No se pudo guardar la contraseña.': 'The password could not be saved.',
+    'No se pudo iniciar sesión.': 'Signing in failed.',
+    'Correo o contraseña incorrectos. Si creaste la cuenta con el enlace del correo, todavía no tiene contraseña: entra con el enlace en el dispositivo de siempre y pónsela desde la pantalla de cuenta.':
+      'Wrong email or password. If you created the account with the email link, it has no password yet: sign in with the link on your usual device and set one from the account screen.',
+    'Falta confirmar el correo. Ábrelo y pulsa el enlace, o desactiva esa confirmación en Supabase.':
+      'The email still has to be confirmed. Open it and tap the link, or turn that confirmation off in Supabase.',
+    'No se pudo abrir la sesión.': 'The session could not be opened.',
+    'El enlace no devolvió una sesión.': 'The link did not return a session.',
+    'El código no devolvió una sesión.': 'The code did not return a session.',
+    'El enlace ha caducado. Pide uno nuevo: solo valen unos minutos y un único uso.':
+      'The link has expired. Ask for a new one: they last a few minutes and work only once.',
+    'Ese enlace ya se usó. Pide uno nuevo desde la app.':
+      'That link has already been used. Ask for a new one from the app.',
+    'La dirección de retorno no está autorizada en Supabase. Añádela en Authentication, URL Configuration.':
+      'The return address is not allowed in Supabase. Add it under Authentication, URL Configuration.',
+    'El enlace no es válido. Pide uno nuevo desde este mismo dispositivo.':
+      'The link is not valid. Ask for a new one from this same device.',
+    'No se pudo completar el acceso.': 'Signing in could not be completed.',
+    'Pega el enlace que te llegó al correo.':
+      'Paste the link that arrived in your email.',
+    'Eso no parece un enlace. Cópialo entero desde el correo.':
+      'That does not look like a link. Copy the whole thing from the email.',
+    'Ese enlace no lleva ningún acceso. Copia el del botón del correo.':
+      'That link carries no sign-in. Copy the one on the button in the email.',
+    'No hay sesión.': 'There is no session.',
+    'Tu sesión caducó en este dispositivo. Entra otra vez con tu correo y contraseña; lo que tienes aquí no se pierde.':
+      'Your session expired on this device. Sign in again with your email and password; what you have here is not lost.',
+    'Entra con tu correo primero.': 'Sign in with your email first.',
+    'Configura antes la sincronización.': 'Set up sync first.',
+    'faltan datos': 'data is missing',
+    'No hay nada guardado en la nube todavía.':
+      'There is nothing saved in the cloud yet.',
+    'Tu sesión ha caducado. Entra otra vez con tu correo y contraseña.':
+      'Your session has expired. Sign in again with your email and password.',
+    'Sin conexión ahora mismo. Lo intento solo cuando vuelva.':
+      'No connection right now. I will try again on my own when it comes back.',
+    'La base de datos rechazó el guardado. Revisa la política de seguridad de la tabla.':
+      'The database rejected the save. Check the table’s security policy.',
+
+    /* ---------- La revisión del plan ---------- */
+    'sesión {n}': 'session {n}',
+    'empuje horizontal': 'horizontal push',
+    'empuje vertical': 'vertical push',
+    'traccion horizontal': 'horizontal pull',
+    'traccion vertical': 'vertical pull',
+    'sentadilla': 'squat',
+    'bisagra de cadera': 'hip hinge',
+    'empujar por delante (press de banca y parecidos)':
+      'pushing straight ahead (bench press and the like)',
+    'empujar por encima de la cabeza': 'pushing overhead',
+    'remar': 'rowing',
+    'dominadas o jalones': 'pull-ups or pulldowns',
+    'flexión de rodilla con carga': 'loaded knee bend',
+    'bisagra de cadera (peso muerto y variantes)': 'hip hinge (deadlift and variants)',
+    'tren superior': 'upper body',
+    'tren inferior': 'lower body',
+    '{que} se queda corto': '{que} is coming up short',
+    '{n} músculos por debajo del mínimo': '{n} muscles below the minimum',
+    'series directas a la semana: {lista}; por debajo de {min} cuesta que crezcan':
+      'direct sets per week: {lista}; below {min} they struggle to grow',
+    'Demasiado {que}': 'Too much {que}',
+    '{n} músculos pasados de volumen': '{n} muscles over on volume',
+    'series directas a la semana: {lista}; por encima de {max} se acumula fatiga sin más músculo':
+      'direct sets per week: {lista}; above {max} fatigue piles up with no extra muscle',
+    'No hay nada de {patron}': 'There is no {patron} at all',
+    'en toda la semana no aparece ningún ejercicio de {que}':
+      'not one exercise for {que} shows up all week',
+    '{que}, dos veces el mismo día': '{que}, twice on the same day',
+    'sale repetido en {donde}': 'it comes up twice in {donde}',
+    'Dos básicos pesados el mismo día': 'Two heavy compounds on the same day',
+    '{lista} caen juntos en {donde}, y el segundo se hace con la espalda baja ya cargada':
+      '{lista} land together in {donde}, and the second one is done with the lower back already loaded',
+    '{que} va demasiado tarde': '{que} comes too late',
+    '{n} básicos van demasiado tarde': '{n} compounds come too late',
+    'en {donde}, {lista}: llegas cansado a lo que más peso mueve':
+      'in {donde}, {lista}: you reach the heaviest lifts already tired',
+    '{que} es el {n}.º, detrás de {tras}': '{que} is number {n}, behind {tras}',
+    '{que} no es de ese día': '{que} does not belong on that day',
+    'en {donde} va el {n}.º, y es un movimiento pesado de {suyo} en una sesión de {dia}: se lleva la fuerza que necesitas para lo principal':
+      'in {donde} it is number {n}, and it is a heavy {suyo} movement in a {dia} session: it takes the strength you need for the main work',
+    '{que}, un solo día a la semana': '{que}, only one day a week',
+    '{n} músculos entrenados un solo día': '{n} muscles trained on a single day',
+    '{lista}; repartidas en dos días rinden más, porque el estímulo de una sesión dura unas 48 horas':
+      '{lista}; split over two days they pay off more, because one session’s stimulus lasts about 48 hours',
+    '{mus} {n} series en 1 día': '{mus} {n} sets on 1 day',
+    'Los días están muy desiguales': 'The days are very uneven',
+    '{corto} lleva {min} ejercicios y {largo} lleva {max}: el corto se queda flojo y el largo se hace eterno':
+      '{corto} has {min} exercises and {largo} has {max}: the short one falls flat and the long one drags on',
+    'Poco descanso en {que}': 'Too little rest on {que}',
+    'Poco descanso en {n} básicos': 'Too little rest on {n} compounds',
+    '{lista}; con menos de 120 en un básico pesado la serie siguiente sale corta de fuerza':
+      '{lista}; under 120 on a heavy compound the next set comes out short on strength',
+    '{que} no lo puedes hacer': 'You cannot do {que}',
+    'entrenas {donde} y ese ejercicio necesita material que no tienes':
+      'you train {donde} and that exercise needs equipment you do not have',
+    '{que} choca con tus limitaciones': '{que} clashes with your limitations',
+    'está desaconsejado con lo que has apuntado en tu perfil':
+      'it is not advised given what you have put in your profile',
+    'los básicos delante y el aislamiento al final, para llegar descansado a lo que más peso mueve':
+      'compounds first and isolation last, so you reach the heaviest lifts rested',
+    'subir el descanso a {n} segundos, que es lo que necesita un básico pesado para repetir la serie con fuerza':
+      'raise the rest to {n} seconds, which is what a heavy compound needs to repeat the set with strength',
+    'un segundo día de {mus}, que ahora solo entrenas uno':
+      'a second {mus} day, since right now you only train one',
+    'no encaja en ese día y no hay otro donde llevarlo, así que sale':
+      'it does not fit on that day and there is nowhere else to move it, so it goes',
+    'dos básicos pesados el mismo día; no hay otro día libre donde colocarlo, así que sale':
+      'two heavy compounds on the same day; there is no other free day to put it on, so it goes',
+    'sacarlo de un día que es de la otra mitad del cuerpo':
+      'take it off a day that belongs to the other half of the body',
+    'sacarlo del día en que choca con el otro básico pesado':
+      'take it off the day where it clashes with the other heavy compound',
+    'llevarlo a un día que ya trabaja esa zona y llegas descansado':
+      'move it to a day that already works that area and where you arrive rested',
+    'cubrir el patrón que falta en toda la semana':
+      'cover the pattern missing from the whole week',
+    'de {antes} a {luego} series para subir {mus}, que está en {tiene} y el mínimo es {min}':
+      'from {antes} to {luego} sets to bring up {mus}, which is at {tiene} and the minimum is {min}',
+    'subir las series de {mus}, que está en {tiene} y el mínimo es {min}':
+      'raise the sets for {mus}, which is at {tiene} and the minimum is {min}',
+    'bajar las series de {mus}, que está en {tiene}':
+      'lower the sets for {mus}, which is at {tiene}',
+    'Es el único que tienes.': 'It is the only one you have.',
+    'saca {a} frente a {b}, y la nota sale de los fallos encontrados':
+      'it scores {a} against {b}, and the score comes from the faults found',
+    'reparte {a} músculos en dos o más días, frente a {b}':
+      'it spreads {a} muscles over two or more days, against {b}',
+    'no deja ningún músculo por debajo del mínimo y el otro deja {n}':
+      'it leaves no muscle below the minimum and the other leaves {n}',
+    'tiene los días más parejos (de {a} a {b} ejercicios, frente a {c} a {d})':
+      'its days are more even ({a} to {b} exercises, against {c} to {d})',
+    'Van muy igualados: quédate con el que te apetezca más entrenar, que es el que acabarás cumpliendo.':
+      'They are very close: keep the one you fancy training more, because that is the one you will actually stick to.',
+    'Frente a «{otro}», {razones}.': 'Against «{otro}», {razones}.',
+    'FALLOS ENCONTRADOS AL REVISAR EL PLAN: ninguno. Las comprobaciones —volumen por músculo, patrones, repeticiones, orden, descansos, material y limitaciones— salen todas limpias.':
+      'FAULTS FOUND WHEN REVIEWING THE PLAN: none. The checks —volume per muscle, patterns, repetitions, order, rest, equipment and limitations— all come out clean.',
+    'FALLOS ENCONTRADOS AL REVISAR EL PLAN (calculados sobre el propio plan, no son opiniones):':
+      'FAULTS FOUND WHEN REVIEWING THE PLAN (worked out from the plan itself, they are not opinions):',
+    '[gravedad {n} sobre 3]': '[severity {n} out of 3]',
+
+    /* ---------- La sesión por zona y el asistente del plan ---------- */
+    'Favoritos': 'Favourites',
+    'Quitar todo': 'Clear all',
+    'Entrenar {zona}': 'Train {zona}',
+    'Monto una sesión equilibrada entre {musculos}. Empiezo por lo pesado y termino con lo accesorio.':
+      'I put together a balanced session across {musculos}. I start with the heavy work and finish with the accessories.',
+    '¿Cuánto tiempo tienes?': 'How much time do you have?',
+    '¿Con qué objetivo?': 'With what goal?',
+    'Ver la sesión': 'See the session',
+    '{n} ejercicios · unos {min} min · {objetivo}':
+      '{n} exercises · about {min} min · {objetivo}',
+    'Guardar como rutina': 'Save as a routine',
+    'Guardada como rutina': 'Saved as a routine',
+    'Entra en tu historial y en tu racha como un entrenamiento más. Las calorías son una estimación por tu peso y el tiempo.':
+      'It goes into your history and your streak like any other workout. The calories are an estimate from your weight and the time.',
+    'QUÉ HICE': 'WHAT I DID',
+    'Escríbelo tú: pickleball, mudanza, subir al pueblo…':
+      'Write it yourself: pickleball, moving house, walking up to the village…',
+    'Si lo escribes tú, elige abajo lo que más se le parezca en esfuerzo: de ahí salen las calorías.':
+      'If you write it yourself, pick the closest thing below in effort: that is where the calories come from.',
+    'CUÁNTO TIEMPO': 'HOW LONG',
+    'ESTIMACIÓN': 'ESTIMATE',
+    '~{kcal} kcal en {min} min': '~{kcal} kcal in {min} min',
+    '{que} apuntado: {min} min': '{que} logged: {min} min',
+    'Caminar': 'Walking',
+    'Correr': 'Running',
+    'Bici': 'Cycling',
+    'Nadar': 'Swimming',
+    'Senderismo': 'Hiking',
+    'Deporte de equipo': 'Team sport',
+    'Raqueta o pádel': 'Racket or padel',
+    'Baile': 'Dancing',
+    'Pilates o yoga': 'Pilates or yoga',
+    'Estirar y movilidad': 'Stretching and mobility',
+    'Pesas por mi cuenta': 'Weights on my own',
+    'Otra cosa': 'Something else',
+    'Crea tu plan semanal': 'Build your weekly plan',
+    'Responde cuatro cosas y te organizo la semana: qué grupo muscular toca cada día y con qué ejercicios, ajustado al tiempo que tengas.':
+      'Answer four things and I will lay out your week: which muscle group each day covers and with which exercises, fitted to the time you have.',
+    '¿Qué días entrenas?': 'Which days do you train?',
+    '¿Cuánto dura cada sesión?': 'How long is each session?',
+    'Entrenas {donde}': 'You train {donde}',
+    'Solo usaré ejercicios que puedas hacer ahí':
+      'I will only use exercises you can do there',
+    '¿Cuál es tu objetivo?': 'What is your goal?',
+    '¿Qué experiencia tienes?': 'How much experience do you have?',
+    'Generar mi plan': 'Generate my plan',
+    'Cambiar respuestas': 'Change answers',
+    'Tu plan de {n} días': 'Your {n}-day plan',
+    'Así queda tu semana. Al guardarlo se crea una rutina por día, y podrás editarlas como quieras.':
+      'This is how your week looks. Saving it creates one routine per day, and you can edit them however you like.',
+    '{n} ejercicios · ~{min} min': '{n} exercises · ~{min} min',
+    'Guardar plan': 'Save plan',
+    'Guardar añade {n} rutinas nuevas; no se borra nada de lo que ya tengas.':
+      'Saving adds {n} new routines; nothing you already have is deleted.',
+    'Nueva propuesta generada': 'New proposal generated',
+    'Plan guardado: {n} rutinas creadas': 'Plan saved: {n} routines created',
+    'Buscar ejercicio…': 'Search for an exercise…',
+
+    /* ---------- La pantalla de cada músculo ---------- */
+    'El pecho empuja. Trabaja bien con press y flexiones, y crece cuando el recorrido es completo: abajo hasta tocar, arriba sin bloquear de golpe.':
+      'The chest pushes. It responds well to presses and push-ups, and it grows when the range is full: down until you touch, up without snapping the elbows straight.',
+    'Los dorsales son lo que da espalda ancha, y lo que más se descuida frente al pecho. Tirón vertical —dominadas, jalón— y horizontal —remo—, las dos cosas cada semana.':
+      'The lats are what make a back wide, and what gets neglected most next to the chest. Vertical pulling —pull-ups, pulldowns— and horizontal —rows—, both every week.',
+    'La espalda media sostiene la postura y aguanta lo que el dorsal tira. Se entrena con remo y con todo lo que junte los omóplatos.':
+      'The mid back holds your posture and takes what the lats pull. You train it with rows and with anything that squeezes the shoulder blades together.',
+    'La zona lumbar no se entrena a repeticiones sueltas: se refuerza aguantando posición en peso muerto, puentes y extensiones.':
+      'The lower back is not trained with loose reps: it gets stronger by holding position in deadlifts, bridges and extensions.',
+    'Los trapecios trabajan en casi todo lo que levantas del suelo. Encogimientos y remos altos si quieres darles algo suyo.':
+      'The traps work in almost everything you lift off the floor. Shrugs and upright rows if you want to give them something of their own.',
+    'El cuádriceps es la pierna que se ve de frente y el motor de la sentadilla. Profundidad antes que peso: media sentadilla con mucho disco no entrena lo mismo.':
+      'The quads are the leg you see from the front and the engine of the squat. Depth before weight: a half squat with a lot of plates is not training the same thing.',
+    'Los isquiotibiales frenan la pierna al correr y son los que más se rompen cuando están débiles. Peso muerto rumano, curl y nórdico.':
+      'The hamstrings brake the leg when you run and are the ones that tear most when they are weak. Romanian deadlift, curls and Nordics.',
+    'El glúteo es el músculo más fuerte que tienes y el que más rinde en sentadilla, peso muerto y puente de cadera.':
+      'The glutes are the strongest muscle you have and the one that pays off most in squats, deadlifts and hip thrusts.',
+    'Los gemelos aguantan tu peso todo el día, así que con poco no notan nada: recorrido completo, arriba del todo y abajo del todo.':
+      'The calves carry your weight all day, so a little does nothing for them: full range, all the way up and all the way down.',
+    'El hombro tiene tres cabezas y casi todo el mundo entrena solo la de delante. Press para la frontal, elevaciones laterales para la media y pájaro para la posterior.':
+      'The shoulder has three heads and almost everyone trains only the front one. Presses for the front, lateral raises for the middle and reverse flyes for the rear.',
+    'El bíceps ya trabaja en cada tirón de espalda. El curl añade lo que falta; no hace falta mucho más volumen del que crees.':
+      'The biceps already work in every back pull. Curls add what is missing; you need less extra volume than you think.',
+    'El tríceps son dos tercios del brazo. Fondos, press cerrado y extensiones: con el codo quieto, que es donde se pierde el ejercicio.':
+      'The triceps are two thirds of the arm. Dips, close-grip presses and extensions: keep the elbow still, which is where the exercise gets lost.',
+    'El antebrazo es lo que se agota antes en dominadas y peso muerto. Colgarse de la barra es el ejercicio más simple y el que más da.':
+      'The forearms are what give out first in pull-ups and deadlifts. Hanging from the bar is the simplest exercise and the one that gives most.',
+    'El abdomen se entrena aguantando, no solo encogiendo. Plancha, hollow y elevaciones de piernas valen más que doscientos abdominales.':
+      'The abs are trained by holding, not only by crunching. Planks, hollow holds and leg raises are worth more than two hundred sit-ups.',
+    'Los abductores estabilizan la cadera en cada paso y en cada sentadilla a una pierna.':
+      'The abductors steady the hip on every step and every single-leg squat.',
+    'Los aductores cierran la pierna y sujetan la rodilla. Suelen estar cortos y débiles a la vez.':
+      'The adductors close the leg and hold the knee. They tend to be tight and weak at the same time.',
+    'El cuello se entrena con muy poco y con mucho cuidado: rango corto y sin tirones.':
+      'The neck is trained with very little and a lot of care: short range and no jerking.',
+
+    /* ---------- El menú genérico y la hidratación ---------- */
+    'Hidratación': 'Hydration',
+    'Llevas hoy': 'So far today',
+    'de {n} L': 'of {n} L',
+    'Consejos': 'Tips',
+
+    /* ---------- Los cajones de mi día ---------- */
+    'Lo que debo comer': 'What I should eat',
+    'Lo que voy a entrenar': 'What I am training',
+    'Lo que llevo comido': 'What I have eaten',
+    'Cómo voy con el plan': 'How I am doing on the plan',
+    'Técnica de {que}': '{que} technique',
+    'Reproducir animación': 'Play animation'
   };
 })(window);

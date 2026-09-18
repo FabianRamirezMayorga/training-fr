@@ -114,8 +114,8 @@
         anterior: peso,
         salto: paso,
         estado: 'sube',
-        porque: 'La última vez sacaste las ' + series + ' series a ' + reps +
-          '. Toca subir.'
+        porque: Tn('La última vez sacaste las {series} series a {reps}. Toca subir.',
+          { series: series, reps: reps })
       };
     }
 
@@ -137,8 +137,8 @@
         anterior: peso,
         salto: paso,
         estado: 'baja',
-        porque: 'Llevas ' + fallos + ' sesiones sin sacarlo. Baja, cógele la ' +
-          'técnica y vuelve a subir.'
+        porque: Tn('Llevas {n} sesiones sin sacarlo. Baja, cógele la técnica y ' +
+          'vuelve a subir.', { n: fallos })
       };
     }
 
@@ -148,8 +148,8 @@
       salto: paso,
       estado: 'repite',
       porque: fallos > 1
-        ? 'Segunda vez que te quedas corto. Repite peso hasta sacarlo entero.'
-        : 'Te quedaste corto la última vez. Repite peso y sácalo entero.'
+        ? T('Segunda vez que te quedas corto. Repite peso hasta sacarlo entero.')
+        : T('Te quedaste corto la última vez. Repite peso y sácalo entero.')
     };
   }
 

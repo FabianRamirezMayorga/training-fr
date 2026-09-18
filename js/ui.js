@@ -560,7 +560,8 @@
            ${raw(opts.fases ? 'data-fases="' + esc(JSON.stringify(opts.fases)) + '"' : '')}>
         ${raw(frames.map(function (src, i) {
           return '<img class="' + (i === 0 ? 'on' : '') + '" src="' + esc(src) +
-                 '" alt="' + (i === 0 ? 'Técnica de ' + esc(ex.nameEs) : '') +
+                 '" alt="' + (i === 0
+                   ? esc(Tn('Técnica de {que}', { que: ex.nameEs })) : '') +
                  '" decoding="async">';
         }).join(''))}
         ${raw(frames.length > 1
@@ -746,7 +747,8 @@
         e.stopPropagation();
         playing = !playing;
         toggleBtn.innerHTML = icon(playing ? 'pause' : 'play');
-        toggleBtn.setAttribute('aria-label', playing ? 'Pausar animación' : 'Reproducir animación');
+        toggleBtn.setAttribute('aria-label',
+          playing ? T('Pausar animación') : T('Reproducir animación'));
         box.classList.toggle('paused', !playing);
         if (playing) run(); else clearInterval(timer);
       };
