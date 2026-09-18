@@ -66,10 +66,11 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Inicio</button>
+        ${raw(icon('back'))} ${T('Inicio')}</button>
 
-      <h1 style="margin-bottom:2px">${DIAS_LARGOS[hoy.getDay()]}</h1>
-      <p class="muted" style="margin-top:0">${hoy.toLocaleDateString('es-ES',
+      <h1 style="margin-bottom:2px">${T(DIAS_LARGOS[hoy.getDay()])}</h1>
+      <p class="muted" style="margin-top:0">${hoy.toLocaleDateString(
+        Idioma.actual() === 'en' ? 'en-GB' : 'es-ES',
         { day: 'numeric', month: 'long' })}${nombre ? ' · ' + nombre : ''}</p>
 
       ${raw(frase ? html`
@@ -141,7 +142,7 @@
           ${raw(o.marca ? '<span class="sec-silueta">' + icon(o.marca) + '</span>' : '')}
           ${raw(o.marca ? '<span class="sec-ico">' + icon(o.marca) + '</span>' : '')}
           <span class="grow" style="min-width:0">
-            <span class="sec-tit">${o.titulo}</span>
+            <span class="sec-tit">${T(o.titulo)}</span>
             ${raw(o.sub ? '<span class="sec-sub">' + esc(o.sub) + '</span>' : '')}
             ${raw(barra(o.progreso))}
           </span>
@@ -170,15 +171,15 @@
     return plegable({
       id: 'agua', titulo: 'Hidratación', marca: 'vaso', tono: '#4f8cf5',
       progreso: { hecho: hechas, total: tomas },
-      cola: llevo ? UI.dec(llevo.litros) + ' L hoy' : '',
+      cola: llevo ? Tn('{n} L hoy', { n: UI.dec(llevo.litros) }) : '',
       /* «Llevas 0» a secas contradecía al «2,5 L hoy» de al lado cuando el agua
          venía de vasos sueltos: lo que cuenta la frase son las tomas de la
          pauta marcadas, y hay que decirlo. */
-      sub: !llevo ? 'Tu pauta de agua del día.'
+      sub: !llevo ? T('Tu pauta de agua del día.')
         : tomas
-          ? 'Tu pauta son ' + tomas + ' tomas y llevas ' + hechas +
-            ' marcadas. Marca cada vez que bebas.'
-          : 'Marca cada vaso y aquí verás cuánto llevas.',
+          ? Tn('Tu pauta son {tomas} tomas y llevas {hechas} marcadas. Marca cada vez ' +
+              'que bebas.', { tomas: tomas, hechas: hechas })
+          : T('Marca cada vaso y aquí verás cuánto llevas.'),
       cuerpo: cuerpo
     });
   }
@@ -189,16 +190,16 @@
     }, 0);
 
     const cuerpo = menu && g.Marcar ? Marcar.hoyHTML() + html`
-        <p class="tiny" style="margin:2px 0 0">Del menú que te preparó el entrenador.
-        <b data-a="menu" style="color:var(--acc)">Ver la semana entera</b></p>`
+        <p class="tiny" style="margin:2px 0 0">${T('Del menú que te preparó el entrenador.')}
+        <b data-a="menu" style="color:var(--acc)">${T('Ver la semana entera')}</b></p>`
       : html`
         <div class="card">
-          <b>Todavía no tienes menú</b>
-          <p class="tiny" style="margin:6px 0 0">El entrenador puede prepararte uno semanal
-          con tus calorías, tu dieta y tus horarios, y entonces aquí verás lo que te toca
-          comer hoy y a qué hora.</p>
+          <b>${T('Todavía no tienes menú')}</b>
+          <p class="tiny" style="margin:6px 0 0">${T('El entrenador puede prepararte uno ' +
+          'semanal con tus calorías, tu dieta y tus horarios, y entonces aquí verás lo ' +
+          'que te toca comer hoy y a qué hora.')}</p>
           <button class="btn primary block sm" data-a="menu" style="margin-top:10px">
-            ${raw(icon('chispa'))} Prepararme el menú</button>
+            ${raw(icon('chispa'))} ${T('Prepararme el menú')}</button>
         </div>`;
 
     const cuantas = (menu && menu.comidas || []).length;
@@ -215,12 +216,12 @@
     return plegable({
       id: 'comer', titulo: 'Lo que debo comer', marca: 'nutricion', tono: '#2fc4b2',
       progreso: { hecho: hechas, total: cuantas },
-      cola: total ? UI.num(total) + ' kcal' : '',
-      sub: !cuantas ? 'Todavía no tienes menú para hoy.'
+      cola: total ? Tn('{n} kcal', { n: UI.num(total) }) : '',
+      sub: !cuantas ? T('Todavía no tienes menú para hoy.')
         : hechas >= cuantas
-          ? 'Las ' + cuantas + ' comidas de hoy, resueltas.'
-          : 'Son ' + cuantas + ' comidas y llevas ' + hechas +
-            '. Marca la que te comas, o dime si comiste otra cosa.',
+          ? Tn('Las {n} comidas de hoy, resueltas.', { n: cuantas })
+          : Tn('Son {cuantas} comidas y llevas {hechas}. Marca la que te comas, o dime ' +
+              'si comiste otra cosa.', { cuantas: cuantas, hechas: hechas }),
       cuerpo: cuerpo
     });
   }
@@ -229,15 +230,16 @@
     if (!rutina) {
       return plegable({
         id: 'entrenar', titulo: 'Lo que voy a entrenar', marca: 'dumbbell',
-        tono: 'var(--acc)', cola: 'Hoy descansas',
-        sub: 'Hoy no toca nada. Descansar también es parte del plan.',
+        tono: 'var(--acc)', cola: T('Hoy descansas'),
+        sub: T('Hoy no toca nada. Descansar también es parte del plan.'),
         cuerpo: html`
         <div class="card">
-          <b>Hoy descansas</b>
-          <p class="tiny" style="margin:6px 0 0">No hay ninguna rutina puesta para hoy.
-          Descansar es parte del plan; si te apetece moverte, camina o apunta lo que hagas.</p>
+          <b>${T('Hoy descansas')}</b>
+          <p class="tiny" style="margin:6px 0 0">${T('No hay ninguna rutina puesta para ' +
+          'hoy. Descansar es parte del plan; si te apetece moverte, camina o apunta lo ' +
+          'que hagas.')}</p>
           <button class="btn block sm" data-a="rutinas" style="margin-top:10px">
-            Elegir una rutina igualmente</button>
+            ${T('Elegir una rutina igualmente')}</button>
         </div>`
       });
     }
@@ -281,9 +283,11 @@
     });
 
     const listaZonas = zonas.length > 3
-      ? zonas.slice(0, 3).join(', ') + ' y ' + (zonas.length - 3) + ' más'
+      ? Tn('{lista} y {n} más',
+          { lista: zonas.slice(0, 3).join(', '), n: zonas.length - 3 })
       : zonas.length > 1
-        ? zonas.slice(0, -1).join(', ') + ' y ' + zonas[zonas.length - 1]
+        ? Tn('{lista} y {ultima}',
+            { lista: zonas.slice(0, -1).join(', '), ultima: zonas[zonas.length - 1] })
         : zonas[0] || '';
 
     /* Solo los ejercicios en la cola: con el botón de entrenar al lado no cabe
@@ -292,9 +296,10 @@
     return plegable({
       id: 'entrenar', titulo: 'Lo que voy a entrenar', marca: 'dumbbell',
       tono: 'var(--acc)',
-      cola: rutina.exercises.length + ' ejercicios',
-      sub: (listaZonas ? 'Hoy le das a ' + listaZonas + '. ' : '') +
-        rutina.exercises.length + ' ejercicios y ' + series + ' series.',
+      cola: Tp(rutina.exercises.length, '{n} ejercicio', '{n} ejercicios'),
+      sub: (listaZonas ? Tn('Hoy le das a {zonas}.', { zonas: listaZonas }) + ' ' : '') +
+        Tn('{ejercicios} ejercicios y {series} series.',
+          { ejercicios: rutina.exercises.length, series: series }),
       cuerpo: cuerpo,
       extra: '<button class="btn primary sm sec-boton" data-a="entrenar">' +
         icon('play') + ' Entrenar</button>'
@@ -312,20 +317,21 @@
               ${raw(barra(h.kcal, m.kcal))}
             </div>
             <div class="grow">
-              <div class="tiny">PROTEÍNA</div>
+              <div class="tiny">${T('PROTEÍNA')}</div>
               <div style="font-weight:700;font-size:1.15rem;color:var(--blue)">${h.prot}<span
                 class="tiny" style="color:var(--dim)"> / ${m.prot} g</span></div>
               ${raw(barra(h.prot, m.prot, 'azul'))}
             </div>
           </div>
           <p class="tiny" style="margin:10px 0 0">${faltanProt
-            ? 'Te faltan ' + faltanProt + ' g de proteína y ' + UI.num(faltanKcal) + ' kcal.'
-            : 'Ya has llegado a la proteína del día.'}</p>
+            ? Tn('Te faltan {prot} g de proteína y {kcal} kcal.',
+                { prot: faltanProt, kcal: UI.num(faltanKcal) })
+            : T('Ya has llegado a la proteína del día.')}</p>
 
           <div class="row" style="margin-top:12px">
             <label class="btn primary grow" for="foto-dia" style="cursor:pointer">
-              ${raw(icon('camara'))} Foto</label>
-            <button class="btn grow" data-a="amano">${raw(icon('plus'))} A mano</button>
+              ${raw(icon('camara'))} ${T('Foto')}</label>
+            <button class="btn grow" data-a="amano">${raw(icon('plus'))} ${T('A mano')}</button>
           </div>
           <input type="file" id="foto-dia" accept="image/*" capture="environment" hidden>
         </div>`
@@ -346,10 +352,10 @@
     const aviso = sueltos.length ? html`
       <div class="cruzar-aviso">
         <span class="ca-ico">${raw(icon('cambiar'))}</span>
-        <span class="grow"><b>${sueltos.length}
-          ${raw(sueltos.length === 1 ? 'apunte de hoy va suelto' : 'apuntes de hoy van sueltos')}</b>
-          <span class="tiny">Encajan con una comida de tu menú. Crúzalos y quedará
-          marcada, con la diferencia contra lo que tenías previsto.</span></span>
+        <span class="grow"><b>${Tp(sueltos.length,
+          '{n} apunte de hoy va suelto', '{n} apuntes de hoy van sueltos')}</b>
+          <span class="tiny">${T('Encajan con una comida de tu menú. Crúzalos y ' +
+          'quedará marcada, con la diferencia contra lo que tenías previsto.')}</span></span>
       </div>` : '';
 
     const lista = comidas.length ? html`
@@ -360,12 +366,14 @@
             Marcar.comidaDeLaHora(c.t);
           return '<div class="list-row"><div class="grow">' +
             '<div class="list-row-title">' + esc(c.plato) + '</div>' +
-            '<div class="list-row-sub">' + UI.num(c.kcal) + ' kcal · ' + c.prot + ' g' +
-            (c.fuente === 'foto' ? ' · de una foto' : '') +
-            (c.sustituye ? ' · en vez de ' + esc(c.sustituye) : '') + '</div></div>' +
+            '<div class="list-row-sub">' +
+            esc(Tn('{kcal} kcal · {prot} g', { kcal: UI.num(c.kcal), prot: c.prot })) +
+            (c.fuente === 'foto' ? esc(T(' · de una foto')) : '') +
+            (c.sustituye ? esc(Tn(' · en vez de {que}', { que: c.sustituye })) : '') +
+            '</div></div>' +
             (cruzable
               ? '<button class="btn sm vidrio" data-cruzar="' + esc(c.id) + '">' +
-                icon('cambiar') + ' Cruzar</button>'
+                icon('cambiar') + ' ' + esc(T('Cruzar')) + '</button>'
               : '') +
             '<button class="btn sm ghost danger" data-quitar="' + esc(c.id) +
             '" aria-label="' + esc(T('Quitar')) + '">' + icon('trash') + '</button></div>';
@@ -375,12 +383,13 @@
     return plegable({
       id: 'comido', titulo: 'Lo que llevo comido', marca: 'proteina', tono: '#f0a23c',
       progreso: m ? { hecho: h.kcal, total: m.kcal, continuo: true } : null,
-      cola: m ? UI.num(h.kcal) + ' / ' + UI.num(m.kcal) + ' kcal' : '',
-      sub: !m ? 'Sin tus datos no puedo calcular nada.'
-        : !h.cuantas ? 'Todavía no has apuntado nada hoy.'
+      cola: m ? UI.num(h.kcal) + ' / ' + Tn('{n} kcal', { n: UI.num(m.kcal) }) : '',
+      sub: !m ? T('Sin tus datos no puedo calcular nada.')
+        : !h.cuantas ? T('Todavía no has apuntado nada hoy.')
         : faltanProt
-          ? 'Te faltan ' + faltanProt + ' g de proteína y ' + UI.num(faltanKcal) + ' kcal.'
-          : 'Proteína del día cubierta.',
+          ? Tn('Te faltan {prot} g de proteína y {kcal} kcal.',
+              { prot: faltanProt, kcal: UI.num(faltanKcal) })
+          : T('Proteína del día cubierta.'),
       cuerpo: cuerpo + repartoHTML(h, m) + lista
     });
   }
@@ -408,20 +417,21 @@
 
     return html`
       <div class="card tarjeta-premium">
-        <div class="pre-encima">De dónde salen esas calorías</div>
+        <div class="pre-encima">${T('De dónde salen esas calorías')}</div>
         <div class="macro-bar nu-bar" style="margin-top:9px">
           <i style="width:${pct(h.prot, 4)}%;background:var(--brand-1)"></i>
           <i style="width:${pct(h.carbo, 4)}%;background:var(--acc)"></i>
           <i style="width:${pct(h.grasa, 9)}%;background:var(--warn)"></i>
         </div>
         <div class="rep-tira">
-          ${raw(trozo('var(--brand-1)', h.prot, 'proteína'))}
-          ${raw(trozo('var(--acc)', h.carbo, 'hidratos'))}
-          ${raw(trozo('var(--warn)', h.grasa, 'grasa'))}
+          ${raw(trozo('var(--brand-1)', h.prot, T('proteína')))}
+          ${raw(trozo('var(--acc)', h.carbo, T('hidratos')))}
+          ${raw(trozo('var(--warn)', h.grasa, T('grasa')))}
         </div>
         ${raw(h.conMacros < h.cuantas ? '<p class="tiny" style="margin:9px 0 0">' +
-          'De ' + h.conMacros + ' de los ' + h.cuantas + ' apuntes de hoy; los demás ' +
-          'se anotaron cuando solo se guardaban calorías y proteína.</p>' : '')}
+          esc(Tn('De {con} de los {total} apuntes de hoy; los demás se anotaron cuando ' +
+            'solo se guardaban calorías y proteína.',
+            { con: h.conMacros, total: h.cuantas })) + '</p>' : '')}
       </div>`;
   }
 
@@ -514,28 +524,30 @@
               '<span class="ps-letra">' + d.letra + '</span>' +
               '<span class="ps-num">' + d.num + '</span>' +
               '<span class="ps-marcas">' +
-              punto(d.entreno, 'entreno', d.tocaba ? 'Entrenaste' : 'Día de descanso') +
-              punto(d.proteina, 'prote', 'Llegaste a la proteína') +
-              punto(d.agua, 'agua', 'Bebiste el agua') +
+              punto(d.entreno, 'entreno', d.tocaba ? T('Entrenaste') : T('Día de descanso')) +
+              punto(d.proteina, 'prote', T('Llegaste a la proteína')) +
+              punto(d.agua, 'agua', T('Bebiste el agua')) +
               '</span></div>';
           }).join(''))}
         </div>
         <div class="plan-leyenda">
-          <span><i class="ps-punto entreno si"></i> Entreno</span>
-          <span><i class="ps-punto prote si"></i> Proteína</span>
-          <span><i class="ps-punto agua si"></i> Agua</span>
+          <span><i class="ps-punto entreno si"></i> ${T('Entreno')}</span>
+          <span><i class="ps-punto prote si"></i> ${T('Proteína')}</span>
+          <span><i class="ps-punto agua si"></i> ${T('Agua')}</span>
         </div>
         ${raw(dias.some(function (d) { return !d.tocaba; })
-          ? '<p class="tiny" style="margin:9px 0 0;text-align:center">Los días de ' +
-            'descanso no piden entreno: ahí solo cuentan la proteína y el agua.</p>' : '')}
+          ? '<p class="tiny" style="margin:9px 0 0;text-align:center">' +
+            esc(T('Los días de descanso no piden entreno: ahí solo cuentan la proteína ' +
+            'y el agua.')) + '</p>' : '')}
       </div>`;
 
     return plegable({
       id: 'plan', titulo: 'Cómo voy con el plan', marca: 'grafica', tono: '#c06bf0',
       progreso: { hecho: salieron, total: 7 },
-      cola: salieron + ' de 7 días',
-      sub: 'Los últimos siete días: si entrenaste, si llegaste a la proteína y si ' +
-        'bebiste el agua. Llevas ' + hechas + ' de ' + pedidas + '.',
+      cola: Tn('{n} de 7 días', { n: salieron }),
+      sub: T('Los últimos siete días: si entrenaste, si llegaste a la proteína y si ' +
+        'bebiste el agua.') + ' ' +
+        Tn('Llevas {hechas} de {pedidas}.', { hechas: hechas, pedidas: pedidas }),
       cuerpo: cuerpo
     });
   }

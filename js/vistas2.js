@@ -1253,11 +1253,11 @@
             (primero ? '<div class="list-title">' + esc(T('Un día de ejemplo')) + '</div>' +
               '<div class="stack">' + (primero.comidas || []).map(function (c) {
                 return '<div class="meal"><div class="row between">' +
-                  '<b style="font-size:.88rem">' + esc(c.nombre || '') +
+                  '<b style="font-size:.88rem">' + esc(T(c.nombre || '')) +
                   (c.hora ? ' <span class="tiny">· ' + esc(c.hora) + '</span>' : '') + '</b>' +
                   '<span class="tiny">' + UI.num(c.kcal || 0) + ' kcal</span></div>' +
                   '<div class="muted" style="font-size:.86rem;margin-top:3px">' +
-                  esc(c.plato || '') + '</div></div>';
+                  esc(T(c.plato || '')) + '</div></div>';
               }).join('') + '</div>' : '') +
             '<button class="btn primary block btn-arranque" data-x="guardar" ' +
             'style="margin-top:14px">' + icon('check') + ' ' +

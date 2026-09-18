@@ -30,26 +30,27 @@
      desde el perfil; no tiene sentido repetirlo en cada pantalla. */
   function avisarInvitado(alSeguir) {
     UI.modal(html`
-      <h2>Vas a seguir como invitado</h2>
-      <p class="muted">Es la forma rápida de empezar, pero conviene que sepas dónde
-      queda lo tuyo.</p>
+      <h2>${T('Vas a seguir como invitado')}</h2>
+      <p class="muted">${T('Es la forma rápida de empezar, pero conviene que sepas ' +
+      'dónde queda lo tuyo.')}</p>
 
       <div class="card aviso-seguridad">
-        <b>Tus datos se guardan solo en este dispositivo</b>
+        <b>${T('Tus datos se guardan solo en este dispositivo')}</b>
         <ul class="instr" style="margin:8px 0 0">
-          <li>Se pierden si borras los datos del navegador o desinstalas la app.</li>
-          <li>No hay copia en ningún servidor: si cambias de móvil, empiezas de cero.</li>
-          <li>No los verás en tu otro dispositivo.</li>
+          <li>${T('Se pierden si borras los datos del navegador o desinstalas la app.')}</li>
+          <li>${T('No hay copia en ningún servidor: si cambias de móvil, empiezas de cero.')}</li>
+          <li>${T('No los verás en tu otro dispositivo.')}</li>
         </ul>
       </div>
 
-      <p class="tiny">Puedes crear la cuenta más adelante desde <b>Perfil, Mi cuenta</b>:
-      lo que hayas hecho hasta entonces se sube y no se pierde nada.</p>
+      <p class="tiny">${raw(Tn('Puedes crear la cuenta más adelante desde {donde}: lo que ' +
+      'hayas hecho hasta entonces se sube y no se pierde nada.',
+      { donde: '<b>' + esc(T('Perfil, Mi cuenta')) + '</b>' }))}</p>
 
       <button class="btn primary block" data-x="cuenta" style="margin-top:6px">
-        Mejor creo mi cuenta</button>
+        ${T('Mejor creo mi cuenta')}</button>
       <button class="btn ghost block" data-x="seguir" style="margin-top:8px">
-        Entiendo, seguir como invitado</button>`,
+        ${T('Entiendo, seguir como invitado')}</button>`,
       function (el) {
         el.querySelector('[data-x=cuenta]').onclick = function () {
           UI.closeModal();
@@ -69,15 +70,15 @@
     if (!esInvitado() || avisoAceptado()) { if (alSeguir) alSeguir(); return; }
 
     UI.modal(html`
-      <h2>Esto es tuyo: guárdalo bien</h2>
+      <h2>${T('Esto es tuyo: guárdalo bien')}</h2>
       <p class="muted">${motivo}</p>
-      <p class="muted">Con una cuenta lo tienes en el móvil, en el portátil y en el que
-      venga después. Es gratis y no hay servidor mío de por medio: los datos van a tu
-      propia base de datos.</p>
+      <p class="muted">${T('Con una cuenta lo tienes en el móvil, en el portátil y en ' +
+      'el que venga después. Es gratis y no hay servidor mío de por medio: los datos van ' +
+      'a tu propia base de datos.')}</p>
 
-      <button class="btn primary block" data-x="cuenta">Crear mi cuenta</button>
+      <button class="btn primary block" data-x="cuenta">${T('Crear mi cuenta')}</button>
       <button class="btn block" data-x="seguir" style="margin-top:8px">
-        Continuar sin cuenta</button>`,
+        ${T('Continuar sin cuenta')}</button>`,
       function (el) {
         el.querySelector('[data-x=cuenta]').onclick = function () {
           UI.closeModal();
@@ -228,50 +229,52 @@
     if (!Sync.puedeConfigurar()) {
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-          ${raw(icon('back'))} Mi cuenta</button>
-        <h1>Tu base de datos</h1>
-        <p class="muted">Tus datos se guardan en el proyecto de quien te dio el acceso, y
-        solo los ves tú: la base de datos no deja que nadie lea lo de otra persona, ni
-        siquiera quien administra.</p>
-        <p class="muted">De la conexión se encarga quien administra; no hay nada que
-        configures aquí.</p>`;
+          ${raw(icon('back'))} ${T('Mi cuenta')}</button>
+        <h1>${T('Tu base de datos')}</h1>
+        <p class="muted">${T('Tus datos se guardan en el proyecto de quien te dio el ' +
+        'acceso, y solo los ves tú: la base de datos no deja que nadie lea lo de otra ' +
+        'persona, ni siquiera quien administra.')}</p>
+        <p class="muted">${T('De la conexión se encarga quien administra; no hay nada ' +
+        'que configures aquí.')}</p>`;
     }
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Mi cuenta</button>
-      <h1>Tu base de datos</h1>
-      <p class="muted">Se crea una vez, es gratis, no pide tarjeta y es tuya: los datos van
-      a tu propio Supabase, no a ningún servidor mío. Ocho pasos y unos diez minutos.</p>
+        ${raw(icon('back'))} ${T('Mi cuenta')}</button>
+      <h1>${T('Tu base de datos')}</h1>
+      <p class="muted">${T('Se crea una vez, es gratis, no pide tarjeta y es tuya: los ' +
+      'datos van a tu propio Supabase, no a ningún servidor mío. Ocho pasos y unos diez ' +
+      'minutos.')}</p>
 
       ${raw(propia ? html`
         <div class="card" style="border-color:var(--acc)">
-          <b>Ya tienes una conexión propia guardada</b>
+          <b>${T('Ya tienes una conexión propia guardada')}</b>
           <p class="tiny" style="margin:6px 0 0">${c.url}</p>
         </div>`
       : html`
         <div class="card">
-          <b>Antes de empezar: ¿te hace falta?</b>
+          <b>${T('Antes de empezar: ¿te hace falta?')}</b>
           <div class="stack" style="margin-top:10px;gap:9px">
             <div>
-              <div style="font-weight:600;font-size:.88rem">Si usas la app en un solo móvil</div>
-              <div class="tiny">No necesitas nada de esto. Todo funciona y se guarda en el
-              dispositivo. Lo único: si borras los datos del navegador, se pierde.</div>
+              <div style="font-weight:600;font-size:.88rem">${T('Si usas la app en un solo móvil')}</div>
+              <div class="tiny">${T('No necesitas nada de esto. Todo funciona y se guarda ' +
+              'en el dispositivo. Lo único: si borras los datos del navegador, se pierde.')}</div>
             </div>
             <div>
-              <div style="font-weight:600;font-size:.88rem">Si ya tienes cuenta en esta app</div>
-              <div class="tiny">Tampoco. Ve a <b>Perfil &rarr; Mi cuenta</b> y entra con tu
-              correo; la conexión ya está puesta.</div>
+              <div style="font-weight:600;font-size:.88rem">${T('Si ya tienes cuenta en esta app')}</div>
+              <div class="tiny">${raw(Tn('Tampoco. Ve a {donde} y entra con tu correo; la ' +
+              'conexión ya está puesta.',
+              { donde: '<b>' + esc(T('Perfil')) + ' &rarr; ' + esc(T('Mi cuenta')) + '</b>' }))}</div>
             </div>
             <div>
-              <div style="font-weight:600;font-size:.88rem">Si quieres tus datos en varios
-              dispositivos y no tienes cuenta</div>
-              <div class="tiny">Entonces sí: la conexión que trae la app tiene el alta
-              cerrada a propósito, así que la tuya te la montas aquí.</div>
+              <div style="font-weight:600;font-size:.88rem">${T('Si quieres tus datos en ' +
+              'varios dispositivos y no tienes cuenta')}</div>
+              <div class="tiny">${T('Entonces sí: la conexión que trae la app tiene el ' +
+              'alta cerrada a propósito, así que la tuya te la montas aquí.')}</div>
             </div>
           </div>
-          <p class="tiny" style="margin:11px 0 0">Los nombres de los menús van en inglés
-          porque Supabase viene así, aunque tu navegador esté en español.</p>
+          <p class="tiny" style="margin:11px 0 0">${T('Los nombres de los menús van en ' +
+          'inglés porque Supabase viene así, aunque tu navegador esté en español.')}</p>
         </div>`)}
 
       <div class="stack" style="margin-top:14px">
@@ -281,33 +284,34 @@
               <div class="row" style="align-items:flex-start;gap:11px">
                 <span class="paso-n">${i + 1}</span>
                 <div class="grow">
-                  <b>${p.titulo}</b>
+                  <b>${T(p.titulo)}</b>
                   <ol class="instr" style="margin:8px 0 0">
-                    ${raw(p.pasos.map(function (x) { return '<li>' + x + '</li>'; }).join(''))}
+                    ${raw(p.pasos.map(function (x) { return '<li>' + T(x) + '</li>'; }).join(''))}
                   </ol>
                   ${raw(p.sql ? html`
                     <div class="row between" style="margin:11px 0 6px">
-                      <span class="tiny">SQL PARA CREAR LA TABLA</span>
-                      <button class="btn sm" data-a="copiarsql">${raw(icon('copy'))} Copiar</button>
+                      <span class="tiny">${T('SQL PARA CREAR LA TABLA')}</span>
+                      <button class="btn sm" data-a="copiarsql">${raw(icon('copy'))} ${T('Copiar')}</button>
                     </div>
                     <pre id="sql-box">${Sync.SQL}</pre>` : '')}
                   ${raw(p.url ? html`
                     <div class="row between" style="margin:11px 0 0;gap:8px">
                       <code class="tiny grow" style="word-break:break-all">${Sync.urlRetorno()}</code>
-                      <button class="btn sm" data-a="copiarurl">${raw(icon('copy'))} Copiar</button>
+                      <button class="btn sm" data-a="copiarurl">${raw(icon('copy'))} ${T('Copiar')}</button>
                     </div>` : '')}
                   ${raw(p.errores ? '<div class="stack" style="margin-top:11px;gap:8px">' +
                     TROPIEZOS.map(function (t) {
-                      return '<div class="error-item"><b>' + t.dice + '</b><p>' + t.es + '</p></div>';
+                      return '<div class="error-item"><b>' + T(t.dice) + '</b><p>' +
+                        T(t.es) + '</p></div>';
                     }).join('') + '</div>' : '')}
-                  ${raw(p.nota ? '<p class="tiny" style="margin:10px 0 0">' + p.nota + '</p>' : '')}
+                  ${raw(p.nota ? '<p class="tiny" style="margin:10px 0 0">' + T(p.nota) + '</p>' : '')}
                 </div>
               </div>
             </div>`;
         }).join(''))}
       </div>
 
-      <div class="list-title">Los dos datos de conexión</div>
+      <div class="list-title">${T('Los dos datos de conexión')}</div>
       <div class="card">
         <label class="tiny">PROJECT URL</label>
         <input id="bd-url" placeholder="https://xxxxxxxx.supabase.co" value="${propia ? c.url : ''}"
@@ -315,14 +319,15 @@
         <label class="tiny">PUBLISHABLE KEY</label>
         <input id="bd-key" placeholder="sb_publishable_..." value="${propia ? c.key : ''}"
                autocomplete="off" spellcheck="false" style="margin:5px 0 12px">
-        <button class="btn primary block" data-a="guardarbd">Guardar la conexión</button>
+        <button class="btn primary block" data-a="guardarbd">${T('Guardar la conexión')}</button>
         ${raw(propia ? '<button class="btn danger block sm" data-a="borrarbd" ' +
-          'style="margin-top:8px">Borrar esta conexión</button>' : '')}
+          'style="margin-top:8px">' + esc(T('Borrar esta conexión')) + '</button>' : '')}
       </div>
 
-      <p class="tiny" style="margin-top:12px">La <b>Publishable key</b> es pública a
-      propósito: va dentro de la app y cualquiera puede verla. Lo que protege tus datos es
-      la política del paso 3, que hace que cada fila solo la lea quien la escribió.</p>`;
+      <p class="tiny" style="margin-top:12px">${raw(T('La <b>Publishable key</b> es ' +
+      'pública a propósito: va dentro de la app y cualquiera puede verla. Lo que protege ' +
+      'tus datos es la política del paso 3, que hace que cada fila solo la lea quien la ' +
+      'escribió.'))}</p>`;
   };
 
   V.basedatos.mount = function (root) {
@@ -331,12 +336,12 @@
     bind(root, '[data-a=copiarsql]', function () {
       const t = root.querySelector('#sql-box').textContent;
       if (navigator.clipboard) navigator.clipboard.writeText(t);
-      UI.toast('SQL copiado');
+      UI.toast(T('SQL copiado'));
     });
 
     bind(root, '[data-a=copiarurl]', function () {
       if (navigator.clipboard) navigator.clipboard.writeText(Sync.urlRetorno());
-      UI.toast('Dirección copiada');
+      UI.toast(T('Dirección copiada'));
     });
 
     bind(root, '[data-a=guardarbd]', function () {
@@ -344,17 +349,17 @@
         Sync.guardarConfig(root.querySelector('#bd-url').value,
           root.querySelector('#bd-key').value);
         go('cuenta');
-        UI.toast('Conexión guardada. Ahora crea tu cuenta con tu correo.');
+        UI.toast(T('Conexión guardada. Ahora crea tu cuenta con tu correo.'));
       } catch (e) {
         UI.toast(e.message);
       }
     });
 
     bind(root, '[data-a=borrarbd]', function () {
-      UI.confirm('Borrar la conexión',
-        'Este dispositivo dejará de usar tu base de datos. Tus datos locales no se tocan.',
-        'Borrar', true).then(function (ok) {
-        if (ok) { Sync.borrarConfig(); render(); UI.toast('Conexión borrada'); }
+      UI.confirm(T('Borrar la conexión'),
+        T('Este dispositivo dejará de usar tu base de datos. Tus datos locales no se tocan.'),
+        T('Borrar'), true).then(function (ok) {
+        if (ok) { Sync.borrarConfig(); render(); UI.toast(T('Conexión borrada')); }
       });
     });
   };

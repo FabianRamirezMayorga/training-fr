@@ -190,15 +190,22 @@
   const DIAS_LARGOS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves',
     'Viernes', 'Sábado'];
 
+  /* ¿Este nombre de día es el de hoy? Se mira en los dos idiomas: lo que
+     guarda la app va en español, pero un menú escrito por la IA viene en el
+     idioma que tuvieras puesto ese día. */
+  function esHoy(nombre) {
+    if (!g.I18N || !nombre) return false;
+    const hoy = DIAS_LARGOS[new Date().getDay()];
+    const puesto = I18N.norm(String(nombre));
+    return puesto === I18N.norm(hoy) || puesto === I18N.norm(T(hoy));
+  }
+
   function diaDeHoy(menu) {
     const m = menu || activo();
     const plan = m && m.plan;
     if (!plan || !plan.dias || !plan.dias.length) return null;
 
-    const nombre = DIAS_LARGOS[new Date().getDay()];
-    const suyo = plan.dias.filter(function (d) {
-      return g.I18N && I18N.norm(String(d.dia || '')) === I18N.norm(nombre);
-    })[0];
+    const suyo = plan.dias.filter(function (d) { return esHoy(d.dia); })[0];
     if (suyo) return suyo;
 
     /* Un menú de siete días puede venir sin nombrar los días; entonces se coge
@@ -211,8 +218,7 @@
      vienen numerados—, se cuenta por posición con el lunes primero, que es como
      se lee un plan semanal. */
   function esElDiaDeHoy(d, i, cuantos) {
-    const hoy = DIAS_LARGOS[new Date().getDay()];
-    if (d && d.dia && g.I18N) return I18N.norm(String(d.dia)) === I18N.norm(hoy);
+    if (d && d.dia && g.I18N) return esHoy(d.dia);
     return cuantos === 7 && i === (new Date().getDay() + 6) % 7;
   }
 
@@ -224,11 +230,8 @@
     const dias = (m && m.plan && m.plan.dias) || [];
     if (!dias.length) return null;
 
-    const hoy = DIAS_LARGOS[new Date().getDay()];
     for (let i = 0; i < dias.length; i++) {
-      if (g.I18N && I18N.norm(String(dias[i].dia || '')) === I18N.norm(hoy)) {
-        return { menu: m, dia: dias[i], i: i };
-      }
+      if (esHoy(dias[i].dia)) return { menu: m, dia: dias[i], i: i };
     }
     const i = (new Date().getDay() + 6) % 7;
     return dias[i] ? { menu: m, dia: dias[i], i: i } : null;
@@ -248,16 +251,16 @@
      El reparto no es a partes iguales: la comida del mediodía pesa más que la
      media mañana, que es como come la gente. */
   const REPARTOS = {
-    2: [{ n: 'Comida', h: '14:00', p: 0.55 }, { n: 'Cena', h: '21:00', p: 0.45 }],
-    3: [{ n: 'Desayuno', h: '08:00', p: 0.28 }, { n: 'Comida', h: '14:00', p: 0.42 },
+    2: [{ n: 'Almuerzo', h: '14:00', p: 0.55 }, { n: 'Cena', h: '21:00', p: 0.45 }],
+    3: [{ n: 'Desayuno', h: '08:00', p: 0.28 }, { n: 'Almuerzo', h: '14:00', p: 0.42 },
         { n: 'Cena', h: '21:00', p: 0.30 }],
-    4: [{ n: 'Desayuno', h: '08:00', p: 0.25 }, { n: 'Comida', h: '14:00', p: 0.35 },
+    4: [{ n: 'Desayuno', h: '08:00', p: 0.25 }, { n: 'Almuerzo', h: '14:00', p: 0.35 },
         { n: 'Merienda', h: '17:30', p: 0.15 }, { n: 'Cena', h: '21:00', p: 0.25 }],
     5: [{ n: 'Desayuno', h: '07:30', p: 0.22 }, { n: 'Media mañana', h: '10:30', p: 0.12 },
-        { n: 'Comida', h: '14:00', p: 0.32 }, { n: 'Merienda', h: '17:30', p: 0.12 },
+        { n: 'Almuerzo', h: '14:00', p: 0.32 }, { n: 'Merienda', h: '17:30', p: 0.12 },
         { n: 'Cena', h: '21:00', p: 0.22 }],
     6: [{ n: 'Desayuno', h: '07:30', p: 0.20 }, { n: 'Media mañana', h: '10:30', p: 0.10 },
-        { n: 'Comida', h: '14:00', p: 0.28 }, { n: 'Merienda', h: '17:00', p: 0.12 },
+        { n: 'Almuerzo', h: '14:00', p: 0.28 }, { n: 'Merienda', h: '17:00', p: 0.12 },
         { n: 'Cena', h: '21:00', p: 0.20 }, { n: 'Antes de dormir', h: '22:30', p: 0.10 }]
   };
 
@@ -265,7 +268,7 @@
     'Desayuno': 'Proteína (huevos, yogur griego, queso fresco), un hidrato ' +
       '(avena, pan integral) y fruta',
     'Media mañana': 'Algo de proteína y fruta o frutos secos',
-    'Comida': 'Una ración de proteína, un hidrato (arroz, pasta, patata, legumbre) ' +
+    'Almuerzo': 'Una ración de proteína, un hidrato (arroz, pasta, patata, legumbre) ' +
       'y verdura, con aceite de oliva',
     'Merienda': 'Proteína (yogur, atún, pavo) con un hidrato ligero',
     'Cena': 'Proteína (pescado, huevo, pollo) y verdura, con poco hidrato',
@@ -313,9 +316,10 @@
     const litros = Perfil.agua(p);
 
     return {
-      resumen: 'Reparto de tus ' + m.kcal + ' kcal y ' + m.prot + ' g de proteína entre ' +
-        cuantas + ' comidas. Los platos los eliges tú: aquí están los números que ' +
-        'tiene que cuadrar cada comida y qué debe llevar.',
+      resumen: Tn('Reparto de tus {kcal} kcal y {prot} g de proteína entre {comidas} ' +
+        'comidas. Los platos los eliges tú: aquí están los números que tiene que cuadrar ' +
+        'cada comida y qué debe llevar.',
+        { kcal: m.kcal, prot: m.prot, comidas: cuantas }),
       dias: dias,
       hidratacion: litros ? {
         total: UI.dec(litros) + ' L',

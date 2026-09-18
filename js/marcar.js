@@ -48,20 +48,23 @@
       return '<div class="ml-hecha">' +
         '<span class="mh-ico">' + icon('check') + '</span>' +
         '<span class="grow"><span class="mh-tit">' +
-        (cambiada ? 'Comiste otra cosa' : 'Te lo comiste') + '</span>' +
+        esc(cambiada ? T('Comiste otra cosa') : T('Te lo comiste')) + '</span>' +
         '<span class="mh-sub">' + esc((cambiada ? hecha.plato + ' · ' : '') +
-          UI.num(hecha.kcal) + ' kcal · ' + hecha.prot + ' g de proteína') + '</span></span>' +
-        '<button class="btn sm ghost" data-descomer="' + esc(hecha.id) + '">Deshacer</button>' +
+          Tn('{kcal} kcal · {prot} g de proteína',
+            { kcal: UI.num(hecha.kcal), prot: hecha.prot })) + '</span></span>' +
+        '<button class="btn sm ghost" data-descomer="' + esc(hecha.id) + '">' +
+        esc(T('Deshacer')) + '</button>' +
         '</div>';
     }
 
     return '<div class="ml-acciones">' +
       '<button class="btn sm ml-si" data-comi="' + esc(r) + '">' +
-      icon('check') + ' Me lo comí</button>' +
+      icon('check') + ' ' + esc(T('Me lo comí')) + '</button>' +
       '<button class="btn sm" data-cambie="' + esc(r) + '">' +
-      icon('cambiar') + ' Comí otra cosa</button>' +
+      icon('cambiar') + ' ' + esc(T('Comí otra cosa')) + '</button>' +
       '</div>' +
-      (esHoy === false ? '<p class="tiny ml-aviso">Se apunta en el día de hoy.</p>' : '');
+      (esHoy === false ? '<p class="tiny ml-aviso">' +
+        esc(T('Se apunta en el día de hoy.')) + '</p>' : '');
   }
 
   /* Los macros de un plato. Los menús no siempre traen los tres: con un «H»
@@ -83,13 +86,14 @@
 
     return '<div class="meal' + (hecha ? ' es-hecha' : '') + '">' +
       '<div class="row between">' +
-      '<b style="font-size:.9rem">' + esc(c.nombre || 'Comida') +
+      '<b style="font-size:.9rem">' + esc(T(c.nombre) || T('Comida')) +
       (c.hora ? ' <span class="tiny">· ' + esc(c.hora) + '</span>' : '') + '</b>' +
       '<span class="tiny">' + UI.num(c.kcal || 0) + ' kcal</span></div>' +
-      '<div class="muted" style="font-size:.9rem;margin-top:3px">' + esc(c.plato || '') + '</div>' +
+      '<div class="muted" style="font-size:.9rem;margin-top:3px">' +
+      esc(T(c.plato || '')) + '</div>' +
       ((c.alternativas || []).length
-        ? '<div class="tiny" style="margin-top:5px;color:var(--acc)">O bien: ' +
-          esc(c.alternativas.join(' · ')) + '</div>' : '') +
+        ? '<div class="tiny" style="margin-top:5px;color:var(--acc)">' +
+          esc(Tn('O bien: {lista}', { lista: c.alternativas.join(' · ') })) + '</div>' : '') +
       macrosHTML(c) +
       comidaHTML(r, c, esHoy) +
       '</div>';
@@ -129,13 +133,13 @@
          su punto, que es lo que era antes de que se pudiera marcar nada. */
       if (!marcable) {
         return '<div class="tiny" style="display:flex;gap:8px">' +
-          '<span style="color:var(--agua)">•</span><span>' + esc(x) + '</span></div>';
+          '<span style="color:var(--agua)">•</span><span>' + esc(T(x)) + '</span></div>';
       }
 
       return '<button class="agua-toma' + (ya ? ' bebida' : '') +
         '" data-agua="' + esc(r) + '" data-ml="' + ml + '">' +
         '<span class="at-casilla">' + (ya ? icon('check') : '') + '</span>' +
-        '<span class="grow at-txt">' + esc(x) + '</span>' +
+        '<span class="grow at-txt">' + esc(T(x)) + '</span>' +
         '</button>';
     }).join('');
 
@@ -162,13 +166,14 @@
           </div>` : '')}
 
         ${raw(pauta ? '<div class="agua-pauta">' + pauta + '</div>' : '')}
-        ${raw(h.nota ? '<p class="tiny" style="margin:10px 0 0">' + esc(h.nota) + '</p>' : '')}
+        ${raw(h.nota ? '<p class="tiny" style="margin:10px 0 0">' + esc(T(h.nota)) + '</p>' : '')}
 
         <div class="row" style="margin-top:11px;gap:9px">
           <button class="btn sm grow" data-a="alertasAgua">
-            ${raw(icon('campana'))} Ponerme los recordatorios</button>
+            ${raw(icon('campana'))} ${T('Ponerme los recordatorios')}</button>
           ${raw(marcable
-            ? '<button class="btn sm icon-vidrio" data-a="vaso" title="Un vaso suelto" ' +
+            ? '<button class="btn sm icon-vidrio" data-a="vaso" ' +
+              'title="' + UI.esc(T('Un vaso suelto')) + '" ' +
               'aria-label="' + UI.esc(T('Apuntar un vaso suelto')) + '">' + icon('plus') + '</button>'
             : '')}
         </div>
@@ -189,7 +194,7 @@
      preguntar. */
   function comerLoPrevisto(r) {
     const d = comidaDeRef(r);
-    if (!d) { UI.toast('Ese plato ya no está en el menú'); return; }
+    if (!d) { UI.toast(T('Ese plato ya no está en el menú')); return; }
     Comidas.anotar({
       plato: d.comida.plato || d.comida.nombre || 'Comida',
       kcal: d.comida.kcal, prot: d.comida.prot,
@@ -198,7 +203,8 @@
       fuente: 'menu', ref: r
     });
     render();
-    UI.toast('Apuntado: ' + UI.num(Math.round(Number(d.comida.kcal) || 0)) + ' kcal');
+    UI.toast(Tn('Apuntado: {n} kcal',
+      { n: UI.num(Math.round(Number(d.comida.kcal) || 0)) }));
   }
 
   /* ---------- comí otra cosa ----------
@@ -213,33 +219,34 @@
      porque hace falta saber de comida. */
   function sustituirComidaSheet(r) {
     const d = comidaDeRef(r);
-    if (!d) { UI.toast('Ese plato ya no está en el menú'); return; }
+    if (!d) { UI.toast(T('Ese plato ya no está en el menú')); return; }
 
     const c = d.comida;
     const conIA = IA.activa() && IA.revisarCambioComida;
 
     UI.modal(html`
-      <h2>Comí otra cosa</h2>
-      <p class="muted">En lugar de <b>${c.plato || c.nombre}</b>
-      (${UI.num(c.kcal)} kcal · ${c.prot} g de proteína).</p>
+      <h2>${T('Comí otra cosa')}</h2>
+      <p class="muted">${raw(Tn('En lugar de {plato} ({kcal} kcal · {prot} g de proteína).',
+        { plato: '<b>' + esc(c.plato || c.nombre) + '</b>',
+          kcal: UI.num(c.kcal), prot: c.prot }))}</p>
 
-      <label class="tiny" style="margin-top:12px;display:block">QUÉ COMISTE</label>
-      <input id="sc-plato" placeholder="Ej. dos arepas con queso y un café con leche"
+      <label class="tiny" style="margin-top:12px;display:block">${T('QUÉ COMISTE')}</label>
+      <input id="sc-plato" placeholder="${T('Ej. dos arepas con queso y un café con leche')}"
              autocomplete="off">
 
       ${raw(conIA ? html`
         <div class="row" style="margin-top:10px;gap:9px">
           <button class="btn primary grow btn-arranque" id="sc-calcular">
-            ${raw(icon('chispa'))} Calcular</button>
+            ${raw(icon('chispa'))} ${T('Calcular')}</button>
           <label class="btn grow" for="sc-foto" style="cursor:pointer">
-            ${raw(icon('camara'))} Hacer foto</label>
+            ${raw(icon('camara'))} ${T('Hacer foto')}</label>
         </div>
         <input type="file" id="sc-foto" accept="image/*" capture="environment" hidden>
-        <p class="tiny" style="margin:7px 0 0">Escríbelo o hazle una foto. Saca las calorías
-        y la proteína, y te dice si el cambio se sostiene. La foto no se guarda en ningún
-        sitio: se manda para que la lea y se suelta.</p>` : html`
-        <p class="tiny" style="margin:8px 0 0">Sin el entrenador con IA configurado
-        tendrás que poner tú los números.</p>`)}
+        <p class="tiny" style="margin:7px 0 0">${T('Escríbelo o hazle una foto. Saca las ' +
+        'calorías y la proteína, y te dice si el cambio se sostiene. La foto no se guarda ' +
+        'en ningún sitio: se manda para que la lea y se suelta.')}</p>` : html`
+        <p class="tiny" style="margin:8px 0 0">${T('Sin el entrenador con IA configurado ' +
+        'tendrás que poner tú los números.')}</p>`)}
 
       <div id="sc-foto-vista"></div>
       <div id="sc-visto" class="tiny" style="margin-top:10px"></div>
@@ -247,11 +254,11 @@
 
       <div class="row" style="margin-top:10px">
         <div class="grow">
-          <label class="tiny">CALORÍAS</label>
+          <label class="tiny">${T('CALORÍAS')}</label>
           <input id="sc-kcal" type="number" inputmode="numeric" min="0" placeholder="0">
         </div>
         <div class="grow">
-          <label class="tiny">PROTEÍNA (g)</label>
+          <label class="tiny">${T('PROTEÍNA (g)')}</label>
           <input id="sc-prot" type="number" inputmode="numeric" min="0" placeholder="0">
         </div>
       </div>
@@ -259,7 +266,7 @@
       <div id="sc-diag"></div>
 
       <button class="btn primary block" id="sc-ok" style="margin-top:14px">
-        Anotar el cambio</button>`,
+        ${T('Anotar el cambio')}</button>`,
       function (el) {
         const campoPlato = el.querySelector('#sc-plato');
         const campoKcal = el.querySelector('#sc-kcal');
@@ -296,9 +303,9 @@
           };
 
           diag.innerHTML = '<div class="sc-diag">' +
-            '<div class="pre-encima">Respecto a lo que tocaba</div>' +
-            linea('Calorías', dk, 'kcal') +
-            linea('Proteína', dp, 'g') +
+            '<div class="pre-encima">' + esc(T('Respecto a lo que tocaba')) + '</div>' +
+            linea(T('Calorías'), dk, 'kcal') +
+            linea(T('Proteína'), dp, 'g') +
             '</div>';
         };
 
@@ -308,9 +315,9 @@
         const pintarDictamen = function (r2) {
           if (!r2 || !r2.consejo) { dictamen.innerHTML = ''; return; }
 
-          const titulo = r2.veredicto === 'bien' ? 'Buen cambio'
-            : r2.veredicto === 'mal' ? 'Este no te conviene'
-            : 'Pasa, pero justo';
+          const titulo = r2.veredicto === 'bien' ? T('Buen cambio')
+            : r2.veredicto === 'mal' ? T('Este no te conviene')
+            : T('Pasa, pero justo');
 
           dictamen.innerHTML = '<div class="sc-dictamen es-' + esc(r2.veredicto) + '">' +
             '<div class="sd-cab">' +
@@ -320,7 +327,8 @@
             '<b>' + esc(titulo) + '</b></div>' +
             '<p class="sd-txt">' + esc(r2.consejo) + '</p>' +
             (r2.alternativas.length
-              ? '<div class="sd-alt"><span class="pre-encima">También puedes alternar con</span>' +
+              ? '<div class="sd-alt"><span class="pre-encima">' +
+                esc(T('También puedes alternar con')) + '</span>' +
                 r2.alternativas.map(function (x) {
                   return '<div class="sd-fila">' + esc(x) + '</div>';
                 }).join('') + '</div>'
@@ -331,18 +339,18 @@
         const calcular = function (imagen) {
           const t = campoPlato.value.trim();
           if (!t && !imagen) {
-            UI.toast('Escribe qué comiste o hazle una foto');
+            UI.toast(T('Escribe qué comiste o hazle una foto'));
             campoPlato.focus();
             return;
           }
-          if (btnCalc) { btnCalc.disabled = true; btnCalc.textContent = 'Mirándolo…'; }
+          if (btnCalc) { btnCalc.disabled = true; btnCalc.textContent = T('Mirándolo…'); }
           visto.textContent = '';
           dictamen.innerHTML = '';
 
           return IA.revisarCambioComida(t, c, imagen).then(function (r2) {
             if (!r2 || !(Number(r2.kcal) > 0)) {
               visto.innerHTML = '<span style="color:var(--warn)">' +
-                esc((r2 && r2.nota) || 'No he sabido qué es eso. Pon tú los números.') +
+                esc((r2 && r2.nota) || T('No he sabido qué es eso. Pon tú los números.')) +
                 '</span>';
               return;
             }
@@ -361,11 +369,11 @@
             pintarDictamen(r2);
           }).catch(function (e) {
             visto.innerHTML = '<span style="color:var(--warn)">' +
-              esc(e.message || 'No se pudo calcular') + '</span>';
+              esc(e.message || T('No se pudo calcular')) + '</span>';
           }).then(function () {
             if (btnCalc) {
               btnCalc.disabled = false;
-              btnCalc.innerHTML = icon('chispa') + ' Calcular';
+              btnCalc.innerHTML = icon('chispa') + ' ' + esc(T('Calcular'));
             }
             /* Se suelta en cuanto termina, salga bien o mal */
             if (verFoto) verFoto.innerHTML = '';
@@ -387,15 +395,15 @@
             verFoto.innerHTML = '<img class="sc-foto" src="' + img.vista + '" alt="">';
             return calcular(img);
           }).catch(function (e) {
-            UI.toast(e.message || 'No he podido leer esa foto');
+            UI.toast(e.message || T('No he podido leer esa foto'));
           });
         };
 
         btnOk.onclick = function () {
           const plato = campoPlato.value.trim();
           const kcal = Number(campoKcal.value) || 0;
-          if (!plato) { UI.toast('Escribe qué comiste'); campoPlato.focus(); return; }
-          if (!kcal) { UI.toast('Faltan las calorías'); campoKcal.focus(); return; }
+          if (!plato) { UI.toast(T('Escribe qué comiste')); campoPlato.focus(); return; }
+          if (!kcal) { UI.toast(T('Faltan las calorías')); campoKcal.focus(); return; }
 
           UI.closeModal();
           Comidas.anotar({
@@ -410,7 +418,7 @@
             consejo: consejo, veredicto: veredicto
           });
           render();
-          UI.toast('Cambio apuntado');
+          UI.toast(T('Cambio apuntado'));
         };
 
         setTimeout(function () { campoPlato.focus(); }, 60);
@@ -517,10 +525,10 @@
     const x = (g.Comidas ? Comidas.del() : []).filter(function (y) {
       return y.id === id;
     })[0];
-    if (!x) { UI.toast('Ese apunte ya no está'); return; }
+    if (!x) { UI.toast(T('Ese apunte ya no está')); return; }
 
     const cand = comidaDeLaHora(x.t);
-    if (!cand) { UI.toast('A esa hora no tenías nada en el menú'); return; }
+    if (!cand) { UI.toast(T('A esa hora no tenías nada en el menú')); return; }
 
     if (!g.IA || !IA.activa() || !IA.revisarCambioComida) {
       /* Sin IA no hay dictamen, pero cruzar sí se puede: la resta la hace la
@@ -533,7 +541,7 @@
       return;
     }
 
-    UI.toast('Mirándolo…');
+    UI.toast(T('Mirándolo…'));
     const texto = x.plato + (x.detalle ? '. ' + x.detalle : '');
     IA.revisarCambioComida(texto, cand.comida, null).then(function (r) {
       cruceSheet(cand, {
@@ -548,7 +556,7 @@
         consejo: (r && r.consejo) || ''
       }, { apunte: x });
     }).catch(function (e) {
-      UI.toast(e.message || 'No he podido mirarlo');
+      UI.toast(e.message || T('No he podido mirarlo'));
     });
   }
 
@@ -574,46 +582,47 @@
     const c = cand.comida;
     /* El nombre que usa el menú manda; si no trae ninguno, el de la franja en
        la que cae, que es como lo llama él. */
-    const nombre = c.nombre || (cand.franja && cand.franja.label) || 'esa comida';
-    const previsto = c.plato || c.nombre || 'lo del menú';
+    const nombre = T(c.nombre) || T((cand.franja && cand.franja.label) || '') ||
+      T('esa comida');
+    const previsto = c.plato || T(c.nombre) || T('lo del menú');
     const igual = r.esLoPrevisto;
 
     UI.modal(html`
       <div class="conf-disco ${raw(igual ? '' : 'cambio')}">
         ${raw(icon(igual ? 'check' : 'cambiar'))}</div>
-      <h2 class="conf-tit">${raw(igual
-        ? 'Eso es tu ' + esc(nombre.toLowerCase())
-        : '¿Esto es tu ' + esc(nombre.toLowerCase()) + '?')}</h2>
-      <p class="muted conf-txt">${raw(igual
-        ? 'A las ' + esc(UI.hora ? UI.hora(cand.hora) : cand.hora) + ' tocaba «' +
-          esc(previsto) + '» y eso es lo que veo en la foto.'
-        : 'A las ' + esc(UI.hora ? UI.hora(cand.hora) : cand.hora) + ' tocaba «' +
-          esc(previsto) + '», y en la foto veo otra cosa.')}</p>
+      <h2 class="conf-tit">${igual
+        ? Tn('Eso es tu {comida}', { comida: nombre.toLowerCase() })
+        : Tn('¿Esto es tu {comida}?', { comida: nombre.toLowerCase() })}</h2>
+      <p class="muted conf-txt">${igual
+        ? Tn('A las {hora} tocaba «{plato}» y eso es lo que veo en la foto.',
+            { hora: UI.hora ? UI.hora(cand.hora) : cand.hora, plato: previsto })
+        : Tn('A las {hora} tocaba «{plato}», y en la foto veo otra cosa.',
+            { hora: UI.hora ? UI.hora(cand.hora) : cand.hora, plato: previsto })}</p>
 
       <div class="cr-plato">${r.plato}</div>
       ${raw(r.nota ? '<p class="tiny cr-nota">' + esc(r.nota) +
         (r.confianza ? ' · ' + esc(r.confianza) : '') + '</p>' : '')}
 
       <div class="cr-tabla">
-        ${raw(difHTML('Calorías', Number(c.kcal) || 0, r.kcal, 'kcal'))}
-        ${raw(difHTML('Proteína', Number(c.prot) || 0, r.prot, 'g'))}
+        ${raw(difHTML(T('Calorías'), Number(c.kcal) || 0, r.kcal, 'kcal'))}
+        ${raw(difHTML(T('Proteína'), Number(c.prot) || 0, r.prot, 'g'))}
       </div>
-      <p class="tiny cr-pie">Frente a las ${UI.num(Number(c.kcal) || 0)} kcal y
-      ${UI.num(Number(c.prot) || 0)} g que tenía el menú.</p>
+      <p class="tiny cr-pie">${Tn('Frente a las {kcal} kcal y {prot} g que tenía el menú.',
+        { kcal: UI.num(Number(c.kcal) || 0), prot: UI.num(Number(c.prot) || 0) })}</p>
 
       ${raw(r.consejo ? '<div class="sc-dictamen ' + esc(r.veredicto || 'regular') + '">' +
         '<p class="sd-txt">' + esc(r.consejo) + '</p></div>' : '')}
 
       <div class="cb-acciones" style="margin-top:16px">
         <button class="btn primary grow btn-arranque" data-x="si">
-          ${raw(icon('check'))} ${raw(igual ? 'Marcar como hecho' : 'Sí, es esa comida')}</button>
-        <button class="btn vidrio" data-x="no">${raw(yaApuntado ? 'Dejarlo' : 'Es aparte')}</button>
+          ${raw(icon('check'))} ${igual ? T('Marcar como hecho') : T('Sí, es esa comida')}</button>
+        <button class="btn vidrio" data-x="no">${yaApuntado ? T('Dejarlo') : T('Es aparte')}</button>
       </div>
-      <p class="tiny" style="margin:10px 0 0;text-align:center">${raw(yaApuntado
-        ? 'Los números no cambian: ya están contados en tu día. Lo que se añade es a qué '
-          + 'comida del menú corresponde.'
-        : '«Es aparte» lo apunta como un extra del día y deja tu ' +
-          esc(nombre.toLowerCase()) + ' sin marcar.')}</p>`,
+      <p class="tiny" style="margin:10px 0 0;text-align:center">${yaApuntado
+        ? T('Los números no cambian: ya están contados en tu día. Lo que se añade es a '
+          + 'qué comida del menú corresponde.')
+        : Tn('«Es aparte» lo apunta como un extra del día y deja tu {comida} sin marcar.',
+            { comida: nombre.toLowerCase() })}</p>`,
       function (el) {
         el.querySelector('[data-x=si]').onclick = function () {
           UI.closeModal();
@@ -629,7 +638,7 @@
               veredicto: r.veredicto || yaApuntado.veredicto || ''
             });
             render();
-            UI.toast('Cruzado con tu ' + nombre.toLowerCase());
+            UI.toast(Tn('Cruzado con tu {comida}', { comida: nombre.toLowerCase() }));
             return;
           }
 
@@ -649,7 +658,7 @@
             consejo: r.consejo || '', veredicto: r.veredicto || ''
           });
           render();
-          UI.toast('Apuntado en tu ' + nombre.toLowerCase());
+          UI.toast(Tn('Apuntado en tu {comida}', { comida: nombre.toLowerCase() }));
         };
 
         el.querySelector('[data-x=no]').onclick = function () {
@@ -685,13 +694,13 @@
     bindAll(root, '[data-agua]', function (el) {
       const puesto = Agua.alternar(el.dataset.agua, Number(el.dataset.ml) || Agua.VASO);
       render();
-      UI.toast(puesto ? 'Apuntados ' + puesto.ml + ' ml' : 'Desmarcado');
+      UI.toast(puesto ? Tn('Apuntados {n} ml', { n: puesto.ml }) : T('Desmarcado'));
     });
 
     bind1(root, '[data-a=vaso]', function () {
       const x = Agua.anotar(Agua.VASO);
       render();
-      UI.toast('Un vaso más: ' + x.ml + ' ml');
+      UI.toast(Tn('Un vaso más: {n} ml', { n: x.ml }));
     });
 
     /* Puente con las alertas: el plan dice cuánta agua y las alertas la
@@ -699,11 +708,12 @@
        pantallas y el botón va dentro. */
     bind1(root, '[data-a=alertasAgua]', function () {
       const sug = Alertas.sugerencias().filter(function (x) { return x.clave === 'agua'; })[0];
-      if (!sug) { UI.toast('Completa tu perfil para calcular el agua'); return; }
-      if (Alertas.yaExiste(sug)) { App.go('alertas'); UI.toast('Ya los tienes puestos'); return; }
+      if (!sug) { UI.toast(T('Completa tu perfil para calcular el agua')); return; }
+      if (Alertas.yaExiste(sug)) { App.go('alertas'); UI.toast(T('Ya los tienes puestos')); return; }
       Alertas.crearDesdeSugerencia(sug);
       App.go('alertas');
-      UI.toast(sug.horas.length + ' recordatorios de agua creados');
+      UI.toast(Tp(sug.horas.length,
+        '{n} recordatorio de agua creado', '{n} recordatorios de agua creados'));
     });
   }
 

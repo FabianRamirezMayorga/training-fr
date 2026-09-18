@@ -2531,6 +2531,358 @@
     'Aleatorio activado': 'Shuffle on',
     'Aleatorio desactivado': 'Shuffle off',
     'Guardada en tus favoritas de Spotify': 'Saved to your Spotify likes',
-    'Quitada de favoritas': 'Removed from your likes'
+    'Quitada de favoritas': 'Removed from your likes',
+
+    /* ---------- Progreso: ejercicios, peso y zonas ---------- */
+    'El que más sube': 'The one going up most',
+    'El que más repites': 'The one you repeat most',
+    '{n} vez': '{n} time',
+    '{n} veces': '{n} times',
+    'Tus ejercicios': 'Your exercises',
+    'Tu peso': 'Your weight',
+    'Ahora': 'Now',
+    'en el periodo': 'over the period',
+    '{n} pesaje': '{n} weigh-in',
+    '{n} pesajes': '{n} weigh-ins',
+    '{signo}{n} {unidad} por semana de media': '{signo}{n} {unidad} a week on average',
+    'Lo que llevas abandonado': 'What you have been neglecting',
+    'Sin tocar': 'Untouched',
+    'zona': 'area',
+    'zonas': 'areas',
+    'nunca': 'never',
+    'Un músculo que no se toca en más de una semana se estanca. Toca la zona en Ejercicios y te monto la sesión.':
+      'A muscle you do not touch for more than a week stalls. Tap the area under Exercises and I will build you the session.',
+    'Rehacer mi programa con esto en cuenta':
+      'Redo my program taking this into account',
+    '{n} nuevo': '{n} new',
+    '{n} nuevos': '{n} new',
+    'Tu marca más alta': 'Your highest lift',
+    'nuevo': 'new',
+    'Tus metas': 'Your goals',
+    'Cumplida el {fecha}': 'Achieved on {fecha}',
+    'Te falta {que}': '{que} to go',
+    'Te faltan {que}': '{que} to go',
+    'Borrar entrenamiento': 'Delete workout',
+    'Se eliminará de tu historial y de las estadísticas.':
+      'It will be removed from your history and from the stats.',
+    'La semana pasada': 'Last week',
+    'Del {a} al {b}': '{a} to {b}',
+
+    /* ---------- Progreso: el reparto por zonas ---------- */
+    '{n} series de {zona} a la semana, y sin subir':
+      '{n} sets of {zona} a week, and not going up',
+    'Por encima de veinte series lo que se añade es fatiga, no músculo, y en {cuando} ninguno de los {cuantos} ejercicios de esa zona ha subido de peso. Baja el volumen una semana y vuelve: es cuando se crece.':
+      'Above twenty sets what you add is fatigue, not muscle, and over {cuando} none of the {cuantos} exercises in that area has gone up in weight. Drop the volume for a week and come back: that is when you grow.',
+    'las últimas cinco semanas': 'the last five weeks',
+    'este periodo': 'this period',
+    'Lo mismo con {lista}.': 'Same with {lista}.',
+    '{n} series de {zona} a la semana': '{n} sets of {zona} a week',
+    'Es mucho —de diez a veinte es lo que suele hacer falta—, pero estás subiendo peso, así que te lo estás recuperando. Si un día se para el progreso, ahí es donde hay que recortar.':
+      'That is a lot —ten to twenty is usually what it takes—, but you are adding weight, so you are recovering from it. The day progress stalls, that is where to cut.',
+    'series por semana que haces': 'sets a week you do',
+    'lo que pide tu plan': 'what your plan asks for',
+    'Donde más te separas es {zona}: tu plan pide {pide} series por semana y estás haciendo {haces}.':
+      'Where you differ most is {zona}: your plan asks for {pide} sets a week and you are doing {haces}.',
+    'Todavía no has completado series en este periodo.':
+      'You have not completed any sets in this period yet.',
+    'En este periodo no has entrenado {lista}.':
+      'In this period you have not trained {lista}.',
+    '{mas} se lleva el triple que {menos}. Si no es a propósito, conviene equilibrarlo.':
+      '{mas} gets three times as much as {menos}. If that is not on purpose, it is worth evening out.',
+    'Reparto equilibrado entre las zonas que entrenas.':
+      'Balanced split across the areas you train.',
+
+    /* ---------- Modo invitado ---------- */
+    'Vas a seguir como invitado': 'You are carrying on as a guest',
+    'Es la forma rápida de empezar, pero conviene que sepas dónde queda lo tuyo.':
+      'It is the quick way to start, but you should know where your things end up.',
+    'Tus datos se guardan solo en este dispositivo':
+      'Your data is stored on this device only',
+    'Se pierden si borras los datos del navegador o desinstalas la app.':
+      'It is lost if you clear your browser data or uninstall the app.',
+    'No hay copia en ningún servidor: si cambias de móvil, empiezas de cero.':
+      'There is no copy on any server: change phone and you start from scratch.',
+    'No los verás en tu otro dispositivo.': 'You will not see it on your other device.',
+    'Puedes crear la cuenta más adelante desde {donde}: lo que hayas hecho hasta entonces se sube y no se pierde nada.':
+      'You can create the account later from {donde}: whatever you have done up to then is uploaded and nothing is lost.',
+    'Perfil, Mi cuenta': 'Profile, My account',
+    'Mejor creo mi cuenta': 'I will create my account instead',
+    'Entiendo, seguir como invitado': 'Understood, carry on as a guest',
+    'Esto es tuyo: guárdalo bien': 'This is yours: keep it safe',
+    'Con una cuenta lo tienes en el móvil, en el portátil y en el que venga después. Es gratis y no hay servidor mío de por medio: los datos van a tu propia base de datos.':
+      'With an account you have it on your phone, on your laptop and on whatever comes next. It is free and there is no server of mine in between: the data goes to your own database.',
+    'Crear mi cuenta': 'Create my account',
+    'Continuar sin cuenta': 'Carry on without an account',
+
+    /* ---------- La base de datos ---------- */
+    'Tu base de datos': 'Your database',
+    'Tus datos se guardan en el proyecto de quien te dio el acceso, y solo los ves tú: la base de datos no deja que nadie lea lo de otra persona, ni siquiera quien administra.':
+      'Your data is stored in the project of whoever gave you access, and only you can see it: the database does not let anyone read another person’s rows, not even the administrator.',
+    'De la conexión se encarga quien administra; no hay nada que configures aquí.':
+      'The administrator handles the connection; there is nothing for you to set up here.',
+    'Se crea una vez, es gratis, no pide tarjeta y es tuya: los datos van a tu propio Supabase, no a ningún servidor mío. Ocho pasos y unos diez minutos.':
+      'You create it once, it is free, it asks for no card and it is yours: the data goes to your own Supabase, not to any server of mine. Eight steps and about ten minutes.',
+    'Ya tienes una conexión propia guardada':
+      'You already have your own connection saved',
+    'Antes de empezar: ¿te hace falta?': 'Before you start: do you need this?',
+    'Si usas la app en un solo móvil': 'If you use the app on one phone only',
+    'No necesitas nada de esto. Todo funciona y se guarda en el dispositivo. Lo único: si borras los datos del navegador, se pierde.':
+      'You need none of this. Everything works and is stored on the device. The one catch: clear your browser data and it is gone.',
+    'Si ya tienes cuenta en esta app': 'If you already have an account in this app',
+    'Tampoco. Ve a {donde} y entra con tu correo; la conexión ya está puesta.':
+      'Not that either. Go to {donde} and sign in with your email; the connection is already set.',
+    'Si quieres tus datos en varios dispositivos y no tienes cuenta':
+      'If you want your data on several devices and have no account',
+    'Entonces sí: la conexión que trae la app tiene el alta cerrada a propósito, así que la tuya te la montas aquí.':
+      'Then yes: the connection the app ships with has sign-ups closed on purpose, so you set up your own here.',
+    'Los nombres de los menús van en inglés porque Supabase viene así, aunque tu navegador esté en español.':
+      'The menu names are in English because that is how Supabase comes, whatever language your browser is in.',
+    'SQL PARA CREAR LA TABLA': 'SQL TO CREATE THE TABLE',
+    'Los dos datos de conexión': 'The two connection details',
+    'Guardar la conexión': 'Save the connection',
+    'Borrar esta conexión': 'Delete this connection',
+    'La <b>Publishable key</b> es pública a propósito: va dentro de la app y cualquiera puede verla. Lo que protege tus datos es la política del paso 3, que hace que cada fila solo la lea quien la escribió.':
+      'The <b>Publishable key</b> is public on purpose: it ships inside the app and anyone can see it. What protects your data is the policy from step 3, which means each row can only be read by whoever wrote it.',
+    'SQL copiado': 'SQL copied',
+    'Dirección copiada': 'Address copied',
+    'Conexión guardada. Ahora crea tu cuenta con tu correo.':
+      'Connection saved. Now create your account with your email.',
+    'Borrar la conexión': 'Delete the connection',
+    'Este dispositivo dejará de usar tu base de datos. Tus datos locales no se tocan.':
+      'This device will stop using your database. Your local data is not touched.',
+    'Conexión borrada': 'Connection deleted',
+
+    /* ---------- La base de datos: el paso a paso ---------- */
+    'Crea tu cuenta en Supabase': 'Create your Supabase account',
+    'Abre <b>supabase.com</b> y pulsa <b>Start your project</b>.':
+      'Open <b>supabase.com</b> and press <b>Start your project</b>.',
+    'Entra con GitHub o con tu correo. Es gratis y no pide tarjeta.':
+      'Sign in with GitHub or with your email. It is free and asks for no card.',
+    'Crea el proyecto': 'Create the project',
+    '<b>Name</b>: el que quieras, por ejemplo Training.':
+      '<b>Name</b>: whatever you like, Training for example.',
+    '<b>Database Password</b>: genera una y guárdala donde guardes tus contraseñas. No es la que usarás en la app, pero la necesitarás si algún día entras a la base de datos.':
+      '<b>Database Password</b>: generate one and keep it wherever you keep your passwords. It is not the one you will use in the app, but you will need it if you ever go into the database.',
+    '<b>Region</b>: la más cercana a ti.': '<b>Region</b>: the one closest to you.',
+    'Pulsa <b>Create new project</b> y espera un par de minutos a que termine de montarse.':
+      'Press <b>Create new project</b> and wait a couple of minutes for it to finish setting up.',
+    'Crea la tabla donde van tus datos': 'Create the table your data goes in',
+    'En el menú de la izquierda entra en <b>SQL Editor</b>.':
+      'In the left-hand menu go into <b>SQL Editor</b>.',
+    'Pulsa <b>New query</b>, pega el bloque de abajo y pulsa <b>Run</b> (o Ctrl+Intro).':
+      'Press <b>New query</b>, paste the block below and press <b>Run</b> (or Ctrl+Enter).',
+    'Tiene que responder <b>Success. No rows returned</b>. Eso es que ha ido bien.':
+      'It should answer <b>Success. No rows returned</b>. That means it worked.',
+    'Ese SQL crea la tabla y la política de seguridad que hace que solo tú puedas ver tus filas, aunque la clave de la app sea pública.':
+      'That SQL creates the table and the security policy that means only you can see your rows, even though the app key is public.',
+    'Quita la confirmación por correo': 'Turn off email confirmation',
+    'Ve a <b>Authentication</b> y luego a <b>Sign In / Providers</b>.':
+      'Go to <b>Authentication</b> and then to <b>Sign In / Providers</b>.',
+    'En <b>User Signups</b>, deja <b>Allow new users to sign up</b> encendido de momento.':
+      'Under <b>User Signups</b>, leave <b>Allow new users to sign up</b> on for now.',
+    'Apaga <b>Confirm email</b> y pulsa <b>Save changes</b>.':
+      'Turn off <b>Confirm email</b> and press <b>Save changes</b>.',
+    'El correo que trae Supabase de serie solo manda un par de mensajes por hora. Sin esa confirmación entras con contraseña al momento y no dependes de ningún correo.':
+      'The email Supabase ships with only sends a couple of messages an hour. Without that confirmation you sign in with a password straight away and depend on no email.',
+    'Autoriza la dirección de la app': 'Authorise the app address',
+    'Pega esta dirección en <b>Site URL</b> y también en <b>Redirect URLs</b>':
+      'Paste this address into <b>Site URL</b> and also into <b>Redirect URLs</b>',
+    'Guarda con <b>Save changes</b>.': 'Save with <b>Save changes</b>.',
+    'Copia los dos datos de conexión': 'Copy the two connection details',
+    'Ve a <b>Project Settings</b> (la rueda dentada) y entra en <b>Data API</b>: copia la <b>Project URL</b>, que acaba en <b>.supabase.co</b>.':
+      'Go to <b>Project Settings</b> (the cog) and into <b>Data API</b>: copy the <b>Project URL</b>, which ends in <b>.supabase.co</b>.',
+    'Entra en <b>API Keys</b> y copia la <b>Publishable key</b>, la que empieza por <b>sb_publishable_</b>. Si tu proyecto es antiguo, se llama <b>anon public</b> y empieza por <b>eyJ</b>.':
+      'Go into <b>API Keys</b> and copy the <b>Publishable key</b>, the one starting with <b>sb_publishable_</b>. On an older project it is called <b>anon public</b> and starts with <b>eyJ</b>.',
+    'No copies nunca las <b>Secret keys</b> ni la <b>service_role</b>: esas dan acceso total y no pintan nada en una app que corre en el navegador.':
+      'Never copy the <b>Secret keys</b> or the <b>service_role</b>: those give full access and have no business in an app that runs in the browser.',
+    'Pégalos aquí abajo y crea tu cuenta': 'Paste them below and create your account',
+    'Pega la Project URL y la Publishable key en los dos campos del final.':
+      'Paste the Project URL and the Publishable key into the two fields at the bottom.',
+    'Pulsa <b>Guardar la conexión</b>.': 'Press <b>Save the connection</b>.',
+    'Ve a <b>Perfil &rarr; Mi cuenta</b> y crea tu cuenta con tu correo y una contraseña de al menos 8 caracteres.':
+      'Go to <b>Profile &rarr; My account</b> and create your account with your email and a password of at least 8 characters.',
+    'Cuando ya estés dentro, vuelve a Supabase y apaga <b>Allow new users to sign up</b>: así nadie más puede crearse cuentas en tu proyecto.':
+      'Once you are in, go back to Supabase and turn off <b>Allow new users to sign up</b>: that way nobody else can create accounts in your project.',
+    'Comprueba que ha funcionado': 'Check that it worked',
+    'En <b>Mi cuenta</b> tiene que salir tu correo y <b>Todo al día</b>.':
+      'Under <b>My account</b> your email should show, along with <b>All up to date</b>.',
+    'Entra con el mismo correo en el otro dispositivo: en un minuto deberías ver ahí tus rutinas.':
+      'Sign in with the same email on the other device: within a minute you should see your routines there.',
+    'Si algo falla, la app te dice qué pasa con sus palabras; abajo tienes qué significa cada aviso.':
+      'If something fails, the app tells you what is happening in its own words; below is what each message means.',
+    '«Falta la tabla donde van los datos»': '«The table the data goes in is missing»',
+    'El paso 3 no llegó a ejecutarse. Vuelve al <b>SQL Editor</b>, pega el bloque otra vez y comprueba que responde <b>Success</b>.':
+      'Step 3 never ran. Go back to the <b>SQL Editor</b>, paste the block again and check it answers <b>Success</b>.',
+    '«Esa clave no vale para este proyecto»':
+      '«That key is not valid for this project»',
+    'La clave y la URL son de proyectos distintos, o copiaste una <b>Secret key</b>. Vuelve a <b>Project Settings &rarr; API Keys</b> y copia la <b>Publishable</b>.':
+      'The key and the URL are from different projects, or you copied a <b>Secret key</b>. Go back to <b>Project Settings &rarr; API Keys</b> and copy the <b>Publishable</b> one.',
+    '«Correo o contraseña incorrectos» recién creada la cuenta':
+      '«Wrong email or password» on a freshly created account',
+    'O el alta estaba cerrada y la cuenta no llegó a crearse, o la creaste con el enlace del correo y todavía no tiene contraseña. En <b>Authentication &rarr; Users</b> de Supabase ves si existe de verdad.':
+      'Either sign-ups were closed and the account never got created, or you created it through the email link and it has no password yet. Under <b>Authentication &rarr; Users</b> in Supabase you can see whether it really exists.',
+    'El correo de confirmación no llega': 'The confirmation email never arrives',
+    'El correo de serie de Supabase manda dos o tres mensajes por hora y nada más. Por eso el paso 4 apaga <b>Confirm email</b>: así no depende de ningún correo.':
+      'The email Supabase ships with sends two or three messages an hour and no more. That is why step 4 turns off <b>Confirm email</b>: that way it depends on no email at all.',
+
+    /* ---------- Mi día ---------- */
+    '{n} L hoy': '{n} L today',
+    'Tu pauta de agua del día.': 'Your water schedule for the day.',
+    'Tu pauta son {tomas} tomas y llevas {hechas} marcadas. Marca cada vez que bebas.':
+      'Your schedule is {tomas} drinks and you have {hechas} ticked. Tick each time you drink.',
+    'Marca cada vaso y aquí verás cuánto llevas.':
+      'Tick each glass and here you will see how much you have had.',
+    'Del menú que te preparó el entrenador.':
+      'From the meal plan the coach prepared for you.',
+    'Ver la semana entera': 'See the whole week',
+    'Todavía no tienes menú': 'You have no meal plan yet',
+    'El entrenador puede prepararte uno semanal con tus calorías, tu dieta y tus horarios, y entonces aquí verás lo que te toca comer hoy y a qué hora.':
+      'The coach can prepare a weekly one with your calories, your diet and your times, and then here you will see what you are due to eat today and when.',
+    '{n} kcal': '{n} kcal',
+    'Todavía no tienes menú para hoy.': 'You have no meal plan for today yet.',
+    'Las {n} comidas de hoy, resueltas.': 'Today\'s {n} meals, all sorted.',
+    'Son {cuantas} comidas y llevas {hechas}. Marca la que te comas, o dime si comiste otra cosa.':
+      'That is {cuantas} meals and you have had {hechas}. Tick the one you eat, or tell me if you ate something else.',
+    'Hoy descansas': 'You rest today',
+    'Hoy no toca nada. Descansar también es parte del plan.':
+      'Nothing is due today. Resting is part of the plan too.',
+    'No hay ninguna rutina puesta para hoy. Descansar es parte del plan; si te apetece moverte, camina o apunta lo que hagas.':
+      'There is no routine set for today. Resting is part of the plan; if you fancy moving, walk or log whatever you do.',
+    'Elegir una rutina igualmente': 'Pick a routine anyway',
+    '{lista} y {n} más': '{lista} and {n} more',
+    '{lista} y {ultima}': '{lista} and {ultima}',
+    'Hoy le das a {zonas}.': 'Today you hit {zonas}.',
+    '{ejercicios} ejercicios y {series} series.':
+      '{ejercicios} exercises and {series} sets.',
+    'PROTEÍNA': 'PROTEIN',
+    'Te faltan {prot} g de proteína y {kcal} kcal.':
+      'You are {prot} g of protein and {kcal} kcal short.',
+    'Ya has llegado a la proteína del día.': 'You have hit today\'s protein.',
+    '{n} apunte de hoy va suelto': '{n} of today\'s entries is unmatched',
+    '{n} apuntes de hoy van sueltos': '{n} of today\'s entries are unmatched',
+    'Encajan con una comida de tu menú. Crúzalos y quedará marcada, con la diferencia contra lo que tenías previsto.':
+      'They match a meal in your plan. Match them up and it gets ticked, with the difference against what you had planned.',
+    '{kcal} kcal · {prot} g': '{kcal} kcal · {prot} g',
+    ' · de una foto': ' · from a photo',
+    ' · en vez de {que}': ' · instead of {que}',
+    'Cruzar': 'Match up',
+    'Sin tus datos no puedo calcular nada.':
+      'Without your details I cannot work anything out.',
+    'Todavía no has apuntado nada hoy.': 'You have logged nothing today yet.',
+    'De dónde salen esas calorías': 'Where those calories come from',
+    'De {con} de los {total} apuntes de hoy; los demás se anotaron cuando solo se guardaban calorías y proteína.':
+      'From {con} of today\'s {total} entries; the rest were logged when only calories and protein were stored.',
+    'Entrenaste': 'You trained',
+    'Día de descanso': 'Rest day',
+    'Llegaste a la proteína': 'You hit your protein',
+    'Bebiste el agua': 'You drank your water',
+    'Entreno': 'Training',
+    'Los días de descanso no piden entreno: ahí solo cuentan la proteína y el agua.':
+      'Rest days ask for no training: there only protein and water count.',
+    '{n} de 7 días': '{n} of 7 days',
+    'Los últimos siete días: si entrenaste, si llegaste a la proteína y si bebiste el agua.':
+      'The last seven days: whether you trained, whether you hit your protein and whether you drank your water.',
+    'Llevas {hechas} de {pedidas}.': 'You are on {hechas} of {pedidas}.',
+
+    /* ---------- Marcar comidas y agua ---------- */
+    'Comiste otra cosa': 'You ate something else',
+    'Te lo comiste': 'You ate it',
+    'Deshacer': 'Undo',
+    'Me lo comí': 'I ate it',
+    'Comí otra cosa': 'I ate something else',
+    'Se apunta en el día de hoy.': 'It gets logged under today\'s date.',
+    'O bien: {lista}': 'Or: {lista}',
+    'Ponerme los recordatorios': 'Set my reminders',
+    'Un vaso suelto': 'A one-off glass',
+    'Ese plato ya no está en el menú': 'That dish is no longer in the meal plan',
+    'Apuntado: {n} kcal': 'Logged: {n} kcal',
+    'En lugar de {plato} ({kcal} kcal · {prot} g de proteína).':
+      'Instead of {plato} ({kcal} kcal · {prot} g of protein).',
+    'QUÉ COMISTE': 'WHAT YOU ATE',
+    'Ej. dos arepas con queso y un café con leche':
+      'E.g. two cheese arepas and a white coffee',
+    'Calcular': 'Work it out',
+    'Hacer foto': 'Take a photo',
+    'Escríbelo o hazle una foto. Saca las calorías y la proteína, y te dice si el cambio se sostiene. La foto no se guarda en ningún sitio: se manda para que la lea y se suelta.':
+      'Write it down or take a photo. It works out the calories and the protein, and tells you whether the swap holds up. The photo is not stored anywhere: it is sent to be read and then released.',
+    'Sin el entrenador con IA configurado tendrás que poner tú los números.':
+      'Without the AI coach set up you will have to put the numbers in yourself.',
+    'Anotar el cambio': 'Log the swap',
+    'Respecto a lo que tocaba': 'Against what was due',
+    'Buen cambio': 'Good swap',
+    'Este no te conviene': 'This one does not suit you',
+    'Pasa, pero justo': 'It passes, but only just',
+    'También puedes alternar con': 'You can also alternate with',
+    'Escribe qué comiste o hazle una foto': 'Write what you ate or take a photo',
+    'Mirándolo…': 'Looking at it…',
+    'No se pudo calcular': 'It could not be worked out',
+    'No he podido leer esa foto': 'I could not read that photo',
+    'Escribe qué comiste': 'Write what you ate',
+    'Faltan las calorías': 'The calories are missing',
+    'Cambio apuntado': 'Swap logged',
+    'Ese apunte ya no está': 'That entry is gone',
+    'A esa hora no tenías nada en el menú':
+      'You had nothing in the meal plan at that time',
+    'No he podido mirarlo': 'I could not look at it',
+    'esa comida': 'that meal',
+    'lo del menú': 'what the plan said',
+    'Eso es tu {comida}': 'That is your {comida}',
+    '¿Esto es tu {comida}?': 'Is this your {comida}?',
+    'A las {hora} tocaba «{plato}» y eso es lo que veo en la foto.':
+      'At {hora} «{plato}» was due, and that is what I see in the photo.',
+    'A las {hora} tocaba «{plato}», y en la foto veo otra cosa.':
+      'At {hora} «{plato}» was due, and in the photo I see something else.',
+    'Frente a las {kcal} kcal y {prot} g que tenía el menú.':
+      'Against the {kcal} kcal and {prot} g the plan had.',
+    'Sí, es esa comida': 'Yes, that is the meal',
+    'Dejarlo': 'Leave it',
+    'Es aparte': 'It is separate',
+    'Los números no cambian: ya están contados en tu día. Lo que se añade es a qué comida del menú corresponde.':
+      'The numbers do not change: they are already counted in your day. What gets added is which meal in the plan it belongs to.',
+    '«Es aparte» lo apunta como un extra del día y deja tu {comida} sin marcar.':
+      '«It is separate» logs it as an extra for the day and leaves your {comida} unticked.',
+    'Cruzado con tu {comida}': 'Matched to your {comida}',
+    'Apuntado en tu {comida}': 'Logged under your {comida}',
+    'Apuntados {n} ml': '{n} ml logged',
+    'Desmarcado': 'Unticked',
+    'Un vaso más: {n} ml': 'One more glass: {n} ml',
+    'Completa tu perfil para calcular el agua':
+      'Fill in your profile so I can work out your water',
+    'Ya los tienes puestos': 'You already have them set',
+    '{n} recordatorio de agua creado': '{n} water reminder created',
+    '{n} recordatorios de agua creados': '{n} water reminders created',
+    'No has elegido ninguna foto.': 'You have not picked a photo.',
+    'Eso no es una imagen.': 'That is not an image.',
+    'No he podido abrir esa foto.': 'I could not open that photo.',
+
+    /* ---------- El menú genérico ---------- */
+    'Reparto de tus {kcal} kcal y {prot} g de proteína entre {comidas} comidas. Los platos los eliges tú: aquí están los números que tiene que cuadrar cada comida y qué debe llevar.':
+      'A split of your {kcal} kcal and {prot} g of protein across {comidas} meals. You pick the dishes: here are the numbers each meal has to add up to and what it should contain.',
+    'Media mañana': 'Mid-morning',
+    'Antes de dormir': 'Before bed',
+    'Proteína (huevos, yogur griego, queso fresco), un hidrato (avena, pan integral) y fruta':
+      'Protein (eggs, Greek yoghurt, fresh cheese), a carb (oats, wholemeal bread) and fruit',
+    'Algo de proteína y fruta o frutos secos': 'Some protein and fruit or nuts',
+    'Una ración de proteína, un hidrato (arroz, pasta, patata, legumbre) y verdura, con aceite de oliva':
+      'A portion of protein, a carb (rice, pasta, potato, pulses) and vegetables, with olive oil',
+    'Proteína (yogur, atún, pavo) con un hidrato ligero':
+      'Protein (yoghurt, tuna, turkey) with a light carb',
+    'Proteína (pescado, huevo, pollo) y verdura, con poco hidrato':
+      'Protein (fish, egg, chicken) and vegetables, with few carbs',
+    'Proteína de digestión lenta: yogur griego o requesón':
+      'Slow-digesting protein: Greek yoghurt or cottage cheese',
+    'A tu elección, cuadrando los números':
+      'Your choice, as long as the numbers add up',
+    'Al levantarte: un vaso grande': 'On waking: a large glass',
+    'A media mañana: un vaso': 'Mid-morning: a glass',
+    'Antes de entrenar: un vaso': 'Before training: a glass',
+    'Al terminar de entrenar: un vaso': 'After training: a glass',
+    'Con la cena: un vaso': 'With dinner: a glass',
+    'El café y las infusiones cuentan para el líquido total, pero no sustituyen al agua.':
+      'Coffee and herbal teas count towards your total fluid, but they do not replace water.',
+    'Cuadra primero la proteína de cada comida; las calorías se ajustan con el hidrato y el aceite.':
+      'Get each meal’s protein right first; the calories are adjusted with the carbs and the oil.',
+    'Si un día te pasas, no compenses saltándote la siguiente comida: vuelve al plan en la siguiente.':
+      'If you overdo it one day, do not make up for it by skipping the next meal: get back on plan at the next one.'
   };
 })(window);

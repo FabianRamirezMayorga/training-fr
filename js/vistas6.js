@@ -22,6 +22,8 @@
 
   /* Rangos que se pueden mirar. dias: cuánto abarca; paso: si se agrupa por día
      o por semana, que 365 puntos diarios no se leen en un móvil. */
+  /* El texto se traduce al pintarlo: esta tabla se arma al cargar el archivo y
+     el idioma se cambia con la app abierta. */
   const RANGOS = [
     { id: 'semana', label: 'Semana', dias: 7, paso: 'dia', frase: 'la última semana' },
     { id: 'mes', label: 'Mes', dias: 30, paso: 'dia', frase: 'el último mes' },
@@ -144,7 +146,7 @@
 
     if (!total) return { total: 0, filas: [] };
     const filas = I18N.GROUPS.map(function (gr) {
-      return { id: gr.id, label: gr.label, series: Math.round((cuenta[gr.id] || 0) * 10) / 10 };
+      return { id: gr.id, label: T(gr.label), series: Math.round((cuenta[gr.id] || 0) * 10) / 10 };
     }).filter(function (f) { return f.series > 0; })
       .sort(function (a, b) { return b.series - a.series; });
 
@@ -261,15 +263,15 @@
     }).sort(function (a, b) { return b.dif - a.dif; });
 
     const cabeza = conPeso.length && conPeso[0].dif > 0
-      ? { rotulo: 'El que más sube',
+      ? { rotulo: T('El que más sube'),
           nombre: (Data.get(conPeso[0].m.exId) || {}).nameEs || conPeso[0].m.name,
           dato: '+' + conPeso[0].dif + '%' }
-      : { rotulo: 'El que más repites',
+      : { rotulo: T('El que más repites'),
           nombre: (Data.get(lista[0].exId) || {}).nameEs || lista[0].name,
-          dato: lista[0].veces + ' veces' };
+          dato: Tp(lista[0].veces, '{n} vez', '{n} veces') };
 
     return html`
-      <div class="list-title">Tus ejercicios</div>
+      <div class="list-title">${T('Tus ejercicios')}</div>
       <div class="card lista-ejs tarjeta-premium">
         <div class="ejs-cab row between">
           <div class="grow" style="min-width:0">
@@ -377,21 +379,22 @@
     const coma = function (n) { return UI.dec(n); };
 
     return html`
-      <div class="list-title">Tu peso</div>
+      <div class="list-title">${T('Tu peso')}</div>
       <div class="card tarjeta-premium">
         <div class="row between" style="align-items:flex-end">
           <div>
-            <div class="pre-encima">Ahora</div>
+            <div class="pre-encima">${T('Ahora')}</div>
             <div class="pre-num">${UI.num(fin)}
               <span class="tiny" style="font-weight:600">${Store.settings().unit || 'kg'}</span></div>
           </div>
           <span class="delta ${tono}">
-            ${dif > 0 ? '+' : ''}${coma(dif)} <span class="tiny">en el periodo</span></span>
+            ${dif > 0 ? '+' : ''}${coma(dif)} <span class="tiny">${T('en el periodo')}</span></span>
         </div>
         ${raw(curvaPeso(lista))}
-        <p class="tiny" style="margin:8px 0 0">${lista.length} pesajes ·
-          ${porSemana > 0 ? '+' : ''}${coma(porSemana)} ${Store.settings().unit || 'kg'}
-          por semana de media</p>
+        <p class="tiny" style="margin:8px 0 0">${Tp(lista.length, '{n} pesaje', '{n} pesajes')} ·
+          ${Tn('{signo}{n} {unidad} por semana de media',
+            { signo: porSemana > 0 ? '+' : '', n: coma(porSemana),
+              unidad: Store.settings().unit || 'kg' })}</p>
       </div>`;
   }
 
@@ -489,23 +492,24 @@
     const olvido = App.abandonados ? App.abandonados() : [];
     if (!olvido.length) return '';
     return html`
-      <div class="list-title">Lo que llevas abandonado</div>
+      <div class="list-title">${T('Lo que llevas abandonado')}</div>
       <div class="card tarjeta-premium">
-        <div class="pre-encima">Sin tocar</div>
+        <div class="pre-encima">${T('Sin tocar')}</div>
         <div class="pre-num" style="margin:1px 0 12px">${olvido.length}
-          <span class="tiny" style="font-weight:600">${raw(olvido.length === 1
-            ? 'zona' : 'zonas')}</span></div>
+          <span class="tiny" style="font-weight:600">${olvido.length === 1
+            ? T('zona') : T('zonas')}</span></div>
         <div class="stack" style="gap:7px">
           ${raw(olvido.map(function (f) {
             return '<div class="row between"><span style="font-size:.9rem">' +
               esc(I18N.muscle(f.m)) + '</span><span class="tiny">' +
-              (f.dias === null ? 'nunca' : 'hace ' + f.dias + ' días') + '</span></div>';
+              esc(f.dias === null ? T('nunca')
+                : Tp(f.dias, 'hace {n} día', 'hace {n} días')) + '</span></div>';
           }).join(''))}
         </div>
-        <p class="tiny" style="margin:11px 0 0">Un músculo que no se toca en más de una
-        semana se estanca. Toca la zona en Ejercicios y te monto la sesión.</p>
+        <p class="tiny" style="margin:11px 0 0">${T('Un músculo que no se toca en más ' +
+        'de una semana se estanca. Toca la zona en Ejercicios y te monto la sesión.')}</p>
         <button class="btn sm block" data-a="programa" style="margin-top:9px">
-          Rehacer mi programa con esto en cuenta</button>
+          ${T('Rehacer mi programa con esto en cuenta')}</button>
       </div>`;
   }
 
@@ -659,13 +663,13 @@
       ${raw(prs.length ? html`
         <div class="list-title">${T('Récords personales')}${raw((function () {
           const nuevos = prs.filter(function (x) { return x.pr.date >= desdeT; }).length;
-          return nuevos ? ' <span class="chip solid tiny-chip">' + nuevos +
-            (nuevos === 1 ? ' nuevo' : ' nuevos') + '</span>' : '';
+          return nuevos ? ' <span class="chip solid tiny-chip">' +
+            esc(Tp(nuevos, '{n} nuevo', '{n} nuevos')) + '</span>' : '';
         })())}</div>
         <div class="card lista-prs tarjeta-premium">
           <div class="ejs-cab row between">
             <div class="grow" style="min-width:0">
-              <div class="pre-encima">Tu marca más alta</div>
+              <div class="pre-encima">${T('Tu marca más alta')}</div>
               <div class="pre-num">${UI.kg(prs[0].pr.weight)}</div>
             </div>
             <span class="chip nowrap">${prs[0].name}</span>
@@ -676,7 +680,7 @@
                 <span class="pr-ico">${raw(icon('trofeo'))}</span>
                 <span class="grow">
                   <span class="pr-tit">${p.name}${raw(p.pr.date >= desdeT
-                    ? ' <span class="pr-nuevo">nuevo</span>' : '')}</span>
+                    ? ' <span class="pr-nuevo">' + esc(T('nuevo')) + '</span>' : '')}</span>
                   <span class="pr-sub">${UI.fecha(p.pr.date)}</span>
                 </span>
                 <span class="pr-marca">${UI.kg(p.pr.weight)} × ${p.pr.reps}</span>
@@ -684,7 +688,7 @@
           }).join(''))}
         </div>` : '')}
 
-      <div class="list-title">Historial</div>
+      <div class="list-title">${T('Historial')}</div>
       ${raw(historialHTML(sesiones))}`;
   };
 
@@ -696,7 +700,7 @@
     const metas = Objetivos.lista();
     if (!metas.length) {
       return html`
-        <div class="list-title">Tus metas</div>
+        <div class="list-title">${T('Tus metas')}</div>
         <div class="card center tarjeta-premium">
           <p class="muted" style="margin-bottom:12px">Ponte una meta y la verás avanzar
           aquí sola: llegar a un peso, entrenar x veces por semana, una racha o un récord
@@ -709,7 +713,7 @@
 
     return html`
       <div class="list-head">
-        <span class="list-title">Tus metas${raw(hechas
+        <span class="list-title">${T('Tus metas')}${raw(hechas
           ? ' <span class="chip solid tiny-chip">' + hechas + ' cumplida' +
             (hechas === 1 ? '' : 's') + '</span>' : '')}</span>
         <button class="btn sm ghost" data-a="metas">Gestionar</button>
@@ -726,11 +730,11 @@
               ${raw(anillo(pct, p.cumplido))}
               <div class="grow" style="min-width:0">
                 <div class="meta-t">${Objetivos.etiqueta(m)}</div>
-                <div class="tiny">${Objetivos.formato(m, p.actual)} de
-                  ${Objetivos.formato(m, m.meta)}</div>
+                <div class="tiny">${Objetivos.formato(m, p.actual)}
+                  ${Tn('de {meta}', { meta: Objetivos.formato(m, m.meta) })}</div>
                 <div class="tiny" style="margin-top:3px;color:${raw(p.cumplido
                   ? 'var(--acc)' : 'var(--dim2)')}">${raw(p.cumplido
-                  ? 'Cumplida el ' + esc(UI.fechaCorta(m.logrado))
+                  ? esc(Tn('Cumplida el {fecha}', { fecha: UI.fechaCorta(m.logrado) }))
                   : esc(loQueFalta(m, falta)))}</div>
               </div>
             </div>`;
@@ -740,10 +744,10 @@
 
   /* "Te falta 1 sesión", no "Te faltan 1 sesiones" */
   function loQueFalta(m, falta) {
+    /* El plural ya lo resuelve el propio formato de la meta, que sabe si son
+       sesiones o días; aquí solo hay que concordar el verbo. */
     const txt = Objetivos.formato(m, falta);
-    const uno = Math.round(falta) === 1;
-    if (!uno) return 'Te faltan ' + txt;
-    return 'Te falta ' + txt.replace(/sesiones$/, 'sesión').replace(/días$/, 'día');
+    return Tp(Math.round(falta), 'Te falta {que}', 'Te faltan {que}').replace('{que}', txt);
   }
 
   /* Anillo de progreso: un círculo con el trazo recortado al porcentaje */
@@ -818,25 +822,27 @@
       const uno = atascadas[0];
       return '<div class="aviso-exceso">' +
         '<span class="ae-ico">' + icon('aviso') + '</span>' +
-        '<span class="grow"><b>' + Math.round(uno.series) + ' series de ' +
-        esc(etiqueta(uno.id).toLowerCase()) + ' a la semana, y sin subir</b>' +
-        '<span class="tiny">Por encima de veinte series lo que se añade es fatiga, no ' +
-        'músculo, y en ' + (dias === 35 ? 'las últimas cinco semanas' : 'este periodo') +
-        ' ninguno de los ' + uno.av.ejercicios + ' ejercicios de esa zona ha subido de ' +
-        'peso. Baja el volumen una semana y vuelve: es cuando se crece.' +
-        (atascadas.length > 1 ? ' Lo mismo con ' +
-          esc(nombres(atascadas.slice(1))) + '.' : '') +
+        '<span class="grow"><b>' + esc(Tn('{n} series de {zona} a la semana, y sin subir',
+          { n: Math.round(uno.series), zona: etiqueta(uno.id).toLowerCase() })) + '</b>' +
+        '<span class="tiny">' + esc(Tn('Por encima de veinte series lo que se añade es ' +
+          'fatiga, no músculo, y en {cuando} ninguno de los {cuantos} ejercicios de esa ' +
+          'zona ha subido de peso. Baja el volumen una semana y vuelve: es cuando se crece.',
+          { cuando: dias === 35 ? T('las últimas cinco semanas') : T('este periodo'),
+            cuantos: uno.av.ejercicios })) +
+        (atascadas.length > 1
+          ? ' ' + esc(Tn('Lo mismo con {lista}.', { lista: nombres(atascadas.slice(1)) }))
+          : '') +
         '</span></span></div>';
     }
 
     const uno = duras[0];
     return '<div class="aviso-exceso ok">' +
       '<span class="ae-ico">' + icon('up') + '</span>' +
-      '<span class="grow"><b>' + Math.round(uno.series) + ' series de ' +
-      esc(etiqueta(uno.id).toLowerCase()) + ' a la semana</b>' +
-      '<span class="tiny">Es mucho —de diez a veinte es lo que suele hacer falta—, pero ' +
-      'estás subiendo peso, así que te lo estás recuperando. Si un día se para el ' +
-      'progreso, ahí es donde hay que recortar.</span></span></div>';
+      '<span class="grow"><b>' + esc(Tn('{n} series de {zona} a la semana',
+        { n: Math.round(uno.series), zona: etiqueta(uno.id).toLowerCase() })) + '</b>' +
+      '<span class="tiny">' + esc(T('Es mucho —de diez a veinte es lo que suele hacer ' +
+      'falta—, pero estás subiendo peso, así que te lo estás recuperando. Si un día se ' +
+      'para el progreso, ahí es donde hay que recortar.')) + '</span></span></div>';
   }
 
   function zonasHTML(reparto, rango) {
@@ -850,7 +856,7 @@
 
     const etiqueta = function (id) {
       const r2 = I18N.REGIONES.find(function (x) { return x.id === id; });
-      return r2 ? r2.label : id;
+      return r2 ? T(r2.label) : id;
     };
     /* Aqui se escribe en espanol: 2,2 y no 2.2 */
     const coma = function (n2) { return UI.dec(n2); };
@@ -898,36 +904,39 @@
       </div>
 
       <div class="zona-leyenda tiny">
-        <span><i class="zl-hago"></i> series por semana que haces</span>
-        ${raw(plan.total ? '<span><i class="zl-pide"></i> lo que pide tu plan</span>' : '')}
+        <span><i class="zl-hago"></i> ${T('series por semana que haces')}</span>
+        ${raw(plan.total ? '<span><i class="zl-pide"></i> ' +
+          esc(T('lo que pide tu plan')) + '</span>' : '')}
       </div>
 
       ${raw(excesoHTML(ids, hecho, plan, etiqueta, rango))}
 
       ${raw(peor && peor.falta > 0.5
-        ? '<p class="tiny" style="margin:9px 0 0">Donde más te separas es <b>' +
-          esc(etiqueta(peor.id)) + '</b>: tu plan pide ' +
-          coma(Math.round((plan.zonas[peor.id] || 0) * 10) / 10) + ' series por semana y ' +
-          'estás haciendo ' + coma(hecho[peor.id] || 0) + '.</p>'
+        ? '<p class="tiny" style="margin:9px 0 0">' + Tn('Donde más te separas es ' +
+          '{zona}: tu plan pide {pide} series por semana y estás haciendo {haces}.',
+          { zona: '<b>' + esc(etiqueta(peor.id)) + '</b>',
+            pide: coma(Math.round((plan.zonas[peor.id] || 0) * 10) / 10),
+            haces: coma(hecho[peor.id] || 0) }) + '</p>'
         : reparto.total
         ? '<p class="tiny" style="margin:9px 0 0">' + pistaReparto(reparto) + '</p>'
-        : '<p class="tiny" style="margin:9px 0 0">Todavía no has completado series en ' +
-          'este periodo.</p>')}`;
+        : '<p class="tiny" style="margin:9px 0 0">' +
+          esc(T('Todavía no has completado series en este periodo.')) + '</p>')}`;
   }
 
   function pistaReparto(r) {
     const nombres = r.filas.map(function (f) { return f.id; });
     const falta = I18N.GROUPS.filter(function (gr) { return nombres.indexOf(gr.id) === -1; });
     if (falta.length) {
-      return 'En este periodo no has entrenado ' +
-        esc(falta.map(function (f) { return f.label.toLowerCase(); }).join(', ')) + '.';
+      return esc(Tn('En este periodo no has entrenado {lista}.',
+        { lista: falta.map(function (f) { return T(f.label).toLowerCase(); }).join(', ') }));
     }
     const arriba = r.filas[0], abajo = r.filas[r.filas.length - 1];
     if (arriba.series > abajo.series * 3) {
-      return esc(arriba.label) + ' se lleva el triple que ' + esc(abajo.label.toLowerCase()) +
-        '. Si no es a propósito, conviene equilibrarlo.';
+      return esc(Tn('{mas} se lleva el triple que {menos}. Si no es a propósito, ' +
+        'conviene equilibrarlo.',
+        { mas: arriba.label, menos: String(abajo.label).toLowerCase() }));
     }
-    return 'Reparto equilibrado entre las zonas que entrenas.';
+    return esc(T('Reparto equilibrado entre las zonas que entrenas.'));
   }
 
   /* ---------- el historial, por semanas ----------
@@ -951,15 +960,14 @@
 
   function tituloSemana(lunes) {
     const hoyLunes = lunesDe(Date.now());
-    if (lunes === hoyLunes) return 'Esta semana';
-    if (lunes === hoyLunes - 7 * 86400000) return 'La semana pasada';
+    if (lunes === hoyLunes) return T('Esta semana');
+    if (lunes === hoyLunes - 7 * 86400000) return T('La semana pasada');
 
+    /* Con UI.fechaCorta, que ya pone el día y el mes en el orden del idioma. */
     const a = new Date(lunes);
     const b = new Date(lunes + 6 * 86400000);
-    return a.getMonth() === b.getMonth()
-      ? 'Del ' + a.getDate() + ' al ' + b.getDate() + ' de ' + MESES[b.getMonth()]
-      : 'Del ' + a.getDate() + ' de ' + MESES[a.getMonth()] + ' al ' +
-        b.getDate() + ' de ' + MESES[b.getMonth()];
+    return Tn('Del {a} al {b}',
+      { a: UI.fechaCorta(a.getTime()), b: UI.fechaCorta(b.getTime()) });
   }
 
   /* Qué se trabajó en una sesión. De los ejercicios si los hubo, y de lo que
@@ -996,12 +1004,12 @@
             <div class="tiny">${UI.fecha(s.start)} · ${lineaSesion(s)}</div>
             ${raw(musculos.length
               ? '<div class="ses-musculos">' + musculos.map(function (m) {
-                  return '<span class="chip tiny-chip">' + esc(m) + '</span>';
+                  return '<span class="chip tiny-chip">' + esc(T(m)) + '</span>';
                 }).join('') + '</div>'
               : '')}
           </div>
           <button class="btn icon sm danger" data-delses="${s.id}"
-                  aria-label="Borrar">${raw(icon('trash'))}</button>
+                  aria-label="${T('Borrar')}">${raw(icon('trash'))}</button>
         </div>
         <div class="stack" data-detail="${s.id}" hidden style="margin-top:9px">
           ${raw((s.entries || []).map(function (e) {
@@ -1105,7 +1113,7 @@
       if (d) d.hidden = !d.hidden;
     });
     bindAll(root, '[data-delses]', function (el) {
-      UI.confirm('Borrar entrenamiento', 'Se eliminará de tu historial y de las estadísticas.',
+      UI.confirm(T('Borrar entrenamiento'), T('Se eliminará de tu historial y de las estadísticas.'),
         'Borrar', true).then(function (ok) {
         if (ok) { Store.deleteSession(el.dataset.delses); render(); }
       });

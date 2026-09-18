@@ -192,9 +192,9 @@
   function prepararFoto(file, ladoMax) {
     const lado = ladoMax || 900;
     return new Promise(function (ok, mal) {
-      if (!file) { mal(new Error('No has elegido ninguna foto.')); return; }
+      if (!file) { mal(new Error(T('No has elegido ninguna foto.'))); return; }
       if (!/^image\//.test(file.type || '')) {
-        mal(new Error('Eso no es una imagen.')); return;
+        mal(new Error(T('Eso no es una imagen.'))); return;
       }
 
       const url = URL.createObjectURL(file);
@@ -221,13 +221,13 @@
           });
         } catch (e) {
           URL.revokeObjectURL(url);
-          mal(new Error('No he podido leer esa foto.'));
+          mal(new Error(T('No he podido leer esa foto.')));
         }
       };
 
       img.onerror = function () {
         URL.revokeObjectURL(url);
-        mal(new Error('No he podido abrir esa foto.'));
+        mal(new Error(T('No he podido abrir esa foto.')));
       };
       img.src = url;
     });
