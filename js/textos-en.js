@@ -2883,6 +2883,319 @@
     'Cuadra primero la proteína de cada comida; las calorías se ajustan con el hidrato y el aceite.':
       'Get each meal’s protein right first; the calories are adjusted with the carbs and the oil.',
     'Si un día te pasas, no compenses saltándote la siguiente comida: vuelve al plan en la siguiente.':
-      'If you overdo it one day, do not make up for it by skipping the next meal: get back on plan at the next one.'
+      'If you overdo it one day, do not make up for it by skipping the next meal: get back on plan at the next one.',
+
+    /* ---------- Zonas y el catálogo ---------- */
+    'Ver {n} más': 'Show {n} more',
+    'Nada por aquí con tu material': 'Nothing here with your equipment',
+    'Cambia dónde entrenas y vuelve a mirar: el catálogo entero tiene bastante más.':
+      'Change where you train and look again: the full catalogue has plenty more.',
+
+    /* ---------- El perfil, en texto ---------- */
+    'el sexo biológico': 'your biological sex',
+    'la edad': 'your age',
+    'la altura': 'your height',
+    'el peso': 'your weight',
+    'el país': 'your country',
+    '{n}% de grasa corporal': '{n}% body fat',
+    'actividad {que}': '{que} activity',
+    'objetivo: {que}': 'goal: {que}',
+    ' (con sus palabras: "{texto}")': ' (in their words: "{texto}")',
+    'ritmo {que}': '{que} pace',
+    'gasto estimado {n} kcal': 'estimated expenditure {n} kcal',
+    'objetivo diario {kcal} kcal ({prot} g proteína, {carbo} g hidratos, {grasa} g grasa)':
+      'daily target {kcal} kcal ({prot} g protein, {carbo} g carbs, {grasa} g fat)',
+    'duerme {n} h': 'sleeps {n} h',
+    'se levanta a las {a} y se acuesta a las {b}':
+      'gets up at {a} and goes to bed at {b}',
+    '{n} comidas al día': '{n} meals a day',
+    'dieta: {que}': 'diet: {que}',
+    'vive en {pais}': 'lives in {pais}',
+    'alergias o intolerancias: {texto}': 'allergies or intolerances: {texto}',
+    'lesiones o limitaciones: {texto}': 'injuries or limitations: {texto}',
+    'condiciones de salud: {texto}': 'health conditions: {texto}',
+    'notas: {texto}': 'notes: {texto}',
+
+    /* ---------- El saludo de la portada ---------- */
+    'Buenas noches': 'Good evening',
+    'Buenos días': 'Good morning',
+    'Buenas tardes': 'Good afternoon',
+    '{saludo}, {nombre}': '{saludo}, {nombre}',
+    'Bienvenido': 'Welcome',
+    'Todo esto empieza con una serie. Elige una rutina y hazla: lo demás ya se va colocando solo.':
+      'All of this starts with one set. Pick a routine and do it: the rest falls into place on its own.',
+    'Cuánto tiempo': 'Long time no see',
+    'Volver es la parte difícil y ya la has hecho. Hoy no busques tu mejor día: busca el primero.':
+      'Coming back is the hard part and you have already done it. Do not look for your best day today: look for the first one.',
+    'Otra vez por aquí': 'Back again',
+    'Una semana parada no borra {n} entrenamientos. Baja algo el peso hoy y en dos sesiones estás donde estabas.':
+      'A week off does not erase {n} workouts. Drop the weight a bit today and in two sessions you are back where you were.',
+    '{n} días seguidos. Lo raro ya no es entrenar hoy: sería no hacerlo.':
+      '{n} days in a row. Training today is no longer the odd thing: not doing it would be.',
+    'Llevas {n} días seguidos. Hoy es el que convierte la casualidad en costumbre.':
+      'You are on {n} days in a row. Today is the one that turns a fluke into a habit.',
+    '{n} entrenamientos esta semana. A este ritmo el descanso también entrena: si hoy toca parar, para.':
+      '{n} workouts this week. At this rate rest is training too: if today is a stop day, stop.',
+    'Llevas {n} entrenamiento esta semana. Uno más y la semana ya cuenta.':
+      'You are on {n} workout this week. One more and the week counts.',
+    'Llevas {n} entrenamientos esta semana. Uno más y la semana ya cuenta.':
+      'You are on {n} workouts this week. One more and the week counts.',
+    'Semana nueva y el cuerpo descansado. Es el mejor día para el ejercicio que peor se te da.':
+      'New week and a rested body. It is the best day for the exercise you are worst at.',
+    'Van {n} días desde la última. Con media hora hoy la semana cambia de signo.':
+      'It has been {n} days since the last one. Half an hour today turns the week around.',
+    'Generado para {min} min · {objetivo} · {donde}. Ajusta lo que quieras.':
+      'Generated for {min} min · {objetivo} · {donde}. Adjust whatever you like.',
+    'Cuerpo completo': 'Full body',
+    'Torso': 'Upper body',
+    'Pierna y core': 'Legs and core',
+    'Pecho y tríceps': 'Chest and triceps',
+    'Espalda y bíceps': 'Back and biceps',
+    'Hombro y core': 'Shoulders and core',
+    'Hombro y trapecio': 'Shoulders and traps',
+    'Glúteo y core': 'Glutes and core',
+    'Empuje pesado': 'Heavy push',
+    'Tracción pesada': 'Heavy pull',
+    'Pierna pesada': 'Heavy legs',
+    'Empuje volumen': 'Push volume',
+    'Tracción volumen': 'Pull volume',
+    'Definir y resistencia': 'Cutting and endurance',
+
+    /* ---------- Compartir un plan ---------- */
+    'Se crea un enlace que lleva el entrenamiento dentro. Quien lo abra lo ve, pero no puede tocarlo ni apuntar nada: no es su plan, es una copia de lectura.':
+      'A link is created with the training inside it. Whoever opens it can see it, but cannot change it or log anything: it is not their plan, it is a read-only copy.',
+    'QUÉ VIAJA EN EL ENLACE': 'WHAT TRAVELS IN THE LINK',
+    'Los {n} ejercicios con sus series, repeticiones y descansos. Nada más: ni tus entrenamientos, ni tus pesos, ni tu comida, ni tu perfil.':
+      'The {n} exercises with their sets, reps and rests. Nothing else: not your workouts, not your weights, not your food, not your profile.',
+    'Decir que es mío': 'Say it is mine',
+    'Incluir mis notas': 'Include my notes',
+    'Tienes {n} nota escrita en estos ejercicios. Va fuera salvo que lo marques, por si hay algo tuyo dentro.':
+      'You have {n} note written on these exercises. It stays out unless you tick this, in case there is something personal in it.',
+    'Tienes {n} notas escritas en estos ejercicios. Van fuera salvo que lo marques, por si hay algo tuyo dentro.':
+      'You have {n} notes written on these exercises. They stay out unless you tick this, in case there is something personal in them.',
+    '{aviso} quien tenga el enlace lo verá siempre, no se puede retirar. Y es una foto de hoy: si mañana cambias el plan, el enlace sigue enseñando lo de ahora.':
+      '{aviso} whoever has the link will always see it, it cannot be withdrawn. And it is a snapshot of today: if you change the plan tomorrow, the link still shows what it is now.',
+    'Antes de mandarlo:': 'Before you send it:',
+    'TU ENLACE': 'YOUR LINK',
+    'Crear el enlace': 'Create the link',
+    'Rehacer el enlace': 'Redo the link',
+    'Mira este plan': 'Take a look at this plan',
+    'No se ha podido crear el enlace': 'The link could not be created',
+    'Enlace copiado': 'Link copied',
+    'Esa rutina no tiene ejercicios': 'That routine has no exercises',
+    'Compartir rutina': 'Share routine',
+    'Ese plan no tiene nada que compartir': 'That plan has nothing to share',
+    'Compartir «{que}»': 'Share «{que}»',
+    'Este enlace no se puede leer': 'This link cannot be read',
+    'O se ha cortado al copiarlo, o se hizo con una versión de la app muy distinta a esta. Pide que te lo manden otra vez.':
+      'Either it got cut off when copied, or it was made with a very different version of the app. Ask for it to be sent again.',
+    'Ir a mi app': 'Go to my app',
+    'Plan compartido': 'Shared plan',
+    'Te lo ha pasado {quien}.': '{quien} sent it to you.',
+    'Son {sesiones} y {ejercicios}.': 'It is {sesiones} and {ejercicios}.',
+    'Esto es solo para verlo': 'This is just to look at',
+    'No está en tu cuenta, así que no hay nada que editar ni que apuntar aquí. Si te gusta, quédatelo abajo y pasa a ser tuyo: a partir de ahí lo cambias como quieras.':
+      'It is not in your account, so there is nothing to edit or log here. If you like it, keep it below and it becomes yours: from then on you change it however you like.',
+    'Falta {n} ejercicio': '{n} exercise is missing',
+    'Faltan {n} ejercicios': '{n} exercises are missing',
+    'No están en el catálogo de esta app. El resto se ve entero.':
+      'They are not in this app’s catalogue. The rest is all there.',
+    'Series por músculo a la semana': 'Sets per muscle per week',
+    'El plan': 'The plan',
+    'Sesión {n}': 'Session {n}',
+    'Guardarlo como mío': 'Save it as mine',
+    'Se crea {n} rutina en tus rutinas. A partir de ahí es tuya: la editas, le pones los días y la entrenas.':
+      '{n} routine is created in your routines. From then on it is yours: you edit it, set its days and train it.',
+    'Se crean {n} rutinas en tus rutinas. A partir de ahí son tuyas: las editas, les pones los días y las entrenas.':
+      '{n} routines are created in your routines. From then on they are yours: you edit them, set their days and train them.',
+    'CÓMO LO LLAMO': 'WHAT I CALL IT',
+    'Cada rutina se queda con el día que tenía en el plan original, porque ninguno de esos días lo tienes ocupado.':
+      'Each routine keeps the day it had in the original plan, because none of those days are taken.',
+    'De las {total}, {libres} se quedan con su día original; el resto entra sin día para no pisar lo que ya entrenas. Se los pones tú cuando decidas qué dejas.':
+      'Of the {total}, {libres} keep their original day; the rest come in without a day so they do not clash with what you already train. You set those once you decide what stays.',
+    'Entran sin día asignado: esos días ya los tienes ocupados y dos rutinas el mismo día se pisan. Ábrelas y colócalas cuando decidas.':
+      'They come in with no day assigned: those days are already taken and two routines on the same day clash. Open them and place them when you decide.',
+    '{n} rutina guardada': '{n} routine saved',
+    '{n} rutinas guardadas': '{n} routines saved',
+
+    /* ---------- Traer una rutina de una foto ---------- */
+    'No he podido leer ese archivo.': 'I could not read that file.',
+    'No has elegido ningún archivo.': 'You have not picked a file.',
+    'Ese archivo pesa demasiado. Prueba con una foto o con un PDF de menos de 8 MB.':
+      'That file is too big. Try a photo or a PDF under 8 MB.',
+    'Tiene que ser una foto o un PDF.': 'It has to be a photo or a PDF.',
+    'Elige antes una foto o un PDF.': 'Pick a photo or a PDF first.',
+    'No he podido leerla.': 'I could not read it.',
+    '{que} (no está en el catálogo)': '{que} (not in the catalogue)',
+    'Mi rutina': 'My routine',
+    'Traer una rutina que ya tienes': 'Bring in a routine you already have',
+    'Una foto de la hoja del gimnasio, de tu libreta o el PDF que te hayan dado. La leo, te enseño lo que he entendido y tú decides si se crea.':
+      'A photo of the sheet from the gym, of your notebook, or the PDF you were given. I read it, show you what I understood and you decide whether it gets created.',
+    'Elegir foto o PDF': 'Pick a photo or PDF',
+    '¿ALGO QUE DEBA SABER?': 'ANYTHING I SHOULD KNOW?',
+    'Ej. es la rutina de mi entrenador, respétala tal cual; la columna de la derecha son los kilos, no las repeticiones':
+      'E.g. this is my trainer’s routine, keep it exactly; the right-hand column is kilos, not reps',
+    'El archivo no se guarda en ningún sitio: se lee, se manda para que lo interpreten y se suelta. Lo único que queda es la rutina si decides crearla.':
+      'The file is not stored anywhere: it is read, sent to be interpreted and released. All that is left is the routine, if you decide to create it.',
+    'Leyendo lo que pone…': 'Reading what it says…',
+    'No he podido leerla': 'I could not read it',
+    'No he encontrado ninguna rutina ahí': 'I did not find any routine in there',
+    'Prueba con una foto más nítida, o recorta solo la tabla de ejercicios.':
+      'Try a sharper photo, or crop to just the exercise table.',
+    'Esto es lo que he entendido': 'This is what I understood',
+    'Míralo antes de crearla: lo que sale de una foto conviene revisarlo. Luego se edita como cualquier otra rutina.':
+      'Look it over before creating it: what comes out of a photo is worth checking. After that you edit it like any other routine.',
+    'en el papel: {que}': 'on the sheet: {que}',
+    'Esto no lo tengo claro': 'I am not sure about this',
+    '¿CORRIJO ALGO ANTES DE CREARLA?': 'ANYTHING TO FIX BEFORE I CREATE IT?',
+    'Ej. el segundo día son 4 series, no 3; el último ejercicio es en polea':
+      'E.g. the second day is 4 sets, not 3; the last exercise is on the cable',
+    'Volver a leerla con esto en cuenta': 'Read it again with this in mind',
+    'Crear esta rutina': 'Create this routine',
+    'Se guarda en tus rutinas y desde ahí puedes editarla, ponerle los días y pedirle al entrenador que la analice.':
+      'It is saved in your routines, and from there you can edit it, set its days and ask the coach to analyse it.',
+    'Todos los ejercicios de esta rutina piden':
+      'Every exercise in this routine asks for',
+    '{ajenos} de los {total} ejercicios piden':
+      '{ajenos} of the {total} exercises ask for',
+    'Pide más material del que tienes marcado':
+      'It asks for more equipment than you have set',
+    '{cuantos} material que «{donde}» no contempla. La he copiado tal cual, que para eso la traes, pero si vas a entrenarla cambia dónde entrenas o no te va a cuadrar.':
+      '{cuantos} equipment that «{donde}» does not cover. I copied it as it is, which is why you brought it, but if you are going to train it, change where you train or it will not add up.',
+    'Cambiar dónde entreno': 'Change where I train',
+    'Necesita el entrenador con IA para leer la hoja':
+      'It needs the AI coach to read the sheet',
+    'Escribe qué hay que corregir': 'Write what needs fixing',
+    'Crear la rutina': 'Create the routine',
+    'Se crea {n} rutina en tus rutinas. A partir de ahí es tuya y la editas como cualquier otra.':
+      '{n} routine is created in your routines. From then on it is yours and you edit it like any other.',
+    'Se crean {n} rutinas en tus rutinas. A partir de ahí son tuyas y las editas como cualquier otra.':
+      '{n} routines are created in your routines. From then on they are yours and you edit them like any other.',
+    'Los días que traía el papel se respetan si los tienes libres; si no, entra sin día y se lo pones tú.':
+      'The days on the sheet are kept if you have them free; if not, it comes in without a day and you set it yourself.',
+
+    /* ---------- Cuentas ---------- */
+    'Entra en tu cuenta para administrar.': 'Sign in to your account to administer.',
+    'La función «admin» no está desplegada en tu proyecto de Supabase.':
+      'The «admin» function is not deployed in your Supabase project.',
+    'No se pudo preguntar al servidor.': 'The server could not be asked.',
+    'Esta pantalla es para quien administra el proyecto. Tu cuenta no lo es.':
+      'This screen is for whoever administers the project. Your account is not one.',
+    'Mientras no conteste, la entrada de Cuentas no aparece en Perfil. No es que hayas dejado de administrar.':
+      'While it does not answer, the Accounts entry does not show under Profile. It is not that you stopped being an administrator.',
+    'Las personas que pueden entrar en tu proyecto. Cada una ve solo sus datos y tú no ves los suyos: eso lo garantiza la base de datos, no esta pantalla.':
+      'The people who can sign in to your project. Each one sees only their own data and you do not see theirs: the database guarantees that, not this screen.',
+    'Pidiendo la lista…': 'Asking for the list…',
+    'No he podido leer las cuentas': 'I could not read the accounts',
+    'Solo estás tú': 'It is just you',
+    'Todavía no hay ninguna cuenta aparte de la tuya. Crea una con «Nueva» y dale el correo y la contraseña a quien la vaya a usar.':
+      'There are no accounts besides yours yet. Create one with «New» and give the email and password to whoever will use it.',
+    '(sin correo)': '(no email)',
+    'tu cuenta': 'your account',
+    'Gestionar {correo}': 'Manage {correo}',
+    'Puede entrar': 'Can sign in',
+    'Desactivada': 'Deactivated',
+    'entró {cuando}': 'signed in {cuando}',
+    'no ha entrado nunca': 'has never signed in',
+    'Alta {fecha}': 'Joined {fecha}',
+    'TÚ': 'YOU',
+    'cuenta': 'account',
+    'cuentas': 'accounts',
+    'puede entrar': 'can sign in',
+    'pueden entrar': 'can sign in',
+    'desactivada': 'deactivated',
+    'desactivadas': 'deactivated',
+    'Cuenta nueva': 'New account',
+    'Se crea con el correo y la contraseña que le pongas, y ya puede entrar. Dile que la cambie cuando entre.':
+      'It is created with the email and password you set, and it can sign in right away. Tell them to change it once they are in.',
+    'Correo': 'Email',
+    'Contraseña para empezar': 'Starter password',
+    'Inventar una': 'Make one up',
+    'Ocho caracteres o más': 'Eight characters or more',
+    'Se la tienes que dar tú por donde quieras: la app no manda correos. Y no la escribas en un sitio donde quede guardada.':
+      'You have to pass it on however you like: the app sends no emails. And do not write it anywhere it gets stored.',
+    'Escribe el correo': 'Write the email',
+    'La contraseña necesita 8 caracteres o más':
+      'The password needs 8 characters or more',
+    'Creando…': 'Creating…',
+    'Cuenta creada para {correo}': 'Account created for {correo}',
+    'Esa cuenta ya no está': 'That account is gone',
+    'Cuenta': 'Account',
+    'Puede entrar con normalidad': 'Can sign in normally',
+    'Desactivada: no puede entrar, pero sus datos siguen ahí':
+      'Deactivated: cannot sign in, but their data is still there',
+    'Alta': 'Joined',
+    'Última entrada': 'Last sign-in',
+    'Desactivar la cuenta': 'Deactivate the account',
+    'Volver a activarla': 'Activate it again',
+    'Deja de poder entrar. Sus datos se quedan donde están y vuelve todo al activarla.':
+      'They can no longer sign in. Their data stays where it is and it all comes back when you activate it.',
+    'Podrá entrar otra vez con su correo y su contraseña de siempre.':
+      'They will be able to sign in again with their usual email and password.',
+    'Borrar la cuenta y sus datos': 'Delete the account and its data',
+    'No se puede deshacer: se va la cuenta y con ella todo lo que tenga guardado.':
+      'It cannot be undone: the account goes and everything stored with it goes too.',
+    'Un momento…': 'One moment…',
+    'Cuenta desactivada': 'Account deactivated',
+    'Cuenta activada': 'Account activated',
+    'Borrar {que}': 'Delete {que}',
+    'esta cuenta': 'this account',
+    'Se va la cuenta y todo lo que tenga guardado: sus rutinas, sus entrenamientos y su historial. No hay vuelta atrás.':
+      'The account goes and everything stored with it: their routines, their workouts and their history. There is no going back.',
+    'Cuenta borrada': 'Account deleted',
+
+    /* ---------- Las rutinas de arranque ---------- */
+    'Full Body 3 días': 'Full Body 3 days',
+    'Fuerza general': 'General strength',
+    'Tres sesiones por semana en días alternos (lunes, miércoles, viernes). La mejor opción para empezar: cada músculo se trabaja tres veces por semana.':
+      'Three sessions a week on alternate days (Monday, Wednesday, Friday). The best way to start: every muscle is worked three times a week.',
+    'Push (empuje)': 'Push',
+    'Hipertrofia': 'Hypertrophy',
+    'Día de empuje del clásico Push / Pull / Legs: pecho, hombro y tríceps.':
+      'The push day of the classic Push / Pull / Legs: chest, shoulders and triceps.',
+    'Pull (tracción)': 'Pull',
+    'Día de tracción: espalda y bíceps.': 'Pull day: back and biceps.',
+    'Legs (pierna)': 'Legs',
+    'Día de pierna completo: cuádriceps, isquios, glúteo y gemelo.':
+      'A full leg day: quads, hamstrings, glutes and calves.',
+    'Fuerza e hipertrofia': 'Strength and hypertrophy',
+    'Mitad superior del clásico Torso / Pierna, dos veces por semana.':
+      'The upper half of the classic Upper / Lower, twice a week.',
+    'Mitad inferior del clásico Torso / Pierna, dos veces por semana.':
+      'The lower half of the classic Upper / Lower, twice a week.',
+    'En casa sin material': 'At home with no equipment',
+    'Mantenimiento': 'Maintenance',
+    'Solo peso corporal. Ideal para viajes o días sin gimnasio. Las repeticiones de plancha son segundos.':
+      'Bodyweight only. Ideal for travelling or days without a gym. The plank reps are seconds.',
+    'Fuerza 5x5': 'Strength 5x5',
+    'Fuerza máxima': 'Maximal strength',
+    'Los tres grandes básicos con series pesadas de 5. Sube 2,5 kg cada vez que completes todas las series.':
+      'The three big lifts with heavy sets of 5. Add 2.5 kg every time you complete all the sets.',
+    'Estiramiento completo': 'Full stretch',
+    'Flexibilidad': 'Flexibility',
+    'Para después de entrenar, con el músculo caliente. Las repeticiones son segundos y las dos series son un lado cada una. Sin rebotes: se entra hasta notar tensión, no dolor, y se respira.':
+      'For after training, with the muscle warm. The reps are seconds and the two sets are one side each. No bouncing: go in until you feel tension, not pain, and keep breathing.',
+    'Movilidad para calentar': 'Mobility to warm up',
+    'Calentamiento': 'Warm-up',
+    'Diez minutos antes de tocar una barra. Movimiento suave y de recorrido creciente, sin quedarse quieto en ninguna posición: esto es para despertar la articulación, no para ganar flexibilidad.':
+      'Ten minutes before you touch a bar. Gentle movement through a growing range, never holding a position: this is to wake the joint up, not to gain flexibility.',
+    'Cuello y espalda de oficina': 'Office neck and back',
+    'Terapia': 'Therapy',
+    'Para la espalda cargada de estar sentado. Se puede hacer a media tarde y sin cambiarse de ropa. Si algo da un dolor agudo o baja por el brazo o la pierna, se para: eso lo mira un fisioterapeuta, no una app.':
+      'For a back stiff from sitting. You can do it mid-afternoon without changing clothes. If anything gives sharp pain or runs down your arm or leg, stop: that is for a physio to look at, not an app.',
+    'Rodillo miofascial': 'Foam rolling',
+    'Recuperación': 'Recovery',
+    'Hace falta un rodillo de espuma. Se rueda despacio y, al dar con un punto sensible, se para ahí y se respira hasta que afloja. No lleva zona lumbar a propósito: ahí el rodillo no tiene nada donde apoyar y se acaba forzando la columna.':
+      'You need a foam roller. Roll slowly and, when you hit a tender spot, stop there and breathe until it lets go. It leaves out the lower back on purpose: there the roller has nothing to rest on and you end up straining your spine.',
+    'Pilates: centro fuerte': 'Pilates: strong centre',
+    'Core y control': 'Core and control',
+    'Trabajo de suelo inspirado en pilates: control, respiración y lumbar pegada al suelo. Mejor pocas repeticiones bien hechas que muchas deprisa. En plancha y puente las repeticiones son segundos.':
+      'Floor work inspired by pilates: control, breathing and lower back pressed to the floor. A few reps done well beat many done fast. In the plank and the bridge the reps are seconds.',
+    'Pilates: espalda y cadera': 'Pilates: back and hips',
+    'Espalda sana': 'Healthy back',
+    'La otra mitad: cadena posterior y cadera, en el suelo y sin material. Va bien en los días que no se entrena fuerte, o el día después de pierna.':
+      'The other half: posterior chain and hips, on the floor and with no equipment. It works well on days you do not train hard, or the day after legs.',
+    'Usar': 'Use',
+    'Rutina copiada. Ya puedes editarla.': 'Routine copied. You can edit it now.'
   };
 })(window);

@@ -257,11 +257,13 @@
   ];
 
   /* Convierte una plantilla en una rutina editable del usuario */
+  /* El nombre y la nota se escriben ya en el idioma que tengas puesto: acaban
+     siendo los de TU rutina, y a partir de ahí son tuyos para editarlos. */
   function toRoutine(tpl) {
     return {
       id: null,
-      name: tpl.name,
-      note: tpl.note,
+      name: T(tpl.name),
+      note: T(tpl.note),
       days: tpl.days.slice(),
       exercises: tpl.exercises
         .filter(function (row) { return Data.get(row[0]); })   // descarta IDs no disponibles

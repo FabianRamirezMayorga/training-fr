@@ -124,28 +124,28 @@
     return html`
       <div class="hero">
         ${raw(heroHTML(z))}
-        <button class="hero-atras" data-a="atras" aria-label="Volver">
+        <button class="hero-atras" data-a="atras" aria-label="${T('Volver')}">
           ${raw(icon('back'))}</button>
       </div>
 
       <h1 class="prog-tit">${I18N.muscle(m)}</h1>
-      ${raw(z.texto ? '<p class="prog-sub">' + esc(z.texto) + '</p>' : '')}
+      ${raw(z.texto ? '<p class="prog-sub">' + esc(T(z.texto)) + '</p>' : '')}
 
       <div class="list-head">
-        <span class="list-title">Ejercicios <span style="opacity:.6">${lista.length}</span></span>
+        <span class="list-title">${T('Ejercicios')} <span style="opacity:.6">${lista.length}</span></span>
         <button class="btn sm ghost" data-a="lugar">${raw(icon('dumbbell'))}
-          ${Data.GEAR[gear] ? Data.GEAR[gear].label : ''}</button>
+          ${Data.GEAR[gear] ? T(Data.GEAR[gear].label) : ''}</button>
       </div>
 
       ${raw(lista.length
         ? '<div class="lista-prog">' + lista.slice(0, tope).map(filaHTML).join('') + '</div>' +
           (lista.length > tope
-            ? '<button class="btn block" data-a="mas" style="margin-top:16px">Ver ' +
-              Math.min(30, lista.length - tope) + ' más</button>'
+            ? '<button class="btn block" data-a="mas" style="margin-top:16px">' +
+              esc(Tn('Ver {n} más', { n: Math.min(30, lista.length - tope) })) + '</button>'
             : '')
-        : '<div class="card"><b>Nada por aquí con tu material</b>' +
-          '<p class="tiny" style="margin:6px 0 0">Cambia dónde entrenas y vuelve a ' +
-          'mirar: el catálogo entero tiene bastante más.</p></div>')}`;
+        : '<div class="card"><b>' + esc(T('Nada por aquí con tu material')) + '</b>' +
+          '<p class="tiny" style="margin:6px 0 0">' + esc(T('Cambia dónde entrenas y ' +
+          'vuelve a mirar: el catálogo entero tiene bastante más.')) + '</p></div>')}`;
   };
 
   V.zona.mount = function (root) {

@@ -2848,17 +2848,17 @@
           <summary>
             <span class="chevron down pl-flecha">${raw(icon('chevron'))}</span>
             <span class="grow">
-              <span style="font-weight:700;display:block">${t.name}</span>
-              <span class="tiny" style="display:block">${t.goal} · ${t.level}
-                · ${t.exercises.length} ejercicios</span>
+              <span style="font-weight:700;display:block">${T(t.name)}</span>
+              <span class="tiny" style="display:block">${T(t.goal)} · ${T(t.level)}
+                · ${Tp(t.exercises.length, '{n} ejercicio', '{n} ejercicios')}</span>
               <span class="tiny" style="display:block">${UI.diasLargos(t.days)}</span>
             </span>
-            <button class="btn sm pl-usar" data-tpl="${t.id}">${raw(icon('copy'))} Usar</button>
+            <button class="btn sm pl-usar" data-tpl="${t.id}">${raw(icon('copy'))} ${T('Usar')}</button>
           </summary>
           <div class="pl-cuerpo">
             <span class="chip tiny-chip" style="display:inline-block">
-              ${raw(icon('dumbbell'))} ${Data.GEAR[Templates.lugarNecesario(t)].label}</span>
-            <p class="muted" style="margin:9px 0 0;font-size:.82rem">${t.note}</p>
+              ${raw(icon('dumbbell'))} ${T(Data.GEAR[Templates.lugarNecesario(t)].label)}</span>
+            <p class="muted" style="margin:9px 0 0;font-size:.82rem">${T(t.note)}</p>
           </div>
         </details>`;
     }).join('');
@@ -2955,7 +2955,7 @@
     bindAll(root, '[data-tpl]', function (el) {
       const tpl = Templates.list.find(function (t) { return t.id === el.dataset.tpl; });
       const r = Store.saveRoutine(Templates.toRoutine(tpl));
-      UI.toast('Rutina copiada. Ya puedes editarla.');
+      UI.toast(T('Rutina copiada. Ya puedes editarla.'));
       go('rutina', r.id);
     });
   };

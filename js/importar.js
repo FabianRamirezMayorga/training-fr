@@ -33,7 +33,7 @@
         const coma = t.indexOf(',');
         ok({ datos: coma === -1 ? t : t.slice(coma + 1), mime: file.type });
       };
-      lector.onerror = function () { mal(new Error('No he podido leer ese archivo.')); };
+      lector.onerror = function () { mal(new Error(T('No he podido leer ese archivo.'))); };
       lector.readAsDataURL(file);
     });
   }
@@ -41,16 +41,16 @@
   /* Las fotos se encogen antes de mandarlas; un PDF va tal cual, que Gemini lo
      lee directo y convertirlo a imagen necesitaría una librería. */
   function preparar(file) {
-    if (!file) return Promise.reject(new Error('No has elegido ningún archivo.'));
+    if (!file) return Promise.reject(new Error(T('No has elegido ningún archivo.')));
     if (file.size > LIMITE) {
-      return Promise.reject(new Error('Ese archivo pesa demasiado. Prueba con una foto ' +
-        'o con un PDF de menos de 8 MB.'));
+      return Promise.reject(new Error(T('Ese archivo pesa demasiado. Prueba con una ' +
+        'foto o con un PDF de menos de 8 MB.')));
     }
     if (/^image\//.test(file.type)) {
       return Comidas.prepararFoto(file, 1400);
     }
     if (file.type === 'application/pdf') return aBase64(file);
-    return Promise.reject(new Error('Tiene que ser una foto o un PDF.'));
+    return Promise.reject(new Error(T('Tiene que ser una foto o un PDF.')));
   }
 
   function analizar(file) {
@@ -63,12 +63,12 @@
        que es lo que permite corregir la lectura sin volver a buscar la foto. */
     const listo = file ? preparar(file).then(function (a) { archivoEnMano = a; return a; })
       : (archivoEnMano ? Promise.resolve(archivoEnMano)
-        : Promise.reject(new Error('Elige antes una foto o un PDF.')));
+        : Promise.reject(new Error(T('Elige antes una foto o un PDF.'))));
 
     listo
       .then(function (archivo) { return IA.leerRutina(archivo, pista); })
       .then(function (r) { leido = resolver(r); })
-      .catch(function (e) { fallo = e.message || 'No he podido leerla.'; })
+      .catch(function (e) { fallo = e.message || T('No he podido leerla.'); })
       .then(function () { cargando = false; App.render(); });
   }
 
@@ -126,7 +126,8 @@
           (delPapel && (Data.search({ q: delPapel }) || [])[0]);
 
         if (!ex) {
-          fuera.push((delPapel || nombre) + ' (no está en el catálogo)');
+          fuera.push(Tn('{que} (no está en el catálogo)',
+            { que: delPapel || nombre }));
           return null;
         }
         return {
@@ -151,7 +152,7 @@
     }).filter(function (d) { return d.ejercicios.length; });
 
     return {
-      nombre: r.nombre || 'Mi rutina',
+      nombre: r.nombre || T('Mi rutina'),
       dias: dias,
       dudas: (r.dudas || []).concat(fuera)
     };
@@ -162,32 +163,32 @@
   V.importar = function () {
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Rutinas</button>
-      <h1>Traer una rutina que ya tienes</h1>
-      <p class="muted">Una foto de la hoja del gimnasio, de tu libreta o el PDF que te
-      hayan dado. La leo, te enseño lo que he entendido y tú decides si se crea.</p>
+        ${raw(icon('back'))} ${T('Rutinas')}</button>
+      <h1>${T('Traer una rutina que ya tienes')}</h1>
+      <p class="muted">${T('Una foto de la hoja del gimnasio, de tu libreta o el PDF que ' +
+      'te hayan dado. La leo, te enseño lo que he entendido y tú decides si se crea.')}</p>
 
       <div class="card">
         <div class="row" style="gap:8px">
           <label class="btn primary grow" for="imp-archivo" style="cursor:pointer">
-            ${raw(icon('camara'))} Elegir foto o PDF</label>
+            ${raw(icon('camara'))} ${T('Elegir foto o PDF')}</label>
         </div>
         <input type="file" id="imp-archivo" accept="image/*,application/pdf" hidden>
 
-        <div class="tiny" style="margin:12px 0 5px">¿ALGO QUE DEBA SABER?</div>
-        <textarea id="imp-pista" rows="2" placeholder="Ej. es la rutina de mi entrenador, respétala tal cual; la columna de la derecha son los kilos, no las repeticiones">${pista}</textarea>
-        <p class="tiny" style="margin:7px 0 0">El archivo no se guarda en ningún sitio: se
-        lee, se manda para que lo interpreten y se suelta. Lo único que queda es la rutina
-        si decides crearla.</p>
+        <div class="tiny" style="margin:12px 0 5px">${T('¿ALGO QUE DEBA SABER?')}</div>
+        <textarea id="imp-pista" rows="2" placeholder="${T('Ej. es la rutina de mi entrenador, respétala tal cual; la columna de la derecha son los kilos, no las repeticiones')}">${pista}</textarea>
+        <p class="tiny" style="margin:7px 0 0">${T('El archivo no se guarda en ningún ' +
+        'sitio: se lee, se manda para que lo interpreten y se suelta. Lo único que queda ' +
+        'es la rutina si decides crearla.')}</p>
       </div>
 
       ${raw(cargando ? html`
         <div class="card center"><div class="spinner" style="margin:6px auto"></div>
-        <p class="tiny" style="margin:8px 0 0">Leyendo lo que pone…</p></div>` : '')}
+        <p class="tiny" style="margin:8px 0 0">${T('Leyendo lo que pone…')}</p></div>` : '')}
 
       ${raw(fallo ? html`
         <div class="card" style="border-color:var(--bad)">
-          <b>No he podido leerla</b>
+          <b>${T('No he podido leerla')}</b>
           <p class="tiny" style="margin:6px 0 0">${fallo}</p>
         </div>` : '')}
 
@@ -200,26 +201,28 @@
     if (!total) {
       return html`
         <div class="card" style="border-color:var(--warn)">
-          <b>No he encontrado ninguna rutina ahí</b>
+          <b>${T('No he encontrado ninguna rutina ahí')}</b>
           <p class="tiny" style="margin:6px 0 0">${r.dudas.length ? esc(r.dudas.join('. '))
-            : 'Prueba con una foto más nítida, o recorta solo la tabla de ejercicios.'}</p>
+            : T('Prueba con una foto más nítida, o recorta solo la tabla de ejercicios.')}</p>
         </div>`;
     }
 
     return html`
       <div class="list-head" style="margin-top:18px">
-        <span class="list-title" style="margin:0">Esto es lo que he entendido</span>
+        <span class="list-title" style="margin:0">${T('Esto es lo que he entendido')}</span>
       </div>
-      <p class="tiny" style="margin:-4px 0 10px">Míralo antes de crearla: lo que sale de
-      una foto conviene revisarlo. Luego se edita como cualquier otra rutina.</p>
+      <p class="tiny" style="margin:-4px 0 10px">${T('Míralo antes de crearla: lo que ' +
+      'sale de una foto conviene revisarlo. Luego se edita como cualquier otra rutina.')}</p>
 
       ${raw(r.dias.map(function (d, i) {
         return html`
           <div class="card" style="padding:0;overflow:hidden">
             <div style="padding:13px 13px 8px">
-              <div class="rt-titulo">${d.dia ? UI.diaLargo(d.dia) : 'Sesión ' + (i + 1)}${raw(
+              <div class="rt-titulo">${d.dia ? UI.diaLargo(d.dia)
+                : Tn('Sesión {n}', { n: i + 1 })}${raw(
                 d.titulo ? ' · ' + esc(d.titulo) : '')}</div>
-              <div class="tiny" style="margin-top:3px">${d.ejercicios.length} ejercicios</div>
+              <div class="tiny" style="margin-top:3px">${Tp(d.ejercicios.length,
+                '{n} ejercicio', '{n} ejercicios')}</div>
             </div>
             <div class="rt-detalle">
               ${raw(d.ejercicios.map(function (e, k) {
@@ -230,7 +233,8 @@
                       <div style="font-weight:600;font-size:.85rem">${k + 1}. ${e.ex.nameEs}</div>
                       <div class="tiny">${e.fila.sets} × ${e.fila.reps} · ${e.fila.rest}s${raw(
                         e.comoVenia && I18N.norm(e.comoVenia) !== I18N.norm(e.ex.nameEs)
-                          ? ' · en el papel: <b>' + esc(e.comoVenia) + '</b>' : '')}</div>
+                          ? ' · ' + Tn('en el papel: {que}',
+                              { que: '<b>' + esc(e.comoVenia) + '</b>' }) : '')}</div>
                     </div>
                   </div>`;
               }).join(''))}
@@ -242,21 +246,21 @@
 
       ${raw(r.dudas.length ? html`
         <div class="card" style="border-color:var(--warn)">
-          <b>Esto no lo tengo claro</b>
+          <b>${T('Esto no lo tengo claro')}</b>
           <ul class="instr" style="margin:8px 0 0">
             ${raw(r.dudas.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join(''))}
           </ul>
         </div>` : '')}
 
-      <div class="tiny" style="margin:16px 0 5px">¿CORRIJO ALGO ANTES DE CREARLA?</div>
-      <textarea id="imp-ajuste" rows="2" placeholder="Ej. el segundo día son 4 series, no 3; el último ejercicio es en polea"></textarea>
+      <div class="tiny" style="margin:16px 0 5px">${T('¿CORRIJO ALGO ANTES DE CREARLA?')}</div>
+      <textarea id="imp-ajuste" rows="2" placeholder="${T('Ej. el segundo día son 4 series, no 3; el último ejercicio es en polea')}"></textarea>
       <button class="btn block sm" data-a="reintentar" style="margin-top:8px">
-        ${raw(icon('cambiar'))} Volver a leerla con esto en cuenta</button>
+        ${raw(icon('cambiar'))} ${T('Volver a leerla con esto en cuenta')}</button>
 
       <button class="btn primary block" data-a="crear" style="margin-top:16px">
-        ${raw(icon('check'))} Crear esta rutina</button>
-      <p class="tiny" style="margin:7px 0 0">Se guarda en tus rutinas y desde ahí
-      puedes editarla, ponerle los días y pedirle al entrenador que la analice.</p>`;
+        ${raw(icon('check'))} ${T('Crear esta rutina')}</button>
+      <p class="tiny" style="margin:7px 0 0">${T('Se guarda en tus rutinas y desde ahí ' +
+      'puedes editarla, ponerle los días y pedirle al entrenador que la analice.')}</p>`;
   }
 
   /* La hoja pide un material y en los ajustes hay otro. No se toca la rutina
@@ -281,18 +285,19 @@
     const todos = ajenos === total;
 
     const cuantos = todos
-      ? 'Todos los ejercicios de esta rutina piden'
-      : ajenos + ' de los ' + total + ' ejercicios piden';
+      ? T('Todos los ejercicios de esta rutina piden')
+      : Tn('{ajenos} de los {total} ejercicios piden',
+          { ajenos: ajenos, total: total });
 
     return html`
       <div class="card" style="border-color:var(--warn)">
-        <b>Pide más material del que tienes marcado</b>
-        <p class="tiny" style="margin:6px 0 0">${cuantos} material que
-        «${esc(gset.label)}» no contempla. La he copiado tal cual, que para eso
-        la traes, pero si vas a entrenarla cambia dónde entrenas o no te va a
-        cuadrar.</p>
+        <b>${T('Pide más material del que tienes marcado')}</b>
+        <p class="tiny" style="margin:6px 0 0">${Tn('{cuantos} material que «{donde}» no ' +
+        'contempla. La he copiado tal cual, que para eso la traes, pero si vas a ' +
+        'entrenarla cambia dónde entrenas o no te va a cuadrar.',
+        { cuantos: cuantos, donde: T(gset.label) })}</p>
         <button class="btn sm block" data-a="lugar" style="margin-top:10px">
-          ${raw(icon('dumbbell'))} Cambiar dónde entreno</button>
+          ${raw(icon('dumbbell'))} ${T('Cambiar dónde entreno')}</button>
       </div>`;
   }
 
@@ -317,7 +322,7 @@
       if (!f) return;
       if (!IA.activa()) {
         App.go('entrenador');
-        UI.toast('Necesita el entrenador con IA para leer la hoja');
+        UI.toast(T('Necesita el entrenador con IA para leer la hoja'));
         return;
       }
       analizar(f);
@@ -326,7 +331,7 @@
     App.bind(root, '[data-a=reintentar]', function () {
       const ajuste = root.querySelector('#imp-ajuste');
       const texto = ajuste ? ajuste.value.trim() : '';
-      if (!texto) { UI.toast('Escribe qué hay que corregir'); return; }
+      if (!texto) { UI.toast(T('Escribe qué hay que corregir')); return; }
       pista = (pista ? pista + '. ' : '') + texto;
       analizar(null);
     });
@@ -351,23 +356,25 @@
     });
 
     UI.modal(html`
-      <h2>Crear la rutina</h2>
-      <p class="muted">Se crean ${leido.dias.length}
-        ${leido.dias.length === 1 ? 'rutina' : 'rutinas'} en tus rutinas. A partir de ahí
-        son tuyas y las editas como cualquier otra.</p>
+      <h2>${T('Crear la rutina')}</h2>
+      <p class="muted">${Tp(leido.dias.length,
+        'Se crea {n} rutina en tus rutinas. A partir de ahí es tuya y la editas como ' +
+        'cualquier otra.',
+        'Se crean {n} rutinas en tus rutinas. A partir de ahí son tuyas y las editas como ' +
+        'cualquier otra.')}</p>
 
-      <div class="tiny" style="margin:14px 0 6px">CÓMO SE LLAMA</div>
+      <div class="tiny" style="margin:14px 0 6px">${T('CÓMO SE LLAMA')}</div>
       <input id="imp-nombre" class="input" value="${nombre}" maxlength="40">
-      <p class="tiny" style="margin:7px 0 0">Los días que traía el papel se respetan si los
-      tienes libres; si no, entra sin día y se lo pones tú.</p>
+      <p class="tiny" style="margin:7px 0 0">${T('Los días que traía el papel se respetan ' +
+      'si los tienes libres; si no, entra sin día y se lo pones tú.')}</p>
 
-      <button class="btn primary block" id="imp-ok" style="margin-top:16px">Crear</button>
-      <button class="btn ghost block" id="imp-no" style="margin-top:8px">Cancelar</button>`,
+      <button class="btn primary block" id="imp-ok" style="margin-top:16px">${T('Crear')}</button>
+      <button class="btn ghost block" id="imp-no" style="margin-top:8px">${T('Cancelar')}</button>`,
       function (el) {
         el.querySelector('#imp-no').onclick = function () { UI.closeModal(); };
         el.querySelector('#imp-ok').onclick = function () {
           const destino = String(el.querySelector('#imp-nombre').value || '').trim();
-          if (!destino) { UI.toast('Ponle un nombre'); return; }
+          if (!destino) { UI.toast(T('Ponle un nombre')); return; }
 
           let creadas = 0;
           let ultima = null;

@@ -119,56 +119,60 @@
 
     UI.modal(html`
       <h2>${titulo}</h2>
-      <p class="muted">Se crea un enlace que lleva el entrenamiento dentro.
-        Quien lo abra lo ve, pero no puede tocarlo ni apuntar nada: no es su plan,
-        es una copia de lectura.</p>
+      <p class="muted">${T('Se crea un enlace que lleva el entrenamiento dentro. ' +
+        'Quien lo abra lo ve, pero no puede tocarlo ni apuntar nada: no es su plan, ' +
+        'es una copia de lectura.')}</p>
 
       <div class="card">
         ${raw(rutinas.map(function (r) {
           return '<div class="row between" style="padding:4px 0;gap:10px">' +
             '<span style="font-size:.86rem">' + esc(App.tituloRutina(r)) + '</span>' +
-            '<span class="tiny">' + r.exercises.length + ' ejercicios</span></div>';
+            '<span class="tiny">' +
+            esc(Tp(r.exercises.length, '{n} ejercicio', '{n} ejercicios')) + '</span></div>';
         }).join(''))}
       </div>
 
-      <div class="tiny" style="margin:14px 0 6px">QUÉ VIAJA EN EL ENLACE</div>
-      <p class="tiny" style="margin:0">Los ${ejercicios} ejercicios con sus series,
-        repeticiones y descansos. Nada más: ni tus entrenamientos, ni tus pesos,
-        ni tu comida, ni tu perfil.</p>
+      <div class="tiny" style="margin:14px 0 6px">${T('QUÉ VIAJA EN EL ENLACE')}</div>
+      <p class="tiny" style="margin:0">${Tn('Los {n} ejercicios con sus series, ' +
+        'repeticiones y descansos. Nada más: ni tus entrenamientos, ni tus pesos, ni ' +
+        'tu comida, ni tu perfil.', { n: ejercicios })}</p>
 
       <label class="row" style="gap:9px;align-items:center;margin-top:14px">
         <input type="checkbox" id="cp-de-on" ${de ? 'checked' : ''}>
-        <span style="font-size:.88rem">Decir que es mío</span>
+        <span style="font-size:.88rem">${T('Decir que es mío')}</span>
       </label>
       <input id="cp-de" class="input" value="${de}" maxlength="30"
-             placeholder="Tu nombre" style="margin-top:7px">
+             placeholder="${T('Tu nombre')}" style="margin-top:7px">
 
       ${raw(notas ? html`
       <label class="row" style="gap:9px;align-items:center;margin-top:14px">
         <input type="checkbox" id="cp-notas">
-        <span style="font-size:.88rem">Incluir mis notas</span>
+        <span style="font-size:.88rem">${T('Incluir mis notas')}</span>
       </label>
-      <p class="tiny" style="margin:5px 0 0">Tienes ${notas}
-        ${notas === 1 ? 'nota escrita' : 'notas escritas'} en estos ejercicios. Van
-        fuera salvo que lo marques, por si hay algo tuyo dentro.</p>` : '')}
+      <p class="tiny" style="margin:5px 0 0">${Tp(notas,
+        'Tienes {n} nota escrita en estos ejercicios. Va fuera salvo que lo marques, ' +
+        'por si hay algo tuyo dentro.',
+        'Tienes {n} notas escritas en estos ejercicios. Van fuera salvo que lo marques, ' +
+        'por si hay algo tuyo dentro.')}</p>` : '')}
 
-      <p class="tiny" style="margin:14px 0 0"><b>Antes de mandarlo:</b> quien tenga
-        el enlace lo verá siempre, no se puede retirar. Y es una foto de hoy: si
-        mañana cambias el plan, el enlace sigue enseñando lo de ahora.</p>
+      <p class="tiny" style="margin:14px 0 0">${raw(Tn('{aviso} quien tenga el enlace lo ' +
+        'verá siempre, no se puede retirar. Y es una foto de hoy: si mañana cambias el ' +
+        'plan, el enlace sigue enseñando lo de ahora.',
+        { aviso: '<b>' + esc(T('Antes de mandarlo:')) + '</b>' }))}</p>
 
       <div id="cp-salida" hidden style="margin-top:14px">
-        <div class="tiny" style="margin-bottom:6px">TU ENLACE</div>
+        <div class="tiny" style="margin-bottom:6px">${T('TU ENLACE')}</div>
         <textarea id="cp-url" class="input" rows="3" readonly
                   style="font-size:.74rem;word-break:break-all"></textarea>
         <div class="row" style="gap:8px;margin-top:8px">
-          <button class="btn sm grow" id="cp-copiar">${raw(icon('copiar'))} Copiar</button>
-          <button class="btn sm grow primary" id="cp-enviar" hidden>Compartir</button>
+          <button class="btn sm grow" id="cp-copiar">${raw(icon('copiar'))} ${T('Copiar')}</button>
+          <button class="btn sm grow primary" id="cp-enviar" hidden>${T('Compartir')}</button>
         </div>
       </div>
 
       <button class="btn primary block" id="cp-ok" style="margin-top:16px">
-        Crear el enlace</button>
-      <button class="btn ghost block" id="cp-no" style="margin-top:8px">Cerrar</button>`,
+        ${T('Crear el enlace')}</button>
+      <button class="btn ghost block" id="cp-no" style="margin-top:8px">${T('Cerrar')}</button>`,
       function (el) {
         const campoDe = el.querySelector('#cp-de');
         const deOn = el.querySelector('#cp-de-on');
@@ -191,22 +195,22 @@
               const url = enlaceDe(p);
               area.value = url;
               salida.hidden = false;
-              el.querySelector('#cp-ok').textContent = 'Rehacer el enlace';
+              el.querySelector('#cp-ok').textContent = T('Rehacer el enlace');
 
               if (navigator.share) {
                 enviar.hidden = false;
                 enviar.onclick = function () {
-                  navigator.share({ title: nombreSugerido, text: 'Mira este plan', url: url })
+                  navigator.share({ title: nombreSugerido, text: T('Mira este plan'), url: url })
                     .catch(function () {});
                 };
               }
             })
-            .catch(function () { UI.toast('No se ha podido crear el enlace'); });
+            .catch(function () { UI.toast(T('No se ha podido crear el enlace')); });
         };
 
         el.querySelector('#cp-copiar').onclick = function () {
           area.select();
-          const listo = function () { UI.toast('Enlace copiado'); };
+          const listo = function () { UI.toast(T('Enlace copiado')); };
           if (navigator.clipboard) {
             navigator.clipboard.writeText(area.value).then(listo, function () {
               document.execCommand('copy'); listo();
@@ -218,9 +222,9 @@
 
   function compartirRutina(id) {
     const r = Store.routine(id);
-    if (!r) { UI.toast('Esa rutina ya no está'); return; }
-    if (!r.exercises.length) { UI.toast('Esa rutina no tiene ejercicios'); return; }
-    hoja('Compartir rutina', [r], App.nombreRutina(r));
+    if (!r) { UI.toast(T('Esa rutina ya no está')); return; }
+    if (!r.exercises.length) { UI.toast(T('Esa rutina no tiene ejercicios')); return; }
+    hoja(T('Compartir rutina'), [r], App.nombreRutina(r));
   }
 
   function compartirPlan(nombre) {
@@ -229,8 +233,8 @@
     }).sort(function (a, b) {
       return DIAS.indexOf((a.days || [])[0]) - DIAS.indexOf((b.days || [])[0]);
     });
-    if (!suyas.length) { UI.toast('Ese plan no tiene nada que compartir'); return; }
-    hoja('Compartir «' + nombre + '»', suyas, nombre);
+    if (!suyas.length) { UI.toast(T('Ese plan no tiene nada que compartir')); return; }
+    hoja(Tn('Compartir «{que}»', { que: nombre }), suyas, nombre);
   }
 
   /* ---------- la vista de quien recibe ----------
@@ -255,10 +259,10 @@
     }
 
     if (cache.error) {
-      return html`<h1>Este enlace no se puede leer</h1>
-        <p class="muted">O se ha cortado al copiarlo, o se hizo con una versión de
-        la app muy distinta a esta. Pide que te lo manden otra vez.</p>
-        <button class="btn block" data-a="acasa" style="margin-top:14px">Ir a mi app</button>`;
+      return html`<h1>${T('Este enlace no se puede leer')}</h1>
+        <p class="muted">${T('O se ha cortado al copiarlo, o se hizo con una versión de ' +
+        'la app muy distinta a esta. Pide que te lo manden otra vez.')}</p>
+        <button class="btn block" data-a="acasa" style="margin-top:14px">${T('Ir a mi app')}</button>`;
     }
 
     const d = cache.datos;
@@ -289,24 +293,26 @@
     }).slice(0, 8);
 
     return html`
-      <h1>${d.n || 'Plan compartido'}</h1>
-      <p class="muted">${d.de ? 'Te lo ha pasado ' + d.de + '. ' : ''}Son
-        ${sesiones.length} ${sesiones.length === 1 ? 'sesión' : 'sesiones'} y
-        ${total} ${total === 1 ? 'ejercicio' : 'ejercicios'}.</p>
+      <h1>${d.n || T('Plan compartido')}</h1>
+      <p class="muted">${d.de ? Tn('Te lo ha pasado {quien}.', { quien: d.de }) + ' ' : ''}${Tn(
+        'Son {sesiones} y {ejercicios}.',
+        { sesiones: Tp(sesiones.length, '{n} sesión', '{n} sesiones'),
+          ejercicios: Tp(total, '{n} ejercicio', '{n} ejercicios') })}</p>
 
       <div class="card" style="margin-top:12px">
-        <b>Esto es solo para verlo</b>
-        <p class="tiny" style="margin:6px 0 0">No está en tu cuenta, así que no hay
-        nada que editar ni que apuntar aquí. Si te gusta, quédatelo abajo y pasa a
-        ser tuyo: a partir de ahí lo cambias como quieras.</p>
+        <b>${T('Esto es solo para verlo')}</b>
+        <p class="tiny" style="margin:6px 0 0">${T('No está en tu cuenta, así que no hay ' +
+        'nada que editar ni que apuntar aquí. Si te gusta, quédatelo abajo y pasa a ser ' +
+        'tuyo: a partir de ahí lo cambias como quieras.')}</p>
       </div>
 
-      ${raw(perdidos ? '<div class="card" style="margin-top:10px"><b>Faltan ' + perdidos +
-        ' ejercicios</b><p class="tiny" style="margin:6px 0 0">No están en el catálogo ' +
-        'de esta app. El resto se ve entero.</p></div>' : '')}
+      ${raw(perdidos ? '<div class="card" style="margin-top:10px"><b>' +
+        esc(Tp(perdidos, 'Falta {n} ejercicio', 'Faltan {n} ejercicios')) +
+        '</b><p class="tiny" style="margin:6px 0 0">' + esc(T('No están en el catálogo ' +
+        'de esta app. El resto se ve entero.')) + '</p></div>' : '')}
 
       ${raw(reparto.length ? html`
-        <div class="list-title">Series por músculo a la semana</div>
+        <div class="list-title">${T('Series por músculo a la semana')}</div>
         <div class="card">
           ${raw(reparto.map(function (m) {
             return '<div class="row between" style="padding:3px 0;gap:10px">' +
@@ -315,7 +321,7 @@
           }).join(''))}
         </div>` : '')}
 
-      <div class="list-title">El plan</div>
+      <div class="list-title">${T('El plan')}</div>
       <div class="stack">
         ${raw(sesiones.map(function (s, i) {
           return html`
@@ -323,8 +329,9 @@
               <div style="padding:13px 13px 9px">
                 <div class="rt-titulo">${s.dias.length
                   ? s.dias.map(UI.diaLargo).join(' y ')
-                  : 'Sesión ' + (i + 1)}</div>
-                <div class="tiny" style="margin-top:3px">${s.ejercicios.length} ejercicios</div>
+                  : Tn('Sesión {n}', { n: i + 1 })}</div>
+                <div class="tiny" style="margin-top:3px">${Tp(s.ejercicios.length,
+                  '{n} ejercicio', '{n} ejercicios')}</div>
               </div>
               <div class="rt-detalle">
                 ${raw(s.ejercicios.map(function (e, k) {
@@ -358,7 +365,7 @@
 
     if (clave && cache.clave !== clave) {
       descodificar(clave).then(function (d) {
-        if (!d || !d.r || !d.r.length) throw new Error('vacío');
+        if (!d || !d.r || !d.r.length) throw new Error('vacio');
         cache = { clave: clave, datos: d, error: null };
         App.render();
       }).catch(function () {
@@ -407,30 +414,32 @@
     const libres = diasDe.filter(function (x) { return x.length; }).length;
 
     UI.modal(html`
-      <h2>Guardarlo como mío</h2>
-      <p class="muted">Se crean ${d.r.length}
-        ${d.r.length === 1 ? 'rutina' : 'rutinas'} en tus rutinas. A partir de ahí
-        son tuyas: las editas, les pones los días y las entrenas.</p>
+      <h2>${T('Guardarlo como mío')}</h2>
+      <p class="muted">${Tp(d.r.length,
+        'Se crea {n} rutina en tus rutinas. A partir de ahí es tuya: la editas, le pones ' +
+        'los días y la entrenas.',
+        'Se crean {n} rutinas en tus rutinas. A partir de ahí son tuyas: las editas, les ' +
+        'pones los días y las entrenas.')}</p>
 
-      <div class="tiny" style="margin:14px 0 6px">CÓMO LO LLAMO</div>
+      <div class="tiny" style="margin:14px 0 6px">${T('CÓMO LO LLAMO')}</div>
       <input id="qm-nombre" class="input" value="${nombre}" maxlength="40">
       <p class="tiny" style="margin:7px 0 0">${libres === total
-        ? 'Cada rutina se queda con el día que tenía en el plan original, porque ' +
-          'ninguno de esos días lo tienes ocupado.'
+        ? T('Cada rutina se queda con el día que tenía en el plan original, porque ' +
+          'ninguno de esos días lo tienes ocupado.')
         : libres
-          ? 'De las ' + total + ', ' + libres + ' se quedan con su día original; el ' +
-            'resto entra sin día para no pisar lo que ya entrenas. Se los pones tú ' +
-            'cuando decidas qué dejas.'
-          : 'Entran sin día asignado: esos días ya los tienes ocupados y dos rutinas ' +
-            'el mismo día se pisan. Ábrelas y colócalas cuando decidas.'}</p>
+          ? Tn('De las {total}, {libres} se quedan con su día original; el resto entra ' +
+            'sin día para no pisar lo que ya entrenas. Se los pones tú cuando decidas ' +
+            'qué dejas.', { total: total, libres: libres })
+          : T('Entran sin día asignado: esos días ya los tienes ocupados y dos rutinas ' +
+            'el mismo día se pisan. Ábrelas y colócalas cuando decidas.')}</p>
 
-      <button class="btn primary block" id="qm-ok" style="margin-top:16px">Guardar</button>
-      <button class="btn ghost block" id="qm-no" style="margin-top:8px">Cancelar</button>`,
+      <button class="btn primary block" id="qm-ok" style="margin-top:16px">${T('Guardar')}</button>
+      <button class="btn ghost block" id="qm-no" style="margin-top:8px">${T('Cancelar')}</button>`,
       function (el) {
         el.querySelector('#qm-no').onclick = function () { UI.closeModal(); };
         el.querySelector('#qm-ok').onclick = function () {
           const destino = String(el.querySelector('#qm-nombre').value || '').trim();
-          if (!destino) { UI.toast('Ponle un nombre'); return; }
+          if (!destino) { UI.toast(T('Ponle un nombre')); return; }
 
           let creadas = 0;
           d.r.forEach(function (par, i) {
@@ -452,7 +461,7 @@
 
           UI.closeModal();
           location.hash = '#/rutinas';
-          UI.toast(creadas + (creadas === 1 ? ' rutina guardada' : ' rutinas guardadas'));
+          UI.toast(Tp(creadas, '{n} rutina guardada', '{n} rutinas guardadas'));
         };
       });
   }

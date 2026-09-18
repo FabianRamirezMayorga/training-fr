@@ -44,7 +44,7 @@
     const c = Sync.config();
     const s = Sync.sesion();
     if (!c || !s || !s.access_token) {
-      return Promise.reject(new Error('Entra en tu cuenta para administrar.'));
+      return Promise.reject(new Error(T('Entra en tu cuenta para administrar.')));
     }
     return fetch(urlFuncion(), {
       method: 'POST',
@@ -60,7 +60,7 @@
           /* Si la función no está desplegada, Supabase responde 404 y el
              mensaje no dice nada útil: más vale decirlo con nombre y apellidos. */
           if (r.status === 404) {
-            throw new Error('La función «admin» no está desplegada en tu proyecto de Supabase.');
+            throw new Error(T('La función «admin» no está desplegada en tu proyecto de Supabase.'));
           }
           throw new Error(d.error || ('Error ' + r.status));
         }
@@ -122,7 +122,7 @@
            poder volver a intentarlo. */
         esAdmin = null;
         ultimoFallo = Date.now();
-        porQueNoSeSupo = e.message || 'No se pudo preguntar al servidor.';
+        porQueNoSeSupo = e.message || T('No se pudo preguntar al servidor.');
         return false;
       });
 
@@ -157,10 +157,10 @@
     if (estado === false) {
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-          ${raw(icon('back'))} Perfil</button>
-        <h1>Cuentas</h1>
-        <p class="muted">Esta pantalla es para quien administra el proyecto. Tu cuenta
-        no lo es.</p>`;
+          ${raw(icon('back'))} ${T('Perfil')}</button>
+        <h1>${T('Cuentas')}</h1>
+        <p class="muted">${T('Esta pantalla es para quien administra el proyecto. Tu ' +
+        'cuenta no lo es.')}</p>`;
     }
 
     /* Ni sí ni no: no se ha podido preguntar. Antes esto se veía igual que un
@@ -168,39 +168,39 @@
     if (estado === null && porQueNoSeSupo) {
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-          ${raw(icon('back'))} Perfil</button>
-        <h1>Cuentas</h1>
+          ${raw(icon('back'))} ${T('Perfil')}</button>
+        <h1>${T('Cuentas')}</h1>
         <div class="card" style="border-color:var(--warn)">
-          <b>No he podido comprobar si administras</b>
+          <b>${T('No he podido comprobar si administras')}</b>
           <p class="tiny" style="margin:6px 0 0">${porQueNoSeSupo}</p>
           <button class="btn sm block" data-a="reintentar" style="margin-top:10px">
-            Probar otra vez</button>
+            ${T('Probar otra vez')}</button>
         </div>
-        <p class="tiny" style="margin-top:10px">Mientras no conteste, la entrada de
-        Cuentas no aparece en Perfil. No es que hayas dejado de administrar.</p>`;
+        <p class="tiny" style="margin-top:10px">${T('Mientras no conteste, la entrada de ' +
+        'Cuentas no aparece en Perfil. No es que hayas dejado de administrar.')}</p>`;
     }
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <div class="row between">
-        <h1 style="margin:0">Cuentas</h1>
-        <button class="btn primary sm" data-a="nueva">${raw(icon('plus'))} Nueva</button>
+        <h1 style="margin:0">${T('Cuentas')}</h1>
+        <button class="btn primary sm" data-a="nueva">${raw(icon('plus'))} ${T('Nueva')}</button>
       </div>
-      <p class="muted" style="margin-top:8px">Las personas que pueden entrar en tu
-      proyecto. Cada una ve solo sus datos y tú no ves los suyos: eso lo garantiza la
-      base de datos, no esta pantalla.</p>
+      <p class="muted" style="margin-top:8px">${T('Las personas que pueden entrar en tu ' +
+      'proyecto. Cada una ve solo sus datos y tú no ves los suyos: eso lo garantiza la ' +
+      'base de datos, no esta pantalla.')}</p>
 
       ${raw(cargando ? html`
         <div class="card center"><div class="spinner" style="margin:6px auto"></div>
-        <p class="tiny" style="margin:8px 0 0">Pidiendo la lista…</p></div>` : '')}
+        <p class="tiny" style="margin:8px 0 0">${T('Pidiendo la lista…')}</p></div>` : '')}
 
       ${raw(fallo ? html`
         <div class="card" style="border-color:var(--bad)">
-          <b>No he podido leer las cuentas</b>
+          <b>${T('No he podido leer las cuentas')}</b>
           <p class="tiny" style="margin:6px 0 0">${fallo}</p>
           <button class="btn sm block" data-a="recargar" style="margin-top:10px">
-            Probar otra vez</button>
+            ${T('Probar otra vez')}</button>
         </div>` : '')}
 
       ${raw(usuarios && usuarios.length ? html`
@@ -211,10 +211,10 @@
       : (!cargando && !fallo ? html`
         <div class="card center" style="padding:26px 18px">
           <span class="cu-vacio">${raw(icon('perfil'))}</span>
-          <b style="display:block;margin-top:11px">Solo estás tú</b>
-          <p class="tiny" style="margin:5px 0 0">Todavía no hay ninguna cuenta aparte de la
-          tuya. Crea una con «Nueva» y dale el correo y la contraseña a quien la vaya a
-          usar.</p>
+          <b style="display:block;margin-top:11px">${T('Solo estás tú')}</b>
+          <p class="tiny" style="margin:5px 0 0">${T('Todavía no hay ninguna cuenta ' +
+          'aparte de la tuya. Crea una con «Nueva» y dale el correo y la contraseña a ' +
+          'quien la vaya a usar.')}</p>
         </div>` : ''))}`;
   };
 
@@ -224,10 +224,10 @@
   function hace(t) {
     if (!t) return '';
     const dias = Math.floor((Date.now() - t) / 86400000);
-    if (dias <= 0) return 'hoy';
-    if (dias === 1) return 'ayer';
-    if (dias < 7) return 'hace ' + dias + ' días';
-    if (dias < 30) return 'hace ' + Math.round(dias / 7) + ' semanas';
+    if (dias <= 0) return T('hoy');
+    if (dias === 1) return T('ayer');
+    if (dias < 7) return Tn('hace {n} días', { n: dias });
+    if (dias < 30) return Tn('hace {n} semanas', { n: Math.round(dias / 7) });
     return UI.fechaCorta(t);
   }
 
@@ -235,9 +235,9 @@
      dos fechas sueltas en otra y un botón gris al final; con tres cuentas ya
      costaba distinguir cuál estaba activa y cuál no. */
   function fichaCuenta(u) {
-    const correo = u.email || '(sin correo)';
+    const correo = u.email || T('(sin correo)');
     const inicial = (correo.trim()[0] || '?').toUpperCase();
-    const etiqueta = u.yo ? 'tu cuenta' : 'Gestionar ' + correo;
+    const etiqueta = u.yo ? T('tu cuenta') : Tn('Gestionar {correo}', { correo: correo });
 
     return '<' + (u.yo ? 'div' : 'button') + ' class="cuenta' +
       (u.yo ? ' yo' : '') + (u.activo ? '' : ' apagada') + '"' +
@@ -248,14 +248,16 @@
         '<span class="cu-correo">' + esc(correo) + '</span>' +
         '<span class="cu-linea">' +
           '<span class="cu-punto"></span>' +
-          (u.activo ? 'Puede entrar' : 'Desactivada') +
+          esc(u.activo ? T('Puede entrar') : T('Desactivada')) +
           (u.ultimoAcceso
-            ? '<span class="cu-sep">·</span>entró ' + esc(hace(u.ultimoAcceso))
-            : '<span class="cu-sep">·</span>no ha entrado nunca') +
+            ? '<span class="cu-sep">·</span>' +
+              esc(Tn('entró {cuando}', { cuando: hace(u.ultimoAcceso) }))
+            : '<span class="cu-sep">·</span>' + esc(T('no ha entrado nunca'))) +
         '</span>' +
-        '<span class="cu-alta">Alta ' + esc(UI.fechaCorta(u.creado)) + '</span>' +
+        '<span class="cu-alta">' +
+        esc(Tn('Alta {fecha}', { fecha: UI.fechaCorta(u.creado) })) + '</span>' +
       '</span>' +
-      (u.yo ? '<span class="cu-tu">TÚ</span>'
+      (u.yo ? '<span class="cu-tu">' + esc(T('TÚ')) + '</span>'
         : '<span class="chevron">' + icon('chevron') + '</span>') +
       '</' + (u.yo ? 'div' : 'button') + '>';
   }
@@ -267,11 +269,11 @@
     const fuera = lista.length - activas;
     return '<div class="cu-resumen">' +
       '<span class="cur-dato"><b>' + lista.length + '</b>' +
-        (lista.length === 1 ? 'cuenta' : 'cuentas') + '</span>' +
+        esc(lista.length === 1 ? T('cuenta') : T('cuentas')) + '</span>' +
       '<span class="cur-dato ok"><b>' + activas + '</b>' +
-        (activas === 1 ? 'puede entrar' : 'pueden entrar') + '</span>' +
+        esc(activas === 1 ? T('puede entrar') : T('pueden entrar')) + '</span>' +
       (fuera ? '<span class="cur-dato mal"><b>' + fuera + '</b>' +
-        (fuera === 1 ? 'desactivada' : 'desactivadas') + '</span>' : '') +
+        esc(fuera === 1 ? T('desactivada') : T('desactivadas')) + '</span>' : '') +
       '</div>';
   }
 
@@ -302,34 +304,35 @@
   function nuevaSheet() {
     UI.modal(html`
       <div class="conf-disco"><span class="cu-disco-txt">+</span></div>
-      <h2 class="conf-tit">Cuenta nueva</h2>
-      <p class="muted conf-txt">Se crea con el correo y la contraseña que le pongas, y ya
-      puede entrar. Dile que la cambie cuando entre.</p>
+      <h2 class="conf-tit">${T('Cuenta nueva')}</h2>
+      <p class="muted conf-txt">${T('Se crea con el correo y la contraseña que le pongas, ' +
+      'y ya puede entrar. Dile que la cambie cuando entre.')}</p>
 
       <div class="clave-bloque">
-        <div class="cb-cab"><span class="cb-lab">Correo</span></div>
+        <div class="cb-cab"><span class="cb-lab">${T('Correo')}</span></div>
         <input id="ad-email" type="email" inputmode="email"
                autocomplete="off" placeholder="alguien@correo.com">
       </div>
 
       <div class="clave-bloque">
-        <div class="cb-cab"><span class="cb-lab">Contraseña para empezar</span>
+        <div class="cb-cab"><span class="cb-lab">${T('Contraseña para empezar')}</span>
           <button class="btn sm vidrio cb-mini" id="ad-dado">${raw(icon('cambiar'))}
-            Inventar una</button></div>
+            ${T('Inventar una')}</button></div>
         <input id="ad-clave" type="text" autocomplete="off"
-               placeholder="Ocho caracteres o más">
+               placeholder="${T('Ocho caracteres o más')}">
       </div>
 
       <div class="nota-prov" style="--tono:var(--warn);margin-top:13px">
         <span class="np-ico">${raw(icon('aviso'))}</span>
-        <span class="grow"><span class="np-txt">Se la tienes que dar tú por donde quieras:
-        la app no manda correos. Y no la escribas en un sitio donde quede guardada.</span></span>
+        <span class="grow"><span class="np-txt">${T('Se la tienes que dar tú por donde ' +
+        'quieras: la app no manda correos. Y no la escribas en un sitio donde quede ' +
+        'guardada.')}</span></span>
       </div>
 
       <div class="cb-acciones" style="margin-top:16px">
         <button class="btn primary grow btn-arranque" id="ad-ok">${raw(icon('plus'))}
-          Crear</button>
-        <button class="btn vidrio" id="ad-no">Cancelar</button>
+          ${T('Crear')}</button>
+        <button class="btn vidrio" id="ad-no">${T('Cancelar')}</button>
       </div>`,
       function (el) {
         el.querySelector('#ad-no').onclick = function () { UI.closeModal(); };
@@ -348,21 +351,21 @@
         el.querySelector('#ad-ok').onclick = function () {
           const email = el.querySelector('#ad-email').value.trim();
           const clave = el.querySelector('#ad-clave').value;
-          if (!email) { UI.toast('Escribe el correo'); return; }
-          if (clave.length < 8) { UI.toast('La contraseña necesita 8 caracteres o más'); return; }
+          if (!email) { UI.toast(T('Escribe el correo')); return; }
+          if (clave.length < 8) { UI.toast(T('La contraseña necesita 8 caracteres o más')); return; }
 
           const boton = el.querySelector('#ad-ok');
           boton.disabled = true;
-          boton.innerHTML = 'Creando…';
+          boton.innerHTML = T('Creando…');
           llamar({ accion: 'crear', email: email, clave: clave })
             .then(function () {
               UI.closeModal();
-              UI.toast('Cuenta creada para ' + email);
+              UI.toast(Tn('Cuenta creada para {correo}', { correo: email }));
               cargar();
             })
             .catch(function (e) {
               boton.disabled = false;
-              boton.innerHTML = icon('plus') + ' Crear';
+              boton.innerHTML = icon('plus') + ' ' + esc(T('Crear'));
               UI.toast(e.message);
             });
         };
@@ -373,9 +376,9 @@
 
   function gestionarSheet(id) {
     const u = (usuarios || []).find(function (x) { return x.id === id; });
-    if (!u) { UI.toast('Esa cuenta ya no está'); return; }
+    if (!u) { UI.toast(T('Esa cuenta ya no está')); return; }
 
-    const correo = u.email || 'Cuenta';
+    const correo = u.email || T('Cuenta');
     const inicial = (correo.trim()[0] || '?').toUpperCase();
 
     UI.modal(html`
@@ -383,18 +386,18 @@
         <span class="cu-avatar grande">${inicial}</span>
         <span class="grow">
           <span class="cu-correo">${correo}</span>
-          <span class="cu-linea"><span class="cu-punto"></span>${raw(u.activo
-            ? 'Puede entrar con normalidad'
-            : 'Desactivada: no puede entrar, pero sus datos siguen ahí')}</span>
+          <span class="cu-linea"><span class="cu-punto"></span>${u.activo
+            ? T('Puede entrar con normalidad')
+            : T('Desactivada: no puede entrar, pero sus datos siguen ahí')}</span>
         </span>
       </div>
 
       <div class="aj-caja" style="margin-top:14px">
-        <div class="aj-fila"><span class="grow"><span class="aj-tit">Alta</span></span>
+        <div class="aj-fila"><span class="grow"><span class="aj-tit">${T('Alta')}</span></span>
           <span class="cu-val">${UI.fechaCorta(u.creado)}</span></div>
-        <div class="aj-fila"><span class="grow"><span class="aj-tit">Última entrada</span>
+        <div class="aj-fila"><span class="grow"><span class="aj-tit">${T('Última entrada')}</span>
           </span><span class="cu-val">${u.ultimoAcceso
-            ? UI.fechaCorta(u.ultimoAcceso) : 'nunca'}</span></div>
+            ? UI.fechaCorta(u.ultimoAcceso) : T('nunca')}</span></div>
       </div>
 
       <div class="plan-acciones" style="margin:14px 0 0">
@@ -402,22 +405,22 @@
                 style="--fp:${raw(u.activo ? 'var(--warn)' : 'var(--acc)')}">
           <span class="fp-ico">${raw(icon(u.activo ? 'salir' : 'check'))}</span>
           <span class="grow"><span class="fp-tit">${u.activo
-            ? 'Desactivar la cuenta' : 'Volver a activarla'}</span>
+            ? T('Desactivar la cuenta') : T('Volver a activarla')}</span>
             <span class="fp-sub">${u.activo
-              ? 'Deja de poder entrar. Sus datos se quedan donde están y vuelve todo al activarla.'
-              : 'Podrá entrar otra vez con su correo y su contraseña de siempre.'}</span></span>
+              ? T('Deja de poder entrar. Sus datos se quedan donde están y vuelve todo al activarla.')
+              : T('Podrá entrar otra vez con su correo y su contraseña de siempre.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
         <button class="fila-plan es-peligro" id="ad-borrar" style="--fp:var(--bad)">
           <span class="fp-ico">${raw(icon('trash'))}</span>
-          <span class="grow"><span class="fp-tit">Borrar la cuenta y sus datos</span>
-            <span class="fp-sub">No se puede deshacer: se va la cuenta y con ella todo lo
-            que tenga guardado.</span></span>
+          <span class="grow"><span class="fp-tit">${T('Borrar la cuenta y sus datos')}</span>
+            <span class="fp-sub">${T('No se puede deshacer: se va la cuenta y con ella ' +
+            'todo lo que tenga guardado.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
       </div>
 
-      <button class="btn vidrio block" id="ad-no" style="margin-top:12px">Cerrar</button>`,
+      <button class="btn vidrio block" id="ad-no" style="margin-top:12px">${T('Cerrar')}</button>`,
       function (el) {
         el.querySelector('#ad-no').onclick = function () { UI.closeModal(); };
 
@@ -425,29 +428,29 @@
           const boton = el.querySelector('#ad-estado');
           const tit = boton.querySelector('.fp-tit');
           boton.disabled = true;
-          if (tit) tit.textContent = 'Un momento…';
+          if (tit) tit.textContent = T('Un momento…');
           llamar({ accion: u.activo ? 'desactivar' : 'activar', id: id })
             .then(function () {
               UI.closeModal();
-              UI.toast(u.activo ? 'Cuenta desactivada' : 'Cuenta activada');
+              UI.toast(u.activo ? T('Cuenta desactivada') : T('Cuenta activada'));
               cargar();
             })
             .catch(function (e) {
               boton.disabled = false;
-              if (tit) tit.textContent = u.activo ? 'Desactivar la cuenta' : 'Volver a activarla';
+              if (tit) tit.textContent = u.activo ? T('Desactivar la cuenta') : T('Volver a activarla');
               UI.toast(e.message);
             });
         };
 
         el.querySelector('#ad-borrar').onclick = function () {
           UI.closeModal();
-          UI.confirm('Borrar ' + (u.email || 'esta cuenta'),
-            'Se va la cuenta y todo lo que tenga guardado: sus rutinas, sus ' +
-            'entrenamientos y su historial. No hay vuelta atrás.',
-            'Borrar', true).then(function (ok) {
+          UI.confirm(Tn('Borrar {que}', { que: u.email || T('esta cuenta') }),
+            T('Se va la cuenta y todo lo que tenga guardado: sus rutinas, sus ' +
+            'entrenamientos y su historial. No hay vuelta atrás.'),
+            T('Borrar'), true).then(function (ok) {
             if (!ok) return;
             llamar({ accion: 'borrar', id: id })
-              .then(function () { UI.toast('Cuenta borrada'); cargar(); })
+              .then(function () { UI.toast(T('Cuenta borrada')); cargar(); })
               .catch(function (e) { UI.toast(e.message); });
           });
         };

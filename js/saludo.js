@@ -44,10 +44,10 @@
 
   function franjaHoraria() {
     const h = new Date().getHours();
-    if (h < 6) return 'Buenas noches';
-    if (h < 13) return 'Buenos días';
-    if (h < 21) return 'Buenas tardes';
-    return 'Buenas noches';
+    if (h < 6) return T('Buenas noches');
+    if (h < 13) return T('Buenos días');
+    if (h < 21) return T('Buenas tardes');
+    return T('Buenas noches');
   }
 
   function nombre() {
@@ -56,7 +56,7 @@
 
   function conNombre(saludo) {
     const n = nombre();
-    return n ? saludo + ', ' + n : saludo;
+    return n ? Tn('{saludo}, {nombre}', { saludo: saludo, nombre: n }) : saludo;
   }
 
   /* El mensaje: se elige por la situación real, de la más excepcional a la más
@@ -73,25 +73,25 @@
     /* 1. Todavía no ha entrenado nunca */
     if (!sesiones.length) {
       return {
-        titulo: conNombre('Bienvenido'),
-        texto: 'Todo esto empieza con una serie. Elige una rutina y hazla: lo demás ' +
-          'ya se va colocando solo.'
+        titulo: conNombre(T('Bienvenido')),
+        texto: T('Todo esto empieza con una serie. Elige una rutina y hazla: lo demás ' +
+          'ya se va colocando solo.')
       };
     }
 
     /* 2. Vuelve después de mucho tiempo */
     if (diasSinEntrenar >= 21) {
       return {
-        titulo: conNombre('Cuánto tiempo'),
-        texto: 'Volver es la parte difícil y ya la has hecho. Hoy no busques tu mejor ' +
-          'día: busca el primero.'
+        titulo: conNombre(T('Cuánto tiempo')),
+        texto: T('Volver es la parte difícil y ya la has hecho. Hoy no busques tu mejor ' +
+          'día: busca el primero.')
       };
     }
     if (diasSinEntrenar >= 8) {
       return {
-        titulo: conNombre('Otra vez por aquí'),
-        texto: 'Una semana parada no borra ' + st.total + ' entrenamientos. Baja algo el ' +
-          'peso hoy y en dos sesiones estás donde estabas.'
+        titulo: conNombre(T('Otra vez por aquí')),
+        texto: Tn('Una semana parada no borra {n} entrenamientos. Baja algo el peso hoy ' +
+          'y en dos sesiones estás donde estabas.', { n: st.total })
       };
     }
 
@@ -99,14 +99,15 @@
     if (st.streak >= 5) {
       return {
         titulo: conNombre(franjaHoraria()),
-        texto: st.streak + ' días seguidos. Lo raro ya no es entrenar hoy: sería no hacerlo.'
+        texto: Tn('{n} días seguidos. Lo raro ya no es entrenar hoy: sería no hacerlo.',
+          { n: st.streak })
       };
     }
     if (st.streak >= 2) {
       return {
         titulo: conNombre(franjaHoraria()),
-        texto: 'Llevas ' + st.streak + ' días seguidos. Hoy es el que convierte la ' +
-          'casualidad en costumbre.'
+        texto: Tn('Llevas {n} días seguidos. Hoy es el que convierte la casualidad ' +
+          'en costumbre.', { n: st.streak })
       };
     }
 
@@ -114,15 +115,16 @@
     if (st.week >= 4) {
       return {
         titulo: conNombre(franjaHoraria()),
-        texto: st.week + ' entrenamientos esta semana. A este ritmo el descanso también ' +
-          'entrena: si hoy toca parar, para.'
+        texto: Tn('{n} entrenamientos esta semana. A este ritmo el descanso también ' +
+          'entrena: si hoy toca parar, para.', { n: st.week })
       };
     }
     if (st.week >= 1) {
       return {
         titulo: conNombre(franjaHoraria()),
-        texto: 'Llevas ' + st.week + (st.week === 1 ? ' entrenamiento' : ' entrenamientos') +
-          ' esta semana. Uno más y la semana ya cuenta.'
+        texto: Tp(st.week,
+          'Llevas {n} entrenamiento esta semana. Uno más y la semana ya cuenta.',
+          'Llevas {n} entrenamientos esta semana. Uno más y la semana ya cuenta.')
       };
     }
 
@@ -130,15 +132,15 @@
     if (diasSinEntrenar <= 2) {
       return {
         titulo: conNombre(franjaHoraria()),
-        texto: 'Semana nueva y el cuerpo descansado. Es el mejor día para el ejercicio ' +
-          'que peor se te da.'
+        texto: T('Semana nueva y el cuerpo descansado. Es el mejor día para el ' +
+          'ejercicio que peor se te da.')
       };
     }
 
     return {
       titulo: conNombre(franjaHoraria()),
-      texto: 'Van ' + diasSinEntrenar + ' días desde la última. Con media hora hoy la ' +
-        'semana cambia de signo.'
+      texto: Tn('Van {n} días desde la última. Con media hora hoy la semana cambia ' +
+        'de signo.', { n: diasSinEntrenar })
     };
   }
 

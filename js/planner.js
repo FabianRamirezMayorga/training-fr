@@ -186,16 +186,19 @@
             reps: estatico ? 40 : (pesado ? goal.reps : goal.isoReps),
             weight: 0,
             rest: pesado ? goal.rest : goal.isoRest,
-            note: estatico ? 'Aguanta la posición: las repeticiones son segundos.' : ''
+            note: estatico ? T('Aguanta la posición: las repeticiones son segundos.') : ''
           });
         }
       });
 
       return {
         id: null,
-        name: UI.diaLargo(day) + ' · ' + plan.name,
-        note: 'Generado para ' + opts.minutes + ' min · ' + goal.label.toLowerCase() +
-          ' · ' + Data.gearFrase(opts.gear) + '. Ajusta lo que quieras.',
+        /* Acaba siendo el nombre de TU rutina, asi que se escribe ya en el
+           idioma que tengas puesto al generarla. */
+        name: UI.diaLargo(day) + ' · ' + T(plan.name),
+        note: Tn('Generado para {min} min · {objetivo} · {donde}. Ajusta lo que quieras.',
+          { min: opts.minutes, objetivo: T(goal.label).toLowerCase(),
+            donde: Data.gearFrase(opts.gear) }),
         days: [day],
         muscles: plan.muscles,
         exercises: ejercicios
@@ -249,7 +252,7 @@
           reps: estatico ? 40 : (pesado ? goal.reps : goal.isoReps),
           weight: 0,
           rest: pesado ? goal.rest : goal.isoRest,
-          note: estatico ? 'Aguanta la posición: las repeticiones son segundos.' : ''
+          note: estatico ? T('Aguanta la posición: las repeticiones son segundos.') : ''
         });
       }
     });

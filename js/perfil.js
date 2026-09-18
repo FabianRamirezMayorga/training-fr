@@ -175,10 +175,10 @@
   function loQueFalta(p) {
     p = p || datos();
     const faltan = [];
-    if (!p.sexo) faltan.push('el sexo biológico');
-    if (!(p.edad > 0)) faltan.push('la edad');
-    if (!(p.altura > 0)) faltan.push('la altura');
-    if (!(p.peso > 0)) faltan.push('el peso');
+    if (!p.sexo) faltan.push(T('el sexo biológico'));
+    if (!(p.edad > 0)) faltan.push(T('la edad'));
+    if (!(p.altura > 0)) faltan.push(T('la altura'));
+    if (!(p.peso > 0)) faltan.push(T('el peso'));
     /* Obligatorio, pero por otro motivo que los cuatro de arriba: aquellos
        hacen falta para la fórmula del metabolismo y sin ellos no hay números;
        el país no toca ni una caloría, pero sin él el menú sale de un
@@ -186,7 +186,7 @@
        y no en `completo()`, que es lo que deja calcular: meterlo ahí dejaría
        sin calorías a quien ya tenía su perfil hecho, por un dato que no entra
        en el cálculo. */
-    if (!p.pais) faltan.push('el país');
+    if (!p.pais) faltan.push(T('el país'));
     return faltan;
   }
 
@@ -252,7 +252,7 @@
       const kg = Math.min(1.2, Math.max(0.1, Number(p.ritmoKg)));
       const t = tdee(p) || 2000;
       return {
-        label: 'El mío', kgSemana: Math.round(kg * 100) / 100,
+        label: 'El mío', kgSemana: Math.round(kg * 100) / 100,   /* se traduce al pintar */
         pct: Math.min(0.3, (kg * 7700 / 7) / t)
       };
     }
@@ -349,31 +349,34 @@
     if (!completo(p)) return '';
     const m = macros(p);
     const partes = [
-      p.sexo === 'mujer' ? 'Mujer' : 'Hombre',
-      p.edad + ' años',
+      p.sexo === 'mujer' ? T('Mujer') : T('Hombre'),
+      Tn('{n} años', { n: p.edad }),
       p.altura + ' cm',
       p.peso + ' kg',
-      p.grasa ? p.grasa + '% de grasa corporal' : null,
+      p.grasa ? Tn('{n}% de grasa corporal', { n: p.grasa }) : null,
       'IMC ' + imc(p).toFixed(1),
-      'actividad ' + (ACTIVIDAD[p.actividad] || {}).label,
-      'objetivo: ' + (OBJETIVO[p.objetivo] || {}).label +
-        (p.objetivoTexto ? ' (con sus palabras: "' + p.objetivoTexto + '")' : ''),
-      'ritmo ' + ritmoActual(p).label,
-      'gasto estimado ' + Math.round(tdee(p)) + ' kcal',
-      m ? 'objetivo diario ' + m.kcal + ' kcal (' + m.prot + ' g proteína, ' +
-        m.carbo + ' g hidratos, ' + m.grasa + ' g grasa)' : null,
-      'duerme ' + p.sueño + ' h',
-      'se levanta a las ' + p.despertar + ' y se acuesta a las ' + p.acostar,
-      p.comidas + ' comidas al día',
-      'dieta: ' + (DIETA[p.dieta] || p.dieta),
+      Tn('actividad {que}', { que: T((ACTIVIDAD[p.actividad] || {}).label) }),
+      Tn('objetivo: {que}', { que: T((OBJETIVO[p.objetivo] || {}).label) }) +
+        (p.objetivoTexto
+          ? Tn(' (con sus palabras: "{texto}")', { texto: p.objetivoTexto }) : ''),
+      Tn('ritmo {que}', { que: T(ritmoActual(p).label) }),
+      Tn('gasto estimado {n} kcal', { n: Math.round(tdee(p)) }),
+      m ? Tn('objetivo diario {kcal} kcal ({prot} g proteína, {carbo} g hidratos, ' +
+        '{grasa} g grasa)',
+        { kcal: m.kcal, prot: m.prot, carbo: m.carbo, grasa: m.grasa }) : null,
+      Tn('duerme {n} h', { n: p.sueño }),
+      Tn('se levanta a las {a} y se acuesta a las {b}',
+        { a: p.despertar, b: p.acostar }),
+      Tn('{n} comidas al día', { n: p.comidas }),
+      Tn('dieta: {que}', { que: T(DIETA[p.dieta] || p.dieta) }),
       /* El pais no es un adorno del perfil: decide si lo que se le propone
          comer existe en su supermercado y como se llama. Va en el resumen, que
          es lo que llega a todos los prompts. */
-      p.pais && g.Paises ? 'vive en ' + Paises.nombreDe(p.pais) : null,
-      p.alergias ? 'alergias o intolerancias: ' + p.alergias : null,
-      p.lesiones ? 'lesiones o limitaciones: ' + p.lesiones : null,
-      p.condiciones ? 'condiciones de salud: ' + p.condiciones : null,
-      p.notas ? 'notas: ' + p.notas : null
+      p.pais && g.Paises ? Tn('vive en {pais}', { pais: Paises.nombreDe(p.pais) }) : null,
+      p.alergias ? Tn('alergias o intolerancias: {texto}', { texto: p.alergias }) : null,
+      p.lesiones ? Tn('lesiones o limitaciones: {texto}', { texto: p.lesiones }) : null,
+      p.condiciones ? Tn('condiciones de salud: {texto}', { texto: p.condiciones }) : null,
+      p.notas ? Tn('notas: {texto}', { texto: p.notas }) : null
     ];
     return partes.filter(Boolean).join('; ') + '.';
   }
