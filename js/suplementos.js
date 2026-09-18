@@ -244,11 +244,12 @@
           return g.UI && UI.hora ? UI.hora(h) : h;
         }).join(', ');
       }
-      return p.label;
+      return T(p.label);
     }
     const m = momentoDe(s.momento);
-    return m.id === 'fija' ? 'A las ' + (g.UI && UI.hora ? UI.hora(horaDe(s)) : horaDe(s))
-      : m.label;
+    return m.id === 'fija'
+      ? Tn('A las {hora}', { hora: g.UI && UI.hora ? UI.hora(horaDe(s)) : horaDe(s) })
+      : T(m.label);
   }
 
   /* ---------- guardado ---------- */
@@ -399,16 +400,16 @@
     if (!l.length) return '';
     const frec = function (s) {
       const f = FRECUENCIAS.filter(function (x) { return x.id === s.frecuencia; })[0];
-      return f ? f.label.toLowerCase() : 'todos los días';
+      return T(f ? f.label : 'Todos los días').toLowerCase();
     };
     return l.map(function (s) {
       const hs = horasDe(s);
       const veces = hs.length;
-      return '- ' + s.nombre + (s.dosis ? ', ' + s.dosis : '') +
+      return '- ' + T(s.nombre) + (s.dosis ? ', ' + s.dosis : '') +
         ', ' + frec(s) + ', ' + etiquetaMomento(s).toLowerCase() +
-        ' (sobre las ' + hs.join(', ') + ')' +
-        (s.aporta ? ' [aporta ~' + (s.aporta.kcal * veces) + ' kcal y ' +
-          (s.aporta.prot * veces) + ' g de proteína al día]' : '');
+        Tn(' (sobre las {horas})', { horas: hs.join(', ') }) +
+        (s.aporta ? Tn(' [aporta ~{kcal} kcal y {prot} g de proteína al día]',
+          { kcal: s.aporta.kcal * veces, prot: s.aporta.prot * veces }) : '');
     }).join('\n');
   }
 
@@ -468,6 +469,8 @@
         sup: firma,
         tipo: 'suplemento',
         titulo: grupo.length === 1 ? grupo[0].nombre : 'Tus suplementos',
+        /* El titulo se guarda en espanol —es la clave— y Alertas lo traduce al
+           pintarlo, igual que el resto de recordatorios. */
         mensaje: que.join(' · '),
         horas: horas,
         dias: dias,

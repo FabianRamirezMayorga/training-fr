@@ -866,16 +866,16 @@
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Perfil')}</button>
       <div class="row between">
-        <h1 style="margin:0">Objetivos</h1>
-        <button class="btn primary sm btn-arranque" data-a="nuevo">${raw(icon('plus'))} Nuevo</button>
+        <h1 style="margin:0">${T('Objetivos')}</h1>
+        <button class="btn primary sm btn-arranque" data-a="nuevo">${raw(icon('plus'))} ${T('Nuevo')}</button>
       </div>
-      <p class="muted" style="margin-top:8px">Se actualizan solos con lo que entrenas
-      y con tus pesajes. No hay que apuntar nada a mano.</p>
+      <p class="muted" style="margin-top:8px">${T('Se actualizan solos con lo que entrenas ' +
+      'y con tus pesajes. No hay que apuntar nada a mano.')}</p>
 
       ${raw(metas.length ? '<div class="stack">' + metas.map(tarjetaMeta).join('') + '</div>'
         : html`<div class="empty">${raw(icon('trofeo'))}
-            <p>Ponte una meta y te enseño cuánto te falta cada vez que abras la app.</p>
-            <button class="btn primary btn-arranque" data-a="nuevo">Crear mi primer objetivo</button>
+            <p>${T('Ponte una meta y te enseño cuánto te falta cada vez que abras la app.')}</p>
+            <button class="btn primary btn-arranque" data-a="nuevo">${T('Crear mi primer objetivo')}</button>
           </div>`)}`;
   };
 
@@ -890,10 +890,11 @@
           <div class="grow">
             <div class="pre-encima">${Objetivos.etiqueta(m)}</div>
             <div class="pre-num" style="margin-top:2px">${Objetivos.formato(m, p.actual)}
-              <span class="tiny" style="font-weight:600">de ${Objetivos.formato(m, m.meta)}</span></div>
+              <span class="tiny" style="font-weight:600">${Tn('de {meta}',
+                { meta: Objetivos.formato(m, m.meta) })}</span></div>
           </div>
           ${raw(p.cumplido
-            ? '<span class="chip solid">' + icon('check') + ' Cumplido</span>'
+            ? '<span class="chip solid">' + icon('check') + ' ' + esc(T('Cumplido')) + '</span>'
             : '<span class="chip">' + pct + '%</span>')}
           <button class="btn icon sm danger" data-del="${m.id}"
                   aria-label="${T('Borrar objetivo')}">${raw(icon('trash'))}</button>
@@ -903,7 +904,7 @@
 
         ${raw(previsionHTML(m, pre))}
 
-        ${raw(m.nota ? '<div class="tiny" style="margin-top:8px">' + esc(m.nota) + '</div>' : '')}
+        ${raw(m.nota ? '<div class="tiny" style="margin-top:8px">' + esc(T(m.nota)) + '</div>' : '')}
       </div>`;
   }
 
@@ -924,7 +925,7 @@
         ${raw(llega ? html`
           <div class="mp-cab">
             <div>
-              <div class="pre-encima">${pre.segunPlan ? 'Según tu plan' : 'Si sigues así'}</div>
+              <div class="pre-encima">${pre.segunPlan ? T('Según tu plan') : T('Si sigues así')}</div>
               <div class="mp-cuanto">${Objetivos.cuanto(pre.dias)}</div>
             </div>
             <div class="mp-fecha">${UI.fechaCorta(pre.fecha)}</div>
@@ -932,7 +933,8 @@
 
         ${raw(graficaMeta(m, pre))}
 
-        <p class="tiny mp-nota">${pre.frase}${raw(llega ? '. ' + salvedad(m, pre) : '')}</p>
+        <p class="tiny mp-nota">${Objetivos.leer(pre.frase)}${raw(llega
+          ? '. ' + esc(salvedad(m, pre)) : '')}</p>
       </div>`;
   }
 
@@ -943,19 +945,19 @@
     /* Cuando el numero sale del plan y no de la bascula hay que decirlo: es una
        intencion, no una medida. */
     if (pre && pre.segunPlan) {
-      return 'Sale de tu plan —tu gasto, tus calorías y el ritmo que elegiste—, ' +
+      return T('Sale de tu plan —tu gasto, tus calorías y el ritmo que elegiste—, ' +
         'no de la báscula. Apunta tu peso una vez por semana y paso a medir lo ' +
-        'que pasa de verdad.';
+        'que pasa de verdad.');
     }
     if (m.tipo === 'peso') {
-      return 'Es una recta sobre lo que llevas: cuenta con que los últimos kilos ' +
-        'cuesten más que los primeros.';
+      return T('Es una recta sobre lo que llevas: cuenta con que los últimos kilos ' +
+        'cuesten más que los primeros.');
     }
     if (m.tipo === 'marca') {
-      return 'Es una recta sobre lo que llevas: la fuerza sube a tirones, no a ' +
-        'ritmo constante.';
+      return T('Es una recta sobre lo que llevas: la fuerza sube a tirones, no a ' +
+        'ritmo constante.');
     }
-    return 'Es una recta sobre lo que llevas, contando con que sigas igual.';
+    return T('Es una recta sobre lo que llevas, contando con que sigas igual.');
   }
 
   /* ---------- el dibujo ----------
@@ -1037,7 +1039,8 @@
       : '';
 
     return '<div class="meta-graf-caja" role="img" aria-label="' +
-      esc('Tu evolución y lo que falta hasta ' + Objetivos.formato(m, meta)) + '">' +
+      esc(Tn('Tu evolución y lo que falta hasta {meta}',
+        { meta: Objetivos.formato(m, meta) })) + '">' +
       '<svg class="meta-graf" viewBox="0 0 ' + W + ' ' + H + '" ' +
       'preserveAspectRatio="none" aria-hidden="true">' +
       '<defs><linearGradient id="' + uid + '" x1="0" y1="0" x2="0" y2="1">' +
@@ -1068,7 +1071,7 @@
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bindAll(root, '[data-a=nuevo]', nuevaMetaSheet);
     bindAll(root, '[data-del]', function (el) {
-      UI.confirm('Borrar objetivo', 'Se quitará de tu lista.', 'Borrar', true).then(function (ok) {
+      UI.confirm(T('Borrar objetivo'), T('Se quitará de tu lista.'), T('Borrar'), true).then(function (ok) {
         if (ok) { Objetivos.borrar(el.dataset.del); render(); }
       });
     });
@@ -1077,12 +1080,12 @@
   function nuevaMetaSheet() {
     let tipo = '';
     UI.modal(html`
-      <h2>Nuevo objetivo</h2>
-      <p class="muted">Elige qué quieres conseguir.</p>
+      <h2>${T('Nuevo objetivo')}</h2>
+      <p class="muted">${T('Elige qué quieres conseguir.')}</p>
       <div class="list" id="tipos">
         ${raw(Object.keys(Objetivos.TIPOS).map(function (k) {
           const t = Objetivos.TIPOS[k];
-          return fila({ icono: t.icono, titulo: t.label, sub: t.note, accion: k });
+          return fila({ icono: t.icono, titulo: T(t.label), sub: T(t.note), accion: k });
         }).join(''))}
       </div>
       <div id="meta-detalle" style="margin-top:14px"></div>`,
@@ -1105,22 +1108,22 @@
 
     caja.innerHTML = html`
       ${raw(tipo === 'marca' ? html`
-        <label class="tiny">EJERCICIO</label>
+        <label class="tiny">${T('EJERCICIO')}</label>
         <select id="meta-ex" style="margin:5px 0 12px">
           ${raw(Data.search({ gear: Store.settings().gear }).slice(0, 200).map(function (ex) {
             return '<option value="' + esc(ex.id) + '">' + esc(ex.nameEs) + '</option>';
           }).join(''))}
         </select>` : '')}
-      <label class="tiny">META (${esc(t.unidad)})</label>
+      <label class="tiny">${Tn('META ({unidad})', { unidad: T(t.unidad) })}</label>
       <input type="number" inputmode="decimal" step="0.5" id="meta-val"
-             placeholder="${esc(t.unidad)}" style="margin:5px 0 12px">
-      <div class="tiny" style="margin-bottom:12px">Ahora mismo vas por
-        ${esc(t.formato(actual))}.</div>
-      <button class="btn primary block" data-x="crear">Crear objetivo</button>`;
+             placeholder="${esc(T(t.unidad))}" style="margin:5px 0 12px">
+      <div class="tiny" style="margin-bottom:12px">${Tn('Ahora mismo vas por {valor}.',
+        { valor: t.formato(actual) })}</div>
+      <button class="btn primary block" data-x="crear">${T('Crear objetivo')}</button>`;
 
     caja.querySelector('[data-x=crear]').onclick = function () {
       const valor = Number(caja.querySelector('#meta-val').value);
-      if (!valor) { UI.toast('Escribe la meta'); return; }
+      if (!valor) { UI.toast(T('Escribe la meta')); return; }
       const m = Objetivos.nuevo(tipo);
       m.meta = valor;
       if (tipo === 'marca') {
@@ -1133,7 +1136,7 @@
       Objetivos.guardar(m);
       UI.closeModal();
       render();
-      UI.toast('Objetivo creado');
+      UI.toast(T('Objetivo creado'));
     };
   }
 

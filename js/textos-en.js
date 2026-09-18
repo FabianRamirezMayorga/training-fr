@@ -1495,6 +1495,1042 @@
       'About {kcal} kcal. Today\'s is in the app.',
     'Abrir en Training FR: {enlace}': 'Open in Training FR: {enlace}',
     '{n} avisos · de {desde} a {hasta} cada {cada}':
-      '{n} alerts · from {desde} to {hasta} every {cada}'
+      '{n} alerts · from {desde} to {hasta} every {cada}',
+
+    /* ---------- Suplementos: el catálogo ---------- */
+    'Creatina': 'Creatine',
+    'Proteína en polvo': 'Protein powder',
+    'Omega 3': 'Omega 3',
+    'Multivitamínico': 'Multivitamin',
+    'Vitamina D': 'Vitamin D',
+    'Magnesio': 'Magnesium',
+    'Pre-entreno': 'Pre-workout',
+    'Colágeno': 'Collagen',
+    'Aminoácidos': 'Amino acids',
+    'Glutamina': 'Glutamine',
+    'Zinc': 'Zinc',
+    'Probiótico': 'Probiotic',
+    'Añadir suplemento': 'Add a supplement',
+    'Elige cuál y en el paso siguiente pones la dosis, cada cuánto y a qué hora.':
+      'Pick which one, and on the next step you set the dose, how often and what time.',
+    'El tuyo no está: lo escribes tú': 'Yours isn\'t here: write it yourself',
+
+    /* ---------- Suplementos: la dosis y las unidades ---------- */
+    'Cuánto tomas': 'How much you take',
+    'En qué se mide': 'How it is measured',
+    'Cápsulas': 'Capsules',
+    'Comprimidos o pastillas': 'Tablets or pills',
+    'Cazos o scoops': 'Scoops',
+    'Gramos': 'Grams',
+    'Mililitros': 'Millilitres',
+    'Gotas': 'Drops',
+    'Sobres': 'Sachets',
+    'Tomas': 'Doses',
+    'cápsula': 'capsule',
+    'cápsulas': 'capsules',
+    'comprimido': 'tablet',
+    'comprimidos': 'tablets',
+    'cazo': 'scoop',
+    'cazos': 'scoops',
+    'gota': 'drop',
+    'gotas': 'drops',
+    'sobre': 'sachet',
+    'sobres': 'sachets',
+    'toma': 'dose',
+    'tomas': 'doses',
+    'Elige la dosis': 'Pick the dose',
+
+    /* ---------- Suplementos: cada cuánto y en qué momento ---------- */
+    'Cada día': 'Daily',
+    'Los siete': 'All seven',
+    'Días que entreno': 'Training days',
+    'Sale de los días de tu plan': 'Taken from the days in your plan',
+    'Día sí, día no': 'Alternate days',
+    'Empezando hoy': 'Starting today',
+    'Un día/semana': 'One day/week',
+    'El que elijas': 'Whichever you pick',
+    'Varias al día': 'Several a day',
+    'Repartido en el día': 'Spread over the day',
+    'Con el desayuno': 'With breakfast',
+    'Con el almuerzo': 'With lunch',
+    'Con la merienda': 'With the afternoon snack',
+    'Con la cena': 'With dinner',
+    'A una hora puntual': 'At a set time',
+    'Post-entreno': 'Post-workout',
+    'Hora puntual': 'Set time',
+    'A las {hora}': 'At {hora}',
+
+    /* ---------- Suplementos: la ficha ---------- */
+    'Nuevo suplemento': 'New supplement',
+    'Nombre': 'Name',
+    'CUÁNTO': 'HOW MUCH',
+    'CADA CUÁNTO': 'HOW OFTEN',
+    'EN QUÉ MOMENTO': 'WHEN',
+    'Ponle nombre': 'Give it a name',
+    'Quitarlo de la lista': 'Remove it from the list',
+    'Quitar {que}': 'Remove {que}',
+    'el suplemento': 'the supplement',
+    'Se va de la lista, de las cuentas y de sus alertas. Si compartía hora con otro, esa alerta se queda con el que sigues tomando.':
+      'It goes from the list, from the totals and from its reminders. If it shared a time with another one, that reminder stays with the one you still take.',
+    '{que} quitado': '{que} removed',
+    'Quitado': 'Removed',
+    '{que} añadido': '{que} added',
+    '{n} alerta lista': '{n} reminder ready',
+    '{n} alertas listas': '{n} reminders ready',
+    'No hay nada que recordar': 'There is nothing to remind you about',
+    'No he podido calcularlo': 'I couldn\'t work it out',
+    '¿A qué hora?': 'What time?',
+    '¿A qué hora empiezas?': 'What time do you start?',
+    'La que tú digas. Es el único momento que no depende de tus comidas ni de tu entreno.':
+      'Whatever you say. It\'s the only slot that doesn\'t depend on your meals or your training.',
+    'De ahí salen las demás, contando hacia delante y cortando en la cena.':
+      'The rest follow from there, counting forwards and stopping at dinner.',
+
+    /* ---------- Suplementos: cómo lo repartes ---------- */
+    '¿Cómo lo repartes?': 'How do you spread it out?',
+    'Tres maneras. Elige una y dentro verás las horas que salen con tus datos de ahora.':
+      'Three ways. Pick one and inside you\'ll see the times that come out of your data right now.',
+    'Cómo lo repartes': 'How you spread it out',
+    'Elige cómo lo repartes': 'Pick how you spread it out',
+    'Por reloj': 'By the clock',
+    'Cada 4, 6, 8 o 12 horas': 'Every 4, 6, 8 or 12 hours',
+    'Arrancan a la hora que elijas y se cortan en la cena: nadie quiere el magnesio a las tres de la mañana.':
+      'They start at the time you pick and stop at dinner: nobody wants magnesium at three in the morning.',
+    'Con tus comidas': 'With your meals',
+    'Antes, con o después de cada una': 'Before, with or after each one',
+    'Salen de tus horas de comer, así que si mueves una comida la toma se mueve con ella.':
+      'They come from your meal times, so if you move a meal the dose moves with it.',
+    'Pones tú cada hora, una a una': 'You set each time, one by one',
+    'Para lo que no encaja en ningún patrón: lo que manda una receta, o los turnos de quien no come a las mismas horas.':
+      'For anything that fits no pattern: what a prescription says, or shift work where you don\'t eat at the same times.',
+    'Debajo de cada una van las horas que salen con tus datos de ahora.':
+      'Under each one are the times that come out of your data right now.',
+    'Pon tus horas': 'Set your times',
+    'Gira la rueda, añade, y repite hasta tenerlas todas. Se crea una alerta por cada una.':
+      'Spin the dial, add, and repeat until you have them all. One reminder is created for each.',
+    'Añadir esta hora': 'Add this time',
+    'Tus horas': 'Your times',
+    'Todavía ninguna. Gira la rueda y añade la primera.':
+      'None yet. Spin the dial and add the first one.',
+    'Esa hora ya está': 'That time is already there',
+    '{hora} añadida': '{hora} added',
+    '{n} toma al día': '{n} dose a day',
+    '{n} tomas al día': '{n} doses a day',
+
+    /* ---------- Suplementos: lo que ve el entrenador ---------- */
+    ' (sobre las {horas})': ' (around {horas})',
+    ' [aporta ~{kcal} kcal y {prot} g de proteína al día]':
+      ' [adds ~{kcal} kcal and {prot} g of protein a day]',
+
+    /* ---------- Programa: el perfil y comparar ---------- */
+    'Tu programa': 'Your program',
+    'Construido con tu perfil: sexo, edad, nivel, objetivo y limitaciones. No es una plantilla con tu nombre encima.':
+      'Built from your profile: sex, age, level, goal and limitations. It isn\'t a template with your name on it.',
+    'Para que el plan sea tuyo de verdad y no una plantilla, necesito cuatro datos: sexo, edad, altura y peso. Con eso ajusto el volumen, las repeticiones, los descansos y el esfuerzo al que llegas.':
+      'For the plan to really be yours and not a template, I need four things: sex, age, height and weight. With those I set the volume, the reps, the rest and how hard you go.',
+    'Te llevo un minuto rellenarlo.': 'It\'ll take you a minute to fill in.',
+    'O crear un plan genérico sin perfil': 'Or create a generic plan with no profile',
+    'Principiante': 'Beginner',
+    'Intermedio': 'Intermediate',
+    'Avanzado': 'Advanced',
+    'TU PERFIL': 'YOUR PROFILE',
+    'Duerme {h} h': 'Sleeps {h} h',
+    'De lo que has escrito en limitaciones he entendido: {lista}. Abajo verás qué se evita por eso.':
+      'From what you wrote under limitations I understood: {lista}. Below you\'ll see what gets avoided because of it.',
+    'Sin limitaciones apuntadas. Si tienes alguna molestia, escríbela en el perfil y el plan la esquiva.':
+      'No limitations noted. If something bothers you, write it in your profile and the plan works around it.',
+    'Necesitas al menos dos planes para comparar':
+      'You need at least two plans to compare',
+    'Cuál seguir': 'Which one to follow',
+    'Los cuatro pueden pasar la revisión y no valer lo mismo: la revisión busca fallos, y no tener fallos no es lo mismo que ser el mejor. Estos son los números que los separan.':
+      'All four can pass the review and still not be worth the same: the review looks for faults, and having no faults isn\'t the same as being the best. These are the numbers that tell them apart.',
+    'Es el que yo seguiría': 'It\'s the one I\'d follow',
+    'CÓMO QUEDAN': 'HOW THEY COMPARE',
+    'Plan': 'Plan',
+    'Nota': 'Score',
+    'Días': 'Days',
+    'Ejer.': 'Exer.',
+    'Repartidos': 'Spread out',
+    'Cortos': 'Short',
+    '{a}: del día más corto al más largo. {b}: músculos que entrenas dos días o más a la semana, que rinden más que los de un solo día. {c}: músculos por debajo de ocho series semanales.':
+      '{a}: from the shortest day to the longest. {b}: muscles you train two or more days a week, which do better than the ones trained on a single day. {c}: muscles under eight sets a week.',
+    'SERIES POR MÚSCULO A LA SEMANA': 'SETS PER MUSCLE PER WEEK',
+    'Músculo': 'Muscle',
+    'El <b>x2</b> es en cuántos días distintos entrenas ese músculo. En rojo, lo que se queda por debajo de ocho series.':
+      'The <b>x2</b> is how many different days you train that muscle. In red, anything under eight sets.',
+    'Abrir «{que}»': 'Open «{que}»',
+
+    /* ---------- Programa: mis planes ---------- */
+    'Lo que ya tienes': 'What you already have',
+    'Plan recién montado': 'Freshly built plan',
+    '{n} sesión': '{n} session',
+    '{n} sesiones': '{n} sessions',
+    'montado con IA': 'built with AI',
+    'montado con la calculadora': 'built by the calculator',
+    'sin pasar a tus rutinas': 'not moved into your routines',
+    '{n} ejercicio': '{n} exercise',
+    'Comparar mis {n} planes': 'Compare my {n} plans',
+    'Toca uno para abrirlo aquí: verás sus días y su reparto, podrás pedirle al entrenador que lo audite y aplicar lo que proponga sobre estas mismas rutinas.':
+      'Tap one to open it here: you\'ll see its days and its split, you can have the coach audit it, and apply what it proposes to these same routines.',
+    'Ese plan ya no está': 'That plan is gone',
+    'Esa rutina ya no está': 'That routine is gone',
+
+    /* ---------- Programa: el asistente ---------- */
+    'Generar uno nuevo': 'Generate a new one',
+    'Corregir mis datos': 'Fix my details',
+    '{n} día': '{n} day',
+    '{n} días': '{n} days',
+    'DÓNDE VAS A ENTRENAR': 'WHERE YOU WILL TRAIN',
+    'Solo vale para este plan; no cambia el catálogo del resto de la app.':
+      'It only applies to this plan; it doesn\'t change the catalogue for the rest of the app.',
+    'CUÁNTO DURA CADA SESIÓN': 'HOW LONG EACH SESSION LASTS',
+    '¿PRIORIZAR ALGUNA ZONA?': 'PRIORITISE AN AREA?',
+    '¿ALGO TE MOLESTA AHORA MISMO?': 'ANYTHING BOTHERING YOU RIGHT NOW?',
+    'Ej. la rodilla al bajar, el hombro por encima de la cabeza':
+      'E.g. my knee on the way down, my shoulder overhead',
+    '¿ALGO MÁS QUE DEBA SABER?': 'ANYTHING ELSE I SHOULD KNOW?',
+    'Ej. quiero mejorar en dominadas; odio las sentadillas; los viernes voy con prisa; tengo una carrera en dos meses':
+      'E.g. I want to get better at pull-ups; I hate squats; Fridays I am in a rush; I have a race in two months',
+    'Lo de arriba es contexto sobre ti; esto son órdenes. Lo que escribas aquí manda sobre lo demás, siempre que no sea un riesgo ni choque con tus limitaciones.':
+      'What\'s above is context about you; this is orders. What you write here overrides the rest, as long as it isn\'t a risk and doesn\'t clash with your limitations.',
+    'Ej. nada de peso muerto; empieza siempre por dominadas; que el viernes no pase de 40 minutos; mete abdomen todos los días':
+      'E.g. no deadlifts; always start with pull-ups; keep Friday under 40 minutes; put abs in every day',
+    'Tus datos': 'Your details',
+    'Son los que usa el plan para el volumen, las repeticiones y el esfuerzo. Si algo no cuadra, corrígelo antes de generar.':
+      'These are what the plan uses for volume, reps and effort. If something doesn\'t look right, fix it before generating.',
+    '¿Cuándo puedes entrenar?': 'When can you train?',
+    'Ponlo realista: es mejor un plan de tres días que cumples que uno de cinco que no.':
+      'Be realistic: a three-day plan you stick to beats a five-day one you don\'t.',
+    '¿Qué buscas?': 'What are you after?',
+    '¿Algo que deba saber?': 'Anything I should know?',
+    'Esto es opcional, pero es lo que separa un plan tuyo de uno genérico. Solo lo aprovecha la IA; la calculadora no lee texto.':
+      'This is optional, but it\'s what separates a plan of your own from a generic one. Only the AI uses it; the calculator doesn\'t read text.',
+    'La IA no ha podido montarlo': 'The AI couldn\'t build it',
+    'Lo que ves abajo lo ha montado la calculadora, no la IA. Arregla lo de arriba y vuelve a darle a {boton}.':
+      'What you see below was built by the calculator, not the AI. Fix what is above and press {boton} again.',
+    'Generar rutina con IA': 'Generate a routine with AI',
+    'Revisar mi proveedor de IA': 'Check my AI provider',
+    'Montándote la semana entera con tus datos delante… esto tarda unos segundos.':
+      'Building your whole week with your data in front of me… this takes a few seconds.',
+    'Lee todo lo anterior más lo que levantas, lo que llevas abandonado y los días que cumples de verdad, y elige los ejercicios uno a uno del catálogo.':
+      'It reads everything above plus what you lift, what you\'ve been neglecting and the days you actually turn up, and picks the exercises one by one from the catalogue.',
+    'Necesita un proveedor de IA con su clave, en la bóveda de Ajustes.':
+      'It needs an AI provider with its key, in the vault in Settings.',
+    'Generar rutina automáticamente': 'Generate a routine automatically',
+    'Sin IA y al momento: reparte patrones de movimiento según tu edad, tu nivel y tu objetivo. Cada vez que la pidas cambia algunos ejercicios, pero no lee lo que hayas escrito arriba.':
+      'No AI and instant: it spreads movement patterns by your age, your level and your goal. Each time you ask it swaps some exercises, but it doesn\'t read what you wrote above.',
+    'Elige al menos un día de entrenamiento': 'Pick at least one training day',
+    'Seis días es el máximo recomendable': 'Six days is the most I would recommend',
+
+    /* ---------- Programa: el resultado ---------- */
+    'Plan sin guardar': 'Unsaved plan',
+    'Viendo: {que}': 'Viewing: {que}',
+    'Esfuerzo tope': 'Effort cap',
+    'Por qué este plan': 'Why this plan',
+    'Ojo: esto lo ha montado la calculadora porque la IA ha fallado. No es el plan que pediste.':
+      'Careful: the calculator built this because the AI failed. It isn\'t the plan you asked for.',
+    'Este es tu plan guardado, tal y como está ahora. Abajo puedes pedirle al entrenador que lo audite; lo que apliques se guarda sobre estas mismas rutinas.':
+      'This is your saved plan, exactly as it stands. Below you can have the coach audit it; whatever you apply is saved to these same routines.',
+    'Lo ha montado la IA leyendo todo lo que la app sabe de ti, y ha elegido cada ejercicio del catálogo. Abajo puedes pedirle además que se lo lea como auditor, que es otra cosa.':
+      'The AI built it by reading everything the app knows about you, and picked each exercise from the catalogue. Below you can also ask it to read it back as an auditor, which is a different job.',
+    'Esto lo calcula la app con tus datos, sin pedirle nada a nadie: por eso funciona sin conexión y sin clave. La lectura de un entrenador, que es otra cosa, está justo debajo.':
+      'The app works this out from your data, asking nobody: that\'s why it works offline and with no key. A coach\'s read, which is a different thing, is right below.',
+    'Lo que no le dejé poner': 'What I didn\'t let it put in',
+    'Propuso esto y no entró, así que el hueco lo completé yo: {lista}.':
+      'It proposed these and they didn\'t make it, so I filled the gap myself: {lista}.',
+    '{que} (no lo tienes donde entrenas)': '{que} (you don\'t have it where you train)',
+    '{que} (tus limitaciones)': '{que} (your limitations)',
+    'Lo que evito por tus limitaciones': 'What I avoid because of your limitations',
+    'Con una lesión diagnosticada, esto no sustituye a tu fisio: enséñale el plan antes de empezar.':
+      'With a diagnosed injury this is no substitute for your physio: show them the plan before you start.',
+    'De qué está hecha tu semana': 'What your week is made of',
+    'Cómo se reparten las {series} del plan entre las zonas del cuerpo. Es la composición de lo que vas a hacer; si cumples o no con ello se ve en {donde}.':
+      'How the plan\'s {series} are spread across the areas of your body. It\'s the make-up of what you\'re going to do; whether you stick to it shows up in {donde}.',
+    'Todo el plan cae en una sola zona. Para una semana completa conviene repartir más.':
+      'The whole plan lands on a single area. For a full week you want to spread it more.',
+    'La cifra grande son series por semana; el porcentaje, qué parte del total se lleva esa zona.':
+      'The big number is sets a week; the percentage is how much of the total that area takes.',
+    'Plegar todo': 'Collapse all',
+    'Abrir todo': 'Expand all',
+    'sin ejercicios': 'no exercises',
+    '{n}s de descanso': '{n}s rest',
+    'Entrenar este día': 'Train this day',
+    'Cómo progresar': 'How to progress',
+    'Repetir el mismo peso cinco semanas no construye nada. Este es el bloque:':
+      'Repeating the same weight for five weeks builds nothing. Here is the block:',
+    'Fuera del gimnasio': 'Outside the gym',
+    'CÓMO QUIERES LLAMARLAS': 'WHAT YOU WANT THEM CALLED',
+    'Cada rutina se llamará «día · lo que pongas aquí». Déjalo vacío y uso el nombre de cada sesión.':
+      'Each routine will be called «day · whatever you put here». Leave it empty and I\'ll use each session\'s name.',
+    'Ej. Mi plan de otoño': 'E.g. My autumn plan',
+    'Otra propuesta': 'Another suggestion',
+    'Actualizar mis rutinas': 'Update my routines',
+    'Guardar mis rutinas': 'Save my routines',
+    'Este plan ya está en tus rutinas: se reescribe esa {n}, no se añaden otras. El resto de tus rutinas no se toca.':
+      'This plan is already in your routines: that {n} gets rewritten, no others are added. The rest of your routines aren\'t touched.',
+    'Este plan ya está en tus rutinas: se reescriben esas {n}, no se añaden otras. El resto de tus rutinas no se toca.':
+      'This plan is already in your routines: those {n} get rewritten, no others are added. The rest of your routines aren\'t touched.',
+    'Se crea {n} rutina con su día asignado. Lo que ya tengas no se borra.':
+      '{n} routine is created with its day assigned. Nothing you already have is deleted.',
+    'Se crean {n} rutinas con sus días asignados. Lo que ya tengas no se borra.':
+      '{n} routines are created with their days assigned. Nothing you already have is deleted.',
+
+    /* ---------- Programa: el entrenador con IA ---------- */
+    'El entrenador está auditando tu programa…': 'The coach is auditing your program…',
+    'Que un entrenador con IA audite tu plan': 'Have an AI coach audit your plan',
+    'No viene a darte la razón: le pedimos que le ponga nota, que señale lo que falla y que proponga quitar, meter o cambiar ejercicios. Lo que diga se queda guardado y se aplica de un toque.':
+      'It isn\'t here to agree with you: we ask it to score the plan, point out what\'s wrong and propose removing, adding or swapping exercises. What it says is saved and applied with one tap.',
+    'Necesita un proveedor de IA con su clave, en la bóveda de Ajustes. Sin eso el plan funciona igual, pero esta lectura no.':
+      'It needs an AI provider with its key, in the vault in Settings. Without it the plan works the same, but this read does not.',
+    'Lo que dice el entrenador': 'What the coach says',
+    'Sale de {n} fallo encontrado al repasar el plan y de lo graves que son. La calcula la app, no la IA: el mismo plan da siempre la misma nota.':
+      'It comes from {n} fault found while going over the plan, and how serious it is. The app works it out, not the AI: the same plan always gets the same score.',
+    'Sale de {n} fallos encontrados al repasar el plan y de lo graves que son. La calcula la app, no la IA: el mismo plan da siempre la misma nota.':
+      'It comes from {n} faults found while going over the plan, and how serious they are. The app works it out, not the AI: the same plan always gets the same score.',
+    'Nota de este plan tal y como está ahora.':
+      'Score for this plan exactly as it stands.',
+    'De comida': 'On food',
+    'No propone tocar ningún ejercicio': 'It proposes no exercise changes',
+    'Sus avisos son sobre hábitos —registrar entrenamientos, apuntar la comida— o sobre el reparto general, no sobre qué ejercicio cambiar. El plan, como lista de ejercicios, le parece defendible.':
+      'Its notes are about habits —logging workouts, writing down your food— or about the overall split, not about which exercise to change. As a list of exercises, it finds the plan defensible.',
+    'Cambios que propone': 'Changes it proposes',
+    'Sustituir': 'Swap',
+    'Reordenar': 'Reorder',
+    'Descanso': 'Rest',
+    'Aplicar': 'Apply',
+    'Cada cambio se comprueba antes de aplicarlo: si el ejercicio no existe, no cabe con tu material o choca con tus limitaciones, se descarta. Lo que apliques se guarda y viaja a tus rutinas al pulsar Guardar.':
+      'Every change is checked before it\'s applied: if the exercise doesn\'t exist, doesn\'t fit your equipment or clashes with your limitations, it\'s dropped. Whatever you apply is saved and travels to your routines when you press Save.',
+    'Ya aplicado': 'Already applied',
+    'Estos cambios ya están en el plan de arriba. Se guardan con él; para que lleguen a tus rutinas pulsa {boton}.':
+      'These changes are already in the plan above. They are saved with it; to get them into your routines press {boton}.',
+    'Si solo haces una cosa': 'If you only do one thing',
+    'Auditar otra vez': 'Audit again',
+    'Este dictamen es el que ya se hizo para este plan: mientras no lo cambies, volver a pulsar enseña lo mismo en vez de inventarse otra cosa. En cuanto apliques un cambio, se rehace solo.':
+      'This verdict is the one already made for this plan: until you change it, pressing again shows the same thing instead of making something up. As soon as you apply a change, it redoes itself.',
+    'Se guarda para este plan. Si aplicas cambios, la próxima auditoría será nueva.':
+      'It is saved for this plan. If you apply changes, the next audit will be a fresh one.',
+    'Pedir otra redacción': 'Ask for another wording',
+    'Los fallos serán los mismos —son cuentas sobre el plan—; lo que cambia es cómo están explicados. Gasta una llamada a la IA.':
+      'The faults will be the same —they are sums about the plan—; what changes is how they are explained. It costs one AI call.',
+    ' en {donde}': ' in {donde}',
+    'Los básicos delante en {que}': 'The basics first in {que}',
+    '{que} al {n}.º': '{que} to position {n}',
+    '{que} a {n}s de descanso': '{que} to {n}s rest',
+    '{que} a {n} series': '{que} to {n} sets',
+    '{nuevo} en lugar de {viejo}': '{nuevo} instead of {viejo}',
+    'Ese día ya no está en el plan.': 'That day is no longer in the plan.',
+    '{que}: reordenada, los básicos delante': '{que}: reordered, basics first',
+    'Ya no está «{que}» en el plan.': '«{que}» is no longer in the plan.',
+    '{que}: pasa al {n}.º en {donde}': '{que}: moves to position {n} in {donde}',
+    'Ese cambio no dice cuánto descanso poner.':
+      'That change doesn\'t say how much rest to set.',
+    '{que}: descanso a {n}s': '{que}: rest set to {n}s',
+    'Ese cambio no dice cuántas series poner.':
+      'That change doesn\'t say how many sets to set.',
+    '{que}: {n} series': '{que}: {n} sets',
+    'Ese día se quedaría en un ejercicio. No lo quito.':
+      'That day would be left with one exercise. I\'m not removing it.',
+    '{que}: fuera de {donde}': '{que}: out of {donde}',
+    'No encuentro «{que}» en el catálogo. Cambio descartado.':
+      'I can\'t find «{que}» in the catalogue. Change dropped.',
+    '«{que}» no encaja con tus limitaciones. Cambio descartado.':
+      '«{que}» does not fit your limitations. Change dropped.',
+    '«{que}» ya está en ese día.': '«{que}» is already on that day.',
+    'Lo mete el entrenador: {porque}': 'The coach put it in: {porque}',
+    '{que}: entra en {donde}': '{que}: goes into {donde}',
+    'Pedía «{pedido}», que no está en el catálogo. He puesto {puesto}.':
+      'It asked for «{pedido}», which is not in the catalogue. I put in {puesto}.',
+    'Cambiado a propuesta del entrenador: {porque}':
+      'Changed at the coach’s suggestion: {porque}',
+    'Cerrar sin guardar': 'Close without saving',
+    'Este plan no está en tus rutinas. Si lo cierras, se pierde.':
+      'This plan is not in your routines. If you close it, it is lost.',
+    'Cerrar igual': 'Close anyway',
+    'Descartar lo generado': 'Discard what was generated',
+    'El plan que hay en pantalla no está en tus rutinas. Si cancelas, se pierde.':
+      'The plan on screen is not in your routines. If you cancel, it is lost.',
+    'Empezar uno nuevo': 'Start a new one',
+    'El plan que tienes en pantalla no está en tus rutinas todavía. Si sigues, se pierde.':
+      'The plan on screen is not in your routines yet. If you go on, it is lost.',
+    'Empezar de cero': 'Start from scratch',
+    '{n} rutina actualizada': '{n} routine updated',
+    '{n} rutinas actualizadas': '{n} routines updated',
+    '{n} rutina creada con su día': '{n} routine created with its day',
+    '{n} rutinas creadas con sus días': '{n} routines created with their days',
+    'Ya tienes un plan llamado «{que}»': 'You already have a plan called «{que}»',
+    'Tiene {n} rutina. Voy a reescribirla con este plan y a borrar las que sobren, para que no se te dupliquen. Si quieres conservarlo, cancela y ponle otro nombre a este.':
+      'It has {n} routine. I\'m going to rewrite it with this plan and delete any left over, so you don\'t end up with duplicates. If you want to keep it, cancel and give this one another name.',
+    'Tiene {n} rutinas. Voy a reescribirlas con este plan y a borrar las que sobren, para que no se te dupliquen. Si quieres conservarlo, cancela y ponle otro nombre a este.':
+      'It has {n} routines. I\'m going to rewrite them with this plan and delete any left over, so you don\'t end up with duplicates. If you want to keep it, cancel and give this one another name.',
+    'Reescribir': 'Rewrite',
+    'Descartar la lectura': 'Discard the read',
+    'Se borra lo que dijo el entrenador y la lista de cambios que quedan sin aplicar. Los que ya aplicaste siguen en el plan.':
+      'What the coach said and the list of changes still unapplied are deleted. The ones you already applied stay in the plan.',
+    'La IA no devolvió un plan aprovechable. Te dejo el de la calculadora.':
+      'The AI didn\'t return a usable plan. I\'m leaving you the calculator\'s.',
+    'Plan listo, pero solo salieron {salieron} de los {pedidos} días. Prueba a generarlo otra vez.':
+      'Plan ready, but only {salieron} of the {pedidos} days came out. Try generating it again.',
+    'Plan listo. Descarté {n} ejercicio que no encajaba y completé el hueco.':
+      'Plan ready. I dropped {n} exercise that didn\'t fit and filled the gap.',
+    'Plan listo. Descarté {n} ejercicios que no encajaban y completé el hueco.':
+      'Plan ready. I dropped {n} exercises that didn\'t fit and filled the gaps.',
+    'Plan montado a tu medida': 'Plan built to your measure',
+    'Lo añade la app para completar el día.': 'The app adds it to round out the day.',
+    'Sesión': 'Session',
+    'Elige proveedor de IA y pon su clave': 'Pick an AI provider and enter its key',
+
+    /* ---------- Programa: los objetivos ---------- */
+    'Volumen alto y cargas medias, que es lo que más masa construye.':
+      'High volume and medium loads, which is what builds the most mass.',
+    'Perder grasa sin perder músculo': 'Lose fat without losing muscle',
+    'Se mantiene la carga alta para conservar músculo y se acorta el descanso; la grasa la quita el déficit de calorías, no las mancuernas ligeras.':
+      'The load stays high to keep muscle and the rest gets shorter; fat comes off through a calorie deficit, not light dumbbells.',
+    'Tonificar y mantenerme': 'Tone up and maintain',
+    'Recomposición: mismo trabajo de fuerza con algo más de repeticiones y algo de acondicionamiento.':
+      'Recomposition: the same strength work with a few more reps and some conditioning.',
+    'Levantar más peso': 'Lift heavier',
+    'Pocas repeticiones, cargas altas y descansos largos en los básicos; el accesorio queda para el volumen.':
+      'Few reps, heavy loads and long rests on the basics; the accessory work carries the volume.',
+
+    /* ---------- Programa: edad, sexo y limitaciones ---------- */
+    'Antes de los 18 la prioridad es la técnica, no la carga: se deja margen en cada serie y se sube peso solo cuando el movimiento sale limpio.':
+      'Before 18 the priority is technique, not load: you leave room in every set and add weight only when the movement comes out clean.',
+    'A partir de los 60 se recorta el volumen y se quita el impacto: la fuerza se mantiene igual de bien con menos series y más calidad.':
+      'From 60 the volume is trimmed and impact is removed: strength holds up just as well with fewer sets and better quality.',
+    'Dos de los ejercicios accesorios se pueden cambiar por trabajo de equilibrio y movilidad sin perder nada.':
+      'Two of the accessory exercises can be swapped for balance and mobility work without losing anything.',
+    'Pasados los 50 la recuperación tarda más: menos series por sesión, sin saltos y sin llevar las series al fallo.':
+      'Past 50 recovery takes longer: fewer sets per session, no jumping and no taking sets to failure.',
+    'A partir de los 40 conviene calentar más y dejar una repetición en recámara en los básicos pesados.':
+      'From 40 it pays to warm up more and leave one rep in reserve on the heavy basics.',
+    'Los descansos van algo más cortos y las repeticiones algo más altas: de media se recupera antes entre series con la misma carga relativa.':
+      'Rests run a little shorter and reps a little higher: on average you recover faster between sets at the same relative load.',
+    'Rodilla': 'Knee',
+    'Sin saltos ni impacto, y la sentadilla en versión guiada o parcial. El trabajo de cadera (peso muerto, empuje de cadera) sí entra: no carga la rodilla.':
+      'No jumping or impact, and squats in a guided or partial version. Hip work (deadlift, hip thrust) does go in: it doesn\'t load the knee.',
+    'Hombro': 'Shoulder',
+    'Fuera el remo al mentón y los fondos, que son los que más pinzan. El press por encima de la cabeza va con mancuernas, que dejan girar el hombro.':
+      'Upright rows and dips are out, as they pinch the most. Overhead pressing goes with dumbbells, which let the shoulder rotate.',
+    'Espalda baja': 'Lower back',
+    'Nada de peso muerto ni remo con barra de pie: el mismo trabajo va con el pecho apoyado o en máquina, que quita la carga de la columna.':
+      'No deadlifts or standing barbell rows: the same work goes chest-supported or on a machine, which takes the load off your spine.',
+    'Codo': 'Elbow',
+    'El tríceps y el bíceps van en polea o con mancuernas: la barra fija la muñeca y es justo lo que irrita el codo.':
+      'Triceps and biceps go on a cable or with dumbbells: a bar locks the wrist, and that is exactly what irritates the elbow.',
+    'Muñeca': 'Wrist',
+    'Sin trabajo directo de muñeca. Donde se pueda, agarre neutro (mancuerna o barra Z) en vez de barra recta.':
+      'No direct wrist work. Where possible, a neutral grip (dumbbell or EZ bar) instead of a straight bar.',
+    'Cadera': 'Hip',
+    'Sin impacto y sin rango profundo de cadera: mejor recorridos cortos y controlados que forzar la flexión.':
+      'No impact and no deep hip range: short, controlled ranges beat forcing the flexion.',
+    'Tobillo': 'Ankle',
+    'Fuera el impacto. El gemelo se entrena sentado, que no carga el tendón igual.':
+      'Impact is out. Calves are trained seated, which doesn\'t load the tendon the same way.',
+    'Cuello': 'Neck',
+    'Sin encogimientos ni cargas por detrás de la nuca.':
+      'No shrugs and nothing loaded behind the neck.',
+    'Corazón o tensión': 'Heart or blood pressure',
+    'Nada de series al fallo ni de aguantar la respiración: se para con margen y se respira en cada repetición. Con esto conviene que lo vea tu médico.':
+      'No sets to failure and no holding your breath: you stop with room to spare and breathe on every rep. With this, your doctor should take a look.',
+
+    /* ---------- Programa: las plantillas de sesión ---------- */
+    'Cuerpo completo A': 'Full body A',
+    'Cuerpo completo B': 'Full body B',
+    'Cuerpo completo C': 'Full body C',
+    'Tren superior': 'Upper body',
+    'Tren inferior': 'Lower body',
+    'Tren superior (volumen)': 'Upper body (volume)',
+    'Tren inferior (volumen)': 'Lower body (volume)',
+    'Empuje': 'Push',
+    'Tracción': 'Pull',
+    'Pierna': 'Legs',
+    'Entra para que el día no se quede corto con el material que tienes.':
+      'It goes in so the day is not short with the equipment you have.',
+    'Aguanta la posición: las repeticiones son segundos.':
+      'Hold the position: the reps are seconds.',
+    'Es el ejercicio fuerte del día: haz dos series de aproximación con poco peso antes de la primera seria.':
+      'This is the big lift of the day: do two light warm-up sets before the first real one.',
+    'Recorrido cómodo, sin bajar a donde molesta.':
+      'Comfortable range, without going down to where it hurts.',
+
+    /* ---------- Programa: los porqués ---------- */
+    'Objetivo: {obj}. {resumen}': 'Goal: {obj}. {resumen}',
+    'Nivel {nivel}: el plan apunta a unas {series} series semanales por músculo, que es donde está el mejor equilibrio entre estímulo y recuperación.':
+      '{nivel} level: the plan aims for around {series} sets a week per muscle, which is where the balance between stimulus and recovery sits best.',
+    '{dias} día a la semana con {unicas} sesiones distintas: así cada músculo recibe dos estímulos por semana, que rinde más que machacarlo una vez.':
+      '{dias} day a week with {unicas} different sessions: that way each muscle gets two stimuli a week, which beats hammering it once.',
+    '{dias} días a la semana con {unicas} sesiones distintas: así cada músculo recibe dos estímulos por semana, que rinde más que machacarlo una vez.':
+      '{dias} days a week with {unicas} different sessions: that way each muscle gets two stimuli a week, which beats hammering it once.',
+    '{edad} años: se recorta el volumen un {pct}% y se para en RPE {rpe}, dejando repeticiones en recámara.':
+      '{edad} years old: the volume is cut by {pct}% and it stops at RPE {rpe}, leaving reps in reserve.',
+    '{edad} años: volumen completo, sin recortes por edad.':
+      '{edad} years old: full volume, no cuts for age.',
+    'Con tu perfil salen {kcal} kcal y {prot} g de proteína al día: sin ese déficit y esa proteína, el gimnasio solo no baja la grasa.':
+      'Your profile works out to {kcal} kcal and {prot} g of protein a day: without that deficit and that protein, the gym alone will not take the fat off.',
+    'Para ganar músculo hacen falta {kcal} kcal y {prot} g de proteína al día: el estímulo lo pone el plan, el material lo pone la comida.':
+      'To build muscle you need {kcal} kcal and {prot} g of protein a day: the plan supplies the stimulus, the food supplies the material.',
+    'Duermes {h} h: por debajo de 7 la recuperación se resiente y el plan rinde menos de lo que puede. Es la palanca más barata que tienes.':
+      'You sleep {h} h: under 7 your recovery suffers and the plan gives less than it could. It is the cheapest lever you have.',
+    'En el último mes has entrenado {hechos} días por semana y este plan pide {pide}. O bajas los días y los cumples, o el plan se queda en papel: vale más un plan de tres días hecho que uno de cinco a medias.':
+      'Over the last month you have trained {hechos} days a week and this plan asks for {pide}. Either you drop the days and stick to them, or the plan stays on paper: a three-day plan done beats a five-day one half done.',
+    'Lo que vienes dejando de lado: {lista}. Ahí es donde este plan te va a cambiar algo.':
+      'What you have been neglecting: {lista}. That is where this plan is going to change something for you.',
+    '{mus} ({n} serie por semana, el plan te pide {pide})':
+      '{mus} ({n} set a week, the plan asks you for {pide})',
+    '{mus} ({n} series por semana, el plan te pide {pide})':
+      '{mus} ({n} sets a week, the plan asks you for {pide})',
+    'Todavía no tienes entrenamientos guardados, así que el plan sale solo de tu perfil. En cuanto entrenes unas semanas, este análisis mira lo que de verdad haces y deja de hablar en general.':
+      'You have no saved workouts yet, so the plan comes from your profile alone. Once you have trained for a few weeks, this analysis looks at what you actually do and stops speaking in general terms.',
+    'Con {dias} días de {min} min no da tiempo a todo: {lista} y alguno más se quedan por debajo de 8 series semanales. Si te importan, añade 15 min a la sesión, otro día, o priorízalos con el selector de zona.':
+      'With {dias} days of {min} min there is not time for everything: {lista} and a few more stay under 8 sets a week. If they matter to you, add 15 min to the session, another day, or prioritise them with the area selector.',
+    'Con {dias} días de {min} min no da tiempo a todo: {lista} se quedan por debajo de 8 series semanales. Si te importan, añade 15 min a la sesión, otro día, o priorízalos con el selector de zona.':
+      'With {dias} days of {min} min there is not time for everything: {lista} stay under 8 sets a week. If they matter to you, add 15 min to the session, another day, or prioritise them with the area selector.',
+    'Además del gimnasio: {pasos} pasos al día y dos sesiones de 25 a 35 min de cardio suave (el que te deje hablar) en los días que no entrenes. El cardio duro y el gimnasio el mismo día se pisan.':
+      'On top of the gym: {pasos} steps a day and two 25-to-35-minute easy cardio sessions (the kind you can talk through) on the days you do not train. Hard cardio and the gym on the same day get in each other’s way.',
+
+    /* ---------- Programa: la progresión ---------- */
+    'Semana 1': 'Week 1',
+    'Semana 2': 'Week 2',
+    'Semana 3': 'Week 3',
+    'Semana 4': 'Week 4',
+    'Semana 5': 'Week 5',
+    'Coge las cargas con las que completas todas las series con la técnica limpia, nunca al fallo. Apunta el peso de cada ejercicio.':
+      'Take the loads that let you finish every set with clean technique, never to failure. Write down the weight for each exercise.',
+    'Coge las cargas con las que completas todas las series con la técnica limpia, dejando 1 o 2 repeticiones en recámara. Apunta el peso de cada ejercicio.':
+      'Take the loads that let you finish every set with clean technique, leaving 1 or 2 reps in reserve. Write down the weight for each exercise.',
+    'Mismo peso, una repetición más por serie. Si todas las series llegan arriba del rango, sube peso en la siguiente.':
+      'Same weight, one more rep per set. If every set reaches the top of the range, add weight next time.',
+    'Sube entre un 2 y un 5% en los básicos, o añade una serie al ejercicio que mejor notes. Es la semana más dura del bloque.':
+      'Add 2 to 5% on the basics, or add a set to the exercise that feels best. It is the hardest week of the block.',
+    'Descarga: mismos ejercicios con la mitad de series y un 10% menos de peso. No es perder tiempo, es cuando el cuerpo consolida lo ganado.':
+      'Deload: same exercises with half the sets and 10% less weight. It is not wasted time, it is when your body locks in what you gained.',
+    'Vuelta a empezar con los pesos de la semana 3. Si ya no suben, cambia los accesorios y repite el bloque.':
+      'Start again with the week 3 weights. If they stop going up, change the accessories and repeat the block.',
+
+    /* ---------- Programa: priorizar una zona ---------- */
+    'Equilibrado': 'Balanced',
+    'Glúteo': 'Glutes',
+    'Pecho': 'Chest',
+    'Espalda': 'Back',
+    'Brazo': 'Arms',
+    'Core': 'Core',
+
+    /* ---------- Objetivos: la pantalla ---------- */
+    'Se actualizan solos con lo que entrenas y con tus pesajes. No hay que apuntar nada a mano.':
+      'They update themselves from what you train and from your weigh-ins. Nothing to log by hand.',
+    'Ponte una meta y te enseño cuánto te falta cada vez que abras la app.':
+      'Set yourself a goal and I\'ll show you how far you have to go every time you open the app.',
+    'Crear mi primer objetivo': 'Create my first goal',
+    'de {meta}': 'of {meta}',
+    'Cumplido': 'Done',
+    ' (cumplido)': ' (done)',
+    'Según tu plan': 'Going by your plan',
+    'Si sigues así': 'If you keep this up',
+    'Sale de tu plan —tu gasto, tus calorías y el ritmo que elegiste—, no de la báscula. Apunta tu peso una vez por semana y paso a medir lo que pasa de verdad.':
+      'It comes from your plan —your expenditure, your calories and the pace you chose—, not from the scale. Log your weight once a week and I\'ll switch to measuring what actually happens.',
+    'Es una recta sobre lo que llevas: cuenta con que los últimos kilos cuesten más que los primeros.':
+      'It is a straight line drawn through what you have done so far: expect the last kilos to be harder than the first.',
+    'Es una recta sobre lo que llevas: la fuerza sube a tirones, no a ritmo constante.':
+      'It is a straight line drawn through what you have done so far: strength goes up in jumps, not at a steady pace.',
+    'Es una recta sobre lo que llevas, contando con que sigas igual.':
+      'It is a straight line drawn through what you have done so far, assuming you carry on the same.',
+    'Tu evolución y lo que falta hasta {meta}':
+      'Your progress and what is left to reach {meta}',
+    'Se quitará de tu lista.': 'It will be removed from your list.',
+    'Nuevo objetivo': 'New goal',
+    'Elige qué quieres conseguir.': 'Pick what you want to achieve.',
+    'EJERCICIO': 'EXERCISE',
+    'META ({unidad})': 'TARGET ({unidad})',
+    'Ahora mismo vas por {valor}.': 'Right now you are on {valor}.',
+    'Crear objetivo': 'Create goal',
+    'Escribe la meta': 'Write the target',
+    'Objetivo creado': 'Goal created',
+
+    /* ---------- Objetivos: los tipos y el pronóstico ---------- */
+    'Llegar a un peso': 'Reach a weight',
+    'Se actualiza con cada pesaje que registres': 'Updates with every weigh-in you log',
+    'Entrenar por semana': 'Train per week',
+    'Cuenta los entrenamientos de los últimos 7 días':
+      'Counts the workouts from the last 7 days',
+    'Mantener una racha': 'Keep a streak going',
+    'Días seguidos entrenando': 'Days training in a row',
+    'Volumen semanal': 'Weekly volume',
+    'Peso por repeticiones de los últimos 7 días':
+      'Weight times reps over the last 7 days',
+    'Récord en un ejercicio': 'Record on an exercise',
+    'Tu mejor serie en el ejercicio elegido': 'Your best set on the exercise you pick',
+    'Entrenamientos totales': 'Total workouts',
+    'Todos los entrenamientos registrados': 'Every workout you have logged',
+    'sesiones': 'sessions',
+    'kg movidos': 'kg moved',
+    'Récord en {que}': 'Record on {que}',
+    'un ejercicio': 'an exercise',
+    'Ya la tienes': 'You already have it',
+    'Entrenando cada día la tienes en {n} día':
+      'Training every day you get there in {n} day',
+    'Entrenando cada día la tienes en {n} días':
+      'Training every day you get there in {n} days',
+    'Aún no hay semanas que comparar': 'No weeks to compare yet',
+    'Lo cumpliste {veces} de las últimas {de} semanas; promedias {media} por semana':
+      'You hit it {veces} of the last {de} weeks; you average {media} a week',
+    'Según tu plan: ritmo {ritmo}, {signo}{kg} kg por semana':
+      'Going by your plan: {ritmo} pace, {signo}{kg} kg a week',
+    'Con un solo dato no se puede estimar: apúntate alguno más':
+      'With a single data point there is nothing to estimate: log a few more',
+    'Llevas semanas parado en el mismo sitio: así no hay fecha que dar':
+      'You have been stuck in the same place for weeks: there is no date to give',
+    'A este ritmo te alejas {cuanto} por semana':
+      'At this rate you are moving {cuanto} further away a week',
+    'A este ritmo, {signo}{cuanto} por semana': 'At this rate, {signo}{cuanto} a week',
+    '{n} semana': '{n} week',
+    '{n} semanas': '{n} weeks',
+    '{n} mes': '{n} month',
+    '{n} meses': '{n} months',
+
+    /* ---------- Alimentación: los menús guardados ---------- */
+    'DE ANTES': 'OUT OF DATE',
+    '{n} comida': '{n} meal',
+    '{n} comidas': '{n} meals',
+    'principal': 'main',
+    'Marcar': 'Set as',
+    'Renombrar': 'Rename',
+    'Este menú es de antes': 'This meal plan is out of date',
+    'Has cambiado algo desde que se hizo —los ingredientes, lo que le pides o tus números—, así que puede llevar cosas que ya no encajan. Rehazlo y se vuelve a montar con lo de ahora.':
+      'Something has changed since it was made —the ingredients, what you ask of it, or your numbers—, so it may carry things that no longer fit. Redo it and it gets rebuilt with what you have now.',
+    'Rehacer este menú': 'Redo this meal plan',
+    'Dejar de ser el menú principal': 'Stop being the main meal plan',
+    'Ahora manda este: es el que sale en «hoy» y en la portada.':
+      'This one is in charge: it is the one that shows under «today» and on the home screen.',
+    'Usar este como menú principal': 'Use this as the main meal plan',
+    'Será el que salga en «hoy» y en la portada.':
+      'It will be the one that shows under «today» and on the home screen.',
+    'Cambiarle el nombre': 'Change its name',
+    'Para saber cuál es sin abrirlo.':
+      'So you know which one it is without opening it.',
+    'Se monta otro con tus números y tus ingredientes de ahora.':
+      'Another one is built with your current numbers and ingredients.',
+    'Duplicar el menú': 'Duplicate the meal plan',
+    'Una copia para probar cambios sin tocar este.':
+      'A copy for trying changes without touching this one.',
+    'Borrar el menú': 'Delete the meal plan',
+    'No se puede deshacer.': 'It cannot be undone.',
+    'Creado el {fecha}': 'Created on {fecha}',
+    'ENTRENO': 'TRAINING',
+    'Guardar otro distinto, sin tocar este':
+      'Save a different one, without touching this',
+    'Generado por IA a partir de tus datos. Revísalo con criterio y consulta a un dietista si tienes alguna condición de salud.':
+      'Generated by AI from your data. Look it over with judgement and see a dietitian if you have any health condition.',
+    'Ahora manda «{que}»': '«{que}» is in charge now',
+    'Sin menú principal': 'No main meal plan',
+    'Copiado como «{que}»': 'Copied as «{que}»',
+    'Borrar «{que}»': 'Delete «{que}»',
+    'Se quita de tus menús. No se puede deshacer.':
+      'It goes from your meal plans. It cannot be undone.',
+    'Menú borrado': 'Meal plan deleted',
+    'Abre el menú que quieres rehacer': 'Open the meal plan you want to redo',
+    'Rehaciendo el menú…': 'Redoing the meal plan…',
+    '«{que}» rehecho': '«{que}» redone',
+    'No se pudo rehacer el menú': 'The meal plan could not be redone',
+
+    /* ---------- Alimentación: apuntar comida ---------- */
+    '{kcal} kcal · {prot} g de proteína': '{kcal} kcal · {prot} g of protein',
+    'estimación floja': 'rough estimate',
+    'Esto necesita un proveedor de IA con su clave, en la bóveda de Ajustes.':
+      'This needs an AI provider with its key, in the vault in Settings.',
+    'No he visto comida en esa foto. Prueba con más luz o más cerca.':
+      'I didn\'t see food in that photo. Try with more light or closer up.',
+    'Anotado: {kcal} kcal y {prot} g de proteína':
+      'Logged: {kcal} kcal and {prot} g of protein',
+    ' (a ojo, retócalo si quieres)': ' (rough guess, tweak it if you like)',
+    'No he podido leer esa foto.': 'I couldn\'t read that photo.',
+    'Escribe lo que has comido y yo calculo las calorías y la proteína. Si ya te sabes los números, pónlos tú y mando los tuyos.':
+      'Write what you ate and I work out the calories and the protein. If you already know the numbers, put them in and yours win.',
+    'Para lo que ya sabes de memoria, o para arreglar una estimación que se quedó corta.':
+      'For what you already know by heart, or to fix an estimate that fell short.',
+    'QUÉ HAS COMIDO': 'WHAT YOU ATE',
+    'Ej. arroz con lentejas y carne asada': 'E.g. rice with lentils and roast beef',
+    'Calcular con IA': 'Work it out with AI',
+    'CALORÍAS': 'CALORIES',
+    'PROTEÍNA (g)': 'PROTEIN (g)',
+    'Anotar': 'Log it',
+    'Anotado': 'Logged',
+    'Escribe antes qué has comido': 'Write what you ate first',
+    'No he sabido qué es eso. Pon tú los números.':
+      'I couldn\'t tell what that is. Put the numbers in yourself.',
+    'Estimación: corrige los números si no te cuadra.':
+      'Estimate: correct the numbers if they don\'t add up for you.',
+    'Pon al menos las calorías o la proteína':
+      'Put in at least the calories or the protein',
+    'Escribe qué has comido': 'Write what you ate',
+
+    /* ---------- Alimentación: un menú nuevo ---------- */
+    'Dale una hora a cada comida': 'Give every meal a time',
+    '{n} alerta movida': '{n} reminder moved',
+    '{n} alertas movidas': '{n} reminders moved',
+    'Completa tus datos para calcular el menú':
+      'Fill in your details so I can work out the meal plan',
+    'Dime de qué país eres: el menú sale de tu supermercado':
+      'Tell me which country you are in: the meal plan comes from your supermarket',
+    'Nuevo menú': 'New meal plan',
+    'Primero lo tuyo, y después decides cómo se hace.':
+      'Your side first, then you decide how it gets made.',
+    'CÓMO SE LLAMA': 'WHAT IT IS CALLED',
+    'Semana fuerte, Cuando viajo, Sin lactosa…':
+      'Heavy week, When I travel, Dairy free…',
+    'Hace falta para guardarlo. Dentro de un mes, «Mi menú 4» no te va a decir cuál es.':
+      'It is needed to save it. A month from now, «My meal plan 4» will not tell you which one it is.',
+    'CON QUÉ CUENTAS': 'WHAT YOU HAVE',
+    'Ej. arroz, lentejas, huevos, pollo, atún, yogur griego, avena':
+      'E.g. rice, lentils, eggs, chicken, tuna, Greek yoghurt, oats',
+    'Se guarda con tus preferencias: vale también para los menús siguientes.':
+      'It is saved with your preferences: it applies to the next meal plans too.',
+    'QUÉ LE PIDES SIEMPRE': 'WHAT YOU ALWAYS ASK FOR',
+    'Ej. nada de pescado; la cena siempre ligera': 'E.g. no fish; dinner always light',
+    '¿TOMAS ALGUNA MEDICACIÓN?': 'DO YOU TAKE ANY MEDICATION?',
+    'No tomo ninguna': 'I don\'t take any',
+    'Sí, tomo': 'Yes, I do',
+    'Cuál y a qué hora. Ej. levotiroxina en ayunas; metformina con la comida':
+      'Which one and at what time. E.g. levothyroxine on an empty stomach; metformin with food',
+    'Sirve para colocar las comidas y lo que tomas alrededor, y para avisarte de lo que se pisa. La app no receta ni cambia nada de tu tratamiento: para eso está tu médico. Se queda en tu móvil, no sale en tu perfil y viaja al entrenador con tu propia clave.':
+      'It is used to place your meals and what you take around them, and to warn you about clashes. The app does not prescribe or change anything in your treatment: that is your doctor’s job. It stays on your phone, it does not appear in your profile, and it travels to the coach with your own key.',
+    'Y PARA ESTE MENÚ EN CONCRETO': 'AND FOR THIS MEAL PLAN IN PARTICULAR',
+    'Ej. esta semana viajo y como fuera; cocino solo los domingos':
+      'E.g. this week I am travelling and eating out; I only cook on Sundays',
+    'Esto no se guarda: vale solo para el menú que vas a crear ahora.':
+      'This is not saved: it only applies to the meal plan you are about to create.',
+    'Cómo lo hago': 'How I make it',
+    'Crearlo con el entrenador': 'Create it with the coach',
+    'Platos concretos con tus ingredientes, tus horarios y tus condiciones. Tarda unos segundos.':
+      'Real dishes with your ingredients, your times and your conditions. It takes a few seconds.',
+    'Crearlo con el entrenador (necesita configurarse)':
+      'Create it with the coach (needs setting up)',
+    'Crear uno genérico, sin IA': 'Create a generic one, no AI',
+    'Reparte tus calorías y tu proteína entre tus comidas y dice qué debe llevar cada una. Los platos los pones tú.':
+      'It splits your calories and protein across your meals and says what each one should have. You supply the dishes.',
+    'Un día de ejemplo': 'A sample day',
+    'Guardar este menú': 'Save this meal plan',
+    'Volver y probar de otra forma': 'Go back and try another way',
+    'Ponle un nombre antes de guardarlo': 'Give it a name before saving it',
+    '«{que}» guardado': '«{que}» saved',
+    'Dime si tomas medicación: cambia a qué hora conviene comer':
+      'Tell me whether you take medication: it changes when it suits you to eat',
+    'Escribe cuál y a qué hora': 'Write which one and at what time',
+    'Preparando el menú…': 'Preparing the meal plan…',
+    'Hecho por el entrenador': 'Made by the coach',
+    'No se pudo crear el menú': 'The meal plan could not be created',
+    'Genérico, con tus números': 'Generic, with your numbers',
+    'Cambiar el nombre': 'Change the name',
+    'Semana fuerte, Cuando viajo…': 'Heavy week, When I travel…',
+    'Ponle un nombre': 'Give it a name',
+
+    /* ---------- El entrenador con IA ---------- */
+    'Entrenador': 'Coach',
+    'Conoce tu perfil, tus rutinas y tu progreso. No está aquí para darte la razón: si algo lo estás haciendo mal, te lo dice.':
+      'It knows your profile, your routines and your progress. It is not here to agree with you: if you are doing something wrong, it says so.',
+    'Pregúntale lo que sea': 'Ask it anything',
+    '¿Estoy entrenando bien el pecho? ¿Cómo bajo grasa sin perder fuerza?':
+      'Am I training my chest well? How do I lose fat without losing strength?',
+    'Preguntar': 'Ask',
+    'Lo que puede hacer por ti': 'What it can do for you',
+    'Cómo voy': 'How I am doing',
+    'Lee tus últimos entrenamientos sin adornos y dice qué se sostiene y qué no.':
+      'It reads your last workouts plainly and says what holds up and what does not.',
+    'Audita mis rutinas': 'Audit my routines',
+    'Les pone nota del uno al diez y dice exactamente qué falla.':
+      'It scores them out of ten and says exactly what is wrong.',
+    'Prepararme el menú': 'Prepare my meal plan',
+    'Semanal, con tus calorías, tu dieta y lo que tienes en casa.':
+      'Weekly, with your calories, your diet and what you have at home.',
+    'Qué sabe de ti': 'What it knows about you',
+    'Se manda en cada pregunta para que la respuesta sea tuya y no de cualquiera. Tu clave no sale de este dispositivo, y las fotos de comida se sueltan al terminar: no se guardan en ningún sitio.':
+      'It is sent with every question so the answer is yours and not anyone’s. Your key never leaves this device, and food photos are released when done: they are not stored anywhere.',
+    'Proveedor y clave': 'Provider and key',
+    '¿Por dónde empiezo con mi nivel?': 'Where do I start at my level?',
+    '¿Cuántos días a la semana me conviene entrenar?':
+      'How many days a week should I train?',
+    '¿Voy bien de volumen para mi objetivo?': 'Is my volume right for my goal?',
+    '¿Qué músculo tengo más flojo?': 'Which muscle is my weakest?',
+    '¿Mi plan encaja con «{que}»?': 'Does my plan fit «{que}»?',
+    '¿Qué ejercicios debería evitar por mis lesiones?':
+      'Which exercises should I avoid because of my injuries?',
+    '¿Qué cambio por mis condiciones de salud?':
+      'What do I change because of my health conditions?',
+    '¿Cómo evito lesionarme?': 'How do I avoid getting injured?',
+    'Tu perfil': 'Your profile',
+    '{edad} años, {peso} kg, {altura} cm, objetivo {objetivo}':
+      '{edad} years old, {peso} kg, {altura} cm, goal {objetivo}',
+    ', y tus lesiones': ', and your injuries',
+    ', y tus condiciones de salud': ', and your health conditions',
+    'Sin completar. Si falta, no se lo inventa: lo dice.':
+      'Not filled in. If something is missing, it does not make it up: it says so.',
+    'Tus rutinas': 'Your routines',
+    '{n} rutina con sus ejercicios, series y repeticiones':
+      '{n} routine with its exercises, sets and reps',
+    '{n} rutinas con sus ejercicios, series y repeticiones':
+      '{n} routines with their exercises, sets and reps',
+    'Ninguna guardada todavía': 'None saved yet',
+    'Tu progreso': 'Your progress',
+    '{n} entrenamiento, tus series por músculo y lo que llevas sin tocar':
+      '{n} workout, your sets per muscle and what you have been neglecting',
+    '{n} entrenamientos, tus series por músculo y lo que llevas sin tocar':
+      '{n} workouts, your sets per muscle and what you have been neglecting',
+    'Sin entrenamientos registrados; no opina de lo que no ve':
+      'No workouts logged; it does not comment on what it cannot see',
+    'Lo que comes': 'What you eat',
+    'Lo apuntado hoy y tus calorías objetivo':
+      'What you logged today and your target calories',
+    'Tus calorías objetivo; hoy no has apuntado nada':
+      'Your target calories; you have logged nothing today',
+    'Analiza tu progreso, revisa tus rutinas y te prepara el plan de comidas. Funciona con el proveedor que elijas: Gemini tiene capa gratuita.':
+      'It analyses your progress, reviews your routines and prepares your meal plan. It works with whichever provider you pick: Gemini has a free tier.',
+    'Entra en {enlace} con tu cuenta de Google.':
+      'Go to {enlace} with your Google account.',
+    'Pulsa {boton} y copia la clave.': 'Press {boton} and copy the key.',
+    'Pégala aquí abajo. Se guarda solo en este dispositivo.':
+      'Paste it below. It is saved on this device only.',
+    'Ir a la bóveda de claves': 'Go to the key vault',
+    'Qué hace y qué no': 'What it does and what it does not',
+    'Lee tus datos reales': 'It reads your real data',
+    'Tu perfil, tus rutinas, tu progreso y lo que comes.':
+      'Your profile, your routines, your progress and what you eat.',
+    'Tu clave no sale de aquí': 'Your key never leaves here',
+    'Se guarda en este dispositivo y no viaja con la sincronización salvo que lo actives.':
+      'It is stored on this device and does not travel with sync unless you turn that on.',
+    'No hace falta para lo demás': 'It is not needed for anything else',
+    'Las calorías, las rutinas y el registro funcionan igual sin ella.':
+      'Calories, routines and logging all work the same without it.',
+    'La capa gratuita tiene un límite diario que sobra para uso personal. Si lo superas, la app te avisa y sigue funcionando.':
+      'The free tier has a daily limit that is more than enough for personal use. If you go over it, the app tells you and keeps working.',
+    'Van bien': 'They are fine',
+    'Se sostienen, con peros': 'They hold up, with caveats',
+    'Hay que tocarlas': 'They need work',
+    'Nota que les pone a tus rutinas tal y como están.':
+      'The score it gives your routines exactly as they stand.',
+    'Escribe tu pregunta': 'Write your question',
+    'Pensando…': 'Thinking…',
+    'Revisando tus entrenamientos…': 'Going over your workouts…',
+    'Auditando tus rutinas…': 'Auditing your routines…',
+    'Lo que se sostiene': 'What holds up',
+    'Lo que hay que arreglar': 'What needs fixing',
+    'Esta semana': 'This week',
+
+    /* ---------- Música: conectar Spotify ---------- */
+    'Reproduce dentro de la app y deja que la IA te prepare listas distintas para cada entrenamiento.':
+      'Play inside the app and let the AI put together a different playlist for every workout.',
+    'Necesita el Client ID de una app de Spotify: se crea en un minuto y es gratis. Tienes el paso a paso en la bóveda.':
+      'It needs the Client ID of a Spotify app: it takes a minute to create and it is free. The step by step is in the vault.',
+    'Suena dentro de la app': 'It plays inside the app',
+    'Sin salir a Spotify y sin perder el cronómetro de vista.':
+      'Without leaving for Spotify and without losing sight of the timer.',
+    'Listas a medida del entrenamiento': 'Playlists made for the workout',
+    'La IA propone artistas distintos cada vez, así que descubres algo.':
+      'The AI suggests different artists every time, so you discover something.',
+    'Reproducir aquí pide Premium': 'Playing here needs Premium',
+    'Es condición de Spotify, no de la app. Sin Premium puedes crear las listas y abrirlas en Spotify.':
+      'That is Spotify’s rule, not the app’s. Without Premium you can still create the playlists and open them in Spotify.',
+    'Un toque': 'One tap',
+    'Conecta tu cuenta para reproducir aquí y generar listas.':
+      'Connect your account to play here and generate playlists.',
+    'Conectar Spotify': 'Connect Spotify',
+    'Al pulsar te lleva a Spotify para dar permiso y vuelve aquí solo. Si vuelves sin conectar, aquí abajo aparecerá el motivo exacto.':
+      'Pressing it takes you to Spotify to give permission and comes back here on its own. If you come back unconnected, the exact reason appears below.',
+    'Vuelve a conectar': 'Connect again',
+    'A la conexión con Spotify le faltan permisos, y por eso tus listas y el buscador dan error. Reconecta y acepta la pantalla de Spotify tal cual sale.':
+      'The Spotify connection is missing permissions, and that is why your playlists and the search fail. Reconnect and accept the Spotify screen exactly as it comes.',
+    'Hay funciones nuevas —tus listas de Spotify y el buscador— y Spotify pide permiso otra vez para eso. Es un toque y no pierdes nada.':
+      'There are new features —your Spotify playlists and the search— and Spotify asks for permission again for them. It is one tap and you lose nothing.',
+    'Falta: {lista}': 'Missing: {lista}',
+    'Reconectar Spotify': 'Reconnect Spotify',
+    'Spotify desconectado': 'Spotify disconnected',
+    'La última conexión con Spotify falló': 'The last Spotify connection failed',
+    'Esto lo ha rechazado Spotify. Comprueba en su panel que en {campo} está exactamente {url} y que tu cuenta figura en {gestion} si la app está en modo desarrollo.':
+      'Spotify rejected this. Check in its dashboard that {campo} contains exactly {url} and that your account is listed under {gestion} if the app is in development mode.',
+    'Esto no es cosa del panel de Spotify: no hace falta tocar nada allí. Pulsa Conectar {aqui} y deja que vuelva sin abrir otras pestañas ni cambiar entre la app instalada y el navegador.':
+      'This is not about the Spotify dashboard: there is nothing to change there. Press Connect {aqui} and let it come back without opening other tabs or switching between the installed app and the browser.',
+    'desde esta misma pantalla': 'from this very screen',
+    'Reintentar aquí': 'Try again here',
+
+    /* ---------- Música: las listas ---------- */
+    'Lista para entrenar': 'Workout playlist',
+    'Deja que la IA te prepare una lista a medida del entrenamiento de hoy. Cada vez propone artistas distintos, así que siempre descubres algo.':
+      'Let the AI put together a playlist made for today\'s workout. It suggests different artists every time, so you always discover something.',
+    'Crear una lista': 'Create a playlist',
+    'Necesita la clave de la IA': 'It needs the AI key',
+    '{n} lista creada': '{n} playlist created',
+    '{n} listas creadas': '{n} playlists created',
+    '{n} artistas ya propuestos que no se repetirán.':
+      '{n} artists already suggested that will not repeat.',
+    'Tus listas de Spotify': 'Your Spotify playlists',
+    'Actualizar': 'Refresh',
+    'Canciones, listas, álbumes o pódcast': 'Songs, playlists, albums or podcasts',
+    'Cargando tus listas…': 'Loading your playlists…',
+    'Lista fija': 'Pinned playlist',
+    'La que quieras tener siempre a mano: pega su enlace y queda guardada para lanzarla de un toque.':
+      'The one you want always to hand: paste its link and it stays saved to launch with one tap.',
+    'Canciones': 'Songs',
+    'Listas': 'Playlists',
+    'Álbumes': 'Albums',
+    'Artistas': 'Artists',
+    'Pódcast': 'Podcasts',
+    'Lista tuya': 'Your playlist',
+    'Spotify no deja ver las canciones desde aquí, así que la siguiente siempre es sorpresa. Tú dale al play y déjate sorprender.':
+      'Spotify will not let the songs be seen from here, so the next one is always a surprise. Press play and let it surprise you.',
+    'No tienes listas guardadas en Spotify todavía.':
+      'You have no playlists saved in Spotify yet.',
+    'Ninguna lista con ese nombre.': 'No playlist with that name.',
+    '{n} canción': '{n} song',
+    '{n} canciones': '{n} songs',
+    'Reproducir {que}': 'Play {que}',
+    'Poniendo «{que}» arriba…': 'Putting «{que}» up top…',
+    'Reproduciendo {que}': 'Playing {que}',
+    'Tu lista de Spotify': 'Your Spotify playlist',
+    'Sonando {que}. La siguiente es sorpresa — déjate llevar.':
+      'Playing {que}. The next one is a surprise — go with it.',
+    'Buscando…': 'Searching…',
+    'Spotify no ha dejado buscar {que} desde esta app.':
+      'Spotify would not let {que} be searched from this app.',
+    ' ni ': ' or ',
+    'Sonando {que}': 'Playing {que}',
+    'Sonando': 'Playing',
+    'Ocultar las canciones': 'Hide the songs',
+    'Ver las {n} canciones': 'Show the {n} songs',
+    'Tu lista de hoy': 'Today\'s playlist',
+    'Reproducir aquí': 'Play here',
+    'Abrirla en Spotify': 'Open it in Spotify',
+    'Ya está en tu cuenta: en el móvil, en el coche o donde la abras.':
+      'It is already in your account: on your phone, in the car or wherever you open it.',
+    'Guardarla en mi Spotify': 'Save it to my Spotify',
+    'Se crea como lista privada con estas mismas canciones.':
+      'It is created as a private playlist with these same songs.',
+    'Crear otra distinta': 'Create a different one',
+    'Con otros artistas: no repite los que ya te ha propuesto.':
+      'With other artists: it does not repeat the ones it has already suggested.',
+    'Borrar la lista': 'Delete the playlist',
+    'Si ya la guardaste en Spotify, allí se queda.':
+      'If you already saved it to Spotify, it stays there.',
+    'Podrás generar otra cuando quieras.':
+      'You can generate another whenever you like.',
+    'Lista guardada': 'Playlist saved',
+    'Reproduciendo': 'Playing',
+    'Memoria musical borrada: podrán repetirse artistas':
+      'Music memory cleared: artists may repeat',
+    'Eso es el enlace de {que}, no de una lista de reproducción.':
+      'That is the link for {que}, not for a playlist.',
+    'No reconozco ese enlace. Abre la lista en Spotify, pulsa los tres puntos y elige Compartir, Copiar enlace.':
+      'I do not recognise that link. Open the playlist in Spotify, press the three dots and choose Share, Copy link.',
+
+    /* ---------- Música: los permisos y el diagnóstico ---------- */
+    'Qué le has dejado hacer a la app': 'What you have let the app do',
+    '{n} cosa no puede hacerla: reconecta y acepta la pantalla tal cual sale':
+      '{n} thing it cannot do: reconnect and accept the screen exactly as it comes',
+    '{n} cosas no puede hacerlas: reconecta y acepta la pantalla tal cual sale':
+      '{n} things it cannot do: reconnect and accept the screen exactly as it comes',
+    'Las {n} cosas que necesita, concedidas': 'All {n} things it needs, granted',
+    'La sesión es anterior y no apuntó los permisos':
+      'The session predates this and did not record the permissions',
+    'No puede: Spotify no dio {n} de los permisos que pide.':
+      'It cannot: Spotify did not grant {n} of the permissions it asks for.',
+    'Reproducir aquí dentro': 'Play in here',
+    'Sonar sin salir de la app y manejar el play, la pausa y el volumen.':
+      'Play without leaving the app and control play, pause and volume.',
+    'Ver tus listas': 'See your playlists',
+    'Las tuyas y las compartidas, para lanzarlas desde aquí.':
+      'Yours and the shared ones, to launch from here.',
+    'Guardarte las listas que crea la IA': 'Save the playlists the AI creates',
+    'Se crean en tu cuenta para oírlas en el móvil o en el coche.':
+      'They are created in your account so you can listen on your phone or in the car.',
+    'Tus me gusta': 'Your likes',
+    'Saber si una canción ya es tuya y poder darle al corazón.':
+      'Know whether a song is already yours and be able to hit the heart.',
+    'Afinar a tu gusto': 'Tune it to your taste',
+    'Lo que más escuchas, para que las listas se te parezcan.':
+      'What you listen to most, so the playlists sound like you.',
+    'Si aún así algo falla': 'If something still fails',
+    'Prueba una a una las llamadas a Spotify y te dice cuál se cae y por qué.':
+      'It tries the Spotify calls one by one and tells you which falls over and why.',
+    'Probar las llamadas que fallan': 'Test the calls that fail',
+    'Los permisos tal cual los escribe Spotify':
+      'The permissions exactly as Spotify writes them',
+    'la sesión es anterior y no lo apuntó':
+      'the session predates this and did not record it',
+    'Hay que reconectar Spotify': 'Spotify needs reconnecting',
+    'Spotify da los permisos el día que autorizas y ya no los amplía: el token se renueva solo, pero con los permisos de aquel día. Reconectar es un toque y no pierdes nada —ni tus listas, ni lo que suena.':
+      'Spotify grants permissions on the day you authorise and never widens them: the token renews itself, but with that day’s permissions. Reconnecting is one tap and you lose nothing —not your playlists, not what is playing.',
+    'Abriendo Spotify para dar permiso…': 'Opening Spotify to grant permission…',
+    'Esto no son los permisos': 'This is not about permissions',
+    'Tu conexión tiene todos los permisos que la app pide y aun así Spotify rechaza crear la lista. Estoy probando qué pasa y qué no.':
+      'Your connection has every permission the app asks for and Spotify still refuses to create the playlist. I am testing what works and what does not.',
+    'Probando las llamadas…': 'Testing the calls…',
+    'Copiar el resultado': 'Copy the result',
+    'Probar otra vez': 'Test again',
+    'Si acabas de tocar algo en el panel de Spotify, tu conexión es de antes del cambio: reconecta y vuelve a probar.':
+      'If you have just changed something in the Spotify dashboard, your connection predates the change: reconnect and test again.',
+    'Copiado': 'Copied',
+    'Selecciona el texto y cópialo a mano': 'Select the text and copy it by hand',
+    'CONCLUSIÓN: ahora sí deja crear listas. Cierra esto y dale otra vez a guardar.':
+      'CONCLUSION: it does let playlists be created now. Close this and press save again.',
+    'CONCLUSIÓN: esta conexión es anterior a cualquier cambio que hayas hecho hoy en el panel de Spotify, y un cambio en el panel no toca un token ya dado. Reconecta aquí abajo y vuelve a probar: hasta entonces esto es la foto de antes.':
+      'CONCLUSION: this connection predates anything you changed in the Spotify dashboard today, and a dashboard change does not touch a token already granted. Reconnect below and test again: until then this is the old picture.',
+    'CONCLUSIÓN: falla hasta el catálogo público, que no pide ningún permiso. El problema está en la app del panel de Spotify, no en tu cuenta: mira si sigue en modo desarrollo y si tu cuenta está en User Management.':
+      'CONCLUSION: even the public catalogue fails, and that asks for no permission at all. The problem is the app in the Spotify dashboard, not your account: check whether it is still in development mode and whether your account is under User Management.',
+    'CONCLUSIÓN: conexión recién hecha, el catálogo público responde y aun así Spotify no deja escribir en tu cuenta. Esto ya no es ni el token ni el panel. Mándame estas líneas.':
+      'CONCLUSION: freshly made connection, the public catalogue responds, and Spotify still will not write to your account. This is neither the token nor the dashboard any more. Send me these lines.',
+    'No se ha podido probar: {error}': 'It could not be tested: {error}',
+    'No se pudo probar: {error}': 'Could not test: {error}',
+    'Probando…': 'Testing…',
+    'No hay lista que guardar': 'There is no playlist to save',
+    'Entra en Spotify primero': 'Sign in to Spotify first',
+    'A tu conexión con Spotify le falta el permiso «{permiso}», que es justo el que hace falta para crear la lista en tu cuenta.':
+      'Your Spotify connection is missing the «{permiso}» permission, which is exactly the one needed to create the playlist in your account.',
+    'Tu conexión con Spotify es anterior a esta función, así que no incluye el permiso para crear listas en tu cuenta.':
+      'Your Spotify connection predates this feature, so it does not include permission to create playlists in your account.',
+    'Guardándola en Spotify…': 'Saving it to Spotify…',
+    'Estas canciones no tienen enlace de Spotify.': 'These songs have no Spotify link.',
+    ' — hecha con Training FR': ' — made with Training FR',
+    'Guardada en tu Spotify': 'Saved to your Spotify',
+    'Spotify ha rechazado crear la lista.': 'Spotify refused to create the playlist.',
+    'No se ha podido guardar en Spotify.': 'It could not be saved to Spotify.',
+
+    /* ---------- Música: crear una lista y el reproductor ---------- */
+    'Esa lista no tiene canciones': 'That playlist has no songs',
+    'Sonando en la app': 'Playing in the app',
+    'Aquí no se pudo, suena en tu Spotify abierto':
+      'It could not play here, it is playing on your open Spotify',
+    'Abre Spotify en algún dispositivo y vuelve a probar.':
+      'Open Spotify on some device and try again.',
+    'Nueva lista': 'New playlist',
+    'La IA propone las canciones y la app las busca en Spotify. Las que no existan se descartan solas.':
+      'The AI suggests the songs and the app looks them up in Spotify. Any that do not exist drop out by themselves.',
+    'A QUÉ TIENE QUE SONAR': 'WHAT IT SHOULD SOUND LIKE',
+    'CUÁNTO VA A DURAR': 'HOW LONG IT WILL LAST',
+    'ALGO MÁS (OPCIONAL)': 'ANYTHING ELSE (OPTIONAL)',
+    'Nada de reguetón, más rock de los noventa…': 'No reggaeton, more nineties rock…',
+    'Se adapta a lo de hoy': 'It adapts to today\'s session',
+    '{rutina}: más pesada en las series duras y más constante entre ellas.':
+      '{rutina}: heavier on the hard sets and steadier in between.',
+    'Crear lista': 'Create playlist',
+    'Vas a pedir': 'You are about to ask for',
+    '{cuanto} de música': '{cuanto} of music',
+    'Pensando la lista…': 'Thinking up the playlist…',
+    'Buscando las canciones en Spotify…': 'Looking the songs up in Spotify…',
+    'Buscando {hechas} de {total} · {halladas} encontradas':
+      'Searching {hechas} of {total} · {halladas} found',
+    'Ninguna de las canciones apareció en Spotify.':
+      'None of the songs turned up in Spotify.',
+    'Lista de entrenamiento': 'Workout playlist',
+    '{n} canción lista': '{n} song ready',
+    '{n} canciones listas': '{n} songs ready',
+    'Reproductor de la app': 'The app\'s player',
+    'Suena aquí mismo, sin abrir Spotify':
+      'It plays right here, without opening Spotify',
+    'Activar': 'Turn on',
+    'Conectando…': 'Connecting…',
+    'Listo: la música sonará en la app': 'Done: the music will play in the app',
+    'Guardar en favoritas': 'Save to your likes',
+    'Traer aquí': 'Bring it here',
+    'Aleatorio activado': 'Shuffle on',
+    'Aleatorio desactivado': 'Shuffle off',
+    'Guardada en tus favoritas de Spotify': 'Saved to your Spotify likes',
+    'Quitada de favoritas': 'Removed from your likes'
   };
 })(window);

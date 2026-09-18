@@ -359,8 +359,6 @@
       'Feet on the platform shoulder-width apart, at mid height. Higher works the glutes and hamstrings more; lower works the quads.',
     'Baja en 3 segundos hasta que las rodillas lleguen a unos 90 grados, o hasta justo antes de que la cadera se despegue del asiento.':
       'Lower over 3 seconds until your knees reach about 90 degrees, or until just before your hips lift off the seat.',
-    'Empuje':
-      'Press',
     'Empuja con toda la planta del pie hasta casi extender las piernas, sin bloquear las rodillas de golpe.':
       'Drive through your whole foot until your legs are nearly straight, without snapping your knees locked.',
     '3 s bajando · 1 s empujando':

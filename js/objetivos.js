@@ -18,14 +18,14 @@
       note: 'Cuenta los entrenamientos de los últimos 7 días',
       actual: function () { return Store.stats().week; },
       inicio: function () { return 0; },
-      formato: function (v) { return Math.round(v) + ' sesiones'; }
+      formato: function (v) { return Tp(Math.round(v), '{n} sesión', '{n} sesiones'); }
     },
     racha: {
       label: 'Mantener una racha', unidad: 'días', icono: 'flag',
       note: 'Días seguidos entrenando',
       actual: function () { return Store.stats().streak; },
       inicio: function () { return 0; },
-      formato: function (v) { return Math.round(v) + ' días'; }
+      formato: function (v) { return Tp(Math.round(v), '{n} día', '{n} días'); }
     },
     volumen: {
       label: 'Volumen semanal', unidad: 'kg movidos', icono: 'grafica',
@@ -49,9 +49,32 @@
       note: 'Todos los entrenamientos registrados',
       actual: function () { return Store.stats().total; },
       inicio: function (m) { return m.desde || 0; },
-      formato: function (v) { return Math.round(v) + ' sesiones'; }
+      formato: function (v) { return Tp(Math.round(v), '{n} sesión', '{n} sesiones'); }
     }
   };
+
+  /* Una frase guardada sin resolver: la meta vive en el dispositivo y se lee
+     en el idioma que tengas puesto ese día, no en el que había al crearla.
+     Un valor puede ser un número, un texto, { dec } para un decimal,
+     { minus } para pasarlo a minúsculas traducido, o { fmt, v } para que lo
+     escriba el propio tipo de meta. */
+  function frase(t, v) { return { t: t, v: v || {} }; }
+
+  function leer(x) {
+    if (x == null) return '';
+    if (typeof x === 'string') return T(x);
+    if (typeof x === 'number') return String(x);
+    if (x.dec !== undefined) return UI.dec(x.dec);
+    if (x.minus !== undefined) return T(x.minus).toLowerCase();
+    if (x.fmt !== undefined) {
+      const t = TIPOS[x.fmt];
+      return t ? t.formato(x.v) : String(x.v);
+    }
+    if (!x.t) return '';
+    const v = {};
+    Object.keys(x.v || {}).forEach(function (k) { v[k] = leer(x.v[k]); });
+    return Tn(x.t, v);
+  }
 
   function lista() { return Store.settings().objetivos || []; }
 
@@ -199,8 +222,9 @@
         falta: faltan, dias: faltan, fecha: Date.now() + faltan * 864e5,
         haciaMeta: true, ritmo: 1,
         frase: faltan === 0 ? 'Ya la tienes'
-          : 'Entrenando cada día la tienes en ' + faltan +
-            (faltan === 1 ? ' día' : ' días')
+          : frase(faltan === 1
+              ? 'Entrenando cada día la tienes en {n} día'
+              : 'Entrenando cada día la tienes en {n} días', { n: faltan })
       };
     }
 
@@ -214,8 +238,10 @@
         clase: 'ritmo', puntos: puntos, cumplido: p.cumplido,
         media: media, logradas: logradas, de: ultimas.length, meta: meta,
         frase: !ultimas.length ? 'Aún no hay semanas que comparar'
-          : 'Lo cumpliste ' + logradas + ' de las últimas ' + ultimas.length +
-            ' semanas; promedias ' + t.formato(Math.round(media * 10) / 10) + ' por semana'
+          : frase('Lo cumpliste {veces} de las últimas {de} semanas; promedias ' +
+              '{media} por semana',
+              { veces: logradas, de: ultimas.length,
+                media: { fmt: m.tipo, v: Math.round(media * 10) / 10 } })
       };
     }
 
@@ -254,9 +280,9 @@
           falta: falta, ritmo: quiere * r.kgSemana, haciaMeta: true,
           bajando: quiere < 0, semanas: plan.semanas, dias: dias,
           fecha: Date.now() + dias * 864e5,
-          frase: 'Según tu plan: ritmo ' + (r.label || '').toLowerCase() + ', ' +
-            (quiere < 0 ? '-' : '+') + UI.dec(r.kgSemana) +
-            ' kg por semana'
+          frase: frase('Según tu plan: ritmo {ritmo}, {signo}{kg} kg por semana',
+            { ritmo: { minus: r.label || '' }, signo: quiere < 0 ? '-' : '+',
+              kg: { dec: r.kgSemana } })
         };
       }
     }
@@ -273,8 +299,8 @@
     if (!haciaMeta) {
       return { clase: 'meta', puntos: puntos, cumplido: false, falta: falta,
         ritmo: ritmo, haciaMeta: false,
-        frase: 'A este ritmo te alejas ' + t.formato(Math.abs(Math.round(ritmo * 10) / 10)) +
-          ' por semana' };
+        frase: frase('A este ritmo te alejas {cuanto} por semana',
+          { cuanto: { fmt: m.tipo, v: Math.abs(Math.round(ritmo * 10) / 10) } }) };
     }
 
     const semanas = Math.abs(falta / ritmo);
@@ -284,8 +310,9 @@
       clase: 'meta', puntos: puntos, cumplido: false,
       falta: falta, ritmo: ritmo, haciaMeta: true, bajando: bajando,
       semanas: semanas, dias: dias, fecha: Date.now() + dias * 864e5,
-      frase: 'A este ritmo, ' + (bajando ? '-' : '+') +
-        t.formato(Math.abs(Math.round(ritmo * 10) / 10)) + ' por semana'
+      frase: frase('A este ritmo, {signo}{cuanto} por semana',
+        { signo: bajando ? '-' : '+',
+          cuanto: { fmt: m.tipo, v: Math.abs(Math.round(ritmo * 10) / 10) } })
     };
   }
 
@@ -293,12 +320,12 @@
      dividir de cabeza. */
   function cuanto(dias) {
     if (!(dias > 0)) return '';
-    if (dias <= 21) return dias === 1 ? '1 día' : dias + ' días';
+    if (dias <= 21) return Tp(dias, '{n} día', '{n} días');
     const sem = Math.round(dias / 7);
-    if (sem <= 10) return sem + ' semanas';
+    if (sem <= 10) return Tp(sem, '{n} semana', '{n} semanas');
     const mes = Math.round(dias / 30.4);
-    if (mes <= 18) return mes === 1 ? '1 mes' : mes + ' meses';
-    return Math.round(dias / 365 * 10) / 10 + ' años';
+    if (mes <= 18) return Tp(mes, '{n} mes', '{n} meses');
+    return Tn('{n} años', { n: UI.dec(Math.round(dias / 365 * 10) / 10) });
   }
 
   /* Revisa las metas y marca las recién cumplidas. Devuelve las que acaban de lograrse. */
@@ -317,12 +344,12 @@
 
   function etiqueta(m) {
     const t = TIPOS[m.tipo];
-    if (!t) return 'Objetivo';
+    if (!t) return T('Objetivo');
     if (m.tipo === 'marca') {
       const ex = Data.get(m.exId);
-      return 'Récord en ' + (ex ? ex.nameEs : 'un ejercicio');
+      return Tn('Récord en {que}', { que: ex ? ex.nameEs : T('un ejercicio') });
     }
-    return t.label;
+    return T(t.label);
   }
 
   function formato(m, valor) {
@@ -336,14 +363,16 @@
     if (!arr.length) return '';
     return arr.map(function (m) {
       const p = progreso(m);
-      return etiqueta(m) + ': ' + formato(m, p.actual) + ' de ' + formato(m, m.meta) +
-        (p.cumplido ? ' (cumplido)' : ' (' + Math.round(p.pct * 100) + '%)');
+      return etiqueta(m) + ': ' + formato(m, p.actual) + ' ' +
+        Tn('de {meta}', { meta: formato(m, m.meta) }) +
+        (p.cumplido ? T(' (cumplido)') : ' (' + Math.round(p.pct * 100) + '%)');
     }).join('; ') + '.';
   }
 
   g.Objetivos = {
     TIPOS: TIPOS, lista: lista, nuevo: nuevo, guardar: guardar, borrar: borrar,
     progreso: progreso, revisar: revisar, etiqueta: etiqueta, formato: formato,
-    resumen: resumen, prevision: prevision, serie: serie, cuanto: cuanto
+    resumen: resumen, prevision: prevision, serie: serie, cuanto: cuanto,
+    leer: leer
   };
 })(window);

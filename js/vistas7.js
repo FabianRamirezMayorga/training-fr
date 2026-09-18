@@ -21,6 +21,15 @@
 
   const S = function () { return g.Suplementos; };
 
+  /* Lo guardado es la frase en espanol, que es la clave con la que se traduce
+     al pintarla. En el campo se ensena traducida; al guardar, si sigue diciendo
+     lo mismo que ensenamos, se devuelve la clave y el bote sigue hablando el
+     idioma que pongas manana. */
+  function comoEstaba(escrito, guardado) {
+    const t = String(escrito || '').trim();
+    return t === T(guardado || '').trim() ? (guardado || '') : t;
+  }
+
   /* Plegada de entrada. La lista completa es para el día que se cambia algo, y
      eso pasa una vez al mes; lo que se mira a diario es la tarjeta de arriba.
      Con cinco botes desplegados había que pasar media pantalla para llegar a
@@ -59,7 +68,7 @@
     const cara = html`
       <button class="sup-fila" data-sup="${s.id}">
         <span class="grow">
-          <span class="sup-nom">${s.nombre}</span>
+          <span class="sup-nom">${T(s.nombre)}</span>
           <span class="sup-sub">${raw(esc([s.dosis, cuando, cada]
             .filter(Boolean).join(' · ')))}</span>
         </span>
@@ -83,10 +92,10 @@
     /* El primer grupo es el panel de la derecha y el segundo el de la
        izquierda, igual que en las rutinas y los menús. */
     return App.deslizable(cara, [
-      { icono: 'trash', texto: 'Borrar', tono: 'malo',
+      { icono: 'trash', texto: T('Borrar'), tono: 'malo',
         attr: 'data-borrarsup="' + esc(s.id) + '"' }
     ], [
-      { icono: 'edit', texto: 'Editar', tono: 'suave',
+      { icono: 'edit', texto: T('Editar'), tono: 'suave',
         attr: 'data-editarsup="' + esc(s.id) + '"' }
     ]);
   }
@@ -132,7 +141,7 @@
       <div class="card sup-hoy2 ${alLado ? 'al-lado' : 'debajo'}">
         ${raw(l.map(function (x) {
           return '<div class="sh-linea">' +
-            '<span class="sl-cab"><span class="sl-n">' + esc(x.sup.nombre) + '</span>' +
+            '<span class="sl-cab"><span class="sl-n">' + esc(T(x.sup.nombre)) + '</span>' +
             (x.sup.dosis ? '<span class="sl-d">' + esc(x.sup.dosis) + '</span>' : '') +
             '</span>' +
             '<span class="sl-h">' + x.horas.map(function (h) {
@@ -309,14 +318,14 @@
         return x.id === el.dataset.borrarsup;
       })[0];
       if (!s) return;
-      UI.confirm('Quitar ' + (s.nombre || 'el suplemento'),
-        'Se va de la lista, de las cuentas y de sus alertas. Si compartía hora con ' +
-        'otro, esa alerta se queda con el que sigues tomando.',
-        'Quitar', true).then(function (ok) {
+      UI.confirm(Tn('Quitar {que}', { que: T(s.nombre) || T('el suplemento') }),
+        T('Se va de la lista, de las cuentas y de sus alertas. Si compartía hora con ' +
+        'otro, esa alerta se queda con el que sigues tomando.'),
+        T('Quitar'), true).then(function (ok) {
         if (!ok) return;
         S().borrar(s.id);
         render();
-        UI.toast(s.nombre + ' quitado');
+        UI.toast(Tn('{que} quitado', { que: T(s.nombre) }));
       });
     });
 
@@ -332,8 +341,8 @@
     bind(root, '[data-a=sincronizar]', function () {
       const n = S().sincronizarAlertas();
       render();
-      UI.toast(n ? n + (n === 1 ? ' alerta lista' : ' alertas listas')
-        : 'No hay nada que recordar');
+      UI.toast(n ? Tp(n, '{n} alerta lista', '{n} alertas listas')
+        : T('No hay nada que recordar'));
     });
   };
 
@@ -351,7 +360,7 @@
         calculando = false;
         falloEn = S().resumenIA();
         render();
-        if (aMano) UI.toast(e.message || 'No he podido calcularlo');
+        if (aMano) UI.toast(e.message || T('No he podido calcularlo'));
       });
   }
 
@@ -372,9 +381,9 @@
 
     UI.modal(html`
       <div class="conf-disco cambio">${raw(icon('bote'))}</div>
-      <h2 class="conf-tit">Añadir suplemento</h2>
-      <p class="muted conf-txt">Elige cuál y en el paso siguiente pones la dosis, cada
-      cuánto y a qué hora.</p>
+      <h2 class="conf-tit">${T('Añadir suplemento')}</h2>
+      <p class="muted conf-txt">${T('Elige cuál y en el paso siguiente pones la dosis, ' +
+      'cada cuánto y a qué hora.')}</p>
 
       <div class="sup-rejilla">
         ${raw(S().CATALOGO.filter(function (c) { return c.id !== 'otro'; })
@@ -383,7 +392,7 @@
             return '<button class="sup-chip' + (ya[c.id] ? ' ya' : '') +
               '" data-cat="' + esc(c.id) + '">' +
               '<span class="sc-ico">' + icon(f.icono) + '</span>' +
-              '<span class="sc-nom">' + esc(c.nombre) + '</span>' +
+              '<span class="sc-nom">' + esc(T(c.nombre)) + '</span>' +
               (ya[c.id] ? '<span class="sc-ya">' + icon('check') + '</span>' : '') +
               '</button>';
           }).join(''))}
@@ -394,7 +403,7 @@
            borde de puntos se perdía entre los doce, y en claro no se veía. -->
       <button class="sup-otro" data-cat="otro">
         <span class="so-ico">${raw(icon('plus'))}</span>
-        <span class="grow"><b>Otro</b><i>El tuyo no está: lo escribes tú</i></span>
+        <span class="grow"><b>${T('Otro')}</b><i>${T('El tuyo no está: lo escribes tú')}</i></span>
         <span class="chevron">${raw(icon('chevron'))}</span>
       </button>`,
       function (el) {
@@ -463,29 +472,29 @@
            flechitas del navegador encima del número, y el teclado que abre el
            móvil es el de cifras con coma, que es como se escriben las dosis. -->
       <div class="do-caja">
-        <button class="do-pm" data-d="menos" aria-label="Menos">${raw(icon('menos'))}</button>
+        <button class="do-pm" data-d="menos" aria-label="${T('Menos')}">${raw(icon('menos'))}</button>
         <span class="do-val">
           <input id="do-num" class="do-num" type="text" inputmode="decimal"
-                 value="1" maxlength="5" autocomplete="off" aria-label="Cuánto tomas">
+                 value="1" maxlength="5" autocomplete="off" aria-label="${T('Cuánto tomas')}">
           <i id="do-uni">toma</i>
         </span>
-        <button class="do-pm" data-d="mas" aria-label="Más">${raw(icon('plus'))}</button>
+        <button class="do-pm" data-d="mas" aria-label="${T('Más')}">${raw(icon('plus'))}</button>
       </div>
 
-      <div class="list-title" style="margin-top:16px" id="do-tit">En qué se mide</div>
+      <div class="list-title" style="margin-top:16px" id="do-tit">${T('En qué se mide')}</div>
       <div class="list do-unidades" role="radiogroup" aria-labelledby="do-tit">
         ${raw(S().UNIDADES.map(function (x) {
           return '<button class="list-row tap do-uni" role="radio" aria-checked="false"' +
             ' data-uni="' + esc(x.id) + '">' +
-            '<span class="grow"><span class="list-row-title">' + esc(x.lista) +
+            '<span class="grow"><span class="list-row-title">' + esc(T(x.lista)) +
             '</span></span><span class="do-marca">' + icon('check') + '</span></button>';
         }).join(''))}
       </div>
 
       <div class="cb-acciones" style="margin-top:16px">
         <button class="btn primary grow btn-arranque" data-d="ok">
-          ${raw(icon('check'))} Listo</button>
-        <button class="btn vidrio" data-d="no">Cancelar</button>
+          ${raw(icon('check'))} ${T('Listo')}</button>
+        <button class="btn vidrio" data-d="no">${T('Cancelar')}</button>
       </div>`,
       function (el) {
         const campo = el.querySelector('#do-num');
@@ -567,7 +576,7 @@
       const rep = el.querySelector('#sf-repchip');
       if (rep) {
         rep.textContent = dat.patron
-          ? S().etiquetaMomento(dat) : 'Elige cómo lo repartes';
+          ? S().etiquetaMomento(dat) : T('Elige cómo lo repartes');
         rep.classList.toggle('sin-elegir', !dat.patron);
       }
 
@@ -582,25 +591,27 @@
 
     UI.modal(html`
       <div class="conf-disco cambio">${raw(icon('bote'))}</div>
-      <h2 class="conf-tit">${esNuevo ? 'Nuevo suplemento' : dat.nombre || 'Suplemento'}</h2>
+      <h2 class="conf-tit">${esNuevo ? T('Nuevo suplemento')
+        : T(dat.nombre) || T('Suplemento')}</h2>
 
       <label class="sup-campo" style="display:block">
-        <span>Nombre</span>
-        <input id="sf-nombre" value="${dat.nombre}" placeholder="Creatina" autocomplete="off">
+        <span>${T('Nombre')}</span>
+        <input id="sf-nombre" value="${T(dat.nombre)}" placeholder="${T('Creatina')}"
+               autocomplete="off">
       </label>
 
-      <label class="tiny sup-lbl">CUÁNTO</label>
+      <label class="tiny sup-lbl">${T('CUÁNTO')}</label>
       <button class="sup-reparto dosis" data-x="dosis">
-        <span class="grow" id="sf-dosistxt">${dat.dosis || 'Elige la dosis'}</span>
+        <span class="grow" id="sf-dosistxt">${dat.dosis || T('Elige la dosis')}</span>
         <span class="chevron">${raw(icon('chevron'))}</span>
       </button>
 
-      <label class="tiny sup-lbl">CADA CUÁNTO</label>
+      <label class="tiny sup-lbl">${T('CADA CUÁNTO')}</label>
       <div class="row wrap sup-pills" id="sf-frec">
         ${raw(S().FRECUENCIAS.map(function (f) {
           return '<button class="chip ' + (dat.frecuencia === f.id ? 'on' : '') +
             (f.reparte ? ' chip-otro' : '') + '" data-frec="' + esc(f.id) + '">' +
-            esc(f.corto || f.label) + '</button>';
+            esc(T(f.corto || f.label)) + '</button>';
         }).join(''))}
       </div>
 
@@ -630,12 +641,12 @@
       </div>
 
       <div id="sf-blmom">
-        <label class="tiny sup-lbl">EN QUÉ MOMENTO</label>
+        <label class="tiny sup-lbl">${T('EN QUÉ MOMENTO')}</label>
         <div class="row wrap sup-pills" id="sf-mom">
           ${raw(S().MOMENTOS.map(function (m) {
             return '<button class="chip ' + (dat.momento === m.id ? 'on' : '') +
               (m.de === 'fija' ? ' chip-otro' : '') + '" data-mom="' + esc(m.id) + '">' +
-              esc(m.corto || m.label) + '</button>';
+              esc(T(m.corto || m.label)) + '</button>';
           }).join(''))}
         </div>
 
@@ -643,7 +654,7 @@
              navegador: aqui es donde se pone una hora a mano, asi que se pone
              como se ponen las horas en todas partes. -->
         <div id="sf-fija" hidden>
-          <label class="tiny sup-lbl">A QUÉ HORA</label>
+          <label class="tiny sup-lbl">${T('A QUÉ HORA')}</label>
           <button class="sup-reparto" data-x="hora">
             <span class="grow sf-horatxt"></span>
             <span class="chevron">${raw(icon('chevron'))}</span>
@@ -653,11 +664,11 @@
 
       <div class="cb-acciones" style="margin-top:16px">
         <button class="btn primary grow btn-arranque" data-x="ok">
-          ${raw(icon('check'))} Guardar</button>
-        <button class="btn vidrio" data-x="no">Cancelar</button>
+          ${raw(icon('check'))} ${T('Guardar')}</button>
+        <button class="btn vidrio" data-x="no">${T('Cancelar')}</button>
       </div>
       ${raw(esNuevo ? '' : '<button class="btn ghost block sm danger" data-x="borrar" ' +
-        'style="margin-top:9px">Quitarlo de la lista</button>')}`,
+        'style="margin-top:9px">' + esc(T('Quitarlo de la lista')) + '</button>')}`,
       function (el) {
         /* Sin patrón por defecto: ponerle «cada 8 horas» de oficio era decidir
            por él y que se lo llevara sin haberlo elegido. */
@@ -694,7 +705,7 @@
           pintar(el);
 
           if (dat.frecuencia === 'varias' && !dat.patron) {
-            dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
+            dat.nombre = comoEstaba(el.querySelector('#sf-nombre').value, dat.nombre);
             repartoSheet(dat, function (elegido) {
               /* Si se cierra sin elegir, la frecuencia vuelve a lo de antes:
                  dejarla en «varias» sin reparto es dejarla sin horas. */
@@ -708,14 +719,14 @@
 
         el.querySelectorAll('[data-x=hora]').forEach(function (b) {
           b.onclick = function () {
-            dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
+            dat.nombre = comoEstaba(el.querySelector('#sf-nombre').value, dat.nombre);
             const fija = S().momentoDe(dat.momento).de === 'fija' &&
               dat.frecuencia !== 'varias';
             horaSheet(dat.hora || '08:00',
-              fija ? '¿A qué hora?' : '¿A qué hora empiezas?',
-              fija ? 'La que tú digas. Es el único momento que no depende de tus ' +
-                'comidas ni de tu entreno.'
-                : 'De ahí salen las demás, contando hacia delante y cortando en la cena.',
+              fija ? T('¿A qué hora?') : T('¿A qué hora empiezas?'),
+              fija ? T('La que tú digas. Es el único momento que no depende de tus ' +
+                'comidas ni de tu entreno.')
+                : T('De ahí salen las demás, contando hacia delante y cortando en la cena.'),
               function (h) {
                 if (h) dat.hora = h;
                 fichaSheet(dat, esNuevo);
@@ -728,12 +739,12 @@
            ficha al elegir. Sin esto, elegir el reparto cerraba el formulario
            entero y se perdía lo tecleado. */
         el.querySelector('[data-x=dosis]').onclick = function () {
-          dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
+          dat.nombre = comoEstaba(el.querySelector('#sf-nombre').value, dat.nombre);
           dosisSheet(dat, function () { fichaSheet(dat, esNuevo); });
         };
 
         el.querySelector('[data-x=reparto]').onclick = function () {
-          dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
+          dat.nombre = comoEstaba(el.querySelector('#sf-nombre').value, dat.nombre);
           repartoSheet(dat, function () { fichaSheet(dat, esNuevo); });
         };
 
@@ -743,25 +754,25 @@
         if (borrarB) {
           borrarB.onclick = function () {
             UI.closeModal();
-            UI.confirm('Quitar ' + (dat.nombre || 'el suplemento'),
-              'Se va de la lista, de las cuentas y de sus alertas. Si compartía hora con ' +
-              'otro, esa alerta se queda con el que sigues tomando.',
-              'Quitar', true).then(function (ok) {
+            UI.confirm(Tn('Quitar {que}', { que: T(dat.nombre) || T('el suplemento') }),
+              T('Se va de la lista, de las cuentas y de sus alertas. Si compartía hora con ' +
+              'otro, esa alerta se queda con el que sigues tomando.'),
+              T('Quitar'), true).then(function (ok) {
               if (!ok) return;
               S().borrar(dat.id);
               render();
-              UI.toast('Quitado');
+              UI.toast(T('Quitado'));
             });
           };
         }
 
         el.querySelector('[data-x=ok]').onclick = function () {
-          dat.nombre = (el.querySelector('#sf-nombre').value || '').trim();
-          if (!dat.nombre) { UI.toast('Ponle nombre'); return; }
+          dat.nombre = comoEstaba(el.querySelector('#sf-nombre').value, dat.nombre);
+          if (!dat.nombre) { UI.toast(T('Ponle nombre')); return; }
           S().guardar(dat);
           UI.closeModal();
           render();
-          UI.toast(esNuevo ? dat.nombre + ' añadido' : 'Guardado');
+          UI.toast(esNuevo ? Tn('{que} añadido', { que: T(dat.nombre) }) : T('Guardado'));
         };
       });
   }
@@ -976,10 +987,10 @@
       const suya = dat.patron ? S().patronDe(dat.patron).de : '';
       return '<div class="opciones" style="margin-top:14px">' +
         FAMILIAS.map(function (f) {
-          let sub = f.sub;
+          let sub = T(f.sub);
           if (suya === f.de && f.de !== 'manual') {
             const hs = horasDelPatron(dat.patron);
-            sub = S().patronDe(dat.patron).label + ' · ' +
+            sub = T(S().patronDe(dat.patron).label) + ' · ' +
               hs.map(function (h) { return UI.hora ? UI.hora(h) : h; }).join(', ');
           } else if (f.de === 'manual' && (dat.horasManuales || []).length) {
             sub = (dat.horasManuales || []).slice().sort().map(function (h) {
@@ -989,7 +1000,7 @@
           return '<button class="opcion ' + (suya === f.de ? 'on' : '') +
             '" data-fam="' + esc(f.de) + '" style="--tono:var(--acc)">' +
             '<span class="op-ico">' + icon(f.ico) + '</span>' +
-            '<span class="grow"><span class="op-nom">' + esc(f.nom) + '</span>' +
+            '<span class="grow"><span class="op-nom">' + esc(T(f.nom)) + '</span>' +
             '<span class="op-sub">' + esc(sub) + '</span></span>' +
             /* Sin el visto redondo de las otras listas: aqui la fila se abre,
                y el visto mas la flecha mas el subtitulo con las horas dejaba el
@@ -1008,14 +1019,13 @@
           const hs = horasDelPatron(p.id);
           return '<button class="opcion ' + (dat.patron === p.id ? 'on' : '') +
             '" data-pat="' + esc(p.id) + '" style="--tono:var(--acc)">' +
-            '<span class="grow"><span class="op-nom">' + esc(p.label) + '</span>' +
-            '<span class="op-sub">' + esc(hs.length +
-              (hs.length === 1 ? ' toma' : ' tomas') + ' al día · ' +
-              hs.map(function (h) { return UI.hora ? UI.hora(h) : h; }).join(', ')) +
+            '<span class="grow"><span class="op-nom">' + esc(T(p.label)) + '</span>' +
+            '<span class="op-sub">' + esc(Tp(hs.length, '{n} toma al día', '{n} tomas al día') +
+              ' · ' + hs.map(function (h) { return UI.hora ? UI.hora(h) : h; }).join(', ')) +
             '</span></span>' +
             '<span class="op-marca">' + icon('check') + '</span></button>';
         }).join('') + '</div>' +
-        '<p class="tiny" style="margin:9px 2px 0">' + esc(f.pie) + '</p>';
+        '<p class="tiny" style="margin:9px 2px 0">' + esc(T(f.pie)) + '</p>';
     };
 
     /* ---------- a mano: la rueda ---------- */
@@ -1024,32 +1034,32 @@
       return atrasHTML() +
         ruedaHTML(rueda) +
         '<button class="btn primary block" data-x="add" style="margin-top:14px">' +
-        icon('plus') + ' Añadir esta hora</button>' +
+        icon('plus') + ' ' + esc(T('Añadir esta hora')) + '</button>' +
 
-        '<div class="list-title" style="margin-top:16px">Tus horas' +
+        '<div class="list-title" style="margin-top:16px">' + esc(T('Tus horas')) +
         (hs.length ? ' <span class="rd-cuenta">' + hs.length + '</span>' : '') + '</div>' +
         (hs.length
           ? '<div class="row wrap sup-pills" style="margin-top:7px">' + hs.map(function (h) {
               return '<button class="chip on" data-quitar="' + esc(h) + '">' +
                 esc(UI.hora ? UI.hora(h) : h) + ' ' + icon('close') + '</button>';
             }).join('') + '</div>'
-          : '<p class="tiny" style="margin:4px 2px 0">Todavía ninguna. Gira la rueda y ' +
-            'añade la primera.</p>') +
+          : '<p class="tiny" style="margin:4px 2px 0">' + esc(T('Todavía ninguna. ' +
+            'Gira la rueda y añade la primera.')) + '</p>') +
 
         '<button class="btn block btn-arranque" data-x="listo" style="margin-top:16px">' +
-        icon('check') + ' Listo</button>';
+        icon('check') + ' ' + esc(T('Listo')) + '</button>';
     };
 
     const atrasHTML = function () {
       return '<button class="rp-atras" data-x="atras">' + icon('back') +
-        ' Cómo lo repartes</button>';
+        ' ' + esc(T('Cómo lo repartes')) + '</button>';
     };
 
     UI.modal(html`
       <div class="conf-disco cambio" id="rp-disco">${raw(icon('reloj'))}</div>
-      <h2 class="conf-tit" id="rp-tit">¿Cómo lo repartes?</h2>
-      <p class="muted conf-txt" id="rp-txt">Tres maneras. Elige una y dentro verás las
-      horas que salen con tus datos de ahora.</p>
+      <h2 class="conf-tit" id="rp-tit">${T('¿Cómo lo repartes?')}</h2>
+      <p class="muted conf-txt" id="rp-txt">${T('Tres maneras. Elige una y dentro verás ' +
+      'las horas que salen con tus datos de ahora.')}</p>
 
       <div id="rp-caja"></div>`,
       function (el) {
@@ -1066,21 +1076,21 @@
 
         const pintar = function () {
           if (!dentro) {
-            cabecera('reloj', '¿Cómo lo repartes?', 'Tres maneras. Elige una y dentro ' +
-              'verás las horas que salen con tus datos de ahora.');
+            cabecera('reloj', T('¿Cómo lo repartes?'), T('Tres maneras. Elige una y ' +
+              'dentro verás las horas que salen con tus datos de ahora.'));
             caja.innerHTML = familiasHTML();
             return;
           }
           const f = FAMILIAS.filter(function (x) { return x.de === dentro; })[0];
           if (dentro === 'manual') {
-            cabecera(f.ico, 'Pon tus horas', 'Gira la rueda, añade, y repite hasta ' +
-              'tenerlas todas. Se crea una alerta por cada una.');
+            cabecera(f.ico, T('Pon tus horas'), T('Gira la rueda, añade, y repite hasta ' +
+              'tenerlas todas. Se crea una alerta por cada una.'));
             caja.innerHTML = manualHTML();
             montarRueda(caja, rueda);
             return;
           }
-          cabecera(f.ico, f.nom, 'Debajo de cada una van las horas que salen con tus ' +
-            'datos de ahora.');
+          cabecera(f.ico, T(f.nom), T('Debajo de cada una van las horas que salen con ' +
+            'tus datos de ahora.'));
           caja.innerHTML = dentroHTML(dentro);
         };
 
@@ -1120,17 +1130,17 @@
             rueda.h = puesta.h; rueda.m = puesta.m; rueda.ap = puesta.ap;
             const v = deRueda(puesta);
             const hs = (dat.horasManuales || []).slice();
-            if (hs.indexOf(v) !== -1) { UI.toast('Esa hora ya está'); return; }
+            if (hs.indexOf(v) !== -1) { UI.toast(T('Esa hora ya está')); return; }
             hs.push(v);
             dat.horasManuales = hs;
             pintar();
-            UI.toast((UI.hora ? UI.hora(v) : v) + ' añadida');
+            UI.toast(Tn('{hora} añadida', { hora: UI.hora ? UI.hora(v) : v }));
             return;
           }
 
           if (b.dataset.x === 'listo') {
             if (!(dat.horasManuales || []).length) {
-              UI.toast('Añade al menos una hora'); return;
+              UI.toast(T('Añade al menos una hora')); return;
             }
             dat.patron = 'manual';
             eligio = true;

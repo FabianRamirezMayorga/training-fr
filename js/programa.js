@@ -513,14 +513,16 @@
             exId: ex.id, patron: Alt.patron(ex), musculo: m, rol: 'accesorio',
             sets: cfg.series, reps: cfg.reps + sexo.repsExtra, weight: 0,
             rest: Math.round(cfg.rest * sexo.descanso / 5) * 5,
-            note: 'Entra para que el día no se quede corto con el material que tienes.'
+            note: T('Entra para que el día no se quede corto con el material que tienes.')
           });
         });
       }
 
       return {
         dia: dia,
-        nombre: UI.diaLargo(dia) + ' · ' + plantilla.nombre,
+        /* El nombre acaba siendo el de la rutina guardada, asi que se escribe
+           ya en el idioma que tengas puesto al generar el plan. */
+        nombre: UI.diaLargo(dia) + ' · ' + T(plantilla.nombre),
         plantilla: plantilla.nombre,
         ejercicios: ejercicios,
         minutos: duracion(ejercicios, edad.calentamiento)
@@ -541,7 +543,7 @@
     });
     const cortos = Object.keys(buscados).filter(function (m) {
       return (volumen[m] || 0) < VOLUMEN_MIN;
-    }).map(function (m) { return I18N.muscle(m); });
+    });   /* en crudo: el nombre del musculo se traduce al leerlo, no aqui */
 
     const real = volumenReal(4);
 
@@ -614,12 +616,12 @@
   }
 
   function notaDeEjercicio(hueco, ex, edad, r, estatico) {
-    if (estatico) return 'Aguanta la posición: las repeticiones son segundos.';
+    if (estatico) return T('Aguanta la posición: las repeticiones son segundos.');
     if (hueco.rol === 'principal') {
-      return 'Es el ejercicio fuerte del día: haz dos series de aproximación con ' +
-        'poco peso antes de la primera seria.';
+      return T('Es el ejercicio fuerte del día: haz dos series de aproximación con ' +
+        'poco peso antes de la primera seria.');
     }
-    if (r.conApoyo[hueco.patron]) return 'Recorrido cómodo, sin bajar a donde molesta.';
+    if (r.conApoyo[hueco.patron]) return T('Recorrido cómodo, sin bajar a donde molesta.');
     return '';
   }
 
@@ -674,26 +676,66 @@
     });
   }
 
+  /* ---------- una frase guardada sin resolver ----------
+     El plan vive en el dispositivo y se lee en el idioma que haya PUESTO ESE
+     DÍA, no en el que había al generarlo. Por eso lo que se guarda es la frase
+     en español —que es la clave— y sus valores aparte.
+
+     Un valor puede ser un número o un texto tal cual, otra frase de estas
+     —{ t, v }— para lo que también hay que traducir, o una de las tres cajas
+     que resuelve leer(): un decimal, una lista de músculos, o un millar. */
+  function frase(t, v) { return { t: t, v: v || {} }; }
+
+  function leer(x) {
+    if (x == null) return '';
+    if (typeof x === 'string') return T(x);
+    if (typeof x === 'number') return String(x);
+    if (Array.isArray(x)) return x.map(leer).join(', ');
+    if (x.dec !== undefined) return UI.dec(x.dec);
+    if (x.miles !== undefined) return UI.num(x.miles);
+    if (x.musculos) {
+      return x.musculos.map(function (m) { return I18N.muscle(m).toLowerCase(); }).join(', ');
+    }
+    if (x.flojos) {
+      return x.flojos.map(function (f) {
+        return Tn(f.tiene === 1
+          ? '{mus} ({n} serie por semana, el plan te pide {pide})'
+          : '{mus} ({n} series por semana, el plan te pide {pide})',
+          { mus: I18N.muscle(f.mus).toLowerCase(), n: UI.dec(f.tiene),
+            pide: UI.dec(f.pide) });
+      }).join('; ');
+    }
+    if (!x.t) return '';
+    const v = {};
+    Object.keys(x.v || {}).forEach(function (k) { v[k] = leer(x.v[k]); });
+    return Tn(x.t, v);
+  }
+
   function razones(p, obj, edad, sexo, experiencia, series, ndias, plantillas, cortos, minutos, volumenPlan, real) {
     const out = [];
-    const nivel = { beginner: 'principiante', intermediate: 'intermedio', expert: 'avanzado' };
+    const nivel = { beginner: 'Principiante', intermediate: 'Intermedio', expert: 'Avanzado' };
 
-    out.push('Objetivo ' + obj.label.toLowerCase() + ': ' + obj.resumen);
+    out.push(frase('Objetivo: {obj}. {resumen}',
+      { obj: obj.label, resumen: obj.resumen }));
 
-    out.push('Nivel ' + (nivel[experiencia] || 'intermedio') + ': el plan apunta a unas ' +
-      series + ' series semanales por músculo, que es donde está el mejor equilibrio ' +
-      'entre estímulo y recuperación.');
+    out.push(frase('Nivel {nivel}: el plan apunta a unas {series} series semanales por ' +
+      'músculo, que es donde está el mejor equilibrio entre estímulo y recuperación.',
+      { nivel: nivel[experiencia] || 'Intermedio', series: series }));
 
     const unicas = plantillas.filter(function (x, i, a) { return a.indexOf(x) === i; }).length;
-    out.push(ndias + (ndias === 1 ? ' día' : ' días') + ' a la semana con ' + unicas +
-      ' sesiones distintas: así cada músculo recibe dos estímulos por semana, que rinde ' +
-      'más que machacarlo una vez.');
+    out.push(frase(ndias === 1
+      ? '{dias} día a la semana con {unicas} sesiones distintas: así cada músculo recibe ' +
+        'dos estímulos por semana, que rinde más que machacarlo una vez.'
+      : '{dias} días a la semana con {unicas} sesiones distintas: así cada músculo recibe ' +
+        'dos estímulos por semana, que rinde más que machacarlo una vez.',
+      { dias: ndias, unicas: unicas }));
 
     if (p.edad) {
-      out.push(p.edad + ' años: ' + (edad.factor < 1
-        ? 'se recorta el volumen un ' + Math.round((1 - edad.factor) * 100) +
-          '% y se para en RPE ' + edad.rpe + ', dejando repeticiones en recámara.'
-        : 'volumen completo, sin recortes por edad.'));
+      out.push(edad.factor < 1
+        ? frase('{edad} años: se recorta el volumen un {pct}% y se para en RPE {rpe}, ' +
+            'dejando repeticiones en recámara.',
+            { edad: p.edad, pct: Math.round((1 - edad.factor) * 100), rpe: edad.rpe })
+        : frase('{edad} años: volumen completo, sin recortes por edad.', { edad: p.edad }));
     }
 
     if (sexo.notas.length) out.push(sexo.notas[0]);
@@ -701,20 +743,23 @@
     if (p.peso && p.altura && obj.label.indexOf('grasa') !== -1) {
       const m = Perfil.macros();
       if (m) {
-        out.push('Con tu perfil salen ' + m.kcal + ' kcal y ' + m.prot + ' g de proteína ' +
-          'al día: sin ese déficit y esa proteína, el gimnasio solo no baja la grasa.');
+        out.push(frase('Con tu perfil salen {kcal} kcal y {prot} g de proteína al día: ' +
+          'sin ese déficit y esa proteína, el gimnasio solo no baja la grasa.',
+          { kcal: m.kcal, prot: m.prot }));
       }
     }
     if (p.peso && obj.label.indexOf('Ganar') === 0) {
       const m = Perfil.macros();
       if (m) {
-        out.push('Para ganar músculo hacen falta ' + m.kcal + ' kcal y ' + m.prot +
-          ' g de proteína al día: el estímulo lo pone el plan, el material lo pone la comida.');
+        out.push(frase('Para ganar músculo hacen falta {kcal} kcal y {prot} g de proteína ' +
+          'al día: el estímulo lo pone el plan, el material lo pone la comida.',
+          { kcal: m.kcal, prot: m.prot }));
       }
     }
     if (p.sueño && p.sueño < 7) {
-      out.push('Duermes ' + p.sueño + ' h: por debajo de 7 la recuperación se resiente y ' +
-        'el plan rinde menos de lo que puede. Es la palanca más barata que tienes.');
+      out.push(frase('Duermes {h} h: por debajo de 7 la recuperación se resiente y el ' +
+        'plan rinde menos de lo que puede. Es la palanca más barata que tienes.',
+        { h: p.sueño }));
     }
 
     /* Lo que sale de sus propios entrenamientos. Sin esto el análisis describe
@@ -723,20 +768,19 @@
     if (real) {
       const porSemana = Math.round(real.sesiones / real.semanas * 10) / 10;
       if (porSemana + 0.6 < ndias) {
-        out.push('En el último mes has entrenado ' + UI.dec(porSemana) +
-          ' días por semana y este plan pide ' + ndias + '. O bajas los días y los ' +
-          'cumples, o el plan se queda en papel: vale más un plan de tres días hecho ' +
-          'que uno de cinco a medias.');
+        out.push(frase('En el último mes has entrenado {hechos} días por semana y este ' +
+          'plan pide {pide}. O bajas los días y los cumples, o el plan se queda en papel: ' +
+          'vale más un plan de tres días hecho que uno de cinco a medias.',
+          { hechos: { dec: porSemana }, pide: ndias }));
       }
 
       const flojos = olvidados(volumenPlan || {}, real);
       if (flojos.length) {
-        out.push('Lo que vienes dejando de lado: ' + flojos.slice(0, 3).map(function (m) {
-          const n = real.porMusculo[m] || 0;
-          return I18N.muscle(m).toLowerCase() + ' (' + UI.dec(n) +
-            (n === 1 ? ' serie' : ' series') + ' por semana, el plan te pide ' +
-            UI.dec(volumenPlan[m]) + ')';
-        }).join('; ') + '. Ahí es donde este plan te va a cambiar algo.');
+        out.push(frase('Lo que vienes dejando de lado: {lista}. Ahí es donde este plan te ' +
+          'va a cambiar algo.',
+          { lista: { flojos: flojos.slice(0, 3).map(function (m) {
+            return { mus: m, tiene: real.porMusculo[m] || 0, pide: volumenPlan[m] };
+          }) } }));
       }
     } else {
       out.push('Todavía no tienes entrenamientos guardados, así que el plan sale solo de ' +
@@ -747,21 +791,26 @@
     /* La aritmética del tiempo: en una hora no caben veinte series por músculo,
        y es mejor decirlo que repartir migajas y llamarlo programa. */
     if (cortos && cortos.length) {
-      out.push('Con ' + ndias + ' días de ' + minutos + ' min no da tiempo a todo: ' +
-        cortos.slice(0, 4).join(', ').toLowerCase() +
-        (cortos.length > 4 ? ' y alguno más' : '') + ' se quedan por debajo de 8 series ' +
-        'semanales. Si te importan, añade 15 min a la sesión, otro día, o priorízalos ' +
-        'con el selector de zona.');
+      out.push(frase(cortos.length > 4
+        ? 'Con {dias} días de {min} min no da tiempo a todo: {lista} y alguno más se ' +
+          'quedan por debajo de 8 series semanales. Si te importan, añade 15 min a la ' +
+          'sesión, otro día, o priorízalos con el selector de zona.'
+        : 'Con {dias} días de {min} min no da tiempo a todo: {lista} se quedan por debajo ' +
+          'de 8 series semanales. Si te importan, añade 15 min a la sesión, otro día, o ' +
+          'priorízalos con el selector de zona.',
+        { dias: ndias, min: minutos, lista: { musculos: cortos.slice(0, 4) } }));
     }
     return out;
   }
 
   /* ---------- 9. Progresión: sin esto no hay resultados ---------- */
   function progresion(obj, prudente) {
-    const tope = prudente ? 'nunca al fallo' : 'dejando 1 o 2 repeticiones en recámara';
     return [
-      { semana: 'Semana 1', texto: 'Coge las cargas con las que completas todas las series ' +
-        'con la técnica limpia, ' + tope + '. Apunta el peso de cada ejercicio.' },
+      { semana: 'Semana 1', texto: prudente
+        ? 'Coge las cargas con las que completas todas las series con la técnica limpia, ' +
+          'nunca al fallo. Apunta el peso de cada ejercicio.'
+        : 'Coge las cargas con las que completas todas las series con la técnica limpia, ' +
+          'dejando 1 o 2 repeticiones en recámara. Apunta el peso de cada ejercicio.' },
       { semana: 'Semana 2', texto: 'Mismo peso, una repetición más por serie. Si todas las ' +
         'series llegan arriba del rango, sube peso en la siguiente.' },
       { semana: 'Semana 3', texto: 'Sube entre un 2 y un 5% en los básicos, o añade una serie ' +
@@ -774,10 +823,10 @@
   }
 
   function cardioTexto(p) {
-    const pasos = p.actividad === 'sedentario' ? '8.000' : '10.000';
-    return 'Además del gimnasio: ' + pasos + ' pasos al día y dos sesiones de 25 a 35 min ' +
+    return frase('Además del gimnasio: {pasos} pasos al día y dos sesiones de 25 a 35 min ' +
       'de cardio suave (el que te deje hablar) en los días que no entrenes. El cardio duro ' +
-      'y el gimnasio el mismo día se pisan.';
+      'y el gimnasio el mismo día se pisan.',
+      { pasos: { miles: p.actividad === 'sedentario' ? 8000 : 10000 } });
   }
 
   /* ---------- 10. Pasar el programa a rutinas de la app ---------- */
@@ -847,6 +896,7 @@
     volumenReal: volumenReal, olvidados: olvidados, revolumen: revolumen,
     sugerir: sugerir,
     crear: crear, aRutinas: aRutinas, lesionesDe: lesionesDe,
+    leer: leer, frase: frase,
     OBJETIVOS: OBJETIVOS, LESIONES: LESIONES
   };
 })(window);

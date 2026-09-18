@@ -91,7 +91,7 @@
       return '<div class="sc-dia' + (esHoy ? ' es-hoy' : '') +
         (futuro ? ' futuro' : '') + '">' +
         '<div class="sc-barra"><i class="' + clase + '" style="height:' + alto + '%"></i></div>' +
-        '<span class="sc-ini">' + (esHoy ? 'Hoy' : ini) + '</span>' +
+        '<span class="sc-ini">' + esc(esHoy ? T('Hoy') : ini) + '</span>' +
         '<span class="sc-num">' + f.getDate() + '</span></div>';
     }).join('');
 
@@ -293,26 +293,28 @@
       <button class="dia-grupo" data-menu="${menu.id}">
         <div class="grow">
           <div class="rt-titulo">${menu.nombre}
-            ${raw(esActivo ? '<span class="chip tiny-chip plan-marca">EN CURSO</span>' : '')}
-            ${raw(viejo ? '<span class="chip tiny-chip">DE ANTES</span>' : '')}</div>
-          <div class="tiny plan-meta">${dias} ${dias === 1 ? 'día' : 'días'} ·
-            ${comidas} comidas · ${UI.fechaCorta(menu.t)}</div>
+            ${raw(esActivo ? '<span class="chip tiny-chip plan-marca">' +
+              esc(T('EN CURSO')) + '</span>' : '')}
+            ${raw(viejo ? '<span class="chip tiny-chip">' + esc(T('DE ANTES')) + '</span>' : '')}</div>
+          <div class="tiny plan-meta">${Tp(dias, '{n} día', '{n} días')} ·
+            ${Tp(comidas, '{n} comida', '{n} comidas')} · ${UI.fechaCorta(menu.t)}</div>
         </div>
         <span class="plegador ${abierto ? 'abierto' : ''}">
-          <span class="plegador-txt">${abierto ? 'Ocultar' : 'Ver'}</span>
+          <span class="plegador-txt">${abierto ? T('Ocultar') : T('Ver')}</span>
           ${raw(icon('chevron'))}</span>
       </button>`;
 
     const desliza = App.deslizable ? App.deslizable(cabecera, [
-      { icono: 'copiar', texto: 'Duplicar', attr: 'data-duplicarmenu="' + esc(menu.id) + '"' },
-      { icono: 'trash', texto: 'Borrar', tono: 'malo',
+      { icono: 'copiar', texto: T('Duplicar'), attr: 'data-duplicarmenu="' + esc(menu.id) + '"' },
+      { icono: 'trash', texto: T('Borrar'), tono: 'malo',
         attr: 'data-borrarmenu="' + esc(menu.id) + '"' }
     ], [
       { icono: esActivo ? 'close' : 'check',
-        texto: esActivo ? 'Quitar' + BAJA + 'principal' : 'Marcar' + BAJA + 'principal',
+        texto: esActivo ? T('Quitar') + BAJA + T('principal')
+          : T('Marcar') + BAJA + T('principal'),
         tono: esActivo ? '' : 'suave',
         attr: 'data-menuactivo="' + (esActivo ? '' : esc(menu.id)) + '"' },
-      { icono: 'edit', texto: 'Renombrar', tono: 'suave',
+      { icono: 'edit', texto: T('Renombrar'), tono: 'suave',
         attr: 'data-renombrarmenu="' + esc(menu.id) + '"' }
     ]) : cabecera;
 
@@ -331,12 +333,13 @@
   function avisoViejoHTML() {
     return html`
       <div class="card" style="border-color:var(--warn)">
-        <b>Este menú es de antes</b>
-        <p class="tiny" style="margin:6px 0 0">Has cambiado algo desde que se hizo —los
-        ingredientes, lo que le pides o tus números—, así que puede llevar cosas que ya
-        no encajan. Rehazlo y se vuelve a montar con lo de ahora.</p>
+        <b>${T('Este menú es de antes')}</b>
+        <p class="tiny" style="margin:6px 0 0">${T('Has cambiado algo desde que se hizo ' +
+        '—los ingredientes, lo que le pides o tus números—, así que puede llevar cosas ' +
+        'que ya no encajan. Rehazlo y se vuelve a montar con lo de ahora.')}</p>
         ${raw(IA.activa() ? '<button class="btn block sm" data-a="regenerar" ' +
-          'style="margin-top:10px">' + icon('chispa') + ' Rehacer este menú</button>' : '')}
+          'style="margin-top:10px">' + icon('chispa') + ' ' +
+          esc(T('Rehacer este menú')) + '</button>' : '')}
       </div>`;
   }
 
@@ -358,25 +361,25 @@
     return '<div class="plan-acciones">' +
       (esActivo
         ? fila('data-menuactivo=""', 'check', 'var(--tono)',
-            'Dejar de ser el men\ú principal',
-            'Ahora manda este: es el que sale en \«hoy\» y en la portada.', ' es-principal')
+            T('Dejar de ser el menú principal'),
+            T('Ahora manda este: es el que sale en «hoy» y en la portada.'), ' es-principal')
         : fila('data-menuactivo="' + id + '"', 'check', 'var(--tono)',
-            'Usar este como men\ú principal',
-            'Ser\á el que salga en \«hoy\» y en la portada.')) +
+            T('Usar este como menú principal'),
+            T('Será el que salga en «hoy» y en la portada.'))) +
 
-      fila('data-renombrarmenu="' + id + '"', 'edit', '#f0a23c', 'Cambiarle el nombre',
-        'Para saber cu\ál es sin abrirlo.') +
+      fila('data-renombrarmenu="' + id + '"', 'edit', '#f0a23c', T('Cambiarle el nombre'),
+        T('Para saber cuál es sin abrirlo.')) +
 
       (IA.activa()
-        ? fila('data-a="regenerar"', 'chispa', '#c06bf0', 'Rehacer este men\ú',
-            'Se monta otro con tus n\úmeros y tus ingredientes de ahora.')
+        ? fila('data-a="regenerar"', 'chispa', '#c06bf0', T('Rehacer este menú'),
+            T('Se monta otro con tus números y tus ingredientes de ahora.'))
         : '') +
 
-      fila('data-duplicarmenu="' + id + '"', 'copiar', '#4f8cf5', 'Duplicar el men\ú',
-        'Una copia para probar cambios sin tocar este.') +
+      fila('data-duplicarmenu="' + id + '"', 'copiar', '#4f8cf5', T('Duplicar el menú'),
+        T('Una copia para probar cambios sin tocar este.')) +
 
-      fila('data-borrarmenu="' + id + '"', 'trash', 'var(--bad)', 'Borrar el men\ú',
-        'No se puede deshacer.', ' es-peligro') +
+      fila('data-borrarmenu="' + id + '"', 'trash', 'var(--bad)', T('Borrar el menú'),
+        T('No se puede deshacer.'), ' es-peligro') +
       '</div>';
   }
 
@@ -503,14 +506,16 @@
         <div class="row between" style="align-items:flex-start;gap:10px">
           <div class="grow">
             <div style="font-weight:600;font-size:.92rem">${c.plato}</div>
-            <div class="tiny">${UI.num(c.kcal)} kcal · ${c.prot} g de proteína
+            <div class="tiny">${Tn('{kcal} kcal · {prot} g de proteína',
+              { kcal: UI.num(c.kcal), prot: c.prot })}
               · ${raw(UI.hora ? UI.hora(c.t) : new Date(c.t).toTimeString().slice(0, 5))}
-              ${raw(dudosa ? ' · <span style="color:var(--warn)">estimación floja</span>' : '')}</div>
+              ${raw(dudosa ? ' · <span style="color:var(--warn)">' +
+                esc(T('estimación floja')) + '</span>' : '')}</div>
             ${raw(c.detalle ? '<div class="tiny" style="margin-top:3px">' +
               esc(c.detalle) + '</div>' : '')}
           </div>
           <button class="btn icon sm danger" data-borrar-comida="${c.id}"
-                  aria-label="Borrar">${raw(icon('trash'))}</button>
+                  aria-label="${T('Borrar')}">${raw(icon('trash'))}</button>
         </div>
       </div>`;
   }
@@ -526,10 +531,11 @@
     return html`
       ${raw(plan.resumen ? html`
         <div class="card tarjeta-premium">
-          <div class="pre-encima">Creado el ${UI.fecha(menu.t)}</div>
+          <div class="pre-encima">${Tn('Creado el {fecha}', { fecha: UI.fecha(menu.t) })}</div>
           <p class="muted" style="margin:6px 0 0;font-size:.9rem">${plan.resumen}</p>
         </div>` : html`
-        <p class="tiny" style="margin:0 0 10px">Creado el ${UI.fecha(menu.t)}</p>`)}
+        <p class="tiny" style="margin:0 0 10px">${Tn('Creado el {fecha}',
+          { fecha: UI.fecha(menu.t) })}</p>`)}
 
       ${raw(Marcar.aguaHTML(plan.hidratacion, menu.id))}
 
@@ -541,12 +547,13 @@
             <div class="card menu-dia${raw(hoy ? ' es-hoy' : '')}">
               <div class="row between" data-dia="${k}" style="cursor:pointer">
                 <div class="grow" style="min-width:0">
-                  <div class="md-nom">${d.dia}${raw(hoy
-                    ? ' <span class="chip solid tiny-chip">HOY</span>' : '')}${raw(d.entreno
-                    ? ' <span class="chip tiny-chip">ENTRENO</span>' : '')}</div>
-                  <div class="tiny md-meta">${raw(d.total
-                    ? esc(UI.num(d.total.kcal) + ' kcal · ' + d.total.prot + ' g de proteína')
-                    : (d.comidas || []).length + ' comidas')}</div>
+                  <div class="md-nom">${T(d.dia)}${raw(hoy
+                    ? ' <span class="chip solid tiny-chip">' + esc(T('HOY')) + '</span>' : '')}${raw(d.entreno
+                    ? ' <span class="chip tiny-chip">' + esc(T('ENTRENO')) + '</span>' : '')}</div>
+                  <div class="tiny md-meta">${d.total
+                    ? Tn('{kcal} kcal · {prot} g de proteína',
+                        { kcal: UI.num(d.total.kcal), prot: d.total.prot })
+                    : Tp((d.comidas || []).length, '{n} comida', '{n} comidas')}</div>
                 </div>
                 <span class="chevron down${raw(diasAbiertosPlan[k]
                   ? ' abierto' : '')}">${raw(icon('chevron'))}</span>
@@ -592,11 +599,11 @@
         <button class="btn primary block btn-arranque" data-a="rehacerCon" style="margin-top:10px">
           ${raw(icon('chispa'))} Rehacer este menú con esto</button>
         <button class="btn block sm" data-a="otroMenu" style="margin-top:8px">
-          ${raw(icon('plus'))} Guardar otro distinto, sin tocar este</button>
+          ${raw(icon('plus'))} ${T('Guardar otro distinto, sin tocar este')}</button>
       </div>
 
-      <p class="tiny" style="margin-top:14px">Generado por IA a partir de tus datos.
-      Revísalo con criterio y consulta a un dietista si tienes alguna condición de salud.</p>`;
+      <p class="tiny" style="margin-top:14px">${T('Generado por IA a partir de tus datos. ' +
+      'Revísalo con criterio y consulta a un dietista si tienes alguna condición de salud.')}</p>`;
   }
 
   /* Manda la foto, apunta lo que la IA vea y suelta la imagen. Mientras piensa
@@ -604,7 +611,7 @@
      memoria hasta que se acaba. */
   function mirarFoto(file) {
     if (!IA.activa()) {
-      UI.toast('Esto necesita un proveedor de IA con su clave, en la bóveda de Ajustes.');
+      UI.toast(T('Esto necesita un proveedor de IA con su clave, en la bóveda de Ajustes.'));
       go('entrenador');
       return;
     }
@@ -652,7 +659,7 @@
       /* null = ya lo ha resuelto el cruce con el menú */
       if (r === null) return;
       if (!r || !(Number(r.kcal) > 0)) {
-        UI.toast('No he visto comida en esa foto. Prueba con más luz o más cerca.');
+        UI.toast(T('No he visto comida en esa foto. Prueba con más luz o más cerca.'));
         return;
       }
       const detalle = (r.alimentos || []).map(function (a) {
@@ -660,18 +667,19 @@
       }).join(', ');
 
       Comidas.anotar({
-        plato: r.plato || 'Comida',
+        plato: r.plato || T('Comida'),
         kcal: r.kcal, prot: r.prot, carbo: r.carbo, grasa: r.grasa,
         detalle: detalle || r.nota || '',
         confianza: r.confianza || '',
         fuente: 'foto'
       });
       render();
-      UI.toast('Anotado: ' + Math.round(r.kcal) + ' kcal y ' + Math.round(r.prot) +
-        ' g de proteína' + (r.confianza === 'baja' ? ' (a ojo, retócalo si quieres)' : ''));
+      UI.toast(Tn('Anotado: {kcal} kcal y {prot} g de proteína',
+        { kcal: Math.round(r.kcal), prot: Math.round(r.prot) }) +
+        (r.confianza === 'baja' ? T(' (a ojo, retócalo si quieres)') : ''));
     }).catch(function (e) {
       soltar();
-      UI.toast(e.message || 'No he podido leer esa foto.');
+      UI.toast(e.message || T('No he podido leer esa foto.'));
     });
   }
 
@@ -680,33 +688,34 @@
     const conIA = IA.activa() && IA.estimarComida;
 
     UI.modal(html`
-      <h2>Apuntar a mano</h2>
+      <h2>${T('Apuntar a mano')}</h2>
       <p class="muted">${conIA
-        ? 'Escribe lo que has comido y yo calculo las calorías y la proteína. Si ya te ' +
-          'sabes los números, pónlos tú y mando los tuyos.'
-        : 'Para lo que ya sabes de memoria, o para arreglar una estimación que se quedó corta.'}</p>
+        ? T('Escribe lo que has comido y yo calculo las calorías y la proteína. Si ya te ' +
+          'sabes los números, pónlos tú y mando los tuyos.')
+        : T('Para lo que ya sabes de memoria, o para arreglar una estimación que se ' +
+          'quedó corta.')}</p>
 
-      <label class="tiny">QUÉ HAS COMIDO</label>
-      <input id="cm-plato" placeholder="Ej. arroz con lentejas y carne asada" autocomplete="off">
+      <label class="tiny">${T('QUÉ HAS COMIDO')}</label>
+      <input id="cm-plato" placeholder="${T('Ej. arroz con lentejas y carne asada')}" autocomplete="off">
 
       ${raw(conIA ? html`
         <button class="btn block sm" id="cm-calcular" style="margin-top:10px">
-          ${raw(icon('chispa'))} Calcular con IA</button>` : '')}
+          ${raw(icon('chispa'))} ${T('Calcular con IA')}</button>` : '')}
 
       <div id="cm-visto" class="tiny" style="margin-top:10px"></div>
 
       <div class="row" style="margin-top:10px">
         <div class="grow">
-          <label class="tiny">CALORÍAS</label>
+          <label class="tiny">${T('CALORÍAS')}</label>
           <input id="cm-kcal" type="number" inputmode="numeric" min="0" placeholder="0">
         </div>
         <div class="grow">
-          <label class="tiny">PROTEÍNA (g)</label>
+          <label class="tiny">${T('PROTEÍNA (g)')}</label>
           <input id="cm-prot" type="number" inputmode="numeric" min="0" placeholder="0">
         </div>
       </div>
 
-      <button class="btn primary block" id="cm-ok" style="margin-top:14px">Anotar</button>`,
+      <button class="btn primary block" id="cm-ok" style="margin-top:14px">${T('Anotar')}</button>`,
       function (el) {
         const campoPlato = el.querySelector('#cm-plato');
         const campoKcal = el.querySelector('#cm-kcal');
@@ -728,14 +737,14 @@
            encima. */
         const calcular = function () {
           const t = campoPlato.value.trim();
-          if (!t) { UI.toast('Escribe antes qué has comido'); campoPlato.focus(); return; }
-          if (btnCalc) { btnCalc.disabled = true; btnCalc.textContent = 'Calculando…'; }
+          if (!t) { UI.toast(T('Escribe antes qué has comido')); campoPlato.focus(); return; }
+          if (btnCalc) { btnCalc.disabled = true; btnCalc.textContent = T('Calculando…'); }
           visto.textContent = '';
 
           return IA.estimarComida(t).then(function (r) {
             if (!r || !(Number(r.kcal) > 0)) {
               visto.innerHTML = '<span style="color:var(--warn)">' +
-                esc((r && r.nota) || 'No he sabido qu\u00e9 es eso. Pon t\u00fa los n\u00fameros.') + '</span>';
+                esc((r && r.nota) || T('No he sabido qué es eso. Pon tú los números.')) + '</span>';
               return;
             }
             campoKcal.value = Math.round(r.kcal);
@@ -750,13 +759,17 @@
             confianza = r.confianza || '';
 
             visto.innerHTML = (detalle ? esc(detalle) + '<br>' : '') +
-              '<span style="opacity:.8">' + esc(r.nota || 'Estimaci\u00f3n: corrige los n\u00fameros si no te cuadra.') +
+              '<span style="opacity:.8">' + esc(r.nota ||
+                T('Estimación: corrige los números si no te cuadra.')) +
               '</span>';
           }).catch(function (e) {
             visto.innerHTML = '<span style="color:var(--bad)">' +
-              esc(e.message || 'No he podido calcularlo.') + '</span>';
+              esc(e.message || T('No he podido calcularlo.')) + '</span>';
           }).then(function () {
-            if (btnCalc) { btnCalc.disabled = false; btnCalc.innerHTML = icon('chispa') + ' Calcular con IA'; }
+            if (btnCalc) {
+              btnCalc.disabled = false;
+              btnCalc.innerHTML = icon('chispa') + ' ' + esc(T('Calcular con IA'));
+            }
           });
         };
 
@@ -774,21 +787,21 @@
           if (!kcal && !prot) {
             if (conIA && plato) {
               btnOk.disabled = true;
-              btnOk.textContent = 'Calculando…';
+              btnOk.textContent = T('Calculando…');
               calcular().then(function () {
                 btnOk.disabled = false;
-                btnOk.textContent = 'Anotar';
+                btnOk.textContent = T('Anotar');
                 if (Number(campoKcal.value) > 0) guardar();
               });
               return;
             }
-            UI.toast(plato ? 'Pon al menos las calorías o la proteína'
-              : 'Escribe qué has comido');
+            UI.toast(plato ? T('Pon al menos las calorías o la proteína')
+              : T('Escribe qué has comido'));
             return;
           }
 
           Comidas.anotar({
-            plato: plato || 'Comida', kcal: kcal, prot: prot,
+            plato: plato || T('Comida'), kcal: kcal, prot: prot,
             carbo: carbo, grasa: grasa,
             detalle: detalle, confianza: confianza,
             fuente: detalle ? 'texto' : 'mano'
@@ -796,8 +809,9 @@
           UI.closeModal();
           render();
           UI.toast(detalle
-            ? 'Anotado: ' + UI.num(kcal) + ' kcal y ' + prot + ' g de proteína'
-            : 'Anotado');
+            ? Tn('Anotado: {kcal} kcal y {prot} g de proteína',
+                { kcal: UI.num(kcal), prot: prot })
+            : T('Anotado'));
         };
 
         if (btnCalc) btnCalc.onclick = calcular;
@@ -894,8 +908,9 @@
       Menus.marcarActivo(el.dataset.menuactivo || '');
       render();
       UI.toast(el.dataset.menuactivo
-        ? 'Ahora manda «' + (Menus.porId(el.dataset.menuactivo) || {}).nombre + '»'
-        : 'Sin menú principal');
+        ? Tn('Ahora manda «{que}»',
+            { que: (Menus.porId(el.dataset.menuactivo) || {}).nombre })
+        : T('Sin menú principal'));
     });
 
     bindAll(root, '[data-renombrarmenu]', function (el) {
@@ -905,20 +920,24 @@
 
     bindAll(root, '[data-duplicarmenu]', function (el) {
       const copia = Menus.duplicar(el.dataset.duplicarmenu);
-      if (copia) { menusAbiertos[copia.id] = true; render(); UI.toast('Copiado como «' + copia.nombre + '»'); }
+      if (copia) {
+        menusAbiertos[copia.id] = true;
+        render();
+        UI.toast(Tn('Copiado como «{que}»', { que: copia.nombre }));
+      }
     });
 
     bindAll(root, '[data-borrarmenu]', function (el) {
       const m = Menus.porId(el.dataset.borrarmenu);
       if (!m) return;
-      UI.confirm('Borrar «' + m.nombre + '»',
-        'Se quita de tus menús. No se puede deshacer.', 'Borrar', true)
+      UI.confirm(Tn('Borrar «{que}»', { que: m.nombre }),
+        T('Se quita de tus menús. No se puede deshacer.'), T('Borrar'), true)
         .then(function (ok) {
           if (!ok) return;
           delete menusAbiertos[m.id];
           Menus.borrar(m.id);
           render();
-          UI.toast('Menú borrado');
+          UI.toast(T('Menú borrado'));
         });
     });
 
@@ -927,21 +946,21 @@
        preferencias y su paso de mirarlo antes de guardarlo—, porque pedir y
        guardar a ciegas era justo el problema. */
     const rehacerMenu = function (sobre) {
-      if (!sobre) { UI.toast('Abre el menú que quieres rehacer'); return; }
+      if (!sobre) { UI.toast(T('Abre el menú que quieres rehacer')); return; }
       const btn = root.querySelector('[data-a=regenerar]');
-      if (btn) { btn.disabled = true; btn.textContent = 'Rehaciendo el menú…'; }
+      if (btn) { btn.disabled = true; btn.textContent = T('Rehaciendo el menú…'); }
 
       IA.planNutricion({ forzar: true, variante: Date.now() % 1000 })
         .then(function (plan) {
           Menus.actualizar(sobre.id, { plan: plan, t: Date.now(), huella: huellaMenu() });
           menusAbiertos[sobre.id] = true;
           render();
-          UI.toast('«' + sobre.nombre + '» rehecho');
+          UI.toast(Tn('«{que}» rehecho', { que: sobre.nombre }));
         })
         .catch(function (e) {
           if (btn) { btn.disabled = false; }
           render();
-          UI.toast(e.message || 'No se pudo rehacer el menú');
+          UI.toast(e.message || T('No se pudo rehacer el menú'));
         });
     };
 
@@ -1058,7 +1077,7 @@
             if (!c.value) faltan = true;
             f[c.dataset.franja] = c.value;
           });
-          if (faltan) { UI.toast('Dale una hora a cada comida'); return; }
+          if (faltan) { UI.toast(T('Dale una hora a cada comida')); return; }
           Perfil.guardar({ franjas: f });
           /* Las alertas de comer que ya existan se mueven con las horas nuevas:
              dejarlas sonando a la hora de antes sería que la app dijera una cosa
@@ -1067,8 +1086,9 @@
           UI.closeModal();
           render();
           UI.toast(movidas
-            ? 'Guardado · ' + movidas + (movidas === 1 ? ' alerta movida' : ' alertas movidas')
-            : 'Guardado');
+            ? T('Guardado') + ' · ' +
+              Tp(movidas, '{n} alerta movida', '{n} alertas movidas')
+            : T('Guardado'));
         };
       });
   }
@@ -1090,7 +1110,7 @@
   function nuevoMenuSheet(alGuardar) {
     const p = Perfil.datos();
     if (!Perfil.completo(p)) {
-      UI.toast('Completa tus datos para calcular el menú');
+      UI.toast(T('Completa tus datos para calcular el menú'));
       go('datos');
       return;
     }
@@ -1099,7 +1119,7 @@
        «completo» sin el; para un menu, no. Sin saber de donde es, la lista de
        la compra sale de otro pais y media no esta en su super. */
     if (!Perfil.datos().pais) {
-      UI.toast('Dime de qué país eres: el menú sale de tu supermercado');
+      UI.toast(T('Dime de qué país eres: el menú sale de tu supermercado'));
       go('datos');
       return;
     }
@@ -1108,70 +1128,70 @@
     let comoSeHizo = '';
 
     UI.modal(html`
-      <h2>Nuevo menú</h2>
-      <p class="muted">Primero lo tuyo, y después decides cómo se hace.</p>
+      <h2>${T('Nuevo menú')}</h2>
+      <p class="muted">${T('Primero lo tuyo, y después decides cómo se hace.')}</p>
 
       <div id="nm-paso1">
-        <label class="tiny" style="margin-top:12px;display:block">CÓMO SE LLAMA</label>
+        <label class="tiny" style="margin-top:12px;display:block">${T('CÓMO SE LLAMA')}</label>
         <input id="nm-nombre" class="input" autocomplete="off"
-               placeholder="Semana fuerte, Cuando viajo, Sin lactosa…">
-        <p class="tiny" style="margin:5px 0 0">Hace falta para guardarlo. Dentro de un mes,
-        «Mi menú 4» no te va a decir cuál es.</p>
+               placeholder="${T('Semana fuerte, Cuando viajo, Sin lactosa…')}">
+        <p class="tiny" style="margin:5px 0 0">${T('Hace falta para guardarlo. Dentro de ' +
+        'un mes, «Mi menú 4» no te va a decir cuál es.')}</p>
 
-        <label class="tiny" style="margin-top:14px;display:block">CON QUÉ CUENTAS</label>
+        <label class="tiny" style="margin-top:14px;display:block">${T('CON QUÉ CUENTAS')}</label>
         <textarea id="nm-despensa" rows="3"
-          placeholder="Ej. arroz, lentejas, huevos, pollo, atún, yogur griego, avena">${p.despensa || ''}</textarea>
-        <p class="tiny" style="margin:5px 0 0">Se guarda con tus preferencias: vale también
-        para los menús siguientes.</p>
+          placeholder="${T('Ej. arroz, lentejas, huevos, pollo, atún, yogur griego, avena')}">${p.despensa || ''}</textarea>
+        <p class="tiny" style="margin:5px 0 0">${T('Se guarda con tus preferencias: vale ' +
+        'también para los menús siguientes.')}</p>
 
-        <label class="tiny" style="margin-top:14px;display:block">QUÉ LE PIDES SIEMPRE</label>
+        <label class="tiny" style="margin-top:14px;display:block">${T('QUÉ LE PIDES SIEMPRE')}</label>
         <textarea id="nm-ordenes" rows="2"
-          placeholder="Ej. nada de pescado; la cena siempre ligera">${p.ordenesComida || ''}</textarea>
+          placeholder="${T('Ej. nada de pescado; la cena siempre ligera')}">${p.ordenesComida || ''}</textarea>
 
         <!-- Se pregunta aquí y no en el perfil: no es un dato de forma física
              que se rellena una vez, es algo que cambia de un mes a otro y que
              solo sirve para esto. Se acuerda de la respuesta para no
              preguntarlo cada vez, y se puede cambiar justo aquí. -->
-        <label class="tiny" style="margin-top:16px;display:block">¿TOMAS ALGUNA MEDICACIÓN?</label>
+        <label class="tiny" style="margin-top:16px;display:block">${T('¿TOMAS ALGUNA MEDICACIÓN?')}</label>
         <div class="row wrap sup-pills" id="nm-meds">
-          <button class="chip" data-med="no">No tomo ninguna</button>
-          <button class="chip" data-med="si">Sí, tomo</button>
+          <button class="chip" data-med="no">${T('No tomo ninguna')}</button>
+          <button class="chip" data-med="si">${T('Sí, tomo')}</button>
         </div>
         <div id="nm-medcaja" hidden>
           <textarea id="nm-med" rows="2" style="margin-top:8px"
-            placeholder="Cuál y a qué hora. Ej. levotiroxina en ayunas; metformina con la comida"></textarea>
-          <p class="tiny" style="margin:5px 0 0">Sirve para colocar las comidas y lo que
-          tomas alrededor, y para avisarte de lo que se pisa. La app no receta ni cambia
-          nada de tu tratamiento: para eso está tu médico. Se queda en tu móvil, no sale
-          en tu perfil y viaja al entrenador con tu propia clave.</p>
+            placeholder="${T('Cuál y a qué hora. Ej. levotiroxina en ayunas; metformina con la comida')}"></textarea>
+          <p class="tiny" style="margin:5px 0 0">${T('Sirve para colocar las comidas y lo ' +
+          'que tomas alrededor, y para avisarte de lo que se pisa. La app no receta ni ' +
+          'cambia nada de tu tratamiento: para eso está tu médico. Se queda en tu móvil, ' +
+          'no sale en tu perfil y viaja al entrenador con tu propia clave.')}</p>
         </div>
 
-        <label class="tiny" style="margin-top:14px;display:block">Y PARA ESTE MENÚ EN CONCRETO</label>
+        <label class="tiny" style="margin-top:14px;display:block">${T('Y PARA ESTE MENÚ EN CONCRETO')}</label>
         <textarea id="nm-extra" rows="2"
-          placeholder="Ej. esta semana viajo y como fuera; cocino solo los domingos"></textarea>
-        <p class="tiny" style="margin:5px 0 0">Esto no se guarda: vale solo para el menú
-        que vas a crear ahora.</p>
+          placeholder="${T('Ej. esta semana viajo y como fuera; cocino solo los domingos')}"></textarea>
+        <p class="tiny" style="margin:5px 0 0">${T('Esto no se guarda: vale solo para el ' +
+        'menú que vas a crear ahora.')}</p>
 
-        <div class="list-title" style="margin-top:18px">Cómo lo hago</div>
+        <div class="list-title" style="margin-top:18px">${T('Cómo lo hago')}</div>
         <div class="stack">
           ${raw(IA.activa() ? html`
             <button class="btn primary block btn-arranque" data-x="ia">
-              ${raw(icon('chispa'))} Crearlo con el entrenador</button>
-            <p class="tiny" style="margin:0">Platos concretos con tus ingredientes, tus
-            horarios y tus condiciones. Tarda unos segundos.</p>` : html`
+              ${raw(icon('chispa'))} ${T('Crearlo con el entrenador')}</button>
+            <p class="tiny" style="margin:0">${T('Platos concretos con tus ingredientes, ' +
+            'tus horarios y tus condiciones. Tarda unos segundos.')}</p>` : html`
             <button class="btn block" data-x="configIA">
-              ${raw(icon('chispa'))} Crearlo con el entrenador (necesita configurarse)</button>`)}
+              ${raw(icon('chispa'))} ${T('Crearlo con el entrenador (necesita configurarse)')}</button>`)}
 
           <button class="btn block" data-x="generico" style="margin-top:6px">
-            ${raw(icon('lista'))} Crear uno genérico, sin IA</button>
-          <p class="tiny" style="margin:0">Reparte tus calorías y tu proteína entre tus
-          comidas y dice qué debe llevar cada una. Los platos los pones tú.</p>
+            ${raw(icon('lista'))} ${T('Crear uno genérico, sin IA')}</button>
+          <p class="tiny" style="margin:0">${T('Reparte tus calorías y tu proteína entre ' +
+          'tus comidas y dice qué debe llevar cada una. Los platos los pones tú.')}</p>
         </div>
       </div>
 
       <div id="nm-paso2" hidden></div>
 
-      <button class="btn ghost block sm" data-x="cerrar" style="margin-top:12px">Cancelar</button>`,
+      <button class="btn ghost block sm" data-x="cerrar" style="margin-top:12px">${T('Cancelar')}</button>`,
       function (el) {
         const campoNombre = el.querySelector('#nm-nombre');
         const paso1 = el.querySelector('#nm-paso1');
@@ -1224,12 +1244,13 @@
           paso2.innerHTML =
             '<div class="card tarjeta-premium" style="margin-top:12px">' +
             '<div class="pre-encima">' + esc(comoSeHizo) + '</div>' +
-            '<div class="pre-num" style="margin:2px 0 6px">' + dias +
-            (dias === 1 ? ' día' : ' días') + ' · ' + comidas + ' comidas</div>' +
+            '<div class="pre-num" style="margin:2px 0 6px">' +
+            esc(Tp(dias, '{n} día', '{n} días') + ' · ' +
+              Tp(comidas, '{n} comida', '{n} comidas')) + '</div>' +
             (plan.resumen ? '<p class="muted" style="margin:0;font-size:.88rem">' +
               esc(plan.resumen) + '</p>' : '') +
             '</div>' +
-            (primero ? '<div class="list-title">Un día de ejemplo</div>' +
+            (primero ? '<div class="list-title">' + esc(T('Un día de ejemplo')) + '</div>' +
               '<div class="stack">' + (primero.comidas || []).map(function (c) {
                 return '<div class="meal"><div class="row between">' +
                   '<b style="font-size:.88rem">' + esc(c.nombre || '') +
@@ -1239,9 +1260,10 @@
                   esc(c.plato || '') + '</div></div>';
               }).join('') + '</div>' : '') +
             '<button class="btn primary block btn-arranque" data-x="guardar" ' +
-            'style="margin-top:14px">' + icon('check') + ' Guardar este menú</button>' +
+            'style="margin-top:14px">' + icon('check') + ' ' +
+            esc(T('Guardar este menú')) + '</button>' +
             '<button class="btn block sm" data-x="otra" style="margin-top:8px">' +
-            'Volver y probar de otra forma</button>';
+            esc(T('Volver y probar de otra forma')) + '</button>';
 
           paso2.querySelector('[data-x=guardar]').onclick = guardar;
           paso2.querySelector('[data-x=otra]').onclick = function () {
@@ -1257,7 +1279,7 @@
         const guardar = function () {
           const nombre = campoNombre.value.trim();
           if (!nombre) {
-            UI.toast('Ponle un nombre antes de guardarlo');
+            UI.toast(T('Ponle un nombre antes de guardarlo'));
             paso2.hidden = true;
             paso1.hidden = false;
             campoNombre.focus();
@@ -1268,7 +1290,7 @@
           menusAbiertos[m.id] = true;
           abrirHoyDe(m.id);
           render();
-          UI.toast('«' + m.nombre + '» guardado');
+          UI.toast(Tn('«{que}» guardado', { que: m.nombre }));
           if (alGuardar) alGuardar(m);
         };
 
@@ -1280,20 +1302,20 @@
              verdad: un menú montado sin saberlo puede ponerle el café justo
              donde no toca, y eso no se arregla luego. */
           if (!dicho) {
-            UI.toast('Dime si tomas medicación: cambia a qué hora conviene comer');
+            UI.toast(T('Dime si tomas medicación: cambia a qué hora conviene comer'));
             cajaMeds.classList.add('pide');
             cajaMeds.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(function () { cajaMeds.classList.remove('pide'); }, 1400);
             return;
           }
           if (dicho === 'si' && !el.querySelector('#nm-med').value.trim()) {
-            UI.toast('Escribe cuál y a qué hora');
+            UI.toast(T('Escribe cuál y a qué hora'));
             el.querySelector('#nm-med').focus();
             return;
           }
           guardarPreferencias();
           botonIA.disabled = true;
-          botonIA.textContent = 'Preparando el menú…';
+          botonIA.textContent = T('Preparando el menú…');
 
           IA.planNutricion({
             forzar: true,
@@ -1301,12 +1323,12 @@
             variante: Date.now() % 1000
           }).then(function (r) {
             plan = r;
-            comoSeHizo = 'Hecho por el entrenador';
+            comoSeHizo = T('Hecho por el entrenador');
             pintarPaso2();
           }).catch(function (e) {
             botonIA.disabled = false;
-            botonIA.innerHTML = icon('chispa') + ' Crearlo con el entrenador';
-            UI.toast(e.message || 'No se pudo crear el menú');
+            botonIA.innerHTML = icon('chispa') + ' ' + esc(T('Crearlo con el entrenador'));
+            UI.toast(e.message || T('No se pudo crear el menú'));
           });
         };
 
@@ -1319,9 +1341,9 @@
         el.querySelector('[data-x=generico]').onclick = function () {
           guardarPreferencias();
           const r = Menus.generico();
-          if (!r) { UI.toast('Completa tus datos para calcular el menú'); return; }
+          if (!r) { UI.toast(T('Completa tus datos para calcular el menú')); return; }
           plan = r;
-          comoSeHizo = 'Genérico, con tus números';
+          comoSeHizo = T('Genérico, con tus números');
           pintarPaso2();
         };
 
@@ -1352,18 +1374,18 @@
      dentro de un mes; «Semana fuerte» o «Cuando viajo», sí. */
   function renombrarMenuSheet(menu) {
     UI.modal(html`
-      <h2>Cambiar el nombre</h2>
-      <p class="muted">Para saber cuál es sin abrirlo.</p>
+      <h2>${T('Cambiar el nombre')}</h2>
+      <p class="muted">${T('Para saber cuál es sin abrirlo.')}</p>
       <input id="mn-nombre" class="input" style="margin-top:12px"
-             value="${menu.nombre}" placeholder="Semana fuerte, Cuando viajo…"
+             value="${menu.nombre}" placeholder="${T('Semana fuerte, Cuando viajo…')}"
              autocomplete="off">
-      <button class="btn primary block" data-x="ok" style="margin-top:14px">Guardar</button>
-      <button class="btn ghost block sm" data-x="no" style="margin-top:8px">Cancelar</button>`,
+      <button class="btn primary block" data-x="ok" style="margin-top:14px">${T('Guardar')}</button>
+      <button class="btn ghost block sm" data-x="no" style="margin-top:8px">${T('Cancelar')}</button>`,
       function (el) {
         const campo = el.querySelector('#mn-nombre');
         const guardar = function () {
           const n = campo.value.trim();
-          if (!n) { UI.toast('Ponle un nombre'); campo.focus(); return; }
+          if (!n) { UI.toast(T('Ponle un nombre')); campo.focus(); return; }
           UI.closeModal();
           Menus.renombrar(menu.id, n);
           render();
@@ -1388,21 +1410,21 @@
       <div class="ia-cab">
         <span class="ia-marca">${raw(icon('chispa'))}</span>
         <div class="grow" style="min-width:0">
-          <h1 style="margin:0">Entrenador</h1>
+          <h1 style="margin:0">${T('Entrenador')}</h1>
           <div class="tiny ia-estado">${IA.proveedorActual().label}${raw(
             IA.config().modelo ? ' · ' + esc(IA.config().modelo) : '')}</div>
         </div>
       </div>
-      <p class="muted">Conoce tu perfil, tus rutinas y tu progreso. No está aquí para
-      darte la razón: si algo lo estás haciendo mal, te lo dice.</p>
+      <p class="muted">${T('Conoce tu perfil, tus rutinas y tu progreso. No está aquí ' +
+      'para darte la razón: si algo lo estás haciendo mal, te lo dice.')}</p>
 
       <!-- Preguntar es lo que se viene a hacer, así que va primero y con el
            material bueno. La caja de antes era un campo de formulario gris con
            un botón debajo. -->
       <div class="card tarjeta-premium ia-caja">
-        <div class="pre-encima">Pregúntale lo que sea</div>
+        <div class="pre-encima">${T('Pregúntale lo que sea')}</div>
         <textarea id="ia-q" rows="3"
-          placeholder="¿Estoy entrenando bien el pecho? ¿Cómo bajo grasa sin perder fuerza?"></textarea>
+          placeholder="${T('¿Estoy entrenando bien el pecho? ¿Cómo bajo grasa sin perder fuerza?')}"></textarea>
 
         <!-- Un cuadro en blanco es lo más difícil de empezar. Estas salen de
              tus datos, no de una lista fija: preguntan por lo que de verdad
@@ -1414,20 +1436,20 @@
         </div>
 
         <button class="btn primary block btn-arranque" data-a="preguntar" style="margin-top:12px">
-          ${raw(icon('chispa'))} Preguntar</button>
+          ${raw(icon('chispa'))} ${T('Preguntar')}</button>
       </div>
 
       <div id="ia-respuesta"></div>
 
-      <div class="list-title">Lo que puede hacer por ti</div>
+      <div class="list-title">${T('Lo que puede hacer por ti')}</div>
       <div class="plan-acciones">
-        ${raw(filaAccion('grafica', '#4f8cf5', 'Cómo voy',
-          'Lee tus últimos entrenamientos sin adornos y dice qué se sostiene y qué no.',
+        ${raw(filaAccion('grafica', '#4f8cf5', T('Cómo voy'),
+          T('Lee tus últimos entrenamientos sin adornos y dice qué se sostiene y qué no.'),
           'analizar'))}
-        ${raw(filaAccion('dumbbell', 'var(--acc)', 'Audita mis rutinas',
-          'Les pone nota del uno al diez y dice exactamente qué falla.', 'revisar'))}
-        ${raw(filaAccion('nutricion', '#f0a23c', 'Prepararme el menú',
-          'Semanal, con tus calorías, tu dieta y lo que tienes en casa.', 'nutricion'))}
+        ${raw(filaAccion('dumbbell', 'var(--acc)', T('Audita mis rutinas'),
+          T('Les pone nota del uno al diez y dice exactamente qué falla.'), 'revisar'))}
+        ${raw(filaAccion('nutricion', '#f0a23c', T('Prepararme el menú'),
+          T('Semanal, con tus calorías, tu dieta y lo que tienes en casa.'), 'nutricion'))}
       </div>
 
       <!-- Lo que sabe de ti, dicho por la app y no por el modelo. Es la
@@ -1436,7 +1458,7 @@
       <details class="seccion" data-sec="iasabe">
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
-          <span class="list-title" style="margin:0">Qué sabe de ti</span>
+          <span class="list-title" style="margin:0">${T('Qué sabe de ti')}</span>
         </summary>
         <div class="sec-cuerpo">
           <div class="list">
@@ -1446,15 +1468,16 @@
                 '</div><div class="list-row-sub">' + esc(x.detalle) + '</div></div></div>';
             }).join(''))}
           </div>
-          <p class="tiny" style="margin-top:10px">Se manda en cada pregunta para que la
-          respuesta sea tuya y no de cualquiera. Tu clave no sale de este dispositivo, y las
-          fotos de comida se sueltan al terminar: no se guardan en ningún sitio.</p>
+          <p class="tiny" style="margin-top:10px">${T('Se manda en cada pregunta para ' +
+          'que la respuesta sea tuya y no de cualquiera. Tu clave no sale de este ' +
+          'dispositivo, y las fotos de comida se sueltan al terminar: no se guardan en ' +
+          'ningún sitio.')}</p>
         </div>
       </details>
 
-      <div class="list-title">Ajustes</div>
+      <div class="list-title">${T('Ajustes')}</div>
       <div class="plan-acciones">
-        ${raw(filaAccion('llave', '#c06bf0', 'Proveedor y clave',
+        ${raw(filaAccion('llave', '#c06bf0', T('Proveedor y clave'),
           IA.proveedorActual().label + (IA.config().modelo ? ' · ' + IA.config().modelo : ''),
           'config'))}
       </div>`;
@@ -1471,21 +1494,21 @@
     const s = Store.stats();
 
     if (s.total < 3) {
-      fuera.push('¿Por dónde empiezo con mi nivel?');
-      fuera.push('¿Cuántos días a la semana me conviene entrenar?');
+      fuera.push(T('¿Por dónde empiezo con mi nivel?'));
+      fuera.push(T('¿Cuántos días a la semana me conviene entrenar?'));
     } else {
-      fuera.push('¿Voy bien de volumen para mi objetivo?');
-      fuera.push('¿Qué músculo tengo más flojo?');
+      fuera.push(T('¿Voy bien de volumen para mi objetivo?'));
+      fuera.push(T('¿Qué músculo tengo más flojo?'));
     }
 
     const p = Perfil.datos();
     if (Perfil.completo(p)) {
       const o = (Perfil.OBJETIVO[p.objetivo] || {}).label;
-      if (o) fuera.push('¿Mi plan encaja con «' + o.toLowerCase() + '»?');
+      if (o) fuera.push(Tn('¿Mi plan encaja con «{que}»?', { que: T(o).toLowerCase() }));
     }
-    if (p.lesiones) fuera.push('¿Qué ejercicios debería evitar por mis lesiones?');
-    if (p.condiciones) fuera.push('¿Qué cambio por mis condiciones de salud?');
-    if (!p.lesiones && !p.condiciones) fuera.push('¿Cómo evito lesionarme?');
+    if (p.lesiones) fuera.push(T('¿Qué ejercicios debería evitar por mis lesiones?'));
+    if (p.condiciones) fuera.push(T('¿Qué cambio por mis condiciones de salud?'));
+    if (!p.lesiones && !p.condiciones) fuera.push(T('¿Cómo evito lesionarme?'));
 
     return fuera.slice(0, 4);
   }
@@ -1499,37 +1522,41 @@
     const fuera = [];
 
     fuera.push({
-      icono: 'perfil', que: 'Tu perfil',
+      icono: 'perfil', que: T('Tu perfil'),
       detalle: Perfil.completo(p)
-        ? p.edad + ' años, ' + p.peso + ' kg, ' + p.altura + ' cm, objetivo ' +
-          ((Perfil.OBJETIVO[p.objetivo] || {}).label || '').toLowerCase() +
-          (p.lesiones ? ', y tus lesiones' : '') +
-          (p.condiciones ? ', y tus condiciones de salud' : '')
-        : 'Sin completar. Si falta, no se lo inventa: lo dice.'
+        ? Tn('{edad} años, {peso} kg, {altura} cm, objetivo {objetivo}',
+            { edad: p.edad, peso: p.peso, altura: p.altura,
+              objetivo: T((Perfil.OBJETIVO[p.objetivo] || {}).label || '').toLowerCase() }) +
+          (p.lesiones ? T(', y tus lesiones') : '') +
+          (p.condiciones ? T(', y tus condiciones de salud') : '')
+        : T('Sin completar. Si falta, no se lo inventa: lo dice.')
     });
 
     fuera.push({
-      icono: 'dumbbell', que: 'Tus rutinas',
+      icono: 'dumbbell', que: T('Tus rutinas'),
       detalle: rutinas.length
-        ? rutinas.length + (rutinas.length === 1 ? ' rutina' : ' rutinas') +
-          ' con sus ejercicios, series y repeticiones'
-        : 'Ninguna guardada todavía'
+        ? Tp(rutinas.length,
+            '{n} rutina con sus ejercicios, series y repeticiones',
+            '{n} rutinas con sus ejercicios, series y repeticiones')
+        : T('Ninguna guardada todavía')
     });
 
     fuera.push({
-      icono: 'grafica', que: 'Tu progreso',
+      icono: 'grafica', que: T('Tu progreso'),
       detalle: s.total
-        ? s.total + ' entrenamientos, tus series por músculo y lo que llevas sin tocar'
-        : 'Sin entrenamientos registrados; no opina de lo que no ve'
+        ? Tp(s.total,
+            '{n} entrenamiento, tus series por músculo y lo que llevas sin tocar',
+            '{n} entrenamientos, tus series por músculo y lo que llevas sin tocar')
+        : T('Sin entrenamientos registrados; no opina de lo que no ve')
     });
 
     if (g.Comidas) {
       const h = Comidas.hoy();
       fuera.push({
-        icono: 'nutricion', que: 'Lo que comes',
+        icono: 'nutricion', que: T('Lo que comes'),
         detalle: h.cuantas
-          ? 'Lo apuntado hoy y tus calorías objetivo'
-          : 'Tus calorías objetivo; hoy no has apuntado nada'
+          ? T('Lo apuntado hoy y tus calorías objetivo')
+          : T('Tus calorías objetivo; hoy no has apuntado nada')
       });
     }
 
@@ -1550,34 +1577,36 @@
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Perfil')}</button>
-      <h1>Entrenador con IA</h1>
-      <p class="muted">Analiza tu progreso, revisa tus rutinas y te prepara el plan de comidas.
-      Funciona con el proveedor que elijas: Gemini tiene capa gratuita.</p>
+      <h1>${T('Entrenador con IA')}</h1>
+      <p class="muted">${T('Analiza tu progreso, revisa tus rutinas y te prepara el plan ' +
+      'de comidas. Funciona con el proveedor que elijas: Gemini tiene capa gratuita.')}</p>
 
       <div class="card tarjeta-premium">
-        <div class="pre-encima">Se hace una vez</div>
+        <div class="pre-encima">${T('Se hace una vez')}</div>
         <ol class="instr" style="margin:10px 0 0">
-          <li>Entra en <a href="https://aistudio.google.com/apikey" target="_blank"
-            rel="noopener noreferrer">aistudio.google.com/apikey</a> con tu cuenta de Google.</li>
-          <li>Pulsa <b>Create API key</b> y copia la clave.</li>
-          <li>Pégala aquí abajo. Se guarda solo en este dispositivo.</li>
+          <li>${raw(Tn('Entra en {enlace} con tu cuenta de Google.',
+            { enlace: '<a href="https://aistudio.google.com/apikey" target="_blank" ' +
+              'rel="noopener noreferrer">aistudio.google.com/apikey</a>' }))}</li>
+          <li>${raw(Tn('Pulsa {boton} y copia la clave.',
+            { boton: '<b>Create API key</b>' }))}</li>
+          <li>${T('Pégala aquí abajo. Se guarda solo en este dispositivo.')}</li>
         </ol>
         <button class="btn primary block btn-arranque" data-a="boveda" style="margin-top:14px">
-          ${raw(icon('llave'))} Ir a la bóveda de claves</button>
+          ${raw(icon('llave'))} ${T('Ir a la bóveda de claves')}</button>
       </div>
 
-      <div class="list-title">Qué hace y qué no</div>
+      <div class="list-title">${T('Qué hace y qué no')}</div>
       <div class="list">
-        ${raw(filaEstadoIA(true, 'Lee tus datos reales',
-          'Tu perfil, tus rutinas, tu progreso y lo que comes.'))}
-        ${raw(filaEstadoIA(true, 'Tu clave no sale de aquí',
-          'Se guarda en este dispositivo y no viaja con la sincronización salvo que lo actives.'))}
-        ${raw(filaEstadoIA(false, 'No hace falta para lo demás',
-          'Las calorías, las rutinas y el registro funcionan igual sin ella.'))}
+        ${raw(filaEstadoIA(true, T('Lee tus datos reales'),
+          T('Tu perfil, tus rutinas, tu progreso y lo que comes.')))}
+        ${raw(filaEstadoIA(true, T('Tu clave no sale de aquí'),
+          T('Se guarda en este dispositivo y no viaja con la sincronización salvo que lo actives.')))}
+        ${raw(filaEstadoIA(false, T('No hace falta para lo demás'),
+          T('Las calorías, las rutinas y el registro funcionan igual sin ella.')))}
       </div>
 
-      <p class="tiny" style="margin-top:12px">La capa gratuita tiene un límite diario que
-      sobra para uso personal. Si lo superas, la app te avisa y sigue funcionando.</p>`;
+      <p class="tiny" style="margin-top:12px">${T('La capa gratuita tiene un límite diario ' +
+      'que sobra para uso personal. Si lo superas, la app te avisa y sigue funcionando.')}</p>`;
   }
 
   /* La nota, en un aro. Un número grande y suelto es un número; el aro dice
@@ -1596,8 +1625,9 @@
       'stroke-dashoffset="' + (C * (1 - p)).toFixed(1) + '"/>' +
       '</svg><span class="in-cifra">' + n + '</span></div>' +
       '<div class="grow"><div class="in-tit">' +
-      (n >= 8 ? 'Van bien' : n >= 6 ? 'Se sostienen, con peros' : 'Hay que tocarlas') +
-      '</div><div class="tiny">Nota que les pone a tus rutinas tal y como están.</div></div>' +
+      esc(n >= 8 ? T('Van bien') : n >= 6 ? T('Se sostienen, con peros') : T('Hay que tocarlas')) +
+      '</div><div class="tiny">' +
+      esc(T('Nota que les pone a tus rutinas tal y como están.')) + '</div></div>' +
       '</div>';
   }
 
@@ -1637,12 +1667,12 @@
 
     bind(root, '[data-a=preguntar]', function () {
       const q = root.querySelector('#ia-q').value.trim();
-      if (!q) { UI.toast('Escribe tu pregunta'); return; }
-      cargando('Pensando…');
+      if (!q) { UI.toast(T('Escribe tu pregunta')); return; }
+      cargando(T('Pensando…'));
       IA.preguntar(q).then(function (r) {
         caja.innerHTML = '<div class="card tarjeta-premium ia-resp">' +
-          '<div class="ia-firma">' + icon('chispa') + '<span>Tu entrenador</span></div>' +
-          parrafos(r) + '</div>';
+          '<div class="ia-firma">' + icon('chispa') + '<span>' +
+          esc(T('Tu entrenador')) + '</span></div>' + parrafos(r) + '</div>';
       }).catch(function (e) {
         caja.innerHTML = '<div class="card tarjeta-premium"><div class="muted">' +
           esc(e.message) + '</div></div>';
@@ -1654,17 +1684,17 @@
       if (a === 'nutricion') return go('nutricion');
       if (a === 'config') return go('claves');
 
-      cargando(a === 'analizar' ? 'Revisando tus entrenamientos…' : 'Auditando tus rutinas…');
+      cargando(a === 'analizar' ? T('Revisando tus entrenamientos…') : T('Auditando tus rutinas…'));
       window.scrollTo({ top: caja.offsetTop - 80, behavior: 'smooth' });
 
       const peticion = a === 'analizar' ? IA.analizarProgreso() : IA.revisarRutinas();
       peticion.then(function (r) {
         caja.innerHTML = a === 'analizar'
           ? html`<div class="card tarjeta-premium ia-resp">
-              <div class="ia-firma">${raw(icon('chispa'))}<span>Tu entrenador</span></div>
-              <div class="ia-bloque"><b>Lo que se sostiene</b><p>${r.bien}</p></div>
-              <div class="ia-bloque"><b>Lo que hay que arreglar</b><p>${r.flojo}</p></div>
-              <div class="ia-bloque destacado"><b>Esta semana</b><p>${r.accion}</p></div>
+              <div class="ia-firma">${raw(icon('chispa'))}<span>${T('Tu entrenador')}</span></div>
+              <div class="ia-bloque"><b>${T('Lo que se sostiene')}</b><p>${r.bien}</p></div>
+              <div class="ia-bloque"><b>${T('Lo que hay que arreglar')}</b><p>${r.flojo}</p></div>
+              <div class="ia-bloque destacado"><b>${T('Esta semana')}</b><p>${r.accion}</p></div>
             </div>`
           : html`<div class="card tarjeta-premium ia-resp">
               ${raw(Number(r.nota) > 0 ? aroNota(Number(r.nota)) : '')}
@@ -1703,27 +1733,27 @@
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
           ${raw(icon('back'))} ${T('Perfil')}</button>
-        <h1>Música</h1>
-        <p class="muted">Reproduce dentro de la app y deja que la IA te prepare listas
-        distintas para cada entrenamiento.</p>
+        <h1>${T('Música')}</h1>
+        <p class="muted">${T('Reproduce dentro de la app y deja que la IA te prepare ' +
+        'listas distintas para cada entrenamiento.')}</p>
         <div class="card tarjeta-premium">
-          <div class="pre-encima">Se hace una vez</div>
-          <p class="muted" style="margin:6px 0 12px;font-size:.88rem">Necesita el Client ID
-          de una app de Spotify: se crea en un minuto y es gratis. Tienes el paso a paso en
-          la bóveda.</p>
+          <div class="pre-encima">${T('Se hace una vez')}</div>
+          <p class="muted" style="margin:6px 0 12px;font-size:.88rem">${T('Necesita el ' +
+          'Client ID de una app de Spotify: se crea en un minuto y es gratis. Tienes el ' +
+          'paso a paso en la bóveda.')}</p>
           <button class="btn primary block btn-arranque" data-a="boveda">
-            ${raw(icon('llave'))} Ir a la bóveda de claves</button>
+            ${raw(icon('llave'))} ${T('Ir a la bóveda de claves')}</button>
         </div>
 
-        <div class="list-title">Qué hace y qué no</div>
+        <div class="list-title">${T('Qué hace y qué no')}</div>
         <div class="list">
-          ${raw(filaEstadoIA(true, 'Suena dentro de la app',
-            'Sin salir a Spotify y sin perder el cronómetro de vista.'))}
-          ${raw(filaEstadoIA(true, 'Listas a medida del entrenamiento',
-            'La IA propone artistas distintos cada vez, así que descubres algo.'))}
-          ${raw(filaEstadoIA(false, 'Reproducir aquí pide Premium',
-            'Es condición de Spotify, no de la app. Sin Premium puedes crear las listas '
-            + 'y abrirlas en Spotify.'))}
+          ${raw(filaEstadoIA(true, T('Suena dentro de la app'),
+            T('Sin salir a Spotify y sin perder el cronómetro de vista.')))}
+          ${raw(filaEstadoIA(true, T('Listas a medida del entrenamiento'),
+            T('La IA propone artistas distintos cada vez, así que descubres algo.')))}
+          ${raw(filaEstadoIA(false, T('Reproducir aquí pide Premium'),
+            T('Es condición de Spotify, no de la app. Sin Premium puedes crear las listas '
+            + 'y abrirlas en Spotify.')))}
         </div>`;
     }
 
@@ -1731,19 +1761,19 @@
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
           ${raw(icon('back'))} ${T('Perfil')}</button>
-        <h1>Música</h1>
+        <h1>${T('Música')}</h1>
         <div class="card tarjeta-premium">
-          <div class="pre-encima">Un toque</div>
-          <p class="muted" style="margin:6px 0 12px;font-size:.88rem">Conecta tu cuenta para
-          reproducir aquí y generar listas.</p>
+          <div class="pre-encima">${T('Un toque')}</div>
+          <p class="muted" style="margin:6px 0 12px;font-size:.88rem">${T('Conecta tu ' +
+          'cuenta para reproducir aquí y generar listas.')}</p>
           <button class="btn block btn-arranque btn-spotify" data-a="conectar">
-            ${raw(icon('musica'))} Conectar Spotify</button>
+            ${raw(icon('musica'))} ${T('Conectar Spotify')}</button>
         </div>
         ${raw(falloSpotifyHTML())}
 
-        <p class="tiny" style="margin-top:12px">Al pulsar te lleva a Spotify para dar
-        permiso y vuelve aquí solo. Si vuelves sin conectar, aquí abajo aparecerá el
-        motivo exacto.</p>`;
+        <p class="tiny" style="margin-top:12px">${T('Al pulsar te lleva a Spotify para ' +
+        'dar permiso y vuelve aquí solo. Si vuelves sin conectar, aquí abajo aparecerá ' +
+        'el motivo exacto.')}</p>`;
     }
 
     const lista = listaGuardada();
@@ -1754,79 +1784,85 @@
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Perfil')}</button>
       <div class="row between">
-        <h1 style="margin:0">Música</h1>
+        <h1 style="margin:0">${T('Música')}</h1>
         <!-- Vidrio neutro y no verde: desconectar no es lo que se viene a hacer
              aquí, y un botón del color de la marca al lado del título pide que lo
              pulses. -->
-        <button class="btn sm vidrio" data-a="desconectar">Desconectar</button>
+        <button class="btn sm vidrio" data-a="desconectar">${T('Desconectar')}</button>
       </div>
 
       ${raw(falloSpotifyHTML())}
 
       ${raw(Spotify.permisosCaducados() ? html`
         <div class="card" style="border-color:var(--warn);margin-top:12px">
-          <b>Vuelve a conectar</b>
-          <p class="muted" style="margin:5px 0 10px">${raw(faltantes.length
-            ? 'A la conexión con Spotify le faltan permisos, y por eso tus listas y el '
+          <b>${T('Vuelve a conectar')}</b>
+          <p class="muted" style="margin:5px 0 10px">${faltantes.length
+            ? T('A la conexión con Spotify le faltan permisos, y por eso tus listas y el '
               + 'buscador dan error. Reconecta y acepta la pantalla de Spotify tal cual '
-              + 'sale.'
-            : 'Hay funciones nuevas —tus listas de Spotify y el buscador— y Spotify pide '
+              + 'sale.')
+            : T('Hay funciones nuevas —tus listas de Spotify y el buscador— y Spotify pide '
               + 'permiso otra vez para eso. Es un toque y no pierdes nada.')}</p>
           ${raw(faltantes.length
-            ? '<p class="tiny" style="margin:0 0 10px">Falta: ' + esc(faltantes.join(', ')) + '</p>'
+            ? '<p class="tiny" style="margin:0 0 10px">' +
+              esc(Tn('Falta: {lista}', { lista: faltantes.join(', ') })) + '</p>'
             : '')}
           <button class="btn block btn-arranque btn-spotify" data-a="conectar">
-            ${raw(icon('musica'))} Reconectar Spotify</button>
+            ${raw(icon('musica'))} ${T('Reconectar Spotify')}</button>
         </div>` : '')}
 
       <div id="sp-player" style="margin-top:12px"></div>
 
       ${raw(permisosHTML(faltantes))}
 
-      <div class="list-title">Lista para entrenar</div>
+      <div class="list-title">${T('Lista para entrenar')}</div>
       ${raw(lista ? listaHTML(lista) : html`
         <div class="card">
-          <p class="muted">Deja que la IA te prepare una lista a medida del entrenamiento
-          de hoy. Cada vez propone artistas distintos, así que siempre descubres algo.</p>
+          <p class="muted">${T('Deja que la IA te prepare una lista a medida del ' +
+          'entrenamiento de hoy. Cada vez propone artistas distintos, así que siempre ' +
+          'descubres algo.')}</p>
           ${raw(IA.activa()
             ? '<button class="btn primary block" data-a="generar">' + icon('chispa') +
-              ' Crear una lista</button>'
-            : '<button class="btn block" data-a="boveda">Necesita la clave de la IA</button>')}
+              ' ' + esc(T('Crear una lista')) + '</button>'
+            : '<button class="btn block" data-a="boveda">' +
+              esc(T('Necesita la clave de la IA')) + '</button>')}
         </div>`)}
 
-      ${raw(mem.listas ? '<p class="tiny" style="margin-top:10px">' + mem.listas +
-        (mem.listas === 1 ? ' lista creada' : ' listas creadas') + ' · ' + mem.artistas.length +
-        ' artistas ya propuestos que no se repetirán. ' +
-        '<button class="btn sm ghost" data-a="olvidar">Empezar de cero</button></p>' : '')}
+      ${raw(mem.listas ? '<p class="tiny" style="margin-top:10px">' +
+        esc(Tp(mem.listas, '{n} lista creada', '{n} listas creadas')) + ' · ' +
+        esc(Tn('{n} artistas ya propuestos que no se repetirán.',
+          { n: mem.artistas.length })) + ' ' +
+        '<button class="btn sm ghost" data-a="olvidar">' +
+        esc(T('Empezar de cero')) + '</button></p>' : '')}
 
       <div class="list-head">
-        <span class="list-title">Tus listas de Spotify</span>
-        <button class="btn sm ghost" data-a="recargarListas">Actualizar</button>
+        <span class="list-title">${T('Tus listas de Spotify')}</span>
+        <button class="btn sm ghost" data-a="recargarListas">${T('Actualizar')}</button>
       </div>
       <div class="search-wrap" style="margin-bottom:10px">
         ${raw(icon('search'))}
-        <input id="sp-buscar" type="search" placeholder="Canciones, listas, álbumes o pódcast"
+        <input id="sp-buscar" type="search" placeholder="${T('Canciones, listas, álbumes o pódcast')}"
                autocomplete="off">
       </div>
       <div class="pill-scroll" id="sp-filtros" style="padding-bottom:10px">
-        <button class="chip ${filtrosBusca.length ? '' : 'on'}" data-tipo="">Todo</button>
+        <button class="chip ${filtrosBusca.length ? '' : 'on'}" data-tipo="">${T('Todo')}</button>
         ${raw(TIPOS_BUSCA.map(function (t) {
           return '<button class="chip ' + (filtrosBusca.indexOf(t.k) !== -1 ? 'on' : '') +
-            '" data-tipo="' + t.k + '">' + esc(t.n) + '</button>';
+            '" data-tipo="' + t.k + '">' + esc(T(t.n)) + '</button>';
         }).join(''))}
       </div>
-      <div id="sp-listas"><p class="tiny">Cargando tus listas…</p></div>
+      <div id="sp-listas"><p class="tiny">${T('Cargando tus listas…')}</p></div>
 
-      <div class="list-title">Lista fija</div>
+      <div class="list-title">${T('Lista fija')}</div>
       <div class="card tarjeta-premium">
-        <p class="muted" style="font-size:.88rem;margin-top:0">La que quieras tener siempre
-        a mano: pega su enlace y queda guardada para lanzarla de un toque.</p>
+        <p class="muted" style="font-size:.88rem;margin-top:0">${T('La que quieras tener ' +
+        'siempre a mano: pega su enlace y queda guardada para lanzarla de un toque.')}</p>
         <input id="sp-pl" value="${Spotify.config().playlist || ''}"
                placeholder="https://open.spotify.com/playlist/..." autocomplete="off" spellcheck="false">
         <div class="row" style="margin-top:10px">
-          <button class="btn grow" data-a="guardarPl">Guardar</button>
+          <button class="btn grow" data-a="guardarPl">${T('Guardar')}</button>
           ${raw(Spotify.config().playlist
-            ? '<button class="btn primary grow" data-a="ponerPl">' + icon('play') + ' Reproducir</button>'
+            ? '<button class="btn primary grow" data-a="ponerPl">' + icon('play') + ' ' +
+              esc(T('Reproducir')) + '</button>'
             : '')}
         </div>
       </div>`;
@@ -1843,6 +1879,8 @@
      correo cuando algo falla de verdad. */
   const GRUPOS_PERMISO = [
     { ico: 'altavoz', tit: 'Reproducir aquí dentro',
+      /* El texto se traduce al pintarlo, no aquí: esta tabla se arma al cargar
+         el archivo y el idioma se cambia con la app abierta. */
       sub: 'Sonar sin salir de la app y manejar el play, la pausa y el volumen.',
       p: ['streaming', 'user-read-email', 'user-read-private', 'user-read-playback-state',
         'user-modify-playback-state', 'user-read-currently-playing'] },
@@ -1874,13 +1912,14 @@
           <span class="sp-escudo ${raw(rotos ? 'mal' : 'bien')}">
             ${raw(icon(rotos ? 'close' : 'check'))}</span>
           <span class="grow">
-            <span class="sp-e-tit">Qué le has dejado hacer a la app</span>
-            <span class="sp-e-sub">${raw(rotos
-              ? rotos + (rotos === 1 ? ' cosa no puede hacerla' : ' cosas no puede hacerlas')
-                + ': reconecta y acepta la pantalla tal cual sale'
+            <span class="sp-e-tit">${T('Qué le has dejado hacer a la app')}</span>
+            <span class="sp-e-sub">${rotos
+              ? Tp(rotos,
+                  '{n} cosa no puede hacerla: reconecta y acepta la pantalla tal cual sale',
+                  '{n} cosas no puede hacerlas: reconecta y acepta la pantalla tal cual sale')
               : (crudo
-                ? 'Las ' + bien + ' cosas que necesita, concedidas'
-                : 'La sesión es anterior y no apuntó los permisos'))}</span>
+                ? Tn('Las {n} cosas que necesita, concedidas', { n: bien })
+                : T('La sesión es anterior y no apuntó los permisos'))}</span>
           </span>
           <span class="chevron sp-e-flecha">${raw(icon('chevron'))}</span>
         </summary>
@@ -1891,11 +1930,11 @@
               const mal = falla(g);
               return '<div class="sp-g' + (mal.length ? ' no' : '') + '">' +
                 '<span class="sp-g-ico">' + icon(g.ico) + '</span>' +
-                '<span class="grow"><span class="sp-g-tit">' + esc(g.tit) + '</span>' +
+                '<span class="grow"><span class="sp-g-tit">' + esc(T(g.tit)) + '</span>' +
                 '<span class="sp-g-sub">' + esc(mal.length
-                  ? 'No puede: Spotify no dio ' + mal.length +
-                    (mal.length === 1 ? ' de los permisos' : ' de los permisos') + ' que pide.'
-                  : g.sub) + '</span></span>' +
+                  ? Tp(mal.length, 'No puede: Spotify no dio {n} de los permisos que pide.',
+                      'No puede: Spotify no dio {n} de los permisos que pide.')
+                  : T(g.sub)) + '</span></span>' +
                 '<span class="sp-g-marca">' + icon(mal.length ? 'close' : 'check') +
                 '</span></div>';
             }).join(''))}
@@ -1906,19 +1945,20 @@
           <div class="sp-dev">
             <div class="sp-dev-cab">
               <span class="sp-dev-ico">${raw(icon('llave'))}</span>
-              <span class="grow"><b>Si aún así algo falla</b>
-                <span class="tiny">Prueba una a una las llamadas a Spotify y te dice
-                cuál se cae y por qué.</span></span>
+              <span class="grow"><b>${T('Si aún así algo falla')}</b>
+                <span class="tiny">${T('Prueba una a una las llamadas a Spotify y te ' +
+                'dice cuál se cae y por qué.')}</span></span>
             </div>
             <button class="btn vidrio block sm" data-a="diagnostico">
-              ${raw(icon('beep'))} Probar las llamadas que fallan</button>
+              ${raw(icon('beep'))} ${T('Probar las llamadas que fallan')}</button>
             <pre class="tiny sp-salida" id="sp-diag" hidden></pre>
 
             <details class="sp-crudo">
-              <summary class="tiny">Los permisos tal cual los escribe Spotify</summary>
-              <p class="tiny sp-crudo-txt">${crudo || 'la sesión es anterior y no lo apuntó'}</p>
+              <summary class="tiny">${T('Los permisos tal cual los escribe Spotify')}</summary>
+              <p class="tiny sp-crudo-txt">${crudo || T('la sesión es anterior y no lo apuntó')}</p>
               ${raw(faltantes.length
-                ? '<p class="tiny sp-crudo-falta">Falta: ' + esc(faltantes.join(', ')) + '</p>'
+                ? '<p class="tiny sp-crudo-falta">' +
+                  esc(Tn('Falta: {lista}', { lista: faltantes.join(', ') })) + '</p>'
                 : '')}
             </details>
           </div>
@@ -1935,28 +1975,29 @@
       <div class="card" style="margin-top:12px;border-color:var(--bad)">
         <div class="row between" style="align-items:flex-start">
           <div class="grow">
-            <b style="color:var(--bad)">La última conexión con Spotify falló</b>
+            <b style="color:var(--bad)">${T('La última conexión con Spotify falló')}</b>
             <p class="tiny" style="margin:6px 0 0">${UI.fecha(f.t)}</p>
           </div>
-          <button class="btn icon sm" data-a="olvidarFallo" aria-label="Descartar">
+          <button class="btn icon sm" data-a="olvidarFallo" aria-label="${T('Descartar')}">
             ${raw(icon('close'))}</button>
         </div>
         <pre style="margin:10px 0 0;font-size:.72rem;white-space:pre-wrap">${f.texto}</pre>
         ${raw(f.detalle ? '<pre class="tiny" style="margin:8px 0 0;opacity:.75;' +
           'white-space:pre-wrap">' + esc(f.detalle) + '</pre>' : '')}
         ${raw(f.deSpotify ? html`
-          <p class="tiny" style="margin:9px 0 0">Esto lo ha rechazado Spotify. Comprueba en
-          su panel que en <b>Redirect URIs</b> está exactamente
-          <code>${Spotify.urlRetorno()}</code> y que tu cuenta figura en
-          <b>User Management</b> si la app está en modo desarrollo.</p>`
+          <p class="tiny" style="margin:9px 0 0">${raw(Tn('Esto lo ha rechazado Spotify. ' +
+          'Comprueba en su panel que en {campo} está exactamente {url} y que tu cuenta ' +
+          'figura en {gestion} si la app está en modo desarrollo.',
+          { campo: '<b>Redirect URIs</b>', url: '<code>' + esc(Spotify.urlRetorno()) + '</code>',
+            gestion: '<b>User Management</b>' }))}</p>`
         : html`
-          <p class="tiny" style="margin:9px 0 0">Esto no es cosa del panel de Spotify: no
-          hace falta tocar nada allí. Pulsa Conectar <b>desde esta misma pantalla</b> y deja
-          que vuelva sin abrir otras pestañas ni cambiar entre la app instalada y el
-          navegador.</p>`)}
+          <p class="tiny" style="margin:9px 0 0">${raw(Tn('Esto no es cosa del panel de ' +
+          'Spotify: no hace falta tocar nada allí. Pulsa Conectar {aqui} y deja que ' +
+          'vuelva sin abrir otras pestañas ni cambiar entre la app instalada y el ' +
+          'navegador.', { aqui: '<b>' + esc(T('desde esta misma pantalla')) + '</b>' }))}</p>`)}
         <button class="btn block sm btn-arranque btn-spotify" data-a="conectar"
                 style="margin-top:10px">
-          ${raw(icon('musica'))} Reintentar aquí</button>
+          ${raw(icon('musica'))} ${T('Reintentar aquí')}</button>
       </div>`;
   }
 
@@ -1990,15 +2031,15 @@
      las canciones. */
   function tarjetasListas(listas, propias) {
     if (!listas.length) {
-      return '<p class="tiny">' + (propias
-        ? 'No tienes listas guardadas en Spotify todavía.'
-        : 'Ninguna lista con ese nombre.') + '</p>';
+      return '<p class="tiny">' + esc(propias
+        ? T('No tienes listas guardadas en Spotify todavía.')
+        : T('Ninguna lista con ese nombre.')) + '</p>';
     }
 
-    return (propias ? '<p class="tiny" style="margin:0 0 10px">' + SORPRESA + '</p>' : '')
+    return (propias ? '<p class="tiny" style="margin:0 0 10px">' + esc(T(SORPRESA)) + '</p>' : '')
       + '<div class="stack sp-listas">' + listas.map(function (l, i) {
       const datos = [
-        l.temas != null ? l.temas + ' canciones' : '',
+        l.temas != null ? esc(Tp(l.temas, '{n} canción', '{n} canciones')) : '',
         l.de ? esc(l.de) : ''
       ].filter(Boolean).join(' · ');
 
@@ -2011,23 +2052,23 @@
             <span class="grow" style="min-width:0">
               <span class="sp-nom">${l.nombre}</span>
               <span class="sp-meta">${raw(l.tipo
-                ? '<i class="sp-tipo">' + esc(l.tipo) + '</i>' : '')}${raw(
+                ? '<i class="sp-tipo">' + esc(T(l.tipo)) + '</i>' : '')}${raw(
                 datos ? '<i class="sp-datos">' + datos + '</i>' : '')}</span>
             </span>
           </button>
           <button class="sp-play" data-poner-ya="${l.uri}" data-nombre="${l.nombre}"
-                  aria-label="Reproducir ${l.nombre}">${raw(icon('play'))}</button>
+                  aria-label="${Tn('Reproducir {que}', { que: l.nombre })}">${raw(icon('play'))}</button>
         </div>`;
     }).join('') + '</div>';
   }
 
   function subirArriba(l) {
-    UI.toast('Poniendo «' + l.nombre + '» arriba…');
+    UI.toast(Tn('Poniendo «{que}» arriba…', { que: l.nombre }));
     return Spotify.cancionesDeLista(l.id, 100).then(function (temas) {
-      if (!temas.length) { UI.toast('Reproduciendo ' + l.nombre); return; }
+      if (!temas.length) { UI.toast(Tn('Reproduciendo {que}', { que: l.nombre })); return; }
       guardarLista({
         nombre: l.nombre,
-        descripcion: 'Tu lista de Spotify' + (l.de ? ' · ' + l.de : ''),
+        descripcion: T('Tu lista de Spotify') + (l.de ? ' · ' + l.de : ''),
         deSpotify: true,
         uri: l.uri,
         pistas: temas.map(function (t) {
@@ -2037,14 +2078,15 @@
       render();
     }).catch(function () {
       /* si no deja leer sus canciones, al menos suena y se dice por qué */
-      UI.toast('Sonando ' + l.nombre + '. La siguiente es sorpresa — déjate llevar.');
+      UI.toast(Tn('Sonando {que}. La siguiente es sorpresa — déjate llevar.',
+        { que: l.nombre }));
     });
   }
 
   function pintarListas(root, texto) {
     const caja = root.querySelector('#sp-listas');
     if (!caja) return;
-    caja.innerHTML = '<p class="tiny">Buscando…</p>';
+    caja.innerHTML = '<p class="tiny">' + esc(T('Buscando…')) + '</p>';
 
     const q = String(texto || '').trim();
     /* Primero lo suyo, que es lo que más se busca, y detrás lo que haya en
@@ -2059,7 +2101,7 @@
           const suyas = !quiereListas ? [] : mias.filter(function (l) {
             return I18N.norm(l.nombre).indexOf(filtro) !== -1;
           }).map(function (l) {
-            return Object.assign({}, l, { tipo: 'Lista tuya' });
+            return Object.assign({}, l, { tipo: 'Lista tuya' });   /* se traduce al pintar */
           });
           return Spotify.buscarListas(q, filtrosBusca).then(function (fuera) {
             const vistas = {};
@@ -2084,8 +2126,9 @@
     pedir.then(function (listas) {
       caja.innerHTML = tarjetasListas(listas, !q)
         + ((listas.noSePudo && listas.noSePudo.length)
-          ? '<p class="tiny" style="margin:10px 0 0;color:var(--warn)">Spotify no ha '
-            + 'dejado buscar ' + esc(listas.noSePudo.join(' ni ')) + ' desde esta app.</p>'
+          ? '<p class="tiny" style="margin:10px 0 0;color:var(--warn)">' +
+            esc(Tn('Spotify no ha dejado buscar {que} desde esta app.',
+              { que: listas.noSePudo.map(T).join(T(' ni ')) })) + '</p>'
           : '');
       caja.querySelectorAll('[data-poner-ya]').forEach(function (b) {
         b.onclick = function (ev) {
@@ -2104,7 +2147,7 @@
               /* sólo una lista puede subir arriba; una canción suelta o un
                  pódcast no tienen nada que poner ahí */
               if (l && esLista) subirArriba(l);
-              else UI.toast('Sonando' + (l ? ' ' + l.nombre : ''));
+              else UI.toast(l ? Tn('Sonando {que}', { que: l.nombre }) : T('Sonando'));
             })
             .catch(function (e) { UI.toast(e.message); });
         };
@@ -2120,7 +2163,8 @@
   let temasAbiertos = true;
 
   function etiquetaPlegar(n) {
-    return temasAbiertos ? 'Ocultar las canciones' : 'Ver las ' + n + ' canciones';
+    return temasAbiertos ? T('Ocultar las canciones')
+      : Tn('Ver las {n} canciones', { n: n });
   }
 
   /* ---------- la lista, como una portada ----------
@@ -2136,17 +2180,18 @@
     return html`
       <div class="card tarjeta-premium mus-portada">
         <span class="mus-onda">${raw(icon('musica'))}</span>
-        <div class="pre-encima">Tu lista de hoy</div>
+        <div class="pre-encima">${T('Tu lista de hoy')}</div>
         <div class="mus-nom">${l.nombre}</div>
         <div class="mus-meta">
           ${raw(l.ambiente ? '<span class="mus-chip">' + esc(l.ambiente) + '</span>' : '')}
-          <span class="tiny">${l.pistas.length} canciones · ${UI.fecha(l.creada)}</span>
+          <span class="tiny">${Tp(l.pistas.length, '{n} canción', '{n} canciones')} ·
+            ${UI.fecha(l.creada)}</span>
         </div>
         ${raw(l.descripcion ? '<p class="muted mus-desc">' + esc(l.descripcion) + '</p>' : '')}
 
         <button class="btn primary block btn-arranque" data-a="reproducirLista"
                 style="margin-top:13px">
-          ${raw(icon('play'))} Reproducir aquí</button>
+          ${raw(icon('play'))} ${T('Reproducir aquí')}</button>
 
         <button class="btn ghost block sm plegar ${temasAbiertos ? 'abierta' : ''}"
                 data-a="plegarTemas" style="margin-top:9px"
@@ -2175,28 +2220,28 @@
           ? '<a class="fila-plan" href="' + esc(l.spotify) + '" target="_blank" ' +
             'rel="noopener noreferrer" style="--fp:#1db954">' +
             '<span class="fp-ico">' + icon('musica') + '</span>' +
-            '<span class="grow"><span class="fp-tit">Abrirla en Spotify</span>' +
-            '<span class="fp-sub">Ya está en tu cuenta: en el móvil, en el coche o donde ' +
-            'la abras.</span></span>' +
+            '<span class="grow"><span class="fp-tit">' + esc(T('Abrirla en Spotify')) + '</span>' +
+            '<span class="fp-sub">' + esc(T('Ya está en tu cuenta: en el móvil, en el ' +
+            'coche o donde la abras.')) + '</span></span>' +
             '<span class="chevron">' + icon('chevron') + '</span></a>'
           : '<button class="fila-plan" data-a="aSpotify" style="--fp:#1db954">' +
             '<span class="fp-ico">' + icon('musica') + '</span>' +
-            '<span class="grow"><span class="fp-tit">Guardarla en mi Spotify</span>' +
-            '<span class="fp-sub">Se crea como lista privada con estas mismas canciones.' +
-            '</span></span>' +
+            '<span class="grow"><span class="fp-tit">' + esc(T('Guardarla en mi Spotify')) + '</span>' +
+            '<span class="fp-sub">' + esc(T('Se crea como lista privada con estas mismas ' +
+            'canciones.')) + '</span></span>' +
             '<span class="chevron">' + icon('chevron') + '</span></button>')}
 
         <button class="fila-plan" data-a="generar" style="--fp:#c06bf0">
           <span class="fp-ico">${raw(icon('chispa'))}</span>
-          <span class="grow"><span class="fp-tit">Crear otra distinta</span>
-            <span class="fp-sub">Con otros artistas: no repite los que ya te ha
-            propuesto.</span></span>
+          <span class="grow"><span class="fp-tit">${T('Crear otra distinta')}</span>
+            <span class="fp-sub">${T('Con otros artistas: no repite los que ya te ha ' +
+            'propuesto.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span></button>
 
         <button class="fila-plan es-peligro" data-a="borrarLista" style="--fp:var(--bad)">
           <span class="fp-ico">${raw(icon('trash'))}</span>
-          <span class="grow"><span class="fp-tit">Borrar la lista</span>
-            <span class="fp-sub">Si ya la guardaste en Spotify, allí se queda.</span></span>
+          <span class="grow"><span class="fp-tit">${T('Borrar la lista')}</span>
+            <span class="fp-sub">${T('Si ya la guardaste en Spotify, allí se queda.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span></button>
       </div>`;
   }
@@ -2210,20 +2255,20 @@
      es un «Forbidden» pelado. Así que se dice antes de intentarlo. */
   function reconectarSheet(motivo) {
     UI.modal(html`
-      <h2>Hay que reconectar Spotify</h2>
+      <h2>${T('Hay que reconectar Spotify')}</h2>
       <p class="muted">${motivo}</p>
-      <p class="tiny" style="margin:10px 0 0">Spotify da los permisos el día que
-      autorizas y ya no los amplía: el token se renueva solo, pero con los permisos
-      de aquel día. Reconectar es un toque y no pierdes nada —ni tus listas, ni lo
-      que suena.</p>
+      <p class="tiny" style="margin:10px 0 0">${T('Spotify da los permisos el día que ' +
+      'autorizas y ya no los amplía: el token se renueva solo, pero con los permisos de ' +
+      'aquel día. Reconectar es un toque y no pierdes nada —ni tus listas, ni lo que ' +
+      'suena.')}</p>
       <button class="btn primary block" id="sp-re" style="margin-top:16px">
-        Reconectar Spotify</button>
-      <button class="btn ghost block" id="sp-no" style="margin-top:8px">Ahora no</button>`,
+        ${T('Reconectar Spotify')}</button>
+      <button class="btn ghost block" id="sp-no" style="margin-top:8px">${T('Ahora no')}</button>`,
       function (el) {
         el.querySelector('#sp-no').onclick = function () { UI.closeModal(); };
         el.querySelector('#sp-re').onclick = function () {
           UI.closeModal();
-          UI.toast('Abriendo Spotify para dar permiso…');
+          UI.toast(T('Abriendo Spotify para dar permiso…'));
           Spotify.entrar().catch(function (e) { UI.toast(e.message); });
         };
       });
@@ -2234,30 +2279,30 @@
      mismo en vez de mandarle a otra pantalla. */
   function noSonLosPermisosSheet(mensaje) {
     UI.modal(html`
-      <h2>Esto no son los permisos</h2>
-      <p class="muted">Tu conexión tiene todos los permisos que la app pide y aun así
-      Spotify rechaza crear la lista. Estoy probando qué pasa y qué no.</p>
+      <h2>${T('Esto no son los permisos')}</h2>
+      <p class="muted">${T('Tu conexión tiene todos los permisos que la app pide y aun ' +
+      'así Spotify rechaza crear la lista. Estoy probando qué pasa y qué no.')}</p>
       <pre class="tiny" style="white-space:pre-wrap;word-break:break-word;margin:10px 0 0;
         opacity:.8">${mensaje}</pre>
 
       <div id="sp-espera" class="center" style="margin:16px 0 0">
         <div class="spinner" style="margin:0 auto"></div>
-        <p class="tiny" style="margin:8px 0 0">Probando las llamadas…</p>
+        <p class="tiny" style="margin:8px 0 0">${T('Probando las llamadas…')}</p>
       </div>
 
       <pre class="tiny" id="sp-res" hidden style="white-space:pre-wrap;word-break:break-word;
         margin:12px 0 0"></pre>
       <div id="sp-fin" hidden>
         <button class="btn block sm" id="sp-copiar" style="margin-top:10px">
-          Copiar el resultado</button>
+          ${T('Copiar el resultado')}</button>
         <button class="btn block sm" id="sp-otra" style="margin-top:8px">
-          Probar otra vez</button>
-        <p class="tiny" style="margin:12px 0 0">Si acabas de tocar algo en el panel de
-        Spotify, tu conexión es de antes del cambio: reconecta y vuelve a probar.</p>
+          ${T('Probar otra vez')}</button>
+        <p class="tiny" style="margin:12px 0 0">${T('Si acabas de tocar algo en el panel ' +
+        'de Spotify, tu conexión es de antes del cambio: reconecta y vuelve a probar.')}</p>
         <button class="btn block sm" id="sp-re2" style="margin-top:8px">
-          Reconectar Spotify</button>
+          ${T('Reconectar Spotify')}</button>
       </div>
-      <button class="btn ghost block" id="sp-cerrar" style="margin-top:10px">Cerrar</button>`,
+      <button class="btn ghost block" id="sp-cerrar" style="margin-top:10px">${T('Cerrar')}</button>`,
       function (el) {
         const espera = el.querySelector('#sp-espera');
         const res = el.querySelector('#sp-res');
@@ -2266,13 +2311,13 @@
         el.querySelector('#sp-cerrar').onclick = function () { UI.closeModal(); };
         el.querySelector('#sp-re2').onclick = function () {
           UI.closeModal();
-          UI.toast('Abriendo Spotify para dar permiso…');
+          UI.toast(T('Abriendo Spotify para dar permiso…'));
           Spotify.entrar().catch(function (e) { UI.toast(e.message); });
         };
         el.querySelector('#sp-copiar').onclick = function () {
           navigator.clipboard.writeText(res.textContent)
-            .then(function () { UI.toast('Copiado'); })
-            .catch(function () { UI.toast('Selecciona el texto y cópialo a mano'); });
+            .then(function () { UI.toast(T('Copiado')); })
+            .catch(function () { UI.toast(T('Selecciona el texto y cópialo a mano')); });
         };
         el.querySelector('#sp-otra').onclick = function () { probar(); };
 
@@ -2293,26 +2338,26 @@
             const reciente = Spotify.conexionReciente && Spotify.conexionReciente(20);
 
             res.textContent = t + BAJA + BAJA + (crearVa
-              ? 'CONCLUSIÓN: ahora sí deja crear listas. Cierra esto y dale otra vez a '
-                + 'guardar.'
+              ? T('CONCLUSIÓN: ahora sí deja crear listas. Cierra esto y dale otra vez a '
+                + 'guardar.')
               : !reciente
-                ? 'CONCLUSIÓN: esta conexión es anterior a cualquier cambio que hayas '
+                ? T('CONCLUSIÓN: esta conexión es anterior a cualquier cambio que hayas '
                   + 'hecho hoy en el panel de Spotify, y un cambio en el panel no toca un '
                   + 'token ya dado. Reconecta aquí abajo y vuelve a probar: hasta '
-                  + 'entonces esto es la foto de antes.'
+                  + 'entonces esto es la foto de antes.')
                 : publicoFalla
-                  ? 'CONCLUSIÓN: falla hasta el catálogo público, que no pide ningún '
+                  ? T('CONCLUSIÓN: falla hasta el catálogo público, que no pide ningún '
                     + 'permiso. El problema está en la app del panel de Spotify, no en tu '
                     + 'cuenta: mira si sigue en modo desarrollo y si tu cuenta está en '
-                    + 'User Management.'
-                  : 'CONCLUSIÓN: conexión recién hecha, el catálogo público responde y '
+                    + 'User Management.')
+                  : T('CONCLUSIÓN: conexión recién hecha, el catálogo público responde y '
                     + 'aun así Spotify no deja escribir en tu cuenta. Esto ya no es ni el '
-                    + 'token ni el panel. Mándame estas líneas.');
+                    + 'token ni el panel. Mándame estas líneas.'));
             espera.hidden = true;
             res.hidden = false;
             fin.hidden = false;
           }).catch(function (e) {
-            res.textContent = 'No se ha podido probar: ' + e.message;
+            res.textContent = Tn('No se ha podido probar: {error}', { error: e.message });
             espera.hidden = true;
             res.hidden = false;
             fin.hidden = false;
@@ -2325,42 +2370,42 @@
 
   function subirASpotify(root) {
     const l = listaGuardada();
-    if (!l || !l.pistas || !l.pistas.length) { UI.toast('No hay lista que guardar'); return; }
-    if (!Spotify.activa()) { UI.toast('Entra en Spotify primero'); return; }
+    if (!l || !l.pistas || !l.pistas.length) { UI.toast(T('No hay lista que guardar')); return; }
+    if (!Spotify.activa()) { UI.toast(T('Entra en Spotify primero')); return; }
 
     /* Si ya se sabe que al token le falta el permiso, no se gasta el intento ni
        se le enseña un error críptico: se le ofrece lo que lo arregla. */
     if (Spotify.permisosCaducados && Spotify.permisosCaducados()) {
       const faltan = (Spotify.permisosQueFaltan && Spotify.permisosQueFaltan()) || [];
       reconectarSheet(faltan.length
-        ? 'A tu conexión con Spotify le falta el permiso «' + faltan[0] + '», que es ' +
-          'justo el que hace falta para crear la lista en tu cuenta.'
-        : 'Tu conexión con Spotify es anterior a esta función, así que no incluye el ' +
-          'permiso para crear listas en tu cuenta.');
+        ? Tn('A tu conexión con Spotify le falta el permiso «{permiso}», que es justo ' +
+          'el que hace falta para crear la lista en tu cuenta.', { permiso: faltan[0] })
+        : T('Tu conexión con Spotify es anterior a esta función, así que no incluye el ' +
+          'permiso para crear listas en tu cuenta.'));
       return;
     }
 
     const boton = root.querySelector('[data-a=aSpotify]');
-    if (boton) { boton.disabled = true; boton.textContent = 'Guardándola en Spotify…'; }
+    if (boton) { boton.disabled = true; boton.textContent = T('Guardándola en Spotify…'); }
 
     const uris = l.pistas.map(function (p) { return p.uri; }).filter(Boolean);
     if (!uris.length) {
-      UI.toast('Estas canciones no tienen enlace de Spotify.');
-      if (boton) { boton.disabled = false; boton.textContent = 'Guardarla en mi Spotify'; }
+      UI.toast(T('Estas canciones no tienen enlace de Spotify.'));
+      if (boton) { boton.disabled = false; boton.textContent = T('Guardarla en mi Spotify'); }
       return;
     }
 
-    Spotify.crearPlaylist(l.nombre || 'Entrenamiento',
-      (l.descripcion || '') + ' — hecha con Training FR', uris)
+    Spotify.crearPlaylist(l.nombre || T('Entrenamiento'),
+      (l.descripcion || '') + T(' — hecha con Training FR'), uris)
       .then(function (pl) {
         const url = (pl.external_urls && pl.external_urls.spotify) ||
           ('https://open.spotify.com/playlist/' + pl.id);
         guardarLista(Object.assign({}, l, { spotify: url }));
         render();
-        UI.toast('Guardada en tu Spotify');
+        UI.toast(T('Guardada en tu Spotify'));
       })
       .catch(function (e) {
-        if (boton) { boton.disabled = false; boton.textContent = 'Guardarla en mi Spotify'; }
+        if (boton) { boton.disabled = false; boton.textContent = T('Guardarla en mi Spotify'); }
         /* Un 403 al crear la lista es, casi siempre, permisos: se ofrece el
            arreglo en vez de dejarlo en un aviso que se va solo. */
         if (/\[40[13] /.test(e.message || '')) {
@@ -2370,13 +2415,13 @@
           const faltan = (Spotify.permisosQueFaltan && Spotify.permisosQueFaltan()) || [];
           const aOscuras = Spotify.sesionSinApuntar && Spotify.sesionSinApuntar();
           if (faltan.length || aOscuras) {
-            reconectarSheet('Spotify ha rechazado crear la lista. ' + e.message);
+            reconectarSheet(T('Spotify ha rechazado crear la lista.') + ' ' + e.message);
           } else {
             noSonLosPermisosSheet(e.message);
           }
           return;
         }
-        UI.toast(e.message || 'No se ha podido guardar en Spotify.');
+        UI.toast(e.message || T('No se ha podido guardar en Spotify.'));
       });
   }
 
@@ -2392,7 +2437,7 @@
     bindAll(root, '[data-a=conectar]', function (btn) {
       root.querySelectorAll('[data-a=conectar]').forEach(function (b) { b.disabled = true; });
       Spotify.apuntarFallo(null);
-      UI.toast('Abriendo Spotify para dar permiso…');
+      UI.toast(T('Abriendo Spotify para dar permiso…'));
       Spotify.entrar().catch(function (e) {
         root.querySelectorAll('[data-a=conectar]').forEach(function (b) { b.disabled = false; });
         UI.toast(e.message);
@@ -2400,7 +2445,7 @@
     });
     bind(root, '[data-a=desconectar]', function () {
       Spotify.apagarReproductor();
-      Spotify.salir(); render(); UI.toast('Spotify desconectado');
+      Spotify.salir(); render(); UI.toast(T('Spotify desconectado'));
     });
 
     bind(root, '[data-a=guardarPl]', function () {
@@ -2408,12 +2453,12 @@
       if (val && !Spotify.idDePlaylist(val)) {
         const que = Spotify.queEs(val);
         UI.toast(que
-          ? 'Eso es el enlace de ' + que + ', no de una lista de reproducción.'
-          : 'No reconozco ese enlace. Abre la lista en Spotify, pulsa los tres puntos ' +
-            'y elige Compartir, Copiar enlace.');
+          ? Tn('Eso es el enlace de {que}, no de una lista de reproducción.', { que: T(que) })
+          : T('No reconozco ese enlace. Abre la lista en Spotify, pulsa los tres puntos ' +
+            'y elige Compartir, Copiar enlace.'));
         return;
       }
-      Spotify.guardarPlaylist(val); render(); UI.toast('Lista guardada');
+      Spotify.guardarPlaylist(val); render(); UI.toast(T('Lista guardada'));
     });
 
     /* tus listas, con buscador */
@@ -2450,17 +2495,17 @@
     }
 
     bind(root, '[data-a=ponerPl]', function () {
-      Spotify.ponerPlaylist().then(function () { UI.toast('Reproduciendo'); })
+      Spotify.ponerPlaylist().then(function () { UI.toast(T('Reproduciendo')); })
         .catch(function (e) { UI.toast(e.message); });
     });
 
     bind(root, '[data-a=olvidar]', function () {
       IA.olvidarMusica(); render();
-      UI.toast('Memoria musical borrada: podrán repetirse artistas');
+      UI.toast(T('Memoria musical borrada: podrán repetirse artistas'));
     });
 
     bind(root, '[data-a=borrarLista]', function () {
-      UI.confirm('Borrar la lista', 'Podrás generar otra cuando quieras.', 'Borrar', true)
+      UI.confirm(T('Borrar la lista'), T('Podrás generar otra cuando quieras.'), T('Borrar'), true)
         .then(function (ok) { if (ok) { guardarLista(null); render(); } });
     });
 
@@ -2501,10 +2546,13 @@
       const caja = root.querySelector('#sp-diag');
       btn.disabled = true;
       caja.hidden = false;
-      caja.textContent = 'Probando…';
+      caja.textContent = T('Probando…');
       Spotify.diagnostico()
         .then(function (t) { caja.textContent = t; btn.disabled = false; })
-        .catch(function (e) { caja.textContent = 'No se pudo probar: ' + e.message; btn.disabled = false; });
+        .catch(function (e) {
+          caja.textContent = Tn('No se pudo probar: {error}', { error: e.message });
+          btn.disabled = false;
+        });
     });
 
   };
@@ -2516,18 +2564,18 @@
      le dice dónde ha sonado. El desbloqueo del audio va antes de cualquier
      espera, que es lo único que acepta Safari. */
   function lanzar(uris) {
-    if (!uris.length) { UI.toast('Esa lista no tiene canciones'); return Promise.resolve(); }
+    if (!uris.length) { UI.toast(T('Esa lista no tiene canciones')); return Promise.resolve(); }
     Spotify.desbloquearAudio();
 
     return Spotify.iniciarReproductor()
       .then(function () {
-        return Spotify.reproducirUris(uris).then(function () { UI.toast('Sonando en la app'); });
+        return Spotify.reproducirUris(uris).then(function () { UI.toast(T('Sonando en la app')); });
       })
       .catch(function (e) {
         return Spotify.reproducirUris(uris)
-          .then(function () { UI.toast('Aquí no se pudo, suena en tu Spotify abierto'); })
+          .then(function () { UI.toast(T('Aquí no se pudo, suena en tu Spotify abierto')); })
           .catch(function () {
-            UI.toast(e.message + ' Abre Spotify en algún dispositivo y vuelve a probar.');
+            UI.toast(e.message + ' ' + T('Abre Spotify en algún dispositivo y vuelve a probar.'));
             throw e;
           });
       });
@@ -2545,32 +2593,32 @@
     const duracion = function (n) {
       const min = Math.round(n * 3.5);
       const h = Math.floor(min / 60);
-      return h ? h + ' h' + (min % 60 ? ' ' + (min % 60) : '') : min + ' min';
+      return h ? h + ' h' + (min % 60 ? ' ' + (min % 60) : '') : Tn('{n} min', { n: min });
     };
 
     UI.modal(html`
-      <h2>Nueva lista</h2>
-      <p class="muted">La IA propone las canciones y la app las busca en Spotify.
-      Las que no existan se descartan solas.</p>
+      <h2>${T('Nueva lista')}</h2>
+      <p class="muted">${T('La IA propone las canciones y la app las busca en Spotify. ' +
+      'Las que no existan se descartan solas.')}</p>
 
       <!-- Lo que vas a pedir, antes de pedirlo. La misma portada que va a salir
            en la pantalla, para no tener que imaginársela. -->
       <div class="pl-previo" id="pl-previo"></div>
 
-      <label class="tiny">A QUÉ TIENE QUE SONAR</label>
+      <label class="tiny">${T('A QUÉ TIENE QUE SONAR')}</label>
       <div class="opciones">
         ${raw(Object.keys(IA.AMBIENTES).map(function (k) {
           const a = IA.AMBIENTES[k];
           return '<button class="opcion' + (k === ambiente ? ' on' : '') + '" data-amb="' + k +
             '" style="--tono:' + (a.tono || 'var(--acc)') + '">' +
             '<span class="op-ico">' + icon(a.icono || 'musica') + '</span>' +
-            '<span class="grow"><span class="op-nom">' + esc(a.label) + '</span>' +
-            '<span class="op-sub">' + esc(a.corto || '') + '</span></span>' +
+            '<span class="grow"><span class="op-nom">' + esc(T(a.label)) + '</span>' +
+            '<span class="op-sub">' + esc(T(a.corto || '')) + '</span></span>' +
             '<span class="op-marca">' + icon('check') + '</span></button>';
         }).join(''))}
       </div>
 
-      <label class="tiny" style="margin-top:16px;display:block">CUÁNTO VA A DURAR</label>
+      <label class="tiny" style="margin-top:16px;display:block">${T('CUÁNTO VA A DURAR')}</label>
       <div class="pl-cuantas">
         ${raw([12, 20, 30].map(function (n) {
           return '<button class="pl-n' + (n === 20 ? ' on' : '') + '" data-num="' + n + '">' +
@@ -2578,20 +2626,20 @@
         }).join(''))}
       </div>
 
-      <label class="tiny" style="margin-top:16px;display:block">ALGO MÁS (OPCIONAL)</label>
-      <input id="pl-libre" placeholder="Nada de reguetón, más rock de los noventa…"
+      <label class="tiny" style="margin-top:16px;display:block">${T('ALGO MÁS (OPCIONAL)')}</label>
+      <input id="pl-libre" placeholder="${T('Nada de reguetón, más rock de los noventa…')}"
              style="margin-top:6px">
 
       ${raw(rutinaHoy ? html`
         <div class="pl-hoy">
           <span class="ph-ico">${raw(icon('dumbbell'))}</span>
-          <span class="grow"><b>Se adapta a lo de hoy</b>
-            <span class="tiny">${rutinaHoy.name}: más pesada en las series duras y más
-            constante entre ellas.</span></span>
+          <span class="grow"><b>${T('Se adapta a lo de hoy')}</b>
+            <span class="tiny">${Tn('{rutina}: más pesada en las series duras y más ' +
+            'constante entre ellas.', { rutina: rutinaHoy.name })}</span></span>
         </div>` : '')}
 
       <button class="btn primary block btn-arranque" data-x="crear" style="margin-top:16px">
-        ${raw(icon('chispa'))} Crear lista</button>
+        ${raw(icon('chispa'))} ${T('Crear lista')}</button>
       <div class="tiny" id="pl-estado" style="margin-top:12px"></div>`,
       function (el) {
         let num = 20;
@@ -2603,11 +2651,13 @@
           el.querySelector('#pl-previo').innerHTML =
             '<div class="card tarjeta-premium mus-portada" style="margin:0">' +
             '<span class="mus-onda">' + icon(a.icono || 'musica') + '</span>' +
-            '<div class="pre-encima">Vas a pedir</div>' +
-            '<div class="mus-nom">' + esc(a.label) + '</div>' +
-            '<div class="mus-meta"><span class="mus-chip">' + num + ' canciones</span>' +
-            '<span class="tiny">' + duracion(num) + ' de música</span></div>' +
-            '<p class="muted mus-desc">' + esc(a.corto || '') + '</p>' +
+            '<div class="pre-encima">' + esc(T('Vas a pedir')) + '</div>' +
+            '<div class="mus-nom">' + esc(T(a.label)) + '</div>' +
+            '<div class="mus-meta"><span class="mus-chip">' +
+            esc(Tp(num, '{n} canción', '{n} canciones')) + '</span>' +
+            '<span class="tiny">' + esc(Tn('{cuanto} de música',
+              { cuanto: duracion(num) })) + '</span></div>' +
+            '<p class="muted mus-desc">' + esc(T(a.corto || '')) + '</p>' +
             '</div>';
         };
         pintarPrevio();
@@ -2633,7 +2683,7 @@
           const boton = ev.currentTarget;
           const estado = el.querySelector('#pl-estado');
           boton.disabled = true;
-          estado.textContent = 'Pensando la lista…';
+          estado.textContent = T('Pensando la lista…');
 
           const mostrarFallo = function (e) {
             boton.disabled = false;
@@ -2653,23 +2703,23 @@
               semilla: Date.now().toString(36)
             });
           }).then(function (r) {
-            estado.textContent = 'Buscando las canciones en Spotify…';
+            estado.textContent = T('Buscando las canciones en Spotify…');
             return Spotify.buscarPistas(r.canciones, function (hechas, total, halladas) {
-              estado.textContent = 'Buscando ' + hechas + ' de ' + total +
-                ' · ' + halladas + ' encontradas';
+              estado.textContent = Tn('Buscando {hechas} de {total} · {halladas} encontradas',
+                { hechas: hechas, total: total, halladas: halladas });
             }).then(function (pistas) {
-              if (!pistas.length) throw new Error('Ninguna de las canciones apareció en Spotify.');
+              if (!pistas.length) throw new Error(T('Ninguna de las canciones apareció en Spotify.'));
               IA.recordarMusica(pistas.map(function (p) { return p.artista.split(',')[0].trim(); }));
               guardarLista({
-                nombre: r.nombre || 'Lista de entrenamiento',
+                nombre: r.nombre || T('Lista de entrenamiento'),
                 descripcion: r.descripcion || '',
-                ambiente: IA.AMBIENTES[ambiente].label,
+                ambiente: T(IA.AMBIENTES[ambiente].label),
                 creada: Date.now(),
                 pistas: pistas
               });
               UI.closeModal();
               render();
-              UI.toast(pistas.length + ' canciones listas');
+              UI.toast(Tp(pistas.length, '{n} canción lista', '{n} canciones listas'));
             });
           }).catch(mostrarFallo);
         };
@@ -2683,26 +2733,26 @@
         <div class="card">
           <div class="row between">
             <div class="grow">
-              <div style="font-weight:600">Reproductor de la app</div>
-              <div class="tiny">Suena aquí mismo, sin abrir Spotify</div>
+              <div style="font-weight:600">${T('Reproductor de la app')}</div>
+              <div class="tiny">${T('Suena aquí mismo, sin abrir Spotify')}</div>
             </div>
-            <button class="btn primary sm" data-a="activar">${raw(icon('play'))} Activar</button>
+            <button class="btn primary sm" data-a="activar">${raw(icon('play'))} ${T('Activar')}</button>
           </div>
         </div>`;
       if (s) Reproductor.montar(host);
       const activar = host.querySelector('[data-a=activar]');
       if (activar) activar.onclick = function () {
         activar.disabled = true;
-        activar.textContent = 'Conectando…';
+        activar.textContent = T('Conectando…');
         Spotify.iniciarReproductor()
           .then(function () { return Spotify.traerAqui(); })
           .then(function () {
-            UI.toast('Listo: la música sonará en la app');
+            UI.toast(T('Listo: la música sonará en la app'));
             pintar(Spotify.estado());
           })
           .catch(function (e) {
             activar.disabled = false;
-            activar.innerHTML = icon('play') + ' Activar';
+            activar.innerHTML = icon('play') + ' ' + esc(T('Activar'));
             UI.toast(e.message);
           });
       };
@@ -2800,11 +2850,11 @@
           <button class="player-b grande" data-sp="alternar"
             aria-label="${s.sonando ? 'Pausar' : 'Reproducir'}">
             ${raw(icon(s.sonando ? 'pausaLleno' : 'playLleno'))}</button>
-          <button class="player-b" data-sp="siguiente" aria-label="Siguiente">
+          <button class="player-b" data-sp="siguiente" aria-label="${T('Siguiente')}">
             ${raw(icon('siguiente'))}</button>
           ${raw(favVa === false ? '<span class="player-b chico hueco"></span>' : html`
           <button class="player-b chico ${favoritaActual ? 'fav' : ''}" data-sp="corazon"
-            aria-label="Guardar en favoritas" aria-pressed="${!!favoritaActual}">
+            aria-label="${T('Guardar en favoritas')}" aria-pressed="${!!favoritaActual}">
             ${raw(icon('corazon'))}</button>`)}
         </div>
 
@@ -2812,13 +2862,14 @@
           <div class="player-vol" style="--pct:${Math.round(volActual * 100)}%">
             ${raw(icon('altavoz'))}
             <input type="range" min="0" max="100" value="${Math.round(volActual * 100)}"
-                   id="player-vol" aria-label="Volumen">
+                   id="player-vol" aria-label="${T('Volumen')}">
           </div>` : '')}
 
         ${raw(s.dispositivo ? html`
           <div class="player-donde">
             ${raw(icon('altavoz'))} <span>${s.dispositivo}</span>
-            ${raw(s.local ? '' : '<button class="btn sm" data-sp="traer">Traer aquí</button>')}
+            ${raw(s.local ? '' : '<button class="btn sm" data-sp="traer">' +
+              esc(T('Traer aquí')) + '</button>')}
           </div>` : '')}
       </div>`;
   }
@@ -2876,7 +2927,7 @@
           aleatorio: function () {
             const s = Spotify.estado() || {};
             return Spotify.aleatorio(!s.aleatorio).then(function () {
-              UI.toast(!s.aleatorio ? 'Aleatorio activado' : 'Aleatorio desactivado');
+              UI.toast(!s.aleatorio ? T('Aleatorio activado') : T('Aleatorio desactivado'));
             });
           },
           corazon: function () {
@@ -2888,8 +2939,8 @@
               return Spotify.marcarFavorita(s && s.id, !favoritaActual);
             }).then(function () {
               favoritaActual = !favoritaActual;
-              UI.toast(favoritaActual ? 'Guardada en tus favoritas de Spotify'
-                : 'Quitada de favoritas');
+              UI.toast(favoritaActual ? T('Guardada en tus favoritas de Spotify')
+                : T('Quitada de favoritas'));
             });
           }
         };

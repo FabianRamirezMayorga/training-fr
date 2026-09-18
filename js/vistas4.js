@@ -113,6 +113,13 @@
     guardarEstado();
   });
 
+  /* Se arma al leerlo y no en una constante: los tres niveles tienen que salir
+     en el idioma que esté puesto ahora, no en el que había al cargar. */
+  function nivelesDe() {
+    return { beginner: T('Principiante'), intermediate: T('Intermedio'),
+      expert: T('Avanzado') };
+  }
+
   function gearActual() {
     const g = est.gear || Store.settings().gear || 'gym';
     /* «Ver todo» es un filtro para curiosear el catálogo, no un sitio donde se
@@ -129,34 +136,35 @@
 
   /* ---------- lo que la app sabe de ti ---------- */
   function fichaPerfil(p) {
-    const nivel = { beginner: 'Principiante', intermediate: 'Intermedio', expert: 'Avanzado' };
+    const nivel = nivelesDe();
     const lesiones = Programa.lesionesDe(p.lesiones)
-      .map(function (k) { return Programa.LESIONES[k].label; });
+      .map(function (k) { return T(Programa.LESIONES[k].label); });
 
     return html`
       <div class="card">
         <div class="row between" style="align-items:flex-start">
           <div class="grow">
-            <div class="tiny" style="color:var(--acc)">TU PERFIL</div>
+            <div class="tiny" style="color:var(--acc)">${T('TU PERFIL')}</div>
             <div class="row wrap" style="gap:6px;margin-top:8px">
-              <span class="chip">${p.sexo === 'mujer' ? 'Mujer' : 'Hombre'}</span>
-              <span class="chip">${p.edad} años</span>
+              <span class="chip">${p.sexo === 'mujer' ? T('Mujer') : T('Hombre')}</span>
+              <span class="chip">${Tn('{n} años', { n: p.edad })}</span>
               <span class="chip">${p.peso} kg · ${p.altura} cm</span>
-              <span class="chip">${nivel[p.experiencia] || 'Intermedio'}</span>
-              <span class="chip">Duerme ${p.sueño} h</span>
+              <span class="chip">${nivel[p.experiencia] || T('Intermedio')}</span>
+              <span class="chip">${Tn('Duerme {h} h', { h: p.sueño })}</span>
               ${raw(lesiones.map(function (l) {
                 return '<span class="chip solid">' + esc(l) + '</span>';
               }).join(''))}
             </div>
           </div>
-          <button class="btn sm" data-a="editarperfil">Editar</button>
+          <button class="btn sm" data-a="editarperfil">${T('Editar')}</button>
         </div>
         ${raw(lesiones.length ? html`
-          <p class="tiny" style="margin:10px 0 0">De lo que has escrito en limitaciones he
-          entendido: <b>${lesiones.join(', ')}</b>. Abajo verás qué se evita por eso.</p>`
+          <p class="tiny" style="margin:10px 0 0">${raw(Tn('De lo que has escrito en ' +
+          'limitaciones he entendido: {lista}. Abajo verás qué se evita por eso.',
+          { lista: '<b>' + esc(lesiones.join(', ')) + '</b>' }))}</p>`
         : html`
-          <p class="tiny" style="margin:10px 0 0">Sin limitaciones apuntadas. Si tienes alguna
-          molestia, escríbela en el perfil y el plan la esquiva.</p>`)}
+          <p class="tiny" style="margin:10px 0 0">${T('Sin limitaciones apuntadas. Si tienes ' +
+          'alguna molestia, escríbela en el perfil y el plan la esquiva.')}</p>`)}
       </div>`;
   }
 
@@ -184,7 +192,7 @@
       if (!planes[k]) { planes[k] = []; orden.push(k); }
       planes[k].push(r);
     });
-    if (orden.length < 2) { UI.toast('Necesitas al menos dos planes para comparar'); return; }
+    if (orden.length < 2) { UI.toast(T('Necesitas al menos dos planes para comparar')); return; }
 
     const progs = orden.map(function (k) {
       const suyas = planes[k].slice().sort(function (a, b) {
@@ -207,10 +215,10 @@
     });
 
     UI.modal(html`
-      <h2>Cuál seguir</h2>
-      <p class="muted">Los cuatro pueden pasar la revisión y no valer lo mismo: la
-        revisión busca fallos, y no tener fallos no es lo mismo que ser el mejor.
-        Estos son los números que los separan.</p>
+      <h2>${T('Cuál seguir')}</h2>
+      <p class="muted">${T('Los cuatro pueden pasar la revisión y no valer lo mismo: la ' +
+        'revisión busca fallos, y no tener fallos no es lo mismo que ser el mejor. ' +
+        'Estos son los números que los separan.')}</p>
 
       <div class="card" style="border-color:var(--acc)">
         <div class="row" style="gap:11px;align-items:center">
@@ -219,17 +227,18 @@
                style="font-size:.8rem;color:var(--dim2)">/10</span></div>
           <div class="grow">
             <b>${ganador.nombre}</b>
-            <div class="tiny" style="margin-top:2px">Es el que yo seguiría</div>
+            <div class="tiny" style="margin-top:2px">${T('Es el que yo seguiría')}</div>
           </div>
         </div>
         <p class="tiny" style="margin:9px 0 0">${Revisar.porQueGana(filas)}</p>
       </div>
 
-      <div class="tiny" style="margin:15px 0 6px">CÓMO QUEDAN</div>
+      <div class="tiny" style="margin:15px 0 6px">${T('CÓMO QUEDAN')}</div>
       <div class="tabla-scroll">
         <table class="comparativa">
-          <thead><tr><th>Plan</th><th>Nota</th><th>Días</th><th>Ejer.</th>
-            <th>Series</th><th>Repartidos</th><th>Cortos</th></tr></thead>
+          <thead><tr><th>${T('Plan')}</th><th>${T('Nota')}</th><th>${T('Días')}</th>
+            <th>${T('Ejer.')}</th><th>${T('Series')}</th><th>${T('Repartidos')}</th>
+            <th>${T('Cortos')}</th></tr></thead>
           <tbody>
             ${raw(filas.map(function (f, i) {
               return '<tr' + (i === 0 ? ' class="gana"' : '') + '>' +
@@ -244,15 +253,16 @@
           </tbody>
         </table>
       </div>
-      <p class="tiny" style="margin:7px 0 0"><b>Ejer.</b>: del día más corto al más
-        largo. <b>Repartidos</b>: músculos que entrenas dos días o más a la semana,
-        que rinden más que los de un solo día. <b>Cortos</b>: músculos por debajo de
-        ocho series semanales.</p>
+      <p class="tiny" style="margin:7px 0 0">${raw(Tn('{a}: del día más corto al más ' +
+        'largo. {b}: músculos que entrenas dos días o más a la semana, que rinden más ' +
+        'que los de un solo día. {c}: músculos por debajo de ocho series semanales.',
+        { a: '<b>' + esc(T('Ejer.')) + '</b>', b: '<b>' + esc(T('Repartidos')) + '</b>',
+          c: '<b>' + esc(T('Cortos')) + '</b>' }))}</p>
 
-      <div class="tiny" style="margin:15px 0 6px">SERIES POR MÚSCULO A LA SEMANA</div>
+      <div class="tiny" style="margin:15px 0 6px">${T('SERIES POR MÚSCULO A LA SEMANA')}</div>
       <div class="tabla-scroll">
         <table class="comparativa">
-          <thead><tr><th>Músculo</th>
+          <thead><tr><th>${T('Músculo')}</th>
             ${raw(filas.map(function (f) {
               return '<th>' + esc(f.nombre.replace(/^Fabian ?/, '') || f.nombre) + '</th>';
             }).join(''))}</tr></thead>
@@ -271,12 +281,13 @@
           </tbody>
         </table>
       </div>
-      <p class="tiny" style="margin:7px 0 0">El <b>x2</b> es en cuántos días distintos
-        entrenas ese músculo. En rojo, lo que se queda por debajo de ocho series.</p>
+      <p class="tiny" style="margin:7px 0 0">${raw(T('El <b>x2</b> es en cuántos días ' +
+        'distintos entrenas ese músculo. En rojo, lo que se queda por debajo de ocho ' +
+        'series.'))}</p>
 
       <button class="btn primary block" id="cmp-abrir" style="margin-top:16px">
-        Abrir «${ganador.nombre}»</button>
-      <button class="btn ghost block" id="cmp-no" style="margin-top:8px">Cerrar</button>`,
+        ${Tn('Abrir «{que}»', { que: ganador.nombre })}</button>
+      <button class="btn ghost block" id="cmp-no" style="margin-top:8px">${T('Cerrar')}</button>`,
       function (el) {
         el.querySelector('#cmp-no').onclick = function () { UI.closeModal(); };
         el.querySelector('#cmp-abrir').onclick = function () {
@@ -339,6 +350,7 @@
       'está ahora mismo.',
       'Debajo puedes pedirle al entrenador que lo audite y aplicar lo que proponga; los ' +
       'cambios se guardan sobre estas mismas rutinas.'];
+    /* Se guardan en español porque son la clave: resultado() las pasa por T(). */
 
     Programa.revolumen(prog);
 
@@ -372,7 +384,7 @@
 
   function abrirPlan(nombre) {
     const prog = planDesdeRutinas(nombre);
-    if (!prog) { UI.toast('Ese plan ya no está'); return; }
+    if (!prog) { UI.toast(T('Ese plan ya no está')); return; }
     est.prog = prog;
     guardarEstado();
     render();
@@ -426,19 +438,19 @@
 
     return html`
       <div class="list-head">
-        <span class="list-title">Lo que ya tienes</span>
-        <button class="btn sm primary" data-a="irgenerar">${raw(icon('plus'))} Nuevo</button>
+        <span class="list-title">${T('Lo que ya tienes')}</span>
+        <button class="btn sm primary" data-a="irgenerar">${raw(icon('plus'))} ${T('Nuevo')}</button>
       </div>
       ${raw(sinGuardar ? html`
         <div class="card" style="border-color:var(--acc)">
           <div class="row between" style="align-items:flex-start">
             <div class="grow">
-              <b>${est.prog.nombreIA || 'Plan recién montado'}</b>
-              <div class="tiny" style="margin-top:2px">${est.prog.sesiones.length} sesiones
-                \u00b7 ${est.prog.porIA ? 'montado con IA' : 'montado con la calculadora'}
-                \u00b7 <span style="color:var(--warn)">sin pasar a tus rutinas</span></div>
+              <b>${est.prog.nombreIA || T('Plan recién montado')}</b>
+              <div class="tiny" style="margin-top:2px">${Tp(est.prog.sesiones.length, '{n} sesión', '{n} sesiones')}
+                \u00b7 ${est.prog.porIA ? T('montado con IA') : T('montado con la calculadora')}
+                \u00b7 <span style="color:var(--warn)">${T('sin pasar a tus rutinas')}</span></div>
             </div>
-            <button class="btn sm" data-a="verplan">Ver</button>
+            <button class="btn sm" data-a="verplan">${T('Ver')}</button>
           </div>
         </div>` : '')}
 
@@ -457,18 +469,20 @@
               '" data-abrirplan="' + esc(k) + '">' +
               '<span class="row-icon">' + icon('dumbbell') + '</span>' +
               '<div class="grow"><div class="list-row-title">' + esc(k) + '</div>' +
-              '<div class="list-row-sub">' + suyas.length +
-              (suyas.length === 1 ? ' rutina' : ' rutinas') + ' \u00b7 ' + n +
-              ' ejercicios \u00b7 ' + dias.join(', ') + '</div></div>' +
+              '<div class="list-row-sub">' +
+              esc(Tp(suyas.length, '{n} rutina', '{n} rutinas') + ' · ' +
+                Tp(n, '{n} ejercicio', '{n} ejercicios') + ' · ' +
+                dias.map(function (d) { return UI.diaLargo(d).slice(0, 3); }).join(', ')) +
+              '</div></div>' +
               '<span class="chevron">' + icon('chevron') + '</span></div>';
           }).join(''))}
         </div>
         ${raw(orden.length > 1 ? '<button class="btn block sm" data-a="comparar" ' +
-          'style="margin-top:10px">' + icon('grafica') + ' Comparar mis ' + orden.length +
-          ' planes</button>' : '')}
-        <p class="tiny" style="margin:8px 0 0">Toca uno para abrirlo aquí: verás sus días
-        y su reparto, podrás pedirle al entrenador que lo audite y aplicar lo que
-        proponga sobre estas mismas rutinas.</p>` : '')}`;
+          'style="margin-top:10px">' + icon('grafica') + ' ' +
+          esc(Tn('Comparar mis {n} planes', { n: orden.length })) + '</button>' : '')}
+        <p class="tiny" style="margin:8px 0 0">${T('Toca uno para abrirlo aquí: verás ' +
+        'sus días y su reparto, podrás pedirle al entrenador que lo audite y aplicar lo ' +
+        'que proponga sobre estas mismas rutinas.')}</p>` : '')}`;
   }
 
   function paso(n, titulo, cuerpo, nota) {
@@ -493,24 +507,23 @@
      decidir quién lo monta. */
   function controles() {
     const p = Perfil.datos();
-    const nivel = { beginner: 'Principiante', intermediate: 'Intermedio', expert: 'Avanzado' };
+    const nivel = nivelesDe();
 
     const datos = html`
       <div class="row wrap" style="gap:6px;margin-top:9px">
-        <span class="chip">${p.sexo === 'mujer' ? 'Mujer' : 'Hombre'}</span>
-        <span class="chip">${p.edad} años</span>
+        <span class="chip">${p.sexo === 'mujer' ? T('Mujer') : T('Hombre')}</span>
+        <span class="chip">${Tn('{n} años', { n: p.edad })}</span>
         <span class="chip">${p.peso} kg · ${p.altura} cm</span>
-        <span class="chip">${nivel[p.experiencia] || 'Intermedio'}</span>
-        <span class="chip">Duerme ${p['sue\u00f1o']} h</span>
+        <span class="chip">${nivel[p.experiencia] || T('Intermedio')}</span>
+        <span class="chip">${Tn('Duerme {h} h', { h: p['sue\u00f1o'] })}</span>
       </div>
       <button class="btn sm block" data-a="editarperfil" style="margin-top:10px">
-        Corregir mis datos</button>`;
+        ${T('Corregir mis datos')}</button>`;
 
     const cuando = html`
       <div class="row between" style="margin:9px 0 6px">
-        <span class="tiny">QUÉ DÍAS</span>
-        <span class="chip solid tiny-chip">${est.dias.length}
-          ${est.dias.length === 1 ? 'día' : 'días'}</span>
+        <span class="tiny">${T('QUÉ DÍAS')}</span>
+        <span class="chip solid tiny-chip">${Tp(est.dias.length, '{n} día', '{n} días')}</span>
       </div>
       <div class="row wrap" style="gap:6px">
         ${raw(DIAS.map(function (d) {
@@ -518,18 +531,18 @@
             '" data-dia="' + d + '">' + UI.diaLargo(d) + '</button>';
         }).join(''))}
       </div>
-      <div class="tiny" style="margin:13px 0 6px">DÓNDE VAS A ENTRENAR</div>
+      <div class="tiny" style="margin:13px 0 6px">${T('DÓNDE VAS A ENTRENAR')}</div>
       <div class="row wrap" style="gap:6px">
         ${raw(Object.keys(Data.GEAR).filter(function (k) { return k !== 'todo'; })
           .map(function (k) {
             return '<button class="chip ' + (gearActual() === k ? 'on' : '') +
-              '" data-gear="' + k + '">' + esc(Data.GEAR[k].label) + '</button>';
+              '" data-gear="' + k + '">' + esc(T(Data.GEAR[k].label)) + '</button>';
           }).join(''))}
       </div>
-      <p class="tiny" style="margin:7px 0 0">${esc(Data.GEAR[gearActual()].note)}. Solo vale
-      para este plan; no cambia el catálogo del resto de la app.</p>
+      <p class="tiny" style="margin:7px 0 0">${esc(T(Data.GEAR[gearActual()].note))}.
+      ${T('Solo vale para este plan; no cambia el catálogo del resto de la app.')}</p>
 
-      <div class="tiny" style="margin:13px 0 6px">CUÁNTO DURA CADA SESIÓN</div>
+      <div class="tiny" style="margin:13px 0 6px">${T('CUÁNTO DURA CADA SESIÓN')}</div>
       <div class="row wrap" style="gap:6px">
         ${raw([30, 45, 60, 75, 90].map(function (m) {
           return '<button class="chip ' + (est.minutos === m ? 'on' : '') +
@@ -541,15 +554,15 @@
       <div class="row wrap" style="gap:6px;margin-top:9px">
         ${raw(Object.keys(Programa.OBJETIVOS).map(function (k) {
           return '<button class="chip ' + (objetivoActual() === k ? 'on' : '') +
-            '" data-obj="' + k + '">' + esc(Programa.OBJETIVOS[k].label) + '</button>';
+            '" data-obj="' + k + '">' + esc(T(Programa.OBJETIVOS[k].label)) + '</button>';
         }).join(''))}
       </div>
-      <p class="tiny" style="margin:9px 0 0">${Programa.OBJETIVOS[objetivoActual()].resumen}</p>
-      <div class="tiny" style="margin:13px 0 6px">¿PRIORIZAR ALGUNA ZONA?</div>
+      <p class="tiny" style="margin:9px 0 0">${T(Programa.OBJETIVOS[objetivoActual()].resumen)}</p>
+      <div class="tiny" style="margin:13px 0 6px">${T('¿PRIORIZAR ALGUNA ZONA?')}</div>
       <div class="pill-scroll" style="margin:0 -4px;padding-left:0">
         ${raw(FOCOS.map(function (f) {
           return '<button class="chip ' + (est.foco === f.id ? 'on' : '') +
-            '" data-foco="' + f.id + '">' + esc(f.label) + '</button>';
+            '" data-foco="' + f.id + '">' + esc(T(f.label)) + '</button>';
         }).join(''))}
       </div>`;
 
@@ -557,70 +570,71 @@
        parecer de plantilla: lo que le molesta hoy y lo que quiere o no quiere. */
     const extra = html`
       <label class="tiny" style="display:block;margin:9px 0 5px">
-        ¿ALGO TE MOLESTA AHORA MISMO?</label>
+        ${T('¿ALGO TE MOLESTA AHORA MISMO?')}</label>
       <input id="pg-molestias" value="${est.molestias || ''}" autocomplete="off"
-             placeholder="Ej. la rodilla al bajar, el hombro por encima de la cabeza">
+             placeholder="${T('Ej. la rodilla al bajar, el hombro por encima de la cabeza')}">
       <label class="tiny" style="display:block;margin:12px 0 5px">
-        ¿ALGO MÁS QUE DEBA SABER?</label>
-      <textarea id="pg-notas" rows="3" placeholder="Ej. quiero mejorar en dominadas; odio las sentadillas; los viernes voy con prisa; tengo una carrera en dos meses">${est.notas || ''}</textarea>
+        ${T('¿ALGO MÁS QUE DEBA SABER?')}</label>
+      <textarea id="pg-notas" rows="3" placeholder="${T('Ej. quiero mejorar en dominadas; odio las sentadillas; los viernes voy con prisa; tengo una carrera en dos meses')}">${est.notas || ''}</textarea>
 
       <div class="hr"></div>
       <label class="tiny" style="display:block;margin:0 0 5px">
-        ¿LE PIDES ALGO CONCRETO AL ENTRENADOR?</label>
-      <div class="tiny" style="margin:0 0 6px">Lo de arriba es contexto sobre ti; esto son
-        órdenes. Lo que escribas aquí manda sobre lo demás, siempre que no sea un riesgo
-        ni choque con tus limitaciones.</div>
-      <textarea id="pg-ordenes" rows="3" placeholder="Ej. nada de peso muerto; empieza siempre por dominadas; que el viernes no pase de 40 minutos; mete abdomen todos los días">${est.ordenes || ''}</textarea>`;
+        ${T('¿LE PIDES ALGO CONCRETO AL ENTRENADOR?')}</label>
+      <div class="tiny" style="margin:0 0 6px">${T('Lo de arriba es contexto sobre ti; esto ' +
+        'son órdenes. Lo que escribas aquí manda sobre lo demás, siempre que no sea un ' +
+        'riesgo ni choque con tus limitaciones.')}</div>
+      <textarea id="pg-ordenes" rows="3" placeholder="${T('Ej. nada de peso muerto; empieza siempre por dominadas; que el viernes no pase de 40 minutos; mete abdomen todos los días')}">${est.ordenes || ''}</textarea>`;
 
     return html`
       <div class="list-head" id="generar">
-        <span class="list-title">Generar uno nuevo</span>
+        <span class="list-title">${T('Generar uno nuevo')}</span>
         ${raw(hayPlanes() ? '<button class="btn sm ghost" data-a="cancelarnuevo">' +
-          icon('close') + ' Cancelar</button>' : '')}
+          icon('close') + ' ' + esc(T('Cancelar')) + '</button>' : '')}
       </div>
 
-      ${raw(paso(1, 'Tus datos', datos,
-        'Son los que usa el plan para el volumen, las repeticiones y el esfuerzo. ' +
-        'Si algo no cuadra, corr\u00edgelo antes de generar.'))}
-      ${raw(paso(2, '\u00bfCu\u00e1ndo puedes entrenar?', cuando,
-        'Ponlo realista: es mejor un plan de tres d\u00edas que cumples que uno de cinco que no.'))}
-      ${raw(paso(3, '\u00bfQu\u00e9 buscas?', busca, ''))}
-      ${raw(paso(4, '\u00bfAlgo que deba saber?', extra,
-        'Esto es opcional, pero es lo que separa un plan tuyo de uno gen\u00e9rico. ' +
-        'Solo lo aprovecha la IA; la calculadora no lee texto.'))}
+      ${raw(paso(1, T('Tus datos'), datos,
+        T('Son los que usa el plan para el volumen, las repeticiones y el esfuerzo. ' +
+        'Si algo no cuadra, corrígelo antes de generar.')))}
+      ${raw(paso(2, T('¿Cuándo puedes entrenar?'), cuando,
+        T('Ponlo realista: es mejor un plan de tres días que cumples que uno de cinco ' +
+        'que no.')))}
+      ${raw(paso(3, T('¿Qué buscas?'), busca, ''))}
+      ${raw(paso(4, T('¿Algo que deba saber?'), extra,
+        T('Esto es opcional, pero es lo que separa un plan tuyo de uno genérico. ' +
+        'Solo lo aprovecha la IA; la calculadora no lee texto.')))}
 
       ${raw(est.falloIA ? html`
         <div class="card aviso-seguridad">
-          <b>La IA no ha podido montarlo</b>
+          <b>${T('La IA no ha podido montarlo')}</b>
           <p style="margin:7px 0 0;font-size:.9rem">${est.falloIA}</p>
-          <p class="tiny" style="margin:9px 0 0">Lo que ves abajo lo ha montado la
-          calculadora, no la IA. Arregla lo de arriba y vuelve a darle a
-          <b>Generar rutina con IA</b>.</p>
+          <p class="tiny" style="margin:9px 0 0">${raw(Tn('Lo que ves abajo lo ha montado ' +
+          'la calculadora, no la IA. Arregla lo de arriba y vuelve a darle a {boton}.',
+          { boton: '<b>' + esc(T('Generar rutina con IA')) + '</b>' }))}</p>
           <button class="btn block" data-a="irclaves" style="margin-top:11px">
-            Revisar mi proveedor de IA</button>
+            ${T('Revisar mi proveedor de IA')}</button>
         </div>` : '')}
 
       ${raw(est.cargandoPlan ? html`
         <div class="card center">
           <div class="spinner" style="margin:6px auto"></div>
-          <p class="tiny" style="margin:8px 0 0">Mont\u00e1ndote la semana entera con tus datos
-          delante\u2026 esto tarda unos segundos.</p>
+          <p class="tiny" style="margin:8px 0 0">${T('Montándote la semana entera con ' +
+          'tus datos delante… esto tarda unos segundos.')}</p>
         </div>`
       : html`
         <button class="btn primary block grande" data-a="crearia">
-          ${raw(icon('chispa'))} Generar rutina con IA
+          ${raw(icon('chispa'))} ${T('Generar rutina con IA')}
         </button>
         <p class="tiny" style="margin:7px 0 0">${IA.activa()
-          ? 'Lee todo lo anterior m\u00e1s lo que levantas, lo que llevas abandonado y los d\u00edas ' +
-            'que cumples de verdad, y elige los ejercicios uno a uno del cat\u00e1logo.'
-          : 'Necesita un proveedor de IA con su clave, en la b\u00f3veda de Ajustes.'}</p>
+          ? T('Lee todo lo anterior más lo que levantas, lo que llevas abandonado y los ' +
+            'días que cumples de verdad, y elige los ejercicios uno a uno del catálogo.')
+          : T('Necesita un proveedor de IA con su clave, en la bóveda de Ajustes.')}</p>
 
         <button class="btn block" data-a="crear" style="margin-top:10px">
-          Generar rutina autom\u00e1ticamente
+          ${T('Generar rutina automáticamente')}
         </button>
-        <p class="tiny" style="margin:7px 0 0">Sin IA y al momento: reparte patrones
-        de movimiento seg\u00fan tu edad, tu nivel y tu objetivo. Cada vez que la pidas cambia
-        algunos ejercicios, pero no lee lo que hayas escrito arriba.</p>`)}`;
+        <p class="tiny" style="margin:7px 0 0">${T('Sin IA y al momento: reparte patrones ' +
+        'de movimiento según tu edad, tu nivel y tu objetivo. Cada vez que la pidas ' +
+        'cambia algunos ejercicios, pero no lee lo que hayas escrito arriba.')}</p>`)}`;
   }
 
   /* ---------- un día del plan ----------
@@ -654,7 +668,7 @@
     const filas = Object.keys(zonas)
       .map(function (id) {
         const r = I18N.REGIONES.find(function (x) { return x.id === id; });
-        return { id: id, label: r ? r.label : id, series: Math.round(zonas[id] * 10) / 10 };
+        return { id: id, label: r ? T(r.label) : id, series: Math.round(zonas[id] * 10) / 10 };
       })
       .filter(function (f) { return f.series > 0; })
       .sort(function (a, b) { return b.series - a.series; });
@@ -664,10 +678,12 @@
     const mayor = filas[0].series;
 
     return html`
-      <div class="list-title">De qué está hecha tu semana</div>
-      <p class="tiny" style="margin:-4px 0 10px">Cómo se reparten las
-      <b>${Math.round(total)} series</b> del plan entre las zonas del cuerpo. Es la
-      composición de lo que vas a hacer; si cumples o no con ello se ve en Progreso.</p>
+      <div class="list-title">${T('De qué está hecha tu semana')}</div>
+      <p class="tiny" style="margin:-4px 0 10px">${raw(Tn('Cómo se reparten las {series} ' +
+      'del plan entre las zonas del cuerpo. Es la composición de lo que vas a hacer; si ' +
+      'cumples o no con ello se ve en {donde}.',
+      { series: '<b>' + esc(Tp(Math.round(total), '{n} serie', '{n} series')) + '</b>',
+        donde: esc(T('Progreso')) }))}</p>
 
       <div class="card">
         <div class="comp">
@@ -685,9 +701,10 @@
           }).join(''))}
         </div>
         <p class="tiny" style="margin:11px 0 0">${filas.length === 1
-          ? 'Todo el plan cae en una sola zona. Para una semana completa conviene repartir más.'
-          : 'La cifra grande son series por semana; el porcentaje, qué parte del total se lleva ' +
-            'esa zona.'}</p>
+          ? T('Todo el plan cae en una sola zona. Para una semana completa conviene ' +
+            'repartir más.')
+          : T('La cifra grande son series por semana; el porcentaje, qué parte del total ' +
+            'se lleva esa zona.')}</p>
       </div>`;
   }
 
@@ -720,15 +737,16 @@
           <span class="dia-ini">${UI.diaLargo(s.dia).slice(0, 3)}</span>
           <span class="grow">
             <span class="dia-nom">${s.nombre}</span>
-            <span class="dia-mus">${musculos || 'sin ejercicios'}</span>
+            <span class="dia-mus">${musculos || T('sin ejercicios')}</span>
           </span>
           <span class="dia-chev ${abierto ? 'abierto' : ''}">${raw(icon('chevron'))}</span>
         </button>
 
         <div class="dia-datos">
-          <span><b>${s.ejercicios.length}</b> ejercicios</span>
-          <span><b>${series}</b> series</span>
-          <span><b>${s.minutos}</b> min</span>
+          <span>${raw(Tn('{n} ejercicios',
+            { n: '<b>' + s.ejercicios.length + '</b>' }))}</span>
+          <span>${raw(Tn('{n} series', { n: '<b>' + series + '</b>' }))}</span>
+          <span>${raw(Tn('{n} min', { n: '<b>' + s.minutos + '</b>' }))}</span>
         </div>
 
         <div class="dia-lista" ${raw(abierto ? '' : 'hidden')}>
@@ -742,7 +760,7 @@
                 <span class="grow">
                   <span class="ejer-nom">${ex ? ex.nameEs : e.exId}</span>
                   <span class="ejer-meta">${e.sets} × ${e.reps}
-                    <i>·</i> ${e.rest}s de descanso</span>
+                    <i>·</i> ${Tn('{n}s de descanso', { n: e.rest })}</span>
                   ${raw(e.note ? '<span class="ejer-nota">' + esc(e.note) + '</span>' : '')}
                 </span>
                 <span class="ejer-mus">${I18N.muscle(e.musculo)}</span>
@@ -752,9 +770,9 @@
           ${raw(suya ? html`
             <div class="dia-pie">
               <button class="btn sm grow" data-editardia="${suya.id}">
-                ${raw(icon('edit'))} Editar</button>
+                ${raw(icon('edit'))} ${T('Editar')}</button>
               <button class="btn sm primary grow" data-entrenardia="${suya.id}">
-                ${raw(icon('play'))} Entrenar este día</button>
+                ${raw(icon('play'))} ${T('Entrenar este día')}</button>
             </div>` : '')}
         </div>
       </div>`;
@@ -766,29 +784,41 @@
     return 'var(--bad)';
   }
 
-  const ETIQUETA_ACCION = {
-    cambiar: 'Sustituir', quitar: 'Quitar', anadir: 'Añadir',
-    orden: 'Reordenar', descanso: 'Descanso', series: 'Series'
-  };
+  /* Se arma al leerla: si fuera una constante saldría en el idioma que hubiera
+     puesto al cargar la app y no en el de ahora. */
+  function etiquetaAccion(a) {
+    const t = { cambiar: 'Sustituir', quitar: 'Quitar', anadir: 'Añadir',
+      orden: 'Reordenar', descanso: 'Descanso', series: 'Series' };
+    return t[a] ? T(t[a]) : a;
+  }
 
   /* Cómo se lee un cambio antes de aplicarlo. Escrito como lo diría alguien de
      viva voz: qué se toca y a cambio de qué. */
   function textoCambio(c) {
     const acc = accionDe(c);
     if (acc === 'quitar') return html`<b>${c.quitar}</b>`;
+    /* Los que llevan HTML dentro salen ya escapados con raw(); el de quitar es
+       solo el nombre y puede seguir pasando por la plantilla. */
     if (acc === 'anadir') {
       const donde = Number(c.dia) > 0 && est.prog.sesiones[Number(c.dia) - 1]
-        ? ' en ' + est.prog.sesiones[Number(c.dia) - 1].nombre : '';
+        ? Tn(' en {donde}', { donde: est.prog.sesiones[Number(c.dia) - 1].nombre }) : '';
       return html`<b>${c.poner}</b>${donde}`;
     }
     if (acc === 'orden') {
       return (c.lista || []).length
-        ? html`Los básicos delante en <b>${c.sobre}</b>`
-        : html`<b>${c.sobre}</b> al ${c.posicion || 1}.º`;
+        ? Tn('Los básicos delante en {que}', { que: '<b>' + esc(c.sobre) + '</b>' })
+        : Tn('{que} al {n}.º', { que: '<b>' + esc(c.sobre) + '</b>', n: c.posicion || 1 });
     }
-    if (acc === 'descanso') return html`<b>${c.sobre}</b> a ${c.rest || 0}s de descanso`;
-    if (acc === 'series') return html`<b>${c.sobre}</b> a ${c.series || 0} series`;
-    return html`<b>${c.poner}</b> en lugar de ${c.quitar}`;
+    if (acc === 'descanso') {
+      return Tn('{que} a {n}s de descanso',
+        { que: '<b>' + esc(c.sobre) + '</b>', n: c.rest || 0 });
+    }
+    if (acc === 'series') {
+      return Tn('{que} a {n} series',
+        { que: '<b>' + esc(c.sobre) + '</b>', n: c.series || 0 });
+    }
+    return Tn('{nuevo} en lugar de {viejo}',
+      { nuevo: '<b>' + esc(c.poner) + '</b>', viejo: esc(c.quitar) });
   }
 
   function accionDe(c) {
@@ -810,20 +840,20 @@
   function bloqueIA() {
     if (est.cargandoIA) {
       return html`<div class="card center"><div class="spinner" style="margin:6px auto"></div>
-        <p class="tiny" style="margin:8px 0 0">El entrenador está auditando tu programa…</p></div>`;
+        <p class="tiny" style="margin:8px 0 0">${T('El entrenador está auditando tu programa…')}</p></div>`;
     }
     const r = est.ia;
     if (!r) {
       return html`
         <button class="btn ${IA.activa() ? 'primary' : ''} block" data-a="afinar"
                 style="margin-top:12px">
-          ${raw(icon('chispa'))} Que un entrenador con IA audite tu plan
+          ${raw(icon('chispa'))} ${T('Que un entrenador con IA audite tu plan')}
         </button>
-        <p class="tiny" style="margin:7px 0 0">${raw(IA.activa()
-          ? 'No viene a darte la razón: le pedimos que le ponga nota, que señale lo que '
+        <p class="tiny" style="margin:7px 0 0">${IA.activa()
+          ? T('No viene a darte la razón: le pedimos que le ponga nota, que señale lo que '
             + 'falla y que proponga quitar, meter o cambiar ejercicios. Lo que diga se '
-            + 'queda guardado y se aplica de un toque.'
-          : 'Necesita un proveedor de IA con su clave, en la bóveda de Ajustes. Sin eso '
+            + 'queda guardado y se aplica de un toque.')
+          : T('Necesita un proveedor de IA con su clave, en la bóveda de Ajustes. Sin eso '
             + 'el plan funciona igual, pero esta lectura no.')}</p>`;
     }
 
@@ -832,8 +862,8 @@
 
     return html`
       <div class="list-head">
-        <span class="list-title">Lo que dice el entrenador</span>
-        <button class="btn sm ghost" data-a="olvidaIA">Descartar</button>
+        <span class="list-title">${T('Lo que dice el entrenador')}</span>
+        <button class="btn sm ghost" data-a="olvidaIA">${T('Descartar')}</button>
       </div>
 
       <div class="card">
@@ -842,12 +872,13 @@
             <div style="flex:none;font-size:1.9rem;font-weight:700;line-height:1;
                         color:${raw(colorNota(nota))}">${nota}<span
                  style="font-size:.9rem;color:var(--dim2)">/10</span></div>
-            <div class="tiny grow">${raw(r.revision
-              ? 'Sale de ' + r.revision.hallazgos.length + ' ' +
-                (r.revision.hallazgos.length === 1 ? 'fallo encontrado' : 'fallos encontrados') +
-                ' al repasar el plan y de lo graves que son. La calcula la app, no la IA: ' +
-                'el mismo plan da siempre la misma nota.'
-              : 'Nota de este plan tal y como está ahora.')}</div>
+            <div class="tiny grow">${r.revision
+              ? Tp(r.revision.hallazgos.length,
+                  'Sale de {n} fallo encontrado al repasar el plan y de lo graves que son. ' +
+                  'La calcula la app, no la IA: el mismo plan da siempre la misma nota.',
+                  'Sale de {n} fallos encontrados al repasar el plan y de lo graves que son. ' +
+                  'La calcula la app, no la IA: el mismo plan da siempre la misma nota.')
+              : T('Nota de este plan tal y como está ahora.')}</div>
           </div>` : '')}
         <p style="margin:0 0 10px">${r.veredicto || ''}</p>
         ${raw((r.puntos || []).map(function (x) {
@@ -858,21 +889,22 @@
 
       ${raw(r.nutricion ? html`
         <div class="card">
-          <h3 class="guia-h">${raw(icon('nutricion'))} De comida</h3>
+          <h3 class="guia-h">${raw(icon('nutricion'))} ${T('De comida')}</h3>
           <p style="margin:0">${r.nutricion}</p>
         </div>` : '')}
 
       ${raw(!pendientes && est.aplicados.length === 0 ? html`
         <div class="card">
-          <b>No propone tocar ningún ejercicio</b>
-          <p class="tiny" style="margin:6px 0 0">Sus avisos son sobre hábitos —registrar
-          entrenamientos, apuntar la comida— o sobre el reparto general, no sobre qué
-          ejercicio cambiar. El plan, como lista de ejercicios, le parece defendible.</p>
+          <b>${T('No propone tocar ningún ejercicio')}</b>
+          <p class="tiny" style="margin:6px 0 0">${T('Sus avisos son sobre hábitos ' +
+          '—registrar entrenamientos, apuntar la comida— o sobre el reparto general, no ' +
+          'sobre qué ejercicio cambiar. El plan, como lista de ejercicios, le parece ' +
+          'defendible.')}</p>
         </div>` : '')}
 
       ${raw(pendientes ? html`
         <div class="card">
-          <b>Cambios que propone</b>
+          <b>${T('Cambios que propone')}</b>
           <div class="stack" style="margin-top:9px">
             ${raw((r.cambios || []).map(function (c, i) {
               const acc = accionDe(c);
@@ -880,66 +912,67 @@
                 <div class="row between" style="gap:10px;align-items:flex-start">
                   <div class="grow">
                     <div style="font-size:.86rem">
-                      <span class="chip tiny-chip">${ETIQUETA_ACCION[acc] || acc}</span>
+                      <span class="chip tiny-chip">${etiquetaAccion(acc)}</span>
                       ${raw(textoCambio(c))}</div>
                     <div class="tiny">${c.porque || ''}</div>
                   </div>
                   <div class="row" style="gap:6px;flex:none">
-                    <button class="btn sm" data-cambio="${i}">Aplicar</button>
+                    <button class="btn sm" data-cambio="${i}">${T('Aplicar')}</button>
                     <button class="btn sm ghost" data-nocambio="${i}"
-                            aria-label="Descartar">✕</button>
+                            aria-label="${T('Descartar')}">✕</button>
                   </div>
                 </div>`;
             }).join(''))}
           </div>
-          <p class="tiny" style="margin:10px 0 0">Cada cambio se comprueba antes de aplicarlo:
-          si el ejercicio no existe, no cabe con tu material o choca con tus limitaciones,
-          se descarta. Lo que apliques se guarda y viaja a tus rutinas al pulsar Guardar.</p>
+          <p class="tiny" style="margin:10px 0 0">${T('Cada cambio se comprueba antes de ' +
+          'aplicarlo: si el ejercicio no existe, no cabe con tu material o choca con tus ' +
+          'limitaciones, se descarta. Lo que apliques se guarda y viaja a tus rutinas al ' +
+          'pulsar Guardar.')}</p>
         </div>` : '')}
 
       ${raw(est.aplicados.length ? html`
         <div class="card">
-          <b>Ya aplicado</b>
+          <b>${T('Ya aplicado')}</b>
           <div class="stack" style="margin-top:8px">
             ${raw(est.aplicados.map(function (t) {
               return '<div class="tiny">✓ ' + esc(t) + '</div>';
             }).join(''))}
           </div>
-          <p class="tiny" style="margin:9px 0 0">Estos cambios ya están en el plan de arriba.
-          Se guardan con él; para que lleguen a tus rutinas pulsa
-          <b>Guardar mis rutinas</b>.</p>
+          <p class="tiny" style="margin:9px 0 0">${raw(Tn('Estos cambios ya están en el ' +
+          'plan de arriba. Se guardan con él; para que lleguen a tus rutinas pulsa {boton}.',
+          { boton: '<b>' + esc(T('Guardar mis rutinas')) + '</b>' }))}</p>
         </div>` : '')}
 
       ${raw(r.consejo ? html`
         <div class="card destacado-clave">
-          <h3 class="guia-h">${raw(icon('chispa'))} Si solo haces una cosa</h3>
+          <h3 class="guia-h">${raw(icon('chispa'))} ${T('Si solo haces una cosa')}</h3>
           <p style="margin:0">${r.consejo}</p>
         </div>` : '')}
 
       <button class="btn block" data-a="afinar" style="margin-top:12px">
-        ${raw(icon('chispa'))} Auditar otra vez</button>
-      <p class="tiny" style="margin:7px 0 0">${raw(r.deCache
-        ? 'Este dictamen es el que ya se hizo para este plan: mientras no lo cambies, ' +
+        ${raw(icon('chispa'))} ${T('Auditar otra vez')}</button>
+      <p class="tiny" style="margin:7px 0 0">${r.deCache
+        ? T('Este dictamen es el que ya se hizo para este plan: mientras no lo cambies, ' +
           'volver a pulsar enseña lo mismo en vez de inventarse otra cosa. En cuanto ' +
-          'apliques un cambio, se rehace solo.'
-        : 'Se guarda para este plan. Si aplicas cambios, la próxima auditoría será nueva.')}</p>
+          'apliques un cambio, se rehace solo.')
+        : T('Se guarda para este plan. Si aplicas cambios, la próxima auditoría será nueva.')}</p>
       ${raw(r.deCache ? html`
         <button class="btn ghost block sm" data-a="reafinar" style="margin-top:8px">
-          Pedir otra redacción</button>
-        <p class="tiny" style="margin:6px 0 0">Los fallos serán los mismos —son
-        cuentas sobre el plan—; lo que cambia es cómo están explicados. Gasta una
-        llamada a la IA.</p>` : '')}`;
+          ${T('Pedir otra redacción')}</button>
+        <p class="tiny" style="margin:6px 0 0">${T('Los fallos serán los mismos —son ' +
+        'cuentas sobre el plan—; lo que cambia es cómo están explicados. Gasta una ' +
+        'llamada a la IA.')}</p>` : '')}`;
   }
 
   /* Un plan abierto tiene que poder cerrarse. Sin esto, tocar uno por error
      dejaba la pantalla ocupada y volver a entrar la encontraba igual, porque el
      plan se guarda entre sesiones. */
   function cabeceraPlan(prog) {
-    const nombre = prog.deRutinas || prog.nombreIA || 'Plan sin guardar';
+    const nombre = prog.deRutinas || prog.nombreIA || T('Plan sin guardar');
     return html`
       <div class="list-head" style="margin-top:18px">
-        <span class="list-title" style="margin:0">Viendo: ${nombre}</span>
-        <button class="btn sm ghost" data-a="cerrarplan">${raw(icon('close'))} Cerrar</button>
+        <span class="list-title" style="margin:0">${Tn('Viendo: {que}', { que: nombre })}</span>
+        <button class="btn sm ghost" data-a="cerrarplan">${raw(icon('close'))} ${T('Cerrar')}</button>
       </div>`;
   }
 
@@ -952,95 +985,101 @@
       ${raw(cabeceraPlan(prog))}
 
       <div class="stats" style="margin-top:12px">
-        <div class="stat"><b>${prog.sesiones.length}</b><span>Días</span></div>
-        <div class="stat"><b>${series}</b><span>Series semana</span></div>
-        <div class="stat"><b>RPE ${prog.rpe}</b><span>Esfuerzo tope</span></div>
+        <div class="stat"><b>${prog.sesiones.length}</b><span>${T('Días')}</span></div>
+        <div class="stat"><b>${series}</b><span>${T('Series semana')}</span></div>
+        <div class="stat"><b>RPE ${prog.rpe}</b><span>${T('Esfuerzo tope')}</span></div>
       </div>
 
-      <div class="list-title">Por qué este plan</div>
+      <div class="list-title">${T('Por qué este plan')}</div>
       <p class="tiny" style="margin:-4px 0 10px">${!prog.porIA && !prog.deRutinas && est.falloIA
-        ? 'Ojo: esto lo ha montado la calculadora porque la IA ha fallado. No es el plan ' +
-          'que pediste.'
+        ? T('Ojo: esto lo ha montado la calculadora porque la IA ha fallado. No es el plan ' +
+          'que pediste.')
         : prog.deRutinas
-        ? 'Este es tu plan guardado, tal y como está ahora. Abajo puedes pedirle al ' +
-          'entrenador que lo audite; lo que apliques se guarda sobre estas mismas rutinas.'
+        ? T('Este es tu plan guardado, tal y como está ahora. Abajo puedes pedirle al ' +
+          'entrenador que lo audite; lo que apliques se guarda sobre estas mismas rutinas.')
         : prog.porIA
-          ? 'Lo ha montado la IA leyendo todo lo que la app sabe de ti, y ha elegido cada ' +
+          ? T('Lo ha montado la IA leyendo todo lo que la app sabe de ti, y ha elegido cada ' +
             'ejercicio del catálogo. Abajo puedes pedirle además que se lo lea como ' +
-            'auditor, que es otra cosa.'
-          : 'Esto lo calcula la app con tus datos, sin pedirle nada a nadie: por eso ' +
+            'auditor, que es otra cosa.')
+          : T('Esto lo calcula la app con tus datos, sin pedirle nada a nadie: por eso ' +
             'funciona sin conexión y sin clave. La lectura de un entrenador, que es otra ' +
-            'cosa, está justo debajo.'}</p>
+            'cosa, está justo debajo.')}</p>
       <div class="card">
         ${raw(prog.razones.map(function (t, i) {
           return '<div class="razon"><span class="rt-idx">' + (i + 1) + '</span><p>' +
-            esc(t) + '</p></div>';
+            esc(Programa.leer(t)) + '</p></div>';
         }).join(''))}
       </div>
 
       ${raw(prog.porIA && prog.descartados && prog.descartados.length ? html`
         <div class="card">
-          <b>Lo que no le dejé poner</b>
-          <p class="tiny" style="margin:6px 0 0">Propuso esto y no entró, así que el hueco lo
-          completé yo: ${prog.descartados.join('; ')}.</p>
+          <b>${T('Lo que no le dejé poner')}</b>
+          <p class="tiny" style="margin:6px 0 0">${Tn('Propuso esto y no entró, así que el ' +
+          'hueco lo completé yo: {lista}.',
+          { lista: prog.descartados.map(T).join('; ') })}</p>
         </div>` : '')}
 
       ${raw(bloqueIA())}
 
       ${raw(prog.avisos.length ? html`
-        <div class="list-title">Lo que evito por tus limitaciones</div>
+        <div class="list-title">${T('Lo que evito por tus limitaciones')}</div>
         <div class="card aviso-seguridad">
           ${raw(prog.avisos.map(function (t) {
-            return '<p style="margin:0 0 8px">' + esc(t) + '</p>';
+            return '<p style="margin:0 0 8px">' + esc(Programa.leer(t)) + '</p>';
           }).join(''))}
-          <p class="tiny" style="margin:6px 0 0">Con una lesión diagnosticada, esto no
-          sustituye a tu fisio: enséñale el plan antes de empezar.</p>
+          <p class="tiny" style="margin:6px 0 0">${T('Con una lesión diagnosticada, esto ' +
+          'no sustituye a tu fisio: enséñale el plan antes de empezar.')}</p>
         </div>` : '')}
 
       ${raw(barraVolumen(prog))}
 
       <div class="list-head">
-        <span class="list-title">Tu semana</span>
+        <span class="list-title">${T('Tu semana')}</span>
         <button class="btn sm ghost" data-a="plegardias">${est.todoAbierto
-          ? 'Plegar todo' : 'Abrir todo'}</button>
+          ? T('Plegar todo') : T('Abrir todo')}</button>
       </div>
       <div class="semana-plan">
         ${raw(prog.sesiones.map(function (s, i) { return tarjetaDia(s, i, prog); }).join(''))}
       </div>
 
-      <div class="list-title">Cómo progresar</div>
-      <p class="tiny" style="margin:-4px 0 10px">Repetir el mismo peso cinco semanas no
-      construye nada. Este es el bloque:</p>
+      <div class="list-title">${T('Cómo progresar')}</div>
+      <p class="tiny" style="margin:-4px 0 10px">${T('Repetir el mismo peso cinco semanas ' +
+      'no construye nada. Este es el bloque:')}</p>
       <div class="card">
         ${raw(prog.progresion.map(function (x) {
-          return '<div class="fase-txt"><b>' + esc(x.semana) + '</b><p>' + esc(x.texto) + '</p></div>';
+          return '<div class="fase-txt"><b>' + esc(T(x.semana)) + '</b><p>' +
+            esc(Programa.leer(x.texto)) + '</p></div>';
         }).join(''))}
       </div>
 
       ${raw(prog.cardio ? html`
         <div class="card">
-          <b>Fuera del gimnasio</b>
-          <p class="muted" style="margin:6px 0 0">${prog.cardio}</p>
+          <b>${T('Fuera del gimnasio')}</b>
+          <p class="muted" style="margin:6px 0 0">${Programa.leer(prog.cardio)}</p>
         </div>` : '')}
 
       <div class="card" style="margin-top:16px">
-        <label class="tiny">CÓMO QUIERES LLAMARLAS</label>
-        <div class="tiny" style="margin:2px 0 0">Cada rutina se llamará «día · lo que pongas
-        aquí». Déjalo vacío y uso el nombre de cada sesión.</div>
-        <input id="prog-nombre" value="${est.nombre}" placeholder="Ej. Mi plan de otoño"
+        <label class="tiny">${T('CÓMO QUIERES LLAMARLAS')}</label>
+        <div class="tiny" style="margin:2px 0 0">${T('Cada rutina se llamará «día · lo ' +
+        'que pongas aquí». Déjalo vacío y uso el nombre de cada sesión.')}</div>
+        <input id="prog-nombre" value="${est.nombre}" placeholder="${T('Ej. Mi plan de otoño')}"
                style="margin:6px 0 0">
       </div>
 
       <div class="row" style="margin-top:12px">
-        <button class="btn grow" data-a="otra">Otra propuesta</button>
+        <button class="btn grow" data-a="otra">${T('Otra propuesta')}</button>
         <button class="btn primary grow" data-a="guardar">${vivas().length
-          ? 'Actualizar mis rutinas' : 'Guardar mis rutinas'}</button>
+          ? T('Actualizar mis rutinas') : T('Guardar mis rutinas')}</button>
       </div>
       <p class="tiny" style="margin-top:8px">${vivas().length
-        ? 'Este plan ya está en tus rutinas: se reescriben esas ' + vivas().length +
-          ', no se añaden otras. El resto de tus rutinas no se toca.'
-        : 'Se crean ' + prog.sesiones.length + ' rutinas con sus días asignados. ' +
-          'Lo que ya tengas no se borra.'}</p>`;
+        ? Tp(vivas().length,
+            'Este plan ya está en tus rutinas: se reescribe esa {n}, no se añaden otras. ' +
+            'El resto de tus rutinas no se toca.',
+            'Este plan ya está en tus rutinas: se reescriben esas {n}, no se añaden otras. ' +
+            'El resto de tus rutinas no se toca.')
+        : Tp(prog.sesiones.length,
+            'Se crea {n} rutina con su día asignado. Lo que ya tengas no se borra.',
+            'Se crean {n} rutinas con sus días asignados. Lo que ya tengas no se borra.')}</p>`;
   }
 
   /* ---------- vista ---------- */
@@ -1050,22 +1089,22 @@
 
     if (!Perfil.completo(p)) {
       return html`
-        <h1>Tu programa</h1>
-        <p class="muted">Para que el plan sea tuyo de verdad y no una plantilla, necesito
-        cuatro datos: sexo, edad, altura y peso. Con eso ajusto el volumen, las repeticiones,
-        los descansos y el esfuerzo al que llegas.</p>
+        <h1>${T('Tu programa')}</h1>
+        <p class="muted">${T('Para que el plan sea tuyo de verdad y no una plantilla, ' +
+        'necesito cuatro datos: sexo, edad, altura y peso. Con eso ajusto el volumen, las ' +
+        'repeticiones, los descansos y el esfuerzo al que llegas.')}</p>
         <div class="card center">
-          <p class="muted" style="margin-bottom:12px">Te llevo un minuto rellenarlo.</p>
-          <button class="btn primary block" data-a="editarperfil">Completar mi perfil</button>
+          <p class="muted" style="margin-bottom:12px">${T('Te llevo un minuto rellenarlo.')}</p>
+          <button class="btn primary block" data-a="editarperfil">${T('Completar mi perfil')}</button>
         </div>
         <button class="btn ghost block sm" data-a="plangenerico" style="margin-top:10px">
-          O crear un plan genérico sin perfil</button>`;
+          ${T('O crear un plan genérico sin perfil')}</button>`;
     }
 
     return html`
-      <h1>Tu programa</h1>
-      <p class="muted">Construido con tu perfil: sexo, edad, nivel, objetivo y limitaciones.
-      No es una plantilla con tu nombre encima.</p>
+      <h1>${T('Tu programa')}</h1>
+      <p class="muted">${T('Construido con tu perfil: sexo, edad, nivel, objetivo y ' +
+      'limitaciones. No es una plantilla con tu nombre encima.')}</p>
 
       ${raw(misProgramasHTML())}
 
@@ -1096,12 +1135,12 @@
           setTimeout(function () { afinar(); }, 40);
         } else {
           render();
-          UI.toast('Elige proveedor de IA y pon su clave');
+          UI.toast(T('Elige proveedor de IA y pon su clave'));
           go('claves');
           return;
         }
       } else {
-        UI.toast('Ese plan ya no está');
+        UI.toast(T('Ese plan ya no está'));
       }
     }
 
@@ -1112,13 +1151,13 @@
       const d = el.dataset.dia;
       const i = est.dias.indexOf(d);
       if (i === -1) {
-        if (est.dias.length >= 6) { UI.toast('Seis días es el máximo recomendable'); return; }
+        if (est.dias.length >= 6) { UI.toast(T('Seis días es el máximo recomendable')); return; }
         est.dias.push(d);
         est.dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
       } else est.dias.splice(i, 1);
       el.classList.toggle('on', i === -1);
       const chip = root.querySelector('.chip.solid');
-      if (chip) chip.textContent = est.dias.length + (est.dias.length === 1 ? ' día' : ' días');
+      if (chip) chip.textContent = Tp(est.dias.length, '{n} día', '{n} días');
     });
 
     bindAll(root, '[data-min]', function (el) {
@@ -1182,9 +1221,9 @@
         window.scrollTo(0, 0);
       };
       if (est.prog && !vivas().length) {
-        UI.confirm('Cerrar sin guardar',
-          'Este plan no está en tus rutinas. Si lo cierras, se pierde.',
-          'Cerrar igual', true).then(function (ok) { if (ok) cerrar(); });
+        UI.confirm(T('Cerrar sin guardar'),
+          T('Este plan no está en tus rutinas. Si lo cierras, se pierde.'),
+          T('Cerrar igual'), true).then(function (ok) { if (ok) cerrar(); });
         return;
       }
       cerrar();
@@ -1201,9 +1240,9 @@
       };
       /* si hay un plan montado y sin guardar, se avisa antes de tirarlo */
       if (est.prog && !vivas().length) {
-        UI.confirm('Descartar lo generado',
-          'El plan que hay en pantalla no está en tus rutinas. Si cancelas, se pierde.',
-          'Descartar', true).then(function (ok) { if (ok) cerrar(); });
+        UI.confirm(T('Descartar lo generado'),
+          T('El plan que hay en pantalla no está en tus rutinas. Si cancelas, se pierde.'),
+          T('Descartar'), true).then(function (ok) { if (ok) cerrar(); });
         return;
       }
       cerrar();
@@ -1229,9 +1268,9 @@
       };
 
       if (sinGuardar) {
-        UI.confirm('Empezar uno nuevo',
-          'El plan que tienes en pantalla no está en tus rutinas todavía. Si sigues, ' +
-          'se pierde.', 'Empezar de cero', true).then(function (ok) { if (ok) limpiar(); });
+        UI.confirm(T('Empezar uno nuevo'),
+          T('El plan que tienes en pantalla no está en tus rutinas todavía. Si sigues, ' +
+          'se pierde.'), T('Empezar de cero'), true).then(function (ok) { if (ok) limpiar(); });
         return;
       }
       limpiar();
@@ -1243,7 +1282,7 @@
 
     bindAll(root, '[data-entrenardia]', function (el) {
       const r = Store.routine(el.dataset.entrenardia);
-      if (!r) { UI.toast('Esa rutina ya no está'); return; }
+      if (!r) { UI.toast(T('Esa rutina ya no está')); return; }
       Workout.start(r);
       go('entrenar');
     });
@@ -1317,8 +1356,9 @@
         guardarEstado();
 
         UI.toast(yaHay.length
-          ? ids.length + ' rutinas actualizadas'
-          : ids.length + ' rutinas creadas con sus días');
+          ? Tp(ids.length, '{n} rutina actualizada', '{n} rutinas actualizadas')
+          : Tp(ids.length, '{n} rutina creada con su día',
+              '{n} rutinas creadas con sus días'));
         go('rutinas');
         Offline.precargarRutinas();
       };
@@ -1327,11 +1367,15 @@
          silencio: puede haberlas editado a mano desde entonces. */
       const deAntes = yaHay.filter(function (r) { return est.guardadas.indexOf(r.id) === -1; });
       if (deAntes.length) {
-        UI.confirm('Ya tienes un plan llamado \u00ab' + etiqueta + '\u00bb',
-          'Tiene ' + yaHay.length + (yaHay.length === 1 ? ' rutina' : ' rutinas') +
-          '. Voy a reescribirlas con este plan y a borrar las que sobren, para que no ' +
-          'se te dupliquen. Si quieres conservarlo, cancela y ponle otro nombre a este.',
-          'Reescribir').then(function (ok) { if (ok) seguir(); });
+        UI.confirm(Tn('Ya tienes un plan llamado «{que}»', { que: etiqueta }),
+          Tp(yaHay.length,
+            'Tiene {n} rutina. Voy a reescribirla con este plan y a borrar las que sobren, ' +
+            'para que no se te dupliquen. Si quieres conservarlo, cancela y ponle otro ' +
+            'nombre a este.',
+            'Tiene {n} rutinas. Voy a reescribirlas con este plan y a borrar las que sobren, ' +
+            'para que no se te dupliquen. Si quieres conservarlo, cancela y ponle otro ' +
+            'nombre a este.'),
+          T('Reescribir')).then(function (ok) { if (ok) seguir(); });
         return;
       }
       seguir();
@@ -1348,9 +1392,9 @@
     });
 
     bind(root, '[data-a=olvidaIA]', function () {
-      UI.confirm('Descartar la lectura', 'Se borra lo que dijo el entrenador y la lista de ' +
-        'cambios que quedan sin aplicar. Los que ya aplicaste siguen en el plan.',
-        'Descartar', true).then(function (ok) {
+      UI.confirm(T('Descartar la lectura'), T('Se borra lo que dijo el entrenador y la ' +
+        'lista de cambios que quedan sin aplicar. Los que ya aplicaste siguen en el plan.'),
+        T('Descartar'), true).then(function (ok) {
         if (!ok) return;
         est.ia = null;
         est.aplicados = [];
@@ -1389,10 +1433,13 @@
         if (!ex) { descartados.push(nombre); return; }
         if (vistos[ex.id]) return;
         if (!Data.permiteNombre(gear, ex.nameEs)) {
-          descartados.push(ex.nameEs + ' (no lo tienes donde entrenas)');
+          descartados.push(Tn('{que} (no lo tienes donde entrenas)', { que: ex.nameEs }));
           return;
         }
-        if (prohibido(ex)) { descartados.push(ex.nameEs + ' (tus limitaciones)'); return; }
+        if (prohibido(ex)) {
+          descartados.push(Tn('{que} (tus limitaciones)', { que: ex.nameEs }));
+          return;
+        }
         vistos[ex.id] = true;
 
         const sets = Math.min(8, Math.max(1, Number(f.series) || 3));
@@ -1424,7 +1471,7 @@
           if (!ex || prohibido(ex)) return;
           vistos[e.exId] = true;
           ejercicios.push(Object.assign({}, e, {
-            note: 'Lo añade la app para completar el día.'
+            note: T('Lo añade la app para completar el día.')
           }));
         });
       }
@@ -1439,7 +1486,7 @@
 
       return {
         dia: dia,
-        nombre: UI.diaLargo(dia) + ' \u00b7 ' + (ses.nombre || 'Sesión'),
+        nombre: UI.diaLargo(dia) + ' · ' + (ses.nombre || T('Sesión')),
         plantilla: ses.nombre || '',
         ejercicios: ejercicios,
         minutos: minutos + base.calentamiento
@@ -1469,8 +1516,8 @@
   }
 
   function crearConIA() {
-    if (!est.dias.length) { UI.toast('Elige al menos un día de entrenamiento'); return; }
-    if (!IA.activa()) { go('claves'); UI.toast('Elige proveedor de IA y pon su clave'); return; }
+    if (!est.dias.length) { UI.toast(T('Elige al menos un día de entrenamiento')); return; }
+    if (!IA.activa()) { go('claves'); UI.toast(T('Elige proveedor de IA y pon su clave')); return; }
 
     /* la calculadora primero: garantiza una forma válida y es la red si algo falla */
     const base = Programa.crear({
@@ -1490,19 +1537,21 @@
     }).then(function (r) {
       const prog = fusionarIA(base, r);
       if (!prog) {
-        UI.toast('La IA no devolvió un plan aprovechable. Te dejo el de la calculadora.');
+        UI.toast(T('La IA no devolvió un plan aprovechable. Te dejo el de la calculadora.'));
         est.prog = base;
       } else {
         est.prog = prog;
         const faltan = est.dias.length - prog.sesiones.length;
         if (faltan > 0) {
-          UI.toast('Plan listo, pero solo salieron ' + prog.sesiones.length + ' de los ' +
-            est.dias.length + ' días. Prueba a generarlo otra vez.');
+          UI.toast(Tn('Plan listo, pero solo salieron {salieron} de los {pedidos} días. ' +
+            'Prueba a generarlo otra vez.',
+            { salieron: prog.sesiones.length, pedidos: est.dias.length }));
         } else if (prog.descartados.length) {
-          UI.toast('Plan listo. Descarté ' + prog.descartados.length + ' ejercicio' +
-            (prog.descartados.length === 1 ? '' : 's') + ' que no encajaban y completé el hueco.');
+          UI.toast(Tp(prog.descartados.length,
+            'Plan listo. Descarté {n} ejercicio que no encajaba y completé el hueco.',
+            'Plan listo. Descarté {n} ejercicios que no encajaban y completé el hueco.'));
         } else {
-          UI.toast('Plan montado a tu medida');
+          UI.toast(T('Plan montado a tu medida'));
         }
       }
     }).catch(function (e) {
@@ -1527,7 +1576,7 @@
   }
 
   function crear() {
-    if (!est.dias.length) { UI.toast('Elige al menos un día de entrenamiento'); return; }
+    if (!est.dias.length) { UI.toast(T('Elige al menos un día de entrenamiento')); return; }
     /* cada vez que se pide, otra variante: antes devolvía el plan idéntico */
     est.variante = (est.variante || 0) + 1;
     est.prog = Programa.crear({
@@ -1546,7 +1595,7 @@
   }
 
   function afinar(rehacer) {
-    if (!IA.activa()) { go('claves'); UI.toast('Elige proveedor de IA y pon su clave'); return; }
+    if (!IA.activa()) { go('claves'); UI.toast(T('Elige proveedor de IA y pon su clave')); return; }
     est.cargandoIA = true;
     render();
     IA.afinarPrograma(est.prog, rehacer)
@@ -1636,7 +1685,7 @@
     if (accion === 'orden' && (c.lista || []).length) {
       const ses = est.prog.sesiones[Number(c.dia) - 1];
       if (!ses) {
-        UI.toast('Ese día ya no está en el plan.');
+        UI.toast(T('Ese día ya no está en el plan.'));
         est.ia.cambios.splice(i, 1);
         guardarEstado();
         repintarQuieto();
@@ -1654,14 +1703,15 @@
       });
       ses.ejercicios = puestos.concat(quedan);
       est.ia.cambios.splice(i, 1);
-      apuntarAplicado(ses.nombre + ': reordenada, los básicos delante');
+      apuntarAplicado(Tn('{que}: reordenada, los básicos delante', { que: ses.nombre }));
       return;
     }
 
     if (accion === 'orden' || accion === 'descanso' || accion === 'series') {
       const sitio = enElPlan(c.sobre || c.quitar || c.poner);
       if (!sitio) {
-        UI.toast('Ya no está «' + (c.sobre || c.quitar || '') + '» en el plan.');
+        UI.toast(Tn('Ya no está «{que}» en el plan.',
+          { que: c.sobre || c.quitar || '' }));
         est.ia.cambios.splice(i, 1);
         guardarEstado();
         repintarQuieto();
@@ -1674,58 +1724,65 @@
         const movido = lista.splice(sitio.i, 1)[0];
         lista.splice(destino, 0, movido);
         est.ia.cambios.splice(i, 1);
-        apuntarAplicado(sitio.ex.nameEs + ': pasa al ' + (destino + 1) + '.º en ' +
-          sitio.ses.nombre);
+        apuntarAplicado(Tn('{que}: pasa al {n}.º en {donde}',
+          { que: sitio.ex.nameEs, n: destino + 1, donde: sitio.ses.nombre }));
         return;
       }
 
       if (accion === 'descanso') {
         const seg = Math.max(0, Math.min(600, Number(c.rest) || 0));
-        if (!seg) { UI.toast('Ese cambio no dice cuánto descanso poner.'); return; }
+        if (!seg) { UI.toast(T('Ese cambio no dice cuánto descanso poner.')); return; }
         sitio.ses.ejercicios[sitio.i].rest = seg;
         est.ia.cambios.splice(i, 1);
-        apuntarAplicado(sitio.ex.nameEs + ': descanso a ' + seg + 's');
+        apuntarAplicado(Tn('{que}: descanso a {n}s',
+          { que: sitio.ex.nameEs, n: seg }));
         return;
       }
 
       const series = Math.max(1, Math.min(15, Number(c.series) || 0));
-      if (!series) { UI.toast('Ese cambio no dice cuántas series poner.'); return; }
+      if (!series) { UI.toast(T('Ese cambio no dice cuántas series poner.')); return; }
       const antes = sitio.ses.ejercicios[sitio.i];
       sitio.ses.minutos = Math.max(15, sitio.ses.minutos - minutosDe(antes));
       antes.sets = series;
       sitio.ses.minutos += minutosDe(antes);
       Programa.revolumen(est.prog);
       est.ia.cambios.splice(i, 1);
-      apuntarAplicado(sitio.ex.nameEs + ': ' + series + ' series');
+      apuntarAplicado(Tn('{que}: {n} series', { que: sitio.ex.nameEs, n: series }));
       return;
     }
 
     if (accion === 'quitar') {
       const sitio = enElPlan(c.quitar);
-      if (!sitio) { UI.toast('Ya no está «' + (c.quitar || '') + '» en el plan.'); return; }
+      if (!sitio) {
+        UI.toast(Tn('Ya no está «{que}» en el plan.', { que: c.quitar || '' }));
+        return;
+      }
       if (sitio.ses.ejercicios.length <= 2) {
-        UI.toast('Ese día se quedaría en un ejercicio. No lo quito.');
+        UI.toast(T('Ese día se quedaría en un ejercicio. No lo quito.'));
         return;
       }
       sitio.ses.minutos = Math.max(15, sitio.ses.minutos -
         minutosDe(sitio.ses.ejercicios[sitio.i]));
       sitio.ses.ejercicios.splice(sitio.i, 1);
       est.ia.cambios.splice(i, 1);
-      apuntarAplicado(sitio.ex.nameEs + ': fuera de ' + sitio.ses.nombre);
+      apuntarAplicado(Tn('{que}: fuera de {donde}',
+        { que: sitio.ex.nameEs, donde: sitio.ses.nombre }));
       return;
     }
 
     const nuevo = delCatalogo(c.poner);
     const aOjo = nuevo && I18N.norm(nuevo.nameEs) !== I18N.norm(String(c.poner || ''));
     if (!nuevo) {
-      UI.toast('No encuentro «' + (c.poner || '') + '» en el catálogo. Cambio descartado.');
+      UI.toast(Tn('No encuentro «{que}» en el catálogo. Cambio descartado.',
+        { que: c.poner || '' }));
       est.ia.cambios.splice(i, 1);
       guardarEstado();
       repintarQuieto();
       return;
     }
     if (chocaConLesiones(nuevo)) {
-      UI.toast('«' + nuevo.nameEs + '» no encaja con tus limitaciones. Cambio descartado.');
+      UI.toast(Tn('«{que}» no encaja con tus limitaciones. Cambio descartado.',
+        { que: nuevo.nameEs }));
       est.ia.cambios.splice(i, 1);
       guardarEstado();
       repintarQuieto();
@@ -1741,7 +1798,7 @@
 
       const repetido = destino.ejercicios.some(function (e) { return e.exId === nuevo.id; });
       if (repetido) {
-        UI.toast('«' + nuevo.nameEs + '» ya está en ese día.');
+        UI.toast(Tn('«{que}» ya está en ese día.', { que: nuevo.nameEs }));
         est.ia.cambios.splice(i, 1);
         guardarEstado();
         repintarQuieto();
@@ -1761,7 +1818,7 @@
         /* El descanso viene con el cambio cuando lo calcula la app; el del último
            ejercicio del día es de un aislamiento y deja corto a un básico. */
         rest: Number(c.rest) || modelo.rest || 75,
-        note: 'Lo mete el entrenador: ' + (c.porque || '')
+        note: Tn('Lo mete el entrenador: {porque}', { porque: c.porque || '' })
       };
       /* Un compuesto al final queda detrás de los aislamientos y se hace cansado:
          entra delante del primer ejercicio de aislamiento que haya. */
@@ -1773,24 +1830,29 @@
       else destino.ejercicios.push(entra);
       destino.minutos += minutosDe(entra);
       est.ia.cambios.splice(i, 1);
-      apuntarAplicado(nuevo.nameEs + ': entra en ' + destino.nombre);
-      if (aOjo) UI.toast('Pedía «' + c.poner + '», que no está en el catálogo. He puesto ' +
-        nuevo.nameEs + '.');
+      apuntarAplicado(Tn('{que}: entra en {donde}',
+        { que: nuevo.nameEs, donde: destino.nombre }));
+      if (aOjo) UI.toast(Tn('Pedía «{pedido}», que no está en el catálogo. He puesto ' +
+        '{puesto}.', { pedido: c.poner, puesto: nuevo.nameEs }));
       return;
     }
 
     /* sustituir */
     const sitio = enElPlan(c.quitar);
-    if (!sitio) { UI.toast('Ya no está «' + (c.quitar || '') + '» en el plan.'); return; }
+    if (!sitio) {
+      UI.toast(Tn('Ya no está «{que}» en el plan.', { que: c.quitar || '' }));
+      return;
+    }
     const antes = sitio.ex.nameEs;
     const e = sitio.ses.ejercicios[sitio.i];
     e.exId = nuevo.id;
     e.patron = Alt.patron(nuevo);
     e.musculo = (nuevo.primaryMuscles || [])[0] || e.musculo;
-    e.note = 'Cambiado a propuesta del entrenador: ' + (c.porque || '');
+    e.note = Tn('Cambiado a propuesta del entrenador: {porque}', { porque: c.porque || '' });
     est.ia.cambios.splice(i, 1);
-    apuntarAplicado(nuevo.nameEs + ' en lugar de ' + antes);
-    if (aOjo) UI.toast('Pedía «' + c.poner + '», que no está en el catálogo. He puesto ' +
-      nuevo.nameEs + '.');
+    apuntarAplicado(Tn('{nuevo} en lugar de {viejo}',
+      { nuevo: nuevo.nameEs, viejo: antes }));
+    if (aOjo) UI.toast(Tn('Pedía «{pedido}», que no está en el catálogo. He puesto ' +
+      '{puesto}.', { pedido: c.poner, puesto: nuevo.nameEs }));
   }
 })(window);
