@@ -5262,13 +5262,23 @@
       });
     });
 
-    if (deferredPrompt) {
+    /* Tres caminos, y el botón dice cuál es antes de tocarlo: instalar de
+       verdad, enseñar los pasos del iPhone, o avisar de que desde dentro de
+       otra app no se puede. Si ya está instalada no sale nada. */
+    if (g.Instalar) {
       const b = root.querySelector('#btn-install');
-      b.hidden = false;
-      b.onclick = function () {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function () { deferredPrompt = null; b.hidden = true; });
-      };
+      const via = Instalar.via();
+      if (b && via) {
+        b.hidden = false;
+        b.textContent = via === 'nativa' ? T('Instalar aplicación')
+          : via === 'ios' ? T('Cómo se instala en el iPhone')
+          : T('Por qué no puedo instalarla aquí');
+        b.onclick = function () {
+          if (via === 'nativa') {
+            Instalar.lanzar().then(function (ok) { if (ok) b.hidden = true; });
+          } else Instalar.guia();
+        };
+      }
     }
   };
 
@@ -6322,12 +6332,6 @@
 
   /* ================= arranque ================= */
 
-  let deferredPrompt = null;
-  window.addEventListener('beforeinstallprompt', function (e) {
-    e.preventDefault();
-    deferredPrompt = e;
-  });
-
   function fallo(msg) {
     document.getElementById('splash-msg').innerHTML =
       esc(msg) + '<br><br><button class="btn sm" onclick="location.reload()">Reintentar</button>';
@@ -6397,6 +6401,9 @@
          datos, y hace falta saberlo en cualquier pantalla, no solo en Perfil. */
       if (g.Admin) Admin.comprobar().then(function (si) { if (si) render(); });
       render();
+      /* El aviso de instalar decide solo si toca y cuándo; aquí solo se le
+         dice que la app ya está en pie. */
+      if (g.Instalar) Instalar.arrancar();
 
       if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         /* Al desplegar, el service worker nuevo se instala y toma el control,

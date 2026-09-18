@@ -898,7 +898,53 @@
     'Sí, entera. El botón *ES / EN* de arriba a la derecha la cambia de un toque, y también está en Ajustes › Idioma.':
       'Yes, all of it. The *ES / EN* button at the top right switches it with one tap, and it is also in Settings › Language.',
     'Cambia todo lo que pone la app: botones, manual, guías de técnica, avisos y el entrenador. Lo que has escrito tú se queda como está.':
-      'Everything the app puts there changes: buttons, manual, technique guides, reminders and the coach. What you wrote yourself stays as it is.'
+      'Everything the app puts there changes: buttons, manual, technique guides, reminders and the coach. What you wrote yourself stays as it is.',
+    /* ---------- instalar la app ---------- */
+    'La app te lo ofrece sola cuando lleva un rato abierta, con un aviso abajo. Si lo cerraste o quieres hacerlo ahora, el camino depende de dónde la hayas abierto:':
+      'The app offers it on its own once you have had it open for a while, with a prompt at the bottom. If you closed it or want to do it now, the route depends on where you opened the app:',
+    'Android o el ordenador': 'Android or the computer',
+    'Hay un botón que lo hace de una vez': 'There is a button that does it in one go',
+    'Pulsa *Instalar* en el aviso de abajo.': 'Tap *Install* in the prompt at the bottom.',
+    'Si no está en pantalla, el mismo botón vive en Ajustes › Instalar en el móvil.':
+      'If it is not on screen, the same button lives under Settings › Install on your phone.',
+    'Acepta el cuadro que saca el navegador.': 'Accept the box the browser puts up.',
+    'Es el diálogo del sistema, no de la app: ahí se decide de verdad.':
+      'That is the system’s dialog, not the app’s: that is where it really happens.',
+    'iPhone o iPad': 'iPhone or iPad',
+    'A mano, porque Apple no deja hacerlo de otra forma':
+      'By hand, because Apple allows no other way',
+    'Toca el botón de *Compartir* en la barra de Safari.':
+      'Tap the *Share* button in the Safari bar.',
+    'Es el cuadrado con la flecha hacia arriba. En Chrome está arriba a la derecha.':
+      'It is the square with the arrow pointing up. In Chrome it is at the top right.',
+    'Baja por la lista hasta *Añadir a pantalla de inicio*.':
+      'Scroll down the list to *Add to Home Screen*.',
+    'Está más abajo de lo que parece, pasadas las opciones de compartir.':
+      'It is further down than you would think, past the sharing options.',
+    'Dale a *Añadir*.': 'Tap *Add*.',
+    'Sale con su icono, como una app más. Desde ahí arranca a pantalla completa y funciona sin conexión.':
+      'It shows up with its icon, like any other app. From there it opens full screen and works offline.',
+    'La abrí desde WhatsApp o Instagram': 'I opened it from WhatsApp or Instagram',
+    'Primero hay que salir de ahí': 'You have to get out of there first',
+    'Toca los tres puntos de esa ventana, arriba a la derecha.':
+      'Tap the three dots in that window, at the top right.',
+    'El navegador que esas apps abren por dentro no puede instalar nada. Es cosa del sistema, no de Training FR.':
+      'The browser those apps open inside themselves cannot install anything. That is the system, not Training FR.',
+    'Elige *Abrir en Safari* o *Abrir en el navegador*.':
+      'Choose *Open in Safari* or *Open in browser*.',
+    'Ya fuera, sigue los pasos de tu móvil de aquí arriba.':
+      'Once outside, follow the steps for your phone above.',
+    'Se instale como se instale, es la misma app y los mismos datos: no se descarga nada de ninguna tienda, solo se crea el acceso.':
+      'However it gets installed, it is the same app and the same data: nothing is downloaded from any store, it just creates the shortcut.',
+    '¿Por qué no me sale el botón de instalar?': 'Why is there no install button?',
+    'Porque no todos los navegadores lo tienen. El botón que instala de una vez lo dan Chrome y Edge, en Android y en el ordenador; ahí la app te lo ofrece sola.':
+      'Because not every browser has one. The button that installs in one go comes from Chrome and Edge, on Android and on the computer; there the app offers it on its own.',
+    'En el iPhone ese botón no existe en ningún sitio: Apple obliga a añadirla a mano desde Compartir. La app te enseña los pasos en vez del botón.':
+      'On the iPhone that button exists nowhere: Apple requires you to add it by hand from Share. The app shows you the steps instead of the button.',
+    'Y si abriste el enlace dentro de WhatsApp, Instagram o parecidos, ahí no se puede instalar de ninguna manera: hay que abrirlo antes en el navegador de verdad.':
+      'And if you opened the link inside WhatsApp, Instagram or the like, nothing can be installed there at all: you have to open it in a real browser first.',
+    'También desaparece cuando ya la tienes instalada, que es lo normal si arrancaste desde el icono.':
+      'It also goes away once you have it installed, which is the usual case if you started from the icon.'
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

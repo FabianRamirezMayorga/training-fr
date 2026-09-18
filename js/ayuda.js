@@ -534,20 +534,49 @@
     { id: 'c-instalar', titulo: 'Instalar la app en el móvil',
       resumen: 'Para que arranque como una app y no como una página',
       primero: true,
-      pasos: [
-        { t: 'Abre Training FR en el navegador del móvil.' },
-        { t: 'En Android: menú del navegador › *Añadir a la pantalla de inicio*.' },
-        { t: 'En iPhone: botón Compartir › *Añadir a pantalla de inicio*.' },
-        { t: 'Ábrela desde el icono nuevo.',
-          d: 'Arranca a pantalla completa, sin barra de navegador, y funciona sin conexión.' }
+      intro: 'La app te lo ofrece sola cuando lleva un rato abierta, con un aviso abajo. Si lo cerraste o quieres hacerlo ahora, el camino depende de dónde la hayas abierto:',
+      ramas: [
+        { id: 'android', titulo: 'Android o el ordenador', sub: 'Hay un botón que lo hace de una vez',
+          pasos: [
+            { t: 'Pulsa *Instalar* en el aviso de abajo.',
+              d: 'Si no está en pantalla, el mismo botón vive en Ajustes › Instalar en el móvil.',
+              ir: { ruta: 'ajustes', label: 'Abrir Ajustes' } },
+            { t: 'Acepta el cuadro que saca el navegador.',
+              d: 'Es el diálogo del sistema, no de la app: ahí se decide de verdad.' },
+            { t: 'Ábrela desde el icono nuevo.',
+              d: 'Arranca a pantalla completa, sin barra de navegador, y funciona sin conexión.' }
+          ] },
+        { id: 'iphone', titulo: 'iPhone o iPad', sub: 'A mano, porque Apple no deja hacerlo de otra forma',
+          pasos: [
+            { t: 'Toca el botón de *Compartir* en la barra de Safari.',
+              d: 'Es el cuadrado con la flecha hacia arriba. En Chrome está arriba a la derecha.' },
+            { t: 'Baja por la lista hasta *Añadir a pantalla de inicio*.',
+              d: 'Está más abajo de lo que parece, pasadas las opciones de compartir.' },
+            { t: 'Dale a *Añadir*.',
+              d: 'Sale con su icono, como una app más. Desde ahí arranca a pantalla completa y funciona sin conexión.' }
+          ] },
+        { id: 'dentro', titulo: 'La abrí desde WhatsApp o Instagram', sub: 'Primero hay que salir de ahí',
+          pasos: [
+            { t: 'Toca los tres puntos de esa ventana, arriba a la derecha.',
+              d: 'El navegador que esas apps abren por dentro no puede instalar nada. Es cosa del sistema, no de Training FR.' },
+            { t: 'Elige *Abrir en Safari* o *Abrir en el navegador*.' },
+            { t: 'Ya fuera, sigue los pasos de tu móvil de aquí arriba.' }
+          ] }
       ],
-      cierre: 'En Ajustes hay también un botón de instalar, que aparece si tu navegador lo permite.',
-      ver: ['c-offline'] }
+      cierre: 'Se instale como se instale, es la misma app y los mismos datos: no se descarga nada de ninguna tienda, solo se crea el acceso.',
+      ver: ['c-offline', 'p-noinstala'] }
   ];
 
   /* ================= preguntas ================= */
 
   const PREGUNTAS = [
+    { id: 'p-noinstala', q: '¿Por qué no me sale el botón de instalar?',
+      a: ['Porque no todos los navegadores lo tienen. El botón que instala de una vez lo dan Chrome y Edge, en Android y en el ordenador; ahí la app te lo ofrece sola.',
+        'En el iPhone ese botón no existe en ningún sitio: Apple obliga a añadirla a mano desde Compartir. La app te enseña los pasos en vez del botón.',
+        'Y si abriste el enlace dentro de WhatsApp, Instagram o parecidos, ahí no se puede instalar de ninguna manera: hay que abrirlo antes en el navegador de verdad.',
+        'También desaparece cuando ya la tienes instalada, que es lo normal si arrancaste desde el icono.'],
+      ver: ['c-instalar'] },
+
     { id: 'p-idioma', q: '¿Puedo poner la app en inglés?',
       a: ['Sí, entera. El botón *ES / EN* de arriba a la derecha la cambia de un toque, y también está en Ajustes › Idioma.',
         'Cambia todo lo que pone la app: botones, manual, guías de técnica, avisos y el entrenador. Lo que has escrito tú se queda como está.'],

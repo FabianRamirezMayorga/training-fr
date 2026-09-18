@@ -1,7 +1,7 @@
 /* sw.js — service worker.
    Deja la app usable sin conexión: los archivos propios se precargan y las
    imágenes del catálogo se guardan la primera vez que se ven. */
-const VERSION = 'trainingfr-v346';
+const VERSION = 'trainingfr-v347';
 const SHELL = VERSION + '-shell';
 const MEDIA = VERSION + '-media';
 const MAX_MEDIA = 4000;         // imágenes guardadas como máximo (~200 MB)
@@ -9,7 +9,7 @@ const MAX_MEDIA = 4000;         // imágenes guardadas como máximo (~200 MB)
 const FILES = [
   './', './index.html',
   './css/styles.css',
-  './js/i18n.js', './js/tecnica.js', './js/store.js', './js/ui.js',
+  './js/i18n.js', './js/tecnica.js', './js/store.js', './js/ui.js', './js/instalar.js',
   './js/yoga.js', './js/figura.js', './js/calistenia.js', './js/zona.js', './data/catalogo-es.json', './js/data.js', './js/comidas.js', './js/agua.js', './js/menus.js',
   './js/templates.js', './js/planner.js', './js/alternativas.js', './js/programa.js',
   './js/offline.js', './js/sync.js',
@@ -18,7 +18,8 @@ const FILES = [
   './js/vistas4.js', './js/vistas5.js', './js/vistas6.js', './js/vistas7.js',
   './js/revisar.js', './js/admin.js', './js/musculos.js', './js/dia.js', './js/importar.js', './js/compartir.js', './js/ayuda.js', './js/progresion.js', './js/workout.js', './js/app.js',
   './manifest.webmanifest',
-  './icons/logo.svg', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png'
+  './icons/logo.svg', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',
+  './icons/icon-180.png', './icons/icon-maskable-192.png', './icons/icon-maskable-512.png'
 ];
 
 /* Se descarga saltándose la caché del navegador: si no, unos archivos vienen

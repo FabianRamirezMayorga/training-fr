@@ -4051,6 +4051,60 @@
       'Second time you have fallen short. Stay on this weight until you get it all.',
     'Te quedaste corto la última vez. Repite peso y sácalo entero.':
       'You fell short last time. Stay on this weight and get it all.',
-    'Otro': 'Other'
+    'Otro': 'Other',
+
+    /* ---------- Instalar la app ---------- */
+    'Ya la tienes instalada': 'It is installed now',
+    'Ábrela en el navegador': 'Open it in the browser',
+    'Desde aquí dentro no se puede instalar. Toca los tres puntos y elige «Abrir en Safari».':
+      'Nothing can be installed from in here. Tap the three dots and choose “Open in Safari”.',
+    'Desde aquí dentro no se puede instalar. Toca los tres puntos y elige «Abrir en el navegador».':
+      'Nothing can be installed from in here. Tap the three dots and choose “Open in browser”.',
+    'Instala Training FR': 'Install Training FR',
+    'Dos toques y la tienes en la pantalla de inicio, como cualquier otra app.':
+      'Two taps and it is on your home screen, like any other app.',
+    'Ver cómo': 'Show me how',
+    'Ocupa poco, arranca a pantalla completa y funciona sin conexión.':
+      'It takes up little space, opens full screen and works offline.',
+    'Instalar': 'Install',
+    'Instalar la aplicación': 'Install the app',
+    'Estás dentro de otra aplicación, y desde aquí ningún navegador puede instalar nada. Es cosa del sistema, no de la app.':
+      'You are inside another app, and from in here no browser can install anything. That is the system, not this app.',
+    'Toca los tres puntos de esta ventana, arriba a la derecha.':
+      'Tap the three dots in this window, at the top right.',
+    'Elige «Abrir en Safari».': 'Choose “Open in Safari”.',
+    'Elige «Abrir en Chrome» o «Abrir en el navegador».':
+      'Choose “Open in Chrome” or “Open in browser”.',
+    'Una vez fuera, vuelve aquí y te saldrá el botón de instalar.':
+      'Once you are out, come back here and the install button will show up.',
+    'Copiar el enlace': 'Copy the link',
+    'Añadirla a la pantalla de inicio': 'Add it to the home screen',
+    'En el iPhone las apps que no vienen de la App Store se añaden así. Se hace una vez.':
+      'On the iPhone this is how apps that do not come from the App Store get added. You do it once.',
+    'Toca el botón de Compartir, arriba a la derecha.':
+      'Tap the Share button, at the top right.',
+    'Baja por la lista hasta «Añadir a pantalla de inicio».':
+      'Scroll down the list to “Add to Home Screen”.',
+    'Dale a «Añadir». Ya está: sale con su icono, como una app más.':
+      'Tap “Add”. That is it: it shows up with its icon, like any other app.',
+    'Desde ahí arranca a pantalla completa, sin la barra del navegador, y funciona sin conexión.':
+      'From there it opens full screen, with no browser bar, and works offline.',
+    'No se pudo copiar': 'It could not be copied',
+    'Cómo se instala en el iPhone': 'How to install it on the iPhone',
+    'Por qué no puedo instalarla aquí': 'Why I cannot install it here',
+
+    /* ---------- El aviso de instalar, más corto ---------- */
+    'Desde dentro de otra app no se puede. Se abre fuera y ya está.':
+      'It cannot be done from inside another app. Open it outside and that is it.',
+    'Dos toques y la tienes en la pantalla de inicio.':
+      'Two taps and it is on your home screen.',
+    'Arranca a pantalla completa y funciona sin conexión.':
+      'It opens full screen and works offline.',
+
+    /* ---------- Los pasos del iPhone ---------- */
+    'Toca el botón de Compartir {ico}, arriba a la derecha.':
+      'Tap the Share button {ico}, at the top right.',
+    'Toca el botón de Compartir {ico}, en la barra de abajo.':
+      'Tap the Share button {ico}, in the bar at the bottom.'
   };
 })(window);

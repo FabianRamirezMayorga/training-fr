@@ -8,7 +8,16 @@
 <meta name="description" content="Crea rutinas de gimnasio, aprende la técnica correcta con animaciones y registra tu progreso.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icons/icon.svg">
+<!-- Safari no admite SVG aquí: sin un PNG, al añadirla a la pantalla de
+     inicio el icono acaba siendo una captura de la página. 180×180 es el
+     tamaño que pide iOS, y opaco porque compone lo transparente sobre negro. -->
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<!-- iOS lee el manifest desde la 17, pero los iPhone que no han actualizado
+     siguen necesitando esto para arrancar a pantalla completa. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Training FR">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -59,6 +68,7 @@
 
 <!-- avisos fijos sobre la barra de pestañas: cronómetro y descanso -->
 <div class="hud">
+  <div id="instalar-host"></div>
   <div id="musica-host"></div>
   <div id="crono-host"></div>
   <div id="rest-host"></div>
@@ -76,6 +86,7 @@
 <script src="js/tecnica.js"></script>
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/instalar.js"></script>
 <script src="js/yoga.js"></script>
   <script src="js/figura.js"></script>
   <script src="js/calistenia.js"></script>
