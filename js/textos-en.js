@@ -4024,6 +4024,33 @@
     'Lo que llevo comido': 'What I have eaten',
     'Cómo voy con el plan': 'How I am doing on the plan',
     'Técnica de {que}': '{que} technique',
-    'Reproducir animación': 'Play animation'
+    'Reproducir animación': 'Play animation',
+
+    /* ---------- El historial de comidas y el menú de hoy ---------- */
+    'Lo que has comido': 'What you have eaten',
+    '{n} registro': '{n} entry',
+    '{n} registros': '{n} entries',
+    '{n} g de proteína': '{n} g of protein',
+    'Menú de hoy': 'Today’s menu',
+    'Ahora: {que}': 'Now: {que}',
+    'comer': 'eating',
+
+    /* ---------- El botón del tema ---------- */
+    'Cambiar a modo oscuro': 'Switch to dark mode',
+    'Cambiar a modo claro': 'Switch to light mode',
+
+    /* ---------- Las acciones de un plan ---------- */
+    'Abrir': 'Open',
+
+    /* ---------- El porqué del peso de hoy ---------- */
+    'La última vez sacaste las {series} series a {reps}. Toca subir.':
+      'Last time you got all {series} sets at {reps}. Time to go up.',
+    'Llevas {n} sesiones sin sacarlo. Baja, cógele la técnica y vuelve a subir.':
+      'You have gone {n} sessions without getting it. Drop the weight, get the technique down and build back up.',
+    'Segunda vez que te quedas corto. Repite peso hasta sacarlo entero.':
+      'Second time you have fallen short. Stay on this weight until you get it all.',
+    'Te quedaste corto la última vez. Repite peso y sácalo entero.':
+      'You fell short last time. Stay on this weight and get it all.',
+    'Otro': 'Other'
   };
 })(window);

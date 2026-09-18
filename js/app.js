@@ -563,9 +563,10 @@
       <details class="menu-hoy plegable-fino" data-sec="menu"${raw(seccionesAbiertas.menu ? ' open' : '')}>
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
-          <span class="grow">Menú de hoy</span>
+          <span class="grow">${T('Menú de hoy')}</span>
           <span class="tiny nowrap">${toca
-            ? 'Ahora: ' + (toca.nombre || 'comer') : UI.num(kcal) + ' kcal'}</span>
+            ? Tn('Ahora: {que}', { que: T(toca.nombre) || T('comer') })
+            : Tn('{n} kcal', { n: UI.num(kcal) })}</span>
         </summary>
         <div class="fino-cuerpo">
           ${raw(comidas.map(function (c, j) {
@@ -1038,12 +1039,10 @@
     const resto = n.slice(corte + 3).trim();
     if (!resto) return n;
 
-    const soloDias = cabeza.split(/\s+y\s+/).every(function (t) {
-      const x = I18N.norm(t);
-      return UI.DAY_NAMES.some(function (d) {
-        return I18N.norm(d) === x || I18N.norm(UI.diaLargo(d)) === x;
-      });
-    });
+    /* La coma y la «y» separan los días; con la app en inglés es «and», y el
+       nombre pudo escribirse con cualquiera de los dos. */
+    const soloDias = cabeza.split(/\s*,\s*|\s+(?:y|and)\s+/i).filter(Boolean)
+      .every(function (t) { return !!UI.claveDeDia(t); });
     return soloDias ? resto : n;
   }
 
@@ -1174,12 +1173,13 @@
              a dos toques y después de desplegar cinco rutinas. Aquí se hace
              empujando la cabecera a la derecha, sin abrir nada. */
           { icono: k === activo ? 'close' : 'check',
-            texto: k === activo ? 'Quitar' + BAJA + 'principal' : 'Marcar' + BAJA + 'principal',
+            texto: k === activo ? T('Quitar') + BAJA + T('principal')
+              : T('Marcar') + BAJA + T('principal'),
             tono: k === activo ? '' : 'suave',
             attr: 'data-planactivo="' + (k === activo ? '' : esc(k)) + '"' },
-          { icono: 'edit', texto: 'Renombrar', tono: 'suave',
+          { icono: 'edit', texto: T('Renombrar'), tono: 'suave',
             attr: 'data-renombrarplan="' + esc(k) + '"' },
-          { icono: 'lista', texto: 'Abrir', tono: 'suave',
+          { icono: 'lista', texto: T('Abrir'), tono: 'suave',
             attr: 'data-verplan="' + esc(k) + '"' }
         ]))}
         ${raw(abierto ? '<div class="stack">' +
@@ -1734,7 +1734,7 @@
       <div class="zona-rejilla">
         ${raw(casillaZona('', T('Todas'), todosMusculos))}
         ${raw(I18N.GROUPS.map(function (gr) {
-          return casillaZona(gr.id, gr.label, gr.muscles);
+          return casillaZona(gr.id, T(gr.label), gr.muscles);
         }).join(''))}
       </div>
 
@@ -4758,7 +4758,8 @@
           <span class="fp-ico">${raw(icon('reloj'))}</span>
           <span class="grow"><span class="fp-tit">${T('A qué hora comes')}</span>
             <span class="fp-sub">${raw(Perfil.franjas().map(function (f) {
-              return esc(f.label.toLowerCase()) + ' ' + esc(UI.hora ? UI.hora(f.desde) : f.desde);
+              return esc(T(f.label).toLowerCase()) + ' ' +
+                esc(UI.hora ? UI.hora(f.desde) : f.desde);
             }).join(' · '))}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
@@ -6245,7 +6246,7 @@
     temaPintado = claro;
 
     return html`<button class="btn icon tema-chip${raw(gira ? ' gira' : '')}" data-a="tema"
-      aria-label="${claro ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}">
+      aria-label="${claro ? T('Cambiar a modo oscuro') : T('Cambiar a modo claro')}">
       ${raw(icon(claro ? 'luna' : 'sol'))}</button>`;
   }
 

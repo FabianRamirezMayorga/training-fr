@@ -520,8 +520,9 @@
 
       return {
         dia: dia,
-        /* El nombre acaba siendo el de la rutina guardada, asi que se escribe
-           ya en el idioma que tengas puesto al generar el plan. */
+        /* Se deja escrito para los planes que ya estaban guardados, pero quien
+           lo pinta llama a nombreSesion(): así el nombre sigue al idioma de hoy
+           y no al del día en que se generó el plan. */
         nombre: UI.diaLargo(dia) + ' · ' + T(plantilla.nombre),
         plantilla: plantilla.nombre,
         ejercicios: ejercicios,
@@ -833,6 +834,15 @@
       { pasos: { miles: p.actividad === 'sedentario' ? 8000 : 10000 } });
   }
 
+  /* El nombre de una sesión, en el idioma de ahora. El día y la plantilla
+     viajan aparte dentro de la sesión, así que se rehace al leerlo; si viene de
+     un plan viejo que no los lleva, se usa lo que se guardó. */
+  function nombreSesion(s) {
+    if (!s) return '';
+    if (!s.dia || !s.plantilla) return s.nombre || '';
+    return UI.diaLargo(s.dia) + ' · ' + T(s.plantilla);
+  }
+
   /* ---------- 10. Pasar el programa a rutinas de la app ---------- */
   /* etiqueta: cómo quiere el usuario que se llamen. Vacío = el nombre del día. */
   function aRutinas(prog, etiqueta) {
@@ -840,7 +850,7 @@
     return prog.sesiones.map(function (s) {
       return {
         id: null,
-        name: etiqueta ? UI.diaLargo(s.dia) + ' · ' + etiqueta : s.nombre,
+        name: etiqueta ? UI.diaLargo(s.dia) + ' · ' + etiqueta : nombreSesion(s),
         note: prog.objetivoLabel + ' · ' + prog.minutos + ' min · RPE ' + prog.rpe +
           ' · calienta ' + prog.calentamiento + ' min antes.',
         days: [s.dia],
@@ -900,7 +910,7 @@
     volumenReal: volumenReal, olvidados: olvidados, revolumen: revolumen,
     sugerir: sugerir,
     crear: crear, aRutinas: aRutinas, lesionesDe: lesionesDe,
-    leer: leer, frase: frase,
+    leer: leer, frase: frase, nombreSesion: nombreSesion,
     OBJETIVOS: OBJETIVOS, LESIONES: LESIONES
   };
 })(window);

@@ -91,7 +91,7 @@
       <div class="secreto">
         <input id="${id}" type="password" autocomplete="off" spellcheck="false"
                value="${valor || ''}" placeholder="${marcador}">
-        <button class="btn sm" data-ver="${id}" aria-label="Mostrar u ocultar">
+        <button class="btn sm" data-ver="${id}" aria-label="${T('Mostrar u ocultar')}">
           ${raw(icon('ojo'))}</button>
       </div>`;
   }

@@ -857,7 +857,7 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} Perfil</button>
+        ${raw(icon('back'))} ${T('Perfil')}</button>
       <h1>${T('Ayuda')}</h1>
       <p class="muted">${T('Cómo se hace cada cosa, cómo funciona por dentro y las dudas de siempre. Escrito aquí dentro: no necesita conexión.')}</p>
 

@@ -455,7 +455,7 @@
     const hoyClave = Comidas.claveDia();
 
     return html`
-      <div class="list-title" style="margin-top:18px">Lo que has comido</div>
+      <div class="list-title" style="margin-top:18px">${T('Lo que has comido')}</div>
       <div class="stack">
         ${raw(dias.map(function (d) { return diaComidasHTML(d, m, hoyClave); }).join(''))}
       </div>`;
@@ -474,12 +474,12 @@
           <span class="row-icon dia-flecha">${raw(icon('chevron'))}</span>
           <div class="grow">
             <div class="dia-nombre">${nombreDeDia(d, hoyClave)}</div>
-            <div class="tiny">${cuantos} ${cuantos === 1 ? 'registro' : 'registros'}</div>
+            <div class="tiny">${Tp(cuantos, '{n} registro', '{n} registros')}</div>
           </div>
           <div class="dia-suma">
             <b>${UI.num(d.kcal)}</b><span class="tiny"> kcal</span>
-            <div class="tiny"${raw(cumple ? ' style="color:var(--brand-1)"' : '')}>${d.prot} g
-              de proteína</div>
+            <div class="tiny"${raw(cumple ? ' style="color:var(--brand-1)"' : '')}>${
+              Tn('{n} g de proteína', { n: d.prot })}</div>
           </div>
         </summary>
         <div class="stack" style="padding:0 0 11px">
@@ -491,9 +491,9 @@
   /* «Hoy», «Ayer» y, más atrás, el día de la semana con su fecha: es como se
      acuerda uno de lo que comió, no por «2026-09-07». */
   function nombreDeDia(d, hoyClave) {
-    if (d.dia === hoyClave) return 'Hoy';
+    if (d.dia === hoyClave) return T('Hoy');
     const ayer = Comidas.claveDia(Date.now() - 864e5);
-    if (d.dia === ayer) return 'Ayer';
+    if (d.dia === ayer) return T('Ayer');
     const p = d.dia.split('-');
     const f = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
     return UI.diaLargo(UI.DAY_NAMES[f.getDay()]) + ' ' + UI.fechaCorta(f.getTime());

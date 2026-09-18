@@ -736,7 +736,7 @@
         <button class="dia-top" data-dia-abrir="${i}">
           <span class="dia-ini">${UI.diaLargo(s.dia).slice(0, 3)}</span>
           <span class="grow">
-            <span class="dia-nom">${s.nombre}</span>
+            <span class="dia-nom">${Programa.nombreSesion(s)}</span>
             <span class="dia-mus">${musculos || T('sin ejercicios')}</span>
           </span>
           <span class="dia-chev ${abierto ? 'abierto' : ''}">${raw(icon('chevron'))}</span>
@@ -802,7 +802,8 @@
        solo el nombre y puede seguir pasando por la plantilla. */
     if (acc === 'anadir') {
       const donde = Number(c.dia) > 0 && est.prog.sesiones[Number(c.dia) - 1]
-        ? Tn(' en {donde}', { donde: est.prog.sesiones[Number(c.dia) - 1].nombre }) : '';
+        ? Tn(' en {donde}',
+          { donde: Programa.nombreSesion(est.prog.sesiones[Number(c.dia) - 1]) }) : '';
       return html`<b>${c.poner}</b>${donde}`;
     }
     if (acc === 'orden') {
@@ -1704,7 +1705,8 @@
       });
       ses.ejercicios = puestos.concat(quedan);
       est.ia.cambios.splice(i, 1);
-      apuntarAplicado(Tn('{que}: reordenada, los básicos delante', { que: ses.nombre }));
+      apuntarAplicado(Tn('{que}: reordenada, los básicos delante',
+        { que: Programa.nombreSesion(ses) }));
       return;
     }
 
@@ -1726,7 +1728,8 @@
         lista.splice(destino, 0, movido);
         est.ia.cambios.splice(i, 1);
         apuntarAplicado(Tn('{que}: pasa al {n}.º en {donde}',
-          { que: sitio.ex.nameEs, n: destino + 1, donde: sitio.ses.nombre }));
+          { que: sitio.ex.nameEs, n: destino + 1,
+            donde: Programa.nombreSesion(sitio.ses) }));
         return;
       }
 
@@ -1767,7 +1770,7 @@
       sitio.ses.ejercicios.splice(sitio.i, 1);
       est.ia.cambios.splice(i, 1);
       apuntarAplicado(Tn('{que}: fuera de {donde}',
-        { que: sitio.ex.nameEs, donde: sitio.ses.nombre }));
+        { que: sitio.ex.nameEs, donde: Programa.nombreSesion(sitio.ses) }));
       return;
     }
 

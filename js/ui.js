@@ -473,6 +473,33 @@
   }
   function diasLargos(lista) { return (lista || []).map(diaLargo).join(', '); }
 
+  /* ¿Este trozo de texto es un día de la semana? Se pregunta en los dos
+     idiomas a propósito: el nombre de una rutina lleva el día delante y se
+     escribió con el idioma que hubiera el día en que se generó el programa.
+     Mirándolo solo en el de ahora, un plan hecho en inglés se quedaba con
+     «Monday · Fabián» entero como nombre de plan al volver a castellano.
+     Devuelve el abreviado que se guarda («Lun»), o '' si no es un día. */
+  function claveDeDia(texto) {
+    if (!g.I18N) return '';
+    const x = I18N.norm(String(texto || '').trim());
+    if (!x) return '';
+    let fuera = '';
+    DAY_NAMES.forEach(function (d) {
+      if (fuera) return;
+      if (I18N.norm(d) === x || I18N.norm(DIA_LARGO[d]) === x) { fuera = d; return; }
+      try {
+        const n = DIA_NUM[d];
+        ['en-US', 'es-ES'].forEach(function (loc) {
+          if (fuera) return;
+          const largo = unDia(n).toLocaleDateString(loc, { weekday: 'long' });
+          const corto = unDia(n).toLocaleDateString(loc, { weekday: 'short' });
+          if (I18N.norm(largo) === x || I18N.norm(corto.replace(/\.$/, '')) === x) fuera = d;
+        });
+      } catch (e) { /* sin Intl se queda con las dos listas de arriba */ }
+    });
+    return fuera;
+  }
+
   const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
   /* El mes y el día abreviados de una fecha que se PINTA. No se saca de
@@ -769,6 +796,7 @@
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,
     num: num, dec: dec, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
     beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos,
+    claveDeDia: claveDeDia,
     hora: hora, INICIALES: INICIALES, inicialDia: inicialDia
   };
 })(window);
