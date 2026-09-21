@@ -537,15 +537,20 @@
               return '<span class="ps-punto ' + clase + (ok ? ' si' : '') + '" ' +
                 'title="' + esc(titulo) + '"></span>';
             };
-            /* Verde si salió, rojo si no, y gris el día que no pedía entrenar:
-               un domingo de descanso no es un día fallado, y pintarlo igual que
-               uno en el que se saltó el gimnasio sería contar una mentira.
+            /* El color del número habla SOLO del entreno: verde si entrenó el día
+               que tocaba, rojo si no, y gris el día que no pedía entrenar.
 
-               Hoy se queda neutro hasta que salga: el día no ha terminado, y
+               Antes se ponía rojo también por no llegar al agua o a la proteína
+               habiendo entrenado, y con el agua al noventa por ciento eso salía
+               rojo casi siempre: un día con el gimnasio hecho no puede leerse
+               igual que uno en el que no se fue. La proteína y el agua tienen
+               su punto, que es donde se cuentan.
+
+               Hoy se queda neutro hasta que termine: el día no ha acabado, y
                pintarlo en rojo a las once de la mañana por no haber cenado
                todavía es regañar por algo que aún no ha pasado. */
             const tono = d.esHoy ? '' : !d.tocaba ? ' libre'
-              : d.cumplido ? ' cumplido' : ' fallado';
+              : d.entreno ? ' entrenado' : ' sin-entrenar';
             return '<div class="ps-dia tap' + (d.esHoy ? ' es-hoy' : '') + tono +
               '" data-plandia="' + esc(d.clave) + '" role="button" tabindex="0">' +
               '<span class="ps-letra">' + d.letra + '</span>' +

@@ -1805,12 +1805,13 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .ps-dia.es-hoy .ps-letra { color: var(--acc); }
 .ps-num { font-size: .95rem; font-weight: 700; font-variant-numeric: tabular-nums;
   line-height: 1.15; }
-/* Tres estados y cada uno su color: verde el día que salió entero, rojo el que
-   no, y gris el que no pedía entrenar. El gris importa tanto como los otros dos:
-   un domingo de descanso pintado como un día fallado convierte el plan en una
-   lista de reproches. */
-.ps-dia.cumplido .ps-num { color: var(--acc); }
-.ps-dia.fallado .ps-num { color: var(--bad); }
+/* El número habla solo del entreno —la proteína y el agua tienen su punto— y
+   tiene tres estados: verde el día que se entrenó, rojo el que tocaba y no se
+   hizo, y gris el que no pedía entrenar. El gris importa tanto como los otros
+   dos: un domingo de descanso pintado como un día fallado convierte el plan en
+   una lista de reproches. */
+.ps-dia.entrenado .ps-num { color: var(--acc); }
+.ps-dia.sin-entrenar .ps-num { color: var(--bad); }
 .ps-dia.libre .ps-num { color: var(--dim2); }
 .ps-marcas { display: flex; gap: 4px; margin-top: 5px; }
 
