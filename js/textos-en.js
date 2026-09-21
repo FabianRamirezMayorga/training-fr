@@ -433,9 +433,7 @@
     'Carga': 'Load',
     'Ojo': 'Watch out',
     'No ha dicho nada.': 'It said nothing.',
-    '{n} día redondo': '{n} perfect day',
-    '{n} días redondos': '{n} perfect days',
-    'Un día redondo es el que sale con las tres.': 'A perfect day is one where you got all three.',
+    '{n} de {total} días entrenados': '{n} of {total} days trained',
     'Los últimos {n} días: si entrenaste, si llegaste a la proteína y si bebiste el agua.':
       'The last {n} days: whether you trained, whether you hit your protein and whether you drank your water.',
     'Apuntar algo que ya hice': 'Log something I already did',

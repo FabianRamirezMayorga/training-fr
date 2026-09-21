@@ -442,10 +442,13 @@
   /* Las cuentas de los siete días, sin nada de pintar: la portada usa la tira
      y esta pantalla usa el cajón entero, y las dos cuentan igual porque cuentan
      aquí. */
-  /* Treinta y no siete: la tira se desplaza, así que el alto de la tarjeta ya no
-     manda cuántos días caben, y un mes cuenta una historia que una semana no.
-     Siete días eran los que cabían, no los que hacían falta. */
-  const DIAS_PLAN = 30;
+  /* Quince y no siete: la tira se desplaza, así que el alto de la tarjeta ya no
+     manda cuántos días caben, y una quincena cuenta una historia que una semana
+     no. Siete días eran los que cabían, no los que hacían falta.
+
+     Y quince y no treinta: el mes entero pedía demasiado dedo para llegar al
+     principio, y lo que se mira de verdad al abrir la app es lo cerca. */
+  const DIAS_PLAN = 15;
 
   function datosPlan(m) {
     if (!m || !g.Comidas) return null;
@@ -512,16 +515,20 @@
       if (aguaMeta > 0) { pedidas++; if (d.agua) hechas++; }
       d.pedidas = pedidas;
       d.hechas = hechas;
-      d.cumplido = pedidas > 0 && hechas === pedidas;
 
       dias.push(d);
     }
 
     const hechas = dias.reduce(function (n, d) { return n + d.hechas; }, 0);
     const pedidas = dias.reduce(function (n, d) { return n + d.pedidas; }, 0);
-    const salieron = dias.filter(function (d) { return d.cumplido; }).length;
+    /* Días con entreno, no días con las tres cosas hechas. Antes se contaban
+       los segundos y el contador decía cuatro al lado de cinco números verdes:
+       dos cuentas distintas en la misma tarjeta se leen como un error, aunque
+       las dos sean ciertas. Días, y no sesiones, porque es lo que pintan los
+       números: dos entrenos el mismo sábado son un día verde, no dos. */
+    const entrenados = dias.filter(function (d) { return d.entreno; }).length;
 
-    return { dias: dias, hechas: hechas, pedidas: pedidas, salieron: salieron };
+    return { dias: dias, hechas: hechas, pedidas: pedidas, entrenados: entrenados };
   }
 
   /* La tira sola, sin la tarjeta que la envuelve, para poder ponerla dentro de
@@ -590,14 +597,13 @@
 
     return plegable({
       id: 'plan', titulo: 'Cómo voy con el plan', marca: 'grafica', tono: '#c06bf0',
-      progreso: { hecho: d.salieron, total: DIAS_PLAN },
-      /* «Redondos» y no «de 30»: esta cuenta pide las tres cosas, y el color del
-         número solo mira el entreno. Decir «6 de 30» al lado de una tira con más
-         de seis números verdes se leía como un fallo de la app. */
-      cola: Tp(d.salieron, '{n} día redondo', '{n} días redondos'),
+      progreso: { hecho: d.entrenados, total: DIAS_PLAN },
+      /* La misma cuenta que pintan los números de la tira, para que el contador
+         y lo que se ve digan lo mismo. Los otros dos hábitos siguen contándose
+         en «Llevas tantas de tantas», que es donde caben con su detalle. */
+      cola: Tn('{n} de {total} días entrenados', { n: d.entrenados, total: DIAS_PLAN }),
       sub: Tn('Los últimos {n} días: si entrenaste, si llegaste a la proteína y si ' +
         'bebiste el agua.', { n: DIAS_PLAN }) + ' ' +
-        T('Un día redondo es el que sale con las tres.') + ' ' +
         Tn('Llevas {hechas} de {pedidas}.', { hechas: d.hechas, pedidas: d.pedidas }),
       cuerpo: html`<div class="card tarjeta-premium">${raw(tiraPlanHTML(d.dias, true))}</div>`
     });
@@ -697,7 +703,7 @@
     const m = Perfil.completo(p) ? Perfil.macros(p) : null;
     const d = datosPlan(m);
     if (!d) return null;
-    return { html: tiraPlanHTML(d.dias), salieron: d.salieron };
+    return { html: tiraPlanHTML(d.dias), entrenados: d.entrenados, total: DIAS_PLAN };
   };
 
   V.dia.mount = function (root) {
