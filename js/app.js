@@ -585,15 +585,26 @@
           Tp(sueltos, '{n} suelto', '{n} sueltos') : '')
       : Tn('{n} días entrenados', { n: cumplidos + sueltos });
 
+    /* La tira de los siete días de atrás, si hay perfil con el que calcular las
+       metas. Las casillas de esta semana miran hacia delante, así que un lunes
+       están vacías enteras y no cuentan nada; la tira siempre tiene algo que
+       decir, y además dice tres cosas por día en vez de una.
+
+       Es la misma que la de «mi día», sacada de allí: dos copias de esto se
+       habrían separado en cuanto una de las dos cambiara. */
+    const tira = (g.VISTAS && VISTAS.dia && VISTAS.dia.tiraPlan)
+      ? VISTAS.dia.tiraPlan() : null;
+
     return html`
       <div class="muelle"></div>
       <div class="card inicio-compacta semana-caja portada-titulo tarjeta-premium"
            data-a="verprogreso" role="button" tabindex="0">
         <div class="row between" style="margin-bottom:6px">
           <span class="pre-encima">${T('Tu semana')}</span>
-          <span class="tiny nowrap">${frase}</span>
+          <span class="tiny nowrap">${tira
+            ? Tn('{n} de 7 días', { n: tira.salieron }) : frase}</span>
         </div>
-        <div class="semana">${raw(celdas)}</div>
+        ${raw(tira ? tira.html : '<div class="semana">' + celdas + '</div>')}
       </div>`;
   }
 

@@ -439,8 +439,11 @@
 
      Sin nota ni porcentaje: tres marcas por día y la semana se lee de un
      vistazo. Un número sobre esto solo serviría para sentirse mal un día malo. */
-  function seccionPlan(m) {
-    if (!m || !g.Comidas) return '';
+  /* Las cuentas de los siete días, sin nada de pintar: la portada usa la tira
+     y esta pantalla usa el cajón entero, y las dos cuentan igual porque cuentan
+     aquí. */
+  function datosPlan(m) {
+    if (!m || !g.Comidas) return null;
 
     const dias = [];
     const sesiones = Store.sessions();
@@ -505,8 +508,16 @@
     const pedidas = dias.reduce(function (n, d) { return n + d.pedidas; }, 0);
     const salieron = dias.filter(function (d) { return d.cumplido; }).length;
 
-    const cuerpo = html`
-      <div class="card tarjeta-premium">
+    return { dias: dias, hechas: hechas, pedidas: pedidas, salieron: salieron };
+  }
+
+  /* La tira sola, sin la tarjeta que la envuelve, para poder ponerla dentro de
+     otra caja —la de «tu semana» en la portada— sin anidar tarjetas. */
+  /* La nota de los días de descanso solo en la pantalla del día: en la portada
+     la tarjeta recorta lo que sobra, y sobraba justo ella. La leyenda sí se
+     queda, que sin ella tres puntos de colores no dicen nada. */
+  function tiraPlanHTML(dias, conNota) {
+    return html`
         <div class="plan-sem">
           ${raw(dias.map(function (d) {
             const punto = function (ok, clase, titulo) {
@@ -532,22 +543,36 @@
           <span><i class="ps-punto prote si"></i> ${T('Proteína')}</span>
           <span><i class="ps-punto agua si"></i> ${T('Agua')}</span>
         </div>
-        ${raw(dias.some(function (d) { return !d.tocaba; })
+        ${raw(conNota && dias.some(function (d) { return !d.tocaba; })
           ? '<p class="tiny" style="margin:9px 0 0;text-align:center">' +
             esc(T('Los días de descanso no piden entreno: ahí solo cuentan la proteína ' +
-            'y el agua.')) + '</p>' : '')}
-      </div>`;
+            'y el agua.')) + '</p>' : '')}`;
+  }
+
+  function seccionPlan(m) {
+    const d = datosPlan(m);
+    if (!d) return '';
 
     return plegable({
       id: 'plan', titulo: 'Cómo voy con el plan', marca: 'grafica', tono: '#c06bf0',
-      progreso: { hecho: salieron, total: 7 },
-      cola: Tn('{n} de 7 días', { n: salieron }),
+      progreso: { hecho: d.salieron, total: 7 },
+      cola: Tn('{n} de 7 días', { n: d.salieron }),
       sub: T('Los últimos siete días: si entrenaste, si llegaste a la proteína y si ' +
         'bebiste el agua.') + ' ' +
-        Tn('Llevas {hechas} de {pedidas}.', { hechas: hechas, pedidas: pedidas }),
-      cuerpo: cuerpo
+        Tn('Llevas {hechas} de {pedidas}.', { hechas: d.hechas, pedidas: d.pedidas }),
+      cuerpo: html`<div class="card tarjeta-premium">${raw(tiraPlanHTML(d.dias, true))}</div>`
     });
   }
+
+  /* Para la portada: la misma tira y la misma cuenta, o nada si aún no hay
+     perfil con el que calcular las metas. */
+  V.dia.tiraPlan = function () {
+    const p = Perfil.datos();
+    const m = Perfil.completo(p) ? Perfil.macros(p) : null;
+    const d = datosPlan(m);
+    if (!d) return null;
+    return { html: tiraPlanHTML(d.dias), salieron: d.salieron };
+  };
 
   V.dia.mount = function (root) {
     /* Marcar comidas y agua lo lleva su módulo, el mismo que en Alimentación */

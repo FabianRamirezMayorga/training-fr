@@ -1691,6 +1691,16 @@ img[src^="data/img/"] {
 .vista-inicio .semana-caja { flex: 2 0 auto; max-height: clamp(118px, 12.4svh, 126px);
   display: flex; flex-direction: column; }
 .vista-inicio .semana-caja .semana { flex: 1; align-items: stretch; min-height: 0; }
+/* La tira de los tres hábitos en la portada va más apretada que en «mi día»:
+   allí es el contenido de la pantalla y aquí es un resumen que comparte el alto
+   con todo lo demás. Sin esto, la leyenda se salía de la tarjeta y se comía el
+   recorte, que es peor que no tenerla. */
+.vista-inicio .semana-caja .plan-sem { flex: 1; min-height: 0; }
+.vista-inicio .semana-caja .ps-dia { padding: 4px 2px 5px; gap: 1px;
+  justify-content: center; }
+.vista-inicio .semana-caja .ps-marcas { margin-top: 3px; }
+.vista-inicio .semana-caja .plan-leyenda { margin-top: 5px; gap: 9px;
+  font-size: .58rem; }
 .vista-inicio .semana-caja .sem-dia { justify-content: flex-end; }
 .vista-inicio .semana-caja .sem-dia i { flex: 1; height: auto; min-height: 16px; }
 
