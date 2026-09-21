@@ -4122,6 +4122,12 @@
 
     /* ---------- Lo que decide el chip de actividad ---------- */
     'Si lo escribes tú, elige abajo lo que más se le parezca: de ahí salen las calorías y los músculos que se apuntan.':
-      'If you write it yourself, pick the closest one below: that is where the calories and the muscles logged come from.'
+      'If you write it yourself, pick the closest one below: that is where the calories and the muscles logged come from.',
+
+    /* ---------- Que lo mire la IA ---------- */
+    'Que lo mire la IA': 'Let the AI look at it',
+    'Escribe antes qué has hecho': 'Write what you did first',
+    'Mirando…': 'Looking…',
+    'Que lo mire otra vez': 'Have it look again'
   };
 })(window);

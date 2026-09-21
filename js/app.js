@@ -3461,11 +3461,28 @@
   function apuntarActividad() {
     const p = Perfil.datos();
     const peso = Number(p && p.peso) || 75;
-    const elegido = { act: 'caminar', min: 60, atras: 0, nombre: '' };
+    const elegido = { act: 'caminar', min: 60, atras: 0, nombre: '', ia: null };
+    const conIA = !!(g.IA && IA.activa());
+
+    /* El MET lo pone el chip, salvo que la IA haya mirado lo que escribió: ella
+       distingue un partido de fútbol de una pachanga, y el chip no. */
+    const metDe = function () {
+      if (elegido.ia && elegido.ia.met) return elegido.ia.met;
+      const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
+      return a.met;
+    };
 
     const kcalDe = function () {
+      return Math.round(metDe() * peso * elegido.min / 60);
+    };
+
+    /* Los músculos, igual: los de la IA si los hay, y si no los del chip. */
+    const musculosDe = function () {
+      if (elegido.ia && elegido.ia.musculos && elegido.ia.musculos.length) {
+        return elegido.ia.musculos.slice();
+      }
       const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
-      return Math.round(a.met * peso * elegido.min / 60);
+      return (a.musculos || []).slice();
     };
 
     const diasHTML = [];
@@ -3493,6 +3510,9 @@
       </div>
       <p class="tiny" style="margin:6px 0 0">${T('Si lo escribes tú, elige abajo lo que ' +
       'más se le parezca: de ahí salen las calorías y los músculos que se apuntan.')}</p>
+      ${raw(conIA ? '<button class="btn sm block" data-a="ia" style="margin-top:9px">' +
+        icon('chispa') + ' ' + esc(T('Que lo mire la IA')) + '</button>' : '')}
+      <div id="ac-ia" class="tiny" style="margin-top:8px"></div>
 
       <label class="tiny" style="display:block;margin-top:14px">${T('CUÁNDO')}</label>
       <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-dias">${raw(diasHTML.join(''))}</div>
@@ -3528,6 +3548,10 @@
           c.onclick = function () {
             elegido.act = c.dataset.act;
             elegido.aMano = true;
+            /* Elegir un chip a mano es contestar a lo mismo que contestó la IA.
+               Manda lo último que se haya tocado, que es lo que uno espera. */
+            elegido.ia = null;
+            pintarIA();
             marcar('#ac-tipos', c);
             pintarKcal();
           };
@@ -3564,6 +3588,57 @@
         };
         pintarKcal();
 
+        /* ---------- que lo mire la IA ---------- */
+        const cajaIA = el.querySelector('#ac-ia');
+        const botonIA = el.querySelector('[data-a=ia]');
+
+        const pintarIA = function () {
+          if (!cajaIA) return;
+          const r = elegido.ia;
+          if (!r) { cajaIA.innerHTML = ''; return; }
+          cajaIA.innerHTML = '<div class="card" style="padding:9px 11px">' +
+            (r.nota ? '<div>' + esc(r.nota) + '</div>' : '') +
+            '<div class="row wrap" style="gap:5px;margin-top:7px">' +
+            r.musculos.map(function (m) {
+              return '<span class="chip">' + esc(I18N.muscle(m)) + '</span>';
+            }).join('') + '</div></div>';
+        };
+
+        if (botonIA) botonIA.onclick = function () {
+          const t = el.querySelector('#ac-nombre').value.trim();
+          if (!t) {
+            UI.toast(T('Escribe antes qué has hecho'));
+            el.querySelector('#ac-nombre').focus();
+            return;
+          }
+          botonIA.disabled = true;
+          botonIA.textContent = T('Mirando…');
+          cajaIA.innerHTML = '';
+
+          IA.estimarActividad(t).then(function (r) {
+            botonIA.disabled = false;
+            botonIA.innerHTML = icon('chispa') + ' ' + esc(T('Que lo mire otra vez'));
+            if (!r || !r.met) {
+              cajaIA.innerHTML = '<span style="color:var(--warn)">' +
+                esc((r && r.nota) || T('Eso no me suena a actividad física.')) + '</span>';
+              return;
+            }
+            elegido.ia = r;
+            /* Lo que ella llama a la actividad, si no había nombre puesto a mano */
+            if (r.nombre && !elegido.nombre) {
+              elegido.nombre = r.nombre;
+              el.querySelector('#ac-nombre').value = r.nombre;
+            }
+            pintarIA();
+            pintarKcal();
+          }).catch(function (e) {
+            botonIA.disabled = false;
+            botonIA.innerHTML = icon('chispa') + ' ' + esc(T('Que lo mire la IA'));
+            cajaIA.innerHTML = '<span style="color:var(--bad)">' +
+              esc(e.message || T('No he podido calcularlo.')) + '</span>';
+          });
+        };
+
         el.querySelector('#ac-ok').onclick = function () {
           const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
           const fin = Date.now() - elegido.atras * 86400000;
@@ -3582,7 +3657,9 @@
             /* Sin esto la sesión no decía de qué fue: el historial la dejaba en
                «apuntado a mano» y la pierna seguía contando como abandonada
                después de un partido. */
-            musculos: (a.musculos || []).slice()
+            musculos: musculosDe(),
+            nota: (elegido.ia && elegido.ia.nota) || '',
+            origen: elegido.ia ? 'ia' : 'medio'
           });
           UI.closeModal();
           render();
