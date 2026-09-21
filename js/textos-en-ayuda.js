@@ -171,8 +171,6 @@
     'Si vuelvo a pulsar «Automáticas», ¿se me duplican las alertas?':
       'If I hit "Automatic" again, do my reminders get duplicated?',
     '¿Las calorías que me da son exactas?': 'Are the calories it gives me exact?',
-    'Debajo de esos minutos te dice qué músculos movió, cuando la zona tiene varios: si el partido fue de cuádriceps y gemelos o te movió la pierna entera. Donde la zona es un solo músculo —pecho, hombro, core— no se repite, que ya lo dice la fila.':
-      'Underneath those minutes it tells you which muscles it moved, when the area has more than one: whether the match was quads and calves or moved your whole leg. Where the area is a single muscle —chest, shoulder, core— it is not repeated, since the row already says it.',
     '¿Por qué la IA dice que lo de ayer son 6 series y no me las suma?':
       'Why does the AI say yesterday was 6 sets and then not add them up?',
     'Porque una cosa es hacerte una idea y otra apuntar un dato. Que el partido de ayer te deje la pierna cargada se sabe: lo trabajaste y está apuntado. Cuántas series de gimnasio vale ese partido no lo sabe nadie —depende de cómo jugaste— y la IA te da un número aproximado para que sepas con qué cuerpo llegas hoy.':
@@ -957,8 +955,10 @@
       'It also goes away once you have it installed, which is the usual case if you started from the icon.',
 
     /* ---------- la actividad en el reparto ---------- */
-    'Lo que hiciste fuera del gimnasio sale debajo, en azul y en minutos, no sumado a las series. Un partido de fútbol trabaja la pierna, pero no son series: sumarlo te diría que estás más cerca de tu objetivo de pesas de lo que estás, que es justo lo que esta pantalla sirve para ver.':
-      'What you did outside the gym shows underneath, in blue and in minutes, not added to the sets. A football match works your legs, but those are not sets: adding them would tell you that you are closer to your lifting target than you are, which is exactly what this screen is for.',
+    'Lo que hiciste fuera del gimnasio sale *dentro* de la barra de su zona, como un trozo azul en el extremo. No es una parte de tus series y no mueve el número de la derecha: un partido trabaja la pierna, pero sumarlo te diría que estás más cerca de tu objetivo de pesas de lo que estás, que es justo lo que esta pantalla sirve para ver.':
+      'What you did outside the gym shows *inside* its area’s bar, as a blue piece at the end. It is not part of your sets and it does not move the number on the right: a match works your legs, but adding it would tell you that you are closer to your lifting target than you are, which is exactly what this screen is for.',
+    'Toca ese trozo azul y te cuenta qué fue: los minutos, cada actividad por su nombre y los músculos que movió. Su ancho cambia con los minutos, así que sirve para comparar una zona con otra, pero no con el verde de al lado: minutos y series no son la misma unidad y no caben en la misma regla.':
+      'Tap that blue piece and it tells you what it was: the minutes, each activity by name and the muscles it moved. Its width changes with the minutes, so it is good for comparing one area against another, but not against the green next to it: minutes and sets are not the same unit and do not fit on the same scale.',
 
     /* ---------- llegar cargado de lo de fuera ---------- */
     'Llegar cargado de lo de fuera':

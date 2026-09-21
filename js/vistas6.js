@@ -20,6 +20,10 @@
 
   const DIA = 864e5;
 
+  /* Lo que hay detrás de cada marca azul del reparto, por zona. Lo llena el
+     render y lo lee la hoja: el enganche corre después y no ve esas cuentas. */
+  let actividadPorZona = {};
+
   /* Rangos que se pueden mirar. dias: cuánto abarca; paso: si se agrupa por día
      o por semana, que 365 puntos diarios no se leen en un móvil. */
   /* El texto se traduce al pintarlo: esta tabla se arma al cargar el archivo y
@@ -141,6 +145,7 @@
     const cuenta = {};
     const minutos = {};
     const musAct = {};
+    const actsAct = {};
     let total = 0;
 
     Store.sessions().forEach(function (s) {
@@ -164,7 +169,18 @@
         });
         /* El tiempo no se reparte entre zonas: los noventa minutos del partido
            los aguantó la pierna enteros, y el core también. */
-        zonas.forEach(function (z) { minutos[z] = (minutos[z] || 0) + min; });
+        zonas.forEach(function (z) {
+          minutos[z] = (minutos[z] || 0) + min;
+          /* Y de qué actividad salieron, con los músculos que puso en esa zona:
+             es lo que se cuenta al tocar la marca azul, y sin esto «hubo
+             actividad» no se puede convertir en «jugaste al fútbol». */
+          if (!actsAct[z]) actsAct[z] = [];
+          actsAct[z].push({
+            nombre: String(s.routineName || '').trim(),
+            min: min,
+            musculos: s.musculos.filter(function (m) { return zonaDe(m) === z; })
+          });
+        });
       }
 
       (s.entries || []).forEach(function (e) {
@@ -187,7 +203,7 @@
       .sort(function (a, b) { return b.series - a.series; });
 
     return { total: Math.round(total), filas: filas, minutos: minutos,
-      musculos: musAct };
+      musculos: musAct, actividades: actsAct };
   }
 
   /* ---------- gráficos ---------- */
@@ -939,25 +955,35 @@
     /* Aqui se escribe en espanol: 2,2 y no 2.2 */
     const coma = function (n2) { return UI.dec(n2); };
 
-    /* Los minutos de actividad de cada zona, en su propia escala: comparten
-       fila con las series pero no unidad, así que tampoco pueden compartir
-       regla. */
+    /* ---------- la actividad, dentro de la barra de su zona ----------
+       Antes era una fila azul entera debajo de cada zona. Con su propia escala
+       —minutos, que no son series— la más larga salía siempre al 100%, así que
+       la barra más larga de la pantalla era la actividad, justo encima de un
+       título que dice que lo que más trabajas es otra cosa. Y dos filas por
+       zona hacían el cuadro el doble de alto sin decir el doble.
+
+       Ahora es una marca en el extremo de la barra de la zona. NO mide series
+       y no se suma al número: dice que ahí además hubo movimiento. Los datos
+       —minutos, qué fue y qué movió— están al tocarla, que es donde hay sitio
+       para contarlos sin mentir por el camino. */
     const mins = reparto.minutos || {};
     const topeMin = Math.max.apply(null, Object.keys(mins).map(function (id) {
       return mins[id];
     }).concat([1]));
 
-    /* «cuádriceps, isquiotibiales, gemelos y glúteos». En minúscula porque van
-       dentro de una frase y no encabezando su fila, que es donde el catálogo
-       los da con mayúscula. */
-    const musDeZona = reparto.musculos || {};
-    const musculosDe = function (id) {
-      /* Pecho, Hombro y Core son un solo músculo en el catálogo, así que la
-         línea diría «pecho» debajo de «Pecho». Solo vale la pena donde la zona
-         tiene varios y saber cuáles tocaste dice algo. */
-      const gr = I18N.GROUPS.filter(function (x) { return x.id === id; })[0];
-      if (!gr || (gr.muscles || []).length < 2) return '';
-      const l = (musDeZona[id] || []).map(function (m) {
+    /* Entre el 12 y el 32% de la pista. Varía con los minutos, porque entre dos
+       zonas eso sí es una comparación honesta, y va acotado porque contra las
+       series no lo es: sin tope, una zona con actividad y sin series tendría la
+       barra llena. */
+    const anchoMarca = function (id) {
+      return Math.round(12 + (mins[id] / topeMin) * 20);
+    };
+
+    /* «cuádriceps, isquiotibiales y glúteos». En minúscula porque van dentro de
+       una frase y no encabezando su fila, que es donde el catálogo los da con
+       mayúscula. */
+    const listaMusculos = function (ms) {
+      const l = (ms || []).map(function (m) {
         const n = String(I18N.muscle(m) || '');
         return n ? n.charAt(0).toLowerCase() + n.slice(1) : '';
       }).filter(Boolean);
@@ -966,6 +992,19 @@
       return Tn('{lista} y {ultimo}',
         { lista: l.slice(0, -1).join(', '), ultimo: l[l.length - 1] });
     };
+
+    /* Lo que necesita la hoja al tocar la marca. Se guarda aquí porque el
+       enganche corre después del render y no vuelve a ver estas cuentas. */
+    actividadPorZona = {};
+    Object.keys(mins).forEach(function (id) {
+      actividadPorZona[id] = {
+        zona: etiqueta(id),
+        minutos: mins[id],
+        series: hecho[id] || 0,
+        actividades: (reparto.actividades || {})[id] || [],
+        musculos: listaMusculos((reparto.musculos || {})[id])
+      };
+    });
 
     const ids = [];
     reparto.filas.forEach(function (f) { if (ids.indexOf(f.id) === -1) ids.push(f.id); });
@@ -1007,19 +1046,15 @@
                    style="width:${Math.round(hace / tope * 100)}%"></i>
                 ${raw(pide > 0 ? '<b class="zona-pide" style="left:' +
                   Math.round(pide / tope * 100) + '%"></b>' : '')}
+                ${raw(mins[id] ? '<button type="button" class="zona-marca" data-zact="' +
+                  esc(id) + '" style="width:' + anchoMarca(id) + '%" aria-label="' +
+                  esc(Tn('{n}′ de actividad en {zona}. Toca para ver qué fue.',
+                    { n: mins[id], zona: etiqueta(id) })) + '"></button>' : '')}
               </span>
               <span class="zona-num">${coma(hace)}${raw(pide > 0
                 ? '<span class="zona-de"> / ' + coma(pide) + '</span>' : '')}</span>
             </div>
-            ${raw(mins[id] ? '<div class="zona-fila zona-act">' +
-              '<span class="zona-nom">' + esc(T('Actividad')) + '</span>' +
-              '<span class="zona-pista"><i class="zona-hago" style="width:' +
-                Math.round(mins[id] / topeMin * 100) + '%"></i></span>' +
-              '<span class="zona-num">' + esc(Tn('{n}′', { n: mins[id] })) + '</span>' +
-              '</div>' +
-              (musculosDe(id)
-                ? '<p class="zona-act-mus tiny">' + esc(musculosDe(id)) + '</p>' : '')
-              : '')}`;
+`;
         }).join(''))}
       </div>
 
@@ -1028,7 +1063,7 @@
         ${raw(plan.total ? '<span><i class="zl-pide"></i> ' +
           esc(T('lo que pide tu plan')) + '</span>' : '')}
         ${raw(Object.keys(mins).length ? '<span><i class="zl-act"></i> ' +
-          esc(T('minutos de actividad')) + '</span>' : '')}
+          esc(T('actividad · toca el azul')) + '</span>' : '')}
       </div>
 
       ${raw(excesoHTML(ids, hecho, plan, etiqueta, rango))}
@@ -1181,6 +1216,41 @@
     }).join('') + '</div>';
   }
 
+  /* Al tocar la marca azul. La barra dice que ahí hubo algo; los números van
+     aquí, que es donde caben sin tener que fingir que son series. */
+  function hojaActividad(id) {
+    const d = actividadPorZona[id];
+    if (!d) return;
+
+    const filas = d.actividades.map(function (a) {
+      const ms = (a.musculos || []).map(function (m) {
+        const n = String(I18N.muscle(m) || '');
+        return n ? n.charAt(0).toLowerCase() + n.slice(1) : '';
+      }).filter(Boolean).join(', ');
+      return '<div class="list-row"><div class="grow">' +
+        '<div class="list-row-title">' + esc(a.nombre || T('Actividad')) + '</div>' +
+        (ms ? '<div class="list-row-sub">' + esc(ms) + '</div>' : '') +
+        '</div><span class="act-min">' + esc(Tn('{n}′', { n: a.min })) + '</span></div>';
+    }).join('');
+
+    UI.modal(html`
+      <h2>${Tn('{n}′ de actividad', { n: d.minutos })}</h2>
+      <p class="muted">${Tn('Lo que hiciste fuera del gimnasio y que trabaja {zona}.',
+        { zona: d.zona.toLowerCase() })}</p>
+      <div class="list">${raw(filas)}</div>
+      <p class="tiny" style="margin:12px 0 0">${Tn('Estos minutos no cuentan en tus ' +
+        '{series} series de {zona}, y por eso van en azul y aparte. Un partido carga la ' +
+        'pierna, pero para meterlo en la barra habría que inventarse cuántas series vale, ' +
+        'y ese número estropearía la única cifra con la que puedes comparar una semana ' +
+        'con otra.', { series: UI.dec(d.series), zona: d.zona.toLowerCase() })}</p>
+      <button class="btn block" data-cerrar>${T('Vale')}</button>`,
+      function (el) {
+        el.querySelectorAll('[data-cerrar]').forEach(function (b) {
+          b.onclick = UI.closeModal;
+        });
+      });
+  }
+
   V.progreso.mount = function (root) {
     bind(root, '[data-a=ir]', function () { go('rutinas'); });
 
@@ -1224,6 +1294,8 @@
         setTimeout(function () { b.style.width = w; }, 60 + i * 60);
       });
     });
+
+    bindAll(root, '[data-zact]', function (el) { hojaActividad(el.dataset.zact); });
 
     bindAll(root, '[data-ex]', function (el) { go('ejercicio', el.dataset.ex); });
     root.querySelectorAll('details[data-sem]').forEach(function (d) {

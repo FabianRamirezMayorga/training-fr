@@ -4132,7 +4132,13 @@
 
     /* ---------- La barra de actividad ---------- */
     'actividad': 'activity',
-    'minutos de actividad': 'minutes of activity',
+    'actividad · toca el azul': 'activity · tap the blue',
+    '{n}′ de actividad en {zona}. Toca para ver qué fue.':
+      '{n}′ of activity in {zona}. Tap to see what it was.',
+    'Lo que hiciste fuera del gimnasio y que trabaja {zona}.':
+      'What you did outside the gym that works {zona}.',
+    'Estos minutos no cuentan en tus {series} series de {zona}, y por eso van en azul y aparte. Un partido carga la pierna, pero para meterlo en la barra habría que inventarse cuántas series vale, y ese número estropearía la única cifra con la que puedes comparar una semana con otra.':
+      'These minutes do not count towards your {series} sets of {zona}, which is why they are blue and kept apart. A match loads your legs, but putting it in the bar would mean making up how many sets it is worth, and that number would spoil the one figure you can compare one week against another with.',
 
     /* ---------- El rótulo de la actividad ---------- */
     'Actividad': 'Activity',

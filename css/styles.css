@@ -2853,6 +2853,10 @@ html[data-theme="light"] .sem-caja.es-ahora {
   position: absolute; top: -3px; bottom: -3px; width: 2px;
   background: var(--txt); opacity: .55; border-radius: 2px;
   transform: translateX(-1px);
+  /* Por encima de la marca de actividad: cuando el plan de una zona coincide
+     con el tope de la escala, la muesca cae en el extremo derecho, que es justo
+     donde va la marca, y sin esto el azul se la tragaba. */
+  z-index: 2;
 }
 
 .zona-num { flex: none; min-width: 58px; text-align: right;
@@ -2862,23 +2866,23 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .zona-leyenda { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 11px; }
 .zona-leyenda span { display: inline-flex; align-items: center; gap: 5px; }
 .zona-leyenda i { width: 12px; height: 8px; border-radius: 999px; flex: none; }
-/* La fila de actividad: misma rejilla, más fina y en azul. No comparte unidad
-   con las series —son minutos— así que tampoco puede parecer la misma barra:
-   el color y el grosor son lo que dice que se leen aparte. Y no lleva la
-   muesca del plan, porque el plan no pide minutos de fútbol. */
-.zona-act { margin-top: -4px; }
-/* El rótulo, del mismo tamaño que el de la zona de arriba: más pequeño se
-   leía como una nota al pie y rompía la columna. Lo que dice que es otra cosa
-   es el color, que es el de su barra, no el tamaño de la letra. */
-.zona-act .zona-nom { font-size: .8rem; color: var(--agua); }
-.zona-act .zona-pista { height: 6px; }
-.zona-act .zona-hago { background: var(--agua); }
-.zona-act .zona-num { font-size: .74rem; font-weight: 600; color: var(--agua); }
-/* Qué movió esa actividad, alineado bajo la barra. El reparto va por zonas y la
-   actividad se apunta músculo a músculo: decir solo «Actividad 149′» obligaba a
-   bajar al historial para saber si el partido fue de pierna o de todo. */
-.zona-act-mus { margin: -5px 0 0 76px; color: var(--agua); opacity: .78;
-  line-height: 1.3; }
+/* La actividad, dentro de la barra de su zona: un trozo azul pegado al extremo
+   derecho, un poco más alto que la pista para que se lea encima y no dentro.
+   No mide series —un partido no las da— así que no se suma al relleno ni mueve
+   el número de la derecha. Se toca y cuenta lo que fue. */
+.zona-marca {
+  position: absolute; top: -2px; bottom: -2px; right: 0; padding: 0; border: 0;
+  border-radius: 999px; background: var(--agua); cursor: pointer;
+  box-shadow: 0 0 0 2px var(--card); transition: transform .12s ease; z-index: 1;
+}
+/* El dedo necesita más sitio que el ojo: la zona tocable se estira arriba y
+   abajo sin que la marca crezca. */
+.zona-marca::after { content: ''; position: absolute; inset: -14px -6px; }
+.zona-marca:active { transform: scale(1.06); }
+
+/* Los minutos de cada actividad dentro de la hoja. */
+.act-min { flex: none; font-size: .82rem; font-weight: 700; color: var(--agua);
+  font-variant-numeric: tabular-nums; }
 
 .zl-hago { background: var(--acc); }
 .zl-act { background: var(--agua); height: 6px !important; }
