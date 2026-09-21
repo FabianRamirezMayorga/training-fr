@@ -481,15 +481,23 @@
          plan no hay días de descanso que respetar. */
       const tocaba = !hayPlanDeDias || !!tocaEntrenar[nombreDia];
 
+      /* Lo que se hizo ese día, para poder contarlo al tocarlo. */
+      const deEseDia = sesiones.filter(function (x) {
+        return Comidas.claveDia(x.start) === clave;
+      });
+
       const d = {
         t: t,
+        clave: clave,
         letra: UI.inicialDia(new Date(t).getDay()),
         num: new Date(t).getDate(),
         esHoy: i === 0,
         tocaba: tocaba,
-        entreno: sesiones.some(function (x) {
-          return Comidas.claveDia(x.start) === clave;
-        }),
+        /* Las cifras, no solo si cumplió: los tres puntos dicen si llegaste y
+           no cuánto, y ya están calculadas aquí para decidir el punto. */
+        kcal: kcal, prot: prot, ml: ml,
+        sesiones: deEseDia,
+        entreno: deEseDia.length > 0,
         /* «Llegar» es el 90 %: exigir el 100 % de una estimación es exigir
            suerte, no constancia. */
         proteina: m.prot > 0 && prot >= m.prot * 0.9,
@@ -533,7 +541,8 @@
                pintarlo en rojo a las once de la mañana por no haber cenado
                todavía es regañar por algo que aún no ha pasado. */
             const tono = d.cumplido ? ' cumplido' : d.esHoy ? '' : ' fallado';
-            return '<div class="ps-dia' + (d.esHoy ? ' es-hoy' : '') + tono + '">' +
+            return '<div class="ps-dia tap' + (d.esHoy ? ' es-hoy' : '') + tono +
+              '" data-plandia="' + esc(d.clave) + '" role="button" tabindex="0">' +
               '<span class="ps-letra">' + d.letra + '</span>' +
               '<span class="ps-num">' + d.num + '</span>' +
               '<span class="ps-marcas">' +
@@ -569,6 +578,93 @@
     });
   }
 
+  /* Lo que pasó ese día, al tocarlo. Los tres puntos dicen si cumpliste; esto
+     dice cuánto, que es lo que uno quiere saber cuando ve un punto apagado. */
+  function hojaDelDia(clave, m) {
+    const d = (datosPlan(m) || { dias: [] }).dias.filter(function (x) {
+      return x.clave === clave;
+    })[0];
+    if (!d) return;
+
+    const fecha = new Date(d.t);
+    const metaAgua = (Number(Perfil.agua()) || 0) * 1000;
+
+    /* Qué movió ese día, con los nombres de sus músculos: lo mismo que enseña el
+       historial, porque es la misma pregunta hecha desde otro sitio. */
+    const musculos = [];
+    d.sesiones.forEach(function (ses) {
+      (ses.entries || []).forEach(function (e) {
+        const ex = g.Data ? Data.get(e.exId) : null;
+        ((ex && ex.primaryMuscles) || []).forEach(function (mu) {
+          if (musculos.indexOf(mu) === -1) musculos.push(mu);
+        });
+      });
+      (ses.musculos || []).forEach(function (mu) {
+        if (musculos.indexOf(mu) === -1) musculos.push(mu);
+      });
+    });
+
+    const fila = function (clase, et, valor, ok, debajo) {
+      return '<div class="dd-fila"><span class="ps-punto ' + clase + (ok ? ' si' : '') +
+        '"></span><span class="grow"><b>' + esc(et) + '</b>' +
+        '<span class="dd-val">' + esc(valor) + '</span>' +
+        (debajo ? '<span class="dd-sub">' + esc(debajo) + '</span>' : '') +
+        '</span></div>';
+    };
+
+    /* Los músculos en su propio renglón. En la misma línea que los nombres, y
+       ambos separados por comas, no había manera de saber dónde acababa un
+       entrenamiento y empezaba una lista de músculos. */
+    const musculosEnFila = musculos.map(function (mu) {
+      const n = String(I18N.muscle(mu) || '');
+      return n ? n.charAt(0).toLowerCase() + n.slice(1) : '';
+    }).filter(Boolean).join(', ');
+
+    const nombres = d.sesiones.map(function (x) {
+      return String(x.routineName || '').trim();
+    }).filter(Boolean).join(', ');
+
+    UI.modal(UI.html`
+      <!-- Sin hora: es el resumen de un día entero, y «19 sep · 16:02» hace
+           pensar que lo que viene debajo pasó a esa hora. -->
+      <h2>${d.esHoy ? T('Hoy')
+        : UI.diaLargo(UI.DAY_NAMES[fecha.getDay()]) + ' ' + UI.fechaCorta(d.t)}</h2>
+      <div class="dd-lista">
+        ${raw(fila('entreno', T('Entreno'),
+          d.entreno ? (nombres || T('Entrenaste'))
+                    : (d.tocaba ? T('No entrenaste') : T('Día de descanso')),
+          d.entreno, d.entreno ? musculosEnFila : ''))}
+        ${raw(fila('prote', T('Proteína'),
+          m && m.prot ? Tn('{n} de {meta} g', { n: Math.round(d.prot), meta: Math.round(m.prot) })
+                      : Tn('{n} g', { n: Math.round(d.prot) }),
+          d.proteina))}
+        ${raw(fila('agua', T('Agua'),
+          metaAgua ? Tn('{n} de {meta} l', { n: UI.dec(Math.round(d.ml / 100) / 10),
+                                             meta: UI.dec(Math.round(metaAgua / 100) / 10) })
+                   : Tn('{n} l', { n: UI.dec(Math.round(d.ml / 100) / 10) }),
+          d.agua))}
+        ${raw(fila('kcal', T('Calorías'),
+          m && m.kcal ? Tn('{n} de {meta} kcal', { n: Math.round(d.kcal), meta: Math.round(m.kcal) })
+                      : Tn('{n} kcal', { n: Math.round(d.kcal) }),
+          false))}
+      </div>
+      <button class="btn block" data-cerrar style="margin-top:16px">${T('Vale')}</button>`,
+      function (el) {
+        el.querySelector('[data-cerrar]').onclick = UI.closeModal;
+      });
+  }
+
+  /* Todo lo que la tira necesita al pintarse, para que los dos sitios que la
+     usan no tengan que acordarse de lo mismo por separado. */
+  V.dia.bindTira = function (root) {
+    root.querySelectorAll('.plan-sem').forEach(UI.alFinal);
+    const p = Perfil.datos();
+    const m = Perfil.completo(p) ? Perfil.macros(p) : null;
+    App.bindAll(root, '[data-plandia]', function (el) {
+      hojaDelDia(el.dataset.plandia, m);
+    });
+  };
+
   /* Para la portada: la misma tira y la misma cuenta, o nada si aún no hay
      perfil con el que calcular las metas. */
   V.dia.tiraPlan = function () {
@@ -583,9 +679,11 @@
     /* Marcar comidas y agua lo lleva su módulo, el mismo que en Alimentación */
     if (g.Marcar) Marcar.bind(root);
 
-    /* Siempre abierta por hoy, también al volver de otra pestaña: dónde se
-       dejó el desplazamiento la última vez no le importa a nadie. */
-    root.querySelectorAll('.plan-sem').forEach(UI.alFinal);
+    /* Siempre abierta por hoy, también al volver de otra pestaña, y cada día
+       se puede tocar para ver qué pasó. Lo lleva todo dia.js, que es de donde
+       sale la tira: dos sitios acordándose de lo mismo por separado es un
+       sitio que se olvida. */
+    if (g.VISTAS && VISTAS.dia && VISTAS.dia.bindTira) VISTAS.dia.bindTira(root);
 
     /* Qué cajones quedan abiertos. Marcar una comida o un vaso repinta la
        pantalla, y sin esto se te cerraría el cajón en el que estabas justo al

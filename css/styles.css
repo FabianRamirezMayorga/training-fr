@@ -1822,6 +1822,27 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .ps-punto.prote.si { background: var(--brand-1); box-shadow: none; }
 .ps-punto.agua.si { background: var(--agua); box-shadow: none; }
 
+/* La ficha se toca y cuenta el día. */
+.ps-dia.tap { cursor: pointer; transition: transform .12s ease; }
+.ps-dia.tap:active { transform: scale(.94); }
+
+/* ---------- lo que pasó ese día ----------
+   Las mismas marcas de la tira, en grande y con su cifra al lado: quien toca
+   un punto apagado quiere saber por cuánto se quedó, no que se lo repitan. */
+.dd-lista { display: flex; flex-direction: column; gap: 2px; }
+.dd-fila { display: flex; align-items: flex-start; gap: 11px; padding: 11px 2px;
+  border-bottom: 1px solid var(--line); }
+.dd-fila:last-child { border-bottom: 0; }
+.dd-fila .ps-punto { width: 11px; height: 11px; flex: none; margin-top: 3px; }
+.dd-fila b { display: block; font-size: .72rem; font-weight: 700; color: var(--dim2);
+  text-transform: uppercase; letter-spacing: .06em; }
+.dd-val { display: block; margin-top: 2px; font-size: .92rem; line-height: 1.35; }
+.dd-sub { display: block; margin-top: 3px; font-size: .78rem; color: var(--dim);
+  line-height: 1.4; }
+/* Las calorías no tienen punto en la tira —no son una de las tres cosas que el
+   plan pide— pero aquí cuentan igual, así que llevan su marca apagada. */
+.ps-punto.kcal.si { background: var(--llama, var(--warn)); box-shadow: none; }
+
 .plan-leyenda {
   display: flex; gap: 14px; justify-content: center; margin-top: 11px;
   padding-top: 10px; border-top: 1px solid var(--line);

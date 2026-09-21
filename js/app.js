@@ -1669,9 +1669,11 @@
     bind(root, '[data-a=apuntar]', apuntarActividad);
     bindTarjetaRutina(root);
 
-    /* Siempre abierta por hoy, también al volver de otra pestaña: dónde se
-       dejó el desplazamiento la última vez no le importa a nadie. */
-    root.querySelectorAll('.plan-sem').forEach(UI.alFinal);
+    /* Siempre abierta por hoy, también al volver de otra pestaña, y cada día
+       se puede tocar para ver qué pasó. Lo lleva todo dia.js, que es de donde
+       sale la tira: dos sitios acordándose de lo mismo por separado es un
+       sitio que se olvida. */
+    if (g.VISTAS && VISTAS.dia && VISTAS.dia.bindTira) VISTAS.dia.bindTira(root);
 
     pintarCargaIA(root);
 
