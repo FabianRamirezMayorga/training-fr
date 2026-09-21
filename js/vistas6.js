@@ -242,7 +242,11 @@
           return '<circle class="graf-p' + (p.act ? ' graf-act' : '') +
             '" cx="' + p.x + '" cy="' + p.y + '" r="' + (p.act ? 3.4 : 2.5) + '"/>';
         }).join(''))}
-        <circle class="graf-ultimo" cx="${ultimo.x}" cy="${ultimo.y}" r="4.5"/>
+        <!-- El punto de cierre se pinta encima del suyo, más gordo, y sin esto
+             iba siempre en verde: un día de solo actividad salía azul en toda la
+             curva menos el último, que es justo el de hoy y el que se mira. -->
+        <circle class="graf-ultimo${ultimo.act ? ' graf-act' : ''}"
+                cx="${ultimo.x}" cy="${ultimo.y}" r="4.5"/>
       </svg>
       <div class="graf-ejes">
         ${raw(puntos.map(function (p, i) {

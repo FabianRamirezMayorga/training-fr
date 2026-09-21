@@ -1060,6 +1060,9 @@ body.con-musica.con-crono{--pad-abajo:196px}
    series— pero el punto dice que sí pasó algo, y lo dice en azul. */
 .graf-p.graf-act{fill:var(--agua);stroke:var(--agua)}
 .graf-ultimo{fill:var(--acc);stroke:var(--bg2);stroke-width:2;vector-effect:non-scaling-stroke}
+/* Y en azul si el último día fue solo actividad. La regla de .graf-p no le
+   alcanza: son dos círculos distintos, y el de cierre va encima. */
+.graf-ultimo.graf-act{fill:var(--agua)}
 .graf-ejes{display:flex;justify-content:space-between;margin-top:6px}
 .graf-ejes span{flex:1;text-align:center;font-size:.6rem;color:var(--dim2);font-weight:600;
   white-space:nowrap;overflow:visible}
