@@ -3691,6 +3691,12 @@
       return ((m && numeroDe(m[1])) || 1) * 60 + 30;
     }
     if (/media\s*hora|half\s*an?\s*hour/.test(t)) return 30;
+    /* «tres horas y diecinueve minutos»: sin esto se quedaba en las horas y
+       tiraba los minutos, que es peor que no entender nada. */
+    m = t.match(/(\d+|[a-z]+)\s*(?:horas?|hours?|hrs?|h)\s*y?\s*(\d+|[a-z]+)\s*(?:minutos?|minutes?|mins?)\b/);
+    if (m && numeroDe(m[1]) && numeroDe(m[2])) {
+      return numeroDe(m[1]) * 60 + numeroDe(m[2]);
+    }
     /* 1:30 y 1h30 */
     m = t.match(/(\d+)\s*[:h]\s*(\d{1,2})\b/);
     if (m) return Number(m[1]) * 60 + Number(m[2]);
@@ -3861,6 +3867,8 @@
 
       <div class="ac-pie">
         <span class="ac-kcal" id="ac-kcal"></span>
+        ${raw(conIA ? '<button class="btn sm" id="ac-analizar" disabled>' + icon('chispa') +
+          ' ' + esc(T('Analizar')) + '</button>' : '')}
         <button class="btn primary grow" id="ac-ok" disabled>${T('Apuntar')}</button>
       </div>`,
       function (el) {
@@ -3884,6 +3892,8 @@
           $('#ac-cambiar').textContent = $('#ac-lista').hidden
             ? (a ? T('Cambiar') : T('Elegir')) : T('Cerrar');
           $('#ac-ok').disabled = !a;
+          /* Analizar sin saber qué fue no da un análisis, da un horóscopo. */
+          if ($('#ac-analizar')) $('#ac-analizar').disabled = !a;
           el.querySelectorAll('#ac-lista [data-act]').forEach(function (f) {
             f.classList.toggle('elegida', !!a && f.dataset.act === elegido.act);
           });
@@ -4030,7 +4040,13 @@
               return;
             }
             elegido.ia = r;
-            if (!elegido.act) elegido.act = actividadDelTexto(t) || 'otro';
+            /* Ella devuelve cómo se llama eso —«Escalada»— y ese nombre sí suele
+               estar en la tabla aunque lo que él escribió no estuviera. Sin esto
+               la ficha decía «Otra cosa» con los músculos de la escalada debajo. */
+            if (!elegido.act || elegido.act === 'otro') {
+              elegido.act = actividadDelTexto(r.nombre) || actividadDelTexto(t) ||
+                elegido.act || 'otro';
+            }
             decirIA(r.nota || T('Afinado por la IA.'), 'ok');
             pintarFicha();
             pintarKcal();
@@ -4051,6 +4067,53 @@
         };
 
         if ($('#ac-ia-btn')) $('#ac-ia-btn').onclick = function () { lanzarIA(true); };
+
+        /* ---------- la lectura completa ----------
+           La de arriba contesta a «qué es esto» en cuanto uno escribe. Esta
+           contesta a «qué me ha hecho», y para eso hace falta la duración ya
+           puesta: por eso se pide aquí abajo y a mano. */
+        const botonAnalisis = $('#ac-analizar');
+        if (botonAnalisis) botonAnalisis.onclick = function () {
+          const a = actual();
+          if (!a) return;
+          botonAnalisis.disabled = true;
+          decirIA(T('Mirando qué te ha hecho…'), '');
+
+          IA.analizarActividad({
+            nombre: elegido.nombre || T(a.label),
+            minutos: elegido.min,
+            musculos: musculosDe(),
+            met: metDe()
+          }).then(function (r) {
+            botonAnalisis.disabled = false;
+            const filas = [
+              [T('Intensidad'), r.intensidad],
+              [T('Carga'), r.carga],
+              [T('Músculo'), r.musculo],
+              [T('Ojo'), r.ojo]
+            ].filter(function (f) { return f[1]; });
+            if (!filas.length) { decirIA(T('No ha dicho nada.'), 'mal'); return; }
+            /* Se pinta a mano y no con innerHTML de la respuesta: esto viene de
+               fuera y no se convierte en código por mucho que lo parezca. */
+            const caja = $('#ac-ia-caja');
+            caja.hidden = false;
+            caja.className = 'ac-ia-caja ok';
+            const txt = $('#ac-ia-txt');
+            txt.textContent = '';
+            filas.forEach(function (f) {
+              const fila = document.createElement('div');
+              fila.className = 'ac-ia-fila';
+              const et = document.createElement('b');
+              et.textContent = f[0] + ': ';
+              fila.appendChild(et);
+              fila.appendChild(document.createTextNode(f[1]));
+              txt.appendChild(fila);
+            });
+          }).catch(function (e) {
+            botonAnalisis.disabled = false;
+            decirIA(e.message || T('No he podido calcularlo.'), 'mal');
+          });
+        };
 
         pintarFicha();
         pintarKcal();

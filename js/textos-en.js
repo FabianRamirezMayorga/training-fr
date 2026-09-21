@@ -426,6 +426,11 @@
     'min': 'min',
     'Mirando qué fue…': 'Working out what it was…',
     'Afinado por la IA.': 'Fine-tuned by the AI.',
+    'Mirando qué te ha hecho…': 'Working out what it did to you…',
+    'Intensidad': 'Intensity',
+    'Carga': 'Load',
+    'Ojo': 'Watch out',
+    'No ha dicho nada.': 'It said nothing.',
     'Apuntar algo que ya hice': 'Log something I already did',
     'Caminar una hora el domingo o la pachanga del sábado cuentan igual, aunque no salgan de una rutina.':
       'An hour walking on Sunday or Saturday kickabout count the same, even if they come from no routine.',

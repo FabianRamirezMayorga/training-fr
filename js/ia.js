@@ -2539,6 +2539,121 @@
     });
   }
 
+  /* ---------- la lectura completa de una actividad ----------
+     estimarActividad() contesta a «qué es esto y cuánto cuesta» en cuanto uno
+     escribe, y con eso basta para apuntarla. Esto es otra cosa: se pide aparte,
+     con la duración ya puesta, y responde a «qué me ha hecho esto».
+
+     Todo lo que dice son opiniones —cómo de fuerte fue, cuánto carga, si eso
+     construye músculo o solo lo mantiene— y ninguna de ellas se guarda ni entra
+     en una gráfica: se lee y se cierra. Por eso va aquí y no en una tabla, y por
+     eso hay que pedirlo: cuesta una llamada y no todo el mundo la quiere.
+
+     Se le pasan sus series de los últimos siete días en las zonas implicadas,
+     que es lo que convierte «carga alta» en algo suyo y no en un horóscopo. */
+  function seriesRecientes(musculos) {
+    if (!g.Store || !g.I18N) return [];
+    const desde = Date.now() - 7 * 86400000;
+    const zonas = [];
+    (musculos || []).forEach(function (m) {
+      I18N.GROUPS.forEach(function (gr) {
+        if ((gr.muscles || []).indexOf(m) !== -1 && zonas.indexOf(gr.id) === -1) {
+          zonas.push(gr.id);
+        }
+      });
+    });
+    if (!zonas.length) return [];
+
+    const cuenta = {};
+    Store.sessions().forEach(function (ses) {
+      if (ses.start < desde) return;
+      (ses.entries || []).forEach(function (e) {
+        const hechas = (e.sets || []).filter(function (x) { return x.done; }).length;
+        if (!hechas) return;
+        const ex = g.Data ? Data.get(e.exId) : null;
+        const grupos = (ex && ex.groups) || [];
+        grupos.forEach(function (id) {
+          if (zonas.indexOf(id) !== -1) cuenta[id] = (cuenta[id] || 0) + hechas / grupos.length;
+        });
+      });
+    });
+
+    return zonas.map(function (id) {
+      const gr = I18N.GROUPS.filter(function (x) { return x.id === id; })[0];
+      return (gr ? gr.label.toLowerCase() : id) + ' ' + Math.round(cuenta[id] || 0) + ' series';
+    });
+  }
+
+  function analizarActividad(datos) {
+    datos = datos || {};
+    const nombre = String(datos.nombre || '').trim();
+    const min = Number(datos.minutos) || 0;
+    if (!nombre || !min) return Promise.reject(new Error('Falta la actividad o el tiempo.'));
+
+    const musculos = (datos.musculos || []).slice();
+    const clave = 'anal1:' + I18N.norm(nombre) + ':' + min + ':' + musculos.join(',') +
+      ':' + (g.Idioma ? Idioma.actual() : 'es');
+    const guardado = leerCache(clave, 12);
+    if (guardado) return Promise.resolve(guardado);
+
+    const p = g.Perfil ? Perfil.datos() : null;
+    const peso = Number(p && p.peso) || 0;
+    const ajustes = g.Store ? Store.settings() : {};
+    const recientes = seriesRecientes(musculos);
+
+    const prompt = [
+      (g.Idioma && Idioma.actual() === 'en')
+        ? 'RESPONDE EN INGLÉS: tiene la app puesta en inglés. Los datos de abajo ' +
+          'están en español porque así los guarda la app; entiéndelos, pero no le ' +
+          'contestes en español.'
+        : null,
+      'Eres su entrenador. Acaba de hacer esto y va a apuntarlo:',
+      '- Actividad: ' + nombre,
+      '- Duración: ' + min + ' min',
+      musculos.length
+        ? '- Músculos que trabaja: ' + musculos.join(', ')
+        : '- No sabemos qué músculos trabaja.',
+      datos.met ? '- MET estimado: ' + datos.met : null,
+      '',
+      peso ? 'Pesa ' + peso + ' kg.' : null,
+      ajustes.goal ? 'Su objetivo es ' + ajustes.goal + '.' : null,
+      ajustes.level ? 'Nivel ' + ajustes.level + '.' : null,
+      recientes.length
+        ? 'En el gimnasio, estos siete días lleva: ' + recientes.join(', ') + '.'
+        : 'Estos siete días no ha hecho series de gimnasio en esas zonas.',
+      '',
+      'Dile qué le ha hecho eso a su cuerpo. Cuatro cosas, cada una en UNA frase de ' +
+        'veinticinco palabras como mucho, concretas y sin adular:',
+      '- "intensidad": cómo de duro fue de verdad para alguien como él, y por qué.',
+      '- "carga": qué deja cargado y cuánto le va a durar, contando lo que ya lleva ' +
+        'esta semana en esas zonas.',
+      '- "musculo": si eso construye músculo, lo mantiene o ni una cosa ni otra, y por ' +
+        'qué. Sé honesto: casi ninguna actividad de fuera hace hipertrofia, y decirle ' +
+        'que sí para agradar le hace entrenar peor.',
+      '- "ojo": lo único que de verdad debería vigilar tras esto, o qué entrenar o no ' +
+        'mañana. Si no hay nada que avisar, dilo en una frase y ya.',
+      '',
+      'Nada de signos de exclamación. No le repitas los minutos ni la lista de ' +
+        'músculos, que los tiene en pantalla.',
+      '',
+      'Devuelve JSON: {"intensidad":"","carga":"","musculo":"","ojo":""}'
+    ].filter(function (l) { return l !== null; }).join(SALTO);
+
+    return llamarJSON(prompt, { maxTokens: 1024, temperatura: 0.4 }).then(function (r) {
+      const limpio = {
+        intensidad: String((r && r.intensidad) || '').trim(),
+        carga: String((r && r.carga) || '').trim(),
+        musculo: String((r && r.musculo) || '').trim(),
+        ojo: String((r && r.ojo) || '').trim()
+      };
+      if (!limpio.intensidad && !limpio.carga && !limpio.musculo && !limpio.ojo) {
+        throw new Error('No ha dicho nada.');
+      }
+      escribirCache(clave, limpio);
+      return limpio;
+    });
+  }
+
   /* ---------- a cuántas series equivale lo de fuera del gimnasio ----------
      Que ayer hubo actividad que carga lo de hoy es un hecho: sale de comparar
      dos listas de músculos y lo calcula una regla, en progresion.js. Cuánto
@@ -3208,6 +3323,7 @@
     analizarSuplementos: analizarSuplementos,
     revisarCambioComida: revisarCambioComida,
     estimarActividad: estimarActividad, estimarCarga: estimarCarga,
+    analizarActividad: analizarActividad,
     seriesDeActividad: seriesDeActividad,
     leerRutina: leerRutina,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
