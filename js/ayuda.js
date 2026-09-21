@@ -358,7 +358,7 @@
         { t: 'Guarda.',
           d: 'Cuenta exactamente igual que una rutina del plan: historial, récords y estadísticas.' }
       ],
-      cierre: 'Para algo que hiciste otro día —una caminata el domingo, la pachanga del sábado—, en Rutinas tienes *Apuntar algo que ya hice*. Ahí no hay series que apuntar, así que ese día sale en verde con los minutos debajo en vez del número de series; y la app sabe qué músculos mueve cada actividad, así que correr el domingo deja de contar como pierna abandonada el lunes. Si lo escribes con tus palabras y tienes la IA puesta, *Que lo mire la IA* afina las calorías y los músculos: ella distingue un partido de once de una pachanga, y el botón de esfuerzo no.',
+      cierre: 'Para algo que hiciste otro día —una caminata el domingo, la pachanga del sábado—, en Rutinas tienes *Apuntar algo que ya hice*. Ahí no hay series que apuntar, así que ese día sale en verde con los minutos debajo en vez del número de series; y la app sabe qué músculos mueve cada actividad, así que correr el domingo deja de contar como pierna abandonada el lunes. Si lo escribes con tus palabras, la app reconoce lo que pone y elige el esfuerzo sola: «Jugué fútbol» es un deporte de equipo y «subida al cerro» es senderismo. Si no reconoce nada se queda en «Otra cosa», que no apunta músculos porque puede ser cualquier cosa; ahí elige tú el botón que más se parezca. Y con la IA puesta, *Que lo mire la IA* lo afina más: ella distingue un partido de once de una pachanga, y el botón de esfuerzo no.',
       ver: ['g-entrenar'] },
 
     { id: 'c-auditar', titulo: 'Pasar tu plan por la auditoría',

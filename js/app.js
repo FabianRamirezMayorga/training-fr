@@ -3516,6 +3516,58 @@
     return tocadas;
   }
 
+  /* ---------- adivinar la actividad por lo que se escribe ----------
+     Escribir el nombre pasaba la actividad a «Otra cosa», y esa no tiene
+     músculos a propósito —puede ser cualquier cosa—, así que un «Jugué fútbol»
+     acababa sin ninguno: contaba sus minutos en constancia pero no llegaba a
+     Pierna en el reparto.
+
+     Casi siempre el texto ya lo dice. Se busca por palabras sueltas, sin tildes
+     ni mayúsculas, y si no se reconoce nada se queda en «Otra cosa», que es lo
+     honesto. Es una tabla y no la IA: reconocer la palabra «fútbol» no es una
+     opinión, y tiene que funcionar sin cobertura y sin clave. */
+  const PISTAS = [
+    ['correr', ['correr', 'corri', 'running', 'trote', 'trotar', 'maraton', 'jogging']],
+    ['bici', ['bici', 'ciclismo', 'spinning', 'pedalear', 'mtb']],
+    ['nadar', ['nadar', 'nade', 'natacion', 'piscina', 'nadando']],
+    ['senderismo', ['sender', 'monte', 'montaña', 'montana', 'cerro', 'trekking',
+      'hiking', 'subida', 'subí', 'subi', 'ascenso', 'excursion']],
+    ['equipo', ['futbol', 'fútbol', 'football', 'soccer', 'baloncesto', 'basquet',
+      'basket', 'voley', 'volei', 'balonmano', 'rugby', 'partido', 'pachanga',
+      'microfutbol', 'banquitas']],
+    ['raqueta', ['padel', 'pádel', 'tenis', 'squash', 'badminton', 'pickleball',
+      'raqueta', 'ping pong', 'pimpon']],
+    ['baile', ['bail', 'danza', 'zumba', 'salsa', 'rumba', 'bachata']],
+    ['pilates', ['pilates', 'yoga']],
+    ['estirar', ['estir', 'movilidad', 'flexibilidad']],
+    ['pesas', ['pesas', 'gimnasio', 'gym', 'mancuerna']],
+    ['caminar', ['caminar', 'camine', 'caminata', 'andar', 'anduve', 'paseo',
+      'pasear', 'paseé']]
+  ];
+
+  function actividadDelTexto(txt) {
+    if (!g.I18N) return '';
+    const t = I18N.norm(String(txt || ''));
+    if (!t) return '';
+    /* Por el principio de cada palabra, no por cualquier trozo: buscando
+       trozos sueltos, «mudanza» entraba por «danza» y se apuntaba como baile.
+       Así siguen valiendo las raíces —«camin» pilla «caminé» y «caminata»— sin
+       colarse dentro de otra palabra. */
+    const palabras = t.split(/[^a-z0-9]+/).filter(Boolean);
+    let fuera = '';
+    PISTAS.forEach(function (par) {
+      if (fuera) return;
+      par[1].forEach(function (pista) {
+        if (fuera) return;
+        const pi = I18N.norm(pista);
+        /* Las de dos palabras —«ping pong»— no caben en esa regla */
+        if (pi.indexOf(' ') !== -1) { if (t.indexOf(pi) !== -1) fuera = par[0]; return; }
+        if (palabras.some(function (w) { return w.indexOf(pi) === 0; })) fuera = par[0];
+      });
+    });
+    return fuera;
+  }
+
   function apuntarActividad() {
     const p = Perfil.datos();
     const peso = Number(p && p.peso) || 75;
@@ -3615,15 +3667,16 @@
           };
         });
 
-        /* Escribir el nombre no puede obligar a elegir esfuerzo: si no se ha
-           tocado ningún chip, se asume una actividad del montón. */
+        /* Escribir el nombre no puede obligar a elegir esfuerzo, pero sí puede
+           proponerlo: lo que uno escribe suele decir ya qué hizo. Si no se
+           reconoce nada se queda en «Otra cosa», y si él toca un chip a mano
+           manda el suyo y esto deja de meterse. */
         el.querySelector('#ac-nombre').oninput = function (ev) {
           elegido.nombre = ev.target.value.trim();
-          if (elegido.nombre && !elegido.aMano) {
-            elegido.act = 'otro';
-            marcar('#ac-tipos', el.querySelector('[data-act=otro]'));
-            pintarKcal();
-          }
+          if (!elegido.nombre || elegido.aMano) return;
+          elegido.act = actividadDelTexto(elegido.nombre) || 'otro';
+          marcar('#ac-tipos', el.querySelector('[data-act=' + elegido.act + ']'));
+          pintarKcal();
         };
         el.querySelectorAll('#ac-dias .chip').forEach(function (c) {
           c.onclick = function () { elegido.atras = Number(c.dataset.cuando); marcar('#ac-dias', c); };
