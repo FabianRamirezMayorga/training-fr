@@ -4107,8 +4107,7 @@
           IA.analizarActividad({
             nombre: elegido.nombre || T(a.label),
             minutos: elegido.min,
-            musculos: musculosDe(),
-            met: metDe()
+            musculos: musculosDe()
           }).then(function (r) {
             botonAnalisis.disabled = false;
             const filas = [

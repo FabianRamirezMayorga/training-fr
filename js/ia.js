@@ -2593,7 +2593,7 @@
     const musculos = (datos.musculos || []).slice();
     /* El «2» es la versión de las instrucciones: al cambiarlas, lo guardado con
        las viejas deja de valer y hay que volver a preguntar. */
-    const clave = 'anal3:' + I18N.norm(nombre) + ':' + min + ':' + musculos.join(',') +
+    const clave = 'anal4:' + I18N.norm(nombre) + ':' + min + ':' + musculos.join(',') +
       ':' + (g.Idioma ? Idioma.actual() : 'es');
     const guardado = leerCache(clave, 12);
     if (guardado) return Promise.resolve(guardado);
@@ -2609,56 +2609,73 @@
           'están en español porque así los guarda la app; entiéndelos, pero no le ' +
           'contestes en español.'
         : null,
-      'Eres su entrenador. Acaba de hacer esto y va a apuntarlo:',
-      '- Lo que ha escrito, con sus palabras: "' + nombre + '"',
+      'Eres su entrenador y va a apuntar lo que acaba de hacer.',
+      '',
+      /* Arriba del todo y no al final. Con esto abajo cumplió a medias: la
+         primera frase le recitó los minutos, el MET y su peso. Lo mismo que ya
+         se aprendió con el idioma —decide CÓMO se escribe todo lo que viene
+         detrás, así que va antes que los datos—. */
+      'CÓMO SE ESCRIBE ESTO, y esto manda sobre todo lo que viene después.',
+      'Cada frase tiene que poder decirse SOLO de la actividad concreta que ha ' +
+        'hecho. Si valdría igual para nadar, para bailar y para subir al monte, no ' +
+        'sirve: bórrala y escribe otra.',
+      'PROHIBIDO, y no es un consejo de estilo: repetirle los minutos o su peso —los ' +
+        'tiene en pantalla—; recitarle la lista de músculos; abrir una frase ' +
+        'resumiendo los datos que te acabo de dar; los rellenos de gimnasio tipo ' +
+        '«esfuerzo cardiovascular alto», «descansa bien», «hidrátate», «escucha a tu ' +
+        'cuerpo» o «para que las fibras se reparen»; los signos de exclamación; y ' +
+        'adular.',
+      'Si una frase tuya se queda sin nada que decir al quitarle lo prohibido, es que ' +
+        'no tenía nada que decir: busca otra cosa que contarle.',
+      '',
+      'ESTO ES LO QUE HA HECHO:',
+      '- Con sus palabras: "' + nombre + '"',
       /* Dos veces y de dos maneras. Con «100 min» a secas contestó «ocho horas a
          MET 5,5»: el número suelto se le confunde con otra cosa, y una frase que
          empieza con una duración falsa ya no vale para nada. */
-      '- Duración: ' + min + ' minutos, es decir ' +
+      '- Duró ' + min + ' minutos, es decir ' +
         (min >= 60 ? Math.floor(min / 60) + ' h ' + (min % 60) + ' min' : min + ' min') +
         '. No es más ni menos que eso; no lo redondees a horas ni lo exageres.',
       musculos.length
-        ? '- Músculos que trabaja: ' + musculos.join(', ')
-        : '- No sabemos qué músculos trabaja.',
-      datos.met ? '- MET estimado: ' + datos.met : null,
+        ? '- Mueve: ' + musculos.join(', ') + '. Ya los tiene en pantalla, no se los ' +
+          'repitas en lista.'
+        : '- No sabemos qué músculos mueve.',
+      /* El MET no se le manda: es una cuenta nuestra, para una lectura
+         cualitativa no dice nada que no diga ya el nombre de la actividad, y en
+         cuanto lo ve lo recita. Lo que no quieras que repita, no se lo mandes. */
       '',
-      peso ? 'Pesa ' + peso + ' kg.' : null,
+      peso ? 'Para calibrar, que no para repetirlo: pesa ' + peso + ' kg.' : null,
       ajustes.goal ? 'Su objetivo es ' + ajustes.goal + '.' : null,
       ajustes.level ? 'Nivel ' + ajustes.level + '.' : null,
       recientes.length
-        ? 'En el gimnasio, estos siete días lleva: ' + recientes.join(', ') + '.'
+        ? 'En el gimnasio, estos siete días lleva: ' + recientes.join(', ') + '. Esto sí ' +
+          'puedes usárselo: es lo que hace que un consejo sea suyo.'
         : 'Estos siete días no ha hecho series de gimnasio en esas zonas.',
       '',
-      'ANTES DE NADA, mira QUÉ ha escrito exactamente. Dos pasos.',
+      'AHORA PIENSA DOS COSAS ANTES DE ESCRIBIR.',
       '',
-      'UNO. Si ahí hay un sitio, una prueba o un recorrido concreto —un cerro, una ' +
-        'montaña, una carrera popular, una ruta conocida— y lo reconoces de verdad, ' +
-        'usa lo que sepas de él: desnivel, distancia, escalones, cuánto se tarda ' +
-        'normalmente. Compara SU tiempo con lo normal allí y dilo con el dato ' +
-        'concreto. Y si NO lo reconoces con seguridad, no te lo inventes ni lo ' +
-        'disimules con un «aproximadamente»: deja "sitio" vacío. Un número falso ' +
-        'sobre un sitio real es peor que no decir nada, porque suena a dato y se lo ' +
-        'va a creer.',
+      'UNA. Si en lo que ha escrito hay un sitio, una prueba o un recorrido concreto ' +
+        '—un cerro, una montaña, una carrera popular, una ruta conocida— y lo ' +
+        'reconoces de verdad, usa lo que sepas de él: desnivel, distancia, escalones, ' +
+        'cuánto se tarda normalmente. Compara SU tiempo con lo normal allí y dilo con ' +
+        'el dato concreto. Y si NO lo reconoces con seguridad, no te lo inventes ni lo ' +
+        'disimules con un «aproximadamente»: deja "sitio" vacío. Un número falso sobre ' +
+        'un sitio real es peor que no decir nada, porque suena a dato y se lo va a creer.',
       '',
-      'DOS. Piensa qué clase de esfuerzo es ESA actividad en concreto, no «ejercicio» ' +
-        'en general. El fútbol son sprints repetidos, frenadas y cambios de ' +
-        'dirección, y lo que pasa factura son los isquios en excéntrico. Nadar es ' +
-        'tirón de dorsal y hombro sin impacto. Bajar del monte castiga la rodilla ' +
-        'mucho más que subirlo. La escalada se acaba por el antebrazo, no por las ' +
-        'piernas.',
-      'Esa es la vara de medir: cada frase que escribas tiene que poder decirse SOLO ' +
-        'de esta actividad. Si valdría igual para nadar, para bailar y para subir al ' +
-        'monte, bórrala y escribe otra.',
+      'DOS. Qué clase de esfuerzo es ESA actividad, no «ejercicio» en general. El ' +
+        'fútbol son sprints repetidos, frenadas y cambios de dirección, y lo que pasa ' +
+        'factura son los isquios en excéntrico. Nadar es tirón de dorsal y hombro sin ' +
+        'impacto. Bajar del monte castiga la rodilla mucho más que subirlo. La ' +
+        'escalada se acaba por el antebrazo, no por las piernas.',
       '',
-      'Dile qué le ha hecho eso a su cuerpo. Cada campo, UNA frase de veinticinco ' +
-        'palabras como mucho:',
+      'Cada campo, UNA frase de veinticinco palabras como mucho:',
       '- "sitio": qué es eso en concreto y cómo queda su tiempo frente a lo normal ' +
         'allí. Cadena vacía si no lo reconoces; no es obligatorio rellenarlo.',
-      '- "intensidad": cómo de duro fue de verdad, comparado con algo que él conozca ' +
-        '—una sesión suya de pesas, una carrera, un paseo— y por qué esta actividad ' +
-        'cansa como cansa.',
+      '- "intensidad": a qué se pareció en esfuerzo, comparado con algo que él conozca ' +
+        '—una sesión suya de pesas, una carrera, un paseo— y qué tiene esta actividad ' +
+        'que cansa así. NO empieces diciendo cuánto duró.',
       '- "carga": qué músculo o articulación queda tocado y cuánto le va a durar, ' +
-        'contando lo que ya lleva esta semana en esas zonas.',
+        'contando lo que ya lleva esta semana. Nombra uno o dos, no la lista entera.',
       '- "musculo": si eso construye músculo, lo mantiene o ni una cosa ni otra, y por ' +
         'qué. Sé honesto: casi ninguna actividad de fuera hace hipertrofia, y decirle ' +
         'que sí para agradar le hace entrenar peor.',
@@ -2666,12 +2683,6 @@
         'qué músculo o qué articulación, qué síntoma, o qué no entrenar mañana y por ' +
         'qué. Si de verdad no hay nada que avisar, dilo en cinco palabras y no ' +
         'rellenes.',
-      '',
-      'PROHIBIDO, y esto no es un consejo de estilo: recitarle el MET, su peso o los ' +
-        'minutos —son cuentas nuestras y los tiene en pantalla—; repetirle la lista ' +
-        'de músculos; los rellenos de gimnasio tipo «descansa bien», «hidrátate», ' +
-        '«escucha a tu cuerpo» o «para que las fibras se reparen»; los signos de ' +
-        'exclamación; y adular.',
       '',
       'Devuelve JSON: {"sitio":"","intensidad":"","carga":"","musculo":"","ojo":""}'
     ].filter(function (l) { return l !== null; }).join(SALTO);
