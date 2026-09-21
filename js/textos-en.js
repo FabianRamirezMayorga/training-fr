@@ -49,7 +49,6 @@
 
     'Tu nombre': 'Your name',
     'Con el que te saluda la app': 'What the app greets you by',
-    '¿Cómo te llamas?': "What's your name?",
 
     'Dónde entrenas': 'Where you train',
 
@@ -4130,6 +4129,7 @@
 
     /* ---------- El historial de comidas y el menú de hoy ---------- */
     'Lo que has comido': 'What you have eaten',
+    '{n} kcal/día': '{n} kcal/day',
     '{n} registro': '{n} entry',
     '{n} registros': '{n} entries',
     '{n} g de proteína': '{n} g of protein',

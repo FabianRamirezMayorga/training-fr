@@ -311,8 +311,14 @@
         /* `nota` es la frase tal cual está escrita y se traduce aquí.
            `notaHecha` es la que ya viene resuelta porque lleva un número
            dentro: volver a pasarla por T() la buscaria con el numero puesto
-           y no la encontraria nunca. */
-        (o.nota ? '<div class="campo-nota">' + esc(T(o.nota)) + '</div>' : '') +
+           y no la encontraria nunca.
+
+           Y la primera solo sale editando. Explica para qué sirve el campo, y
+           eso hace falta al rellenarlo, no al mirarlo: leyendo eran dos
+           renglones de ayuda debajo de cada dato, y la pantalla se iba a cuatro
+           pantallas de rodar para comprobar una edad. La segunda se queda
+           siempre, que esa no explica nada: es un número. */
+        (o.nota && edita ? '<div class="campo-nota">' + esc(T(o.nota)) + '</div>' : '') +
         (o.notaHecha ? '<div class="campo-nota">' + esc(o.notaHecha) + '</div>' : '') +
         (o.abajo || '') +
         '</div>';

@@ -5482,14 +5482,22 @@
 
       <!-- El nombre ocupaba una tarjeta entera para una palabra: rótulo arriba,
            etiqueta debajo y una caja de ancho completo para escribir «Fabián».
-           En una fila, con el nombre a la derecha, cabe lo mismo en un tercio. -->
+           En una fila, con el nombre a la derecha, cabe lo mismo en un tercio.
+
+           Y se lee, no se escribe. Era una caja de texto puesta ahí mismo, que
+           además no guardaba nada: se escribía dentro y el nombre seguía igual
+           porque nadie escuchaba ese campo. Ahora lleva a Datos y hábitos, que
+           es donde sí se guarda: un dato, un sitio donde se cambia. Con dos
+           cajas para lo mismo, tarde o temprano una deja de funcionar y no se
+           entera nadie. -->
       <div class="aj-caja" style="margin-top:14px">
-        <div class="aj-fila">
+        <button class="aj-fila tap" data-a="editarnombre">
           <span class="aj-ico">${raw(icon('perfil'))}</span>
-          <span class="grow"><span class="aj-tit">${T('Tu nombre')}</span>
+          <span class="grow" style="text-align:left"><span class="aj-tit">${T('Tu nombre')}</span>
             <span class="aj-sub">${T('Con el que te saluda la app')}</span></span>
-          <input class="aj-campo" id="s-name" value="${s.name}" placeholder="${T('¿Cómo te llamas?')}">
-        </div>
+          <span class="aj-valor">${s.name || T('Sin poner')}</span>
+          <span class="aj-lapiz">${raw(icon('edit'))}</span>
+        </button>
       </div>
 
       <div class="plan-acciones" style="margin:10px 0 0">
@@ -5927,6 +5935,9 @@
     });
     bind(root, '[data-a=claves]', function () { go('claves'); });
     bind(root, '[data-a=ircuenta]', function () { go('cuenta'); });
+    /* El nombre se cambia en Datos y hábitos, que es donde vive con los demás
+       datos de la persona. Aquí solo se enseña. */
+    bind(root, '[data-a=editarnombre]', function () { go('datos'); });
 
     bindAll(root, '[data-reg]', function (el) {
       Store.setSetting('registro', el.dataset.reg);

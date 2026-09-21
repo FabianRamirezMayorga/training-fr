@@ -206,7 +206,14 @@
 
       ${raw(menus.length > 1 ? html`
         <p class="tiny" style="margin-top:12px">El menú marcado como principal es el que
-        sale en «hoy» y en la portada. Los demás siguen aquí.</p>` : '')}`;
+        sale en «hoy» y en la portada. Los demás siguen aquí.</p>` : '')}
+
+      <!-- Lo comido va al final y no pegado a la tarjeta de hoy. Ahí en medio
+           partía la pantalla en dos: primero lo de hoy, luego sesenta días de
+           historia, y después otra vez cosas de ahora -tus números, la despensa,
+           los menús-. Lo que se consulta de vez en cuando va al fondo, que es
+           donde uno lo busca cuando lo busca. -->
+      ${raw(historialHTML(m))}`;
   };
 
   /* ---------- el objetivo del día ----------
@@ -431,9 +438,7 @@
         <p class="tiny" style="margin:9px 0 0">${T('La foto se encoge en el móvil, se manda para que la IA la lea y se suelta: no se guarda ni aquí ni en ningún sitio. Solo quedan el nombre del plato y los números.')}</p>
       </div>
 
-      <div id="comida-pensando"></div>
-
-      ${raw(historialHTML(m))}`;
+      <div id="comida-pensando"></div>`;
   }
 
   /* Qué días quedan abiertos. Vive fuera del pintado porque la app repinta la
@@ -445,19 +450,69 @@
      Registrando de verdad son cinco o seis platos diarios: en una semana la
      lista plana pasaba de cuarenta filas y el día de hoy quedaba enterrado.
      Cada día es una fila con su total; se abre el que interese. */
+  /* El lunes de una clave de día, para agrupar. La misma cuenta que usa el
+     historial de entrenamientos: dos ideas distintas de dónde empieza la semana
+     en la misma app es de lo que más despista. */
+  function lunesDe(clave) {
+    const p = String(clave).split('-');
+    const f = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    const dia = (f.getDay() + 6) % 7;           // lunes = 0
+    return new Date(f.getFullYear(), f.getMonth(), f.getDate() - dia).getTime();
+  }
+
+  function tituloSemana(lunes) {
+    const hoyLunes = lunesDe(Comidas.claveDia());
+    if (lunes === hoyLunes) return T('Esta semana');
+    if (lunes === hoyLunes - 7 * 86400000) return T('La semana pasada');
+    return Tn('Del {a} al {b}', {
+      a: UI.fechaCorta(lunes), b: UI.fechaCorta(lunes + 6 * 86400000)
+    });
+  }
+
+  /* Lo comido, por semanas y dentro por días.
+     Sesenta días eran sesenta fichas seguidas de dos renglones cada una: una
+     tira de pantalla y media para llegar al final de Alimentación. Con las
+     semanas por fuera son cuatro o cinco filas, y cada día cabe en un renglón
+     porque lo que se busca ahí es la cifra, no leerse el día entero.
+
+     Todo plegado, hoy incluido: los totales de hoy ya están arriba en la
+     tarjeta grande, así que abrirlo solo repetía lo que ya se ve. */
   function historialHTML(m) {
     const dias = Comidas.porDias(60);
     if (!dias.length) return '';
 
-    /* Todo plegado, hoy incluido: los totales del día ya están arriba, en la
-       tarjeta grande, así que abrir hoy solo alargaba la pantalla repitiendo lo
-       que ya se ve. Se abre lo que se quiera mirar. */
     const hoyClave = Comidas.claveDia();
+
+    const orden = [];
+    const semanas = {};
+    dias.forEach(function (d) {
+      const k = lunesDe(d.dia);
+      if (!semanas[k]) { semanas[k] = []; orden.push(k); }
+      semanas[k].push(d);
+    });
 
     return html`
       <div class="list-title" style="margin-top:18px">${T('Lo que has comido')}</div>
       <div class="stack">
-        ${raw(dias.map(function (d) { return diaComidasHTML(d, m, hoyClave); }).join(''))}
+        ${raw(orden.map(function (k) {
+          const lista = semanas[k];
+          const kcal = lista.reduce(function (n, d) { return n + d.kcal; }, 0);
+          /* La media y no la suma: «56.000 kcal» en una semana no le dice nada
+             a nadie, y «2.100 al día» se compara solo con tu objetivo. */
+          const media = Math.round(kcal / lista.length);
+          return '<details class="sem-comidas"' + (k === lunesDe(hoyClave) ? ' open' : '') + '>' +
+            '<summary>' +
+              '<span class="row-icon dia-flecha">' + icon('chevron') + '</span>' +
+              '<span class="grow sem-tit">' + esc(tituloSemana(k)) + '</span>' +
+              '<span class="tiny nowrap">' +
+                esc(Tp(lista.length, '{n} día', '{n} días')) + ' \u00b7 ' +
+                esc(Tn('{n} kcal/día', { n: UI.num(media) })) +
+              '</span>' +
+            '</summary>' +
+            '<div class="stack sem-dias">' +
+              lista.map(function (d) { return diaComidasHTML(d, m, hoyClave); }).join('') +
+            '</div></details>';
+        }).join(''))}
       </div>`;
   }
 
@@ -468,19 +523,20 @@
        referencia, que el objetivo no cambia de un día para otro. */
     const cumple = m && m.prot && d.prot >= m.prot;
 
+    /* Un renglón por día. Eran dos: el nombre con «3 registros» debajo y las
+       kcal con la proteína debajo, cuatro líneas de texto para dos cifras. En
+       fila se lee igual y ocupa la mitad. */
     return html`
       <details class="dia-comidas" data-dia="${d.dia}"${raw(abierto ? ' open' : '')}>
         <summary>
           <span class="row-icon dia-flecha">${raw(icon('chevron'))}</span>
-          <div class="grow">
-            <div class="dia-nombre">${nombreDeDia(d, hoyClave)}</div>
-            <div class="tiny">${Tp(cuantos, '{n} registro', '{n} registros')}</div>
-          </div>
-          <div class="dia-suma">
-            <b>${UI.num(d.kcal)}</b><span class="tiny"> kcal</span>
-            <div class="tiny"${raw(cumple ? ' style="color:var(--brand-1)"' : '')}>${
-              Tn('{n} g de proteína', { n: d.prot })}</div>
-          </div>
+          <span class="grow dia-nombre">${nombreDeDia(d, hoyClave)}
+            <span class="tiny dia-cuantos">${raw('\u00b7')} ${cuantos}</span></span>
+          <span class="tiny nowrap dia-suma">
+            <b>${UI.num(d.kcal)}</b> kcal ${raw('\u00b7')} <span${
+              raw(cumple ? ' style="color:var(--brand-1)"' : '')}>${
+              Tn('{n} g', { n: d.prot })}</span>
+          </span>
         </summary>
         <div class="stack" style="padding:0 0 11px">
           ${raw(d.lista.map(comidaFilaHTML).join(''))}
