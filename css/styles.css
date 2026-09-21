@@ -197,6 +197,12 @@ a{color:var(--blue)}
   34%{transform:translateX(260%) skewX(-16deg)}
   100%{transform:translateX(260%) skewX(-16deg)}}
 /* Quien pide menos movimiento no quiere un brillo latiendo en su portada. */
+/* Sobre verde, el reflejo verde no se ve. El mismo blanco que lleva el botón
+   grande, para que el reflejo sea uno solo en toda la app aunque el color
+   tenga que cambiar con el fondo. */
+.btn.primary.realce::after{
+  background:linear-gradient(100deg,transparent,
+    color-mix(in srgb,#fff 40%,transparent) 50%,transparent)}
 @media (prefers-reduced-motion:reduce){.realce::after{animation:none}}
 .btn.icon{padding:.5em;width:36px;height:36px;flex:none}
 .btn.grande{padding:.95em 1.2em;font-size:1.02rem;font-weight:700}

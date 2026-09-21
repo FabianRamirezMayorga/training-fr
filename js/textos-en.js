@@ -340,7 +340,7 @@
       'If you did something on your own, log it. And if you fancy training, pick a routine.',
     'Copia una plantilla probada y edítala a tu gusto, o móntate el programa con tus datos.':
       'Copy a proven template and edit it, or build the programme from your own data.',
-    'Arrancar el cronómetro': 'Start the stopwatch',
+    'Empezar algo ahora': 'Start something now',
     'Apuntar algo': 'Log something',
     'Elegir rutina': 'Pick a routine',
     'Ver plantillas': 'See templates',

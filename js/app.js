@@ -525,8 +525,10 @@
           : T('Copia una plantilla probada y edítala a tu gusto, o móntate el programa con tus datos.')}</p>
         <div class="row" style="margin-top:12px">
           ${raw(rutinas.length
+            /* Los dos neutros: el verde de este día se lo lleva «Empezar algo
+               ahora», que es lo más probable en un día sin plan. */
             ? '<button class="btn grow sm" data-a="apuntar">' + esc(T('Apuntar algo')) + '</button>' +
-              '<button class="btn primary grow sm" data-a="plantillas">' + esc(T('Elegir rutina')) + '</button>'
+              '<button class="btn grow sm" data-a="plantillas">' + esc(T('Elegir rutina')) + '</button>'
             : '<button class="btn grow sm" data-a="plantillas">' + esc(T('Ver plantillas')) + '</button>' +
               '<button class="btn primary grow sm" data-a="programa">' + esc(T('Crear mi programa')) + '</button>')}
         </div>
@@ -907,14 +909,19 @@
         ${raw(diaLibreHTML(rutinas))}
         <!-- El día libre también necesita su botón: cronometrar una trotada o una
              caminata es justo lo que se hace un día sin plan, y un enlace flojo
-             no es sitio para eso. Lo que no puede es llamarse «iniciar
-             entrenamiento», que promete un plan que hoy no hay: dice lo que de
-             verdad hace, poner el cronómetro en marcha.
+             no es sitio para eso.
 
-             Y sin verde, que el verde de esta tarjeta ya lo lleva «elegir
-             rutina». -->
-        <button class="btn block" data-a="empezarlibre" style="margin-top:9px">
-          ${raw(icon('timer'))} ${T('Arrancar el cronómetro')}
+             Se llama como el de arriba pero al revés: «Apuntar algo» es lo que ya
+             hiciste y «Empezar algo ahora» es lo que arranca con el cronómetro
+             corriendo. Misma construcción y lo único que cambia es el verbo y el
+             tiempo, que es la única diferencia que hay de verdad.
+
+             Verde solo si ya tiene rutinas: a quien acaba de entrar en la app lo
+             que le hace falta es montarse el programa, y ahí el verde se queda
+             en la tarjeta. Uno solo, siempre. -->
+        <button class="btn ${rutinas.length ? 'primary ' : ''}block realce"
+                data-a="empezarlibre" style="margin-top:9px">
+          ${raw(icon('timer'))} ${T('Empezar algo ahora')}
         </button>`)}
 
       <div class="muelle"></div>
