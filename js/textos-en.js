@@ -3960,6 +3960,7 @@
     'Nadar': 'Swimming',
     'Remo o piragua': 'Rowing or kayaking',
     'Escalada': 'Climbing',
+    'Saltar la comba': 'Skipping rope',
     'Boxeo o artes marciales': 'Boxing or martial arts',
     'Senderismo': 'Hiking',
     'Deporte de equipo': 'Team sport',

@@ -3103,6 +3103,8 @@
       musculos: ['shoulders', 'abdominals', 'lats', 'triceps', 'calves'] },
     { id: 'baile', label: 'Baile', met: 5,
       musculos: ['quadriceps', 'calves', 'glutes', 'abdominals'] },
+    { id: 'comba', label: 'Saltar la comba', met: 11,
+      musculos: ['calves', 'quadriceps', 'shoulders', 'abdominals'] },
     { id: 'pilates', label: 'Pilates o yoga', met: 3,
       musculos: ['abdominals', 'lower back', 'glutes'] },
     { id: 'estirar', label: 'Estirar y movilidad', met: 2.5, musculos: [] },
@@ -3622,6 +3624,9 @@
     ['raqueta', ['padel', 'pádel', 'tenis', 'tennis', 'squash', 'badminton',
       'pickleball', 'raqueta', 'racquet', 'ping pong', 'pimpon']],
     ['baile', ['bail', 'danza', 'danc', 'zumba', 'salsa', 'rumba', 'bachata']],
+    /* Sin «saltar» a secas: «saltos al cajón» no es esto. Y va detrás de escalada
+       porque «escalada con cuerda» es escalada, y manda la primera que casa. */
+    ['comba', ['comba', 'lazo', 'cuerda', 'soga', 'skipping', 'jump rope', 'rope']],
     ['pilates', ['pilates', 'yoga']],
     ['estirar', ['estir', 'movilidad', 'flexibilidad', 'stretch', 'mobility']],
     ['pesas', ['pesas', 'gimnasio', 'gym', 'mancuerna', 'weights', 'lifting',
