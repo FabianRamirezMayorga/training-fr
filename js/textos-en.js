@@ -332,7 +332,6 @@
     'Entrenos': 'Workouts',
     'Series semana': 'Sets this week',
     'Volumen semana': 'Volume this week',
-    'Ver el día entero': 'See the whole day',
 
     'Hoy': 'Today',
     'Ayer': 'Yesterday',
@@ -4171,6 +4170,7 @@
     '{min} min de actividad. Si lo notas pesado, baja una serie por ejercicio o quita algo de peso: rendir menos hoy es normal.':
       '{min} min of activity. If it feels heavy, drop a set per exercise or take some weight off: performing worse today is normal.',
     'Tu día': 'Your day',
+    'Ver mi día': 'See my day',
     'Sube a {peso}': 'Go up to {peso}',
     'Baja a {peso}': 'Drop to {peso}',
     'Repite {peso}': 'Stay at {peso}',

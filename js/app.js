@@ -899,7 +899,7 @@
            veces a media pantalla de distancia. El día sin rutina sí mantiene
            la suya, que ahí no hay botón que la repita. -->
       <div class="muelle"></div>
-      <!-- El rótulo se queda aunque la tarjeta se vaya: «Ver el día entero» no
+      <!-- El rótulo se queda aunque la tarjeta se vaya: «Ver mi día» no
            lo dice nadie más, y lo que viene debajo —la semana y lo comido— sigue
            siendo lo de hoy. -->
       <div class="list-head portada-titulo">
@@ -911,7 +911,7 @@
              a hacer», y en la portada solo puede haber una cosa así. Con este
              botón también en verde, el de Entrenar dejaba de destacar. Y así
              se parece al resto de acciones de sección de la app. -->
-        <button class="btn sm" data-a="verdia">${raw(icon('lista'))} ${T('Ver el día entero')}</button>
+        <button class="btn sm realce" data-a="verdia">${raw(icon('lista'))} ${T('Ver mi día')}</button>
       </div>
       ${raw(deHoy.length
         ? ''
