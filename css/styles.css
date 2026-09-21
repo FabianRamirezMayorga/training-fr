@@ -1813,14 +1813,20 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .ps-dia.entrenado .ps-num { color: var(--acc); }
 .ps-dia.sin-entrenar .ps-num { color: var(--bad); }
 .ps-dia.libre .ps-num { color: var(--dim2); }
-.ps-marcas { display: flex; gap: 4px; margin-top: 5px; }
+.ps-marcas { display: flex; gap: 3px; margin-top: 5px; }
 
-/* Nueve píxeles y no seis: tres puntos por día es un dato, y un dato que hay
-   que acercarse a mirar no se mira. */
+/* Cinco píxeles. Nueve era el tamaño de cuando la tira tenía siete días y los
+   puntos eran la mitad de la ficha: con quince días seguidos, tres lunares
+   gordos por día pesaban más que el número, que es lo que se viene a leer.
+   Pequeños siguen leyéndose porque lo que se mira es si están encendidos, no
+   su forma. El hueco baja a tres para que los tres sigan siendo un grupo.
+
+   El aro del punto apagado no baja proporcional: a 0,8 px desaparecía sobre el
+   fondo oscuro y el día parecía no tener punto en vez de tenerlo apagado. */
 .ps-punto {
-  display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+  display: inline-block; width: 5px; height: 5px; border-radius: 50%;
   background: transparent;
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--dim2) 45%, transparent);
+  box-shadow: inset 0 0 0 1.2px color-mix(in srgb, var(--dim2) 55%, transparent);
 }
 .ps-punto.entreno.si { background: var(--acc); box-shadow: none; }
 .ps-punto.prote.si { background: var(--brand-1); box-shadow: none; }
