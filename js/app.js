@@ -4112,6 +4112,10 @@
           }).then(function (r) {
             botonAnalisis.disabled = false;
             const filas = [
+              /* Lo primero, si reconoció el sitio. Es la única línea que demuestra
+                 que ha mirado QUÉ hizo y no solo cuánto duró, y va vacía cuando no
+                 lo conoce, que también es una respuesta. */
+              [T('En concreto'), r.sitio],
               [T('Intensidad'), r.intensidad],
               [T('Carga'), r.carga],
               [T('Músculo'), r.musculo],

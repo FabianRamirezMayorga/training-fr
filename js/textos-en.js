@@ -427,6 +427,7 @@
     'Mirando qué fue…': 'Working out what it was…',
     'Afinado por la IA.': 'Fine-tuned by the AI.',
     'Mirando qué te ha hecho…': 'Working out what it did to you…',
+    'En concreto': 'Specifically',
     'Intensidad': 'Intensity',
     'Carga': 'Load',
     'Ojo': 'Watch out',

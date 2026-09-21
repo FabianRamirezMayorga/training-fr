@@ -2591,7 +2591,9 @@
     if (!nombre || !min) return Promise.reject(new Error('Falta la actividad o el tiempo.'));
 
     const musculos = (datos.musculos || []).slice();
-    const clave = 'anal1:' + I18N.norm(nombre) + ':' + min + ':' + musculos.join(',') +
+    /* El «2» es la versión de las instrucciones: al cambiarlas, lo guardado con
+       las viejas deja de valer y hay que volver a preguntar. */
+    const clave = 'anal2:' + I18N.norm(nombre) + ':' + min + ':' + musculos.join(',') +
       ':' + (g.Idioma ? Idioma.actual() : 'es');
     const guardado = leerCache(clave, 12);
     if (guardado) return Promise.resolve(guardado);
@@ -2608,7 +2610,7 @@
           'contestes en español.'
         : null,
       'Eres su entrenador. Acaba de hacer esto y va a apuntarlo:',
-      '- Actividad: ' + nombre,
+      '- Lo que ha escrito, con sus palabras: "' + nombre + '"',
       /* Dos veces y de dos maneras. Con «100 min» a secas contestó «ocho horas a
          MET 5,5»: el número suelto se le confunde con otra cosa, y una frase que
          empieza con una duración falsa ya no vale para nada. */
@@ -2627,8 +2629,20 @@
         ? 'En el gimnasio, estos siete días lleva: ' + recientes.join(', ') + '.'
         : 'Estos siete días no ha hecho series de gimnasio en esas zonas.',
       '',
-      'Dile qué le ha hecho eso a su cuerpo. Cuatro cosas, cada una en UNA frase de ' +
-        'veinticinco palabras como mucho, concretas y sin adular:',
+      'ANTES DE NADA, mira QUÉ ha escrito exactamente. Si ahí hay un sitio, una ' +
+        'prueba o un recorrido concreto —un cerro, una montaña, una carrera popular, ' +
+        'una ruta conocida— y lo reconoces de verdad, usa lo que sepas de él: ' +
+        'desnivel, distancia, escalones, cuánto se tarda normalmente. Compara SU ' +
+        'tiempo con lo normal allí y dilo con el dato concreto.',
+      'Y si NO lo reconoces con seguridad, no te lo inventes ni lo disimules con un ' +
+        '«aproximadamente»: deja "sitio" vacío y trátalo como la actividad genérica ' +
+        'que es. Un número falso sobre un sitio real es peor que no decir nada, ' +
+        'porque suena a dato y se lo va a creer.',
+      '',
+      'Dile qué le ha hecho eso a su cuerpo. Cada campo, UNA frase de veinticinco ' +
+        'palabras como mucho, concreta y sin adular:',
+      '- "sitio": qué es eso en concreto y cómo queda su tiempo frente a lo normal ' +
+        'allí. Cadena vacía si no lo reconoces; no es obligatorio rellenarlo.',
       '- "intensidad": cómo de duro fue de verdad para alguien como él, y por qué.',
       '- "carga": qué deja cargado y cuánto le va a durar, contando lo que ya lleva ' +
         'esta semana en esas zonas.',
@@ -2641,11 +2655,14 @@
       'Nada de signos de exclamación. No le repitas los minutos ni la lista de ' +
         'músculos, que los tiene en pantalla.',
       '',
-      'Devuelve JSON: {"intensidad":"","carga":"","musculo":"","ojo":""}'
+      'Devuelve JSON: {"sitio":"","intensidad":"","carga":"","musculo":"","ojo":""}'
     ].filter(function (l) { return l !== null; }).join(SALTO);
 
-    return llamarJSON(prompt, { maxTokens: 1024, temperatura: 0.4 }).then(function (r) {
+    /* Más fría que el resto: aquí no hay que no repetirse, hay que no inventarse
+       un desnivel. */
+    return llamarJSON(prompt, { maxTokens: 1024, temperatura: 0.25 }).then(function (r) {
       const limpio = {
+        sitio: String((r && r.sitio) || '').trim(),
         intensidad: String((r && r.intensidad) || '').trim(),
         carga: String((r && r.carga) || '').trim(),
         musculo: String((r && r.musculo) || '').trim(),
@@ -2654,6 +2671,8 @@
       if (!limpio.intensidad && !limpio.carga && !limpio.musculo && !limpio.ojo) {
         throw new Error('No ha dicho nada.');
       }
+      /* La clave ya lleva el nombre, así que el guardado no se mezcla entre una
+         subida al cerro y un partido. */
       escribirCache(clave, limpio);
       return limpio;
     });
