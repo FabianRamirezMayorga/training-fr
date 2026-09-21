@@ -880,10 +880,26 @@
       '</span><span class="chevron">' + icon('chevron') + '</span></button>';
   }
 
+  /* Cada grupo, plegado y con cuántas entradas tiene. El índice entero son más
+     de cuarenta fichas, y abierto de golpe hay que rodar cuatro pantallas para
+     saber qué hay: un índice que no cabe en la pantalla deja de ser un índice.
+
+     Ninguno abierto de entrada. Abrir el primero por cortesía obliga a cerrarlo
+     para ver los otros tres, que es trabajo de más para todos.
+
+     Lo que el buscador encuentra no se pliega: ahí ya has preguntado algo y la
+     respuesta no se esconde detrás de otro toque. */
   function grupoHTML(titulo2, xs) {
     if (!xs.length) return '';
-    return '<div class="list-title">' + esc(T(titulo2)) + '</div>' +
-      '<div class="list ay-lista">' + xs.map(filaHTML).join('') + '</div>';
+    return '<details class="plegable-fino fila-plegable ay-grupo">' +
+      '<summary>' +
+        '<span class="chevron down sec-flecha">' + icon('chevron') + '</span>' +
+        '<span class="grow">' + esc(T(titulo2)) + '</span>' +
+        '<span class="tiny nowrap">' + esc(String(xs.length)) + '</span>' +
+      '</summary>' +
+      '<div class="fino-cuerpo">' +
+        '<div class="list ay-lista">' + xs.map(filaHTML).join('') + '</div>' +
+      '</div></details>';
   }
 
   function irHTML(ir) {

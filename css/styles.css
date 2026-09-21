@@ -1998,7 +1998,7 @@ html[data-theme="light"] .zona-tile .pri { opacity: .45; }
 
 /* Material y nivel: trece y cuatro opciones que casi nunca se tocan. Plegadas,
    con su valor a la derecha. */
-.filtro-mas > summary {
+.fila-plegable > summary {
   margin-top: 14px; padding: 11px 13px; border-radius: var(--r-s);
   background: var(--card); color: var(--txt); text-transform: none;
   letter-spacing: 0; font-size: .92rem; font-weight: 600;
@@ -2007,13 +2007,13 @@ html[data-theme="light"] .zona-tile .pri { opacity: .45; }
    con mancuernas» no cabe de una pieza en un móvil, y de las dos mitades la
    que se puede leer a medias es la de la derecha: el título dice de qué va la
    fila, y el valor entero está a un toque. */
-.filtro-mas > summary .grow { white-space: nowrap; flex: none; }
-.filtro-mas > summary .tiny {
+.fila-plegable > summary .grow { white-space: nowrap; flex: none; }
+.fila-plegable > summary .tiny {
   color: var(--dim); flex: 0 1 auto; min-width: 0;
   margin-left: auto;                  /* sin grow en el título, nada lo empuja */
   overflow: hidden; text-overflow: ellipsis;
 }
-.filtro-mas > .fino-cuerpo { padding: 10px 0 0; }
+.fila-plegable > .fino-cuerpo { padding: 10px 0 0; }
 
 /* ---------- elegir una de muchas, en la hoja de filtrar ----------
    Eran píldoras. Con diez tipos de trabajo y trece materiales salían tres y
@@ -2423,7 +2423,7 @@ html[data-theme="light"] {
 
 /* Lo de dentro tambien: las filas plegables y las de conmutador dejan de ser
    cajas macizas. */
-.hoja-vidrio .filtro-mas > summary,
+.hoja-vidrio .fila-plegable > summary,
 .hoja-vidrio .filtro-sw > .row {
   background:
     linear-gradient(180deg, var(--vidrio-luz) 0%, transparent 60%),
@@ -2431,7 +2431,7 @@ html[data-theme="light"] {
   box-shadow: inset 0 1px 0 var(--vidrio-rim);
   transition: background .25s ease, box-shadow .25s ease;
 }
-.hoja-vidrio .filtro-mas > summary:active,
+.hoja-vidrio .fila-plegable > summary:active,
 .hoja-vidrio .filtro-sw > .row:active {
   background: color-mix(in srgb, var(--card) 85%, transparent);
 }
@@ -2490,7 +2490,7 @@ html[data-theme="light"] .zona-tile.on {
               0 8px 20px color-mix(in srgb, var(--acc) 24%, transparent);
 }
 
-html[data-theme="light"] .hoja-vidrio .filtro-mas > summary,
+html[data-theme="light"] .hoja-vidrio .fila-plegable > summary,
 html[data-theme="light"] .hoja-vidrio .filtro-sw > .row {
   background: #fff;
   box-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 12px rgba(16, 24, 40, .05);

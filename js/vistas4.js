@@ -609,7 +609,7 @@
       <!-- Plegado y con lo elegido a la derecha: contestada la pregunta, las
            otras tres opciones no pintan nada ocupando pantalla. Se cierra solo
            al elegir porque el formulario se repinta y nace cerrado. -->
-      <details class="plegable-fino filtro-mas" data-mas="gear">
+      <details class="plegable-fino fila-plegable" data-mas="gear">
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="grow">${T('Dónde entrenas')}</span>
@@ -652,7 +652,7 @@
            suelto al pie del grupo y solo el del elegido: para comparar dos había
            que tocarlos por turnos y leer abajo cada vez. Y plegado tras elegir,
            que son cuatro explicaciones y ya has decidido. -->
-      <details class="plegable-fino filtro-mas" data-mas="obj" style="margin-top:9px">
+      <details class="plegable-fino fila-plegable" data-mas="obj" style="margin-top:9px">
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="grow">${T('Tu objetivo')}</span>
@@ -670,7 +670,7 @@
 
       <!-- Plegada: es opcional y casi siempre se queda en «Equilibrado», así
            que ocho zonas abiertas eran ocho renglones para no tocar nada. -->
-      <details class="plegable-fino filtro-mas" data-mas="foco">
+      <details class="plegable-fino fila-plegable" data-mas="foco">
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="grow">${T('Priorizar una zona')}</span>

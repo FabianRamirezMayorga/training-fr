@@ -720,6 +720,40 @@
     });
   }
 
+  /* ---------- la ultima vez que se uso la app ----------
+     Para la pantalla de cuentas. Lo que trae Supabase es `last_sign_in_at`, que
+     solo cambia cuando alguien teclea su contraseña: con la sesión renovándose
+     sola en segundo plano, alguien que abre la app cada día figura entrando el
+     día que se dio de alta. Esto apunta la fecha de verdad.
+
+     Una vez al abrir la app y como mucho una cada seis horas: es un dato para
+     mirarlo de reojo en una lista, no un registro de auditoría, y no vale la
+     pena una escritura por cada vez que se toca algo.
+
+     Y en silencio: si falla —sin red, o sin la tabla porque no se ha pegado el
+     SQL— no se dice nada. Nadie ha pedido esto, es un apunte de fondo, y un
+     aviso de error por algo que el usuario no ha hecho solo asusta. */
+  const VISTO_CADA = 6 * 3600 * 1000;
+
+  function marcarVisto() {
+    const s = sesion();
+    if (!s || !s.user_id) return Promise.resolve(false);
+
+    let ultima = 0;
+    try { ultima = Number(localStorage.getItem('tfr_visto')) || 0; } catch (e) { ultima = 0; }
+    if (Date.now() - ultima < VISTO_CADA) return Promise.resolve(false);
+
+    const h = cabeceras(true);
+    h['Prefer'] = 'resolution=merge-duplicates,return=minimal';
+    return pedir('/rest/v1/actividad', {
+      method: 'POST', headers: h,
+      body: JSON.stringify([{ user_id: s.user_id, visto: new Date().toISOString() }])
+    }).then(function () {
+      try { localStorage.setItem('tfr_visto', String(Date.now())); } catch (e) { /* nada */ }
+      return true;
+    }).catch(function () { return false; });
+  }
+
   /* ---------- fusión ----------
      Añadir un dispositivo no puede costarle datos a nadie. Por eso no se
      reemplaza un estado por otro: se fusionan los dos, elemento a elemento.
@@ -1050,6 +1084,7 @@
     entrarConEnlace: entrarConEnlace, registrar: registrar, entrarConClave: entrarConClave,
     establecerClave: establecerClave,
     bajar: bajar, subir: subir, sincronizar: sincronizar,
+    marcarVisto: marcarVisto,
     hayDatosLocales: hayDatosLocales, programarSubida: programarSubida,
     arrancarAuto: arrancarAuto, pararAuto: pararAuto, subirAhora: subirAhora,
     estado: estadoActual, alCambiarEstado: alCambiarEstado, ciclo: ciclo,

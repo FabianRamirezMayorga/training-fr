@@ -80,12 +80,26 @@ Deno.serve(async (req) => {
   if (accion === 'listar') {
     const { data, error } = await supabase.auth.admin.listUsers({ perPage: 200 });
     if (error) return responder({ error: error.message }, 500);
+
+    /* Cuando se uso la app de verdad. last_sign_in_at solo cambia al teclear la
+       contrasena: una sesion que se renueva sola en segundo plano no lo toca, y
+       de alguien que entra a diario decia que entro hace un mes.
+
+       Si la tabla no esta -porque no se ha pegado el SQL todavia- la lista sale
+       igual, solo que sin esa columna. No merece romper la pantalla entera. */
+    let vistos = new Map<string, string>();
+    try {
+      const { data: act } = await supabase.from('actividad').select('user_id, visto');
+      vistos = new Map((act || []).map((r) => [r.user_id as string, r.visto as string]));
+    } catch (_) { /* sin tabla, sin columna */ }
+
     return responder({
       usuarios: data.users.map((u) => ({
         id: u.id,
         email: u.email,
         creado: u.created_at,
         ultimoAcceso: u.last_sign_in_at,
+        visto: vistos.get(u.id) || null,
         confirmado: !!u.email_confirmed_at,
         /* banned_until viene en el futuro mientras está desactivado */
         activo: !u.banned_until || new Date(u.banned_until) <= new Date(),

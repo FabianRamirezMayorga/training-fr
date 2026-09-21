@@ -221,14 +221,19 @@
   /* Cuándo fue, dicho como lo diría alguien. «13 sep» obliga a mirar el
      calendario para saber si eso fue ayer o hace tres semanas, que es justo lo
      que se quiere saber de una cuenta ajena. */
+  /* Le llega una fecha ISO de Supabase, no un número de milisegundos. Restarle
+     Date.now() a una cadena da NaN, y con NaN fallan todas las comparaciones de
+     abajo: caía siempre en la última línea y esto no dijo «hoy» ni «ayer» una
+     sola vez desde que existe. */
   function hace(t) {
-    if (!t) return '';
-    const dias = Math.floor((Date.now() - t) / 86400000);
+    const cuando = typeof t === 'number' ? t : Date.parse(t);
+    if (!cuando) return '';
+    const dias = Math.floor((Date.now() - cuando) / 86400000);
     if (dias <= 0) return T('hoy');
     if (dias === 1) return T('ayer');
     if (dias < 7) return Tn('hace {n} días', { n: dias });
     if (dias < 30) return Tn('hace {n} semanas', { n: Math.round(dias / 7) });
-    return UI.fechaCorta(t);
+    return UI.fechaCorta(cuando);
   }
 
   /* La cuenta, como una ficha. Eran filas de lista con el correo en una línea,
@@ -249,9 +254,15 @@
         '<span class="cu-linea">' +
           '<span class="cu-punto"></span>' +
           esc(u.activo ? T('Puede entrar') : T('Desactivada')) +
-          (u.ultimoAcceso
+          /* Lo que se mira de una lista de cuentas es quién la usa, no quién
+             tecleó su contraseña. Si hay marca de uso manda ella; el inicio de
+             sesión sigue estando, pero en el detalle. */
+          (u.visto
             ? '<span class="cu-sep">·</span>' +
-              esc(Tn('entró {cuando}', { cuando: hace(u.ultimoAcceso) }))
+              esc(Tn('activo {cuando}', { cuando: hace(u.visto) }))
+            : u.ultimoAcceso
+            ? '<span class="cu-sep">·</span>' +
+              esc(Tn('inició sesión {cuando}', { cuando: hace(u.ultimoAcceso) }))
             : '<span class="cu-sep">·</span>' + esc(T('no ha entrado nunca'))) +
         '</span>' +
         '<span class="cu-alta">' +
@@ -395,7 +406,12 @@
       <div class="aj-caja" style="margin-top:14px">
         <div class="aj-fila"><span class="grow"><span class="aj-tit">${T('Alta')}</span></span>
           <span class="cu-val">${UI.fechaCorta(u.creado)}</span></div>
-        <div class="aj-fila"><span class="grow"><span class="aj-tit">${T('Última entrada')}</span>
+        <div class="aj-fila"><span class="grow"><span class="aj-tit">${T('Última vez que la usó')}</span>
+          </span><span class="cu-val">${u.visto
+            ? UI.fechaCorta(u.visto) : T('sin datos')}</span></div>
+        <!-- Las dos cosas, porque no son la misma: una dice cuándo abrió la app
+             y la otra cuándo tuvo que volver a escribir su contraseña. -->
+        <div class="aj-fila"><span class="grow"><span class="aj-tit">${T('Último inicio de sesión')}</span>
           </span><span class="cu-val">${u.ultimoAcceso
             ? UI.fechaCorta(u.ultimoAcceso) : T('nunca')}</span></div>
       </div>

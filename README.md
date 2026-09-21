@@ -274,6 +274,22 @@ alter table public.estado enable row level security;
 
 create policy "solo lo mio" on public.estado
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Cuando se usó la app por última vez, para la pantalla de Cuentas. Hace falta
+-- porque `last_sign_in_at` de Supabase solo cambia al teclear la contraseña: una
+-- sesión que se renueva sola no lo toca, y de quien entra a diario diría que
+-- entró el día que se dio de alta. Cada cuenta escribe su propia fila y nadie
+-- lee la de otro; quien administra las ve todas desde la función del servidor,
+-- que va con la service_role key y se salta RLS.
+create table if not exists public.actividad (
+  user_id uuid primary key references auth.users on delete cascade,
+  visto timestamptz not null default now()
+);
+
+alter table public.actividad enable row level security;
+
+create policy "solo la mia" on public.actividad
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 ```
 
 4. En **Authentication → URL Configuration**, añade la dirección de tu app

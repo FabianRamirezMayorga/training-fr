@@ -3197,6 +3197,11 @@
     'Puede entrar': 'Can sign in',
     'Desactivada': 'Deactivated',
     'entró {cuando}': 'signed in {cuando}',
+    'activo {cuando}': 'active {cuando}',
+    'inició sesión {cuando}': 'signed in {cuando}',
+    'Última vez que la usó': 'Last time they used it',
+    'Último inicio de sesión': 'Last sign-in',
+    'sin datos': 'no data',
     'no ha entrado nunca': 'has never signed in',
     'Alta {fecha}': 'Joined {fecha}',
     'TÚ': 'YOU',
@@ -3226,7 +3231,6 @@
     'Desactivada: no puede entrar, pero sus datos siguen ahí':
       'Deactivated: cannot sign in, but their data is still there',
     'Alta': 'Joined',
-    'Última entrada': 'Last sign-in',
     'Desactivar la cuenta': 'Deactivate the account',
     'Volver a activarla': 'Activate it again',
     'Deja de poder entrar. Sus datos se quedan donde están y vuelve todo al activarla.':

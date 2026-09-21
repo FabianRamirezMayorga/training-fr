@@ -1904,7 +1904,7 @@
            trabajo» iba suelto y siempre abierto, y los otros dos se abrían a
            una pared de burbujas: entre los tres llenaban la pantalla y había
            que rodar para llegar al botón de ver. -->
-      <details class="plegable-fino filtro-mas" data-mas="tipo">
+      <details class="plegable-fino fila-plegable" data-mas="tipo">
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="grow">${T('Tipo de trabajo')}</span>
@@ -1920,7 +1920,7 @@
         </div>
       </details>
 
-      <details class="plegable-fino filtro-mas" data-mas="eq">
+      <details class="plegable-fino fila-plegable" data-mas="eq">
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="grow">${T('Material')}</span>
@@ -1936,7 +1936,7 @@
         </div>
       </details>
 
-      <details class="plegable-fino filtro-mas" data-mas="lv">
+      <details class="plegable-fino fila-plegable" data-mas="lv">
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="grow">${T('Nivel')}</span>
@@ -7316,6 +7316,13 @@
          en el propio módulo: arranca cuando la app ya tiene catálogo y perfil,
          que son de los que salen el peso y los músculos con los que recalcula. */
       if (g.Pendientes) Pendientes.enMarcha();
+
+      /* Y se apunta que hoy se abrió la app, para la pantalla de cuentas. Va en
+         segundo plano y sin avisar de nada: es un apunte para quien administra,
+         no algo que el usuario haya pedido. */
+      setTimeout(function () {
+        if (g.Sync && Sync.marcarVisto) Sync.marcarVisto();
+      }, 4000);
     }).catch(function (err) {
       console.error(err);
       fallo(T('No se pudo descargar el catálogo de ejercicios. Comprueba tu conexión.'));
