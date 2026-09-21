@@ -2985,19 +2985,40 @@
      se puede apuntar, la racha miente y el progreso enseña menos de lo que hay.
      Las calorías salen del MET de cada actividad por el peso y el tiempo, que es
      la misma cuenta que hace cualquier reloj y no pretende ser exacta. */
+  /* Qué mueve cada una. Va en la tabla y no lo decide la IA: que correr trabaja
+     el cuádriceps y los gemelos es una regla, no una opinión, y tiene que dar lo
+     mismo siempre y sin cobertura.
+
+     Sirve para dos cosas: que el historial diga de qué fue la sesión, y que
+     «lo que llevas abandonado» deje de acusarte de tener la pierna parada el
+     lunes después de correr el domingo.
+
+     Tres se quedan vacías a propósito. Estirar y la movilidad no son estímulo:
+     no evitan que un músculo se estanque, así que no deben reiniciar esa
+     cuenta. Y «pesas por mi cuenta» y «otra cosa» pueden ser cualquier cosa;
+     inventarles músculos sería peor que no decir nada. */
   const ACTIVIDADES = [
     /* El texto se traduce al pintarlo: la tabla se arma al cargar el archivo. */
-    { id: 'caminar', label: 'Caminar', met: 3.5 },
-    { id: 'correr', label: 'Correr', met: 9 },
-    { id: 'bici', label: 'Bici', met: 7 },
-    { id: 'nadar', label: 'Nadar', met: 7 },
-    { id: 'senderismo', label: 'Senderismo', met: 6 },
-    { id: 'equipo', label: 'Deporte de equipo', met: 7 },
-    { id: 'raqueta', label: 'Raqueta o pádel', met: 6.5 },
-    { id: 'baile', label: 'Baile', met: 5 },
-    { id: 'pilates', label: 'Pilates o yoga', met: 3 },
-    { id: 'estirar', label: 'Estirar y movilidad', met: 2.5 },
-    { id: 'pesas', label: 'Pesas por mi cuenta', met: 5 },
+    { id: 'caminar', label: 'Caminar', met: 3.5,
+      musculos: ['quadriceps', 'calves', 'glutes'] },
+    { id: 'correr', label: 'Correr', met: 9,
+      musculos: ['quadriceps', 'hamstrings', 'calves', 'glutes'] },
+    { id: 'bici', label: 'Bici', met: 7,
+      musculos: ['quadriceps', 'glutes', 'calves'] },
+    { id: 'nadar', label: 'Nadar', met: 7,
+      musculos: ['lats', 'shoulders', 'chest', 'middle back'] },
+    { id: 'senderismo', label: 'Senderismo', met: 6,
+      musculos: ['quadriceps', 'glutes', 'calves', 'hamstrings'] },
+    { id: 'equipo', label: 'Deporte de equipo', met: 7,
+      musculos: ['quadriceps', 'hamstrings', 'glutes', 'calves', 'abdominals'] },
+    { id: 'raqueta', label: 'Raqueta o pádel', met: 6.5,
+      musculos: ['shoulders', 'quadriceps', 'abdominals', 'forearms'] },
+    { id: 'baile', label: 'Baile', met: 5,
+      musculos: ['quadriceps', 'calves', 'glutes', 'abdominals'] },
+    { id: 'pilates', label: 'Pilates o yoga', met: 3,
+      musculos: ['abdominals', 'lower back', 'glutes'] },
+    { id: 'estirar', label: 'Estirar y movilidad', met: 2.5, musculos: [] },
+    { id: 'pesas', label: 'Pesas por mi cuenta', met: 5, musculos: [] },
     { id: 'otro', label: 'Otra cosa', met: 4 }
   ];
 
@@ -3471,7 +3492,7 @@
         }).join(''))}
       </div>
       <p class="tiny" style="margin:6px 0 0">${T('Si lo escribes tú, elige abajo lo que ' +
-      'más se le parezca en esfuerzo: de ahí salen las calorías.')}</p>
+      'más se le parezca: de ahí salen las calorías y los músculos que se apuntan.')}</p>
 
       <label class="tiny" style="display:block;margin-top:14px">${T('CUÁNDO')}</label>
       <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-dias">${raw(diasHTML.join(''))}</div>
@@ -3557,7 +3578,11 @@
             manual: true,
             actividad: a.id,
             minutos: elegido.min,
-            kcal: kcalDe()
+            kcal: kcalDe(),
+            /* Sin esto la sesión no decía de qué fue: el historial la dejaba en
+               «apuntado a mano» y la pierna seguía contando como abandonada
+               después de un partido. */
+            musculos: (a.musculos || []).slice()
           });
           UI.closeModal();
           render();

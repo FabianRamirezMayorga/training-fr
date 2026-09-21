@@ -400,15 +400,33 @@
 
   /* La semana, dia a dia: inicial, numero y una barra con lo que hiciste. Lo
      que en un mapa de calor de siete cuadros no se puede poner. */
+  /* El color sale de las series, pero un día de actividad no tiene ninguna: un
+     partido o una hora de bici dejaban el cuadro gris, como si no hubieras
+     hecho nada. Y encima la cuenta de arriba sí lo contaba, así que ponía
+     «4 de 7» con tres cuadros pintados. Cualquier día con algo apuntado se
+     pinta; cuánto se pinta sigue saliendo de las series. */
+  function nivelDia(d, max) {
+    if (d.series) return Math.min(4, Math.ceil(d.series / max * 4));
+    return d.n ? 1 : 0;
+  }
+
+  /* Y debajo, lo que hubo: las series si las hubo, y si no los minutos, que es
+     lo único que tiene una actividad. Un «0» bajo un cuadro verde no se
+     entiende. */
+  function cifraDia(d) {
+    if (d.series) return String(d.series);
+    if (d.n && d.minutos) return Tn('{n}′', { n: d.minutos });
+    return '·';
+  }
+
   function tiraSemana(dias, max, hoyKey) {
     return '<div class="tira-sem">' + dias.map(function (d) {
-      const nivel = !d.series ? 0 : Math.min(4, Math.ceil(d.series / max * 4));
       const f = new Date(d.t);
       return '<div class="ts-dia' + (d.k === hoyKey ? ' hoy' : '') + '">' +
         '<span class="ts-letra">' + UI.inicialDia(f.getDay()) + '</span>' +
         '<span class="ts-num">' + f.getDate() + '</span>' +
-        '<i class="n' + nivel + '"></i>' +
-        '<span class="ts-series">' + (d.series || '·') + '</span>' +
+        '<i class="n' + nivelDia(d, max) + '"></i>' +
+        '<span class="ts-series">' + UI.esc(cifraDia(d)) + '</span>' +
         '</div>';
     }).join('') + '</div>';
   }
@@ -459,7 +477,7 @@
     }
 
     const celdas = dias.map(function (d) {
-      const nivel = !d.series ? 0 : Math.min(4, Math.ceil(d.series / max * 4));
+      const nivel = nivelDia(d, max);
       const titulo = UI.fechaCorta(d.t) + (d.series
         ? ': ' + d.series + ' series' + (d.volumen ? ', ' + UI.kg(d.volumen) : '')
         : ': descanso');
@@ -627,7 +645,7 @@
           <span class="tiny" style="font-weight:600">${Tn('de {n}', { n: r.dias })}</span></div>
         ${raw(mapaCalor(porDia(r.dias)))}
         <p class="tiny" style="margin:10px 0 0">${r.dias <= 8
-          ? T('El número de abajo son las series de ese día.')
+          ? T('El número de abajo son las series de ese día, o los minutos si fue una actividad.')
           : T('Un cuadro por día.')} ${T('Los huecos también cuentan: el descanso forma parte del plan.')}</p>
       </div>
 
@@ -987,10 +1005,10 @@
   function lineaSesion(s) {
     const dura = UI.mmss(((s.end || s.start) - s.start) / 1000);
     const que = s.manual
-      ? 'apuntado a mano' + (s.kcal ? ' · ~' + UI.num(s.kcal) + ' kcal' : '')
+      ? T('apuntado a mano') + (s.kcal ? ' · ' + Tn('~{n} kcal', { n: UI.num(s.kcal) }) : '')
       : s.actividad && !s.setsDone
-      ? '~' + UI.num(s.kcal || 0) + ' kcal'
-      : s.setsDone + ' series' + (s.volume ? ' · ' + UI.kg(s.volume) : '');
+      ? Tn('~{n} kcal', { n: UI.num(s.kcal || 0) })
+      : Tn('{n} series', { n: s.setsDone }) + (s.volume ? ' · ' + UI.kg(s.volume) : '');
     return que + ' · ' + dura;
   }
 

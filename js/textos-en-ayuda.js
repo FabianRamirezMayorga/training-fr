@@ -445,7 +445,7 @@
       'Log each set with its weight and reps.',
     'Cuenta exactamente igual que una rutina del plan: historial, récords y estadísticas.':
       'It counts exactly the same as a routine from your plan: history, records and stats.',
-    'Para algo que hiciste otro día —una caminata el domingo, la pachanga del sábado—, en Rutinas tienes *Apuntar algo que ya hice*.':
+    'Para algo que hiciste otro día —una caminata el domingo, la pachanga del sábado—, en Rutinas tienes *Apuntar algo que ya hice*. Ahí no hay series que apuntar, así que ese día sale en verde con los minutos debajo en vez del número de series; y la app sabe qué músculos mueve cada actividad, así que correr el domingo deja de contar como pierna abandonada el lunes.':
       'For something you did on another day — a walk on Sunday, Saturday’s kickabout — Routines has *Log something I already did*.',
     'Abre las acciones del plan que quieres revisar.':
       'Open the actions for the plan you want reviewed.',

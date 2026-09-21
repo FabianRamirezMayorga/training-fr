@@ -346,7 +346,7 @@
         { t: 'Guarda.',
           d: 'Cuenta exactamente igual que una rutina del plan: historial, récords y estadísticas.' }
       ],
-      cierre: 'Para algo que hiciste otro día —una caminata el domingo, la pachanga del sábado—, en Rutinas tienes *Apuntar algo que ya hice*.',
+      cierre: 'Para algo que hiciste otro día —una caminata el domingo, la pachanga del sábado—, en Rutinas tienes *Apuntar algo que ya hice*. Ahí no hay series que apuntar, así que ese día sale en verde con los minutos debajo en vez del número de series; y la app sabe qué músculos mueve cada actividad, así que correr el domingo deja de contar como pierna abandonada el lunes.',
       ver: ['g-entrenar'] },
 
     { id: 'c-auditar', titulo: 'Pasar tu plan por la auditoría',

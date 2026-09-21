@@ -4111,6 +4111,17 @@
     'No te lo vuelvo a ofrecer': 'I will not offer it again',
     'Ya la tengo': 'I already have it',
     'Ya la tengo instalada, no me lo vuelvas a decir':
-      'I already have it installed, stop telling me'
+      'I already have it installed, stop telling me',
+
+    /* ---------- Los días con actividad ---------- */
+    '{n}′': '{n}′',
+    'El número de abajo son las series de ese día, o los minutos si fue una actividad.':
+      'The number underneath is that day’s sets, or the minutes if it was an activity.',
+    'apuntado a mano': 'logged by hand',
+    '~{n} kcal': '~{n} kcal',
+
+    /* ---------- Lo que decide el chip de actividad ---------- */
+    'Si lo escribes tú, elige abajo lo que más se le parezca: de ahí salen las calorías y los músculos que se apuntan.':
+      'If you write it yourself, pick the closest one below: that is where the calories and the muscles logged come from.'
   };
 })(window);
