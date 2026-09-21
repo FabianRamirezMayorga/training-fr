@@ -134,6 +134,24 @@
     return Programa.OBJETIVOS[p.objetivo] ? p.objetivo : 'mantener';
   }
 
+  function focoActual() {
+    return FOCOS.filter(function (f) { return f.id === est.foco; })[0] || FOCOS[0];
+  }
+
+  /* Una opción de una lista de una sola elección, con su explicación debajo si
+     la tiene. La misma pieza que la hoja de filtrar ejercicios: aquí eran
+     píldoras y «Perder grasa sin perder músculo» ocupaba una burbuja de dos
+     renglones, con lo que el paso entero se leía como un montón de globos.
+
+     La explicación va en cada fila y no al pie del grupo: al pie solo salía la
+     del elegido, así que comparar dos objetivos era tocarlos por turnos. */
+  function opcion(attr, valor, texto, activo, sub) {
+    return '<button class="filtro-op' + (activo ? ' on' : '') + '" data-' + attr + '="' +
+      esc(valor) + '"><span class="grow"><span class="op-et">' + esc(texto) + '</span>' +
+      (sub ? '<span class="op-sub">' + esc(sub) + '</span>' : '') + '</span>' +
+      '<span class="filtro-tick">' + icon('check') + '</span></button>';
+  }
+
   /* ---------- lo que la app sabe de ti ---------- */
   function fichaPerfil(p) {
     const nivel = nivelesDe();
@@ -521,50 +539,70 @@
         ${T('Corregir mis datos')}</button>`;
 
     const cuando = html`
-      <div class="row between" style="margin:9px 0 6px">
+      <div class="row between" style="margin:9px 0 7px">
         <span class="tiny">${T('QUÉ DÍAS')}</span>
         <span class="chip solid tiny-chip">${Tp(est.dias.length, '{n} día', '{n} días')}</span>
       </div>
-      <div class="row wrap" style="gap:6px">
+      <!-- Una semana, no siete etiquetas. Con los nombres enteros se iban a dos
+           renglones y se leían como siete botones sueltos; con las iniciales en
+           fila se ve de un vistazo qué días caen y cuáles no, que es lo que uno
+           está decidiendo. -->
+      <div class="sem-pick">
         ${raw(DIAS.map(function (d) {
-          return '<button class="chip ' + (est.dias.indexOf(d) !== -1 ? 'on' : '') +
-            '" data-dia="' + d + '">' + UI.diaLargo(d) + '</button>';
+          return '<button class="sp-dia' + (est.dias.indexOf(d) !== -1 ? ' on' : '') +
+            '" data-dia="' + d + '" aria-pressed="' +
+            (est.dias.indexOf(d) !== -1 ? 'true' : 'false') + '">' +
+            esc(UI.inicialDia(UI.DAY_NAMES.indexOf(d))) + '</button>';
         }).join(''))}
       </div>
-      <div class="tiny" style="margin:13px 0 6px">${T('DÓNDE VAS A ENTRENAR')}</div>
-      <div class="row wrap" style="gap:6px">
+
+      <div class="tiny" style="margin:15px 0 7px">${T('DÓNDE VAS A ENTRENAR')}</div>
+      <div class="filtro-lista">
         ${raw(Object.keys(Data.GEAR).filter(function (k) { return k !== 'todo'; })
           .map(function (k) {
-            return '<button class="chip ' + (gearActual() === k ? 'on' : '') +
-              '" data-gear="' + k + '">' + esc(T(Data.GEAR[k].label)) + '</button>';
+            return opcion('gear', k, T(Data.GEAR[k].label), gearActual() === k,
+              T(Data.GEAR[k].note));
           }).join(''))}
       </div>
-      <p class="tiny" style="margin:7px 0 0">${esc(T(Data.GEAR[gearActual()].note))}.
-      ${T('Solo vale para este plan; no cambia el catálogo del resto de la app.')}</p>
+      <p class="tiny" style="margin:8px 0 0">${T('Solo vale para este plan; no cambia el catálogo del resto de la app.')}</p>
 
-      <div class="tiny" style="margin:13px 0 6px">${T('CUÁNTO DURA CADA SESIÓN')}</div>
-      <div class="row wrap" style="gap:6px">
+      <!-- Cinco opciones cortas: eso es un mando de una pieza, no cinco
+           burbujas. Se ve la escala entera y dónde caes dentro de ella. -->
+      <div class="tiny" style="margin:15px 0 7px">${T('CUÁNTO DURA CADA SESIÓN')}</div>
+      <div class="segmento segmento-periodo">
         ${raw([30, 45, 60, 75, 90].map(function (m) {
-          return '<button class="chip ' + (est.minutos === m ? 'on' : '') +
-            '" data-min="' + m + '">' + m + ' min</button>';
+          return '<button class="' + (est.minutos === m ? 'on' : '') +
+            '" data-min="' + m + '">' + esc(Tn('{n} min', { n: m })) + '</button>';
         }).join(''))}
       </div>`;
 
     const busca = html`
-      <div class="row wrap" style="gap:6px;margin-top:9px">
+      <!-- Cada objetivo con lo que significa debajo. Antes el resumen salía
+           suelto al pie del grupo y solo el del elegido: para comparar dos había
+           que tocarlos por turnos y leer abajo cada vez. -->
+      <div class="filtro-lista" style="margin-top:9px">
         ${raw(Object.keys(Programa.OBJETIVOS).map(function (k) {
-          return '<button class="chip ' + (objetivoActual() === k ? 'on' : '') +
-            '" data-obj="' + k + '">' + esc(T(Programa.OBJETIVOS[k].label)) + '</button>';
+          return opcion('obj', k, T(Programa.OBJETIVOS[k].label), objetivoActual() === k,
+            T(Programa.OBJETIVOS[k].resumen));
         }).join(''))}
       </div>
-      <p class="tiny" style="margin:9px 0 0">${T(Programa.OBJETIVOS[objetivoActual()].resumen)}</p>
-      <div class="tiny" style="margin:13px 0 6px">${T('¿PRIORIZAR ALGUNA ZONA?')}</div>
-      <div class="pill-scroll" style="margin:0 -4px;padding-left:0">
-        ${raw(FOCOS.map(function (f) {
-          return '<button class="chip ' + (est.foco === f.id ? 'on' : '') +
-            '" data-foco="' + f.id + '">' + esc(T(f.label)) + '</button>';
-        }).join(''))}
-      </div>`;
+
+      <!-- Plegada: es opcional y casi siempre se queda en «Equilibrado», así
+           que ocho zonas abiertas eran ocho renglones para no tocar nada. -->
+      <details class="plegable-fino filtro-mas" data-mas="foco">
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="grow">${T('Priorizar una zona')}</span>
+          <span class="tiny nowrap">${T(focoActual().label)}</span>
+        </summary>
+        <div class="fino-cuerpo">
+          <div class="filtro-lista">
+            ${raw(FOCOS.map(function (f) {
+              return opcion('foco', f.id, T(f.label), est.foco === f.id, '');
+            }).join(''))}
+          </div>
+        </div>
+      </details>`;
 
     /* Lo que no está en ningún campo y es justo lo que hace que un plan deje de
        parecer de plantilla: lo que le molesta hoy y lo que quiere o no quiere. */
@@ -1162,22 +1200,30 @@
       if (chip) chip.textContent = Tp(est.dias.length, '{n} día', '{n} días');
     });
 
-    bindAll(root, '[data-min]', function (el) {
-      est.minutos = Number(el.dataset.min); guardarEstado(); render();
-    });
-    bindAll(root, '[data-obj]', function (el) {
-      est.objetivo = el.dataset.obj; guardarEstado(); render();
-    });
-    bindAll(root, '[data-foco]', function (el) {
-      est.foco = el.dataset.foco; guardarEstado(); render();
-    });
-    bindAll(root, '[data-gear]', function (el) {
+    /* Todos repintan sin moverse del sitio. Antes solo lo hacía el material, y
+       elegir objetivo o minutos te devolvía al principio del formulario: en un
+       formulario de cuatro pasos, cada toque costaba volver a bajar. */
+    const enElSitio = function (fn) {
+      return function (el) {
+        fn(el);
+        guardarEstado();
+        const pos = window.scrollY;
+        render();
+        window.scrollTo(0, pos);
+      };
+    };
+    bindAll(root, '[data-min]', enElSitio(function (el) {
+      est.minutos = Number(el.dataset.min);
+    }));
+    bindAll(root, '[data-obj]', enElSitio(function (el) {
+      est.objetivo = el.dataset.obj;
+    }));
+    bindAll(root, '[data-foco]', enElSitio(function (el) {
+      est.foco = el.dataset.foco;
+    }));
+    bindAll(root, '[data-gear]', enElSitio(function (el) {
       est.gear = el.dataset.gear;
-      guardarEstado();
-      const pos = window.scrollY;
-      render();
-      window.scrollTo(0, pos);
-    });
+    }));
 
     bind(root, '[data-a=crear]', crear);
     bind(root, '[data-a=crearia]', crearConIA);

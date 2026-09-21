@@ -1720,7 +1720,7 @@
     'Solo vale para este plan; no cambia el catálogo del resto de la app.':
       'It only applies to this plan; it doesn\'t change the catalogue for the rest of the app.',
     'CUÁNTO DURA CADA SESIÓN': 'HOW LONG EACH SESSION LASTS',
-    '¿PRIORIZAR ALGUNA ZONA?': 'PRIORITISE AN AREA?',
+    'Priorizar una zona': 'Prioritise an area',
     '¿ALGO TE MOLESTA AHORA MISMO?': 'ANYTHING BOTHERING YOU RIGHT NOW?',
     'Ej. la rodilla al bajar, el hombro por encima de la cabeza':
       'E.g. my knee on the way down, my shoulder overhead',
