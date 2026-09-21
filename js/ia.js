@@ -2609,7 +2609,12 @@
         : null,
       'Eres su entrenador. Acaba de hacer esto y va a apuntarlo:',
       '- Actividad: ' + nombre,
-      '- Duración: ' + min + ' min',
+      /* Dos veces y de dos maneras. Con «100 min» a secas contestó «ocho horas a
+         MET 5,5»: el número suelto se le confunde con otra cosa, y una frase que
+         empieza con una duración falsa ya no vale para nada. */
+      '- Duración: ' + min + ' minutos, es decir ' +
+        (min >= 60 ? Math.floor(min / 60) + ' h ' + (min % 60) + ' min' : min + ' min') +
+        '. No es más ni menos que eso; no lo redondees a horas ni lo exageres.',
       musculos.length
         ? '- Músculos que trabaja: ' + musculos.join(', ')
         : '- No sabemos qué músculos trabaja.',

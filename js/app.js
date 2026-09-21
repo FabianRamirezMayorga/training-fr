@@ -3742,7 +3742,8 @@
     const p = Perfil.datos();
     const peso = Number(p && p.peso) || 75;
     /* Sin actividad de salida: «Caminar» puesto es la app decidiendo por él. */
-    const elegido = { act: '', min: 60, atras: 0, nombre: '', ia: null };
+    const MIN_DEFECTO = 60;
+    const elegido = { act: '', min: MIN_DEFECTO, atras: 0, nombre: '', ia: null };
     const conIA = !!(g.IA && IA.activa());
 
     /* El MET lo pone el chip, salvo que la IA haya mirado lo que escribió: ella
@@ -3921,7 +3922,7 @@
           elegido.diaAMano = true;
           pintarFecha();
         });
-        const rodMin = UI.rodillo($('#rod-min'), minutosDelRodillo(), elegido.min, function (v) {
+        const rodMin = UI.rodillo($('#rod-min'), minutosDelRodillo(), MIN_DEFECTO, function (v) {
           elegido.min = v;
           elegido.minAMano = true;
           pintarMin();
@@ -3982,10 +3983,34 @@
           };
         });
 
+        /* Borrar lo escrito deja la hoja como al abrirla. Sin esto, vaciar el
+           campo se quedaba con la actividad, los minutos, el día y el análisis
+           de lo anterior, y Apuntar seguía encendido: se guardaba una sesión
+           que ya no se había escrito en ninguna parte. */
+        const reiniciar = function () {
+          elegido.act = '';
+          elegido.ia = null;
+          elegido.aMano = false;
+          elegido.minAMano = false;
+          elegido.diaAMano = false;
+          elegido.min = MIN_DEFECTO;
+          elegido.atras = 0;
+          ultimoIA = '';
+          $('#ac-lista').hidden = true;
+          $('#ac-ia-caja').hidden = true;
+          $('#ac-ia-txt').textContent = '';
+          sincroDia();
+          sincroMin();
+          pintarFecha();
+          pintarMin();
+          pintarFicha();
+          pintarKcal();
+        };
+
         $('#ac-nombre').oninput = function (ev) {
           elegido.nombre = ev.target.value.trim();
           clearTimeout(esperaIA);
-          if (!elegido.nombre) return;
+          if (!elegido.nombre) { reiniciar(); return; }
 
           /* Lo que escribe propone el esfuerzo… */
           if (!elegido.aMano) elegido.act = actividadDelTexto(elegido.nombre) || 'otro';
