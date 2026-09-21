@@ -2605,6 +2605,70 @@
     });
   }
 
+  /* ---------- a cuántas series equivale, en el reparto ----------
+     Parecida a estimarCarga pero no es la misma pregunta, y por eso no comparte
+     prompt. Allí se pregunta por la fatiga de ayer —con qué cuerpo llega hoy—
+     con una ventana de treinta y seis horas. Aquí se pregunta por el trabajo
+     acumulado de un periodo que puede ser de tres meses, que es otra cosa: no
+     hay fatiga que arrastrar a tres meses vista, hay volumen.
+
+     Sigue sin entrar en el número del reparto. Es lo que se enseña al tocar la
+     marca azul, donde ya se está explicando por qué esos minutos van aparte: la
+     estimación responde a la pregunta que lleva a tocarla, no la contradice.
+
+     Se pregunta solo cuando él toca, que es el mejor momento para gastarle un
+     poco de su clave: lo ha pedido. */
+  function seriesDeActividad(datos) {
+    if (!datos || !datos.minutos) return Promise.reject(new Error('No hay actividad que mirar.'));
+
+    const lista = (datos.actividades || []).filter(function (a) { return a.nombre; });
+    const clave = 'equiv1:' + datos.zona + ':' + datos.dias + ':' + datos.minutos + ':' +
+      lista.map(function (a) { return a.nombre + a.min; }).join('|') + ':' +
+      (g.Idioma ? Idioma.actual() : 'es');
+    const guardado = leerCache(clave, 12);
+    if (guardado) return Promise.resolve(guardado);
+
+    const perfil = g.Perfil ? Perfil.datos() : null;
+    const peso = Number(perfil && perfil.peso) || 0;
+
+    const prompt = [
+      (g.Idioma && Idioma.actual() === 'en')
+        ? 'RESPONDE EN INGLÉS: tiene la app puesta en inglés. Los datos de abajo ' +
+          'están en español porque así los guarda la app; entiéndelos, pero no le ' +
+          'contestes en español.'
+        : null,
+      'Eres su entrenador. En los últimos ' + datos.dias + ' días ha hecho esto fuera ' +
+        'del gimnasio, y todo ello trabaja ' + String(datos.zona).toLowerCase() + ':',
+      lista.length
+        ? lista.map(function (a) { return '- ' + a.nombre + ', ' + a.min + ' min'; }).join(SALTO)
+        : '- ' + datos.minutos + ' min de actividad',
+      '',
+      peso ? 'Pesa ' + peso + ' kg.' : null,
+      'No es fatiga de hoy lo que te pregunto, es trabajo acumulado: a cuántas series ' +
+        'de gimnasio de esa zona equivaldría, más o menos, todo ese tiempo. No lo vamos ' +
+        'a apuntar en ninguna parte ni se suma a su recuento: es para que se haga una ' +
+        'idea de lo que ha movido fuera.',
+      '- "series": un entero de 0 a 60. Si ese tipo de actividad no aporta trabajo ' +
+        'comparable a una serie de esa zona, pon 0 y dilo en la nota.',
+      '- "nota": UNA frase, veinte palabras como mucho, sobre qué clase de trabajo es ' +
+        'y en qué se parece o no a una serie de gimnasio. Sin adular y sin signos de ' +
+        'exclamación.',
+      '',
+      'Devuelve JSON: {"series":número,"nota":""}'
+    ].filter(function (l) { return l !== null; }).join(SALTO);
+
+    return llamarJSON(prompt, { maxTokens: 512, temperatura: 0.3 }).then(function (r) {
+      const n = Math.round(Number(r && r.series) || 0);
+      const fuera = {
+        series: Math.min(60, Math.max(0, n)),
+        nota: String((r && r.nota) || '').trim()
+      };
+      if (!fuera.series && !fuera.nota) throw new Error('No ha dicho nada.');
+      escribirCache(clave, fuera);
+      return fuera;
+    });
+  }
+
   /* Lo mismo que la foto pero desde lo que uno escribe. Nadie sabe cuántas
      calorías tiene «arroz con fideos, lentejas y carne asada», y pedírselo era
      pedirle un dato que no tiene: o lo dejaba en blanco o se lo inventaba, y un
@@ -3132,6 +3196,7 @@
     analizarSuplementos: analizarSuplementos,
     revisarCambioComida: revisarCambioComida,
     estimarActividad: estimarActividad, estimarCarga: estimarCarga,
+    seriesDeActividad: seriesDeActividad,
     leerRutina: leerRutina,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,

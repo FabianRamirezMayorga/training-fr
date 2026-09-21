@@ -999,6 +999,7 @@
     Object.keys(mins).forEach(function (id) {
       actividadPorZona[id] = {
         zona: etiqueta(id),
+        dias: rango.dias,
         minutos: mins[id],
         series: hecho[id] || 0,
         actividades: (reparto.actividades || {})[id] || [],
@@ -1238,6 +1239,8 @@
       <p class="muted">${Tn('Lo que hiciste fuera del gimnasio y que trabaja {zona}.',
         { zona: d.zona.toLowerCase() })}</p>
       <div class="list">${raw(filas)}</div>
+      ${raw(hayIA() ? '<p class="ia-equiv tiny" id="ia-equiv">' + icon('chispa') +
+        '<span>' + esc(T('Preguntando a la IA…')) + '</span></p>' : '')}
       <p class="tiny" style="margin:12px 0 0">${Tn('Estos minutos no cuentan en tus ' +
         '{series} series de {zona}, y por eso van en azul y aparte. Lo de fuera carga el ' +
         'músculo igual, pero para meterlo en la barra habría que inventarse cuántas ' +
@@ -1248,7 +1251,32 @@
         el.querySelectorAll('[data-cerrar]').forEach(function (b) {
           b.onclick = UI.closeModal;
         });
+        pintarEquivalencia(el, d);
       });
+  }
+
+  function hayIA() {
+    return !!(g.IA && IA.activa && IA.activa() && IA.seriesDeActividad);
+  }
+
+  /* La estimación llega después de que la hoja esté abierta. Si falla —sin red,
+     sin cuota— la línea se va entera: media frase de la IA es peor que ninguna,
+     y lo que había que contar ya está contado debajo. */
+  function pintarEquivalencia(el, d) {
+    const hueco = el.querySelector('#ia-equiv');
+    if (!hueco || !hayIA()) return;
+
+    IA.seriesDeActividad(d).then(function (r) {
+      const partes = [];
+      if (r.series) {
+        partes.push(Tn('La IA lo estima en unas {n} series de {zona}. Es su opinión, ' +
+          'no una medida.', { n: r.series, zona: d.zona.toLowerCase() }));
+      }
+      if (r.nota) partes.push(r.nota);
+      if (!partes.length) { hueco.remove(); return; }
+      /* textContent: esto viene de fuera y no se pinta como código. */
+      hueco.querySelector('span').textContent = partes.join(' ');
+    }).catch(function () { hueco.remove(); });
   }
 
   V.progreso.mount = function (root) {

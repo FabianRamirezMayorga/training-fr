@@ -155,7 +155,8 @@
         'Si pasa de veinte pero sí estás subiendo, te lo dice en verde: es mucho, pero te lo estás recuperando, y no hay nada que corregir.',
         'No se mide contra tu plan, se mide contra lo que sirve para crecer. Tu plan puede estar mal escrito, y entonces el que está mal es el plan, no lo que haces.',
         'Lo que hiciste fuera del gimnasio sale *dentro* de la barra de su zona, como un trozo azul en el extremo. No es una parte de tus series y no mueve el número de la derecha: un partido trabaja la pierna, pero sumarlo te diría que estás más cerca de tu objetivo de pesas de lo que estás, que es justo lo que esta pantalla sirve para ver.',
-        'Toca ese trozo azul y te cuenta qué fue: los minutos, cada actividad por su nombre y los músculos que movió. Su ancho cambia con los minutos, así que sirve para comparar una zona con otra, pero no con el verde de al lado: minutos y series no son la misma unidad y no caben en la misma regla.'
+        'Toca ese trozo azul y te cuenta qué fue: los minutos, cada actividad por su nombre y los músculos que movió. Su ancho cambia con los minutos, así que sirve para comparar una zona con otra, pero no con el verde de al lado: minutos y series no son la misma unidad y no caben en la misma regla.',
+        'Si tienes el entrenador puesto, dentro de esa hoja te añade a cuántas series de gimnasio equivaldría todo ese tiempo. Es una opinión suya —por eso va en azul y con su chispa— y sigue sin entrar en el número: está ahí porque es la pregunta que lleva a tocar el azul, no para que la app se corrija a sí misma.'
       ],
       ver: ['g-plan', 'c-libre'] },
 

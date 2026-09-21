@@ -2880,6 +2880,14 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .zona-marca::after { content: ''; position: absolute; inset: -14px -6px; }
 .zona-marca:active { transform: scale(1.06); }
 
+/* Lo que añade la IA dentro de la hoja: en azul, con su chispa, y separado del
+   párrafo de abajo, que es el que explica la regla. Uno es una opinión y el otro
+   no, y no pueden parecer la misma voz. */
+.ia-equiv { display: flex; gap: 8px; align-items: flex-start; margin: 14px 0 0;
+  color: var(--agua); line-height: 1.4; }
+.ia-equiv svg { width: 15px; height: 15px; flex: none; margin-top: 1px;
+  stroke: var(--agua); fill: none; }
+
 /* Los minutos de cada actividad dentro de la hoja. */
 .act-min { flex: none; font-size: .82rem; font-weight: 700; color: var(--agua);
   font-variant-numeric: tabular-nums; }

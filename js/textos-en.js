@@ -4136,6 +4136,9 @@
     /* ---------- La barra de actividad ---------- */
     'actividad': 'activity',
     'actividad · toca el azul': 'activity · tap the blue',
+    'Preguntando a la IA…': 'Asking the AI…',
+    'La IA lo estima en unas {n} series de {zona}. Es su opinión, no una medida.':
+      'The AI puts that at roughly {n} sets of {zona}. That is its opinion, not a measurement.',
     '{n}′ de actividad en {zona}. Toca para ver qué fue.':
       '{n}′ of activity in {zona}. Tap to see what it was.',
     'Lo que hiciste fuera del gimnasio y que trabaja {zona}.':
