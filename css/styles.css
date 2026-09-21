@@ -2986,6 +2986,22 @@ html[data-theme="light"] .sem-caja.es-ahora {
    tiene dos opciones de verdad, no una rueda— los sigue necesitando. */
 .ac-et { margin: 16px 0 7px; font-size: .68rem; font-weight: 700;
   letter-spacing: .08em; color: var(--dim2); }
+/* ---------- mando de dos posiciones ----------
+   Dos pastillas sueltas para una elección de dos no son un control, son un par
+   de botones que da la casualidad de que van juntos. Esto es lo que usa el
+   sistema para esto mismo: una sola pieza hundida, y la elegida en relieve
+   encima. Se ve de un vistazo que son las dos caras de una misma pregunta. */
+.segmento { display: flex; padding: 3px; gap: 3px; border-radius: 13px;
+  background: var(--card2); border: 1px solid var(--line); }
+.segmento button { flex: 1; min-width: 0; padding: .5em .6em; border: 0;
+  border-radius: 10px; background: none; color: var(--dim); cursor: pointer;
+  font: inherit; font-size: .85rem; font-weight: 600; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  transition: background .16s ease, color .16s ease; }
+.segmento button.on { background: var(--card); color: var(--txt);
+  box-shadow: 0 1px 3px color-mix(in srgb, #000 22%, transparent); }
+.segmento button:active { transform: scale(.98); }
+
 .ac-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px;
   scrollbar-width: none; }
 .ac-scroll::-webkit-scrollbar { display: none; }

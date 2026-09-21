@@ -366,34 +366,6 @@
     return kcalDe(a.actividad, ((hasta || Date.now()) - a.start) / 60000);
   }
 
-  /* Lo que ya se hizo: no hay cronómetro que valga, se apunta con los minutos
-     que diga y se cierra. La sesión se coloca terminando ahora y empezando los
-     minutos antes, que es como se cuenta cualquier otra. */
-  function apuntarHecha(act, minutos) {
-    const fin = Date.now();
-    const sesion = {
-      routineId: null,
-      routineName: act.nombre,
-      start: fin - minutos * 60000,
-      end: fin,
-      entries: [],
-      setsDone: 0,
-      volume: 0,
-      actividad: 'otro',
-      minutos: minutos,
-      kcal: kcalDe(act, minutos),
-      musculos: act.musculos || [],
-      nota: act.nota || '',
-      origen: act.origen || ''
-    };
-
-    if (Store.active()) {
-      stopTimers();
-      Store.clearActive();
-      pintarBanner();
-    }
-    return Store.addSession(sesion);
-  }
 
   function tarjetaActividad(a) {
     const act = a.actividad;
@@ -1049,11 +1021,8 @@
     const conIA = g.IA && IA.activa() && IA.estimarActividad;
     const yaHay = a.actividad || null;
 
-    /* Dos salidas, porque hay dos momentos: se abre la app al empezar el
-       partido, o se abre al volver a casa. Con solo cronómetro, lo segundo
-       obligaba a inventarse un tiempo mirando el reloj. */
-    let cuando = 'ahora';
-    let minutos = 60;
+    /* Esta hoja es solo la de «ahora». Lo ya hecho tiene la suya, con su fecha
+       y su duración, y «Ya lo hice» lleva allí. */
 
     UI.modal(html`
       <h2>${T('¿Qué estás haciendo?')}</h2>
@@ -1075,23 +1044,19 @@
         </div>
       </div>
 
-      <div class="ac-et">${T('CUÁNDO')}</div>
-      <div class="ac-scroll" id="ac-cuando">
-        <button class="chip on" data-cuando="ahora">${T('Lo estoy haciendo')}</button>
-        <button class="chip" data-cuando="hecho">${T('Ya lo hice')}</button>
-      </div>
+      <!-- Dos pastillas sueltas para una elección de dos no es un control, es un
+           par de botones. Esto es el mando de dos posiciones del sistema: una
+           pieza, la elegida en relieve.
 
-      <!-- El mismo rodillo que en «apuntar algo que ya hice»: es la misma pregunta,
-           y dos selectores distintos para «cuántos minutos» es lo que hace que una
-           app parezca cosida de trozos. -->
-      <div id="ac-tiempo" hidden>
-        <div class="rodillo">
-          <div class="rod-cab"><span>${T('CUÁNTO DURÓ')}</span></div>
-          <div class="rod-cuerpo">
-            <div class="rod-marca"></div>
-            <div class="rod-col" id="ac-mins"></div>
-          </div>
-        </div>
+           Y «Ya lo hice» no cambia esta hoja: abre la de «apuntar algo que ya
+           hice», que es la misma pregunta y tiene el formulario bueno —fecha,
+           ficha de lo entendido, análisis y la IA sola—. Aquí había una
+           versión pobre de eso mismo, y manteniendo dos para la misma pregunta
+           el pobre siempre se queda atrás. -->
+      <div class="ac-et">${T('CUÁNDO')}</div>
+      <div class="segmento" id="ac-cuando">
+        <button class="on" data-cuando="ahora">${T('Lo estoy haciendo')}</button>
+        <button data-cuando="hecho">${T('Ya lo hice')}</button>
       </div>
 
       <div id="ac-visto" class="tiny" style="margin-top:10px"></div>
@@ -1127,45 +1092,25 @@
         };
         campo.oninput();
 
-        const textoBoton = function () {
-          return cuando === 'ahora'
-            ? (conIA ? T('Calcular y empezar') : T('Empezar'))
-            : (conIA ? T('Calcular y apuntar') : T('Apuntar'));
+        const pintarBoton = function () {
+          btn.textContent = conIA ? T('Calcular y empezar') : T('Empezar');
         };
-        const pintarBoton = function () { btn.textContent = textoBoton(); };
         pintarBoton();
 
-        const marcar = function (sel, uno) {
-          el.querySelectorAll(sel + ' .chip').forEach(function (c) {
-            c.classList.toggle('on', c === uno);
-          });
-        };
-
-        el.querySelectorAll('#ac-cuando .chip').forEach(function (c) {
+        el.querySelectorAll('#ac-cuando button').forEach(function (c) {
           c.onclick = function () {
-            cuando = c.dataset.cuando;
-            marcar('#ac-cuando', c);
-            caja.hidden = cuando !== 'hecho';
-            if (!caja.hidden) ponerRodillo();
-            pintarBoton();
+            if (c.dataset.cuando !== 'hecho') return;
+            /* El cronómetro acababa de arrancar y resultó que no era eso: si no
+               tiene nada dentro y lleva cuatro segundos, se va sin preguntar.
+               Si llevaba un rato o tiene series, se queda y que decida él en la
+               pantalla de entrenamiento. */
+            const viva = Store.active();
+            if (viva && !(viva.entries || []).length &&
+                Date.now() - viva.start < 5 * 60000) discard();
+            UI.closeModal();
+            if (g.App && App.apuntarActividad) App.apuntarActividad();
           };
         });
-
-        /* De cinco en cinco hasta dos horas y de cuarto en cuarto hasta cinco:
-           por debajo no hay actividad que apuntar y por encima nadie mide al
-           minuto. Se monta aunque la caja esté oculta, y por eso se coloca al
-           abrirse: sobre algo de altura cero, scrollTop se queda en cero. */
-        const minsRodillo = [];
-        for (let m = 5; m <= 120; m += 5) minsRodillo.push({ v: m, et: Tn('{n} min', { n: m }) });
-        for (let m = 135; m <= 300; m += 15) minsRodillo.push({ v: m, et: Tn('{n} min', { n: m }) });
-        let rodilloPuesto = false;
-        const ponerRodillo = function () {
-          if (rodilloPuesto) return;
-          rodilloPuesto = true;
-          UI.rodillo(el.querySelector('#ac-mins'), minsRodillo, minutos, function (v) {
-            minutos = v;
-          });
-        };
 
         /* Ponerlo en marcha: el cronómetro sigue y las calorías suben solas. */
         const enMarcha = function (act) {
@@ -1180,19 +1125,6 @@
           UI.toast(Tn('{que} en marcha', { que: act.nombre }));
         };
 
-        /* Ya hecho: se apunta con sus minutos y se cierra el entrenamiento. */
-        const yaHecho = function (act) {
-          apuntarHecha(act, minutos);
-          UI.closeModal();
-          if (g.App) g.App.go('inicio');
-          UI.toast(Tn('{que}: {min} min, ~{kcal} kcal',
-            { que: act.nombre, min: minutos, kcal: UI.num(kcalDe(act, minutos)) }) +
-            (act.origen === 'ia' ? '' : ' ' + T('(gasto medio, sin analizar)')));
-        };
-
-        const rematar = function (act) {
-          if (cuando === 'hecho') yaHecho(act); else enMarcha(act);
-        };
 
         btn.onclick = function () {
           const t = campo.value.trim();
@@ -1202,7 +1134,7 @@
             /* Antes: met 4 y ningún músculo, siempre. Un partido apuntado desde
                aquí no llegaba a Pierna, que es el mismo agujero que se tapó en
                la otra hoja. Ahora manda lo que dice la tabla de lo escrito. */
-            rematar({ nombre: t, met: leido ? leido.met : 4,
+            enMarcha({ nombre: t, met: leido ? leido.met : 4,
               musculos: leido ? leido.musculos : [], nota: '', intensidad: '',
               origen: 'medio' });
             return;
@@ -1223,7 +1155,7 @@
             /* Si ella no acierta con los músculos, los de la tabla antes que
                ninguno: guardar una sesión sin músculos es lo que dejaba la
                pierna contando como abandonada después de un partido. */
-            rematar((r.musculos && r.musculos.length) || !leido ? r
+            enMarcha((r.musculos && r.musculos.length) || !leido ? r
               : Object.assign({}, r, { musculos: leido.musculos }));
           }).catch(function (e) {
             visto.innerHTML = '<span style="color:var(--bad)">' +

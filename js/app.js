@@ -7246,6 +7246,9 @@
        de «¿qué estás haciendo?» del entrenamiento hace la misma pregunta. Sin
        esto tenía su propia respuesta —met 4 y ningún músculo— y un partido
        apuntado desde allí no llegaba a Pierna. */
+    /* La hoja de «apuntar algo que ya hice», para que el «Ya lo hice» del
+       entrenamiento abra esta misma y no una versión suya más pobre. */
+    apuntarActividad: apuntarActividad,
     actividadDe: function (texto) {
       const id = actividadDelTexto(texto || '');
       const a = ACTIVIDADES.filter(function (x) { return x.id === id; })[0];
