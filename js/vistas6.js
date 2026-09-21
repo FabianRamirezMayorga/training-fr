@@ -957,7 +957,7 @@
                 ? '<span class="zona-de"> / ' + coma(pide) + '</span>' : '')}</span>
             </div>
             ${raw(mins[id] ? '<div class="zona-fila zona-act">' +
-              '<span class="zona-nom">' + esc(T('actividad')) + '</span>' +
+              '<span class="zona-nom">' + esc(T('Actividad')) + '</span>' +
               '<span class="zona-pista"><i class="zona-hago" style="width:' +
                 Math.round(mins[id] / topeMin * 100) + '%"></i></span>' +
               '<span class="zona-num">' + esc(Tn('{n}′', { n: mins[id] })) + '</span>' +

@@ -4132,6 +4132,9 @@
 
     /* ---------- La barra de actividad ---------- */
     'actividad': 'activity',
-    'minutos de actividad': 'minutes of activity'
+    'minutos de actividad': 'minutes of activity',
+
+    /* ---------- El rótulo de la actividad ---------- */
+    'Actividad': 'Activity'
   };
 })(window);

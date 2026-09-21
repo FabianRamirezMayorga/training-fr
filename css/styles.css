@@ -2858,7 +2858,10 @@ html[data-theme="light"] .sem-caja.es-ahora {
    el color y el grosor son lo que dice que se leen aparte. Y no lleva la
    muesca del plan, porque el plan no pide minutos de fútbol. */
 .zona-act { margin-top: -4px; }
-.zona-act .zona-nom { font-size: .72rem; color: var(--dim2); }
+/* El rótulo, del mismo tamaño que el de la zona de arriba: más pequeño se
+   leía como una nota al pie y rompía la columna. Lo que dice que es otra cosa
+   es el color, que es el de su barra, no el tamaño de la letra. */
+.zona-act .zona-nom { font-size: .8rem; color: var(--agua); }
 .zona-act .zona-pista { height: 6px; }
 .zona-act .zona-hago { background: var(--agua); }
 .zona-act .zona-num { font-size: .74rem; font-weight: 600; color: var(--agua); }
