@@ -1239,10 +1239,10 @@
         { zona: d.zona.toLowerCase() })}</p>
       <div class="list">${raw(filas)}</div>
       <p class="tiny" style="margin:12px 0 0">${Tn('Estos minutos no cuentan en tus ' +
-        '{series} series de {zona}, y por eso van en azul y aparte. Un partido carga la ' +
-        'pierna, pero para meterlo en la barra habría que inventarse cuántas series vale, ' +
-        'y ese número estropearía la única cifra con la que puedes comparar una semana ' +
-        'con otra.', { series: UI.dec(d.series), zona: d.zona.toLowerCase() })}</p>
+        '{series} series de {zona}, y por eso van en azul y aparte. Lo de fuera carga el ' +
+        'músculo igual, pero para meterlo en la barra habría que inventarse cuántas ' +
+        'series vale, y ese número estropearía la única cifra con la que puedes comparar ' +
+        'una semana con otra.', { series: UI.dec(d.series), zona: d.zona.toLowerCase() })}</p>
       <button class="btn block" data-cerrar>${T('Vale')}</button>`,
       function (el) {
         el.querySelectorAll('[data-cerrar]').forEach(function (b) {

@@ -3087,12 +3087,20 @@
       musculos: ['quadriceps', 'glutes', 'calves'] },
     { id: 'nadar', label: 'Nadar', met: 7,
       musculos: ['lats', 'shoulders', 'chest', 'middle back'] },
+    /* «Remo» a secas ya es un ejercicio de espalda con barra, y la misma
+       palabra en dos sitios se pisa en el diccionario. */
+    { id: 'remo', label: 'Remo o piragua', met: 7,
+      musculos: ['lats', 'middle back', 'biceps', 'quadriceps', 'glutes'] },
     { id: 'senderismo', label: 'Senderismo', met: 6,
       musculos: ['quadriceps', 'glutes', 'calves', 'hamstrings'] },
+    { id: 'escalada', label: 'Escalada', met: 7.5,
+      musculos: ['lats', 'forearms', 'biceps', 'abdominals', 'middle back'] },
     { id: 'equipo', label: 'Deporte de equipo', met: 7,
       musculos: ['quadriceps', 'hamstrings', 'glutes', 'calves', 'abdominals'] },
     { id: 'raqueta', label: 'Raqueta o pádel', met: 6.5,
       musculos: ['shoulders', 'quadriceps', 'abdominals', 'forearms'] },
+    { id: 'boxeo', label: 'Boxeo o artes marciales', met: 8,
+      musculos: ['shoulders', 'abdominals', 'lats', 'triceps', 'calves'] },
     { id: 'baile', label: 'Baile', met: 5,
       musculos: ['quadriceps', 'calves', 'glutes', 'abdominals'] },
     { id: 'pilates', label: 'Pilates o yoga', met: 3,
@@ -3582,6 +3590,16 @@
     ['correr', ['correr', 'corri', 'running', 'trote', 'trotar', 'maraton', 'jogging']],
     ['bici', ['bici', 'ciclismo', 'spinning', 'pedalear', 'mtb']],
     ['nadar', ['nadar', 'nade', 'natacion', 'piscina', 'nadando']],
+    /* Con «=» delante, la palabra entera: «remo» es el principio de «remolque»
+       y una mudanza se apuntaba como remar. */
+    ['remo', ['=remo', '=remar', '=reme', 'remando', 'rowing', 'piragua', 'kayak']],
+    /* Sin «escale» a propósito: «escalé el cerro» es subir al monte, no colgarse
+       de una pared, y los músculos de una cosa y otra no se parecen en nada. Lo
+       que de verdad dice que es escalada son las palabras de escalar. */
+    ['escalada', ['escalad', 'escalar', 'climbing', 'boulder', 'rocodromo',
+      'rocódromo', 'via ferrata']],
+    ['boxeo', ['boxe', 'boxing', 'muay', 'kickbox', 'karate', 'kárate', 'judo',
+      'taekwondo', 'jiu', 'mma', 'sparring', 'artes marciales', 'saco de boxeo']],
     ['senderismo', ['sender', 'monte', 'montaña', 'montana', 'cerro', 'trekking',
       'hiking', 'subida', 'subí', 'subi', 'ascenso', 'excursion']],
     ['equipo', ['futbol', 'fútbol', 'football', 'soccer', 'baloncesto', 'basquet',
@@ -3611,10 +3629,16 @@
       if (fuera) return;
       par[1].forEach(function (pista) {
         if (fuera) return;
-        const pi = I18N.norm(pista);
+        /* Un «=» delante pide la palabra entera. Casi todas las pistas son raíces
+           —«camin» vale para «caminé» y «caminata»— pero alguna es una palabra
+           corta que vive dentro de otra: «remo» dentro de «remolque». */
+        const exacta = String(pista).charAt(0) === '=';
+        const pi = I18N.norm(exacta ? String(pista).slice(1) : pista);
         /* Las de dos palabras —«ping pong»— no caben en esa regla */
         if (pi.indexOf(' ') !== -1) { if (t.indexOf(pi) !== -1) fuera = par[0]; return; }
-        if (palabras.some(function (w) { return w.indexOf(pi) === 0; })) fuera = par[0];
+        if (palabras.some(function (w) {
+          return exacta ? w === pi : w.indexOf(pi) === 0;
+        })) fuera = par[0];
       });
     });
     return fuera;
