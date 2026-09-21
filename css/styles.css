@@ -1805,10 +1805,13 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .ps-dia.es-hoy .ps-letra { color: var(--acc); }
 .ps-num { font-size: .95rem; font-weight: 700; font-variant-numeric: tabular-nums;
   line-height: 1.15; }
-/* Verde si el día salió entero. El que no salió se queda en el color del texto
-   normal: los puntos ya cuentan qué faltó, y además en rojo, era la app
-   regañando por no haber bebido agua un martes. */
+/* Tres estados y cada uno su color: verde el día que salió entero, rojo el que
+   no, y gris el que no pedía entrenar. El gris importa tanto como los otros dos:
+   un domingo de descanso pintado como un día fallado convierte el plan en una
+   lista de reproches. */
 .ps-dia.cumplido .ps-num { color: var(--acc); }
+.ps-dia.fallado .ps-num { color: var(--bad); }
+.ps-dia.libre .ps-num { color: var(--dim2); }
 .ps-marcas { display: flex; gap: 4px; margin-top: 5px; }
 
 /* Nueve píxeles y no seis: tres puntos por día es un dato, y un dato que hay

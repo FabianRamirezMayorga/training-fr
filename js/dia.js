@@ -537,10 +537,15 @@
               return '<span class="ps-punto ' + clase + (ok ? ' si' : '') + '" ' +
                 'title="' + esc(titulo) + '"></span>';
             };
-            /* Hoy se queda neutro hasta que salga: el día no ha terminado, y
+            /* Verde si salió, rojo si no, y gris el día que no pedía entrenar:
+               un domingo de descanso no es un día fallado, y pintarlo igual que
+               uno en el que se saltó el gimnasio sería contar una mentira.
+
+               Hoy se queda neutro hasta que salga: el día no ha terminado, y
                pintarlo en rojo a las once de la mañana por no haber cenado
                todavía es regañar por algo que aún no ha pasado. */
-            const tono = d.cumplido ? ' cumplido' : d.esHoy ? '' : ' fallado';
+            const tono = d.esHoy ? '' : !d.tocaba ? ' libre'
+              : d.cumplido ? ' cumplido' : ' fallado';
             return '<div class="ps-dia tap' + (d.esHoy ? ' es-hoy' : '') + tono +
               '" data-plandia="' + esc(d.clave) + '" role="button" tabindex="0">' +
               '<span class="ps-letra">' + d.letra + '</span>' +
