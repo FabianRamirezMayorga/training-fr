@@ -2593,7 +2593,7 @@
     const musculos = (datos.musculos || []).slice();
     /* El «2» es la versión de las instrucciones: al cambiarlas, lo guardado con
        las viejas deja de valer y hay que volver a preguntar. */
-    const clave = 'anal2:' + I18N.norm(nombre) + ':' + min + ':' + musculos.join(',') +
+    const clave = 'anal3:' + I18N.norm(nombre) + ':' + min + ':' + musculos.join(',') +
       ':' + (g.Idioma ? Idioma.actual() : 'es');
     const guardado = leerCache(clave, 12);
     if (guardado) return Promise.resolve(guardado);
@@ -2629,38 +2629,56 @@
         ? 'En el gimnasio, estos siete días lleva: ' + recientes.join(', ') + '.'
         : 'Estos siete días no ha hecho series de gimnasio en esas zonas.',
       '',
-      'ANTES DE NADA, mira QUÉ ha escrito exactamente. Si ahí hay un sitio, una ' +
-        'prueba o un recorrido concreto —un cerro, una montaña, una carrera popular, ' +
-        'una ruta conocida— y lo reconoces de verdad, usa lo que sepas de él: ' +
-        'desnivel, distancia, escalones, cuánto se tarda normalmente. Compara SU ' +
-        'tiempo con lo normal allí y dilo con el dato concreto.',
-      'Y si NO lo reconoces con seguridad, no te lo inventes ni lo disimules con un ' +
-        '«aproximadamente»: deja "sitio" vacío y trátalo como la actividad genérica ' +
-        'que es. Un número falso sobre un sitio real es peor que no decir nada, ' +
-        'porque suena a dato y se lo va a creer.',
+      'ANTES DE NADA, mira QUÉ ha escrito exactamente. Dos pasos.',
+      '',
+      'UNO. Si ahí hay un sitio, una prueba o un recorrido concreto —un cerro, una ' +
+        'montaña, una carrera popular, una ruta conocida— y lo reconoces de verdad, ' +
+        'usa lo que sepas de él: desnivel, distancia, escalones, cuánto se tarda ' +
+        'normalmente. Compara SU tiempo con lo normal allí y dilo con el dato ' +
+        'concreto. Y si NO lo reconoces con seguridad, no te lo inventes ni lo ' +
+        'disimules con un «aproximadamente»: deja "sitio" vacío. Un número falso ' +
+        'sobre un sitio real es peor que no decir nada, porque suena a dato y se lo ' +
+        'va a creer.',
+      '',
+      'DOS. Piensa qué clase de esfuerzo es ESA actividad en concreto, no «ejercicio» ' +
+        'en general. El fútbol son sprints repetidos, frenadas y cambios de ' +
+        'dirección, y lo que pasa factura son los isquios en excéntrico. Nadar es ' +
+        'tirón de dorsal y hombro sin impacto. Bajar del monte castiga la rodilla ' +
+        'mucho más que subirlo. La escalada se acaba por el antebrazo, no por las ' +
+        'piernas.',
+      'Esa es la vara de medir: cada frase que escribas tiene que poder decirse SOLO ' +
+        'de esta actividad. Si valdría igual para nadar, para bailar y para subir al ' +
+        'monte, bórrala y escribe otra.',
       '',
       'Dile qué le ha hecho eso a su cuerpo. Cada campo, UNA frase de veinticinco ' +
-        'palabras como mucho, concreta y sin adular:',
+        'palabras como mucho:',
       '- "sitio": qué es eso en concreto y cómo queda su tiempo frente a lo normal ' +
         'allí. Cadena vacía si no lo reconoces; no es obligatorio rellenarlo.',
-      '- "intensidad": cómo de duro fue de verdad para alguien como él, y por qué.',
-      '- "carga": qué deja cargado y cuánto le va a durar, contando lo que ya lleva ' +
-        'esta semana en esas zonas.',
+      '- "intensidad": cómo de duro fue de verdad, comparado con algo que él conozca ' +
+        '—una sesión suya de pesas, una carrera, un paseo— y por qué esta actividad ' +
+        'cansa como cansa.',
+      '- "carga": qué músculo o articulación queda tocado y cuánto le va a durar, ' +
+        'contando lo que ya lleva esta semana en esas zonas.',
       '- "musculo": si eso construye músculo, lo mantiene o ni una cosa ni otra, y por ' +
         'qué. Sé honesto: casi ninguna actividad de fuera hace hipertrofia, y decirle ' +
         'que sí para agradar le hace entrenar peor.',
-      '- "ojo": lo único que de verdad debería vigilar tras esto, o qué entrenar o no ' +
-        'mañana. Si no hay nada que avisar, dilo en una frase y ya.',
+      '- "ojo": UNA cosa concreta de ESTA actividad que deba vigilar, con su nombre: ' +
+        'qué músculo o qué articulación, qué síntoma, o qué no entrenar mañana y por ' +
+        'qué. Si de verdad no hay nada que avisar, dilo en cinco palabras y no ' +
+        'rellenes.',
       '',
-      'Nada de signos de exclamación. No le repitas los minutos ni la lista de ' +
-        'músculos, que los tiene en pantalla.',
+      'PROHIBIDO, y esto no es un consejo de estilo: recitarle el MET, su peso o los ' +
+        'minutos —son cuentas nuestras y los tiene en pantalla—; repetirle la lista ' +
+        'de músculos; los rellenos de gimnasio tipo «descansa bien», «hidrátate», ' +
+        '«escucha a tu cuerpo» o «para que las fibras se reparen»; los signos de ' +
+        'exclamación; y adular.',
       '',
       'Devuelve JSON: {"sitio":"","intensidad":"","carga":"","musculo":"","ojo":""}'
     ].filter(function (l) { return l !== null; }).join(SALTO);
 
     /* Más fría que el resto: aquí no hay que no repetirse, hay que no inventarse
        un desnivel. */
-    return llamarJSON(prompt, { maxTokens: 1024, temperatura: 0.25 }).then(function (r) {
+    return llamarJSON(prompt, { maxTokens: 1536, temperatura: 0.25 }).then(function (r) {
       const limpio = {
         sitio: String((r && r.sitio) || '').trim(),
         intensidad: String((r && r.intensidad) || '').trim(),
