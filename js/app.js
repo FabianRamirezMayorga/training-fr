@@ -604,7 +604,7 @@
                además la palabra que ya usa Progreso para esto mismo. -->
           <span class="pre-encima">${tira ? T('Tu constancia') : T('Tu semana')}</span>
           <span class="tiny nowrap">${tira
-            ? Tn('{n} de {total} días', { n: tira.salieron, total: tira.total })
+            ? Tp(tira.salieron, '{n} día redondo', '{n} días redondos')
             : frase}</span>
         </div>
         ${raw(tira ? tira.html : '<div class="semana">' + celdas + '</div>')}

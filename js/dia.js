@@ -580,9 +580,13 @@
     return plegable({
       id: 'plan', titulo: 'Cómo voy con el plan', marca: 'grafica', tono: '#c06bf0',
       progreso: { hecho: d.salieron, total: DIAS_PLAN },
-      cola: Tn('{n} de {total} días', { n: d.salieron, total: DIAS_PLAN }),
+      /* «Redondos» y no «de 30»: esta cuenta pide las tres cosas, y el color del
+         número solo mira el entreno. Decir «6 de 30» al lado de una tira con más
+         de seis números verdes se leía como un fallo de la app. */
+      cola: Tp(d.salieron, '{n} día redondo', '{n} días redondos'),
       sub: Tn('Los últimos {n} días: si entrenaste, si llegaste a la proteína y si ' +
         'bebiste el agua.', { n: DIAS_PLAN }) + ' ' +
+        T('Un día redondo es el que sale con las tres.') + ' ' +
         Tn('Llevas {hechas} de {pedidas}.', { hechas: d.hechas, pedidas: d.pedidas }),
       cuerpo: html`<div class="card tarjeta-premium">${raw(tiraPlanHTML(d.dias, true))}</div>`
     });
@@ -682,7 +686,7 @@
     const m = Perfil.completo(p) ? Perfil.macros(p) : null;
     const d = datosPlan(m);
     if (!d) return null;
-    return { html: tiraPlanHTML(d.dias), salieron: d.salieron, total: DIAS_PLAN };
+    return { html: tiraPlanHTML(d.dias), salieron: d.salieron };
   };
 
   V.dia.mount = function (root) {
