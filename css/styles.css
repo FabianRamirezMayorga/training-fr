@@ -2927,19 +2927,43 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .ac-tic svg { width: 17px; height: 17px; stroke: var(--acc); fill: none; }
 .ac-lista .elegida .ac-tic { opacity: 1; }
 
-.ac-et { margin: 17px 0 7px; font-size: .68rem; font-weight: 700;
+/* Cuando no hay nada elegido, el hueco no puede gritar como un dato: dice lo
+   que falta por hacer y se calla. */
+.ac-nom.vacia { color: var(--dim); font-weight: 600; }
+
+/* ---------- selector de rodillo ----------
+   El del sistema, hecho a mano porque aquí no entran librerías. La lista rueda
+   por debajo de una marca que no se mueve y lo elegido es lo que queda dentro.
+
+   Los extremos se apagan con una máscara —no con un degradado encima— para que
+   funcione igual en claro y en oscuro sin tener que saber de qué color es el
+   fondo, y para que el borde no corte una fila por la mitad. */
+.rodillo { margin-top: 13px; border: 1px solid var(--line); border-radius: 16px;
+  background: var(--card); overflow: hidden; }
+.rod-cab { display: flex; padding: 11px 0 1px; }
+.rod-cab span { flex: 1; text-align: center; font-size: .66rem; font-weight: 700;
   letter-spacing: .08em; color: var(--dim2); }
+.rod-cuerpo { position: relative; display: flex; height: 180px; }
 
-/* En fila y con desplazamiento. Seis pastillas partidas en dos renglónes
-   desiguales, tres veces seguidas, era la mitad de lo que hacía esta hoja tan
-   alta —y el borde derecho en zigzag es lo que la hacía parecer vieja. */
-.ac-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px;
-  scrollbar-width: none; }
-.ac-scroll::-webkit-scrollbar { display: none; }
-.ac-scroll .chip { flex: none; }
-.ac-scroll + .ac-scroll { margin-top: 6px; }
-
-.ac-otro { margin-top: 8px; }
+/* z-index en los dos: la marca está posicionada y las columnas no, y sin esto
+   se pinta por encima del texto en vez de por debajo. */
+.rod-marca { position: absolute; z-index: 0; left: 9px; right: 9px; top: 72px;
+  height: 36px; border-radius: 11px; background: var(--card2); pointer-events: none; }
+.rod-col {
+  position: relative; z-index: 1; flex: 1; height: 100%;
+  overflow-y: auto; scroll-snap-type: y mandatory;
+  /* dos filas de hueco arriba y abajo, para que la primera y la última
+     también puedan llegar al centro */
+  padding-block: 72px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent);
+          mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent);
+}
+.rod-col::-webkit-scrollbar { display: none; }
+.rod-it { height: 36px; display: flex; align-items: center; justify-content: center;
+  scroll-snap-align: center; font-size: .95rem; color: var(--dim);
+  white-space: nowrap; transition: color .14s ease; }
+.rod-it.eje { color: var(--txt); font-weight: 700; }
 
 /* Las calorías al lado del botón y no en su propia tarjeta: son un número que
    sale de lo de arriba, no una decisión que haya que tomar. */

@@ -1071,16 +1071,17 @@
         <button class="chip" data-cuando="hecho">${T('Ya lo hice')}</button>
       </div>
 
+      <!-- El mismo rodillo que en «apuntar algo que ya hice»: es la misma pregunta,
+           y dos selectores distintos para «cuántos minutos» es lo que hace que una
+           app parezca cosida de trozos. -->
       <div id="ac-tiempo" hidden>
-        <label class="tiny" style="display:block;margin-top:14px">${T('CUÁNTO DURÓ')}</label>
-        <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-mins">
-          ${raw([20, 30, 45, 60, 90, 120].map(function (m) {
-            return '<button class="chip ' + (m === 60 ? 'on' : '') + '" data-min="' + m +
-              '">' + UI.esc(Tn('{n} min', { n: m })) + '</button>';
-          }).join(''))}
+        <div class="rodillo">
+          <div class="rod-cab"><span>${T('CUÁNTO DURÓ')}</span></div>
+          <div class="rod-cuerpo">
+            <div class="rod-marca"></div>
+            <div class="rod-col" id="ac-mins"></div>
+          </div>
         </div>
-        <input id="ac-otro" type="number" inputmode="numeric" min="1" max="600"
-               placeholder="${T('u otro número de minutos')}" style="margin-top:8px">
       </div>
 
       <div id="ac-visto" class="tiny" style="margin-top:10px"></div>
@@ -1111,21 +1112,25 @@
             cuando = c.dataset.cuando;
             marcar('#ac-cuando', c);
             caja.hidden = cuando !== 'hecho';
+            if (!caja.hidden) ponerRodillo();
             pintarBoton();
           };
         });
 
-        el.querySelectorAll('#ac-mins .chip').forEach(function (c) {
-          c.onclick = function () {
-            minutos = Number(c.dataset.min);
-            el.querySelector('#ac-otro').value = '';
-            marcar('#ac-mins', c);
-          };
-        });
-
-        el.querySelector('#ac-otro').oninput = function (ev) {
-          const v = Number(ev.target.value);
-          if (v > 0) { minutos = Math.min(600, v); marcar('#ac-mins', null); }
+        /* De cinco en cinco hasta dos horas y de cuarto en cuarto hasta cinco:
+           por debajo no hay actividad que apuntar y por encima nadie mide al
+           minuto. Se monta aunque la caja esté oculta, y por eso se coloca al
+           abrirse: sobre algo de altura cero, scrollTop se queda en cero. */
+        const minsRodillo = [];
+        for (let m = 5; m <= 120; m += 5) minsRodillo.push({ v: m, et: Tn('{n} min', { n: m }) });
+        for (let m = 135; m <= 300; m += 15) minsRodillo.push({ v: m, et: Tn('{n} min', { n: m }) });
+        let rodilloPuesto = false;
+        const ponerRodillo = function () {
+          if (rodilloPuesto) return;
+          rodilloPuesto = true;
+          UI.rodillo(el.querySelector('#ac-mins'), minsRodillo, minutos, function (v) {
+            minutos = v;
+          });
         };
 
         /* Ponerlo en marcha: el cronómetro sigue y las calorías suben solas. */

@@ -3576,6 +3576,16 @@
     return tocadas;
   }
 
+  /* Cinco en cinco hasta dos horas y de cuarto en cuarto hasta cinco: por debajo
+     de cinco minutos no hay actividad que apuntar, y por encima de dos horas
+     nadie mide al minuto. */
+  function minutosDelRodillo() {
+    const out = [];
+    for (let m = 5; m <= 120; m += 5) out.push({ v: m, et: Tn('{n} min', { n: m }) });
+    for (let m = 135; m <= 300; m += 15) out.push({ v: m, et: Tn('{n} min', { n: m }) });
+    return out;
+  }
+
   /* ---------- adivinar la actividad por lo que se escribe ----------
      Escribir el nombre pasaba la actividad a «Otra cosa», y esa no tiene
      músculos a propósito —puede ser cualquier cosa—, así que un «Jugué fútbol»
@@ -3647,15 +3657,16 @@
   function apuntarActividad() {
     const p = Perfil.datos();
     const peso = Number(p && p.peso) || 75;
-    const elegido = { act: 'caminar', min: 60, atras: 0, nombre: '', ia: null };
+    /* Sin actividad de salida: «Caminar» puesto es la app decidiendo por él. */
+    const elegido = { act: '', min: 60, atras: 0, nombre: '', ia: null };
     const conIA = !!(g.IA && IA.activa());
 
     /* El MET lo pone el chip, salvo que la IA haya mirado lo que escribió: ella
        distingue un partido de fútbol de una pachanga, y el chip no. */
     const metDe = function () {
       if (elegido.ia && elegido.ia.met) return elegido.ia.met;
-      const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
-      return a.met;
+      const a = ACTIVIDADES.filter(function (x) { return x.id === elegido.act; })[0];
+      return a ? a.met : 0;
     };
 
     const kcalDe = function () {
@@ -3667,8 +3678,8 @@
       if (elegido.ia && elegido.ia.musculos && elegido.ia.musculos.length) {
         return elegido.ia.musculos.slice();
       }
-      const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
-      return (a.musculos || []).slice();
+      const a = ACTIVIDADES.filter(function (x) { return x.id === elegido.act; })[0];
+      return a ? (a.musculos || []).slice() : [];
     };
 
     const diasHTML = [];
@@ -3690,12 +3701,15 @@
         : T('Sin músculos concretos');
     };
 
-    const diasMas = [];
-    for (let i = 2; i < 7; i++) {
-      const d = new Date(Date.now() - i * 86400000);
-      diasMas.push('<button class="chip" data-cuando="' + i + '">' +
-        esc(UI.diaLargo(UI.DAY_NAMES[d.getDay()])) + '</button>');
-    }
+    const diasDelRodillo = function () {
+      const out = [];
+      for (let k = 0; k < 7; k++) {
+        const d = new Date(Date.now() - k * 86400000);
+        out.push({ v: k, et: k === 0 ? T('Hoy') : k === 1 ? T('Ayer')
+          : UI.diaLargo(UI.DAY_NAMES[d.getDay()]) });
+      }
+      return out;
+    };
 
     UI.modal(html`
       <h2>${T('Apuntar algo que ya hice')}</h2>
@@ -3705,23 +3719,21 @@
       <input id="ac-nombre" class="ac-campo" autocomplete="off"
              placeholder="${T('¿Qué hiciste? Jugué fútbol, subí al cerro, boxeo…')}">
 
-      <!-- Lo que la app ha entendido. Es la única cosa de la hoja que dice qué se
-           va a guardar, así que va entera en una ficha y no repartida en pastillas. -->
+      <!-- Lo que la app ha entendido. Empieza vacía a propósito: traer «Caminar»
+           puesto es decidir por él, y si no lo cambia se guarda algo que no hizo. -->
       <div class="ac-ficha">
         <div class="ac-cab">
           <div class="grow">
             <div class="ac-nom" id="ac-nom"></div>
             <div class="ac-mus" id="ac-mus"></div>
           </div>
-          <button class="btn sm" id="ac-cambiar">${T('Cambiar')}</button>
+          <button class="btn sm" id="ac-cambiar">${T('Elegir')}</button>
         </div>
         <div class="ac-nota" id="ac-nota" hidden></div>
         ${raw(conIA ? '<button class="ac-ia" id="ac-ia-btn">' + icon('chispa') +
           '<span>' + esc(T('Que lo mire la IA')) + '</span></button>' : '')}
       </div>
 
-      <!-- Las quince de siempre, pero como lista y solo cuando se piden: cada una
-           dice lo que registra, que en una pastilla no cabía. -->
       <div class="ac-lista" id="ac-lista" hidden>
         ${raw(ACTIVIDADES.map(function (a) {
           return '<div class="list-row tap" data-act="' + esc(a.id) + '">' +
@@ -3731,32 +3743,28 @@
         }).join(''))}
       </div>
 
-      <div class="ac-et">${T('CUÁNDO')}</div>
-      <div class="ac-scroll" id="ac-dias">
-        <button class="chip on" data-cuando="0">${T('Hoy')}</button>
-        <button class="chip" data-cuando="1">${T('Ayer')}</button>
-        <button class="chip" id="ac-otrodia">${T('Otro día')}</button>
+      <!-- Cuándo y cuánto, en una sola pieza de dos columnas. Eran tres bloques de
+           pastillas y un campo suelto, y ninguno de los cuatro era una decisión
+           distinta: es «qué día y cuánto rato». -->
+      <div class="rodillo">
+        <div class="rod-cab">
+          <span>${T('CUÁNDO')}</span><span>${T('CUÁNTO TIEMPO')}</span>
+        </div>
+        <div class="rod-cuerpo">
+          <div class="rod-marca"></div>
+          <div class="rod-col" id="rod-dia"></div>
+          <div class="rod-col" id="rod-min"></div>
+        </div>
       </div>
-      <div class="ac-scroll" id="ac-dias-mas" hidden>${raw(diasMas.join(''))}</div>
-
-      <div class="ac-et">${T('CUÁNTO TIEMPO')}</div>
-      <div class="ac-scroll" id="ac-mins">
-        ${raw([15, 30, 45, 60, 90, 120].map(function (m) {
-          return '<button class="chip ' + (m === 60 ? 'on' : '') + '" data-min="' + m +
-            '">' + esc(Tn('{n} min', { n: m })) + '</button>';
-        }).join(''))}
-      </div>
-      <input id="ac-otro" class="ac-otro" type="number" inputmode="numeric" min="1" max="600"
-             placeholder="${T('u otro número de minutos')}">
 
       <div class="ac-pie">
         <span class="ac-kcal" id="ac-kcal"></span>
-        <button class="btn primary grow" id="ac-ok">${T('Apuntar')}</button>
+        <button class="btn primary grow" id="ac-ok" disabled>${T('Apuntar')}</button>
       </div>`,
       function (el) {
         const $ = function (sel) { return el.querySelector(sel); };
         const actual = function () {
-          return ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
+          return ACTIVIDADES.filter(function (x) { return x.id === elegido.act; })[0] || null;
         };
 
         /* Todo lo que se ve de la decisión sale de aquí, y por eso se repinta
@@ -3766,9 +3774,16 @@
           const a = actual();
           const r = elegido.ia;
           const deIA = !!(r && r.musculos && r.musculos.length);
-          $('#ac-nom').textContent = T(a.label);
-          $('#ac-mus').textContent = musculosEnFila(musculosDe(), a.id);
+
+          $('#ac-nom').textContent = a ? T(a.label) : T('Elige qué fue');
+          $('#ac-nom').classList.toggle('vacia', !a);
+          $('#ac-mus').textContent = a
+            ? musculosEnFila(musculosDe(), a.id)
+            : T('De aquí salen las calorías y los músculos que se apuntan.');
           $('#ac-mus').classList.toggle('de-ia', deIA);
+          $('#ac-cambiar').textContent = $('#ac-lista').hidden
+            ? (a ? T('Cambiar') : T('Elegir')) : T('Cerrar');
+          $('#ac-ok').disabled = !a;
 
           const nota = $('#ac-nota');
           nota.className = 'ac-nota';
@@ -3776,25 +3791,22 @@
           else { nota.textContent = ''; nota.hidden = true; }
 
           el.querySelectorAll('#ac-lista [data-act]').forEach(function (f) {
-            f.classList.toggle('elegida', f.dataset.act === elegido.act);
+            f.classList.toggle('elegida', !!a && f.dataset.act === elegido.act);
           });
         };
 
+        /* Sin actividad no hay MET, y sin MET no hay calorías que enseñar: un
+           cero ahí parecería un resultado en vez de una pregunta sin contestar. */
         const pintarKcal = function () {
-          $('#ac-kcal').textContent = Tn('~{kcal} kcal', { kcal: UI.num(kcalDe()) });
-        };
-
-        const marcar = function (caja, sel) {
-          el.querySelectorAll(caja + ' .chip').forEach(function (c) {
-            c.classList.toggle('on', c === sel);
-          });
+          $('#ac-kcal').textContent = actual()
+            ? Tn('~{kcal} kcal', { kcal: UI.num(kcalDe()) }) : '';
         };
 
         /* ---------- qué hice ---------- */
         $('#ac-cambiar').onclick = function () {
           const lista = $('#ac-lista');
           lista.hidden = !lista.hidden;
-          $('#ac-cambiar').textContent = lista.hidden ? T('Cambiar') : T('Cerrar');
+          pintarFicha();
           if (!lista.hidden) {
             const puesta = lista.querySelector('.elegida');
             if (puesta) puesta.scrollIntoView({ block: 'nearest' });
@@ -3809,7 +3821,6 @@
                último que se haya tocado, que es lo que uno espera. */
             elegido.ia = null;
             $('#ac-lista').hidden = true;
-            $('#ac-cambiar').textContent = T('Cambiar');
             pintarFicha();
             pintarKcal();
           };
@@ -3826,33 +3837,14 @@
           pintarKcal();
         };
 
-        /* ---------- cuándo ---------- */
-        const ponerDia = function (c) {
-          elegido.atras = Number(c.dataset.cuando);
-          marcar('#ac-dias', c);
-          marcar('#ac-dias-mas', c);
-        };
-        el.querySelectorAll('[data-cuando]').forEach(function (c) {
-          c.onclick = function () { ponerDia(c); };
+        /* ---------- cuándo y cuánto ---------- */
+        UI.rodillo($('#rod-dia'), diasDelRodillo(), 0, function (v) {
+          elegido.atras = v;
         });
-        $('#ac-otrodia').onclick = function () {
-          const mas = $('#ac-dias-mas');
-          mas.hidden = !mas.hidden;
-        };
-
-        /* ---------- cuánto ---------- */
-        el.querySelectorAll('#ac-mins .chip').forEach(function (c) {
-          c.onclick = function () {
-            elegido.min = Number(c.dataset.min);
-            $('#ac-otro').value = '';
-            marcar('#ac-mins', c);
-            pintarKcal();
-          };
+        UI.rodillo($('#rod-min'), minutosDelRodillo(), elegido.min, function (v) {
+          elegido.min = v;
+          pintarKcal();
         });
-        $('#ac-otro').oninput = function (ev) {
-          const v = Number(ev.target.value);
-          if (v > 0) { elegido.min = Math.min(600, v); marcar('#ac-mins', null); pintarKcal(); }
-        };
 
         pintarFicha();
         pintarKcal();
@@ -3866,9 +3858,7 @@
             $('#ac-nombre').focus();
             return;
           }
-          const decir = function (txt) {
-            botonIA.querySelector('span').textContent = txt;
-          };
+          const decir = function (txt) { botonIA.querySelector('span').textContent = txt; };
           botonIA.disabled = true;
           decir(T('Mirando…'));
 
@@ -3883,6 +3873,9 @@
               return;
             }
             elegido.ia = r;
+            /* Si ella reconoce la actividad y él no había elegido nada, ya hay con
+               qué llenar la ficha: sus músculos mandan igual. */
+            if (!elegido.act) elegido.act = actividadDelTexto(t) || 'otro';
             /* Cómo lo llama ella, si no había nombre puesto a mano */
             if (r.nombre && !elegido.nombre) {
               elegido.nombre = r.nombre;
@@ -3901,7 +3894,10 @@
         };
 
         el.querySelector('#ac-ok').onclick = function () {
-          const a = ACTIVIDADES.find(function (x) { return x.id === elegido.act; }) || ACTIVIDADES[0];
+          const a = ACTIVIDADES.filter(function (x) { return x.id === elegido.act; })[0];
+          /* El botón está apagado sin actividad, pero un guardado sin ella
+             escribiría una sesión de la que no se sabe nada. */
+          if (!a) return;
           const fin = Date.now() - elegido.atras * 86400000;
           const comoSeLlama = elegido.nombre || T(a.label);
           Store.addSession({

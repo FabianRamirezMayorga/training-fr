@@ -789,11 +789,84 @@
     });
   }
 
+  /* ---------- selector de rodillo ----------
+     El de iOS, hecho a mano porque aquí no entran librerías: una lista que se
+     desplaza con `scroll-snap`, un hueco arriba y abajo de dos filas para que la
+     primera y la última puedan llegar al centro, y una marca fija en el medio
+     que no se mueve. Lo elegido es lo que quede en esa marca.
+
+     Se avisa al cruzar cada fila, no al parar. Lo intenté con `scrollend` —que
+     es lo que parece correcto— y el rodillo enseñaba noventa minutos mientras
+     guardaba sesenta: el resaltado se pinta en cada aviso de scroll y el valor
+     solo se leía en un evento que no siempre llega. Un selector que enseña una
+     cosa y devuelve otra es peor que no tenerlo.
+
+     Avisar por fila no cuesta nada —aquí detrás no hay red ni IA, solo una
+     resta— y de paso las calorías se mueven mientras rueda, que es como debe
+     sentirse. */
+  const ROD_ALTO = 36;
+
+  function rodillo(col, valores, inicial, alElegir) {
+    col.innerHTML = valores.map(function (v) {
+      return '<div class="rod-it">' + esc(v.et) + '</div>';
+    }).join('');
+    const filas = Array.prototype.slice.call(col.children);
+
+    let puesta = 0;
+    valores.forEach(function (v, k) { if (v.v === inicial) puesta = k; });
+    const destino = puesta * ROD_ALTO;
+
+    const cual = function () {
+      const i = Math.round(col.scrollTop / ROD_ALTO);
+      return Math.max(0, Math.min(valores.length - 1, i));
+    };
+    const resaltar = function (i) {
+      filas.forEach(function (f, k) { f.classList.toggle('eje', k === i); });
+    };
+
+    /* Una vez por fila y no una por aviso: rodar de punta a punta son cientos de
+       avisos de scroll y solo unas decenas de filas. */
+    let ultima = puesta;
+    let colocando = true;
+    const mirar = function () {
+      /* Mientras se coloca solo, lo que se mueve no lo mueve él. */
+      if (colocando) return;
+      const i = cual();
+      if (i === ultima) return;
+      ultima = i;
+      resaltar(i);
+      alElegir(valores[i].v);
+    };
+    col.addEventListener('scroll', mirar);
+
+    /* Colocarlo no es una línea. Si el rodillo nace dentro de algo plegado —la
+       caja de «ya lo hice» empieza oculta— su altura es cero, no hay dónde
+       desplazarse y scrollTop se queda en cero por mucho que se le pida: el
+       resultado era una marca con «cinco minutos» dentro mientras el valor era
+       sesenta. Así que se insiste hasta que el sitio exista, y no más de un
+       segundo, que si a esas alturas no hay altura es que no la va a haber. */
+    let intentos = 0;
+    const colocar = function () {
+      col.scrollTop = destino;
+      if (col.scrollTop === destino || intentos++ > 60) {
+        /* Un cuadro de respiro: el último aviso del colocado llega después. */
+        requestAnimationFrame(function () { colocando = false; });
+        return;
+      }
+      requestAnimationFrame(colocar);
+    };
+    /* Primero a pelo: cuando el rodillo nace en algo ya visible —que es lo
+       normal— acierta a la primera y no se ve ningún salto. */
+    colocar();
+    resaltar(puesta);
+  }
+
   g.UI = {
     esc: esc, html: html, raw: raw, icon: icon,
     demoHTML: demoHTML, mountDemos: mountDemos, clearDemos: clearDemos,
     deslizables: deslizables, cerrarDeslizadas: cerrarDeslizadas,
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,
+    rodillo: rodillo,
     num: num, dec: dec, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
     beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos,
     claveDeDia: claveDeDia,

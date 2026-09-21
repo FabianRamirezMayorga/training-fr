@@ -417,8 +417,10 @@
       'What did you do? Played football, hiked up the hill, boxing…',
     'No apunta músculos: puede ser cualquier cosa': 'Logs no muscles: it could be anything',
     'Sin músculos concretos': 'No particular muscles',
-    'Otro día': 'Another day',
     '~{kcal} kcal': '~{kcal} kcal',
+    'Elige qué fue': 'Pick what it was',
+    'De aquí salen las calorías y los músculos que se apuntan.':
+      'The calories and the muscles that get logged come from this.',
     'Apuntar algo que ya hice': 'Log something I already did',
     'Caminar una hora el domingo o la pachanga del sábado cuentan igual, aunque no salgan de una rutina.':
       'An hour walking on Sunday or Saturday kickabout count the same, even if they come from no routine.',
@@ -819,7 +821,6 @@
     'Ya lo hice': 'I already did it',
     'CUÁNTO DURÓ': 'HOW LONG IT TOOK',
     '{n} min': '{n} min',
-    'u otro número de minutos': 'or another number of minutes',
     'Calcular y empezar': 'Work it out and start',
     'Calcular y apuntar': 'Work it out and log it',
     'Apuntar': 'Log it',
