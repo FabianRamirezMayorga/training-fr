@@ -36,10 +36,15 @@
     { id: 'año', label: 'Año', dias: 364, paso: 'semana', frase: 'el último año' }
   ];
 
-  /* El elegido dura lo que dure la sesión de la app */
-  let rango = '3meses';
+  /* El elegido dura lo que dure la sesión de la app.
+
+     Se abre por la semana y no por los tres meses. Al entrar, la pregunta es
+     «¿cómo voy?», y eso es lo de estos días: con tres meses por delante, una
+     semana buena o mala no se nota en la curva y el mapa sale casi entero en
+     gris. Los tres meses son para ir a buscarlos, que para eso está el mando. */
+  let rango = 'semana';
   function rangoActual() {
-    return RANGOS.find(function (r) { return r.id === rango; }) || RANGOS[3];
+    return RANGOS.find(function (r) { return r.id === rango; }) || RANGOS[0];
   }
 
   /* ---------- datos ---------- */
@@ -491,10 +496,23 @@
     return '·';
   }
 
+  /* Un día con algo dentro se puede tocar y cuenta lo que se hizo. Los dos
+     dibujos del mapa lo llevan —la tira de la semana y la rejilla de los
+     meses— porque es la misma pregunta hecha delante del mismo cuadrito, y
+     que la respuesta dependa del periodo elegido no lo entiende nadie.
+
+     Los días vacíos no: no hay nada que abrir, y un cuadro que se hunde al
+     tocarlo para decir «no hiciste nada» es una burla. */
+  function marcaTocable(d) {
+    return d.n > 0
+      ? ' tap" role="button" tabindex="0" data-diases="' + UI.esc(d.k) + '"'
+      : '"';
+  }
+
   function tiraSemana(dias, max, hoyKey) {
     return '<div class="tira-sem">' + dias.map(function (d) {
       const f = new Date(d.t);
-      return '<div class="ts-dia' + (d.k === hoyKey ? ' hoy' : '') + '">' +
+      return '<div class="ts-dia' + (d.k === hoyKey ? ' hoy' : '') + marcaTocable(d) + '>' +
         '<span class="ts-letra">' + UI.inicialDia(f.getDay()) + '</span>' +
         '<span class="ts-num">' + f.getDate() + '</span>' +
         '<i class="n' + nivelDia(d, max) + (soloActividad(d) ? ' act' : '') + '"></i>' +
@@ -558,8 +576,8 @@
         : soloActividad(d) ? Tn('{n}′ de actividad', { n: d.minutos })
         : T('descanso'));
       return '<i class="n' + nivel + (soloActividad(d) ? ' act' : '') +
-        (d.k === hoyKey ? ' hoy' : '') +
-        '" title="' + esc(titulo) + '"></i>';
+        (d.k === hoyKey ? ' hoy' : '') + marcaTocable(d) +
+        ' title="' + esc(titulo) + '"></i>';
     }).join('');
 
     return html`
@@ -669,10 +687,19 @@
       <!-- El periodo manda sobre toda la pantalla, no solo sobre la grafica:
            tambien cambia el mapa de constancia y el reparto por zona. Debajo
            del titulo de la grafica parecia el mando de esa caja, y para cambiar
-           de mes habia que buscarlo a media pantalla. -->
-      <div class="pill-scroll periodo-arriba">
+           de mes habia que buscarlo a media pantalla.
+
+           Y una sola pieza en vez de cinco pastillas sueltas. Cinco pastillas
+           puestas en fila son cinco botones que da la casualidad de que van
+           juntos: no se ve que sean las cinco caras de una misma pregunta, y
+           la elegida se distinguia solo por el color. Ademas se iban de ancho
+           y habia que arrastrarlas, asi que «Año» vivia fuera de la pantalla.
+           Aqui caben las cinco de una vez, que es lo que hace que se compare
+           un periodo con otro sin buscarlo. -->
+      <div class="segmento segmento-periodo periodo-arriba" role="tablist">
         ${raw(RANGOS.map(function (x) {
-          return '<button class="chip ' + (x.id === rango ? 'on' : '') +
+          return '<button class="' + (x.id === rango ? 'on' : '') +
+            '" role="tab" aria-selected="' + (x.id === rango ? 'true' : 'false') +
             '" data-rango="' + x.id + '">' + esc(T(x.label)) + '</button>';
         }).join(''))}
       </div>
@@ -1156,6 +1183,68 @@
     return que + ' · ' + dura;
   }
 
+  /* ---------- lo que se hizo un día ----------
+     El mapa de constancia dice que ese día hubo entreno y ahí se queda: un
+     cuadro verde no cuenta si fue pierna o fue una carrera, y esa es justo la
+     pregunta que se hace uno al verlo. El dato ya estaba —es el mismo del
+     historial—, solo que dos pantallas más abajo y ordenado por semanas.
+
+     Se enseña lo mismo que la fila del historial, sin el botón de borrar: esto
+     es una consulta desde una gráfica, y un cubo de basura al lado de un dato
+     que se ha venido a mirar solo sirve para tocarlo sin querer. */
+  function hojaDiaEntrenado(clave) {
+    const delDia = Store.sessions().filter(function (s) {
+      return Store.dayKey(s.start) === clave;
+    }).sort(function (a, b) { return a.start - b.start; });
+    if (!delDia.length) return;
+
+    const series = delDia.reduce(function (n, s) { return n + (s.setsDone || 0); }, 0);
+    const volumen = delDia.reduce(function (n, s) { return n + (s.volume || 0); }, 0);
+    const minutos = delDia.reduce(function (n, s) {
+      return n + Math.round(((s.end || s.start) - s.start) / 60000);
+    }, 0);
+
+    /* El total del día solo cuando hay más de un entreno: con uno repetiría
+       palabra por palabra la línea que viene justo debajo. */
+    const total = delDia.length > 1 ? [
+      series ? Tn('{n} series', { n: series }) : '',
+      volumen ? UI.kg(volumen) : '',
+      minutos ? Tn('{n} min', { n: minutos }) : ''
+    ].filter(Boolean).join(' · ') : '';
+
+    UI.modal(html`
+      <h2>${UI.fecha(delDia[0].start)}</h2>
+      ${raw(total ? '<p class="muted" style="margin:-4px 0 12px">' +
+        esc(total) + '</p>' : '')}
+      <div class="stack">
+        ${raw(delDia.map(function (s) {
+          const musculos = musculosDeSesion(s);
+          const hechos = (s.entries || []).filter(function (e) {
+            return (e.sets || []).some(function (x) { return x.done; });
+          });
+          return '<div class="card">' +
+            '<div style="font-weight:700">' + esc(s.routineName) + '</div>' +
+            '<div class="tiny" style="margin-top:2px">' + esc(lineaSesion(s)) + '</div>' +
+            (musculos.length ? '<div class="ses-musculos">' + musculos.map(function (m) {
+              return '<span class="chip tiny-chip">' + esc(T(m)) + '</span>';
+            }).join('') + '</div>' : '') +
+            (hechos.length ? '<div class="stack dia-ejes">' + hechos.map(function (e) {
+              const st = (e.sets || []).filter(function (x) { return x.done; });
+              return '<div class="row between" style="font-size:.84rem;gap:10px">' +
+                '<span class="grow">' + esc(nombreEj(e)) + '</span>' +
+                '<span class="tiny nowrap">' + esc(st.map(function (x) {
+                  return UI.num(x.weight) + '×' + x.reps;
+                }).join(' · ')) + '</span></div>';
+            }).join('') + '</div>' : '') +
+            '</div>';
+        }).join(''))}
+      </div>
+      <button class="btn block" data-cerrar style="margin-top:14px">${T('Vale')}</button>`,
+      function (el) {
+        el.querySelector('[data-cerrar]').onclick = UI.closeModal;
+      });
+  }
+
   function sesionHTML(s) {
     const musculos = musculosDeSesion(s);
     return html`
@@ -1294,6 +1383,12 @@
       const pos = window.scrollY;
       render();
       window.scrollTo(0, pos);
+    });
+
+    /* Un día del mapa, tocado. Los dos dibujos usan la misma marca, así que
+       esto vale para la tira de la semana y para la rejilla de los meses. */
+    bindAll(root, '[data-diases]', function (el) {
+      hojaDiaEntrenado(el.dataset.diases);
     });
 
     /* la curva se dibuja sola al entrar */

@@ -140,6 +140,24 @@
     '¿Por qué mi plan saca esa nota?': 'Why does my plan get that score?',
     '¿Por qué mi foto no se cruzó con el menú?':
       'Why did my photo not match the meal plan?',
+    '¿Puedo ver qué entrené un día concreto?':
+      'Can I see what I trained on a particular day?',
+    'Sí. En Progreso, en el mapa de *Constancia*, toca el cuadro de ese día: te sale la rutina que hiciste, los músculos que movió y lo que levantaste, serie a serie.':
+      'Yes. In Progress, on the *Consistency* map, tap that day\'s square: you get the routine you did, the muscles it moved and what you lifted, set by set.',
+    'Los días en blanco no se abren, porque no hay nada que enseñar.':
+      'Blank days do not open, because there is nothing to show.',
+    'Funciona igual con la tira de la semana y con la rejilla de los meses: son el mismo mapa dibujado de dos maneras, según el periodo que tengas puesto arriba.':
+      'It works the same on the week strip and on the month grid: they are the same map drawn two ways, depending on the period you have set at the top.',
+    'Si lo que quieres es recorrer varias semanas seguidas en vez de mirar un día suelto, eso está en el historial, al final de esa misma pantalla.':
+      'If what you want is to go through several weeks in a row rather than look at one day, that is in the history, at the bottom of that same screen.',
+    '¿Por qué Progreso me abre en la semana?':
+      'Why does Progress open on the week?',
+    'Porque al entrar la pregunta suele ser «¿cómo voy?», y eso es lo de estos días. Con tres meses por delante, una semana buena o mala no se nota en la curva y el mapa sale casi entero en gris.':
+      'Because when you come in the question is usually “how am I doing?”, and that means these last few days. With three months in front of you, a good or a bad week does not show in the curve and the map comes out almost all grey.',
+    'El mando de arriba cambia el periodo, y manda sobre toda la pantalla: la gráfica, la constancia, el reparto por zona y las cuatro cifras de arriba. La racha no, que una racha es de hoy y no de un periodo.':
+      'The control at the top changes the period, and it rules the whole screen: the chart, the consistency map, the split by area and the four figures at the top. Not the streak, because a streak is about today and not about a period.',
+    'Lo que elijas dura mientras tengas la app abierta. Al volver a entrar arranca otra vez por la semana.':
+      'Whatever you pick lasts as long as you keep the app open. Next time you come in it starts on the week again.',
     '¿Puedo apuntar una comida con foto sin internet?':
       'Can I log a meal by photo with no internet?',
     'Apuntarla no, porque quien lee la foto es la IA y la IA vive fuera del móvil. La app te lo dice en cuanto lo intentas, en vez de dejarte con una rueda girando.':

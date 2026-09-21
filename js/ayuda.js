@@ -633,6 +633,19 @@
         'Si quieres récords, volumen y gráficas de peso, cambia el registro a «peso y repeticiones» en Ajustes.'],
       ver: ['g-registro'] },
 
+    { id: 'p-diaconcreto', q: '¿Puedo ver qué entrené un día concreto?',
+      a: ['Sí. En Progreso, en el mapa de *Constancia*, toca el cuadro de ese día: te sale la rutina que hiciste, los músculos que movió y lo que levantaste, serie a serie.',
+        'Los días en blanco no se abren, porque no hay nada que enseñar.',
+        'Funciona igual con la tira de la semana y con la rejilla de los meses: son el mismo mapa dibujado de dos maneras, según el periodo que tengas puesto arriba.',
+        'Si lo que quieres es recorrer varias semanas seguidas en vez de mirar un día suelto, eso está en el historial, al final de esa misma pantalla.'],
+      ver: ['g-registro'] },
+
+    { id: 'p-periodo', q: '¿Por qué Progreso me abre en la semana?',
+      a: ['Porque al entrar la pregunta suele ser «¿cómo voy?», y eso es lo de estos días. Con tres meses por delante, una semana buena o mala no se nota en la curva y el mapa sale casi entero en gris.',
+        'El mando de arriba cambia el periodo, y manda sobre toda la pantalla: la gráfica, la constancia, el reparto por zona y las cuatro cifras de arriba. La racha no, que una racha es de hoy y no de un periodo.',
+        'Lo que elijas dura mientras tengas la app abierta. Al volver a entrar arranca otra vez por la semana.'],
+      ver: ['g-registro'] },
+
     { id: 'p-nota', q: '¿Por qué mi plan saca esa nota?',
       a: ['La nota parte de un 10 y baja por cada fallo encontrado, según su gravedad.',
         'Los fallos están listados uno a uno con lo que se ha medido: no es un número a secas. Casi todos traen un arreglo automático.',

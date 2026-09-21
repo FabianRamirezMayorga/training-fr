@@ -2681,8 +2681,25 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .vista-progreso .meta.lograda { border-color: var(--acc); }
 
 /* El selector de periodo, pegado al titulo de la pantalla: manda sobre toda
-   ella y no solo sobre la grafica. */
-.periodo-arriba { margin-top: 2px; margin-bottom: 2px; padding-bottom: 10px; }
+   ella y no solo sobre la grafica.
+
+   Es el mando de dos posiciones de siempre, pero con cinco. Aquí los huecos NO
+   miden lo mismo: con cinco a partes iguales caben 68 px cada uno y «2 meses»
+   salía como «2 mes…», y un filtro con la etiqueta a medias no dice qué filtra.
+   Con `flex: 1 1 auto` cada uno parte de lo que ocupa su palabra y el sobrante
+   se reparte, así que «Mes» y «Año» ceden lo suyo a los dos largos y no se
+   corta ninguno. La letra baja a .78rem por lo mismo: para que quepan.
+
+   Va con las dos clases en el selector a propósito: `.segmento button` pesa lo
+   mismo y está declarado más abajo, así que con una sola clase ganaba él y los
+   cinco volvían a medir igual. */
+.periodo-arriba { margin: 2px 0; }
+.segmento.segmento-periodo { margin-bottom: 12px; }
+.segmento.segmento-periodo button {
+  flex: 1 1 auto; min-width: auto;      /* el 0 de la base los dejaba encogerse
+                                            por debajo de su propia palabra */
+  font-size: .78rem; padding: .52em .5em;
+}
 
 /* La diferencia con el periodo anterior. Verde si sube, ambar si baja —rojo
    seria un error, y bajar el volumen una semana no lo es—. */
@@ -2872,6 +2889,25 @@ html[data-theme="light"] .sem-caja.es-ahora {
   font-variant-numeric: tabular-nums; }
 .ts-dia.hoy .ts-letra, .ts-dia.hoy .ts-num { color: var(--txt); font-weight: 700; }
 .ts-dia.hoy i { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+/* ---------- un día del mapa se toca y cuenta lo que se hizo ----------
+   Solo los días con algo dentro, que en un día vacío no hay nada que abrir.
+
+   El cuadrito de la rejilla no se hunde al tocarlo como se hunde una ficha:
+   lleva `animation: pop … forwards`, y un `forwards` deja el transform clavado
+   donde lo dejó la animación, así que un scale en :active no se ve. Se aclara,
+   que ahí no pisa a nadie. La ficha de la semana sí se hunde, porque el
+   transform lo lleva el contenedor y la animación va en el hijo. */
+.calor i.tap { cursor: pointer; }
+.calor i.tap:active { filter: brightness(1.5); }
+.ts-dia.tap { cursor: pointer; transition: transform .12s ease; }
+.ts-dia.tap:active { transform: scale(.94); }
+
+/* La ventana del día: una tarjeta por entrenamiento, con lo que se levantó
+   debajo separado por una línea. Sin la línea, el nombre del ejercicio y el
+   nombre de la rutina pesaban igual y no se veía qué colgaba de qué. */
+.dia-ejes { margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line);
+  gap: 4px; }
 
 /* ---------- como va cada ejercicio ----------
    Nombre, de cuanto a cuanto, la forma de la curva y el cambio. Cuatro datos
