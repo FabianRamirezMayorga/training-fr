@@ -178,15 +178,20 @@ a{color:var(--blue)}
 .realce::after{
   content:'';position:absolute;top:0;bottom:0;left:0;width:55%;pointer-events:none;
   background:linear-gradient(100deg,transparent,
-    color-mix(in srgb,var(--acc) 32%,transparent) 50%,transparent);
+    color-mix(in srgb,var(--acc) 55%,transparent) 50%,transparent);
   transform:translateX(-180%);
   /* Nombre propio: ya había un @keyframes «destello» para el botón grande,
      y con dos iguales gana el segundo. El mío mueve transform y el suyo mueve
      left, así que el reflejo se quedaba parado fuera de la pantalla. */
-  animation:realce 6s cubic-bezier(.35,0,.2,1) 1s infinite}
+  /* Cada dos segundos y medio, no cada seis: a seis se notaba tan poco que
+     había que estar mirando el botón para pillarlo, y un reflejo que hay que
+     buscar no sirve para que un botón no se pierda. El barrido sigue durando
+     casi un segundo —más rápido parpadea— y deja más de un segundo de calma
+     entre pasada y pasada. */
+  animation:realce 2.6s cubic-bezier(.35,0,.2,1) .6s infinite}
 @keyframes realce{
   0%{transform:translateX(-180%)}
-  18%{transform:translateX(260%)}
+  34%{transform:translateX(260%)}
   100%{transform:translateX(260%)}}
 /* Quien pide menos movimiento no quiere un brillo latiendo en su portada. */
 @media (prefers-reduced-motion:reduce){.realce::after{animation:none}}
