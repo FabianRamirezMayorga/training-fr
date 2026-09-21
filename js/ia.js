@@ -2484,6 +2484,15 @@
     const t = String(texto || '').trim();
     if (!t) return Promise.reject(new Error('Escribe antes qué has hecho.'));
 
+    /* Guardado por lo escrito, y no por lo escrito más los minutos: lo que se
+       pregunta aquí —qué actividad es, cuánto cuesta por minuto, qué mueve— no
+       cambia porque el partido durase noventa o sesenta. Sin esto, preguntarlo
+       solo al escribir gastaba una llamada por cada vez que se corrige una
+       letra. */
+    const clave = 'act1:' + I18N.norm(t) + ':' + (g.Idioma ? Idioma.actual() : 'es');
+    const guardado = leerCache(clave, 24 * 30);
+    if (guardado) return Promise.resolve(guardado);
+
     const datos = g.Perfil ? Perfil.datos() : null;
     const peso = Number(datos && datos.peso) || 0;
 
@@ -2524,6 +2533,9 @@
         origen: 'ia',
         tardo: Date.now() - arranque
       };
+    }).then(function (r) {
+      if (r.met) escribirCache(clave, r);
+      return r;
     });
   }
 

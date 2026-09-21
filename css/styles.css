@@ -2902,18 +2902,19 @@ html[data-theme="light"] .sem-caja.es-ahora {
 /* Cuando los pone la IA y no la tabla se dice con el color, que es el suyo en
    toda la app, y no con una etiqueta que ocupe otro renglón. */
 .ac-mus.de-ia { color: var(--agua); }
-.ac-nota { margin-top: 9px; font-size: .78rem; color: var(--dim); line-height: 1.45; }
-.ac-nota.mal { color: var(--warn); }
-
-.ac-ia {
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  width: 100%; margin-top: 11px; padding: 9px; border-radius: 11px;
-  border: 1px solid var(--line); background: none; color: var(--agua);
-  font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer;
-}
-.ac-ia svg { width: 15px; height: 15px; flex: none; stroke: var(--agua); fill: none; }
-.ac-ia:disabled { opacity: .55; }
-.ac-ia:active { background: color-mix(in srgb, var(--agua) 12%, transparent); }
+/* Lo que dice la IA, abajo del todo y encima del botón de guardar. Arriba era
+   un botón en mitad de la hoja que había que acordarse de pulsar; ahora habla
+   sola en cuanto uno deja de escribir, así que su sitio es el de un resultado y
+   no el de una acción. */
+.ac-ia-caja { display: flex; align-items: flex-start; gap: 8px; margin-top: 14px;
+  font-size: .8rem; line-height: 1.45; color: var(--agua); }
+.ac-ia-ico { flex: none; display: flex; margin-top: 1px; }
+.ac-ia-ico svg { width: 15px; height: 15px; stroke: var(--agua); fill: none; }
+.ac-ia-caja.mal { color: var(--warn); }
+.ac-ia-caja.mal .ac-ia-ico svg { stroke: var(--warn); }
+.ac-ia-otra { flex: none; padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: .78rem; font-weight: 700; color: var(--agua);
+  text-decoration: underline; text-underline-offset: 3px; }
 
 /* Quince filas no caben en una hoja, así que la lista se desplaza sola: si
    creciera hacia abajo empujaría el botón de guardar fuera de la pantalla. */
@@ -2964,6 +2965,31 @@ html[data-theme="light"] .sem-caja.es-ahora {
   scroll-snap-align: center; font-size: .95rem; color: var(--dim);
   white-space: nowrap; transition: color .14s ease; }
 .rod-it.eje { color: var(--txt); font-weight: 700; }
+
+/* Cuando el valor no está en la rueda —una fecha de hace tres semanas, cuarenta
+   y siete minutos— la rueda se apaga en vez de marcar el de al lado: el valor
+   está en el campo de abajo y una rueda diciendo «45» con 47 escritos debajo es
+   otra vez enseñar una cosa y guardar otra. */
+.rod-col.fuera .rod-it.eje { color: var(--dim); font-weight: 400; opacity: .55; }
+
+/* Los campos de verdad. El rodillo es el atajo para lo de siempre; aquí se
+   escribe cualquier fecha y cualquier número. */
+.rod-pie { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
+.rod-campo { flex: 1; display: flex; align-items: center; gap: 6px;
+  padding: 8px 11px; border-radius: 11px; border: 1px solid var(--line);
+  background: var(--card2); font-size: .86rem; color: var(--txt); min-width: 0; }
+.rod-campo input { flex: 1; min-width: 0; padding: 0; border: 0; background: none;
+  font: inherit; color: inherit; }
+.rod-campo input:focus { outline: none; }
+/* El número pegado a su unidad. Con el campo estirado, «60» quedaba en una
+   punta y «min» en la otra, y no se leían como una sola cosa. */
+.rod-campo-min input { flex: none; width: 3.2em; }
+.rod-campo-min span { flex: none; color: var(--dim2); font-size: .8rem; }
+/* Safari pinta su propio icono de calendario y sus flechas; aquí sobran las dos
+   cosas, que el campo ya es el control. */
+.rod-campo input::-webkit-calendar-picker-indicator { opacity: .45; }
+.rod-campo input::-webkit-inner-spin-button,
+.rod-campo input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
 /* Las calorías al lado del botón y no en su propia tarjeta: son un número que
    sale de lo de arriba, no una decisión que haya que tomar. */

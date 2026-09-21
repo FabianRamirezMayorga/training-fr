@@ -413,14 +413,19 @@
 
     'Entra en tu historial y en tu racha como un entrenamiento más.':
       'It goes into your history and your streak like any other session.',
-    '¿Qué hiciste? Jugué fútbol, subí al cerro, boxeo…':
-      'What did you do? Played football, hiked up the hill, boxing…',
     'No apunta músculos: puede ser cualquier cosa': 'Logs no muscles: it could be anything',
     'Sin músculos concretos': 'No particular muscles',
     '~{kcal} kcal': '~{kcal} kcal',
     'Elige qué fue': 'Pick what it was',
     'De aquí salen las calorías y los músculos que se apuntan.':
       'The calories and the muscles that get logged come from this.',
+    '¿Qué hiciste? Trote una hora, jugué fútbol ayer…':
+      'What did you do? Ran for an hour, played football yesterday…',
+    'Fecha': 'Date',
+    'Minutos': 'Minutes',
+    'min': 'min',
+    'Mirando qué fue…': 'Working out what it was…',
+    'Afinado por la IA.': 'Fine-tuned by the AI.',
     'Apuntar algo que ya hice': 'Log something I already did',
     'Caminar una hora el domingo o la pachanga del sábado cuentan igual, aunque no salgan de una rutina.':
       'An hour walking on Sunday or Saturday kickabout count the same, even if they come from no routine.',

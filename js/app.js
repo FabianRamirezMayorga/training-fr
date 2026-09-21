@@ -3597,12 +3597,16 @@
      honesto. Es una tabla y no la IA: reconocer la palabra «fútbol» no es una
      opinión, y tiene que funcionar sin cobertura y sin clave. */
   const PISTAS = [
-    ['correr', ['correr', 'corri', 'running', 'trote', 'trotar', 'maraton', 'jogging']],
-    ['bici', ['bici', 'ciclismo', 'spinning', 'pedalear', 'mtb']],
-    ['nadar', ['nadar', 'nade', 'natacion', 'piscina', 'nadando']],
+    ['correr', ['correr', 'corri', 'trote', 'trotar', 'maraton',
+      'run', '=ran', 'jog', 'marathon']],
+    ['bici', ['bici', 'ciclismo', 'spinning', 'pedalear', 'mtb',
+      'cycl', 'bike', 'biking']],
+    ['nadar', ['nadar', 'nade', 'natacion', 'piscina', 'nadando',
+      'swim', '=swam', 'pool']],
     /* Con «=» delante, la palabra entera: «remo» es el principio de «remolque»
        y una mudanza se apuntaba como remar. */
-    ['remo', ['=remo', '=remar', '=reme', 'remando', 'rowing', 'piragua', 'kayak']],
+    ['remo', ['=remo', '=remar', '=reme', 'remando', 'row', 'piragua', 'kayak',
+      'canoe', 'paddl']],
     /* Sin «escale» a propósito: «escalé el cerro» es subir al monte, no colgarse
        de una pared, y los músculos de una cosa y otra no se parecen en nada. Lo
        que de verdad dice que es escalada son las palabras de escalar. */
@@ -3610,19 +3614,20 @@
       'rocódromo', 'via ferrata']],
     ['boxeo', ['boxe', 'boxing', 'muay', 'kickbox', 'karate', 'kárate', 'judo',
       'taekwondo', 'jiu', 'mma', 'sparring', 'artes marciales', 'saco de boxeo']],
-    ['senderismo', ['sender', 'monte', 'montaña', 'montana', 'cerro', 'trekking',
-      'hiking', 'subida', 'subí', 'subi', 'ascenso', 'excursion']],
+    ['senderismo', ['sender', 'monte', 'montaña', 'montana', 'cerro', 'trek',
+      'hik', 'subida', 'subí', 'subi', 'ascenso', 'excursion', 'trail']],
     ['equipo', ['futbol', 'fútbol', 'football', 'soccer', 'baloncesto', 'basquet',
       'basket', 'voley', 'volei', 'balonmano', 'rugby', 'partido', 'pachanga',
-      'microfutbol', 'banquitas']],
-    ['raqueta', ['padel', 'pádel', 'tenis', 'squash', 'badminton', 'pickleball',
-      'raqueta', 'ping pong', 'pimpon']],
-    ['baile', ['bail', 'danza', 'zumba', 'salsa', 'rumba', 'bachata']],
+      'microfutbol', 'banquitas', 'volleyball', 'handball', 'match', 'kickabout']],
+    ['raqueta', ['padel', 'pádel', 'tenis', 'tennis', 'squash', 'badminton',
+      'pickleball', 'raqueta', 'racquet', 'ping pong', 'pimpon']],
+    ['baile', ['bail', 'danza', 'danc', 'zumba', 'salsa', 'rumba', 'bachata']],
     ['pilates', ['pilates', 'yoga']],
-    ['estirar', ['estir', 'movilidad', 'flexibilidad']],
-    ['pesas', ['pesas', 'gimnasio', 'gym', 'mancuerna']],
+    ['estirar', ['estir', 'movilidad', 'flexibilidad', 'stretch', 'mobility']],
+    ['pesas', ['pesas', 'gimnasio', 'gym', 'mancuerna', 'weights', 'lifting',
+      'dumbbell']],
     ['caminar', ['caminar', 'camine', 'caminata', 'andar', 'anduve', 'paseo',
-      'pasear', 'paseé']]
+      'pasear', 'paseé', 'walk', 'stroll']]
   ];
 
   function actividadDelTexto(txt) {
@@ -3652,6 +3657,79 @@
       });
     });
     return fuera;
+  }
+
+  /* ---------- lo que se escribe también dice cuándo y cuánto ----------
+     «Trote una hora» lleva dentro los sesenta minutos y «jugué fútbol ayer»
+     lleva el día. Pedirlos otra vez con dos rodillos es hacerle repetir lo que
+     acaba de escribir.
+
+     Es una tabla y no la IA: reconocer «una hora» no es una opinión, tiene que
+     dar lo mismo siempre y funcionar sin cobertura. Y solo propone: en cuanto
+     él toca un rodillo manda lo suyo y esto deja de meterse. */
+  const NUMEROS = {
+    un: 1, una: 1, uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6,
+    siete: 7, ocho: 8, nueve: 9, diez: 10, quince: 15, veinte: 20, treinta: 30,
+    cuarenta: 40, cuarentaycinco: 45, cincuenta: 50, sesenta: 60, noventa: 90,
+    one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, half: 0
+  };
+
+  function numeroDe(txt) {
+    const n = Number(txt);
+    if (n > 0) return n;
+    return NUMEROS[String(txt)] || 0;
+  }
+
+  /* Devuelve minutos, o 0 si ahí no hay ninguna duración. */
+  function minutosDelTexto(t) {
+    /* «hora y media» antes que «hora», o se queda en sesenta. Y el número
+       delante es opcional: «pádel hora y media» no lleva ninguno, y exigirlo
+       dejaba la frase entera sin reconocer. */
+    let m;
+    if (/\b(?:horas?|hours?|hrs?|h)\s*y\s*media\b/.test(t)) {
+      m = t.match(/(\d+|[a-z]+)\s+(?:horas?|hours?|hrs?|h)\s*y\s*media\b/);
+      return ((m && numeroDe(m[1])) || 1) * 60 + 30;
+    }
+    if (/media\s*hora|half\s*an?\s*hour/.test(t)) return 30;
+    /* 1:30 y 1h30 */
+    m = t.match(/(\d+)\s*[:h]\s*(\d{1,2})\b/);
+    if (m) return Number(m[1]) * 60 + Number(m[2]);
+    m = t.match(/(\d+|[a-z]+)\s*(?:horas?|hours?|hrs?|h)\b/);
+    if (m && numeroDe(m[1])) return numeroDe(m[1]) * 60;
+    m = t.match(/(\d+|[a-z]+)\s*(?:minutos?|minutes?|mins?)\b/);
+    if (m && numeroDe(m[1])) return numeroDe(m[1]);
+    return 0;
+  }
+
+  const DIAS_TXT = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+  const DIAS_EN = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+  /* Devuelve cuántos días atrás, o -1 si no lo dice. */
+  function diaDelTexto(t) {
+    if (/\banteayer\b|\bantier\b|\bantes\s*de\s*ayer\b/.test(t)) return 2;
+    if (/\bayer\b|\byesterday\b/.test(t)) return 1;
+    if (/\bhoy\b|\btoday\b/.test(t)) return 0;
+
+    const palabras = t.split(/[^a-z0-9]+/);
+    const hoy = new Date().getDay();
+    let fuera = -1;
+    DIAS_TXT.forEach(function (nombre, dow) {
+      if (fuera !== -1) return;
+      if (palabras.indexOf(nombre) === -1 && palabras.indexOf(DIAS_EN[dow]) === -1) return;
+      /* El de la semana pasada y no el que viene: esto sirve para apuntar algo
+         que ya se hizo. Y si cae en el mismo día de la semana que hoy, es hoy:
+         nadie escribe «el lunes» un lunes para hablar del lunes anterior. */
+      fuera = (hoy - dow + 7) % 7;
+    });
+    return fuera;
+  }
+
+  /* {min, atras} con lo que se haya reconocido; cada uno puede venir vacío. */
+  function cuandoYCuantoDelTexto(txt) {
+    if (!g.I18N) return { min: 0, atras: -1 };
+    const t = I18N.norm(String(txt || ''));
+    if (!t) return { min: 0, atras: -1 };
+    return { min: minutosDelTexto(t), atras: diaDelTexto(t) };
   }
 
   function apuntarActividad() {
@@ -3711,13 +3789,21 @@
       return out;
     };
 
+    const isoDe = function (atras) {
+      const d = new Date(Date.now() - atras * 86400000);
+      const mes = String(d.getMonth() + 1);
+      const dia = String(d.getDate());
+      return d.getFullYear() + '-' + (mes.length < 2 ? '0' + mes : mes) +
+        '-' + (dia.length < 2 ? '0' + dia : dia);
+    };
+
     UI.modal(html`
       <h2>${T('Apuntar algo que ya hice')}</h2>
       <p class="muted" style="margin:0 0 14px">${T('Entra en tu historial y en tu racha ' +
       'como un entrenamiento más.')}</p>
 
       <input id="ac-nombre" class="ac-campo" autocomplete="off"
-             placeholder="${T('¿Qué hiciste? Jugué fútbol, subí al cerro, boxeo…')}">
+             placeholder="${T('¿Qué hiciste? Trote una hora, jugué fútbol ayer…')}">
 
       <!-- Lo que la app ha entendido. Empieza vacía a propósito: traer «Caminar»
            puesto es decidir por él, y si no lo cambia se guarda algo que no hizo. -->
@@ -3729,9 +3815,6 @@
           </div>
           <button class="btn sm" id="ac-cambiar">${T('Elegir')}</button>
         </div>
-        <div class="ac-nota" id="ac-nota" hidden></div>
-        ${raw(conIA ? '<button class="ac-ia" id="ac-ia-btn">' + icon('chispa') +
-          '<span>' + esc(T('Que lo mire la IA')) + '</span></button>' : '')}
       </div>
 
       <div class="ac-lista" id="ac-lista" hidden>
@@ -3743,9 +3826,11 @@
         }).join(''))}
       </div>
 
-      <!-- Cuándo y cuánto, en una sola pieza de dos columnas. Eran tres bloques de
-           pastillas y un campo suelto, y ninguno de los cuatro era una decisión
-           distinta: es «qué día y cuánto rato». -->
+      <!-- El rodillo para lo de siempre y los campos para lo de verdad: una
+           caminata de hace tres semanas o unos cuarenta y siete minutos no caben
+           en una rueda de siete días y saltos de cinco. Mandan los campos; la
+           rueda es el atajo, y cuando no puede representar lo escrito se apaga
+           en vez de enseñar un valor que no es. -->
       <div class="rodillo">
         <div class="rod-cab">
           <span>${T('CUÁNDO')}</span><span>${T('CUÁNTO TIEMPO')}</span>
@@ -3755,6 +3840,23 @@
           <div class="rod-col" id="rod-dia"></div>
           <div class="rod-col" id="rod-min"></div>
         </div>
+        <div class="rod-pie">
+          <input type="date" id="ac-fecha" class="rod-campo" max="${isoDe(0)}"
+                 aria-label="${T('Fecha')}">
+          <label class="rod-campo rod-campo-min">
+            <input type="number" id="ac-minman" inputmode="numeric" min="1" max="600"
+                   aria-label="${T('Minutos')}">
+            <span>${T('min')}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- La IA, aquí abajo y sola. Arriba era un botón en mitad de la hoja que
+           había que acordarse de pulsar. -->
+      <div class="ac-ia-caja" id="ac-ia-caja" hidden>
+        <span class="ac-ia-ico">${raw(icon('chispa'))}</span>
+        <span class="grow" id="ac-ia-txt"></span>
+        <button class="ac-ia-otra" id="ac-ia-btn" hidden>${T('Que lo mire la IA')}</button>
       </div>
 
       <div class="ac-pie">
@@ -3773,23 +3875,15 @@
         const pintarFicha = function () {
           const a = actual();
           const r = elegido.ia;
-          const deIA = !!(r && r.musculos && r.musculos.length);
-
           $('#ac-nom').textContent = a ? T(a.label) : T('Elige qué fue');
           $('#ac-nom').classList.toggle('vacia', !a);
           $('#ac-mus').textContent = a
             ? musculosEnFila(musculosDe(), a.id)
             : T('De aquí salen las calorías y los músculos que se apuntan.');
-          $('#ac-mus').classList.toggle('de-ia', deIA);
+          $('#ac-mus').classList.toggle('de-ia', !!(r && r.musculos && r.musculos.length));
           $('#ac-cambiar').textContent = $('#ac-lista').hidden
             ? (a ? T('Cambiar') : T('Elegir')) : T('Cerrar');
           $('#ac-ok').disabled = !a;
-
-          const nota = $('#ac-nota');
-          nota.className = 'ac-nota';
-          if (r && r.nota) { nota.textContent = r.nota; nota.hidden = false; }
-          else { nota.textContent = ''; nota.hidden = true; }
-
           el.querySelectorAll('#ac-lista [data-act]').forEach(function (f) {
             f.classList.toggle('elegida', !!a && f.dataset.act === elegido.act);
           });
@@ -3800,6 +3894,57 @@
         const pintarKcal = function () {
           $('#ac-kcal').textContent = actual()
             ? Tn('~{kcal} kcal', { kcal: UI.num(kcalDe()) }) : '';
+        };
+
+        /* ---------- cuándo y cuánto ---------- */
+        const campoFecha = $('#ac-fecha');
+        const campoMin = $('#ac-minman');
+
+        const pintarFecha = function () { campoFecha.value = isoDe(elegido.atras); };
+        const pintarMin = function () { campoMin.value = elegido.min; };
+
+        /* La rueda se apaga cuando no puede decir la verdad: el valor vive en el
+           campo, y una rueda marcando «45» con 47 escritos al lado es el mismo
+           fallo de enseñar una cosa y guardar otra, solo que más pequeño. */
+        const rodDia = UI.rodillo($('#rod-dia'), diasDelRodillo(), 0, function (v) {
+          elegido.atras = v;
+          elegido.diaAMano = true;
+          pintarFecha();
+        });
+        const rodMin = UI.rodillo($('#rod-min'), minutosDelRodillo(), elegido.min, function (v) {
+          elegido.min = v;
+          elegido.minAMano = true;
+          pintarMin();
+          pintarKcal();
+        });
+
+        const sincroDia = function () {
+          $('#rod-dia').classList.toggle('fuera', !rodDia.poner(elegido.atras));
+        };
+        const sincroMin = function () {
+          $('#rod-min').classList.toggle('fuera', !rodMin.poner(elegido.min));
+        };
+
+        campoFecha.onchange = function () {
+          if (!campoFecha.value) { pintarFecha(); return; }
+          /* Al mediodía los dos, que si no el cambio de hora se come un día. */
+          const puesta = new Date(campoFecha.value + 'T12:00:00');
+          const hoy = new Date();
+          hoy.setHours(12, 0, 0, 0);
+          const atras = Math.round((hoy - puesta) / 86400000);
+          if (!(atras >= 0)) { pintarFecha(); return; }
+          elegido.atras = atras;
+          elegido.diaAMano = true;
+          sincroDia();
+        };
+
+        campoMin.oninput = function () {
+          const v = Math.round(Number(campoMin.value));
+          if (!(v > 0)) return;
+          elegido.min = Math.min(600, v);
+          elegido.minAMano = true;
+          sincroMin();
+          pintarKcal();
         };
 
         /* ---------- qué hice ---------- */
@@ -3817,81 +3962,100 @@
           f.onclick = function () {
             elegido.act = f.dataset.act;
             elegido.aMano = true;
-            /* Elegir a mano es contestar a lo mismo que contestó la IA. Manda lo
-               último que se haya tocado, que es lo que uno espera. */
+            /* Elegir a mano es contestar a lo mismo que contestaría la IA. Manda
+               lo último que se haya tocado, y desde aquí ella no vuelve sola. */
             elegido.ia = null;
             $('#ac-lista').hidden = true;
+            $('#ac-ia-caja').hidden = true;
             pintarFicha();
             pintarKcal();
           };
         });
 
-        /* Escribir no obliga a elegir esfuerzo, pero sí lo propone: lo que uno
-           escribe suele decir ya qué hizo. Si no se reconoce nada se queda en
-           «Otra cosa», y si tocó la lista a mano manda lo suyo. */
         $('#ac-nombre').oninput = function (ev) {
           elegido.nombre = ev.target.value.trim();
-          if (!elegido.nombre || elegido.aMano) return;
-          elegido.act = actividadDelTexto(elegido.nombre) || 'otro';
+          clearTimeout(esperaIA);
+          if (!elegido.nombre) return;
+
+          /* Lo que escribe propone el esfuerzo… */
+          if (!elegido.aMano) elegido.act = actividadDelTexto(elegido.nombre) || 'otro';
+          /* …y también el día y el rato, si los lleva dentro. */
+          const leido = cuandoYCuantoDelTexto(elegido.nombre);
+          if (leido.min && !elegido.minAMano) {
+            elegido.min = leido.min;
+            sincroMin();
+            pintarMin();
+          }
+          if (leido.atras >= 0 && !elegido.diaAMano) {
+            elegido.atras = leido.atras;
+            sincroDia();
+            pintarFecha();
+          }
           pintarFicha();
           pintarKcal();
+          prontoIA();
         };
 
-        /* ---------- cuándo y cuánto ---------- */
-        UI.rodillo($('#rod-dia'), diasDelRodillo(), 0, function (v) {
-          elegido.atras = v;
-        });
-        UI.rodillo($('#rod-min'), minutosDelRodillo(), elegido.min, function (v) {
-          elegido.min = v;
-          pintarKcal();
-        });
+        /* ---------- la IA, sola ---------- */
+        let esperaIA = null;
+        let ultimoIA = '';
 
-        pintarFicha();
-        pintarKcal();
+        const decirIA = function (txt, clase) {
+          const caja = $('#ac-ia-caja');
+          caja.hidden = false;
+          caja.className = 'ac-ia-caja' + (clase ? ' ' + clase : '');
+          $('#ac-ia-txt').textContent = txt;
+        };
 
-        /* ---------- que lo mire la IA ---------- */
-        const botonIA = $('#ac-ia-btn');
-        if (botonIA) botonIA.onclick = function () {
+        /* Se pregunta por lo escrito y nada más —los minutos no cambian qué
+           actividad es ni qué mueve— así que volver sobre lo mismo sale de la
+           caché y no cuesta nada. El respiro es para no gastar una llamada por
+           cada letra que teclea. */
+        const lanzarIA = function (aMano) {
+          if (!conIA) return;
           const t = $('#ac-nombre').value.trim();
-          if (!t) {
-            UI.toast(T('Escribe antes qué has hecho'));
-            $('#ac-nombre').focus();
-            return;
-          }
-          const decir = function (txt) { botonIA.querySelector('span').textContent = txt; };
-          botonIA.disabled = true;
-          decir(T('Mirando…'));
+          if (t.length < 3) return;
+          if (!aMano && t === ultimoIA) return;
+          ultimoIA = t;
+          $('#ac-ia-btn').hidden = true;
+          decirIA(T('Mirando qué fue…'), '');
 
           IA.estimarActividad(t).then(function (r) {
-            botonIA.disabled = false;
-            decir(T('Que lo mire otra vez'));
+            /* Si mientras contestaba él siguió escribiendo, esto ya es de otra
+               actividad y meterlo sería peor que no decir nada. */
+            if ($('#ac-nombre').value.trim() !== t) return;
             if (!r || !r.met) {
-              const nota = $('#ac-nota');
-              nota.className = 'ac-nota mal';
-              nota.textContent = (r && r.nota) || T('Eso no me suena a actividad física.');
-              nota.hidden = false;
+              decirIA((r && r.nota) || T('Eso no me suena a actividad física.'), 'mal');
+              $('#ac-ia-btn').hidden = false;
               return;
             }
             elegido.ia = r;
-            /* Si ella reconoce la actividad y él no había elegido nada, ya hay con
-               qué llenar la ficha: sus músculos mandan igual. */
             if (!elegido.act) elegido.act = actividadDelTexto(t) || 'otro';
-            /* Cómo lo llama ella, si no había nombre puesto a mano */
-            if (r.nombre && !elegido.nombre) {
-              elegido.nombre = r.nombre;
-              $('#ac-nombre').value = r.nombre;
-            }
+            decirIA(r.nota || T('Afinado por la IA.'), 'ok');
             pintarFicha();
             pintarKcal();
           }).catch(function (e) {
-            botonIA.disabled = false;
-            decir(T('Que lo mire la IA'));
-            const nota = $('#ac-nota');
-            nota.className = 'ac-nota mal';
-            nota.textContent = e.message || T('No he podido calcularlo.');
-            nota.hidden = false;
+            if ($('#ac-nombre').value.trim() !== t) return;
+            ultimoIA = '';
+            decirIA(e.message || T('No he podido calcularlo.'), 'mal');
+            $('#ac-ia-btn').hidden = false;
           });
         };
+
+        /* No se mete cuando él ya ha elegido a mano: eso sería contestar por
+           encima de lo que acaba de decidir. */
+        const prontoIA = function () {
+          if (!conIA || elegido.aMano) return;
+          clearTimeout(esperaIA);
+          esperaIA = setTimeout(function () { lanzarIA(false); }, 1300);
+        };
+
+        if ($('#ac-ia-btn')) $('#ac-ia-btn').onclick = function () { lanzarIA(true); };
+
+        pintarFicha();
+        pintarKcal();
+        pintarFecha();
+        pintarMin();
 
         el.querySelector('#ac-ok').onclick = function () {
           const a = ACTIVIDADES.filter(function (x) { return x.id === elegido.act; })[0];

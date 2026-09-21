@@ -839,26 +839,63 @@
     };
     col.addEventListener('scroll', mirar);
 
-    /* Colocarlo no es una línea. Si el rodillo nace dentro de algo plegado —la
-       caja de «ya lo hice» empieza oculta— su altura es cero, no hay dónde
-       desplazarse y scrollTop se queda en cero por mucho que se le pida: el
-       resultado era una marca con «cinco minutos» dentro mientras el valor era
-       sesenta. Así que se insiste hasta que el sitio exista, y no más de un
-       segundo, que si a esas alturas no hay altura es que no la va a haber. */
-    let intentos = 0;
+    /* Colocarlo no es una línea, y me ha costado dos intentos aprenderlo.
+
+       Si el rodillo nace dentro de algo plegado —la caja de «ya lo hice» empieza
+       oculta— su altura es cero, no hay dónde desplazarse y scrollTop se queda
+       en cero por mucho que se le pida.
+
+       Y colocarlo una vez tampoco basta: con `scroll-snap` mandatorio, el
+       navegador vuelve a encajar por su cuenta cuando termina de medir la hoja
+       —la animación de entrada, una tipografía que acaba de cargar— y se lleva
+       el rodillo al primer valor. En mi navegador no pasaba y en su iPhone sí:
+       la hoja abría en «cinco minutos» con sesenta guardados dentro.
+
+       Así que se insiste durante medio segundo, que es más de lo que tarda
+       cualquier hoja en asentarse, y se deja de insistir en cuanto él lo toca,
+       que a partir de ahí el sitio es suyo. */
+    const HASTA = performance.now() + 500;
+    let suyo = false;
+    const sueltalo = function () { suyo = true; colocando = false; };
+    ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(function (ev) {
+      col.addEventListener(ev, sueltalo, { passive: true });
+    });
+
     const colocar = function () {
-      col.scrollTop = destino;
-      if (col.scrollTop === destino || intentos++ > 60) {
-        /* Un cuadro de respiro: el último aviso del colocado llega después. */
-        requestAnimationFrame(function () { colocando = false; });
-        return;
-      }
-      requestAnimationFrame(colocar);
+      if (suyo) return;
+      if (col.scrollTop !== destino) col.scrollTop = destino;
+      if (performance.now() < HASTA) { requestAnimationFrame(colocar); return; }
+      /* Un cuadro de respiro: el último aviso del colocado llega después. */
+      requestAnimationFrame(function () { if (!suyo) colocando = false; });
     };
     /* Primero a pelo: cuando el rodillo nace en algo ya visible —que es lo
        normal— acierta a la primera y no se ve ningún salto. */
     colocar();
     resaltar(puesta);
+
+    /* Para que quien lo usa pueda moverlo sin que parezca un gesto suyo: lo que
+       cambia desde fuera no vuelve a avisar hacia fuera. */
+    return {
+      /* Devuelve si ese valor existe en la rueda. Quien pregunta lo necesita:
+         cuarenta y siete minutos no están, y una rueda marcando «45» con 47
+         escritos al lado vuelve a enseñar una cosa y guardar otra. */
+      poner: function (valor) {
+        let k = -1;
+        valores.forEach(function (v, n) { if (v.v === valor) k = n; });
+        if (k === -1) return false;
+        if (k !== ultima) {
+          /* Sin banderas ni esperas: se apunta como última ANTES de moverla, y
+             cuando llegue el aviso de scroll —que llega tarde y en su momento—
+             la fila que encuentre ya será la misma y no avisará hacia fuera.
+             Con una bandera atada a un fotograma, escribir deprisa se comía el
+             relleno automático. */
+          ultima = k;
+          col.scrollTop = k * ROD_ALTO;
+          resaltar(k);
+        }
+        return true;
+      }
+    };
   }
 
   g.UI = {
