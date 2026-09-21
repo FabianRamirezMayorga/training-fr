@@ -578,6 +578,18 @@
     /* Marcar comidas y agua lo lleva su módulo, el mismo que en Alimentación */
     if (g.Marcar) Marcar.bind(root);
 
+    /* La tira empieza por el final: hoy es el último día y es el que se mira,
+       y una tira que se desplaza y arranca por el lunes de hace una semana
+       esconde justo lo que se ha venido a ver.
+
+       En el fotograma siguiente y no ahora: aquí la tarjeta todavía no está
+       medida, y scrollLeft sobre algo de ancho cero se queda en cero. */
+    requestAnimationFrame(function () {
+      root.querySelectorAll('.plan-sem').forEach(function (t) {
+        t.scrollLeft = t.scrollWidth;
+      });
+    });
+
     /* Qué cajones quedan abiertos. Marcar una comida o un vaso repinta la
        pantalla, y sin esto se te cerraría el cajón en el que estabas justo al
        marcar algo dentro. */
