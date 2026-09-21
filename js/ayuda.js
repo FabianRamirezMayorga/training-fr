@@ -603,7 +603,15 @@
     { id: 'p-offline', q: '¿Funciona sin internet?',
       a: ['Sí, entera. Las rutinas, el entrenamiento, el cronómetro, el historial y las estadísticas no necesitan conexión.',
         'Solo necesitan internet tres cosas: el entrenador con IA, sincronizar con tu cuenta y actualizar la app. Las imágenes de los ejercicios hay que bajarlas una vez.'],
-      ver: ['c-offline', 'g-offline'] },
+      ver: ['c-offline', 'g-offline', 'p-actsinred'] },
+
+    { id: 'p-actsinred', q: 'Apunté una actividad sin cobertura, ¿se pierde el cálculo?',
+      a: ['No. Se guarda con lo que la app sabe por sus propias reglas: el día, los minutos y, si reconoce lo que escribiste, la actividad con los músculos que mueve. Eso ya cuenta en tu historial, en tu racha y en el reparto por zona desde ese momento.',
+        'Lo que no puede hacer sin red es preguntarle a la IA cuánto cuesta eso de verdad. Y ahí está la diferencia: «subí a Monserrate andando» con la regla es una caminata, y con la IA son setecientos metros de desnivel.',
+        'Así que queda marcado. En el historial verás *A falta de afinar con internet* debajo de ese apunte. En cuanto vuelva la cobertura —al recuperarla con la app abierta, o la próxima vez que la abras— la app lo repasa sola, recalcula las calorías y los músculos, y te avisa de cuántos apuntes ha afinado.',
+        'Lo que pusiste tú no se toca nunca: ni el día, ni los minutos, ni el nombre. Lo que se rellena es lo que la app había estimado a ojo.',
+        'Si la IA acaba diciendo que eso no era una actividad física, se le quita la marca y se queda como lo apuntaste. No se te va a quedar preguntando lo mismo cada vez que haya red.'],
+      ver: ['p-offline', 'g-ia'] },
 
     { id: 'p-datos', q: '¿Dónde se guardan mis datos?',
       a: ['En tu propio móvil, en el almacenamiento del navegador. Sin cuenta, no salen de ahí.',

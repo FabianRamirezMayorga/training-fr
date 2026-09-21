@@ -1253,6 +1253,12 @@
           <div class="grow" style="cursor:pointer;min-width:0" data-ses="${s.id}">
             <div style="font-weight:700;font-size:.92rem">${s.routineName}</div>
             <div class="tiny">${UI.fecha(s.start)} · ${lineaSesion(s)}</div>
+            <!-- Se apuntó sin cobertura y las cifras son las del chip. Se dice
+                 en vez de callarlo: un número provisional que no avisa de que
+                 lo es se lee como medido, y luego cambia solo. -->
+            ${raw(g.Pendientes && Pendientes.esPendiente(s)
+              ? '<div class="ses-medias">' + T('A falta de afinar con internet') + '</div>'
+              : '')}
             ${raw(musculos.length
               ? '<div class="ses-musculos">' + musculos.map(function (m) {
                   return '<span class="chip tiny-chip">' + esc(T(m)) + '</span>';

@@ -1903,6 +1903,15 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .ses-musculos { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
 .ses-musculos .chip { padding: 1px 7px; font-size: .7rem; background: var(--card2); }
 
+/* Un apunte que se hizo sin cobertura y está a falta de afinar. En ámbar y no
+   en rojo: no está mal, está a medias, y cuenta en el historial desde ya. El
+   punto delante lo separa del resto de líneas pequeñas de la ficha, que si no
+   parece una más. */
+.ses-medias { display: flex; align-items: center; gap: 6px; margin-top: 5px;
+  font-size: .7rem; color: var(--warn); }
+.ses-medias::before { content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor; flex: none; }
+
 /* Abierto el menu, la tarjeta deja de tener tope: el max-height que la hace
    crecer con la pantalla le cortaria la lista por la mitad. */
 .vista-inicio .comida-caja:has(.menu-hoy[open]) { max-height: none; }

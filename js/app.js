@@ -4147,7 +4147,14 @@
           }).catch(function (e) {
             if ($('#ac-nombre').value.trim() !== t) return;
             ultimoIA = '';
-            decirIA(e.message || T('No he podido calcularlo.'), 'mal');
+            /* Sin red no es un fallo, es un «luego»: lo que llega aquí es el
+               error de un fetch que no salió, y enseñarlo tal cual —«Failed to
+               fetch»— parece que el apunte no vale. Vale: se guarda con lo que
+               la app sabe por reglas y se afina cuando haya cobertura. */
+            decirIA(navigator.onLine === false
+              ? T('Sin internet. Apúntalo igual: lo afino en cuanto haya red.')
+              : (e.message || T('No he podido calcularlo.')),
+              navigator.onLine === false ? '' : 'mal');
             $('#ac-ia-btn').hidden = false;
           });
         };
@@ -4224,6 +4231,9 @@
           if (!a) return;
           const fin = Date.now() - elegido.atras * 86400000;
           const comoSeLlama = elegido.nombre || T(a.label);
+          /* Lo que escribió él, no el nombre del chip: «subí a Monserrate
+             andando» es lo que hay que volver a preguntar, y «Caminar» no. */
+          const escrito = String(elegido.nombre || '').trim();
           Store.addSession({
             routineName: comoSeLlama,
             start: fin - elegido.min * 60000,
@@ -4240,12 +4250,24 @@
                después de un partido. */
             musculos: musculosDe(),
             nota: (elegido.ia && elegido.ia.nota) || '',
-            origen: elegido.ia ? 'ia' : 'medio'
+            origen: elegido.ia ? 'ia' : 'medio',
+            /* Lo que escribió, tal cual, para poder volver a preguntarlo. Sin
+               esto, un apunte hecho sin cobertura no se puede afinar después:
+               «Caminar · 90 min» no dice que fueron setecientos metros de
+               desnivel, y el texto sí. */
+            texto: escrito,
+            /* A medias: lo apuntado vale y cuenta desde ya, pero el MET y los
+               músculos son los del chip y la IA no ha llegado a mirarlos.
+               `pendientes.js` lo repasa en cuanto haya internet. */
+            pendiente: !elegido.ia && !!escrito
           });
           UI.closeModal();
           render();
-          UI.toast(Tn('{que} apuntado: {min} min',
-            { que: comoSeLlama, min: elegido.min }));
+          UI.toast(!elegido.ia && escrito
+            ? Tn('{que} apuntado: {min} min. Lo afino cuando haya internet.',
+              { que: comoSeLlama, min: elegido.min })
+            : Tn('{que} apuntado: {min} min',
+              { que: comoSeLlama, min: elegido.min }));
         };
       });
   }
@@ -7243,6 +7265,11 @@
 
       /* en segundo plano se guardan las imágenes de lo que ya tienes planificado */
       setTimeout(function () { Offline.precargarRutinas(); }, 2500);
+
+      /* Y lo que se apuntó sin cobertura se afina en cuanto la haya. Aquí y no
+         en el propio módulo: arranca cuando la app ya tiene catálogo y perfil,
+         que son de los que salen el peso y los músculos con los que recalcula. */
+      if (g.Pendientes) Pendientes.enMarcha();
     }).catch(function (err) {
       console.error(err);
       fallo(T('No se pudo descargar el catálogo de ejercicios. Comprueba tu conexión.'));

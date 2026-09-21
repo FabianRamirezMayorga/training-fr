@@ -434,6 +434,15 @@
     'Ojo': 'Watch out',
     'No ha dicho nada.': 'It said nothing.',
     '{n} de {total} días entrenados': '{n} of {total} days trained',
+    'Ya tengo internet: he afinado {n} apunte.':
+      'I have internet again: I have fine-tuned {n} entry.',
+    'Ya tengo internet: he afinado {n} apuntes.':
+      'I have internet again: I have fine-tuned {n} entries.',
+    '{que} apuntado: {min} min. Lo afino cuando haya internet.':
+      '{que} logged: {min} min. I will fine-tune it when there is internet.',
+    'A falta de afinar con internet': 'Waiting on internet to be fine-tuned',
+    'Sin internet. Apúntalo igual: lo afino en cuanto haya red.':
+      'No internet. Log it anyway: I will fine-tune it as soon as there is a connection.',
     'Los últimos {n} días: si entrenaste, si llegaste a la proteína y si bebiste el agua.':
       'The last {n} days: whether you trained, whether you hit your protein and whether you drank your water.',
     'Apuntar algo que ya hice': 'Log something I already did',

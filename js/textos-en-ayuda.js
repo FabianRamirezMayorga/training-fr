@@ -140,6 +140,18 @@
     '¿Por qué mi plan saca esa nota?': 'Why does my plan get that score?',
     '¿Por qué mi foto no se cruzó con el menú?':
       'Why did my photo not match the meal plan?',
+    'Apunté una actividad sin cobertura, ¿se pierde el cálculo?':
+      'I logged an activity with no signal — do I lose the calculation?',
+    'No. Se guarda con lo que la app sabe por sus propias reglas: el día, los minutos y, si reconoce lo que escribiste, la actividad con los músculos que mueve. Eso ya cuenta en tu historial, en tu racha y en el reparto por zona desde ese momento.':
+      'No. It is saved with what the app knows from its own rules: the day, the minutes and, if it recognises what you wrote, the activity with the muscles it moves. That already counts towards your history, your streak and your split by area from that moment on.',
+    'Lo que no puede hacer sin red es preguntarle a la IA cuánto cuesta eso de verdad. Y ahí está la diferencia: «subí a Monserrate andando» con la regla es una caminata, y con la IA son setecientos metros de desnivel.':
+      'What it cannot do without a connection is ask the AI what that really costs. And that is where the difference is: “I walked up Monserrate” is a stroll by the rule, and seven hundred metres of climb by the AI.',
+    'Así que queda marcado. En el historial verás *A falta de afinar con internet* debajo de ese apunte. En cuanto vuelva la cobertura —al recuperarla con la app abierta, o la próxima vez que la abras— la app lo repasa sola, recalcula las calorías y los músculos, y te avisa de cuántos apuntes ha afinado.':
+      'So it is flagged. In your history you will see *Waiting on internet to be fine-tuned* under that entry. As soon as you have signal again —either while the app is open or the next time you open it— the app goes over it on its own, recalculates the calories and the muscles, and tells you how many entries it has fine-tuned.',
+    'Lo que pusiste tú no se toca nunca: ni el día, ni los minutos, ni el nombre. Lo que se rellena es lo que la app había estimado a ojo.':
+      'What you put in is never touched: not the day, not the minutes, not the name. What gets filled in is what the app had estimated by eye.',
+    'Si la IA acaba diciendo que eso no era una actividad física, se le quita la marca y se queda como lo apuntaste. No se te va a quedar preguntando lo mismo cada vez que haya red.':
+      'If the AI ends up saying that was not physical activity, the flag comes off and it stays as you logged it. It is not going to keep asking the same thing every time you get a connection.',
     '¿Puedo ver qué entrené un día concreto?':
       'Can I see what I trained on a particular day?',
     'Sí. En Progreso, en el mapa de *Constancia*, toca el cuadro de ese día: te sale la rutina que hiciste, los músculos que movió y lo que levantaste, serie a serie.':

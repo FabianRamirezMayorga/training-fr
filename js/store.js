@@ -202,6 +202,26 @@
     return s;
   }
 
+  /* Retocar una sesión ya guardada. La usa el repaso de los apuntes que se
+     hicieron sin cobertura: cuando vuelve la red se rellena lo que la app había
+     estimado a ojo, sin tocar lo que puso el usuario.
+
+     Se cambian campos sueltos y no la sesión entera a propósito: así quien
+     llame no puede cargarse sin querer lo que no conocía. Y `updatedAt` se
+     mueve, que es lo que mira la fusión al sincronizar entre dispositivos; sin
+     eso, el móvil que afinó el apunte perdía contra la copia vieja del otro. */
+  function actualizarSesion(id, campos) {
+    const s = state.sessions.filter(function (x) { return x.id === id; })[0];
+    if (!s || !campos) return null;
+    Object.keys(campos).forEach(function (k) {
+      if (k === 'id') return;
+      s[k] = campos[k];
+    });
+    s.updatedAt = Date.now();
+    save();
+    return s;
+  }
+
   function deleteSession(id) {
     state.sessions = state.sessions.filter(function (s) { return s.id !== id; });
     marcarBorrado('sessions', id);
@@ -358,6 +378,7 @@
     newRoutine: newRoutine, newRoutineExercise: newRoutineExercise,
     active: active, setActive: setActive, clearActive: clearActive,
     sessions: sessions, addSession: addSession, deleteSession: deleteSession,
+    actualizarSesion: actualizarSesion,
     historyOf: historyOf, prOf: prOf, lastPerformance: lastPerformance,
     volumeOf: volumeOf, stats: stats, weeklyVolume: weeklyVolume, dayKey: dayKey,
     exportJSON: exportJSON, importJSON: importJSON, wipe: wipe, uid: uid,
