@@ -657,7 +657,7 @@
           <button class="btn grow sm" data-a="comidamano">${raw(icon('plus'))} ${T('A mano')}</button>
         </div>
 
-        <input type="file" id="foto-inicio" accept="image/*" capture="environment" hidden>
+        <input type="file" id="foto-inicio" accept="image/*" hidden>
 
         ${raw(menuHoyHTML())}
       </div>

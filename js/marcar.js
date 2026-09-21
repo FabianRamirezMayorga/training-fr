@@ -238,10 +238,13 @@
         <div class="row" style="margin-top:10px;gap:9px">
           <button class="btn primary grow btn-arranque" id="sc-calcular">
             ${raw(icon('chispa'))} ${T('Calcular')}</button>
+          <!-- «Foto» y ya no «Hacer foto»: el campo dejó de forzar la cámara,
+               así que también se puede sacar de la galería y el botón no debe
+               prometer una sola de las dos cosas. -->
           <label class="btn grow" for="sc-foto" style="cursor:pointer">
-            ${raw(icon('camara'))} ${T('Hacer foto')}</label>
+            ${raw(icon('camara'))} ${T('Foto')}</label>
         </div>
-        <input type="file" id="sc-foto" accept="image/*" capture="environment" hidden>
+        <input type="file" id="sc-foto" accept="image/*" hidden>
         <p class="tiny" style="margin:7px 0 0">${T('Escríbelo o hazle una foto. Saca las ' +
         'calorías y la proteína, y te dice si el cambio se sostiene. La foto no se guarda ' +
         'en ningún sitio: se manda para que la lea y se suelta.')}</p>` : html`

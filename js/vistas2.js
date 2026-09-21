@@ -427,7 +427,7 @@
                   aria-label="${T('Apuntar a mano')}"
                   title="${T('Apuntar a mano')}">${raw(icon('plus'))}</button>
         </div>
-        <input type="file" id="foto-comida" accept="image/*" capture="environment" hidden>
+        <input type="file" id="foto-comida" accept="image/*" hidden>
         <p class="tiny" style="margin:9px 0 0">${T('La foto se encoge en el móvil, se manda para que la IA la lea y se suelta: no se guarda ni aquí ni en ningún sitio. Solo quedan el nombre del plato y los números.')}</p>
       </div>
 
@@ -609,12 +609,46 @@
   /* Manda la foto, apunta lo que la IA vea y suelta la imagen. Mientras piensa
      se enseña la foto en pequeño, que es la única copia que existe y vive en
      memoria hasta que se acaba. */
+  /* ---------- a qué hora se comió esto ----------
+     Los campos de foto ya no llevan `capture`, así que el móvil ofrece hacerla
+     ahora o sacarla de la galería. Hacía falta: sin cobertura la IA no puede
+     mirar nada, y lo que uno hace entonces es fotografiar el plato con la
+     cámara del teléfono y subirlo cuando vuelve la red. Con `capture` puesto
+     esa foto no había manera de meterla.
+
+     Pero una foto de la galería es de antes, y apuntarla «ahora» mandaba la
+     comida a la franja equivocada: el plato de las dos de la tarde subido a las
+     nueve se cruzaba con la cena. Así que manda la hora del archivo.
+
+     Solo si es creíble y solo si es de hoy. De menos de cinco minutos es la
+     foto que acaba de hacer, y ahí `lastModified` no aporta nada. Y de otro día
+     no se toca: escribir en el ayer dejaría el recuento de hoy sin moverse
+     después de subir una foto, que se lee como que no ha funcionado. */
+  function cuandoSeComio(file) {
+    const ahora = Date.now();
+    const tomada = Number(file && file.lastModified) || 0;
+    if (!tomada || ahora - tomada < 5 * 60000) return ahora;
+    if (!g.Comidas || Comidas.claveDia(tomada) !== Comidas.claveDia(ahora)) return ahora;
+    return tomada;
+  }
+
+  /* Sin red no hay nada que mirar, y conviene decirlo antes de encoger la foto
+     para nada. El mensaje dice dónde sigue estando la foto: el error de siempre
+     —«no he podido leer esa foto»— sonaba a que la foto era mala. */
+  function sinRedParaLaFoto() {
+    UI.toast(T('Sin conexión no puedo mirar la foto. Sigue en tu galería: vuelve a ' +
+      'elegirla cuando tengas cobertura.'));
+  }
+
   function mirarFoto(file) {
     if (!IA.activa()) {
       UI.toast(T('Esto necesita un proveedor de IA con su clave, en la bóveda de Ajustes.'));
       go('entrenador');
       return;
     }
+    if (navigator.onLine === false) { sinRedParaLaFoto(); return; }
+
+    const cuando = cuandoSeComio(file);
 
     /* La caja donde se enseña la foto mientras se piensa. Se busca en el
        documento y no dentro de una pantalla concreta: la misma función la usan
@@ -648,7 +682,9 @@
          camino de siempre. */
       const img = { mime: f.mime, datos: f.datos };
       if (g.Marcar && Marcar.cruzarFoto) {
-        return Marcar.cruzarFoto(img).then(function (x) {
+        /* Con la hora de la foto, no con la de ahora: es la que decide con qué
+           comida del menú se cruza, y para eso se calculó. */
+        return Marcar.cruzarFoto(img, cuando).then(function (x) {
           if (x && x.cruzado) return null;
           return IA.analizarComida(img);
         });
@@ -667,6 +703,7 @@
       }).join(', ');
 
       Comidas.anotar({
+        t: cuando,
         plato: r.plato || T('Comida'),
         kcal: r.kcal, prot: r.prot, carbo: r.carbo, grasa: r.grasa,
         detalle: detalle || r.nota || '',
@@ -679,6 +716,9 @@
         (r.confianza === 'baja' ? T(' (a ojo, retócalo si quieres)') : ''));
     }).catch(function (e) {
       soltar();
+      /* La red se puede haber caído entre el toque y la respuesta, y entonces
+         el error que llega no habla de red: habla de un fetch que no llegó. */
+      if (navigator.onLine === false) { sinRedParaLaFoto(); return; }
       UI.toast(e.message || T('No he podido leer esa foto.'));
     });
   }

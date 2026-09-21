@@ -330,7 +330,7 @@
               ${raw(icon('camara'))} ${T('Foto')}</label>
             <button class="btn grow" data-a="amano">${raw(icon('plus'))} ${T('A mano')}</button>
           </div>
-          <input type="file" id="foto-dia" accept="image/*" capture="environment" hidden>
+          <input type="file" id="foto-dia" accept="image/*" hidden>
         </div>`
       : html`
         <div class="card">

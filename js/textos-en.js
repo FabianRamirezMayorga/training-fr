@@ -2826,7 +2826,8 @@
     'Ej. dos arepas con queso y un café con leche':
       'E.g. two cheese arepas and a white coffee',
     'Calcular': 'Work it out',
-    'Hacer foto': 'Take a photo',
+    'Sin conexión no puedo mirar la foto. Sigue en tu galería: vuelve a elegirla cuando tengas cobertura.':
+      'With no connection I cannot look at the photo. It is still in your gallery: pick it again when you have signal.',
     'Escríbelo o hazle una foto. Saca las calorías y la proteína, y te dice si el cambio se sostiene. La foto no se guarda en ningún sitio: se manda para que la lea y se suelta.':
       'Write it down or take a photo. It works out the calories and the protein, and tells you whether the swap holds up. The photo is not stored anywhere: it is sent to be read and then released.',
     'Sin el entrenador con IA configurado tendrás que poner tú los números.':

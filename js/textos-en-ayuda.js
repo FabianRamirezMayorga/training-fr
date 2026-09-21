@@ -140,6 +140,16 @@
     '¿Por qué mi plan saca esa nota?': 'Why does my plan get that score?',
     '¿Por qué mi foto no se cruzó con el menú?':
       'Why did my photo not match the meal plan?',
+    '¿Puedo apuntar una comida con foto sin internet?':
+      'Can I log a meal by photo with no internet?',
+    'Apuntarla no, porque quien lee la foto es la IA y la IA vive fuera del móvil. La app te lo dice en cuanto lo intentas, en vez de dejarte con una rueda girando.':
+      'Logging it, no, because the one reading the photo is the AI and the AI lives outside your phone. The app tells you as soon as you try, instead of leaving you with a spinner going round.',
+    'Pero no tienes que renunciar al plato: hazle la foto con la cámara del móvil, como una foto cualquiera, y cuando vuelvas a tener cobertura tócala desde *Foto de lo que comes* y elígela de la galería.':
+      'But you do not have to give up on the plate: photograph it with your phone camera, like any other photo, and when you have signal again tap *Photo of what you eat* and pick it from your gallery.',
+    'Se apunta a la hora en que la hiciste y no a la hora en que la subes, así que se cruza con la comida que tocaba. Eso vale para las fotos del mismo día: una de ayer se apunta como de hoy.':
+      'It is logged at the time you took it and not at the time you upload it, so it is matched against the meal that was due. That holds for photos from the same day: one from yesterday is logged as today.',
+    'Lo demás de la app sí va sin conexión: apuntar a mano, el agua, el entrenamiento y el historial. Lo único que necesita internet es lo que pasa por la IA.':
+      'The rest of the app does work offline: logging by hand, your water, your training and your history. The only thing that needs the internet is whatever goes through the AI.',
     '¿La app cuenta lo que me aportan los suplementos?':
       'Does the app count what my supplements give me?',
     '¿Y si tomo algo varias veces al día?': 'What if I take something several times a day?',
@@ -477,12 +487,16 @@
       'Go to Food',
     'Toca *Foto de lo que comes*.':
       'Tap *Photo of what you eat*.',
-    'Puedes hacerla en el momento o elegir una de la galería.':
-      'You can take it there and then or pick one from your gallery.',
+    'Puedes hacerla en el momento o elegir una de la galería. Lo segundo es para cuando comes sin cobertura: fotografía el plato con la cámara del móvil y súbelo luego, que la IA necesita internet para leerla.':
+      'You can take it there and then or pick one from your gallery. The second one is for when you eat with no signal: photograph the plate with your phone camera and upload it later, because the AI needs the internet to read it.',
     'Deja que la lea.':
       'Let it read the photo.',
-    'Calcula lo que llevaba: calorías, proteína y el resto. Esto sí usa la IA, así que necesita conexión y tu clave puesta.':
-      'It works out what was in it: calories, protein and the rest. This one does use the AI, so it needs a connection and your key set up.',
+    'Calcula lo que llevaba: calorías, proteína y el resto. Esto sí usa la IA, así que necesita conexión y tu clave puesta. Si la subes sin cobertura te lo dice y no se pierde nada: la foto sigue en tu galería.':
+      'It works out what was in it: calories, protein and the rest. This one does use the AI, so it needs a connection and your key set up. If you upload it with no signal it tells you so and nothing is lost: the photo is still in your gallery.',
+    'La hora es la de la foto, no la de ahora.':
+      'The time is the photo\'s, not right now.',
+    'Una foto de la galería se apunta a la hora en que la hiciste, así que el plato de las dos se cruza con la comida y no con la cena. Solo si es del mismo día: una de ayer se apunta como de hoy.':
+      'A photo from your gallery is logged at the time you took it, so the two o\'clock plate is matched against lunch and not against dinner. Only for the same day: one from yesterday is logged as today.',
     'Mira el cruce.':
       'Look at the match.',
     'Si la hora cae en una franja con menú, te dice si comiste lo previsto o algo distinto, y la diferencia en calorías y en proteína.':
