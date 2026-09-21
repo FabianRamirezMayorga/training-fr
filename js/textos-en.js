@@ -432,6 +432,67 @@
     'Intensidad': 'Intensity',
     'Carga': 'Load',
     'Ojo': 'Watch out',
+    /* ---------- cuando la IA falla ----------
+       Salen como aviso en pantalla, asi que van en el idioma de la app: un
+       error en espanol con la app en ingles hace dudar de toda la traduccion.
+       Lo que devuelve el servidor del proveedor no esta aqui, porque no es
+       nuestro y viene en su idioma. */
+    'Esa clave no parece válida.': 'That key does not look valid.',
+    'Eso no parece una clave de {prov}.': 'That does not look like a {prov} key.',
+    'Falta la clave de {prov}. Ponla en Ajustes → Bóveda de claves.':
+      'The {prov} key is missing. Add it under Settings → Key vault.',
+    '{prov} no lee imágenes. Para esto elige Gemini o Anthropic como proveedor en la bóveda de claves.':
+      '{prov} does not read images. For this, pick Gemini or Anthropic as your provider in the key vault.',
+    '{prov} ha tardado demasiado en responder. Vuelve a intentarlo.':
+      '{prov} took too long to answer. Try again.',
+    'El navegador no ha podido conectar con {prov}. Puede que no permita llamadas desde una página web; si se repite, elige Gemini o Anthropic en la bóveda de claves.':
+      'The browser could not reach {prov}. It may not allow calls from a web page; if it keeps happening, pick Gemini or Anthropic in the key vault.',
+    'La clave de {prov} no vale o no tiene permiso.':
+      'The {prov} key is not valid or does not have permission.',
+    'Has agotado la cuota de {prov} por ahora. Inténtalo más tarde.':
+      'You have used up your {prov} quota for now. Try again later.',
+    'Prueba a escribir otro modelo en la bóveda de claves.':
+      'Try typing a different model in the key vault.',
+    '{prov} devolvió una respuesta que no se entiende.':
+      '{prov} returned an answer that cannot be understood.',
+    'Anthropic no devolvió texto.': 'Anthropic returned no text.',
+    '{prov} no devolvió texto.': '{prov} returned no text.',
+    'Ningún modelo disponible respondió.': 'No available model answered.',
+    'La IA ha tardado demasiado en responder. Vuelve a intentarlo: suele ser cosa de la conexión o de que Google va cargado.':
+      'The AI took too long to answer. Try again: it is usually the connection, or Google being busy.',
+    'No se pudo conectar con el servicio de IA.': 'Could not reach the AI service.',
+    'Los modelos de Gemini están saturados ahora mismo. Vuelve a intentarlo en un minuto: es cosa de Google, no de tu clave.':
+      'Gemini\'s models are overloaded right now. Try again in a minute: it is Google, not your key.',
+    'La clave de la IA no es válida.': 'The AI key is not valid.',
+    'Gemini rechazó la petición ({msg}). Prueba a elegir otro modelo en la bóveda de claves.':
+      'Gemini rejected the request ({msg}). Try picking a different model in the key vault.',
+    'Has agotado la cuota de todos los modelos de Gemini por ahora. Suele reponerse en un minuto si es el límite por minuto, o mañana si es el diario. Si tienes otro proveedor puesto en la bóveda, cambia a él mientras.':
+      'You have used up the quota on every Gemini model for now. It usually comes back in a minute if it is the per-minute limit, or tomorrow if it is the daily one. If you have another provider set up in the vault, switch to it meanwhile.',
+    'Has agotado la cuota gratuita de Gemini por ahora. Suele reponerse en unos minutos si es el límite por minuto, o mañana si es el diario. Si tienes otro proveedor puesto en la bóveda, cambia a él mientras.':
+      'You have used up the free Gemini quota for now. It usually comes back in a few minutes if it is the per-minute limit, or tomorrow if it is the daily one. If you have another provider set up in the vault, switch to it meanwhile.',
+    'El modelo elegido ya no está disponible. Abre la bóveda y pulsa «Ver los suyos» para refrescar la lista con los que admite tu clave.':
+      'The model you picked is no longer available. Open the vault and tap “See theirs” to refresh the list with the ones your key accepts.',
+    'La IA no pudo responder a esa petición.': 'The AI could not answer that request.',
+    'La respuesta se cortó por longitud. Prueba a pedir menos de una vez.':
+      'The answer was cut off for length. Try asking for less at a time.',
+    'La IA se negó a responder por posible copia de otra fuente.':
+      'The AI refused to answer over possible copying from another source.',
+    'La IA no devolvió texto (motivo: {razon}).': 'The AI returned no text (reason: {razon}).',
+    'La IA no devolvió texto.': 'The AI returned no text.',
+    'Prueba con otro modelo desde la bóveda.': 'Try another model from the vault.',
+    'La IA ha contestado en un formato que no entiendo. Vuelve a intentarlo: suele salir a la segunda.':
+      'The AI answered in a format I do not understand. Try again: it usually works the second time.',
+    'Completa tu perfil para calcular el plan.': 'Fill in your profile so the plan can be worked out.',
+    'Escribe antes qué has hecho.': 'Write what you did first.',
+    'Falta la actividad o el tiempo.': 'The activity or the time is missing.',
+    'No hay nada que mirar.': 'There is nothing to look at.',
+    'No hay actividad que mirar.': 'There is no activity to look at.',
+    'No hay suplementos.': 'There are no supplements.',
+    'No tienes ninguno apuntado.': 'You have none logged.',
+    'Escribe antes qué has comido.': 'Write what you ate first.',
+    'Escribe qué has comido o hazle una foto.': 'Write what you ate or take a photo of it.',
+    'Aún no hay entrenamientos que analizar.': 'There are no workouts to analyse yet.',
+    'La IA no devolvió canciones.': 'The AI returned no songs.',
     'No ha dicho nada.': 'It said nothing.',
     '{n} de {total} días entrenados': '{n} of {total} days trained',
     'Ya tengo internet: he afinado {n} apunte.':

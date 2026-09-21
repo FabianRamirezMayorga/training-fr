@@ -758,6 +758,12 @@ body.con-crono{--pad-abajo:134px}
 
 /* Los pasos del asistente de plan: el número ancla la lectura */
 .paso-plan{padding:14px}
+/* El numero y el titulo en el mismo renglon, y lo que viene debajo desde el
+   borde. Antes el numero ocupaba una columna y todo lo demas iba sangrado a su
+   derecha: bajo el circulo quedaba una franja vacia de treinta y cinco pixeles
+   a lo largo de toda la tarjeta, y en un movil eso es un decimo del ancho
+   tirado en cada paso. */
+.paso-cab{display:flex;align-items:center;gap:10px;margin-bottom:4px}
 .paso-plan .paso-n{flex:none;width:24px;height:24px;border-radius:50%;
   background:var(--acc-d);color:var(--acc);display:flex;align-items:center;
   justify-content:center;font-size:.76rem;font-weight:700}

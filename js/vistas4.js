@@ -544,17 +544,13 @@
   function paso(n, titulo, cuerpo, nota, cabecera) {
     return html`
       <div class="card paso-plan">
-        <div class="row" style="align-items:flex-start;gap:11px">
+        <div class="paso-cab">
           <span class="paso-n">${n}</span>
-          <div class="grow">
-            <div class="row between" style="gap:10px;align-items:center">
-              <b class="grow">${titulo}</b>
-              ${raw(cabecera || '')}
-            </div>
-            ${raw(cuerpo)}
-            ${raw(nota ? '<p class="tiny" style="margin:10px 0 0">' + nota + '</p>' : '')}
-          </div>
+          <b class="grow">${titulo}</b>
+          ${raw(cabecera || '')}
         </div>
+        ${raw(cuerpo)}
+        ${raw(nota ? '<p class="tiny" style="margin:10px 0 0">' + nota + '</p>' : '')}
       </div>`;
   }
 

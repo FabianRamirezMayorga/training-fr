@@ -204,15 +204,15 @@
   function guardarProveedor(id, clave, modelo) {
     const prov = proveedorPorId(id);
     clave = String(clave || '').trim();
-    if (clave && clave.length < 20) throw new Error('Esa clave no parece válida.');
+    if (clave && clave.length < 20) throw new Error(T('Esa clave no parece válida.'));
 
     /* Cada proveedor tiene su prefijo y no cuesta nada mirarlo. Sin esto, pegar
        un token de sesión en vez de la clave se guardaba tan campante y el fallo
        no aparecía hasta la primera llamada, con un mensaje del servidor que no
        explicaba qué había que hacer. */
     if (clave && prov.forma && !prov.forma.test(clave)) {
-      throw new Error('Eso no parece una clave de ' + prov.label + '. ' +
-        (prov.formaTxt || ''));
+      throw new Error(Tn('Eso no parece una clave de {prov}.', { prov: prov.label }) +
+        ' ' + (prov.formaTxt || ''));
     }
 
     const c = config();
@@ -444,12 +444,12 @@
     const clave = claveDe(prov.id);
 
     if (!clave) {
-      return Promise.reject(new Error('Falta la clave de ' + prov.label +
-        '. Ponla en Ajustes → Bóveda de claves.'));
+      return Promise.reject(new Error(Tn('Falta la clave de {prov}. Ponla en Ajustes → Bóveda de claves.',
+        { prov: prov.label })));
     }
     if (opciones.imagen && opciones.imagen.datos && !prov.imagen) {
-      return Promise.reject(new Error(prov.label + ' no lee imágenes. Para esto elige ' +
-        'Gemini o Anthropic como proveedor en la bóveda de claves.'));
+      return Promise.reject(new Error(Tn('{prov} no lee imágenes. Para esto elige Gemini o Anthropic como ' +
+        'proveedor en la bóveda de claves.', { prov: prov.label })));
     }
 
     if (prov.id === 'gemini') return llamarGemini(prompt, opciones, clave, modeloDe('gemini'));
@@ -472,11 +472,12 @@
     }).catch(function (e) {
       clearTimeout(reloj);
       if (e && e.name === 'AbortError') {
-        throw new Error(prov.label + ' ha tardado demasiado en responder. Vuelve a intentarlo.');
+        throw new Error(Tn('{prov} ha tardado demasiado en responder. Vuelve a intentarlo.',
+          { prov: prov.label }));
       }
-      throw new Error('El navegador no ha podido conectar con ' + prov.label + '. Puede que ' +
-        'no permita llamadas desde una página web; si se repite, elige Gemini o Anthropic ' +
-        'en la bóveda de claves.');
+      throw new Error(Tn('El navegador no ha podido conectar con {prov}. Puede que no permita ' +
+        'llamadas desde una página web; si se repite, elige Gemini o Anthropic en la ' +
+        'bóveda de claves.', { prov: prov.label }));
     }).then(function (r) {
       clearTimeout(reloj);
       return r.text().then(function (t) { return { r: r, t: t }; });
@@ -489,19 +490,20 @@
         const msg = (err && (err.message || (typeof err === 'string' ? err : ''))) ||
           (j && j.message) || ('Error ' + x.r.status);
         if (x.r.status === 401 || x.r.status === 403) {
-          throw new Error('La clave de ' + prov.label + ' no vale o no tiene permiso.');
+          throw new Error(Tn('La clave de {prov} no vale o no tiene permiso.', { prov: prov.label }));
         }
         if (x.r.status === 429) {
-          throw new Error('Has agotado la cuota de ' + prov.label + ' por ahora. ' +
-            'Inténtalo más tarde.');
+          throw new Error(Tn('Has agotado la cuota de {prov} por ahora. Inténtalo más tarde.',
+            { prov: prov.label }));
         }
         if (x.r.status === 404 || /model/i.test(msg)) {
-          throw new Error(prov.label + ': ' + msg + ' Prueba a escribir otro modelo en la ' +
-            'bóveda de claves.');
+          throw new Error(prov.label + ': ' + msg + ' ' +
+            T('Prueba a escribir otro modelo en la bóveda de claves.'));
         }
         throw new Error(prov.label + ': ' + msg);
       }
-      if (!j) throw new Error(prov.label + ' devolvió una respuesta que no se entiende.');
+      if (!j) throw new Error(Tn('{prov} devolvió una respuesta que no se entiende.',
+        { prov: prov.label }));
       return j;
     });
   }
@@ -537,7 +539,7 @@
         .filter(function (x) { return x.type === 'text'; })
         .map(function (x) { return x.text || ''; })
         .join('').trim();
-      if (!texto) throw new Error('Anthropic no devolvió texto.');
+      if (!texto) throw new Error(T('Anthropic no devolvió texto.'));
       return o.json ? '{' + texto : texto;
     });
   }
@@ -565,7 +567,7 @@
     return pedirHTTP(url, cab, cuerpo, prov).then(function (j) {
       const m = ((j.choices || [])[0] || {}).message || {};
       const texto = String(m.content || '').trim();
-      if (!texto) throw new Error(prov.label + ' no devolvió texto.');
+      if (!texto) throw new Error(Tn('{prov} no devolvió texto.', { prov: prov.label }));
       return texto;
     });
   }
@@ -618,7 +620,7 @@
 
     /* si el modelo elegido ya no existe, se prueba el siguiente */
     function intentar(i) {
-      if (i >= modelos.length) return Promise.reject(new Error('Ningún modelo disponible respondió.'));
+      if (i >= modelos.length) return Promise.reject(new Error(T('Ningún modelo disponible respondió.')));
       /* Sin límite de tiempo, una red que se queda a medias deja la pantalla
          "pensando" para siempre. Minuto y medio es de sobra para lo más largo
          que se pide aquí, que es el menú semanal. */
@@ -638,10 +640,10 @@
       }).catch(function (e) {
         clearTimeout(reloj);
         if (e && e.name === 'AbortError') {
-          throw new Error('La IA ha tardado demasiado en responder. Vuelve a intentarlo: ' +
-            'suele ser cosa de la conexión o de que Google va cargado.');
+          throw new Error(T('La IA ha tardado demasiado en responder. Vuelve a intentarlo: ' +
+            'suele ser cosa de la conexión o de que Google va cargado.'));
         }
-        throw new Error('No se pudo conectar con el servicio de IA.');
+        throw new Error(T('No se pudo conectar con el servicio de IA.'));
       }).then(function (r) { clearTimeout(reloj); return r; }).then(function (r) {
         return r.text().then(function (t) {
           let j = null;
@@ -691,18 +693,18 @@
                     claveIA, modeloIA);
                 });
               }
-              throw new Error('Los modelos de Gemini están saturados ahora mismo. ' +
-                'Vuelve a intentarlo en un minuto: es cosa de Google, no de tu clave.');
+              throw new Error(T('Los modelos de Gemini están saturados ahora mismo. ' +
+                'Vuelve a intentarlo en un minuto: es cosa de Google, no de tu clave.'));
             }
 
             const retirado = r.status === 404 ||
               /no longer available|not found|is not supported/i.test(msg);
             if (retirado && i < modelos.length - 1) return intentar(i + 1);
 
-            if (r.status === 400 && /API key/i.test(msg)) throw new Error('La clave de la IA no es válida.');
+            if (r.status === 400 && /API key/i.test(msg)) throw new Error(T('La clave de la IA no es válida.'));
             if (r.status === 400) {
-              throw new Error('Gemini rechazó la petición (' + msg + '). Prueba a elegir ' +
-                'otro modelo en la bóveda de claves.');
+              throw new Error(Tn('Gemini rechazó la petición ({msg}). Prueba a elegir otro modelo ' +
+                'en la bóveda de claves.', { msg: msg }));
             }
             /* La cuota va por modelo, no por clave: el flash del día tiene un
                límite corto y los de la generación anterior uno mucho más ancho.
@@ -711,18 +713,18 @@
             if (r.status === 429) huboCuota = true;
             if (r.status === 429 && i < modelos.length - 1) return intentar(i + 1);
             if (r.status === 429) {
-              throw new Error('Has agotado la cuota de todos los modelos de Gemini por ahora. ' +
+              throw new Error(T('Has agotado la cuota de todos los modelos de Gemini por ahora. ' +
                 'Suele reponerse en un minuto si es el límite por minuto, o mañana si es el ' +
-                'diario. Si tienes otro proveedor puesto en la bóveda, cambia a él mientras.');
+                'diario. Si tienes otro proveedor puesto en la bóveda, cambia a él mientras.'));
             }
             if (retirado && huboCuota) {
-              throw new Error('Has agotado la cuota gratuita de Gemini por ahora. Suele ' +
+              throw new Error(T('Has agotado la cuota gratuita de Gemini por ahora. Suele ' +
                 'reponerse en unos minutos si es el límite por minuto, o mañana si es el ' +
-                'diario. Si tienes otro proveedor puesto en la bóveda, cambia a él mientras.');
+                'diario. Si tienes otro proveedor puesto en la bóveda, cambia a él mientras.'));
             }
             if (retirado) {
-              throw new Error('El modelo elegido ya no está disponible. Abre la bóveda y ' +
-                'pulsa «Ver los suyos» para refrescar la lista con los que admite tu clave.');
+              throw new Error(T('El modelo elegido ya no está disponible. Abre la bóveda y ' +
+                'pulsa «Ver los suyos» para refrescar la lista con los que admite tu clave.'));
             }
             throw new Error(msg);
           }
@@ -761,16 +763,18 @@
             }
 
             if (razon === 'SAFETY' || razon === 'PROHIBITED_CONTENT') {
-              throw new Error('La IA no pudo responder a esa petición.');
+              throw new Error(T('La IA no pudo responder a esa petición.'));
             }
             if (razon === 'MAX_TOKENS') {
-              throw new Error('La respuesta se cortó por longitud. Prueba a pedir menos de una vez.');
+              throw new Error(T('La respuesta se cortó por longitud. Prueba a pedir menos de una vez.'));
             }
             if (razon === 'RECITATION') {
-              throw new Error('La IA se negó a responder por posible copia de otra fuente.');
+              throw new Error(T('La IA se negó a responder por posible copia de otra fuente.'));
             }
-            throw new Error('La IA no devolvió texto' + (razon ? ' (motivo: ' + razon + ')' : '') +
-              '. Prueba con otro modelo desde la bóveda.');
+            throw new Error((razon
+              ? Tn('La IA no devolvió texto (motivo: {razon}).', { razon: razon })
+              : T('La IA no devolvió texto.')) +
+              ' ' + T('Prueba con otro modelo desde la bóveda.'));
           }
           /* el modelo que ha respondido pasa a ser el preferido */
           if (modelos[i] !== c.modelo) {
@@ -903,8 +907,8 @@
       ).then(function (t2) {
         const r2 = analizarJSON(t2);
         if (r2) return r2;
-        throw new Error('La IA ha contestado en un formato que no entiendo. '
-          + 'Vuelve a intentarlo: suele salir a la segunda.');
+        throw new Error(T('La IA ha contestado en un formato que no entiendo. '
+          + 'Vuelve a intentarlo: suele salir a la segunda.'));
       });
     });
   }
@@ -1468,7 +1472,7 @@
   function planNutricion(opciones) {
     opciones = opciones || {};
     const m = Perfil.macros();
-    if (!m) return Promise.reject(new Error('Completa tu perfil para calcular el plan.'));
+    if (!m) return Promise.reject(new Error(T('Completa tu perfil para calcular el plan.')));
 
     const p = Perfil.datos();
     const clave = 'nutricion:' + JSON.stringify(m) + ':' + p.dieta + ':' + p.comidas +
@@ -1905,7 +1909,7 @@
   function crearPrograma(o) {
     o = o || {};
     const dias = o.dias || [];
-    if (!dias.length) return Promise.reject(new Error('Elige al menos un día.'));
+    if (!dias.length) return Promise.reject(new Error(T('Elige al menos un día.')));
 
     const objetivo = Programa.OBJETIVOS[o.objetivo] || {};
     const minimo = Store.MINIMO_EJERCICIOS || 6;
@@ -2072,7 +2076,7 @@
           ? ' (' + ex.primaryMuscles.map(I18N.muscle).join(', ') + ')' : '');
     }).join('\n');
 
-    if (!lista) return Promise.reject(new Error('Esta rutina todavía no tiene ejercicios.'));
+    if (!lista) return Promise.reject(new Error(T('Esta rutina todavía no tiene ejercicios.')));
 
     const dias = (r.days || []).length ? UI.diasLargos(r.days) : 'ningún día fijo';
     const minimo = Store.MINIMO_EJERCICIOS || 6;
@@ -2374,7 +2378,7 @@
      una lista de texto que no se puede entrenar. */
   function leerRutina(archivo, pista) {
     if (!archivo || !archivo.datos) {
-      return Promise.reject(new Error('No has elegido ningún archivo.'));
+      return Promise.reject(new Error(T('No has elegido ningún archivo.')));
     }
 
     /* Aquí NO va el contexto de quien la sube, a propósito. Copiar una hoja no
@@ -2482,7 +2486,7 @@
 
   function estimarActividad(texto) {
     const t = String(texto || '').trim();
-    if (!t) return Promise.reject(new Error('Escribe antes qué has hecho.'));
+    if (!t) return Promise.reject(new Error(T('Escribe antes qué has hecho.')));
 
     /* Guardado por lo escrito, y no por lo escrito más los minutos: lo que se
        pregunta aquí —qué actividad es, cuánto cuesta por minuto, qué mueve— no
@@ -2588,7 +2592,7 @@
     datos = datos || {};
     const nombre = String(datos.nombre || '').trim();
     const min = Number(datos.minutos) || 0;
-    if (!nombre || !min) return Promise.reject(new Error('Falta la actividad o el tiempo.'));
+    if (!nombre || !min) return Promise.reject(new Error(T('Falta la actividad o el tiempo.')));
 
     const musculos = (datos.musculos || []).slice();
     /* El «2» es la versión de las instrucciones: al cambiarlas, lo guardado con
@@ -2706,7 +2710,7 @@
         ojo: String((r && r.ojo) || '').trim()
       };
       if (!limpio.intensidad && !limpio.carga && !limpio.musculo && !limpio.ojo) {
-        throw new Error('No ha dicho nada.');
+        throw new Error(T('No ha dicho nada.'));
       }
       /* La clave ya lleva el nombre, así que el guardado no se mezcla entre una
          subida al cerro y un partido. */
@@ -2753,7 +2757,7 @@
   }
 
   function analizarSesion(ses) {
-    if (!ses) return Promise.reject(new Error('No hay nada que mirar.'));
+    if (!ses) return Promise.reject(new Error(T('No hay nada que mirar.')));
 
     const minutos = Number(ses.minutos) ||
       Math.max(1, Math.round(((ses.end || Date.now()) - ses.start) / 60000));
@@ -2829,7 +2833,7 @@
         ojo: String((r && r.ojo) || '').trim()
       };
       if (!limpio.intensidad && !limpio.carga && !limpio.musculo && !limpio.ojo) {
-        throw new Error('No ha dicho nada.');
+        throw new Error(T('No ha dicho nada.'));
       }
       escribirCache(clave, limpio);
       return limpio;
@@ -2850,7 +2854,7 @@
      Se pregunta una vez y se guarda doce horas: esto es la portada, se abre
      veinte veces al día y cada vuelta cuesta dinero de su clave. */
   function estimarCarga(carga, sesion) {
-    if (!carga || !carga.minutos) return Promise.reject(new Error('No hay actividad que mirar.'));
+    if (!carga || !carga.minutos) return Promise.reject(new Error(T('No hay actividad que mirar.')));
 
     const zonas = (carga.zonas || []).map(function (id) {
       const gr = I18N.GROUPS.filter(function (x) { return x.id === id; })[0];
@@ -2908,7 +2912,7 @@
       };
       /* Sin número y sin frase no hay nada que enseñar, y guardarlo doce horas
          sería quedarse con el fallo. */
-      if (!fuera.series && !fuera.nota) throw new Error('No ha dicho nada.');
+      if (!fuera.series && !fuera.nota) throw new Error(T('No ha dicho nada.'));
       escribirCache(clave, fuera);
       return fuera;
     });
@@ -2928,7 +2932,7 @@
      Se pregunta solo cuando él toca, que es el mejor momento para gastarle un
      poco de su clave: lo ha pedido. */
   function seriesDeActividad(datos) {
-    if (!datos || !datos.minutos) return Promise.reject(new Error('No hay actividad que mirar.'));
+    if (!datos || !datos.minutos) return Promise.reject(new Error(T('No hay actividad que mirar.')));
 
     const lista = (datos.actividades || []).filter(function (a) { return a.nombre; });
     const clave = 'equiv1:' + datos.zona + ':' + datos.dias + ':' + datos.minutos + ':' +
@@ -2972,7 +2976,7 @@
         series: Math.min(60, Math.max(0, n)),
         nota: String((r && r.nota) || '').trim()
       };
-      if (!fuera.series && !fuera.nota) throw new Error('No ha dicho nada.');
+      if (!fuera.series && !fuera.nota) throw new Error(T('No ha dicho nada.'));
       escribirCache(clave, fuera);
       return fuera;
     });
@@ -2998,10 +3002,10 @@
      otra vez la proteína que ya te bebiste. */
   function analizarSuplementos(opciones) {
     opciones = opciones || {};
-    if (!g.Suplementos) return Promise.reject(new Error('No hay suplementos.'));
+    if (!g.Suplementos) return Promise.reject(new Error(T('No hay suplementos.')));
 
     const lista = Suplementos.lista();
-    if (!lista.length) return Promise.reject(new Error('No tienes ninguno apuntado.'));
+    if (!lista.length) return Promise.reject(new Error(T('No tienes ninguno apuntado.')));
 
     const resumen = Suplementos.resumenIA();
     const clave = 'suplementos:' + (g.Idioma ? Idioma.actual() : 'es') + ':' + resumen;
@@ -3061,7 +3065,7 @@
       '"menu":"","dudas":""}';
 
     return llamarJSON(prompt, { temperatura: 0.2 }).then(function (r) {
-      if (!r) throw new Error('No he podido calcularlo.');
+      if (!r) throw new Error(T('No he podido calcularlo.'));
       const n = function (x) { return Math.max(0, Math.round(Number(x) || 0)); };
       const out = {
         kcal: n(r.kcal), prot: n(r.prot), carbo: n(r.carbo), grasa: n(r.grasa),
@@ -3078,7 +3082,7 @@
 
   function estimarComida(texto) {
     const t = String(texto || '').trim();
-    if (!t) return Promise.reject(new Error('Escribe antes qu\u00e9 has comido.'));
+    if (!t) return Promise.reject(new Error(T('Escribe antes qué has comido.')));
 
     const prompt = contexto({ comida: true }) + '\n\n' +
       'Ha escrito esto de lo que ha comido: "' + t + '".\n\n' +
@@ -3114,7 +3118,7 @@
   function revisarCambioComida(texto, previsto, imagen) {
     const t = String(texto || '').trim();
     if (!t && !(imagen && imagen.datos)) {
-      return Promise.reject(new Error('Escribe qué has comido o hazle una foto.'));
+      return Promise.reject(new Error(T('Escribe qué has comido o hazle una foto.')));
     }
 
     const pre = previsto || {};
@@ -3308,7 +3312,7 @@
         ' series, ' + Math.round(s.volume) + ' kg';
     }).join(' | ');
 
-    if (!sesiones) return Promise.reject(new Error('Aún no hay entrenamientos que analizar.'));
+    if (!sesiones) return Promise.reject(new Error(T('Aún no hay entrenamientos que analizar.')));
 
     const prompt = contexto({ progreso: true, cargas: true }) + '\n\nÚLTIMAS SESIONES: ' + sesiones + '\n\n' +
       'Analiza cómo voy de verdad, mirando fechas, huecos, series y cargas.\n' +
@@ -3449,7 +3453,7 @@
     return llamarJSON(partes.join('\n'), { maxTokens: 4096, temperatura: 1.0 })
       .then(function (r) {
         if (!r || !Array.isArray(r.canciones) || !r.canciones.length) {
-          throw new Error('La IA no devolvió canciones.');
+          throw new Error(T('La IA no devolvió canciones.'));
         }
         return r;
       });
