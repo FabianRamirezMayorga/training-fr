@@ -140,6 +140,7 @@
     const desde = Date.now() - dias * DIA;
     const cuenta = {};
     const minutos = {};
+    const musAct = {};
     let total = 0;
 
     Store.sessions().forEach(function (s) {
@@ -153,7 +154,13 @@
         const zonas = [];
         s.musculos.forEach(function (m) {
           const z = zonaDe(m);
-          if (z && zonas.indexOf(z) === -1) zonas.push(z);
+          if (!z) return;
+          if (zonas.indexOf(z) === -1) zonas.push(z);
+          /* Y cuáles en concreto. El reparto habla de zonas, pero la actividad
+             se apuntó músculo a músculo: sin esto había que bajar al historial
+             para saber qué había movido el partido. */
+          if (!musAct[z]) musAct[z] = [];
+          if (musAct[z].indexOf(m) === -1) musAct[z].push(m);
         });
         /* El tiempo no se reparte entre zonas: los noventa minutos del partido
            los aguantó la pierna enteros, y el core también. */
@@ -179,7 +186,8 @@
     }).filter(function (f) { return f.series > 0; })
       .sort(function (a, b) { return b.series - a.series; });
 
-    return { total: Math.round(total), filas: filas, minutos: minutos };
+    return { total: Math.round(total), filas: filas, minutos: minutos,
+      musculos: musAct };
   }
 
   /* ---------- gráficos ---------- */
@@ -939,6 +947,26 @@
       return mins[id];
     }).concat([1]));
 
+    /* «cuádriceps, isquiotibiales, gemelos y glúteos». En minúscula porque van
+       dentro de una frase y no encabezando su fila, que es donde el catálogo
+       los da con mayúscula. */
+    const musDeZona = reparto.musculos || {};
+    const musculosDe = function (id) {
+      /* Pecho, Hombro y Core son un solo músculo en el catálogo, así que la
+         línea diría «pecho» debajo de «Pecho». Solo vale la pena donde la zona
+         tiene varios y saber cuáles tocaste dice algo. */
+      const gr = I18N.GROUPS.filter(function (x) { return x.id === id; })[0];
+      if (!gr || (gr.muscles || []).length < 2) return '';
+      const l = (musDeZona[id] || []).map(function (m) {
+        const n = String(I18N.muscle(m) || '');
+        return n ? n.charAt(0).toLowerCase() + n.slice(1) : '';
+      }).filter(Boolean);
+      if (!l.length) return '';
+      if (l.length === 1) return l[0];
+      return Tn('{lista} y {ultimo}',
+        { lista: l.slice(0, -1).join(', '), ultimo: l[l.length - 1] });
+    };
+
     const ids = [];
     reparto.filas.forEach(function (f) { if (ids.indexOf(f.id) === -1) ids.push(f.id); });
     Object.keys(plan.zonas).forEach(function (id) {
@@ -988,7 +1016,10 @@
               '<span class="zona-pista"><i class="zona-hago" style="width:' +
                 Math.round(mins[id] / topeMin * 100) + '%"></i></span>' +
               '<span class="zona-num">' + esc(Tn('{n}′', { n: mins[id] })) + '</span>' +
-              '</div>' : '')}`;
+              '</div>' +
+              (musculosDe(id)
+                ? '<p class="zona-act-mus tiny">' + esc(musculosDe(id)) + '</p>' : '')
+              : '')}`;
         }).join(''))}
       </div>
 

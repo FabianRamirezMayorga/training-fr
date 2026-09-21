@@ -2874,6 +2874,11 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .zona-act .zona-pista { height: 6px; }
 .zona-act .zona-hago { background: var(--agua); }
 .zona-act .zona-num { font-size: .74rem; font-weight: 600; color: var(--agua); }
+/* Qué movió esa actividad, alineado bajo la barra. El reparto va por zonas y la
+   actividad se apunta músculo a músculo: decir solo «Actividad 149′» obligaba a
+   bajar al historial para saber si el partido fue de pierna o de todo. */
+.zona-act-mus { margin: -5px 0 0 76px; color: var(--agua); opacity: .78;
+  line-height: 1.3; }
 
 .zl-hago { background: var(--acc); }
 .zl-act { background: var(--agua); height: 6px !important; }

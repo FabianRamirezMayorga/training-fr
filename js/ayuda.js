@@ -154,7 +154,8 @@
         'El aviso de exceso salta si una zona pasa de *veinte series por semana* y además no está subiendo peso. Por encima de veinte, lo que se añade suele ser fatiga y no músculo; si encima ningún ejercicio de esa zona ha subido de peso en el periodo, no estás entrenando duro, estás cavando.',
         'Si pasa de veinte pero sí estás subiendo, te lo dice en verde: es mucho, pero te lo estás recuperando, y no hay nada que corregir.',
         'No se mide contra tu plan, se mide contra lo que sirve para crecer. Tu plan puede estar mal escrito, y entonces el que está mal es el plan, no lo que haces.',
-        'Lo que hiciste fuera del gimnasio sale debajo, en azul y en minutos, no sumado a las series. Un partido de fútbol trabaja la pierna, pero no son series: sumarlo te diría que estás más cerca de tu objetivo de pesas de lo que estás, que es justo lo que esta pantalla sirve para ver.'
+        'Lo que hiciste fuera del gimnasio sale debajo, en azul y en minutos, no sumado a las series. Un partido de fútbol trabaja la pierna, pero no son series: sumarlo te diría que estás más cerca de tu objetivo de pesas de lo que estás, que es justo lo que esta pantalla sirve para ver.',
+        'Debajo de esos minutos te dice qué músculos movió, cuando la zona tiene varios: si el partido fue de cuádriceps y gemelos o te movió la pierna entera. Donde la zona es un solo músculo —pecho, hombro, core— no se repite, que ya lo dice la fila.'
       ],
       ver: ['g-plan', 'c-libre'] },
 
