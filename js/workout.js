@@ -920,7 +920,8 @@
         if (set.done) {
           const prev = Store.prOf(entry.exId).best;
           if (!simple && set.weight > 0 && (!prev || set.weight > prev.weight)) {
-            UI.toast(Tn('¡Nuevo récord en {que}!', { que: entry.name }));
+            UI.toast(Tn('¡Nuevo récord en {que}!',
+              { que: (Data.get(entry.exId) || {}).nameEs || entry.name }));
           }
           startRest(entry.rest);
           /* la barra de progreso de la cabecera se actualiza sin recargar la vista */

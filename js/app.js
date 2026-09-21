@@ -1350,9 +1350,9 @@
               ${n === 1 ? 'ejercicio' : 'ejercicios'}</div>
           </button>
           ${raw(hechaHoy
-            ? '<span class="hoy-hecho">' + icon('check') + ' Hecho</span>'
+            ? '<span class="hoy-hecho">' + icon('check') + ' ' + esc(T('Hecho')) + '</span>'
             : '<button class="hoy-play" data-train="' + esc(r.id) + '">' +
-              icon('play') + ' Entrenar</button>')}
+              icon('play') + ' ' + esc(T('Entrenar')) + '</button>')}
         </div>`;
     };
 
@@ -1390,7 +1390,7 @@
             ? html`<button class="btn sm danger" data-borrar="${r.id}"
                      aria-label="${T('Borrar rutina')}">${raw(icon('trash'))}</button>`
             : html`<button class="btn primary sm" data-train="${r.id}">
-                     ${raw(icon('play'))} Entrenar</button>`)}
+                     ${raw(icon('play'))} ${T('Entrenar')}</button>`)}
         </div>
 
         ${raw(abierta && n ? detalleHTML() : '')}
@@ -1425,9 +1425,9 @@
               pónselo a la otra.</p>
             </div>
             <div class="row" style="padding:11px 13px 0">
-              <button class="btn sm grow" data-open="${r.id}">${raw(icon('edit'))} Editar</button>
+              <button class="btn sm grow" data-open="${r.id}">${raw(icon('edit'))} ${T('Editar')}</button>
               <button class="btn sm primary grow" data-train="${r.id}">
-                ${raw(icon('play'))} Entrenar</button>
+                ${raw(icon('play'))} ${T('Entrenar')}</button>
             </div>
             ${raw(ambito === 'inicio' ? '' : html`
             <div style="padding:8px 13px 13px">
@@ -5564,7 +5564,7 @@
 
           <label class="tiny" style="display:block;margin-top:15px">${T('CORREO')}</label>
           <input id="sync-mail" type="email" inputmode="email" autocomplete="email"
-                 placeholder="tucorreo@ejemplo.com" style="margin:5px 0 10px">
+                 placeholder="${T('tucorreo@ejemplo.com')}" style="margin:5px 0 10px">
 
           <label class="tiny">${T('CONTRASEÑA')}</label>
           <div class="secreto">
@@ -5594,7 +5594,7 @@
             'pulsarlo. El correo que trae Supabase de serie solo permite {limite}, así que ' +
             'si lo agotas tendrás que esperar.',
             { limite: '<b>' + esc(T('dos mensajes por hora')) + '</b>' }))}</p>
-            <input id="mail-enlace" type="email" inputmode="email" placeholder="tucorreo@ejemplo.com"
+            <input id="mail-enlace" type="email" inputmode="email" placeholder="${T('tucorreo@ejemplo.com')}"
                    autocomplete="email" style="margin:10px 0">
             <button class="btn block" data-a="enviarenlace">
               ${raw(icon('correo'))} ${T('Enviarme el enlace')}</button>
@@ -6410,10 +6410,14 @@
       return html`<div class="aviso">
         <span class="row-icon">${raw(icon(t.icono))}</span>
         <div class="grow">
-          <div style="font-weight:600;font-size:.95rem">${x.titulo}</div>
-          <div class="tiny">${x.hora}${raw(x.mensaje ? ' · ' + esc(x.mensaje) : '')}</div>
+          <!-- El título y el mensaje se guardan en castellano, que es la clave;
+               se traducen aquí, al pintarlos, como en el resto de la app. -->
+          <div style="font-weight:600;font-size:.95rem">${Alertas.traduce(x.titulo)}</div>
+          <div class="tiny">${x.hora}${raw(x.mensaje
+            ? ' · ' + esc(Alertas.traduce(x.mensaje)) : '')}</div>
         </div>
-        <button class="btn sm" data-visto="${x.alerta.id}" data-hora="${x.hora}">Vale</button>
+        <button class="btn sm" data-visto="${x.alerta.id}"
+                data-hora="${x.hora}">${T('Vale')}</button>
       </div>`;
     }).join('');
 

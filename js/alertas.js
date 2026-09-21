@@ -1050,6 +1050,9 @@
 
   g.Alertas = {
     esDeIA: esDeIA, textoDe: textoDe, tituloDe: tituloDe,
+    /* Los títulos y mensajes de un recordatorio se guardan en castellano —esa es
+       la clave— así que quien los pinte necesita poder traducirlos. */
+    traduce: traduce,
     TIPOS: TIPOS, DIAS: DIAS,
     lista: lista, nueva: nueva, guardar: guardar, borrar: borrar, desdeRutinas: desdeRutinas,
     soportado: soportado, permiso: permiso, pedirPermiso: pedirPermiso, avisar: avisar,

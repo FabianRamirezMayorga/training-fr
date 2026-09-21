@@ -299,7 +299,7 @@
           { ejercicios: rutina.exercises.length, series: series }),
       cuerpo: cuerpo,
       extra: '<button class="btn primary sm sec-boton" data-a="entrenar">' +
-        icon('play') + ' Entrenar</button>'
+        icon('play') + ' ' + UI.esc(T('Entrenar')) + '</button>'
     });
   }
 

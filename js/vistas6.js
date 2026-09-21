@@ -241,6 +241,14 @@
      decision no se toma mirando el ajuste sino los datos: si ese ejercicio
      tiene pesos, se ensena la curva de peso; si no, cuantas veces lo has hecho.
      Asi tambien funciona para quien cambio de modo por el camino. */
+  /* El nombre que se guardó con la sesión quedó escrito en el idioma de aquel
+     día. El catálogo sabe decirlo en el de hoy, así que manda él; lo guardado
+     solo sirve de respaldo para un ejercicio que ya no exista. */
+  function nombreEj(e) {
+    const ex = g.Data ? Data.get(e.exId) : null;
+    return (ex && ex.nameEs) || e.name || e.exId;
+  }
+
   function porEjercicio(sesiones, desdeT) {
     const mapa = {};
     sesiones.filter(function (x) { return x.start >= desdeT; }).forEach(function (x) {
@@ -248,7 +256,7 @@
         const hechas = (e.sets || []).filter(function (st) { return st.done; });
         if (!hechas.length) return;
         const m = mapa[e.exId] || (mapa[e.exId] = {
-          exId: e.exId, name: e.name, veces: 0, series: 0, puntos: [], conPeso: false
+          exId: e.exId, name: nombreEj(e), veces: 0, series: 0, puntos: [], conPeso: false
         });
         const mejor = hechas.reduce(function (a2, st) {
           return Math.max(a2, Number(st.weight) || 0);
@@ -620,7 +628,9 @@
         if (vistos[e.exId]) return;
         vistos[e.exId] = true;
         const p = Store.prOf(e.exId);
-        if (p.best && p.best.weight > 0) prs.push({ exId: e.exId, name: e.name, pr: p.best });
+        if (p.best && p.best.weight > 0) {
+          prs.push({ exId: e.exId, name: nombreEj(e), pr: p.best });
+        }
       });
     });
     prs.sort(function (a, b) { return b.pr.weight - a.pr.weight; });
@@ -762,10 +772,10 @@
       return html`
         <div class="list-title">${T('Tus metas')}</div>
         <div class="card center tarjeta-premium">
-          <p class="muted" style="margin-bottom:12px">Ponte una meta y la verás avanzar
-          aquí sola: llegar a un peso, entrenar x veces por semana, una racha o un récord
-          en un ejercicio.</p>
-          <button class="btn primary block" data-a="metas">Crear mi primera meta</button>
+          <p class="muted" style="margin-bottom:12px">${T('Ponte una meta y la verás ' +
+          'avanzar aquí sola: llegar a un peso, entrenar x veces por semana, una racha o ' +
+          'un récord en un ejercicio.')}</p>
+          <button class="btn primary block" data-a="metas">${T('Crear mi primera meta')}</button>
         </div>`;
     }
 
@@ -1097,7 +1107,7 @@
             const hechas = (e.sets || []).filter(function (x) { return x.done; });
             if (!hechas.length) return '';
             return html`<div class="row between" style="font-size:.82rem">
-              <span class="grow">${e.name}</span>
+              <span class="grow">${nombreEj(e)}</span>
               <span class="tiny">${hechas.map(function (x) {
                 return UI.num(x.weight) + '×' + x.reps;
               }).join(' · ')}</span></div>`;
@@ -1130,8 +1140,8 @@
           <summary>
             <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
             <span class="grow">${tituloSemana(k)}</span>
-            <span class="tiny nowrap">${lista.length} ${lista.length === 1
-              ? 'entreno' : 'entrenos'}${raw(series ? ' · ' + series + ' series' : '')}</span>
+            <span class="tiny nowrap">${Tp(lista.length, '{n} entreno', '{n} entrenos')}${raw(
+              series ? ' · ' + esc(Tn('{n} series', { n: series })) : '')}</span>
           </summary>
           <div class="fino-cuerpo">
             ${raw(lista.map(sesionHTML).join(''))}

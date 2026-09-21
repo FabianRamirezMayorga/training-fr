@@ -4146,6 +4146,16 @@
       '{cuando} you did {min} min of activity that loads {zonas}. If they feel heavy, drop a set per exercise or take some weight off: you will perform worse today and that is fine.',
     'Sube a {peso}': 'Go up to {peso}',
     'Baja a {peso}': 'Drop to {peso}',
-    'Repite {peso}': 'Stay at {peso}'
+    'Repite {peso}': 'Stay at {peso}',
+
+    /* ---------- Metas vacías y el resumen de la semana ---------- */
+    'Ponte una meta y la verás avanzar aquí sola: llegar a un peso, entrenar x veces por semana, una racha o un récord en un ejercicio.':
+      'Set yourself a goal and you will watch it move here on its own: reaching a weight, training x times a week, a streak or a record on an exercise.',
+    'Crear mi primera meta': 'Create my first goal',
+    '{n} entreno': '{n} workout',
+    '{n} entrenos': '{n} workouts',
+
+    /* ---------- El correo de ejemplo ---------- */
+    'tucorreo@ejemplo.com': 'youremail@example.com'
   };
 })(window);
