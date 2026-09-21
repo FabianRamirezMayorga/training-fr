@@ -537,8 +537,19 @@
               return '<span class="ps-punto ' + clase + (ok ? ' si' : '') + '" ' +
                 'title="' + esc(titulo) + '"></span>';
             };
-            /* El color del número habla SOLO del entreno: verde si entrenó el día
-               que tocaba, rojo si no, y gris el día que no pedía entrenar.
+            /* El color del número habla SOLO del entreno: verde si entrenó,
+               tocase o no; rojo el día que pedía entreno y no lo hubo; gris el
+               día que no pedía nada y se descansó.
+
+               El entreno primero y el calendario después, y ese orden importa.
+               Antes se miraba `tocaba` primero, así que entrenar un sábado que
+               no estaba en el plan salía gris: la regla se escribió para que un
+               domingo de descanso no contase como día fallado, pero «no cuenta
+               en contra» acabó siendo «no cuenta nada». Un entrenamiento libre
+               un día suelto es justo lo que se quiere ver, no lo que hay que
+               esconder. Al contador de días redondos no se le añade casilla:
+               entrenar de más se ve, pero no se convierte en una obligación
+               nueva que dejarse sin marcar.
 
                Antes se ponía rojo también por no llegar al agua o a la proteína
                habiendo entrenado, y con el agua al noventa por ciento eso salía
@@ -549,8 +560,8 @@
                Hoy se queda neutro hasta que termine: el día no ha acabado, y
                pintarlo en rojo a las once de la mañana por no haber cenado
                todavía es regañar por algo que aún no ha pasado. */
-            const tono = d.esHoy ? '' : !d.tocaba ? ' libre'
-              : d.entreno ? ' entrenado' : ' sin-entrenar';
+            const tono = d.esHoy ? '' : d.entreno ? ' entrenado'
+              : d.tocaba ? ' sin-entrenar' : ' libre';
             return '<div class="ps-dia tap' + (d.esHoy ? ' es-hoy' : '') + tono +
               '" data-plandia="' + esc(d.clave) + '" role="button" tabindex="0">' +
               '<span class="ps-letra">' + d.letra + '</span>' +
