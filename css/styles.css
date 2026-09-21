@@ -189,10 +189,13 @@ a{color:var(--blue)}
      casi un segundo —más rápido parpadea— y deja más de un segundo de calma
      entre pasada y pasada. */
   animation:realce 2.6s cubic-bezier(.35,0,.2,1) .6s infinite}
+/* La inclinación va en los fotogramas y no en la regla: si la dejara en el
+   transform del elemento, el translateX de la animación la pisaría entera y el
+   reflejo cruzaría recto. */
 @keyframes realce{
-  0%{transform:translateX(-180%)}
-  34%{transform:translateX(260%)}
-  100%{transform:translateX(260%)}}
+  0%{transform:translateX(-180%) skewX(-16deg)}
+  34%{transform:translateX(260%) skewX(-16deg)}
+  100%{transform:translateX(260%) skewX(-16deg)}}
 /* Quien pide menos movimiento no quiere un brillo latiendo en su portada. */
 @media (prefers-reduced-motion:reduce){.realce::after{animation:none}}
 .btn.icon{padding:.5em;width:36px;height:36px;flex:none}
@@ -2101,20 +2104,21 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
   to   { transform: translateX(9%) rotate(1deg); }
 }
 
-/* Y el destello corto que lo cruza de vez en cuando. */
+/* Y el mismo reflejo que el botón neutro, para que sea el movimiento lo que
+   se reconoce en toda la app. El color no puede ser el mismo —verde sobre
+   verde no se ve— así que aquí va en blanco; lo que se comparte es el ritmo.
+
+   Mismo retraso que el otro a propósito: los dos cruzan a la vez y parece una
+   sola cosa. Con retrasos distintos se cruzan cuando les toca y parecen dos
+   averías. */
 .btn.btn-arranque::after {
-  content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 42%;
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 42%;
   background: linear-gradient(100deg, transparent,
-              color-mix(in srgb, #fff 26%, transparent), transparent);
-  transform: skewX(-18deg); pointer-events: none;
-  animation: destello 7.5s cubic-bezier(.25, .6, .3, 1) 2s infinite;
+              color-mix(in srgb, #fff 40%, transparent), transparent);
+  pointer-events: none;
+  animation: realce 2.6s cubic-bezier(.35, 0, .2, 1) .6s infinite;
 }
 
-@keyframes destello {
-  0% { left: -60%; }
-  17% { left: 125%; }
-  100% { left: 125%; }
-}
 
 .btn.btn-arranque:active {
   transform: scale(.975);
