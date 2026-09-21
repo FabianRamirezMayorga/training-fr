@@ -7220,6 +7220,17 @@
     /* el nombre del plan sin el día delante, que la pantalla de Programa
        necesita para agrupar igual que la de Rutinas */
     nombreRutina: nombreRutina, tituloRutina: tituloRutina,
+    /* La tabla de actividades y el lector de lo escrito viven aquí, y la hoja
+       de «¿qué estás haciendo?» del entrenamiento hace la misma pregunta. Sin
+       esto tenía su propia respuesta —met 4 y ningún músculo— y un partido
+       apuntado desde allí no llegaba a Pierna. */
+    actividadDe: function (texto) {
+      const id = actividadDelTexto(texto || '');
+      const a = ACTIVIDADES.filter(function (x) { return x.id === id; })[0];
+      return a ? { id: a.id, label: a.label, met: a.met,
+        musculos: (a.musculos || []).slice() } : null;
+    },
+    cuandoYCuanto: cuandoYCuantoDelTexto,
     /* compartir.js pinta según el trozo de hash que trae el plan dentro */
     ruta: function () { return route; },
     planActivo: planActivo, marcarPlanActivo: marcarPlanActivo,

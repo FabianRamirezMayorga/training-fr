@@ -2937,6 +2937,16 @@ html[data-theme="light"] .sem-caja.es-ahora {
    que falta por hacer y se calla. */
 .ac-nom.vacia { color: var(--dim); font-weight: 600; }
 
+/* El rótulo de sección y la fila de pastillas que se desplaza. Los quité al
+   poner el rodillo en la hoja de apuntar, y la hoja del entrenamiento —que
+   tiene dos opciones de verdad, no una rueda— los sigue necesitando. */
+.ac-et { margin: 16px 0 7px; font-size: .68rem; font-weight: 700;
+  letter-spacing: .08em; color: var(--dim2); }
+.ac-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px;
+  scrollbar-width: none; }
+.ac-scroll::-webkit-scrollbar { display: none; }
+.ac-scroll .chip { flex: none; }
+
 /* ---------- selector de rodillo ----------
    El del sistema, hecho a mano porque aquí no entran librerías. La lista rueda
    por debajo de una marca que no se mueve y lo elegido es lo que queda dentro.

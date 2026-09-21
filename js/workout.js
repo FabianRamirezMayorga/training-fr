@@ -1057,16 +1057,26 @@
 
     UI.modal(html`
       <h2>${T('¿Qué estás haciendo?')}</h2>
-      <p class="muted">${T('Escríbelo como lo dirías: «partido de fútbol», «subí a ' +
-      'Monserrate», «ciclovía».')} ${raw(UI.esc(conIA
-        ? T('Yo calculo el gasto y qué partes del cuerpo trabajas.')
-        : T('Sin la IA conectada lo apunto con un gasto medio.')))}</p>
+      <p class="muted" style="margin:0 0 13px">${T('Escríbelo como lo dirías: ' +
+      '«partido de fútbol», «subí a Monserrate», «ciclovía».')}</p>
 
-      <input id="ac-que" placeholder="${T('Partido de fútbol')}" autocomplete="off"
-             value="${yaHay ? yaHay.nombre : ''}">
+      <input id="ac-que" class="ac-campo" placeholder="${T('Partido de fútbol')}"
+             autocomplete="off" value="${yaHay ? yaHay.nombre : ''}">
 
-      <label class="tiny" style="display:block;margin-top:14px">${T('CUÁNDO')}</label>
-      <div class="row wrap" style="gap:6px;margin-top:6px" id="ac-cuando">
+      <!-- La misma ficha que en «apuntar algo que ya hice». Aquí no había nada:
+           se escribía a ciegas y no se sabía qué iba a quedar apuntado hasta
+           después de guardarlo. -->
+      <div class="ac-ficha">
+        <div class="ac-cab">
+          <div class="grow">
+            <div class="ac-nom" id="ac-nom"></div>
+            <div class="ac-mus" id="ac-mus"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ac-et">${T('CUÁNDO')}</div>
+      <div class="ac-scroll" id="ac-cuando">
         <button class="chip on" data-cuando="ahora">${T('Lo estoy haciendo')}</button>
         <button class="chip" data-cuando="hecho">${T('Ya lo hice')}</button>
       </div>
@@ -1092,6 +1102,30 @@
         const visto = el.querySelector('#ac-visto');
         const btn = el.querySelector('#ac-listo');
         const caja = el.querySelector('#ac-tiempo');
+
+        /* Lo que la app entiende de lo escrito, con la tabla de app.js. Aquí la
+           IA no se enseña antes de guardar —un solo toque calcula y arranca—,
+           así que la ficha solo cuenta lo que se sabe sin ella. */
+        let leido = null;
+
+        const pintarFicha = function () {
+          const nom = el.querySelector('#ac-nom');
+          const mus = el.querySelector('#ac-mus');
+          nom.textContent = leido ? T(leido.label) : T('Escribe qué estás haciendo');
+          nom.classList.toggle('vacia', !leido);
+          const ms = leido ? leido.musculos : [];
+          mus.textContent = ms.length
+            ? ms.map(function (m) { return I18N.muscle(m); }).join(' · ')
+            : (leido ? T('Sin músculos concretos')
+                     : T('De aquí salen las calorías y los músculos que se apuntan.'));
+        };
+
+        campo.oninput = function () {
+          leido = campo.value.trim() && g.App && App.actividadDe
+            ? App.actividadDe(campo.value) : null;
+          pintarFicha();
+        };
+        campo.oninput();
 
         const textoBoton = function () {
           return cuando === 'ahora'
@@ -1165,7 +1199,11 @@
           if (!t) { UI.toast(T('Escribe qué has hecho')); campo.focus(); return; }
 
           if (!conIA) {
-            rematar({ nombre: t, met: 4, musculos: [], nota: '', intensidad: '',
+            /* Antes: met 4 y ningún músculo, siempre. Un partido apuntado desde
+               aquí no llegaba a Pierna, que es el mismo agujero que se tapó en
+               la otra hoja. Ahora manda lo que dice la tabla de lo escrito. */
+            rematar({ nombre: t, met: leido ? leido.met : 4,
+              musculos: leido ? leido.musculos : [], nota: '', intensidad: '',
               origen: 'medio' });
             return;
           }
@@ -1182,7 +1220,11 @@
               pintarBoton();
               return;
             }
-            rematar(r);
+            /* Si ella no acierta con los músculos, los de la tabla antes que
+               ninguno: guardar una sesión sin músculos es lo que dejaba la
+               pierna contando como abandonada después de un partido. */
+            rematar((r.musculos && r.musculos.length) || !leido ? r
+              : Object.assign({}, r, { musculos: leido.musculos }));
           }).catch(function (e) {
             visto.innerHTML = '<span style="color:var(--bad)">' +
               UI.esc(e.message || T('No he podido calcularlo.')) + '</span>';

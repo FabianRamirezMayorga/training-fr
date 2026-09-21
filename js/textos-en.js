@@ -416,6 +416,7 @@
     'No apunta músculos: puede ser cualquier cosa': 'Logs no muscles: it could be anything',
     'Sin músculos concretos': 'No particular muscles',
     '~{kcal} kcal': '~{kcal} kcal',
+    'Escribe qué estás haciendo': 'Write what you are doing',
     'Elige qué fue': 'Pick what it was',
     'De aquí salen las calorías y los músculos que se apuntan.':
       'The calories and the muscles that get logged come from this.',
@@ -822,10 +823,6 @@
     '¿Qué estás haciendo?': 'What are you doing?',
     'Escríbelo como lo dirías: «partido de fútbol», «subí a Monserrate», «ciclovía».':
       'Write it the way you would say it: “football match”, “walked up the hill”, “cycle lane”.',
-    'Yo calculo el gasto y qué partes del cuerpo trabajas.':
-      'I work out the burn and which parts of your body you are working.',
-    'Sin la IA conectada lo apunto con un gasto medio.':
-      'Without the AI connected I log it with an average burn.',
     'Partido de fútbol': 'Football match',
     'CUÁNDO': 'WHEN',
     'Lo estoy haciendo': 'I am doing it now',
