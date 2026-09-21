@@ -1068,27 +1068,67 @@
         const btn = el.querySelector('#ac-listo');
         const caja = el.querySelector('#ac-tiempo');
 
-        /* Lo que la app entiende de lo escrito, con la tabla de app.js. Aquí la
-           IA no se enseña antes de guardar —un solo toque calcula y arranca—,
-           así que la ficha solo cuenta lo que se sabe sin ella. */
+        /* Lo que la app entiende de lo escrito: primero la tabla de app.js, que
+           es inmediata y funciona sin cobertura, y encima lo que diga la IA
+           cuando conteste. La ficha enseña siempre lo último que mande. */
         let leido = null;
+        let deIA = null;
+
+        const musculosAhora = function () {
+          if (deIA && deIA.musculos && deIA.musculos.length) return deIA.musculos;
+          return leido ? leido.musculos : [];
+        };
 
         const pintarFicha = function () {
           const nom = el.querySelector('#ac-nom');
           const mus = el.querySelector('#ac-mus');
-          nom.textContent = leido ? T(leido.label) : T('Escribe qué estás haciendo');
-          nom.classList.toggle('vacia', !leido);
-          const ms = leido ? leido.musculos : [];
+          const hay = leido || deIA;
+          nom.textContent = deIA && deIA.nombre ? deIA.nombre
+            : leido ? T(leido.label) : T('Escribe qué estás haciendo');
+          nom.classList.toggle('vacia', !hay);
+          const ms = musculosAhora();
           mus.textContent = ms.length
             ? ms.map(function (m) { return I18N.muscle(m); }).join(' · ')
-            : (leido ? T('Sin músculos concretos')
-                     : T('De aquí salen las calorías y los músculos que se apuntan.'));
+            : (hay ? T('Sin músculos concretos')
+                   : T('De aquí salen las calorías y los músculos que se apuntan.'));
+          mus.classList.toggle('de-ia', !!(deIA && deIA.musculos && deIA.musculos.length));
+        };
+
+        /* Sola, en cuanto para de escribir, igual que en la otra hoja: la misma
+           pregunta no puede contestarse de dos maneras según por dónde entres.
+           Se guarda por lo escrito, así que volver sobre lo mismo sale de la
+           caché —la misma que usa la otra hoja— y no cuesta otra llamada. */
+        let esperaIA = null;
+        let ultimoIA = '';
+
+        const mirarloYa = function () {
+          if (!conIA) return;
+          const t = campo.value.trim();
+          if (t.length < 3 || t === ultimoIA) return;
+          ultimoIA = t;
+          visto.textContent = T('Mirando qué es…');
+          IA.estimarActividad(t).then(function (r) {
+            if (campo.value.trim() !== t) return;
+            visto.textContent = '';
+            if (!r || !r.met) return;
+            deIA = r;
+            pintarFicha();
+          }).catch(function () {
+            if (campo.value.trim() !== t) return;
+            /* Sin red o sin cuota se sigue pudiendo empezar: manda la tabla, y
+               el botón vuelve a intentarlo al pulsarlo. */
+            ultimoIA = '';
+            visto.textContent = '';
+          });
         };
 
         campo.oninput = function () {
+          clearTimeout(esperaIA);
           leido = campo.value.trim() && g.App && App.actividadDe
             ? App.actividadDe(campo.value) : null;
+          if (!campo.value.trim()) { deIA = null; ultimoIA = ''; visto.textContent = ''; }
           pintarFicha();
+          esperaIA = setTimeout(mirarloYa, 1300);
         };
         campo.oninput();
 
@@ -1140,6 +1180,14 @@
             return;
           }
 
+          /* Si ya contestó mientras escribía, no hay nada que esperar. */
+          if (deIA && ultimoIA === t) {
+            enMarcha((deIA.musculos && deIA.musculos.length) || !leido ? deIA
+              : Object.assign({}, deIA, { musculos: leido.musculos }));
+            return;
+          }
+
+          clearTimeout(esperaIA);
           btn.disabled = true;
           btn.textContent = T('Calculando…');
           visto.textContent = '';
@@ -1347,6 +1395,51 @@
      volver atrás: descartar estaba en la pantalla, abajo del todo, y reiniciar
      no existía —había que descartar y montar la rutina otra vez—. Las dos que
      borran algo piden confirmación aparte, con lo que se pierde delante. */
+  /* Lo que la IA dice de lo que acaba de terminar. Se abre ya, con la sesión
+     guardada detrás, y mientras contesta enseña que está mirando: la respuesta
+     tarda unos segundos y una hoja en blanco parece que se ha roto. */
+  function hojaAnalisis(ses, alCerrar) {
+    UI.modal(UI.html`
+      <h2>${T('Lo que acabas de hacer')}</h2>
+      <div class="ac-ia-caja" id="an-caja">
+        <span class="ac-ia-ico">${UI.raw(icon('chispa'))}</span>
+        <span class="grow" id="an-txt">${T('Mirándolo…')}</span>
+      </div>
+      <button class="btn block" data-cerrar style="margin-top:16px">${T('Vale')}</button>`,
+      function (el) {
+        el.querySelector('[data-cerrar]').onclick = function () {
+          UI.closeModal();
+          if (alCerrar) alCerrar();
+        };
+
+        IA.analizarSesion(ses).then(function (r) {
+          const filas = [
+            [T('Intensidad'), r.intensidad],
+            [T('Carga'), r.carga],
+            [T('Músculo'), r.musculo],
+            [T('Ojo'), r.ojo]
+          ].filter(function (f) { return f[1]; });
+          const txt = el.querySelector('#an-txt');
+          if (!filas.length) { txt.textContent = T('No ha dicho nada.'); return; }
+          /* A mano y no con innerHTML: esto viene de fuera y no se convierte en
+             código por mucho que lo parezca. */
+          txt.textContent = '';
+          filas.forEach(function (f) {
+            const fila = document.createElement('div');
+            fila.className = 'ac-ia-fila';
+            const et = document.createElement('b');
+            et.textContent = f[0] + ': ';
+            fila.appendChild(et);
+            fila.appendChild(document.createTextNode(f[1]));
+            txt.appendChild(fila);
+          });
+        }).catch(function (e) {
+          el.querySelector('#an-caja').className = 'ac-ia-caja mal';
+          el.querySelector('#an-txt').textContent = e.message || T('No he podido calcularlo.');
+        });
+      });
+  }
+
   function doFinish() {
     const h = loQueHay();
     if (!h) return;
@@ -1357,6 +1450,14 @@
 
       <button class="btn primary block" data-f="guardar" style="margin-top:18px">
         ${UI.raw(icon('check'))} ${h.done ? T('Guardar el entrenamiento') : T('Guardar el tiempo')}</button>
+
+      <!-- Guarda igual que el de arriba y además lo lee. Va aquí y no antes
+           porque se analiza lo que ha quedado guardado, no un borrador: si se
+           pidiera antes habría que volver a pedirlo después por si cambia algo. -->
+      ${UI.raw(g.IA && IA.activa() && IA.analizarSesion
+        ? '<button class="btn block realce" data-f="analizar" style="margin-top:8px">' +
+          icon('chispa') + ' ' + UI.esc(T('Guardar y analizarlo con la IA')) + '</button>'
+        : '')}
 
       <button class="btn block" data-f="reiniciar" style="margin-top:8px">
         ${UI.raw(icon('cambiar'))} ${T('Reiniciar y empezar de cero')}</button>
@@ -1375,6 +1476,18 @@
           UI.toast(s && s.volume
             ? Tn('¡Entrenamiento guardado! Volumen: {v}', { v: UI.kg(s.volume) })
             : Tn('¡Entrenamiento guardado! {t}', { t: UI.mmss(h.segundos) }));
+        };
+
+        const botonAnalisis = el.querySelector('[data-f=analizar]');
+        if (botonAnalisis) botonAnalisis.onclick = function () {
+          UI.closeModal();
+          const s = finish();
+          if (!s) { g.App.go('inicio'); return; }
+          /* Primero la lectura y al cerrarla se va a la portada, no al revés:
+             cambiar de pantalla dispara un hashchange, y el hashchange cierra
+             los modales. Abriendo la hoja antes de irse, la cerraba el propio
+             viaje medio segundo después. */
+          hojaAnalisis(s, function () { g.App.go('inicio'); });
         };
 
         el.querySelector('[data-f=reiniciar]').onclick = function () {

@@ -2715,6 +2715,127 @@
     });
   }
 
+  /* ---------- la sesión entera, al terminarla ----------
+     analizarActividad() contesta sobre algo que se va a apuntar. Esto contesta
+     sobre algo que ya está guardado, y además hay dos clases de sesión muy
+     distintas: la de gimnasio —series, pesos, volumen— y la de actividad
+     —minutos y músculos—. La pregunta es la misma, «qué me ha hecho esto»,
+     pero los datos no se parecen en nada, así que el encargo se arma distinto
+     y las normas de cómo escribir son las mismas.
+
+     Se pide a mano al terminar, nunca solo: cuesta una llamada de su clave y
+     no todo el mundo quiere una lectura cada vez que cierra el cronómetro. */
+  function musculosDeSesion(ses) {
+    const fuera = [];
+    (ses.entries || []).forEach(function (e) {
+      const ex = g.Data ? Data.get(e.exId) : null;
+      ((ex && ex.primaryMuscles) || []).forEach(function (m) {
+        if (fuera.indexOf(m) === -1) fuera.push(m);
+      });
+    });
+    (ses.musculos || []).forEach(function (m) {
+      if (fuera.indexOf(m) === -1) fuera.push(m);
+    });
+    return fuera;
+  }
+
+  function ejerciciosDeSesion(ses) {
+    return (ses.entries || []).map(function (e) {
+      const ex = g.Data ? Data.get(e.exId) : null;
+      const hechas = (e.sets || []).filter(function (x) { return x.done; });
+      if (!hechas.length) return '';
+      const pesos = hechas.map(function (x) {
+        return (x.weight ? x.weight + 'kg' : '') + (x.reps ? 'x' + x.reps : '');
+      }).filter(Boolean).join(', ');
+      const nombre = (ex && (ex.nameEs || ex.name)) || e.name || '';
+      return '- ' + nombre + ': ' + hechas.length + ' series' + (pesos ? ' (' + pesos + ')' : '');
+    }).filter(Boolean);
+  }
+
+  function analizarSesion(ses) {
+    if (!ses) return Promise.reject(new Error('No hay nada que mirar.'));
+
+    const minutos = Number(ses.minutos) ||
+      Math.max(1, Math.round(((ses.end || Date.now()) - ses.start) / 60000));
+    const series = Number(ses.setsDone) || 0;
+    const lineas = ejerciciosDeSesion(ses);
+    const musculos = musculosDeSesion(ses);
+    const deGimnasio = !!lineas.length;
+
+    const clave = 'ses1:' + (ses.id || ses.start) + ':' + series + ':' + minutos +
+      ':' + (g.Idioma ? Idioma.actual() : 'es');
+    const guardado = leerCache(clave, 24 * 30);
+    if (guardado) return Promise.resolve(guardado);
+
+    const p = g.Perfil ? Perfil.datos() : null;
+    const peso = Number(p && p.peso) || 0;
+    const ajustes = g.Store ? Store.settings() : {};
+    const recientes = seriesRecientes(musculos);
+
+    const prompt = [
+      (g.Idioma && Idioma.actual() === 'en')
+        ? 'RESPONDE EN INGLÉS: tiene la app puesta en inglés. Los datos de abajo ' +
+          'están en español porque así los guarda la app; entiéndelos, pero no le ' +
+          'contestes en español.'
+        : null,
+      'Eres su entrenador. Acaba de terminar esto y ya está guardado.',
+      '',
+      'CÓMO SE ESCRIBE ESTO, y esto manda sobre todo lo que viene después.',
+      'Cada frase tiene que poder decirse SOLO de esta sesión suya. Si valdría ' +
+        'igual para cualquier otro entrenamiento, no sirve: bórrala y escribe otra.',
+      'NINGUNA CIFRA en tus frases salvo las que te doy aquí abajo de sus series y ' +
+        'sus pesos, que sí puedes citar porque son suyas y las reconoce. Ni su peso ' +
+        'corporal, ni calorías, ni MET, ni porcentajes inventados.',
+      'PROHIBIDO también: abrir una frase resumiendo los datos que te acabo de dar; ' +
+        'los rellenos de gimnasio tipo «buen trabajo», «descansa bien», «hidrátate» ' +
+        'o «escucha a tu cuerpo»; los signos de exclamación; y adular.',
+      '',
+      'ESTO ES LO QUE HA HECHO:',
+      deGimnasio ? '- Entrenamiento de gimnasio, ' + minutos + ' minutos.' : null,
+      deGimnasio ? lineas.join(SALTO) : null,
+      deGimnasio && series ? '- En total ' + series + ' series.' : null,
+      deGimnasio && ses.volume ? '- Volumen total ' + Math.round(ses.volume) + ' kg.' : null,
+      !deGimnasio ? '- Actividad: "' + String(ses.routineName || '').trim() + '", ' +
+        minutos + ' minutos.' : null,
+      !deGimnasio && musculos.length ? '- Mueve: ' + musculos.join(', ') + '.' : null,
+      '',
+      peso ? 'De complexión es ' + (peso < 60 ? 'ligero' : peso < 85 ? 'normal' : 'grande') +
+        '. No le des ninguna cifra suya de peso.' : null,
+      ajustes.goal ? 'Su objetivo es ' + ajustes.goal + '.' : null,
+      ajustes.level ? 'Nivel ' + ajustes.level + '.' : null,
+      recientes.length
+        ? 'Contando esta, estos siete días lleva: ' + recientes.join(', ') + '.'
+        : null,
+      '',
+      'Dile qué le ha hecho esta sesión. Cada campo, UNA frase de veinticinco ' +
+        'palabras como mucho:',
+      '- "intensidad": cómo de exigente fue esta en concreto, y por qué —qué ' +
+        'ejercicio o qué parte de ella la hizo dura o suave—.',
+      '- "carga": qué músculo o articulación queda más tocado y cuánto le va a durar, ' +
+        'contando lo que ya lleva esta semana. Nombra uno o dos, no la lista entera.',
+      '- "musculo": si esta sesión construye músculo, lo mantiene o ni una cosa ni ' +
+        'otra, y por qué. Sé honesto aunque no le guste.',
+      '- "ojo": UNA cosa concreta que deba vigilar o cambiar en la próxima, con su ' +
+        'nombre. Si de verdad no hay nada, dilo en cinco palabras y no rellenes.',
+      '',
+      'Devuelve JSON: {"intensidad":"","carga":"","musculo":"","ojo":""}'
+    ].filter(function (l) { return l !== null; }).join(SALTO);
+
+    return llamarJSON(prompt, { maxTokens: 1536, temperatura: 0.25 }).then(function (r) {
+      const limpio = {
+        intensidad: String((r && r.intensidad) || '').trim(),
+        carga: String((r && r.carga) || '').trim(),
+        musculo: String((r && r.musculo) || '').trim(),
+        ojo: String((r && r.ojo) || '').trim()
+      };
+      if (!limpio.intensidad && !limpio.carga && !limpio.musculo && !limpio.ojo) {
+        throw new Error('No ha dicho nada.');
+      }
+      escribirCache(clave, limpio);
+      return limpio;
+    });
+  }
+
   /* ---------- a cuántas series equivale lo de fuera del gimnasio ----------
      Que ayer hubo actividad que carga lo de hoy es un hecho: sale de comparar
      dos listas de músculos y lo calcula una regla, en progresion.js. Cuánto
@@ -3384,7 +3505,7 @@
     analizarSuplementos: analizarSuplementos,
     revisarCambioComida: revisarCambioComida,
     estimarActividad: estimarActividad, estimarCarga: estimarCarga,
-    analizarActividad: analizarActividad,
+    analizarActividad: analizarActividad, analizarSesion: analizarSesion,
     seriesDeActividad: seriesDeActividad,
     leerRutina: leerRutina,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
