@@ -4166,12 +4166,14 @@
     'descanso': 'rest',
 
     /* ---------- El aviso de carga ---------- */
-    '{cuando} hiciste {min} min de actividad que cargan {zonas}. Si las notas pesadas, baja una serie por ejercicio o quita algo de peso: hoy vas a rendir menos y no pasa nada.':
-      '{cuando} you did {min} min of activity that loads {zonas}. If they feel heavy, drop a set per exercise or take some weight off: you will perform worse today and that is fine.',
     'La IA lo estima en unas {n} series de {zonas} ya hechas.':
       'The AI puts that at roughly {n} sets of {zonas} already done.',
     '¿Cuál de las de hoy?': 'Which one today?',
     'Tienes {n} rutinas puestas para {dia}.': 'You have {n} routines set for {dia}.',
+    '{cuando} cargaste {zonas}': '{cuando} you loaded {zonas}',
+    '{min} min de actividad. Si lo notas pesado, baja una serie por ejercicio o quita algo de peso: rendir menos hoy es normal.':
+      '{min} min of activity. If it feels heavy, drop a set per exercise or take some weight off: performing worse today is normal.',
+    'Tu día': 'Your day',
     'Sube a {peso}': 'Go up to {peso}',
     'Baja a {peso}': 'Drop to {peso}',
     'Repite {peso}': 'Stay at {peso}',

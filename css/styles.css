@@ -7299,6 +7299,11 @@ html[data-theme="light"] .ag-ico {
   color:var(--dim);line-height:1.4}
 .aviso-carga svg{width:15px;height:15px;flex:none;margin-top:1px;
   stroke:var(--agua);fill:none}
+/* La entrada, en su renglón y en el color del texto normal. Era un párrafo de
+   cuatro líneas de letra pequeña y gris pegado al botón grande: lo más denso de
+   la pantalla, justo donde hay que decidir si entrenar. Con una entrada se lee
+   de un vistazo y el resto se lee solo si interesa. */
+.carga-tit{display:block;color:var(--txt);font-weight:700;margin-bottom:2px}
 /* Lo que añade la IA va en el mismo renglón pero en otro color: lo de arriba es
    una regla que calcula la app y esto es una opinión, y quien lo lee tiene
    derecho a saber cuál es cuál sin preguntar. */

@@ -443,15 +443,24 @@
     cargaDeHoy = { carga: c, zonas: listaDias(zonas),
       sesion: suya || queEsHoy(rutinasDeHoy) };
 
+    /* Un renglón de entrada en negrita y el resto debajo. Era un párrafo de
+       cuatro líneas de letra pequeña pegado al botón grande, y lo más denso de
+       la pantalla estaba justo donde hay que decidir si entrenar.
+
+       La entrada va en segunda persona —«ayer cargaste pierna»— para no tener
+       que concordar en género con la zona: «cargado» vale para pecho, «cargada»
+       para pierna y «cargados» para pierna y core, y eso no se puede armar con
+       una sola frase. */
     /* Sin raw(): esto es una cadena que se concatena, no una plantilla, y ahí
        raw() devuelve un objeto que se pinta como [object Object]. */
     return '<p class="aviso-carga tiny">' +
       icon('chispa') +
-      '<span>' + esc(Tn('{cuando} hiciste {min} min de actividad que cargan ' +
-        '{zonas}. Si las notas pesadas, baja una serie por ejercicio o quita algo ' +
-        'de peso: hoy vas a rendir menos y no pasa nada.',
-        { cuando: c.ayer ? T('Ayer') : T('Hoy'), min: c.minutos,
-          zonas: listaDias(zonas) })) +
+      '<span><b class="carga-tit">' +
+      esc(Tn('{cuando} cargaste {zonas}',
+        { cuando: c.ayer ? T('Ayer') : T('Hoy'), zonas: listaDias(zonas) })) + '</b>' +
+      esc(Tn('{min} min de actividad. Si lo notas pesado, baja una serie por ' +
+        'ejercicio o quita algo de peso: rendir menos hoy es normal.',
+        { min: c.minutos })) +
       /* Hueco vacío: el aviso de regla sale ya, y la estimación se cuela aquí
          cuando conteste la IA. Si no hay entrenador puesto o falla, no se nota
          nada, que es como tiene que ser algo opcional. */
@@ -872,9 +881,15 @@
       <div class="stats portada-hueco">
         <div class="stat"><b>${st.streak}</b><span>${T('Días seguidos')}</span></div>
         <div class="stat"><b>${st.total}</b><span>${T('Entrenos')}</span></div>
-        <div class="stat"><b>${UI.num(Store.settings().registro !== 'detallado' || st.totalVolume === 0
-          ? st.weekSets : st.weekVolume)}</b><span>${Store.settings().registro !== 'detallado' ||
-          st.totalVolume === 0 ? T('Series semana') : T('Volumen semana')}</span></div>
+        <!-- Con la unidad. Un «68.400» a secas no se lee como una cantidad de
+             nada: hay que saber ya que son kilos para entenderlo, y quien abre
+             la portada no viene a descifrar. -->
+        ${raw((function () {
+          const porVolumen = Store.settings().registro === 'detallado' && st.totalVolume > 0;
+          return '<div class="stat"><b>' +
+            esc(porVolumen ? UI.kg(st.weekVolume) : UI.num(st.weekSets)) + '</b><span>' +
+            esc(porVolumen ? T('Volumen semana') : T('Series semana')) + '</span></div>';
+        })())}
       </div>
 
       ${raw(Modo.franjaInvitado())}
@@ -888,9 +903,15 @@
            lo dice nadie más, y lo que viene debajo —la semana y lo comido— sigue
            siendo lo de hoy. -->
       <div class="list-head portada-titulo">
-        <span class="list-title" style="margin:0">${Tn('Hoy, {d}',
-          { d: UI.diaLargo(hoy).toLowerCase() })}</span>
-        <button class="btn sm primary" data-a="verdia">${raw(icon('lista'))} ${T('Ver el día entero')}</button>
+        <!-- «Hoy, lunes» ya lo dice el botón de arriba en su rótulo, y repetirlo
+             media pantalla más abajo no informa de nada. Lo que hace falta aquí
+             es decir de quién es lo que viene: su día. -->
+        <span class="list-title" style="margin:0">${T('Tu día')}</span>
+        <!-- Sin verde: el verde de esta app significa «esto es lo que has venido
+             a hacer», y en la portada solo puede haber una cosa así. Con este
+             botón también en verde, el de Entrenar dejaba de destacar. Y así
+             se parece al resto de acciones de sección de la app. -->
+        <button class="btn sm" data-a="verdia">${raw(icon('lista'))} ${T('Ver el día entero')}</button>
       </div>
       ${raw(deHoy.length
         ? ''
