@@ -2035,9 +2035,27 @@
           void b.offsetWidth;
           b.classList.add('brilla');
         });
-        bindAll(el, '[data-f-tipo]', function (b) { exFilters.tipo = b.dataset.fTipo; refrescar(); });
-        bindAll(el, '[data-f-eq]', function (b) { exFilters.equipment = b.dataset.fEq; refrescar(); });
-        bindAll(el, '[data-f-lv]', function (b) { exFilters.level = b.dataset.fLv; refrescar(); });
+        /* Elegida una, el grupo se cierra solo: ya has contestado a esa pregunta
+           y la fila plegada dice lo que pusiste. Abierto, la lista de trece
+           materiales tapa el resto de la hoja y hay que cerrarla a mano para
+           seguir, que es un toque de más en cada filtro.
+
+           Con un respiro de por medio, no al instante: la marca tarda .14s en
+           encenderse, y cerrar antes deja la sensación de que se ha cerrado sin
+           enterarse de qué elegiste. */
+        const cerrarGrupo = function (b) {
+          const caja = b.closest('details');
+          if (caja) setTimeout(function () { caja.open = false; }, 200);
+        };
+        bindAll(el, '[data-f-tipo]', function (b) {
+          exFilters.tipo = b.dataset.fTipo; refrescar(); cerrarGrupo(b);
+        });
+        bindAll(el, '[data-f-eq]', function (b) {
+          exFilters.equipment = b.dataset.fEq; refrescar(); cerrarGrupo(b);
+        });
+        bindAll(el, '[data-f-lv]', function (b) {
+          exFilters.level = b.dataset.fLv; refrescar(); cerrarGrupo(b);
+        });
 
         bind(el, '[data-f-favs]', function () {
           exFilters.favs = !exFilters.favs;
