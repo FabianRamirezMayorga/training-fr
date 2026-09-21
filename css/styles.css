@@ -1013,6 +1013,9 @@ body.con-musica.con-crono{--pad-abajo:196px}
 .graf-linea{fill:none;stroke:var(--acc);stroke-width:2.4;stroke-linecap:round;
   stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .graf-p{fill:var(--bg2);stroke:var(--acc);stroke-width:1.6;vector-effect:non-scaling-stroke}
+/* El punto de un día que fue actividad: la línea sigue en cero —no hubo
+   series— pero el punto dice que sí pasó algo, y lo dice en azul. */
+.graf-p.graf-act{fill:var(--agua);stroke:var(--agua)}
 .graf-ultimo{fill:var(--acc);stroke:var(--bg2);stroke-width:2;vector-effect:non-scaling-stroke}
 .graf-ejes{display:flex;justify-content:space-between;margin-top:6px}
 .graf-ejes span{flex:1;text-align:center;font-size:.6rem;color:var(--dim2);font-weight:600;
@@ -1031,6 +1034,7 @@ body.con-musica.con-crono{--pad-abajo:196px}
 .calor i.n2{background:color-mix(in srgb,var(--acc) 50%,var(--card2))}
 .calor i.n3{background:color-mix(in srgb,var(--acc) 74%,var(--card2))}
 .calor i.n4{background:var(--acc)}
+.calor i.act{background:var(--agua)}
 .calor i.hoy{outline:2px solid var(--blue);outline-offset:1px}
 .calor-meses{display:grid;grid-template-columns:repeat(var(--cols,12),1fr);gap:3px;
   margin-bottom:5px}
@@ -2750,6 +2754,11 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .ts-dia i.n1 { background: color-mix(in srgb, var(--acc) 28%, var(--card2)); }
 .ts-dia i.n2 { background: color-mix(in srgb, var(--acc) 50%, var(--card2)); }
 .ts-dia i.n3 { background: color-mix(in srgb, var(--acc) 74%, var(--card2)); }
+/* Un día de actividad no es un día flojo de gimnasio: el verde cuenta series
+   y el azul dice que hubo movimiento sin ellas. Es el mismo color de la barra
+   de actividad del reparto, para que se lean como lo mismo. */
+.ts-dia i.act { background: var(--agua); }
+.ts-series.es-act { color: var(--agua); font-weight: 600; }
 .ts-dia i.n4 { background: var(--acc); }
 .ts-series { font-size: .68rem; color: var(--dim2);
   font-variant-numeric: tabular-nums; }

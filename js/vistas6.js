@@ -73,9 +73,12 @@
     const dias = porDia(r.dias);
     const dato = function (d) { return porSeries ? d.series : d.volumen; };
 
+    /* `act` marca el punto en el que hubo algo pero no series: la línea
+       sigue valiendo cero, que es la verdad, y el punto se pinta en azul para
+       que el día no parezca vacío. */
     if (r.paso === 'dia') {
       return dias.map(function (d) {
-        return { y: dato(d), etiqueta: UI.fechaCorta(d.t) };
+        return { y: dato(d), etiqueta: UI.fechaCorta(d.t), act: !dato(d) && d.n > 0 };
       });
     }
 
@@ -83,9 +86,11 @@
     const out = [];
     for (let i = 0; i < dias.length; i += 7) {
       const trozo = dias.slice(i, i + 7);
+      const suma = trozo.reduce(function (a2, d) { return a2 + dato(d); }, 0);
       out.push({
-        y: trozo.reduce(function (a2, d) { return a2 + dato(d); }, 0),
-        etiqueta: UI.fechaCorta(trozo[0].t)
+        y: suma,
+        etiqueta: UI.fechaCorta(trozo[0].t),
+        act: !suma && trozo.some(function (d) { return d.n > 0; })
       });
     }
     return out;
@@ -186,7 +191,8 @@
     const paso = puntos.length > 1 ? (W - P * 2) / (puntos.length - 1) : 0;
 
     const xy = puntos.map(function (p, i) {
-      return { x: P + i * paso, y: H - P - (p.y / max) * (H - P * 2), v: p.y, et: p.etiqueta };
+      return { x: P + i * paso, y: H - P - (p.y / max) * (H - P * 2), v: p.y,
+        et: p.etiqueta, act: !!p.act };
     });
 
     /* curva de Bézier entre puntos, que queda menos angulosa que las rectas */
@@ -209,7 +215,8 @@
         <path class="graf-area" d="${area}" fill="url(#gradGraf)"/>
         <path class="graf-linea" d="${d}"/>
         ${raw(xy.map(function (p) {
-          return '<circle class="graf-p" cx="' + p.x + '" cy="' + p.y + '" r="2.5"/>';
+          return '<circle class="graf-p' + (p.act ? ' graf-act' : '') +
+            '" cx="' + p.x + '" cy="' + p.y + '" r="' + (p.act ? 3.4 : 2.5) + '"/>';
         }).join(''))}
         <circle class="graf-ultimo" cx="${ultimo.x}" cy="${ultimo.y}" r="4.5"/>
       </svg>
@@ -434,6 +441,11 @@
     return d.n ? 1 : 0;
   }
 
+  /* Un día en el que hubo algo pero ninguna serie. Se pinta en azul, como la
+     barra de actividad del reparto: en verde parecía una semana floja de
+     gimnasio en vez de un día de otra cosa. */
+  function soloActividad(d) { return !d.series && d.n > 0; }
+
   /* Y debajo, lo que hubo: las series si las hubo, y si no los minutos, que es
      lo único que tiene una actividad. Un «0» bajo un cuadro verde no se
      entiende. */
@@ -449,8 +461,9 @@
       return '<div class="ts-dia' + (d.k === hoyKey ? ' hoy' : '') + '">' +
         '<span class="ts-letra">' + UI.inicialDia(f.getDay()) + '</span>' +
         '<span class="ts-num">' + f.getDate() + '</span>' +
-        '<i class="n' + nivelDia(d, max) + '"></i>' +
-        '<span class="ts-series">' + UI.esc(cifraDia(d)) + '</span>' +
+        '<i class="n' + nivelDia(d, max) + (soloActividad(d) ? ' act' : '') + '"></i>' +
+        '<span class="ts-series' + (soloActividad(d) ? ' es-act' : '') + '">' +
+          UI.esc(cifraDia(d)) + '</span>' +
         '</div>';
     }).join('') + '</div>';
   }
@@ -502,10 +515,14 @@
 
     const celdas = dias.map(function (d) {
       const nivel = nivelDia(d, max);
-      const titulo = UI.fechaCorta(d.t) + (d.series
-        ? ': ' + d.series + ' series' + (d.volumen ? ', ' + UI.kg(d.volumen) : '')
-        : ': descanso');
-      return '<i class="n' + nivel + (d.k === hoyKey ? ' hoy' : '') +
+      /* Decía «descanso» en cualquier día sin series, también en los que hubo
+         una actividad. Y estaba sin traducir. */
+      const titulo = UI.fechaCorta(d.t) + ': ' + (d.series
+        ? Tn('{n} series', { n: d.series }) + (d.volumen ? ', ' + UI.kg(d.volumen) : '')
+        : soloActividad(d) ? Tn('{n}′ de actividad', { n: d.minutos })
+        : T('descanso'));
+      return '<i class="n' + nivel + (soloActividad(d) ? ' act' : '') +
+        (d.k === hoyKey ? ' hoy' : '') +
         '" title="' + esc(titulo) + '"></i>';
     }).join('');
 

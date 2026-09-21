@@ -4135,6 +4135,10 @@
     'minutos de actividad': 'minutes of activity',
 
     /* ---------- El rótulo de la actividad ---------- */
-    'Actividad': 'Activity'
+    'Actividad': 'Activity',
+
+    /* ---------- El día de actividad en verde no, en azul ---------- */
+    '{n}′ de actividad': '{n}′ of activity',
+    'descanso': 'rest'
   };
 })(window);
