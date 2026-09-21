@@ -948,7 +948,23 @@
 
     /* ---------- la actividad en el reparto ---------- */
     'Lo que hiciste fuera del gimnasio sale debajo, en azul y en minutos, no sumado a las series. Un partido de fútbol trabaja la pierna, pero no son series: sumarlo te diría que estás más cerca de tu objetivo de pesas de lo que estás, que es justo lo que esta pantalla sirve para ver.':
-      'What you did outside the gym shows underneath, in blue and in minutes, not added to the sets. A football match works your legs, but those are not sets: adding them would tell you that you are closer to your lifting target than you are, which is exactly what this screen is for.'
+      'What you did outside the gym shows underneath, in blue and in minutes, not added to the sets. A football match works your legs, but those are not sets: adding them would tell you that you are closer to your lifting target than you are, which is exactly what this screen is for.',
+
+    /* ---------- llegar cargado de lo de fuera ---------- */
+    'Llegar cargado de lo de fuera':
+      'Arriving loaded from what you did outside',
+    'Lo que un partido o una caminata le hacen al entrenamiento de hoy':
+      'What a match or a long walk does to today’s session',
+    'Un partido o una subida al monte no dejan series, así que no cuentan en el reparto por zona: no hay forma honesta de decir cuántas series valen, y meterlos ahí te diría que estás más cerca de tu objetivo de pesas de lo que estás.':
+      'A match or a climb up the mountain leaves no sets, so they do not count in the breakdown by area: there is no honest way to say how many sets they are worth, and putting them there would tell you that you are closer to your lifting target than you are.',
+    'Pero sí dejan la pierna cargada, y eso sí cambia algo: cómo te sale el entrenamiento de hoy.':
+      'What they do leave is loaded legs, and that does change something: how today’s session goes.',
+    'Si en las *36 horas* anteriores apuntaste una actividad de *media hora o más* que trabaja los mismos músculos que te tocan hoy, la portada te lo dice debajo del botón de entrenar, con los minutos y las zonas.':
+      'If in the previous *36 hours* you logged an activity of *half an hour or more* that works the same muscles you are due to train today, the home screen tells you underneath the train button, with the minutes and the areas.',
+    'No es un regaño ni te quita nada: es un dato para que no te extrañe ir flojo. Si las notas pesadas, baja una serie por ejercicio o quita algo de peso. Rendir menos el día después de dos horas de fútbol es lo normal.':
+      'It is not a telling-off and it takes nothing away: it is there so that feeling weak does not surprise you. If they feel heavy, drop a set per exercise or take some weight off. Performing worse the day after two hours of football is normal.',
+    'Es una regla, no una opinión de la IA: se calcula con lo que tienes apuntado y funciona sin conexión.':
+      'It is a rule, not an AI opinion: it is worked out from what you have logged and works offline.'
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

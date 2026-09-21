@@ -158,6 +158,17 @@
       ],
       ver: ['g-plan', 'c-libre'] },
 
+    { id: 'g-carga', titulo: 'Llegar cargado de lo de fuera',
+      resumen: 'Lo que un partido o una caminata le hacen al entrenamiento de hoy',
+      cuerpo: [
+        'Un partido o una subida al monte no dejan series, así que no cuentan en el reparto por zona: no hay forma honesta de decir cuántas series valen, y meterlos ahí te diría que estás más cerca de tu objetivo de pesas de lo que estás.',
+        'Pero sí dejan la pierna cargada, y eso sí cambia algo: cómo te sale el entrenamiento de hoy.',
+        'Si en las *36 horas* anteriores apuntaste una actividad de *media hora o más* que trabaja los mismos músculos que te tocan hoy, la portada te lo dice debajo del botón de entrenar, con los minutos y las zonas.',
+        'No es un regaño ni te quita nada: es un dato para que no te extrañe ir flojo. Si las notas pesadas, baja una serie por ejercicio o quita algo de peso. Rendir menos el día después de dos horas de fútbol es lo normal.',
+        'Es una regla, no una opinión de la IA: se calcula con lo que tienes apuntado y funciona sin conexión.'
+      ],
+      ver: ['c-libre', 'g-reparto'] },
+
     { id: 'g-comida', titulo: 'El menú y el cruce de fotos',
       resumen: 'Cómo sabe la app si comiste lo previsto',
       cuerpo: [

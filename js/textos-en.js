@@ -4139,6 +4139,13 @@
 
     /* ---------- El día de actividad en verde no, en azul ---------- */
     '{n}′ de actividad': '{n}′ of activity',
-    'descanso': 'rest'
+    'descanso': 'rest',
+
+    /* ---------- El aviso de carga ---------- */
+    '{cuando} hiciste {min} min de actividad que cargan {zonas}. Si las notas pesadas, baja una serie por ejercicio o quita algo de peso: hoy vas a rendir menos y no pasa nada.':
+      '{cuando} you did {min} min of activity that loads {zonas}. If they feel heavy, drop a set per exercise or take some weight off: you will perform worse today and that is fine.',
+    'Sube a {peso}': 'Go up to {peso}',
+    'Baja a {peso}': 'Drop to {peso}',
+    'Repite {peso}': 'Stay at {peso}'
   };
 })(window);

@@ -7145,3 +7145,12 @@ html[data-theme="light"] .ag-ico {
 @media (prefers-reduced-motion: reduce){
   .instalar-aviso{transition:none;transform:none;opacity:1}
 }
+
+/* ---------- el aviso de carga ----------
+   Va pegado debajo del botón de entrenar, que es donde se decide. No es una
+   alarma —no has hecho nada mal— sino un dato que cambia lo de hoy, así que
+   lleva el azul de la actividad de la que viene y no el rojo de un error. */
+.aviso-carga{display:flex;gap:8px;align-items:flex-start;margin:9px 2px 0;
+  color:var(--dim);line-height:1.4}
+.aviso-carga svg{width:15px;height:15px;flex:none;margin-top:1px;
+  stroke:var(--agua);fill:none}

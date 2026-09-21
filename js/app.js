@@ -417,6 +417,33 @@
     return filas.slice(0, 3);
   }
 
+  /* Lo que dejó el fin de semana para la sesión de hoy.
+
+     Un partido no da series, así que no sale en el reparto; pero deja la pierna
+     cargada, y eso sí decide cómo entrenas hoy. Es lo único que de verdad
+     cambia, y por eso se dice aquí —en el sitio donde se decide entrenar— y no
+     en una pantalla de estadísticas. */
+  function cargaPreviaHTML(rutinasDeHoy) {
+    if (!g.Progresion || !Progresion.cargaPrevia) return '';
+    const c = Progresion.cargaPrevia(rutinasDeHoy);
+    if (!c) return '';
+
+    const zonas = c.zonas.map(function (id) {
+      const gr = I18N.GROUPS.filter(function (x) { return x.id === id; })[0];
+      return gr ? T(gr.label).toLowerCase() : id;
+    });
+
+    /* Sin raw(): esto es una cadena que se concatena, no una plantilla, y ahí
+       raw() devuelve un objeto que se pinta como [object Object]. */
+    return '<p class="aviso-carga tiny">' +
+      icon('chispa') +
+      '<span>' + esc(Tn('{cuando} hiciste {min} min de actividad que cargan ' +
+        '{zonas}. Si las notas pesadas, baja una serie por ejercicio o quita algo ' +
+        'de peso: hoy vas a rendir menos y no pasa nada.',
+        { cuando: c.ayer ? T('Ayer') : T('Hoy'), min: c.minutos,
+          zonas: listaDias(zonas) })) + '</span></p>';
+  }
+
   /* La semana de un vistazo: qué días había plan y cuáles se han cumplido. */
   function semanaHTML() {
     const orden = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -784,6 +811,7 @@
               : Tn('{n} rutinas para hoy: te dejo elegir', { n: deHoy.length })}</span>
           </span>
         </button>
+        ${raw(cargaPreviaHTML(deHoy))}
         <button class="enlace-flojo" data-a="empezarlibre">
           ${T('O un entrenamiento libre')}</button>`
       : html`

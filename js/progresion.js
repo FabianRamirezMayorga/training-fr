@@ -204,13 +204,84 @@
   /* La frase corta, la que cabe en una pastilla al lado del ejercicio */
   function etiqueta(s) {
     if (!s) return '';
-    if (s.estado === 'sube') return 'Sube a ' + UI.kg(s.peso);
-    if (s.estado === 'baja') return 'Baja a ' + UI.kg(s.peso);
-    return 'Repite ' + UI.kg(s.peso);
+    if (s.estado === 'sube') return Tn('Sube a {peso}', { peso: UI.kg(s.peso) });
+    if (s.estado === 'baja') return Tn('Baja a {peso}', { peso: UI.kg(s.peso) });
+    return Tn('Repite {peso}', { peso: UI.kg(s.peso) });
+  }
+
+  /* ---------- llegar cargado de lo de fuera ----------
+     Un partido o una subida al monte no dan series, y por eso no cuentan en el
+     reparto: no hay forma honesta de decir cuántas series valen. Pero sí dejan
+     la pierna cargada, y eso sí cambia algo, que es cómo sale el entrenamiento
+     de hoy.
+
+     Es una regla y no una opinión —actividad reciente cuyos músculos coinciden
+     con los de la sesión de hoy— así que va aquí, no por la IA: tiene que dar
+     lo mismo siempre y funcionar sin cobertura.
+
+     Treinta y seis horas porque es lo que dura la fatiga que se nota de verdad;
+     media hora de mínimo porque por debajo de eso no cambia nada. */
+  const HORAS_CARGA = 36;
+  const MINUTOS_CARGA = 30;
+
+  function zonaDe(m) {
+    if (!g.I18N) return '';
+    const gr = I18N.GROUPS.filter(function (x) {
+      return (x.muscles || []).indexOf(m) !== -1;
+    })[0];
+    return gr ? gr.id : '';
+  }
+
+  function musculosDeRutinas(rutinas) {
+    const fuera = [];
+    (rutinas || []).forEach(function (r) {
+      (r.exercises || []).forEach(function (e) {
+        const ex = g.Data ? Data.get(e.exId) : null;
+        if (!ex) return;
+        (ex.primaryMuscles || []).forEach(function (m) {
+          if (fuera.indexOf(m) === -1) fuera.push(m);
+        });
+      });
+    });
+    return fuera;
+  }
+
+  /* Devuelve {minutos, zonas, ayer} o null si no hay nada que avisar. */
+  function cargaPrevia(rutinas) {
+    if (!g.Store || !g.I18N) return null;
+    const hoy = musculosDeRutinas(rutinas);
+    if (!hoy.length) return null;
+
+    const desde = Date.now() - HORAS_CARGA * 3600000;
+    const zonas = [];
+    const dias = {};
+    let minutos = 0;
+
+    Store.sessions().forEach(function (s) {
+      if ((s.end || s.start) < desde) return;
+      /* Solo lo de fuera del gimnasio: lleva minutos y músculos, y ninguna
+         serie. Un entrenamiento de pesas ya se cuenta por su lado. */
+      const min = Number(s.minutos) || 0;
+      if (!min || !(s.musculos || []).length || s.setsDone) return;
+
+      const juntos = s.musculos.filter(function (m) { return hoy.indexOf(m) !== -1; });
+      if (!juntos.length) return;
+
+      minutos += min;
+      dias[Store.dayKey(s.start)] = true;
+      juntos.forEach(function (m) {
+        const z = zonaDe(m);
+        if (z && zonas.indexOf(z) === -1) zonas.push(z);
+      });
+    });
+
+    if (minutos < MINUTOS_CARGA || !zonas.length) return null;
+    return { minutos: minutos, zonas: zonas, ayer: !dias[Store.dayKey(Date.now())] };
   }
 
   g.Progresion = {
     sugerir: sugerir, etiqueta: etiqueta, zonaAvanza: zonaAvanza,
+    cargaPrevia: cargaPrevia,
     salto: salto, SALTOS_KG: SALTOS_KG, SALTOS_LB: SALTOS_LB
   };
 })(window);
