@@ -165,9 +165,10 @@
         'Pero sí dejan la pierna cargada, y eso sí cambia algo: cómo te sale el entrenamiento de hoy.',
         'Si en las *36 horas* anteriores apuntaste una actividad de *media hora o más* que trabaja los mismos músculos que te tocan hoy, la portada te lo dice debajo del botón de entrenar, con los minutos y las zonas.',
         'No es un regaño ni te quita nada: es un dato para que no te extrañe ir flojo. Si las notas pesadas, baja una serie por ejercicio o quita algo de peso. Rendir menos el día después de dos horas de fútbol es lo normal.',
-        'Es una regla, no una opinión de la IA: se calcula con lo que tienes apuntado y funciona sin conexión.'
+        'El aviso es una regla: se calcula con lo que tienes apuntado y funciona sin conexión.',
+        'Si tienes el entrenador puesto, detrás te añade *en azul* a cuántas series de gimnasio equivale, más o menos, lo que ya llevas encima. Eso sí es una opinión, y por eso va en otro color y no entra en el reparto ni en ninguna gráfica: no hay tabla que diga cuánto vale un partido, y meter ahí un número inventado ensuciaría la única cifra con la que comparas una semana con otra.'
       ],
-      ver: ['c-libre', 'g-reparto'] },
+      ver: ['c-libre', 'g-reparto', 'g-ia'] },
 
     { id: 'g-comida', titulo: 'El menú y el cruce de fotos',
       resumen: 'Cómo sabe la app si comiste lo previsto',
@@ -770,6 +771,12 @@
       a: ['Son una estimación calculada con tus datos —sexo, peso, altura, edad, actividad y objetivo— con las fórmulas habituales.',
         'Sirven como punto de partida, no como verdad absoluta: dos personas con los mismos números gastan distinto. Lo que manda es cómo responde tu peso a lo largo de varias semanas; si no se mueve como esperabas, ajusta.'],
       ver: ['g-comida'] },
+
+    { id: 'p-cargaseries', q: '¿Por qué la IA dice que lo de ayer son 6 series y no me las suma?',
+      a: ['Porque una cosa es hacerte una idea y otra apuntar un dato. Que el partido de ayer te deje la pierna cargada se sabe: lo trabajaste y está apuntado. Cuántas series de gimnasio vale ese partido no lo sabe nadie —depende de cómo jugaste— y la IA te da un número aproximado para que sepas con qué cuerpo llegas hoy.',
+        'Si ese número entrara en el reparto por zona, tu gráfica de pierna subiría sin que hayas hecho una sola serie, y la semana que juegues dos partidos parecería mejor que la que entrenaste de verdad. Dejarías de poder comparar una semana con otra, que es para lo único que sirve esa cifra.',
+        'Por eso va en otro color y en una frase suelta: es contexto para hoy, no un dato de tu historial.'],
+      ver: ['g-carga', 'g-reparto'] },
 
     { id: 'p-libras', q: '¿Puedo usar libras en vez de kilos?',
       a: ['Sí, en Ajustes. Y no es solo cambiar la etiqueta: los saltos de peso que te propone la app también cambian, porque en libras el gimnasio va de cinco en cinco.'],

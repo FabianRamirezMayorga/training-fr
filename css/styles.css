@@ -7154,3 +7154,8 @@ html[data-theme="light"] .ag-ico {
   color:var(--dim);line-height:1.4}
 .aviso-carga svg{width:15px;height:15px;flex:none;margin-top:1px;
   stroke:var(--agua);fill:none}
+/* Lo que añade la IA va en el mismo renglón pero en otro color: lo de arriba es
+   una regla que calcula la app y esto es una opinión, y quien lo lee tiene
+   derecho a saber cuál es cuál sin preguntar. */
+.aviso-carga .carga-ia{color:var(--agua)}
+.aviso-carga .carga-ia:empty{display:none}

@@ -2527,6 +2527,84 @@
     });
   }
 
+  /* ---------- a cuántas series equivale lo de fuera del gimnasio ----------
+     Que ayer hubo actividad que carga lo de hoy es un hecho: sale de comparar
+     dos listas de músculos y lo calcula una regla, en progresion.js. Cuánto
+     vale ese partido en series de gimnasio no lo es. No hay tabla que lo diga,
+     depende de cómo se jugó, y un número inventado metido en el reparto
+     ensuciaría la única cifra con la que de verdad se compara una semana con
+     otra.
+
+     Así que el número lo pone quien puede opinar, se enseña en una frase al
+     lado del aviso —contexto, no dato— y no entra en ninguna gráfica.
+
+     Se pregunta una vez y se guarda doce horas: esto es la portada, se abre
+     veinte veces al día y cada vuelta cuesta dinero de su clave. */
+  function estimarCarga(carga, sesion) {
+    if (!carga || !carga.minutos) return Promise.reject(new Error('No hay actividad que mirar.'));
+
+    const zonas = (carga.zonas || []).map(function (id) {
+      const gr = I18N.GROUPS.filter(function (x) { return x.id === id; })[0];
+      return gr ? gr.label.toLowerCase() : id;
+    });
+    const lista = (carga.actividades || []).filter(function (a) { return a.nombre; });
+
+    /* La clave lleva lo que se le cuenta —minutos, zonas y actividades— y el
+       idioma: al cambiar a inglés hay que volver a preguntar, o se queda en
+       pantalla la frase en español. */
+    const clave = 'carga1:' + Store.dayKey(Date.now()) + ':' + carga.minutos + ':' +
+      zonas.join(',') + ':' +
+      lista.map(function (a) { return a.nombre + a.min; }).join('|') + ':' +
+      (g.Idioma ? Idioma.actual() : 'es');
+    const guardado = leerCache(clave, 12);
+    if (guardado) return Promise.resolve(guardado);
+
+    const datos = g.Perfil ? Perfil.datos() : null;
+    const peso = Number(datos && datos.peso) || 0;
+
+    const prompt = [
+      (g.Idioma && Idioma.actual() === 'en')
+        ? 'RESPONDE EN INGLÉS: tiene la app puesta en inglés. Los datos de abajo ' +
+          'están en español porque así los guarda la app; entiéndelos, pero no le ' +
+          'contestes en español.'
+        : null,
+      'Eres su entrenador. En las últimas 36 horas ha hecho esto fuera del gimnasio:',
+      lista.length
+        ? lista.map(function (a) { return '- ' + a.nombre + ', ' + a.min + ' min'; }).join(SALTO)
+        : '- ' + carga.minutos + ' min de actividad',
+      '',
+      peso ? 'Pesa ' + peso + ' kg.' : null,
+      'Hoy le toca ' + (sesion ? '«' + sesion + '», que trabaja ' : 'una sesión que trabaja ') +
+        zonas.join(', ') + '.',
+      '',
+      'Dime a cuántas series de gimnasio de esas zonas equivale, más o menos, lo que ' +
+        'ya lleva encima. No es un dato exacto y no lo vamos a apuntar en ninguna ' +
+        'parte: es para que sepa con qué cuerpo llega hoy.',
+      '- "series": un entero de 0 a 25. Si eso no le deja cansancio que importe para ' +
+        'la sesión de hoy, pon 0 y dilo en la nota.',
+      '- "nota": UNA frase, veinte palabras como mucho, con qué hacer hoy con eso. Sin ' +
+        'adular, sin signos de exclamación, y sin repetirle los minutos ni las zonas: ' +
+        'los tiene delante en la misma línea.',
+      '',
+      'Devuelve JSON: {"series":número,"nota":""}'
+      /* null es «esta línea no toca» y '' es un renglón en blanco a propósito.
+         Con filter(Boolean) se iban los dos y le llegaba todo pegado. */
+    ].filter(function (l) { return l !== null; }).join(SALTO);
+
+    return llamarJSON(prompt, { maxTokens: 512, temperatura: 0.3 }).then(function (r) {
+      const n = Math.round(Number(r && r.series) || 0);
+      const fuera = {
+        series: Math.min(25, Math.max(0, n)),
+        nota: String((r && r.nota) || '').trim()
+      };
+      /* Sin número y sin frase no hay nada que enseñar, y guardarlo doce horas
+         sería quedarse con el fallo. */
+      if (!fuera.series && !fuera.nota) throw new Error('No ha dicho nada.');
+      escribirCache(clave, fuera);
+      return fuera;
+    });
+  }
+
   /* Lo mismo que la foto pero desde lo que uno escribe. Nadie sabe cuántas
      calorías tiene «arroz con fideos, lentejas y carne asada», y pedírselo era
      pedirle un dato que no tiene: o lo dejaba en blanco o se lo inventaba, y un
@@ -3053,7 +3131,7 @@
     analizarComida: analizarComida, estimarComida: estimarComida,
     analizarSuplementos: analizarSuplementos,
     revisarCambioComida: revisarCambioComida,
-    estimarActividad: estimarActividad,
+    estimarActividad: estimarActividad, estimarCarga: estimarCarga,
     leerRutina: leerRutina,
     playlistEntreno: playlistEntreno, AMBIENTES: AMBIENTES,
     memoriaMusical: memoriaMusical, recordarMusica: recordarMusica, olvidarMusica: olvidarMusica,

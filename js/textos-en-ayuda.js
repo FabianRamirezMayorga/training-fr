@@ -171,6 +171,14 @@
     'Si vuelvo a pulsar «Automáticas», ¿se me duplican las alertas?':
       'If I hit "Automatic" again, do my reminders get duplicated?',
     '¿Las calorías que me da son exactas?': 'Are the calories it gives me exact?',
+    '¿Por qué la IA dice que lo de ayer son 6 series y no me las suma?':
+      'Why does the AI say yesterday was 6 sets and then not add them up?',
+    'Porque una cosa es hacerte una idea y otra apuntar un dato. Que el partido de ayer te deje la pierna cargada se sabe: lo trabajaste y está apuntado. Cuántas series de gimnasio vale ese partido no lo sabe nadie —depende de cómo jugaste— y la IA te da un número aproximado para que sepas con qué cuerpo llegas hoy.':
+      'Because getting an idea of something is one thing and logging a figure is another. That yesterday\u2019s match left your legs loaded is known: you worked them and it is logged. How many gym sets that match is worth nobody knows —it depends on how you played— and the AI gives you a rough number so you know what body you are turning up with today.',
+    'Si ese número entrara en el reparto por zona, tu gráfica de pierna subiría sin que hayas hecho una sola serie, y la semana que juegues dos partidos parecería mejor que la que entrenaste de verdad. Dejarías de poder comparar una semana con otra, que es para lo único que sirve esa cifra.':
+      'If that number went into the split by area, your leg chart would go up without you having done a single set, and the week you play two matches would look better than the one you actually trained. You would no longer be able to compare one week against another, which is the only thing that figure is for.',
+    'Por eso va en otro color y en una frase suelta: es contexto para hoy, no un dato de tu historial.':
+      'That is why it is a different colour and a sentence of its own: it is context for today, not a figure in your history.',
     '¿Puedo usar libras en vez de kilos?': 'Can I use pounds instead of kilos?',
     '¿Por qué me pide actualizar tan a menudo?': 'Why does it ask me to update so often?',
 
@@ -963,8 +971,10 @@
       'If in the previous *36 hours* you logged an activity of *half an hour or more* that works the same muscles you are due to train today, the home screen tells you underneath the train button, with the minutes and the areas.',
     'No es un regaño ni te quita nada: es un dato para que no te extrañe ir flojo. Si las notas pesadas, baja una serie por ejercicio o quita algo de peso. Rendir menos el día después de dos horas de fútbol es lo normal.':
       'It is not a telling-off and it takes nothing away: it is there so that feeling weak does not surprise you. If they feel heavy, drop a set per exercise or take some weight off. Performing worse the day after two hours of football is normal.',
-    'Es una regla, no una opinión de la IA: se calcula con lo que tienes apuntado y funciona sin conexión.':
-      'It is a rule, not an AI opinion: it is worked out from what you have logged and works offline.'
+    'El aviso es una regla: se calcula con lo que tienes apuntado y funciona sin conexión.':
+      'The warning is a rule: it is worked out from what you have logged and works offline.',
+    'Si tienes el entrenador puesto, detrás te añade *en azul* a cuántas series de gimnasio equivale, más o menos, lo que ya llevas encima. Eso sí es una opinión, y por eso va en otro color y no entra en el reparto ni en ninguna gráfica: no hay tabla que diga cuánto vale un partido, y meter ahí un número inventado ensuciaría la única cifra con la que comparas una semana con otra.':
+      'If you have the AI coach set up, after it you get *in blue* roughly how many gym sets what you already have on you is worth. That one is an opinion, which is why it is a different colour and never enters the split or any chart: no table says what a football match is worth, and putting a made-up number in there would spoil the one figure you compare one week against another with.'
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

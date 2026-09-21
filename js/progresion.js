@@ -246,7 +246,7 @@
     return fuera;
   }
 
-  /* Devuelve {minutos, zonas, ayer} o null si no hay nada que avisar. */
+  /* Devuelve {minutos, zonas, ayer, actividades} o null si no hay que avisar. */
   function cargaPrevia(rutinas) {
     if (!g.Store || !g.I18N) return null;
     const hoy = musculosDeRutinas(rutinas);
@@ -255,6 +255,7 @@
     const desde = Date.now() - HORAS_CARGA * 3600000;
     const zonas = [];
     const dias = {};
+    const actividades = [];
     let minutos = 0;
 
     Store.sessions().forEach(function (s) {
@@ -269,6 +270,10 @@
 
       minutos += min;
       dias[Store.dayKey(s.start)] = true;
+      /* El nombre tal cual lo escribió él. «Jugué fútbol» dice bastante más que
+         «deporte de equipo, 90 min» a quien luego tenga que estimar lo que costó,
+         y el que estima es el entrenador, no la app. */
+      actividades.push({ nombre: String(s.routineName || '').trim(), min: min });
       juntos.forEach(function (m) {
         const z = zonaDe(m);
         if (z && zonas.indexOf(z) === -1) zonas.push(z);
@@ -276,7 +281,8 @@
     });
 
     if (minutos < MINUTOS_CARGA || !zonas.length) return null;
-    return { minutos: minutos, zonas: zonas, ayer: !dias[Store.dayKey(Date.now())] };
+    return { minutos: minutos, zonas: zonas, actividades: actividades,
+      ayer: !dias[Store.dayKey(Date.now())] };
   }
 
   g.Progresion = {

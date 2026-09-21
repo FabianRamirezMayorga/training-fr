@@ -424,6 +424,7 @@
      cambia, y por eso se dice aquí —en el sitio donde se decide entrenar— y no
      en una pantalla de estadísticas. */
   function cargaPreviaHTML(rutinasDeHoy) {
+    cargaDeHoy = null;
     if (!g.Progresion || !Progresion.cargaPrevia) return '';
     const c = Progresion.cargaPrevia(rutinasDeHoy);
     if (!c) return '';
@@ -433,6 +434,15 @@
       return gr ? T(gr.label).toLowerCase() : id;
     });
 
+    /* Se guarda lo que ya se ha pintado para que el añadido de la IA, que llega
+       después del render, hable de lo mismo y con las mismas palabras. El nombre
+       va antes que la zona: «hoy le toca pecho, que trabaja pecho» no le dice
+       nada a quien tiene que estimar, y «Fabian PPL · pecho» sí dice qué clase
+       de sesión es. */
+    const suya = rutinasDeHoy.length === 1 ? String(rutinasDeHoy[0].name || '').trim() : '';
+    cargaDeHoy = { carga: c, zonas: listaDias(zonas),
+      sesion: suya || queEsHoy(rutinasDeHoy) };
+
     /* Sin raw(): esto es una cadena que se concatena, no una plantilla, y ahí
        raw() devuelve un objeto que se pinta como [object Object]. */
     return '<p class="aviso-carga tiny">' +
@@ -441,7 +451,45 @@
         '{zonas}. Si las notas pesadas, baja una serie por ejercicio o quita algo ' +
         'de peso: hoy vas a rendir menos y no pasa nada.',
         { cuando: c.ayer ? T('Ayer') : T('Hoy'), min: c.minutos,
-          zonas: listaDias(zonas) })) + '</span></p>';
+          zonas: listaDias(zonas) })) +
+      /* Hueco vacío: el aviso de regla sale ya, y la estimación se cuela aquí
+         cuando conteste la IA. Si no hay entrenador puesto o falla, no se nota
+         nada, que es como tiene que ser algo opcional. */
+      '<span class="carga-ia" id="carga-ia"></span>' +
+      '</span></p>';
+  }
+
+  /* Lo último que se pintó del aviso de carga: {carga, zonas, sesion} o null. */
+  let cargaDeHoy = null;
+
+  /* Mientras se espera respuesta no se vuelve a preguntar: la portada se pinta
+     dos veces seguidas al arrancar —la frase del entrenador llega y obliga a
+     otro render— y sin esto salían dos llamadas, que en su clave son dos veces
+     lo que cuesta. La caché no lo evita porque aún no ha contestado nadie. */
+  let pidiendoCargaIA = false;
+
+  function pintarCargaIA(root) {
+    const hueco = root.querySelector('#carga-ia');
+    if (!hueco || !cargaDeHoy || pidiendoCargaIA) return;
+    if (!g.IA || !IA.activa || !IA.activa() || !IA.estimarCarga) return;
+
+    const lo = cargaDeHoy;
+    pidiendoCargaIA = true;
+    IA.estimarCarga(lo.carga, lo.sesion).then(function (r) {
+      const partes = [];
+      /* Cero series es una respuesta válida —un paseo largo no carga una sesión
+         de pecho— y entonces solo vale lo que diga la frase. */
+      if (r.series) {
+        partes.push(Tn('La IA lo estima en unas {n} series de {zonas} ya hechas.',
+          { n: r.series, zonas: lo.zonas }));
+      }
+      if (r.nota) partes.push(r.nota);
+      if (!partes.length) return;
+      /* textContent y no innerHTML: esto viene de fuera y no se pinta como
+         código por mucho que lo parezca. */
+      hueco.textContent = ' ' + partes.join(' ');
+    }).catch(function () { /* sin clave, sin red o sin cuota: el aviso vale solo */ })
+      .then(function () { pidiendoCargaIA = false; });
   }
 
   /* La semana de un vistazo: qué días había plan y cuáles se han cumplido. */
@@ -1524,13 +1572,15 @@
       if (deHoy.length === 1) { empezar(deHoy[0].id); return; }
 
       UI.modal(html`
-        <h2>¿Cuál de las de hoy?</h2>
-        <p class="muted">Tienes ${deHoy.length} rutinas puestas para ${UI.diaLargo(hoy).toLowerCase()}.</p>
+        <h2>${T('¿Cuál de las de hoy?')}</h2>
+        <p class="muted">${Tn('Tienes {n} rutinas puestas para {dia}.',
+          { n: deHoy.length, dia: UI.diaLargo(hoy).toLowerCase() })}</p>
         <div class="list">
           ${raw(deHoy.map(function (r) {
             return '<div class="list-row tap" data-elige="' + esc(r.id) + '">' +
               '<div class="grow"><div class="list-row-title">' + esc(tituloRutina(r)) + '</div>' +
-              '<div class="list-row-sub">' + r.exercises.length + ' ejercicios</div></div>' +
+              '<div class="list-row-sub">' +
+                esc(Tp(r.exercises.length, '{n} ejercicio', '{n} ejercicios')) + '</div></div>' +
               '<span class="chevron">' + icon('chevron') + '</span></div>';
           }).join(''))}
         </div>`,
@@ -1561,6 +1611,8 @@
     bind(root, '[data-a=irperfil]', function () { go('perfil'); });
     bind(root, '[data-a=apuntar]', apuntarActividad);
     bindTarjetaRutina(root);
+
+    pintarCargaIA(root);
 
     /* La frase se pide una vez por sesión de la app y se queda. Si falla o no
        hay entrenador, la portada vale igual: se queda la línea de siempre. */
