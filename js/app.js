@@ -1865,9 +1865,24 @@
       return a.concat(gr.muscles);
     }, []);
 
-    const pildora = function (attr, valor, texto, activo) {
-      return '<button class="chip ' + (activo ? 'on' : '') + '" data-' + attr + '="' +
-        esc(valor) + '">' + esc(texto) + '</button>';
+    /* Una opción de una lista de una sola elección. La fila entera se toca y la
+       puesta lleva su marca a la derecha.
+
+       Eran píldoras. Con diez tipos de trabajo y trece materiales eso son tres
+       y cuatro renglones de burbujas por grupo, y la hoja de filtrar no cabía
+       en la pantalla. Y encendida o apagada una píldora se distingue solo por
+       el color, que en un grupo de trece se convierte en buscar cuál era. */
+    const opcion = function (attr, valor, texto, activo) {
+      return '<button class="filtro-op' + (activo ? ' on' : '') + '" data-' + attr + '="' +
+        esc(valor) + '"><span class="grow">' + esc(texto) + '</span>' +
+        '<span class="filtro-tick">' + icon('check') + '</span></button>';
+    };
+
+    /* Lo que dice la fila plegada: el valor puesto, para no tener que abrirla
+       para saberlo. */
+    const etiquetaTipo = function (id) {
+      const t = Data.TIPOS.filter(function (x) { return x.id === id; })[0];
+      return t ? T(t.label) : T('Todo');
     };
 
     const tituloGrupo = function (t) {
@@ -1885,13 +1900,25 @@
         }).join(''))}
       </div>
 
-      ${raw(tituloGrupo(T('TIPO DE TRABAJO')))}
-      <div class="row wrap" style="gap:6px">
-        ${raw(pildora('f-tipo', '', T('Todo'), !exFilters.tipo))}
-        ${raw(Data.TIPOS.map(function (t) {
-          return pildora('f-tipo', t.id, T(t.label), exFilters.tipo === t.id);
-        }).join(''))}
-      </div>
+      <!-- Los tres, plegados y con su valor a la derecha. Antes «Tipo de
+           trabajo» iba suelto y siempre abierto, y los otros dos se abrían a
+           una pared de burbujas: entre los tres llenaban la pantalla y había
+           que rodar para llegar al botón de ver. -->
+      <details class="plegable-fino filtro-mas" data-mas="tipo">
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="grow">${T('Tipo de trabajo')}</span>
+          <span class="tiny nowrap" data-valor="tipo"></span>
+        </summary>
+        <div class="fino-cuerpo">
+          <div class="filtro-lista">
+            ${raw(opcion('f-tipo', '', T('Todo'), !exFilters.tipo))}
+            ${raw(Data.TIPOS.map(function (t) {
+              return opcion('f-tipo', t.id, T(t.label), exFilters.tipo === t.id);
+            }).join(''))}
+          </div>
+        </div>
+      </details>
 
       <details class="plegable-fino filtro-mas" data-mas="eq">
         <summary>
@@ -1900,10 +1927,10 @@
           <span class="tiny nowrap" data-valor="eq"></span>
         </summary>
         <div class="fino-cuerpo">
-          <div class="row wrap" style="gap:6px">
-            ${raw(pildora('f-eq', '', T('Todo'), !exFilters.equipment))}
+          <div class="filtro-lista">
+            ${raw(opcion('f-eq', '', T('Todo'), !exFilters.equipment))}
             ${raw(equipos.map(function (k) {
-              return pildora('f-eq', k, I18N.equip(k), exFilters.equipment === k);
+              return opcion('f-eq', k, I18N.equip(k), exFilters.equipment === k);
             }).join(''))}
           </div>
         </div>
@@ -1916,10 +1943,10 @@
           <span class="tiny nowrap" data-valor="lv"></span>
         </summary>
         <div class="fino-cuerpo">
-          <div class="row wrap" style="gap:6px">
-            ${raw(pildora('f-lv', '', T('Cualquiera'), !exFilters.level))}
+          <div class="filtro-lista">
+            ${raw(opcion('f-lv', '', T('Cualquiera'), !exFilters.level))}
             ${raw(Object.keys(I18N.LEVEL).map(function (k) {
-              return pildora('f-lv', k, I18N.level(k), exFilters.level === k);
+              return opcion('f-lv', k, I18N.level(k), exFilters.level === k);
             }).join(''))}
           </div>
         </div>
@@ -1976,6 +2003,7 @@
               (b.dataset.fGrp || '') === (exFilters.group || ''));
           });
 
+          el.querySelector('[data-valor="tipo"]').textContent = etiquetaTipo(exFilters.tipo);
           el.querySelector('[data-valor="eq"]').textContent =
             exFilters.equipment ? I18N.equip(exFilters.equipment) : T('Todo');
           el.querySelector('[data-valor="lv"]').textContent =

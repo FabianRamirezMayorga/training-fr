@@ -918,7 +918,7 @@
     'Filtrar': 'Filter',
     'ZONA DEL CUERPO': 'AREA OF THE BODY',
     'Todas': 'All',
-    'TIPO DE TRABAJO': 'TYPE OF WORK',
+    'Tipo de trabajo': 'Type of work',
     'Material': 'Equipment',
     'Nivel': 'Level',
     'Cualquiera': 'Any',

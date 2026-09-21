@@ -1998,7 +1998,37 @@ html[data-theme="light"] .zona-tile .pri { opacity: .45; }
   letter-spacing: 0; font-size: .92rem; font-weight: 600;
 }
 .filtro-mas > summary .tiny { color: var(--dim); }
-.filtro-mas > .fino-cuerpo { padding: 10px 2px 0; }
+.filtro-mas > .fino-cuerpo { padding: 10px 0 0; }
+
+/* ---------- elegir una de muchas, en la hoja de filtrar ----------
+   Eran píldoras. Con diez tipos de trabajo y trece materiales salían tres y
+   cuatro renglones de burbujas por grupo, la hoja no cabía en la pantalla, y
+   una píldora encendida se distingue de una apagada solo por el color: en un
+   grupo de trece eso es buscar cuál tenías puesta cada vez que abres.
+
+   Una lista con su marca se lee de una pasada, y plegada ocupa un renglón con
+   el valor a la derecha, que es lo que uno quiere saber sin abrir nada. */
+.filtro-lista {
+  display: flex; flex-direction: column;
+  border-radius: var(--r-s); overflow: hidden;
+  background: var(--card2); border: 1px solid var(--line);
+}
+.filtro-op {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 11px 13px; border: 0; background: none; color: var(--txt);
+  font: inherit; font-size: .9rem; text-align: left; cursor: pointer;
+  border-bottom: 1px solid var(--line);
+}
+.filtro-op:last-child { border-bottom: 0; }
+.filtro-op:active { background: color-mix(in srgb, var(--acc) 12%, transparent); }
+.filtro-op.on { color: var(--acc); font-weight: 600; }
+/* La marca ocupa su sitio siempre, encendida o no: si apareciera y desapareciera
+   el texto de todas las filas bailaría al cambiar de opción. */
+.filtro-tick { display: flex; flex: none; width: 17px; opacity: 0;
+  transition: opacity .14s ease; }
+.filtro-op.on .filtro-tick { opacity: 1; }
+.filtro-tick svg { width: 17px; height: 17px; fill: none; stroke: currentColor;
+  stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Lo que es si o no se pregunta con un conmutador, no con una pildora que hay
    que adivinar si esta encendida. */
