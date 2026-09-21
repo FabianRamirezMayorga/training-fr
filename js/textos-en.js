@@ -1713,7 +1713,6 @@
 
     /* ---------- Programa: el asistente ---------- */
     'Generar uno nuevo': 'Generate a new one',
-    'Corregir mis datos': 'Fix my details',
     '{n} día': '{n} day',
     '{n} días': '{n} days',
     'Solo vale para este plan; no cambia el catálogo del resto de la app.':
@@ -1723,9 +1722,11 @@
     'En minutos, entre 20 y 180.': 'In minutes, between 20 and 180.',
     'Escribir los minutos': 'Type the minutes',
     'Tu objetivo': 'Your goal',
-    'Sexo': 'Sex',
-    'Peso y altura': 'Weight and height',
     'Duerme': 'Sleeps',
+    'Corregir': 'Fix',
+    '{n} h de sueño': '{n} h of sleep',
+    'Si algo no cuadra, corrígelo antes de generar.':
+      'If something looks wrong, fix it before you generate.',
     '{n} h': '{n} h',
     'Priorizar una zona': 'Prioritise an area',
     '¿ALGO TE MOLESTA AHORA MISMO?': 'ANYTHING BOTHERING YOU RIGHT NOW?',
@@ -1739,8 +1740,6 @@
     'Ej. nada de peso muerto; empieza siempre por dominadas; que el viernes no pase de 40 minutos; mete abdomen todos los días':
       'E.g. no deadlifts; always start with pull-ups; keep Friday under 40 minutes; put abs in every day',
     'Tus datos': 'Your details',
-    'Son los que usa el plan para el volumen, las repeticiones y el esfuerzo. Si algo no cuadra, corrígelo antes de generar.':
-      'These are what the plan uses for volume, reps and effort. If something doesn\'t look right, fix it before generating.',
     '¿Cuándo puedes entrenar?': 'When can you train?',
     'Ponlo realista: es mejor un plan de tres días que cumples que uno de cinco que no.':
       'Be realistic: a three-day plan you stick to beats a five-day one you don\'t.',

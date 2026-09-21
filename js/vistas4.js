@@ -537,13 +537,20 @@
         'que proponga sobre estas mismas rutinas.')}</p>` : '')}`;
   }
 
-  function paso(n, titulo, cuerpo, nota) {
+  /* `cabecera` va en la misma línea del título. Lo pide el botón de corregir
+     los datos: al lado del texto se comían el ancho entre los dos y el perfil
+     salía en tres renglones, y arriba está donde se busca lo que actúa sobre
+     el paso entero. */
+  function paso(n, titulo, cuerpo, nota, cabecera) {
     return html`
       <div class="card paso-plan">
         <div class="row" style="align-items:flex-start;gap:11px">
           <span class="paso-n">${n}</span>
           <div class="grow">
-            <b>${titulo}</b>
+            <div class="row between" style="gap:10px;align-items:center">
+              <b class="grow">${titulo}</b>
+              ${raw(cabecera || '')}
+            </div>
             ${raw(cuerpo)}
             ${raw(nota ? '<p class="tiny" style="margin:10px 0 0">' + nota + '</p>' : '')}
           </div>
@@ -561,24 +568,29 @@
     const p = Perfil.datos();
     const nivel = nivelesDe();
 
-    /* Los datos, con su nombre delante. Eran cinco burbujas sueltas y había
-       que adivinar qué era cada una: «68 kg · 175 cm» se entiende, pero «7 h»
-       podía ser cualquier cosa y «Intermedio» no decía intermedio de qué. */
-    const filaDato = function (et, valor) {
-      return '<div class="dato-fila"><span class="dato-et">' + esc(et) + '</span>' +
-        '<span class="dato-val">' + esc(valor) + '</span></div>';
-    };
+    /* Una línea y un botón. Este paso no enseña nada nuevo —son sus propios
+       datos, se los sabe—: está para mirarlos de reojo antes de generar y
+       corregir si algo baila. Cinco filas con su rótulo eran media pantalla
+       para eso.
 
+       En fila y separados por puntos se leen igual, porque cada valor lleva su
+       unidad pegada: «34 años», «80 kg», «8 h de sueño». El único sin
+       unidad es el nivel, y ese no la necesita. */
     const datos = html`
-      <div class="dato-lista">
-        ${raw(filaDato(T('Sexo'), p.sexo === 'mujer' ? T('Mujer') : T('Hombre')))}
-        ${raw(filaDato(T('Edad'), Tn('{n} años', { n: p.edad })))}
-        ${raw(filaDato(T('Peso y altura'), p.peso + ' kg · ' + p.altura + ' cm'))}
-        ${raw(filaDato(T('Nivel'), nivel[p.experiencia] || T('Intermedio')))}
-        ${raw(filaDato(T('Duerme'), Tn('{n} h', { n: p['sue\u00f1o'] })))}
-      </div>
-      <button class="btn sm block" data-a="editarperfil" style="margin-top:11px">
-        ${T('Corregir mis datos')}</button>`;
+      <div class="dato-linea">
+        <p>${raw([
+          p.sexo === 'mujer' ? T('Mujer') : T('Hombre'),
+          Tn('{n} años', { n: p.edad }),
+          p.peso + ' kg',
+          p.altura + ' cm',
+          nivel[p.experiencia] || T('Intermedio'),
+          Tn('{n} h de sueño', { n: p['sue\u00f1o'] })
+        ].map(function (x) {
+          /* Cada dato entero o nada: sin esto se partía en «178» y «cm» en dos
+             renglones, y un número separado de su unidad no es un dato. */
+          return '<span class="nowrap">' + esc(x) + '</span>';
+        }).join(' · '))}</p>
+      </div>`;
 
     const cuando = html`
       <div class="row between" style="margin:9px 0 7px">
@@ -704,8 +716,8 @@
       </div>
 
       ${raw(paso(1, T('Tus datos'), datos,
-        T('Son los que usa el plan para el volumen, las repeticiones y el esfuerzo. ' +
-        'Si algo no cuadra, corrígelo antes de generar.')))}
+        T('Si algo no cuadra, corrígelo antes de generar.'),
+        '<button class="btn sm" data-a="editarperfil">' + esc(T('Corregir')) + '</button>'))}
       ${raw(paso(2, T('¿Cuándo puedes entrenar?'), cuando,
         T('Ponlo realista: es mejor un plan de tres días que cumples que uno de cinco ' +
         'que no.')))}

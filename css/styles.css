@@ -2788,16 +2788,14 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .segmento .seg-lapiz { display: flex; align-items: center; justify-content: center; }
 
 /* ---------- los datos del perfil, en el generador ----------
-   Eran cinco burbujas sueltas y había que adivinar qué era cada una: «68 kg ·
-   175 cm» se entiende solo, pero «7 h» podía ser cualquier cosa e «Intermedio»
-   no decía intermedio de qué. Con el nombre delante no hay nada que adivinar. */
-.dato-lista { margin-top: 10px; border-radius: var(--r-s); overflow: hidden;
-  background: var(--card2); border: 1px solid var(--line); }
-.dato-fila { display: flex; align-items: baseline; gap: 12px;
-  padding: 9px 13px; border-bottom: 1px solid var(--line); font-size: .88rem; }
-.dato-fila:last-child { border-bottom: 0; }
-.dato-et { flex: none; color: var(--dim); }
-.dato-val { flex: 1; min-width: 0; text-align: right; font-weight: 600; }
+   Este paso no enseña nada nuevo: son sus propios datos y se los sabe. Está
+   para mirarlos de reojo antes de generar y corregirlos si algo baila, así que
+   una lista de cinco filas con su rótulo era media pantalla para nada.
+
+   Una línea que envuelve y el botón al lado, alineado arriba: con dos renglones
+   de datos, centrarlo lo dejaba flotando en medio de la nada. */
+.dato-linea { margin-top: 7px; }
+.dato-linea p { margin: 0; font-size: .86rem; line-height: 1.45; color: var(--dim); }
 
 /* La diferencia con el periodo anterior. Verde si sube, ambar si baja —rojo
    seria un error, y bajar el volumen una semana no lo es—. */
