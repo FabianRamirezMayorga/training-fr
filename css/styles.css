@@ -1803,7 +1803,11 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .ps-letra { font-size: .6rem; font-weight: 700; color: var(--dim2);
   text-transform: uppercase; letter-spacing: .03em; }
 .ps-dia.es-hoy .ps-letra { color: var(--acc); }
-.ps-num { font-size: .95rem; font-weight: 700; font-variant-numeric: tabular-nums;
+/* El número es lo que se viene a leer, así que manda en la ficha: los puntos
+   se miran de reojo para ver si están encendidos y el número se lee. Al bajar
+   los puntos a cinco píxeles se quedó pequeño sin haberlo tocado —era el mismo
+   .95rem de siempre—, porque lo que hace grande a algo es lo que tiene al lado. */
+.ps-num { font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums;
   line-height: 1.15; }
 /* El número habla solo del entreno —la proteína y el agua tienen su punto— y
    tiene tres estados: verde el día que se entrenó, rojo el que tocaba y no se
