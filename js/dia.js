@@ -442,6 +442,11 @@
   /* Las cuentas de los siete días, sin nada de pintar: la portada usa la tira
      y esta pantalla usa el cajón entero, y las dos cuentan igual porque cuentan
      aquí. */
+  /* Treinta y no siete: la tira se desplaza, así que el alto de la tarjeta ya no
+     manda cuántos días caben, y un mes cuenta una historia que una semana no.
+     Siete días eran los que cabían, no los que hacían falta. */
+  const DIAS_PLAN = 30;
+
   function datosPlan(m) {
     if (!m || !g.Comidas) return null;
 
@@ -461,7 +466,7 @@
     });
     const hayPlanDeDias = Object.keys(tocaEntrenar).length > 0;
 
-    for (let i = 6; i >= 0; i--) {
+    for (let i = DIAS_PLAN - 1; i >= 0; i--) {
       const t = Date.now() - i * 86400000;
       const clave = Comidas.claveDia(t);
       const lista = Comidas.del(clave);
@@ -555,10 +560,10 @@
 
     return plegable({
       id: 'plan', titulo: 'Cómo voy con el plan', marca: 'grafica', tono: '#c06bf0',
-      progreso: { hecho: d.salieron, total: 7 },
-      cola: Tn('{n} de 7 días', { n: d.salieron }),
-      sub: T('Los últimos siete días: si entrenaste, si llegaste a la proteína y si ' +
-        'bebiste el agua.') + ' ' +
+      progreso: { hecho: d.salieron, total: DIAS_PLAN },
+      cola: Tn('{n} de {total} días', { n: d.salieron, total: DIAS_PLAN }),
+      sub: Tn('Los últimos {n} días: si entrenaste, si llegaste a la proteína y si ' +
+        'bebiste el agua.', { n: DIAS_PLAN }) + ' ' +
         Tn('Llevas {hechas} de {pedidas}.', { hechas: d.hechas, pedidas: d.pedidas }),
       cuerpo: html`<div class="card tarjeta-premium">${raw(tiraPlanHTML(d.dias, true))}</div>`
     });
@@ -571,24 +576,16 @@
     const m = Perfil.completo(p) ? Perfil.macros(p) : null;
     const d = datosPlan(m);
     if (!d) return null;
-    return { html: tiraPlanHTML(d.dias), salieron: d.salieron };
+    return { html: tiraPlanHTML(d.dias), salieron: d.salieron, total: DIAS_PLAN };
   };
 
   V.dia.mount = function (root) {
     /* Marcar comidas y agua lo lleva su módulo, el mismo que en Alimentación */
     if (g.Marcar) Marcar.bind(root);
 
-    /* La tira empieza por el final: hoy es el último día y es el que se mira,
-       y una tira que se desplaza y arranca por el lunes de hace una semana
-       esconde justo lo que se ha venido a ver.
-
-       En el fotograma siguiente y no ahora: aquí la tarjeta todavía no está
-       medida, y scrollLeft sobre algo de ancho cero se queda en cero. */
-    requestAnimationFrame(function () {
-      root.querySelectorAll('.plan-sem').forEach(function (t) {
-        t.scrollLeft = t.scrollWidth;
-      });
-    });
+    /* Siempre abierta por hoy, también al volver de otra pestaña: dónde se
+       dejó el desplazamiento la última vez no le importa a nadie. */
+    root.querySelectorAll('.plan-sem').forEach(UI.alFinal);
 
     /* Qué cajones quedan abiertos. Marcar una comida o un vaso repinta la
        pantalla, y sin esto se te cerraría el cajón en el que estabas justo al

@@ -600,9 +600,12 @@
       <div class="card inicio-compacta semana-caja portada-titulo tarjeta-premium"
            data-a="verprogreso" role="button" tabindex="0">
         <div class="row between" style="margin-bottom:6px">
-          <span class="pre-encima">${T('Tu semana')}</span>
+          <!-- «Tu semana» con treinta días dentro era mentira. «Constancia» es
+               además la palabra que ya usa Progreso para esto mismo. -->
+          <span class="pre-encima">${tira ? T('Tu constancia') : T('Tu semana')}</span>
           <span class="tiny nowrap">${tira
-            ? Tn('{n} de 7 días', { n: tira.salieron }) : frase}</span>
+            ? Tn('{n} de {total} días', { n: tira.salieron, total: tira.total })
+            : frase}</span>
         </div>
         ${raw(tira ? tira.html : '<div class="semana">' + celdas + '</div>')}
       </div>`;
@@ -1666,17 +1669,9 @@
     bind(root, '[data-a=apuntar]', apuntarActividad);
     bindTarjetaRutina(root);
 
-    /* La tira empieza por el final: hoy es el último día y es el que se mira,
-       y una tira que se desplaza y arranca por el lunes de hace una semana
-       esconde justo lo que se ha venido a ver.
-
-       En el fotograma siguiente y no ahora: aquí la tarjeta todavía no está
-       medida, y scrollLeft sobre algo de ancho cero se queda en cero. */
-    requestAnimationFrame(function () {
-      root.querySelectorAll('.plan-sem').forEach(function (t) {
-        t.scrollLeft = t.scrollWidth;
-      });
-    });
+    /* Siempre abierta por hoy, también al volver de otra pestaña: dónde se
+       dejó el desplazamiento la última vez no le importa a nadie. */
+    root.querySelectorAll('.plan-sem').forEach(UI.alFinal);
 
     pintarCargaIA(root);
 

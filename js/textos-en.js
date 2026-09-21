@@ -433,6 +433,9 @@
     'Carga': 'Load',
     'Ojo': 'Watch out',
     'No ha dicho nada.': 'It said nothing.',
+    '{n} de {total} días': '{n} of {total} days',
+    'Los últimos {n} días: si entrenaste, si llegaste a la proteína y si bebiste el agua.':
+      'The last {n} days: whether you trained, whether you hit your protein and whether you drank your water.',
     'Apuntar algo que ya hice': 'Log something I already did',
     'Caminar una hora el domingo o la pachanga del sábado cuentan igual, aunque no salgan de una rutina.':
       'An hour walking on Sunday or Saturday kickabout count the same, even if they come from no routine.',
@@ -556,6 +559,7 @@
     'Un punto por día': 'One dot per day',
     'Un punto por semana': 'One dot per week',
     'Constancia': 'Consistency',
+    'Tu constancia': 'Your consistency',
     'Días entrenados': 'Days trained',
     'de {n}': 'of {n}',
     'El número de abajo son las series de ese día.': "The number below is that day's sets.",
@@ -2796,9 +2800,6 @@
     'Entreno': 'Training',
     'Los días de descanso no piden entreno: ahí solo cuentan la proteína y el agua.':
       'Rest days ask for no training: there only protein and water count.',
-    '{n} de 7 días': '{n} of 7 days',
-    'Los últimos siete días: si entrenaste, si llegaste a la proteína y si bebiste el agua.':
-      'The last seven days: whether you trained, whether you hit your protein and whether you drank your water.',
     'Llevas {hechas} de {pedidas}.': 'You are on {hechas} of {pedidas}.',
 
     /* ---------- Marcar comidas y agua ---------- */

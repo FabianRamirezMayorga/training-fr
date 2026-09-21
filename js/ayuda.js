@@ -115,7 +115,7 @@
         'Un *plan* es un conjunto de rutinas con días de la semana puestos. Las rutinas que comparten nombre de plan se leen juntas como una semana.',
         'Poner los días cambia lo que la app puede saber de ti: qué te toca hoy en la portada, cuántas series por semana haces de cada zona, si el reparto está equilibrado y qué nota saca el plan.',
         'Sin días asignados no hay una semana que contar, y media app se queda muda: la portada no sabe qué ofrecerte y la auditoría no tiene nada que auditar.',
-        'En la portada, «Tu semana» son los siete días de atrás con tres puntos cada uno: si entrenaste, si llegaste a la proteína y si bebiste el agua. Mira hacia atrás y no hacia delante a propósito —un lunes, la semana que viene está vacía y no cuenta nada—. Es la misma tira que en *Ver mi día*, donde además está explicada.',
+        'En la portada, «Tu constancia» son los últimos treinta días con tres puntos cada uno: si entrenaste, si llegaste a la proteína y si bebiste el agua. Se rueda con el dedo y siempre abre en hoy, vengas de donde vengas. Mira hacia atrás y no hacia delante a propósito: un lunes, la semana que viene está vacía y no cuenta nada. Es la misma tira que en *Ver mi día*, donde además está explicada.',
         'Si sigues más de un plan a la vez, marca uno como *plan principal*: en «hoy» solo salen sus rutinas, y las cuentas semanales se hacen con él. Los demás siguen guardados.'
       ],
       ver: ['c-dias', 'c-rutina'] },

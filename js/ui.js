@@ -898,12 +898,37 @@
     };
   }
 
+  /* ---------- poner una tira en su final ----------
+     Hoy es el último día de la tira y es el que se mira; una tira que se
+     desplaza y arranca hace un mes esconde justo lo que se viene a ver.
+
+     Y no vale con hacerlo una vez: si la tarjeta aún no está medida —con altos
+     en svh y tipografías que acaban de cargar tarda— el ancho es cero y
+     scrollLeft se queda quieto. Se insiste medio segundo y se deja en cuanto
+     alguien la toca, que a partir de ahí el sitio es suyo. */
+  function alFinal(el) {
+    if (!el) return;
+    const hasta = performance.now() + 500;
+    let suyo = false;
+    const sueltalo = function () { suyo = true; };
+    ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(function (ev) {
+      el.addEventListener(ev, sueltalo, { passive: true, once: true });
+    });
+    const poner = function () {
+      if (suyo) return;
+      const fin = el.scrollWidth - el.clientWidth;
+      if (el.scrollLeft !== fin) el.scrollLeft = fin;
+      if (performance.now() < hasta) requestAnimationFrame(poner);
+    };
+    poner();
+  }
+
   g.UI = {
     esc: esc, html: html, raw: raw, icon: icon,
     demoHTML: demoHTML, mountDemos: mountDemos, clearDemos: clearDemos,
     deslizables: deslizables, cerrarDeslizadas: cerrarDeslizadas,
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,
-    rodillo: rodillo,
+    rodillo: rodillo, alFinal: alFinal,
     num: num, dec: dec, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
     beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos,
     claveDeDia: claveDeDia,
