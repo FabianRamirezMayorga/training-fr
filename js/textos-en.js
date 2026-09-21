@@ -324,9 +324,6 @@
     'Entrenar': 'Train',
     '{n} rutinas para hoy: te dejo elegir': '{n} routines for today: you pick',
     'O un entrenamiento libre': 'Or a free workout',
-    'Iniciar entrenamiento': 'Start workout',
-    'Arranca el cronómetro ahora y añade los ejercicios sobre la marcha. El tiempo se ve desde cualquier pantalla.':
-      'Start the timer now and add exercises as you go. The clock shows on every screen.',
 
     'Días seguidos': 'Day streak',
     'Entrenos': 'Workouts',

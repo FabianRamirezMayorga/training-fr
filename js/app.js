@@ -501,6 +501,38 @@
       .then(function () { pidiendoCargaIA = false; });
   }
 
+  /* ---------- el día que no toca nada ----------
+     Estaba dicho dos veces: un botón verde «Iniciar entrenamiento» arriba y esta
+     tarjeta media pantalla más abajo, resolviendo la misma situación. Y peor
+     que repetirse: el botón empujaba a entrenar en verde —el color que en esta
+     portada significa «esto es a lo que vienes»— el mismo día que el plan dice
+     descansar, y el descanso también es parte del plan.
+
+     Ahora la tarjeta ocupa el sitio del botón y el botón se va. Entrenar por su
+     cuenta sigue estando, como enlace debajo, igual que el día que sí hay
+     rutina: quien quiera entrenar en su día libre lo tiene a un toque, pero no
+     se lo pide la app. */
+  function diaLibreHTML(rutinas) {
+    return html`
+      <div class="card tarjeta-premium tarjeta-libre portada-hueco">
+        <div class="hoy-encima">${T('Hoy')} · ${rutinas.length
+          ? T('Día libre') : T('Empieza aquí')}</div>
+        <div class="hoy-tit">${rutinas.length
+          ? T('No toca nada en tu plan')
+          : T('Todavía no tienes rutinas')}</div>
+        <p class="hoy-meta">${rutinas.length
+          ? T('Si has hecho algo por tu cuenta, apúntalo. Y si te apetece entrenar, elige una rutina.')
+          : T('Copia una plantilla probada y edítala a tu gusto, o móntate el programa con tus datos.')}</p>
+        <div class="row" style="margin-top:12px">
+          ${raw(rutinas.length
+            ? '<button class="btn grow sm" data-a="apuntar">' + esc(T('Apuntar algo')) + '</button>' +
+              '<button class="btn primary grow sm" data-a="plantillas">' + esc(T('Elegir rutina')) + '</button>'
+            : '<button class="btn grow sm" data-a="plantillas">' + esc(T('Ver plantillas')) + '</button>' +
+              '<button class="btn primary grow sm" data-a="programa">' + esc(T('Crear mi programa')) + '</button>')}
+        </div>
+      </div>`;
+  }
+
   /* La semana de un vistazo: qué días había plan y cuáles se han cumplido. */
   function semanaHTML() {
     const orden = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -872,10 +904,9 @@
         <button class="enlace-flojo" data-a="empezarlibre">
           ${T('O un entrenamiento libre')}</button>`
       : html`
-        <button class="btn primary block grande portada-hueco btn-arranque" data-a="empezarlibre">
-          ${raw(icon('play'))} ${T('Iniciar entrenamiento')}
-        </button>
-        <p class="tiny" style="margin:7px 0 0">${T('Arranca el cronómetro ahora y añade los ejercicios sobre la marcha. El tiempo se ve desde cualquier pantalla.')}</p>`)}
+        ${raw(diaLibreHTML(rutinas))}
+        <button class="enlace-flojo" data-a="empezarlibre">
+          ${T('O un entrenamiento libre')}</button>`)}
 
       <div class="muelle"></div>
       <div class="stats portada-hueco">
@@ -894,10 +925,9 @@
 
       ${raw(Modo.franjaInvitado())}
 
-      <!-- El botón de arriba ya dice qué toca hoy, de qué plan es y cuánto
-           es, así que la tarjeta de la rutina sobra: era lo mismo dicho dos
-           veces a media pantalla de distancia. El día sin rutina sí mantiene
-           la suya, que ahí no hay botón que la repita. -->
+      <!-- Aquí no va ninguna tarjeta del día. Lo que toca hoy —haya rutina o no
+           la haya— ya está arriba, en el sitio grande, y repetirlo a media
+           pantalla de distancia no informa de nada. -->
       <div class="muelle"></div>
       <!-- El rótulo se queda aunque la tarjeta se vaya: «Ver mi día» no
            lo dice nadie más, y lo que viene debajo —la semana y lo comido— sigue
@@ -913,30 +943,6 @@
              se parece al resto de acciones de sección de la app. -->
         <button class="btn sm realce" data-a="verdia">${raw(icon('lista'))} ${T('Ver mi día')}</button>
       </div>
-      ${raw(deHoy.length
-        ? ''
-        : html`
-          <!-- El día sin nada que hacer merece la misma tarjeta que el día con
-               algo: era la única caja lisa de la portada, y es la que ve quien
-               acaba de entrar en la app. -->
-          <div class="card tarjeta-premium tarjeta-libre">
-            <div class="hoy-encima">${T('Hoy')} · ${rutinas.length
-              ? T('Día libre') : T('Empieza aquí')}</div>
-            <div class="hoy-tit">${rutinas.length
-              ? T('No toca nada en tu plan')
-              : T('Todavía no tienes rutinas')}</div>
-            <p class="hoy-meta">${rutinas.length
-              ? T('Si has hecho algo por tu cuenta, apúntalo. Y si te apetece entrenar, elige una rutina.')
-              : T('Copia una plantilla probada y edítala a tu gusto, o móntate el programa con tus datos.')}</p>
-            <div class="row" style="margin-top:12px">
-              ${raw(rutinas.length
-                ? '<button class="btn grow sm" data-a="apuntar">' + esc(T('Apuntar algo')) + '</button>' +
-                  '<button class="btn primary grow sm" data-a="plantillas">' + esc(T('Elegir rutina')) + '</button>'
-                : '<button class="btn grow sm" data-a="plantillas">' + esc(T('Ver plantillas')) + '</button>' +
-                  '<button class="btn primary grow sm" data-a="programa">' + esc(T('Crear mi programa')) + '</button>')}
-            </div>
-          </div>`)}
-
       ${raw(semanaHTML())}
       ${raw(comidaHoyHTML())}
 
