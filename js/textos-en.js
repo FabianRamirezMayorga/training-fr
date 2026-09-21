@@ -4128,6 +4128,10 @@
     'Que lo mire la IA': 'Let the AI look at it',
     'Escribe antes qué has hecho': 'Write what you did first',
     'Mirando…': 'Looking…',
-    'Que lo mire otra vez': 'Have it look again'
+    'Que lo mire otra vez': 'Have it look again',
+
+    /* ---------- La barra de actividad ---------- */
+    'actividad': 'activity',
+    'minutos de actividad': 'minutes of activity'
   };
 })(window);

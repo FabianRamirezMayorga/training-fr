@@ -2853,7 +2853,18 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .zona-leyenda { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 11px; }
 .zona-leyenda span { display: inline-flex; align-items: center; gap: 5px; }
 .zona-leyenda i { width: 12px; height: 8px; border-radius: 999px; flex: none; }
+/* La fila de actividad: misma rejilla, más fina y en azul. No comparte unidad
+   con las series —son minutos— así que tampoco puede parecer la misma barra:
+   el color y el grosor son lo que dice que se leen aparte. Y no lleva la
+   muesca del plan, porque el plan no pide minutos de fútbol. */
+.zona-act { margin-top: -4px; }
+.zona-act .zona-nom { font-size: .72rem; color: var(--dim2); }
+.zona-act .zona-pista { height: 6px; }
+.zona-act .zona-hago { background: var(--agua); }
+.zona-act .zona-num { font-size: .74rem; font-weight: 600; color: var(--agua); }
+
 .zl-hago { background: var(--acc); }
+.zl-act { background: var(--agua); height: 6px !important; }
 .zl-pide { width: 2px !important; height: 12px !important; border-radius: 2px !important;
   background: var(--txt); opacity: .55; }
 

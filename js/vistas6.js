@@ -123,13 +123,38 @@
     return { zonas: zonas, total: total };
   }
 
+  /* De qué zona es un músculo */
+  function zonaDe(m) {
+    const gr = I18N.GROUPS.filter(function (x) {
+      return (x.muscles || []).indexOf(m) !== -1;
+    })[0];
+    return gr ? gr.id : '';
+  }
+
   function repartoMuscular(dias) {
     const desde = Date.now() - dias * DIA;
     const cuenta = {};
+    const minutos = {};
     let total = 0;
 
     Store.sessions().forEach(function (s) {
       if (s.start < desde) return;
+
+      /* Lo de fuera del gimnasio no deja series, solo tiempo, y va por su lado:
+         sumarlo a las series diría que estás más cerca de tu objetivo de pesas
+         de lo que estás, que es justo lo que esta pantalla sirve para ver. */
+      const min = Number(s.minutos) || 0;
+      if (min && (s.musculos || []).length) {
+        const zonas = [];
+        s.musculos.forEach(function (m) {
+          const z = zonaDe(m);
+          if (z && zonas.indexOf(z) === -1) zonas.push(z);
+        });
+        /* El tiempo no se reparte entre zonas: los noventa minutos del partido
+           los aguantó la pierna enteros, y el core también. */
+        zonas.forEach(function (z) { minutos[z] = (minutos[z] || 0) + min; });
+      }
+
       (s.entries || []).forEach(function (e) {
         const hechas = (e.sets || []).filter(function (x) { return x.done; }).length;
         if (!hechas) return;
@@ -144,13 +169,12 @@
       });
     });
 
-    if (!total) return { total: 0, filas: [] };
     const filas = I18N.GROUPS.map(function (gr) {
       return { id: gr.id, label: T(gr.label), series: Math.round((cuenta[gr.id] || 0) * 10) / 10 };
     }).filter(function (f) { return f.series > 0; })
       .sort(function (a, b) { return b.series - a.series; });
 
-    return { total: Math.round(total), filas: filas };
+    return { total: Math.round(total), filas: filas, minutos: minutos };
   }
 
   /* ---------- gráficos ---------- */
@@ -649,11 +673,12 @@
           : T('Un cuadro por día.')} ${T('Los huecos también cuentan: el descanso forma parte del plan.')}</p>
       </div>
 
-      ${raw(reparto.total || planPorZona().total ? html`
+      ${raw(reparto.total || planPorZona().total ||
+        Object.keys(reparto.minutos || {}).length ? html`
         <div class="list-title">${Tn('Reparto por zona ({n} días)',
           { n: Math.min(r.dias, 90) })}</div>
         <div class="card tarjeta-premium">
-          ${raw(reparto.filas.length ? '<div class="pre-encima">' +
+          ${raw(reparto.total && reparto.filas.length ? '<div class="pre-encima">' +
             esc(T('Lo que más trabajas')) + '</div>' +
             '<div class="pre-num" style="margin:1px 0 12px">' + esc(T(reparto.filas[0].label)) +
             ' <span class="tiny" style="font-weight:600">' +
@@ -879,10 +904,23 @@
     /* Aqui se escribe en espanol: 2,2 y no 2.2 */
     const coma = function (n2) { return UI.dec(n2); };
 
+    /* Los minutos de actividad de cada zona, en su propia escala: comparten
+       fila con las series pero no unidad, así que tampoco pueden compartir
+       regla. */
+    const mins = reparto.minutos || {};
+    const topeMin = Math.max.apply(null, Object.keys(mins).map(function (id) {
+      return mins[id];
+    }).concat([1]));
+
     const ids = [];
     reparto.filas.forEach(function (f) { if (ids.indexOf(f.id) === -1) ids.push(f.id); });
     Object.keys(plan.zonas).forEach(function (id) {
       if (plan.zonas[id] > 0 && ids.indexOf(id) === -1) ids.push(id);
+    });
+    /* Una zona que solo tiene actividad también sale: si el domingo jugaste,
+       el core tiene algo que enseñar aunque no hayas hecho una serie. */
+    Object.keys(mins).forEach(function (id) {
+      if (mins[id] > 0 && ids.indexOf(id) === -1) ids.push(id);
     });
     if (!ids.length) return '';
 
@@ -917,7 +955,13 @@
               </span>
               <span class="zona-num">${coma(hace)}${raw(pide > 0
                 ? '<span class="zona-de"> / ' + coma(pide) + '</span>' : '')}</span>
-            </div>`;
+            </div>
+            ${raw(mins[id] ? '<div class="zona-fila zona-act">' +
+              '<span class="zona-nom">' + esc(T('actividad')) + '</span>' +
+              '<span class="zona-pista"><i class="zona-hago" style="width:' +
+                Math.round(mins[id] / topeMin * 100) + '%"></i></span>' +
+              '<span class="zona-num">' + esc(Tn('{n}′', { n: mins[id] })) + '</span>' +
+              '</div>' : '')}`;
         }).join(''))}
       </div>
 
@@ -925,6 +969,8 @@
         <span><i class="zl-hago"></i> ${T('series por semana que haces')}</span>
         ${raw(plan.total ? '<span><i class="zl-pide"></i> ' +
           esc(T('lo que pide tu plan')) + '</span>' : '')}
+        ${raw(Object.keys(mins).length ? '<span><i class="zl-act"></i> ' +
+          esc(T('minutos de actividad')) + '</span>' : '')}
       </div>
 
       ${raw(excesoHTML(ids, hecho, plan, etiqueta, rango))}

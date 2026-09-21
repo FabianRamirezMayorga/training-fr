@@ -944,7 +944,11 @@
     'Y si abriste el enlace dentro de WhatsApp, Instagram o parecidos, ahí no se puede instalar de ninguna manera: hay que abrirlo antes en el navegador de verdad.':
       'And if you opened the link inside WhatsApp, Instagram or the like, nothing can be installed there at all: you have to open it in a real browser first.',
     'También desaparece cuando ya la tienes instalada, que es lo normal si arrancaste desde el icono.':
-      'It also goes away once you have it installed, which is the usual case if you started from the icon.'
+      'It also goes away once you have it installed, which is the usual case if you started from the icon.',
+
+    /* ---------- la actividad en el reparto ---------- */
+    'Lo que hiciste fuera del gimnasio sale debajo, en azul y en minutos, no sumado a las series. Un partido de fútbol trabaja la pierna, pero no son series: sumarlo te diría que estás más cerca de tu objetivo de pesas de lo que estás, que es justo lo que esta pantalla sirve para ver.':
+      'What you did outside the gym shows underneath, in blue and in minutes, not added to the sets. A football match works your legs, but those are not sets: adding them would tell you that you are closer to your lifting target than you are, which is exactly what this screen is for.'
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

@@ -3458,6 +3458,36 @@
       });
   }
 
+  /* ---------- lo apuntado antes de que esto existiera ----------
+     Hasta v351 «Apuntar algo que ya hice» no guardaba músculos, así que esas
+     sesiones se quedaron mudas: el historial las dejaba en «apuntado a mano» a
+     secas y la pierna seguía contando como abandonada después de un partido.
+
+     El tipo de actividad sí quedó grabado, y de ahí salen los músculos igual
+     que saldrían hoy, así que se rellenan y no hay que volver a apuntar nada.
+     Solo se toca lo que está vacío: si una sesión ya traía los suyos —las de la
+     IA— se queda como está. */
+  function rellenarMusculosDeActividades() {
+    if (Store.settings().musculosDeActividadPuestos) return;
+
+    let tocadas = 0;
+    Store.sessions().forEach(function (s) {
+      if (!s.actividad || (s.musculos || []).length) return;
+      const a = ACTIVIDADES.filter(function (x) { return x.id === s.actividad; })[0];
+      if (!a || !(a.musculos || []).length) return;
+      s.musculos = a.musculos.slice();
+      /* Para que el cambio viaje a los otros dispositivos */
+      s.updatedAt = Date.now();
+      tocadas++;
+    });
+
+    /* El sello se pone siempre, haya tocado algo o no: si no, esto se recorrería
+       entero en cada arranque para no hacer nada. Y guarda de paso lo de arriba,
+       que muta el array en sitio. */
+    Store.setSetting('musculosDeActividadPuestos', true);
+    return tocadas;
+  }
+
   function apuntarActividad() {
     const p = Perfil.datos();
     const peso = Number(p && p.peso) || 75;
@@ -6509,6 +6539,7 @@
       /* El aviso de instalar decide solo si toca y cuándo; aquí solo se le
          dice que la app ya está en pie. */
       if (g.Instalar) Instalar.arrancar();
+      rellenarMusculosDeActividades();
 
       if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         /* Al desplegar, el service worker nuevo se instala y toma el control,
