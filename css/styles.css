@@ -2880,6 +2880,73 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .zona-marca::after { content: ''; position: absolute; inset: -14px -6px; }
 .zona-marca:active { transform: scale(1.06); }
 
+/* ---------- «Apuntar algo que ya hice» ----------
+   La hoja tenía dos campos preguntando lo mismo: se escribe arriba y se elige
+   abajo entre quince pastillas, y hacía falta un renglón explicando cómo se
+   relacionaban. Ese renglón era la confesión del fallo.
+
+   Ahora manda el campo, una ficha enseña lo que la app ha entendido —con los
+   músculos que va a apuntar, que antes se guardaban sin decir cuáles— y las
+   quince siguen ahí detrás de «Cambiar», como lista y no como pared. */
+.ac-campo { font-size: 1rem; padding: 13px 14px; }
+
+.ac-ficha {
+  margin-top: 11px; padding: 13px 14px; border-radius: 15px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card2) 55%, transparent);
+}
+.ac-cab { display: flex; align-items: flex-start; gap: 10px; }
+.ac-cab .btn { flex: none; }
+.ac-nom { font-weight: 700; font-size: 1.02rem; line-height: 1.25; }
+.ac-mus { margin-top: 4px; font-size: .78rem; color: var(--dim); line-height: 1.4; }
+/* Cuando los pone la IA y no la tabla se dice con el color, que es el suyo en
+   toda la app, y no con una etiqueta que ocupe otro renglón. */
+.ac-mus.de-ia { color: var(--agua); }
+.ac-nota { margin-top: 9px; font-size: .78rem; color: var(--dim); line-height: 1.45; }
+.ac-nota.mal { color: var(--warn); }
+
+.ac-ia {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  width: 100%; margin-top: 11px; padding: 9px; border-radius: 11px;
+  border: 1px solid var(--line); background: none; color: var(--agua);
+  font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer;
+}
+.ac-ia svg { width: 15px; height: 15px; flex: none; stroke: var(--agua); fill: none; }
+.ac-ia:disabled { opacity: .55; }
+.ac-ia:active { background: color-mix(in srgb, var(--agua) 12%, transparent); }
+
+/* Quince filas no caben en una hoja, así que la lista se desplaza sola: si
+   creciera hacia abajo empujaría el botón de guardar fuera de la pantalla. */
+.ac-lista {
+  margin-top: 9px; max-height: 244px; overflow-y: auto;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
+  -webkit-overflow-scrolling: touch;
+}
+.ac-lista .list-row { padding: 10px 14px; }
+.ac-tic { flex: none; opacity: 0; }
+.ac-tic svg { width: 17px; height: 17px; stroke: var(--acc); fill: none; }
+.ac-lista .elegida .ac-tic { opacity: 1; }
+
+.ac-et { margin: 17px 0 7px; font-size: .68rem; font-weight: 700;
+  letter-spacing: .08em; color: var(--dim2); }
+
+/* En fila y con desplazamiento. Seis pastillas partidas en dos renglónes
+   desiguales, tres veces seguidas, era la mitad de lo que hacía esta hoja tan
+   alta —y el borde derecho en zigzag es lo que la hacía parecer vieja. */
+.ac-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px;
+  scrollbar-width: none; }
+.ac-scroll::-webkit-scrollbar { display: none; }
+.ac-scroll .chip { flex: none; }
+.ac-scroll + .ac-scroll { margin-top: 6px; }
+
+.ac-otro { margin-top: 8px; }
+
+/* Las calorías al lado del botón y no en su propia tarjeta: son un número que
+   sale de lo de arriba, no una decisión que haya que tomar. */
+.ac-pie { display: flex; align-items: center; gap: 13px; margin-top: 18px; }
+.ac-kcal { flex: none; font-size: .84rem; font-weight: 700; color: var(--dim);
+  font-variant-numeric: tabular-nums; }
+
 /* Lo que añade la IA dentro de la hoja: en azul, con su chispa, y separado del
    párrafo de abajo, que es el que explica la regla. Uno es una opinión y el otro
    no, y no pueden parecer la misma voz. */

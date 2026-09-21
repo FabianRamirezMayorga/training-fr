@@ -411,6 +411,14 @@
     'te lo monto yo con tus datos y lo editas igual.':
       'I build it from your data and you can still edit it.',
 
+    'Entra en tu historial y en tu racha como un entrenamiento más.':
+      'It goes into your history and your streak like any other session.',
+    '¿Qué hiciste? Jugué fútbol, subí al cerro, boxeo…':
+      'What did you do? Played football, hiked up the hill, boxing…',
+    'No apunta músculos: puede ser cualquier cosa': 'Logs no muscles: it could be anything',
+    'Sin músculos concretos': 'No particular muscles',
+    'Otro día': 'Another day',
+    '~{kcal} kcal': '~{kcal} kcal',
     'Apuntar algo que ya hice': 'Log something I already did',
     'Caminar una hora el domingo o la pachanga del sábado cuentan igual, aunque no salgan de una rutina.':
       'An hour walking on Sunday or Saturday kickabout count the same, even if they come from no routine.',
@@ -3930,16 +3938,9 @@
       '{n} exercises · about {min} min · {objetivo}',
     'Guardar como rutina': 'Save as a routine',
     'Guardada como rutina': 'Saved as a routine',
-    'Entra en tu historial y en tu racha como un entrenamiento más. Las calorías son una estimación por tu peso y el tiempo.':
-      'It goes into your history and your streak like any other workout. The calories are an estimate from your weight and the time.',
-    'QUÉ HICE': 'WHAT I DID',
-    'Escríbelo tú: pickleball, mudanza, subir al pueblo…':
-      'Write it yourself: pickleball, moving house, walking up to the village…',
     'Si lo escribes tú, elige abajo lo que más se le parezca en esfuerzo: de ahí salen las calorías.':
       'If you write it yourself, pick the closest thing below in effort: that is where the calories come from.',
     'CUÁNTO TIEMPO': 'HOW LONG',
-    'ESTIMACIÓN': 'ESTIMATE',
-    '~{kcal} kcal en {min} min': '~{kcal} kcal in {min} min',
     '{que} apuntado: {min} min': '{que} logged: {min} min',
     'Caminar': 'Walking',
     'Correr': 'Running',
@@ -4124,8 +4125,6 @@
     '~{n} kcal': '~{n} kcal',
 
     /* ---------- Lo que decide el chip de actividad ---------- */
-    'Si lo escribes tú, elige abajo lo que más se le parezca: de ahí salen las calorías y los músculos que se apuntan.':
-      'If you write it yourself, pick the closest one below: that is where the calories and the muscles logged come from.',
 
     /* ---------- Que lo mire la IA ---------- */
     'Que lo mire la IA': 'Let the AI look at it',
