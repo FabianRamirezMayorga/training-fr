@@ -138,6 +138,40 @@
     return FOCOS.filter(function (f) { return f.id === est.foco; })[0] || FOCOS[0];
   }
 
+  /* Los cinco saltos del mando. Fuera de esta lista, la duración la escribió él
+     y hay que enseñarla en el lápiz, que si no no se ve por ninguna parte. */
+  const MINUTOS = [30, 45, 60, 75, 90];
+  function minutosAMano() { return MINUTOS.indexOf(est.minutos) === -1; }
+
+  /* Escribir los minutos a mano. Con límites y no con un campo libre: media
+     hora es el suelo por debajo del cual no hay plan que repartir, y tres horas
+     el techo que ningún generador va a llenar con algo sensato. */
+  function pedirMinutos() {
+    UI.modal(html`
+      <h2>${T('Cuánto dura cada sesión')}</h2>
+      <p class="muted" style="margin-top:0">${T('En minutos, entre 20 y 180.')}</p>
+      <input id="pg-min" type="number" inputmode="numeric" min="20" max="180" step="5"
+             value="${est.minutos}">
+      <button class="btn primary block" id="pg-min-ok" style="margin-top:14px">
+        ${T('Vale')}</button>`,
+      function (el) {
+        const campo = el.querySelector('#pg-min');
+        setTimeout(function () { campo.focus(); campo.select(); }, 80);
+        const guardar = function () {
+          const n = Math.round(Number(campo.value) || 0);
+          if (!n) { UI.closeModal(); return; }
+          est.minutos = Math.min(180, Math.max(20, n));
+          guardarEstado();
+          UI.closeModal();
+          const pos = window.scrollY;
+          render();
+          window.scrollTo(0, pos);
+        };
+        el.querySelector('#pg-min-ok').onclick = guardar;
+        campo.onkeydown = function (ev) { if (ev.key === 'Enter') guardar(); };
+      });
+  }
+
   /* Una opción de una lista de una sola elección, con su explicación debajo si
      la tiene. La misma pieza que la hoja de filtrar ejercicios: aquí eran
      píldoras y «Perder grasa sin perder músculo» ocupaba una burbuja de dos
@@ -527,15 +561,23 @@
     const p = Perfil.datos();
     const nivel = nivelesDe();
 
+    /* Los datos, con su nombre delante. Eran cinco burbujas sueltas y había
+       que adivinar qué era cada una: «68 kg · 175 cm» se entiende, pero «7 h»
+       podía ser cualquier cosa y «Intermedio» no decía intermedio de qué. */
+    const filaDato = function (et, valor) {
+      return '<div class="dato-fila"><span class="dato-et">' + esc(et) + '</span>' +
+        '<span class="dato-val">' + esc(valor) + '</span></div>';
+    };
+
     const datos = html`
-      <div class="row wrap" style="gap:6px;margin-top:9px">
-        <span class="chip">${p.sexo === 'mujer' ? T('Mujer') : T('Hombre')}</span>
-        <span class="chip">${Tn('{n} años', { n: p.edad })}</span>
-        <span class="chip">${p.peso} kg · ${p.altura} cm</span>
-        <span class="chip">${nivel[p.experiencia] || T('Intermedio')}</span>
-        <span class="chip">${Tn('Duerme {h} h', { h: p['sue\u00f1o'] })}</span>
+      <div class="dato-lista">
+        ${raw(filaDato(T('Sexo'), p.sexo === 'mujer' ? T('Mujer') : T('Hombre')))}
+        ${raw(filaDato(T('Edad'), Tn('{n} años', { n: p.edad })))}
+        ${raw(filaDato(T('Peso y altura'), p.peso + ' kg · ' + p.altura + ' cm'))}
+        ${raw(filaDato(T('Nivel'), nivel[p.experiencia] || T('Intermedio')))}
+        ${raw(filaDato(T('Duerme'), Tn('{n} h', { n: p['sue\u00f1o'] })))}
       </div>
-      <button class="btn sm block" data-a="editarperfil" style="margin-top:10px">
+      <button class="btn sm block" data-a="editarperfil" style="margin-top:11px">
         ${T('Corregir mis datos')}</button>`;
 
     const cuando = html`
@@ -556,36 +598,67 @@
         }).join(''))}
       </div>
 
-      <div class="tiny" style="margin:15px 0 7px">${T('DÓNDE VAS A ENTRENAR')}</div>
-      <div class="filtro-lista">
-        ${raw(Object.keys(Data.GEAR).filter(function (k) { return k !== 'todo'; })
-          .map(function (k) {
-            return opcion('gear', k, T(Data.GEAR[k].label), gearActual() === k,
-              T(Data.GEAR[k].note));
-          }).join(''))}
-      </div>
+      <!-- Plegado y con lo elegido a la derecha: contestada la pregunta, las
+           otras tres opciones no pintan nada ocupando pantalla. Se cierra solo
+           al elegir porque el formulario se repinta y nace cerrado. -->
+      <details class="plegable-fino filtro-mas" data-mas="gear">
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="grow">${T('Dónde entrenas')}</span>
+          <span class="tiny nowrap">${T(Data.GEAR[gearActual()].label)}</span>
+        </summary>
+        <div class="fino-cuerpo">
+          <div class="filtro-lista">
+            ${raw(Object.keys(Data.GEAR).filter(function (k) { return k !== 'todo'; })
+              .map(function (k) {
+                return opcion('gear', k, T(Data.GEAR[k].label), gearActual() === k,
+                  T(Data.GEAR[k].note));
+              }).join(''))}
+          </div>
+        </div>
+      </details>
       <p class="tiny" style="margin:8px 0 0">${T('Solo vale para este plan; no cambia el catálogo del resto de la app.')}</p>
 
       <!-- Cinco opciones cortas: eso es un mando de una pieza, no cinco
            burbujas. Se ve la escala entera y dónde caes dentro de ella. -->
-      <div class="tiny" style="margin:15px 0 7px">${T('CUÁNTO DURA CADA SESIÓN')}</div>
-      <div class="segmento segmento-periodo">
+      <div class="tiny" style="margin:15px 0 7px">${T('MINUTOS POR SESIÓN')}</div>
+      <!-- Las cinco de siempre y, al final, el lápiz para escribirla. Cinco
+           saltos de quince minutos cubren casi todo, pero no a quien tiene
+           cincuenta justos entre dos cosas, y redondear a cuarenta y cinco o a
+           sesenta le cambia el plan. Cuando el número no es ninguno de los
+           cinco, el lápiz lleva la cifra puesta: si no, no se vería en ningún
+           sitio cuánto dura la sesión. -->
+      <div class="segmento segmento-auto">
         ${raw([30, 45, 60, 75, 90].map(function (m) {
           return '<button class="' + (est.minutos === m ? 'on' : '') +
-            '" data-min="' + m + '">' + esc(Tn('{n} min', { n: m })) + '</button>';
+            '" data-min="' + m + '">' + m + '</button>';
         }).join(''))}
+        <button class="seg-lapiz${raw(minutosAMano() ? ' on' : '')}" data-minmano="1"
+                aria-label="${T('Escribir los minutos')}" title="${T('Escribir los minutos')}"
+          >${raw(icon('edit'))}${raw(minutosAMano()
+            ? '<span>' + esc(String(est.minutos)) + '</span>' : '')}</button>
       </div>`;
 
     const busca = html`
       <!-- Cada objetivo con lo que significa debajo. Antes el resumen salía
            suelto al pie del grupo y solo el del elegido: para comparar dos había
-           que tocarlos por turnos y leer abajo cada vez. -->
-      <div class="filtro-lista" style="margin-top:9px">
-        ${raw(Object.keys(Programa.OBJETIVOS).map(function (k) {
-          return opcion('obj', k, T(Programa.OBJETIVOS[k].label), objetivoActual() === k,
-            T(Programa.OBJETIVOS[k].resumen));
-        }).join(''))}
-      </div>
+           que tocarlos por turnos y leer abajo cada vez. Y plegado tras elegir,
+           que son cuatro explicaciones y ya has decidido. -->
+      <details class="plegable-fino filtro-mas" data-mas="obj" style="margin-top:9px">
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="grow">${T('Tu objetivo')}</span>
+          <span class="tiny nowrap">${T(Programa.OBJETIVOS[objetivoActual()].label)}</span>
+        </summary>
+        <div class="fino-cuerpo">
+          <div class="filtro-lista">
+            ${raw(Object.keys(Programa.OBJETIVOS).map(function (k) {
+              return opcion('obj', k, T(Programa.OBJETIVOS[k].label), objetivoActual() === k,
+                T(Programa.OBJETIVOS[k].resumen));
+            }).join(''))}
+          </div>
+        </div>
+      </details>
 
       <!-- Plegada: es opcional y casi siempre se queda en «Equilibrado», así
            que ocho zonas abiertas eran ocho renglones para no tocar nada. -->
@@ -1215,6 +1288,7 @@
     bindAll(root, '[data-min]', enElSitio(function (el) {
       est.minutos = Number(el.dataset.min);
     }));
+    bindAll(root, '[data-minmano]', function () { pedirMinutos(); });
     bindAll(root, '[data-obj]', enElSitio(function (el) {
       est.objetivo = el.dataset.obj;
     }));

@@ -696,7 +696,7 @@
            y habia que arrastrarlas, asi que «Año» vivia fuera de la pantalla.
            Aqui caben las cinco de una vez, que es lo que hace que se compare
            un periodo con otro sin buscarlo. -->
-      <div class="segmento segmento-periodo periodo-arriba" role="tablist">
+      <div class="segmento segmento-auto periodo-arriba" role="tablist">
         ${raw(RANGOS.map(function (x) {
           return '<button class="' + (x.id === rango ? 'on' : '') +
             '" role="tab" aria-selected="' + (x.id === rango ? 'true' : 'false') +

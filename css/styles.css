@@ -1997,7 +1997,16 @@ html[data-theme="light"] .zona-tile .pri { opacity: .45; }
   background: var(--card); color: var(--txt); text-transform: none;
   letter-spacing: 0; font-size: .92rem; font-weight: 600;
 }
-.filtro-mas > summary .tiny { color: var(--dim); }
+/* El título no se parte y lo que cede es el valor. «Dónde entrenas · En casa
+   con mancuernas» no cabe de una pieza en un móvil, y de las dos mitades la
+   que se puede leer a medias es la de la derecha: el título dice de qué va la
+   fila, y el valor entero está a un toque. */
+.filtro-mas > summary .grow { white-space: nowrap; flex: none; }
+.filtro-mas > summary .tiny {
+  color: var(--dim); flex: 0 1 auto; min-width: 0;
+  margin-left: auto;                  /* sin grow en el título, nada lo empuja */
+  overflow: hidden; text-overflow: ellipsis;
+}
 .filtro-mas > .fino-cuerpo { padding: 10px 0 0; }
 
 /* ---------- elegir una de muchas, en la hoja de filtrar ----------
@@ -2745,26 +2754,50 @@ html[data-theme="light"] .sem-caja.es-ahora {
 /* La meta cumplida ya tenia su verde: el degradado no puede pisarselo. */
 .vista-progreso .meta.lograda { border-color: var(--acc); }
 
-/* El selector de periodo, pegado al titulo de la pantalla: manda sobre toda
-   ella y no solo sobre la grafica.
+/* ---------- el mando de muchas posiciones ----------
+   El de dos posiciones de siempre, pero con cinco o seis. Lo usan el periodo de
+   Progreso y la duración de la sesión en el generador.
 
-   Es el mando de dos posiciones de siempre, pero con cinco. Aquí los huecos NO
-   miden lo mismo: con cinco a partes iguales caben 68 px cada uno y «2 meses»
-   salía como «2 mes…», y un filtro con la etiqueta a medias no dice qué filtra.
-   Con `flex: 1 1 auto` cada uno parte de lo que ocupa su palabra y el sobrante
-   se reparte, así que «Mes» y «Año» ceden lo suyo a los dos largos y no se
-   corta ninguno. La letra baja a .78rem por lo mismo: para que quepan.
+   Aquí los huecos NO miden lo mismo. Con cinco a partes iguales caben 68 px
+   cada uno y «2 meses» salía como «2 mes…», y un filtro con la etiqueta a
+   medias no dice qué filtra. Con `flex: 1 1 auto` cada uno parte de lo que
+   ocupa su palabra y el sobrante se reparte, así que «Mes» y «Año» ceden lo
+   suyo a los dos largos y no se corta ninguno. La letra baja a .78rem por lo
+   mismo: para que quepan.
 
    Va con las dos clases en el selector a propósito: `.segmento button` pesa lo
    mismo y está declarado más abajo, así que con una sola clase ganaba él y los
    cinco volvían a medir igual. */
 .periodo-arriba { margin: 2px 0; }
-.segmento.segmento-periodo { margin-bottom: 12px; }
-.segmento.segmento-periodo button {
+.segmento.segmento-auto { margin-bottom: 12px; }
+.segmento.segmento-auto button {
   flex: 1 1 auto; min-width: auto;      /* el 0 de la base los dejaba encogerse
                                             por debajo de su propia palabra */
   font-size: .78rem; padding: .52em .5em;
 }
+
+/* El lápiz al final del mando: para el tiempo que no es ninguno de los cinco.
+   No crece con los demás —es un botón, no una opción— salvo cuando lleva la
+   cifra escrita a mano, que entonces necesita su sitio para enseñarla. */
+.segmento .seg-lapiz { flex: 0 0 auto; gap: 5px; padding-left: .7em; padding-right: .7em; }
+.segmento .seg-lapiz svg { width: 14px; height: 14px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.segmento .seg-lapiz.on { flex: 1 1 auto; }
+/* El botón del mando es flex por esto: el icono y la cifra tienen que ir en
+   línea y centrados, y un `button` a secas los deja apilados a la izquierda. */
+.segmento .seg-lapiz { display: flex; align-items: center; justify-content: center; }
+
+/* ---------- los datos del perfil, en el generador ----------
+   Eran cinco burbujas sueltas y había que adivinar qué era cada una: «68 kg ·
+   175 cm» se entiende solo, pero «7 h» podía ser cualquier cosa e «Intermedio»
+   no decía intermedio de qué. Con el nombre delante no hay nada que adivinar. */
+.dato-lista { margin-top: 10px; border-radius: var(--r-s); overflow: hidden;
+  background: var(--card2); border: 1px solid var(--line); }
+.dato-fila { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 13px; border-bottom: 1px solid var(--line); font-size: .88rem; }
+.dato-fila:last-child { border-bottom: 0; }
+.dato-et { flex: none; color: var(--dim); }
+.dato-val { flex: 1; min-width: 0; text-align: right; font-weight: 600; }
 
 /* La diferencia con el periodo anterior. Verde si sube, ambar si baja —rojo
    seria un error, y bajar el volumen una semana no lo es—. */
