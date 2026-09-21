@@ -2593,7 +2593,7 @@
     const musculos = (datos.musculos || []).slice();
     /* El «2» es la versión de las instrucciones: al cambiarlas, lo guardado con
        las viejas deja de valer y hay que volver a preguntar. */
-    const clave = 'anal4:' + I18N.norm(nombre) + ':' + min + ':' + musculos.join(',') +
+    const clave = 'anal5:' + I18N.norm(nombre) + ':' + min + ':' + musculos.join(',') +
       ':' + (g.Idioma ? Idioma.actual() : 'es');
     const guardado = leerCache(clave, 12);
     if (guardado) return Promise.resolve(guardado);
@@ -2619,12 +2619,14 @@
       'Cada frase tiene que poder decirse SOLO de la actividad concreta que ha ' +
         'hecho. Si valdría igual para nadar, para bailar y para subir al monte, no ' +
         'sirve: bórrala y escribe otra.',
-      'PROHIBIDO, y no es un consejo de estilo: repetirle los minutos o su peso —los ' +
-        'tiene en pantalla—; recitarle la lista de músculos; abrir una frase ' +
-        'resumiendo los datos que te acabo de dar; los rellenos de gimnasio tipo ' +
-        '«esfuerzo cardiovascular alto», «descansa bien», «hidrátate», «escucha a tu ' +
-        'cuerpo» o «para que las fibras se reparen»; los signos de exclamación; y ' +
-        'adular.',
+      'NINGUNA CIFRA en tus frases. Ni los minutos, ni kilos, ni calorías, ni MET, ni ' +
+        'porcentajes. La única excepción son sus series de gimnasio de esta semana, ' +
+        'que te doy más abajo y que sí puedes citar.',
+      'PROHIBIDO también, y no es un consejo de estilo: recitarle la lista de ' +
+        'músculos; abrir una frase resumiendo los datos que te acabo de dar; los ' +
+        'rellenos de gimnasio tipo «esfuerzo cardiovascular alto», «descansa bien», ' +
+        '«hidrátate», «escucha a tu cuerpo» o «para que las fibras se reparen»; los ' +
+        'signos de exclamación; y adular.',
       'Si una frase tuya se queda sin nada que decir al quitarle lo prohibido, es que ' +
         'no tenía nada que decir: busca otra cosa que contarle.',
       '',
@@ -2644,7 +2646,11 @@
          cualitativa no dice nada que no diga ya el nombre de la actividad, y en
          cuanto lo ve lo recita. Lo que no quieras que repita, no se lo mandes. */
       '',
-      peso ? 'Para calibrar, que no para repetirlo: pesa ' + peso + ' kg.' : null,
+      /* Ni el peso ni el MET: con los dos y la duración se saca las calorías, y
+         las recita también. En palabras sí sirve para calibrar el esfuerzo y no
+         hay ninguna cifra que pueda devolverle. */
+      peso ? 'De complexión es ' + (peso < 60 ? 'ligero' : peso < 85 ? 'normal' : 'grande') +
+        '. No hay ninguna cifra tuya que darle aquí: no calcules calorías ni kilos.' : null,
       ajustes.goal ? 'Su objetivo es ' + ajustes.goal + '.' : null,
       ajustes.level ? 'Nivel ' + ajustes.level + '.' : null,
       recientes.length
@@ -2671,9 +2677,11 @@
       'Cada campo, UNA frase de veinticinco palabras como mucho:',
       '- "sitio": qué es eso en concreto y cómo queda su tiempo frente a lo normal ' +
         'allí. Cadena vacía si no lo reconoces; no es obligatorio rellenarlo.',
-      '- "intensidad": a qué se pareció en esfuerzo, comparado con algo que él conozca ' +
-        '—una sesión suya de pesas, una carrera, un paseo— y qué tiene esta actividad ' +
-        'que cansa así. NO empieces diciendo cuánto duró.',
+      /* Con «no empieces por la duración» le quedan mil maneras de empezar mal.
+         Con una forma obligatoria le queda una de empezar bien. */
+      '- "intensidad": EMPIEZA la frase con «Se parece a» o «Es como» y compara con ' +
+        'algo que él conozca —una sesión suya de pesas, una cuesta, un paseo largo—; ' +
+        'luego di qué tiene esta actividad que cansa así. Sin cifras.',
       '- "carga": qué músculo o articulación queda tocado y cuánto le va a durar, ' +
         'contando lo que ya lleva esta semana. Nombra uno o dos, no la lista entera.',
       '- "musculo": si eso construye músculo, lo mantiene o ni una cosa ni otra, y por ' +
