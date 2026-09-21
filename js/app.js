@@ -905,8 +905,17 @@
           ${T('O un entrenamiento libre')}</button>`
       : html`
         ${raw(diaLibreHTML(rutinas))}
-        <button class="enlace-flojo" data-a="empezarlibre">
-          ${T('O un entrenamiento libre')}</button>`)}
+        <!-- El día libre también necesita su botón: cronometrar una trotada o una
+             caminata es justo lo que se hace un día sin plan, y un enlace flojo
+             no es sitio para eso. Lo que no puede es llamarse «iniciar
+             entrenamiento», que promete un plan que hoy no hay: dice lo que de
+             verdad hace, poner el cronómetro en marcha.
+
+             Y sin verde, que el verde de esta tarjeta ya lo lleva «elegir
+             rutina». -->
+        <button class="btn block" data-a="empezarlibre" style="margin-top:9px">
+          ${raw(icon('timer'))} ${T('Arrancar el cronómetro')}
+        </button>`)}
 
       <div class="muelle"></div>
       <div class="stats portada-hueco">
