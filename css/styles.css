@@ -8,7 +8,14 @@
      dos #26c6da—, asi que en cualquier sitio donde salieran juntas no habia
      forma de distinguirlas. Ahora es un azul de verdad, no un cian. */
   --agua:#4f8cf5;
-  --r:16px; --r-s:12px; --r-xs:9px;
+  /* Esquina más abierta, la de iOS. Con 16 las tarjetas se leían como cajas;
+     con 20 se leen como piezas. */
+  --r:20px; --r-s:14px; --r-xs:10px;
+  /* La profundidad de una tarjeta. De noche es una sombra corta y otra larga
+     muy tenue —en oscuro lo que separa es el fondo, no la sombra— y de día
+     tiene que hacer todo el trabajo, porque blanco sobre gris claro sin raya
+     ni sombra no se despega. */
+  --sombra-carta: 0 1px 2px rgba(0,0,0,.24), 0 12px 28px -16px rgba(0,0,0,.6);
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
 
@@ -22,6 +29,7 @@ html[data-theme="light"]{
   --bg:#f4f6fa; --bg2:#ffffff; --card:#ffffff; --card2:#eef1f7;
   --line:#dde3ec; --txt:#141922; --dim:#5c6779; --dim2:#8a94a6;
   --acc:#5b8f2b; --acc-d:#eaf5db; --on-acc:#ffffff; --blue:#0f8a9c; --agua:#2f6fd0;
+  --sombra-carta: 0 1px 2px rgba(16,24,40,.05), 0 10px 24px rgba(16,24,40,.07);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -100,14 +108,24 @@ a{color:var(--blue)}
   vertical-align:.72em;margin-left:.34em;color:var(--acc);top:0}
 
 /* ---------- primitives ---------- */
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px}
+/* ---------- una tarjeta no se dibuja con una raya ----------
+   Cada tarjeta llevaba un borde de un píxel. En una pantalla con diez, eso son
+   diez rayas compitiendo con lo que hay dentro, y ninguna dice nada: lo que
+   separa una tarjeta del fondo es que es más clara, y lo que la levanta es la
+   sombra. Así es como se ven en iOS.
+
+   El borde se queda en su sitio pero transparente. Quitarlo del todo encoge
+   cada tarjeta dos píxeles de ancho y de alto, y eso mueve media app. */
+.card{background:var(--card);border:1px solid transparent;border-radius:var(--r);
+  padding:15px;box-shadow:var(--sombra-carta)}
 .card+.card{margin-top:11px}
 /* El hueco de la música en el entrenamiento se queda vacío cuando ya está la
    barra flotante, y sin esto la tarjeta siguiente perdía su separación. */
 #wo-musica:empty+.card{margin-top:11px}
 
 /* lista agrupada: filas separadas por una línea de un píxel, como en Ajustes de iOS */
-.list{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.list{background:var(--card);border:1px solid transparent;border-radius:var(--r);
+  overflow:hidden;box-shadow:var(--sombra-carta)}
 /* text-align:left porque muchas de estas filas son <button>, y un boton
    centra su texto por defecto: el titulo y el subtitulo salian centrados
    entre el icono y el chevron, que es justo lo que hace que una lista
@@ -294,7 +312,7 @@ html[data-theme="light"] .chip.on{
 
 /* ---------- exercise grid ---------- */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px}
-.ex-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .12s,border-color .15s;text-align:left;padding:0}
+.ex-card{background:var(--card);border:1px solid transparent;border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .12s,border-color .15s;text-align:left;padding:0;box-shadow:var(--sombra-carta)}
 .ex-card:active{transform:scale(.975)}
 .ex-thumb{position:relative;aspect-ratio:4/3;background:var(--card2);overflow:hidden}
 .ex-thumb img{width:100%;height:100%;object-fit:cover;background:var(--card2)}
@@ -353,7 +371,8 @@ html[data-theme="light"] .chip.on{
    totales") partía en dos líneas y descolocaba la fila entera, así que todas
    tienen la misma altura y el contenido va centrado en los dos ejes. */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:9px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+.stat{background:var(--card);border:1px solid transparent;border-radius:var(--r);
+  box-shadow:var(--sombra-carta);
   padding:7px 8px;text-align:center;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:1px;min-height:50px}
 .stat b{display:block;font-size:1.15rem;line-height:1.05;font-weight:800;
@@ -2191,11 +2210,16 @@ html[data-theme="light"] .zona-tile .pri { opacity: .45; }
    borde con una pizca de verde y la esquina mas redonda. El tinte es mas flojo
    que en la tarjeta de hoy a proposito: esa manda, estas acompanan. */
 .tarjeta-premium {
-  position: relative; overflow: hidden; border-radius: 20px;
+  position: relative; overflow: hidden; border-radius: 22px;
   background:
     linear-gradient(152deg, color-mix(in srgb, var(--acc) 9%, var(--card)) 0%,
                     var(--card) 56%);
-  border-color: color-mix(in srgb, var(--acc) 24%, var(--line));
+  /* Sin la raya verde de alrededor: en su sitio, un filo de luz arriba —una
+     línea de un píxel por dentro— que es lo que hace que una superficie
+     parezca vidrio y no cartulina. El verde sigue estando, en el degradado. */
+  border-color: transparent;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent),
+              var(--sombra-carta);
 }
 
 /* El rotulo de encima: pequeno, en versales y en verde, como el HOY de la
@@ -2233,7 +2257,7 @@ html[data-theme="light"] .plantilla,
 html[data-theme="light"] .tarjeta-hoy {
   background:
     linear-gradient(152deg, color-mix(in srgb, var(--acc) 14%, #fff) 0%, #fff 60%);
-  border-color: color-mix(in srgb, var(--acc) 26%, var(--line));
+  border-color: transparent;
   box-shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 10px 26px rgba(16, 24, 40, .07);
 }
 
@@ -8017,7 +8041,12 @@ html[data-theme="light"] .ag-ico {
 .vista-inicio .plan-leyenda { display: flex; }
 
 /* El saludo y el enlace flojo, que son texto suelto entre tarjetas. */
-.vista-inicio .hola { margin-bottom: clamp(1px, .4svh, 5px); }
+/* El saludo, del tamaño del título grande de iOS: es el nombre de la
+   pantalla, y a 1,35 rem pesaba lo mismo que el rótulo de una tarjeta. Va en
+   svh como todo lo que ocupa alto aquí, para que en una pantalla corta ceda
+   antes de obligar a rodar. */
+.vista-inicio .hola { margin-bottom: clamp(1px, .4svh, 5px);
+  font-size: clamp(1.5rem, 3.4svh, 1.95rem); letter-spacing: -.032em; }
 .vista-inicio .enlace-flojo { margin: clamp(3px, .6svh, 7px) 0;
   padding: clamp(3px, .6svh, 7px) 0; }
 
