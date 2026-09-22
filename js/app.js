@@ -1518,17 +1518,22 @@
                 </button>`;
             }).join(''))}
             <div style="padding:11px 13px 0">
-              <div class="tiny">QUÉ DÍAS LA HAGO</div>
-              <div class="row wrap" style="gap:6px;margin-top:6px">
+              <div class="tiny">${T('QUÉ DÍAS LA HAGO')}</div>
+              <!-- Una semana y no siete pastillas sueltas: en fila, con su
+                   inicial, se ve de un vistazo qué días caen y cuáles no, que es
+                   justo lo que se está decidiendo. La misma pieza que el
+                   generador de programas, que hace esta misma pregunta. -->
+              <div class="sem-pick" style="margin-top:7px">
                 ${raw(DIAS.map(function (d) {
                   const on = (r.days || []).indexOf(d) !== -1;
-                  return '<button class="chip ' + (on ? 'on' : '') + '" data-rdia="' + d +
-                    '" data-rid="' + r.id + '">' + d + '</button>';
+                  return '<button class="sp-dia' + (on ? ' on' : '') + '" data-rdia="' + d +
+                    '" data-rid="' + r.id + '" aria-pressed="' + (on ? 'true' : 'false') +
+                    '">' + esc(UI.inicialDia(UI.DAY_NAMES.indexOf(d))) + '</button>';
                 }).join(''))}
               </div>
-              <p class="tiny" style="margin:6px 0 0">Tócalos para mover la rutina de día. Si
-              el viernes quieres pecho en vez de pierna, quita el viernes de una y
-              pónselo a la otra.</p>
+              <p class="tiny" style="margin:7px 0 0">${T('Tócalos para mover la rutina de ' +
+              'día. Si el viernes quieres pecho en vez de pierna, quita el viernes de una y ' +
+              'pónselo a la otra.')}</p>
             </div>
             <div class="row" style="padding:11px 13px 0">
               <button class="btn sm grow" data-open="${r.id}">${raw(icon('edit'))} ${T('Editar')}</button>
@@ -1537,10 +1542,16 @@
             </div>
             ${raw(ambito === 'inicio' ? '' : html`
             <div style="padding:8px 13px 13px">
-              <button class="btn sm block" data-duplicar="${r.id}">
-                ${raw(icon('copiar'))} Duplicar esta rutina</button>
-              <button class="btn sm block" data-compartir="${r.id}" style="margin-top:8px">
-                ${raw(icon('compartir'))} Compartir esta rutina</button>
+              <!-- Duplicar y compartir van en la misma fila: son dos formas de
+                   llevarse la rutina a otro sitio y caben de sobra con el verbo
+                   solo. Revisar con IA se queda entera debajo, que no es de la
+                   misma familia y encima cuesta una llamada. -->
+              <div class="row" style="gap:8px">
+                <button class="btn sm grow" data-duplicar="${r.id}">
+                  ${raw(icon('copiar'))} ${T('Duplicar')}</button>
+                <button class="btn sm grow" data-compartir="${r.id}">
+                  ${raw(icon('compartir'))} ${T('Compartir')}</button>
+              </div>
               <button class="btn sm block" data-iarutina="${r.id}" style="margin-top:8px">
                 ${raw(icon('chispa'))} ${T('Revisar esta rutina con IA')}</button>
             </div>`)}
