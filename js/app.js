@@ -1201,16 +1201,22 @@
              no es sitio para eso.
 
              Se llama como el de arriba pero al revés: «Apuntar algo» es lo que ya
-             hiciste y «Empezar algo ahora» es lo que arranca con el cronómetro
-             corriendo. Misma construcción y lo único que cambia es el verbo y el
-             tiempo, que es la única diferencia que hay de verdad.
+             hiciste y esto es lo que arranca con el cronómetro corriendo. Lo
+             único que cambia es el verbo y el tiempo, que es la única
+             diferencia que hay de verdad.
+
+             «Iniciar una actividad rápida» y no «empezar algo ahora»: «algo» no
+             dice qué va a pasar al tocarlo, y lo que pasa es que arranca una
+             actividad y empieza a contar. Con la figura corriendo al lado se
+             entiende sin leerlo: el reloj de antes valía igual para un
+             cronómetro que para un descanso.
 
              Verde solo si ya tiene rutinas: a quien acaba de entrar en la app lo
              que le hace falta es montarse el programa, y ahí el verde se queda
              en la tarjeta. Uno solo, siempre. -->
         <button class="btn ${rutinas.length ? 'primary ' : ''}block realce"
                 data-a="empezarlibre" style="margin-top:9px">
-          ${raw(icon('timer'))} ${T('Empezar algo ahora')}
+          ${raw(icon('correr'))} ${T('Iniciar una actividad rápida')}
         </button>`)}
 
       <div class="muelle"></div>

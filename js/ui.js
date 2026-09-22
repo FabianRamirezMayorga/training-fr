@@ -42,6 +42,14 @@
     timer: '<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>',
     flag: '<svg viewBox="0 0 24 24"><path d="M6 21V4h12l-2.5 4L18 12H6"/></svg>',
     dumbbell: '<svg viewBox="0 0 24 24"><path d="M4 8v8M8 6v12M16 6v12M20 8v8M8 12h8"/></svg>',
+    /* Una figura corriendo, de trazo como las demás: cabeza, tronco inclinado,
+       las dos piernas en tijera y los brazos en contra. Las líneas son rectas a
+       propósito —a 18 píxeles una curva no se ve y sí se emborrona— y el peso
+       cae adelante, que es lo que distingue a alguien corriendo de alguien de
+       pie. */
+    correr: '<svg viewBox="0 0 24 24"><circle cx="15.7" cy="4.6" r="2.1"/>'
+      + '<path d="M14.4 8.4L11 12.8M11 12.8l3.6 2.6-.7 5.2M11 12.8l-3.6 1.6'
+      + '-1.7 4.4M13.5 9.6L17.6 12M14.2 8.6L10.2 7"/></svg>',
     youtube: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="M10.5 9.5l5 2.5-5 2.5z"/></svg>',
     share: '<svg viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4M4 14v5a2 2 0 002 2h12a2 2 0 002-2v-5"/></svg>',
     sol: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>',

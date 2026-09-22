@@ -7818,17 +7818,18 @@ html[data-theme="light"] .ag-ico {
   /* El hueco centrado abajo: girando -225 grados, el arco arranca a las siete
      en punto y termina a las cinco. */
   transform: rotate(-225deg); }
-/* Trazo de 4,2 y no de 6: un 30% más fino. Con los aros del resumen fuera,
-   estos dos son los únicos que quedan y a ese tamaño el 6 los hacía parecer
-   dos anillos gordos en vez de dos medidores. */
-.aro-fondo { fill: none; stroke: var(--card2); stroke-width: 4.2; stroke-linecap: round; }
+/* Trazo de 3 y no de 6: la mitad. Con los aros del resumen fuera, estos dos
+   son los únicos que quedan, y a ese tamaño un trazo gordo los hacía parecer
+   dos anillos en vez de dos medidores. Fino se lee como una línea de gráfico,
+   que es lo que son. */
+.aro-fondo { fill: none; stroke: var(--card2); stroke-width: 3; stroke-linecap: round; }
 @media (prefers-reduced-motion: reduce) {
   .aro-arco { transition: none; }
 }
 /* Cada aro con su color, que viene en --tono desde el HTML: tres verdes
    iguales se leen como un bloque y hay que leer las etiquetas para saber
    cual es cual. */
-.aro-arco { fill: none; stroke: var(--tono, var(--acc)); stroke-width: 4.2;
+.aro-arco { fill: none; stroke: var(--tono, var(--acc)); stroke-width: 3;
   stroke-linecap: round;
   transition: stroke-dasharray .9s cubic-bezier(.2,.9,.3,1); }
 
