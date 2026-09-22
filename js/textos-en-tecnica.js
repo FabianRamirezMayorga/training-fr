@@ -16,6 +16,121 @@
   'use strict';
 
   const TECNICA = {
+    /* ---------- lo que tienes en la mano ----------
+       Las guias van por patron de movimiento, asi que el texto no nombra la
+       barra: escribe {carga} y se rellena al pintarlo con "the bar" o "the
+       weight". El hueco se queda igual en la clave y en la traduccion. */
+    'Túmbate en el banco con cinco puntos de apoyo: cabeza, espalda alta, glúteos y los dos pies en el suelo.':
+      'Lie on the bench with five points of contact: head, upper back, glutes and both feet on the floor.',
+    'Agarra {carga} algo más ancho que los hombros. Rodea con el pulgar, nunca por encima.':
+      'Grip {carga} slightly wider than your shoulders. Wrap your thumb around, never over the top.',
+    'Baja {carga} en 2 segundos hacia la parte baja del pecho, a la altura de los pezones. Los codos van a unos 45 grados del torso, no abiertos en cruz. Baja hasta el pecho sin rebotar.':
+      'Lower {carga} over 2 seconds towards your lower chest, at nipple height. Elbows at about 45 degrees from your torso, not flared out. Come down to your chest without bouncing.',
+    'Empuja el suelo con los pies y sube {carga} en línea ligeramente diagonal, hacia los hombros. Termina con los codos extendidos pero sin bloquearlos de golpe.':
+      'Push the floor with your feet and drive {carga} up on a slight diagonal, towards your shoulders. Finish with your elbows extended but without snapping them locked.',
+    'Rebotar {carga} en el pecho': 'Bouncing {carga} off your chest',
+    'Colócate con los ojos justo debajo de la barra antes de sacarla del soporte.':
+      'Set up with your eyes directly under the bar before you unrack it.',
+    'De pie, pies al ancho de las caderas, con {carga} a la altura de la parte alta del pecho.':
+      'Standing, feet hip-width apart, with {carga} at upper-chest height.',
+    'Manos algo más abiertas que los hombros, codos ligeramente por delante.':
+      'Hands slightly wider than your shoulders, elbows a little in front.',
+    'Mete la barbilla hacia atrás para dejar paso a {carga} y empuja en vertical. Cuando {carga} pase la frente, mete la cabeza hacia delante: acaba justo encima de la coronilla, no por delante.':
+      'Tuck your chin back to clear the way for {carga} and press straight up. Once {carga} passes your forehead, move your head forward: it finishes right over the crown of your head, not out in front.',
+    'La cabeza se aparta y vuelve: ese pequeño movimiento es lo que permite subir en línea recta.':
+      'Your head moves out of the way and back: that small movement is what lets you press in a straight line.',
+    'Dejar {carga} por delante arriba': 'Leaving {carga} out in front at the top',
+    'Termina con {carga} sobre la cabeza; si se queda por delante, el hombro trabaja en desventaja.':
+      'Finish with {carga} over your head; if it stays out in front, your shoulder works at a disadvantage.',
+    'Pies al ancho de caderas, rodillas algo flexionadas, cadera hacia atrás hasta que el torso quede a unos 45 grados o algo más horizontal.':
+      'Feet hip-width apart, knees slightly bent, hips back until your torso is at about 45 degrees or a little more horizontal.',
+    'Deja que {carga} cuelgue con los brazos extendidos, cerca de las espinillas.':
+      'Let {carga} hang with your arms extended, close to your shins.',
+    'Lleva {carga} hacia el ombligo o la parte baja del abdomen, con los codos pegados al cuerpo. Aprieta las escápulas al final, como si sujetaras un lápiz entre ellas.':
+      'Pull {carga} towards your navel or lower abs, elbows close to your body. Squeeze your shoulder blades at the end, as if holding a pencil between them.',
+    'Sujeta el peso con las manos a los lados, o sin peso mientras coges el gesto.':
+      'Hold the weight in your hands at your sides, or go without weight while you learn the movement.',
+    'Coloca {carga} sobre el medio del pie, casi tocando la espinilla. Pies al ancho de las caderas.':
+      'Set {carga} over your midfoot, almost touching your shin. Feet hip-width apart.',
+    'Cadera atrás y baja hasta agarrar {carga} por fuera de las piernas, con los brazos verticales.':
+      'Hips back and lower until you can grip {carga} outside your legs, arms vertical.',
+    'Pecho alto, espalda neutra, hombros ligeramente por delante de {carga}. Coge aire y aprieta el abdomen.':
+      'Chest up, neutral back, shoulders slightly in front of {carga}. Take a breath and brace your core.',
+    'Antes de tirar, "quita la holgura": tensa los brazos hasta notar que ya no hay juego.':
+      'Before you pull, "take out the slack": tense your arms until there is no give left.',
+    'Empuja el suelo con las piernas sin dejar que {carga} se separe del cuerpo. La cadera y el pecho suben a la vez; la espalda no cambia de ángulo.':
+      'Push the floor with your legs without letting {carga} drift away from your body. Hips and chest rise together; your back does not change angle.',
+    'Lleva primero la cadera atrás, y cuando {carga} pase las rodillas, flexiónalas. Baja rozando las piernas.':
+      'Send your hips back first, and once {carga} passes your knees, bend them. Come down brushing your legs.',
+    'Que {carga} se separe del cuerpo': 'Letting {carga} drift away from your body',
+    'Es la causa número uno de lumbares cargadas. Piensa en arrastrar {carga} por las piernas.':
+      'It is the number one cause of a sore lower back. Think about dragging {carga} up your legs.',
+    'Si no puedes mantenerla neutra abajo, eleva {carga} sobre un soporte y trabaja desde ahí.':
+      'If you cannot keep it neutral at the bottom, raise {carga} onto a support and work from there.',
+    'De pie con {carga} a la altura de la cadera, brazos extendidos, pies al ancho de las caderas.':
+      'Standing with {carga} at hip height, arms extended, feet hip-width apart.',
+    'Lleva la cadera hacia atrás, como si empujaras una puerta con el glúteo, mientras {carga} baja rozando los muslos. Baja hasta notar un estiramiento fuerte en los isquios, normalmente a media espinilla. La espalda no se redondea.':
+      'Send your hips back, as if pushing a door shut with your glutes, while {carga} travels down brushing your thighs. Go down until you feel a strong hamstring stretch, usually mid-shin. Your back does not round.',
+    'Empuja la cadera hacia delante y aprieta los glúteos para volver arriba, sin separar {carga} de la pierna.':
+      'Drive your hips forward and squeeze your glutes to come back up, without letting {carga} leave your leg.',
+    'Separar {carga} del cuerpo': 'Letting {carga} drift away from your body',
+    'Mira hacia delante durante todo el movimiento: si sigues {carga} con la vista, la lumbar se arquea.':
+      'Look straight ahead throughout: if you follow {carga} with your eyes, your lower back arches.',
+    'Baja despacio hasta el estiramiento completo, dejando incluso que {carga} ruede hasta los dedos.':
+      'Lower slowly into a full stretch, even letting {carga} roll down to your fingers.',
+
+    '{Carga} sobre el pliegue de la cadera.': '{Carga} across the crease of your hips.',
+    'Con barra, ponle una almohadilla: el hueso de la cadera lo agradece.':
+      'With a barbell, use a pad: your hip bones will thank you.',
+    'Posición de peso muerto, con {carga} sobre el medio del pie.':
+      'Deadlift position, with {carga} over your midfoot.',
+    'Hombros ligeramente por delante de {carga}, espalda neutra, brazos rectos y relajados.':
+      'Shoulders slightly in front of {carga}, neutral back, arms straight and relaxed.',
+    'Despega {carga} del suelo empujando con las piernas, manteniendo el ángulo de la espalda. Sube rozando las piernas.':
+      'Break {carga} off the floor by pushing with your legs, keeping your back angle. It travels up brushing your legs.',
+    'Al pasar la rodilla, extiende cadera, rodilla y tobillo con potencia. Los brazos siguen relajados: {carga} sube por el impulso, no por tirar con los brazos.':
+      'As it passes your knee, extend hips, knees and ankles explosively. Your arms stay relaxed: {carga} rises on that drive, not by pulling with your arms.',
+    'Métete debajo de {carga} girando los codos hacia delante y recíbela sobre los deltoides, en media sentadilla frontal. Levántate.':
+      'Drop under {carga} by whipping your elbows forward and catch it on your front delts, in a half front squat. Stand up.',
+    'Los levantamientos olímpicos son técnicos de verdad. Aprende con muy poco peso y, a ser posible, con alguien que sepa mirándote.':
+      'The olympic lifts are genuinely technical. Learn them with very light weight and, if you can, with someone who knows watching you.',
+    'Gira los codos rápido y alto; con codos bajos {carga} cae sobre las muñecas.':
+      'Whip your elbows fast and high; with low elbows {carga} lands on your wrists.',
+
+    /* ---------- swing con kettlebell ---------- */
+    'Swing con kettlebell': 'Kettlebell swing',
+    'Pesa en el suelo, un palmo por delante de los pies. Pies algo más abiertos que las caderas, puntas ligeramente hacia fuera.':
+      'Bell on the floor, a hand-span in front of your feet. Feet slightly wider than your hips, toes turned out a little.',
+    'Cadera atrás y agarra el asa con las dos manos, brazos largos. La espalda queda neutra y el pecho alto, no de cuclillas.':
+      'Hips back and grip the handle with both hands, arms long. Neutral back and chest up, not squatting down.',
+    'Inclina la pesa hacia ti y lánzala entre las piernas para coger impulso, como si pasaras un balón de rugby hacia atrás.':
+      'Tilt the bell towards you and hike it between your legs to start, like snapping a rugby ball backwards.',
+    'Balanceo atrás': 'Backswing',
+    'Cadera hacia atrás y la pesa pasa por encima de las rodillas, alta y pegada a la ingle. Las rodillas apenas se flexionan: esto es una bisagra de cadera, no una sentadilla.':
+      'Hips back and the bell passes above your knees, high and close to your groin. Your knees barely bend: this is a hip hinge, not a squat.',
+    'Extiende la cadera de golpe y aprieta glúteos y abdomen. La pesa sube sola por ese impulso; los brazos solo la acompañan. Arriba, el cuerpo queda en línea recta.':
+      'Snap your hips open and squeeze glutes and core. The bell floats up on that drive; your arms only go along with it. At the top your body is in a straight line.',
+    'Deja que caiga y espérala con la cadera: cuando los brazos toquen las costillas, vuelve a llevar la cadera atrás y encadena.':
+      'Let it fall and meet it with your hips: when your arms touch your ribs, send your hips back again and link the next rep.',
+    'Espira con fuerza al extender la cadera e inspira mientras la pesa baja. El ritmo lo marca la respiración, no los brazos.':
+      'Breathe out sharply as your hips open and in as the bell comes down. Your breathing sets the rhythm, not your arms.',
+    'Continuo, sin pausa entre repeticiones': 'Continuous, no pause between reps',
+    'Es un salto sin despegar los pies: el peso lo proyecta la cadera, no los brazos.':
+      'It is a jump without leaving the ground: the hips throw the weight, not the arms.',
+    'Hazlo en un sitio despejado, con la pesa bien agarrada. Si no controlas la bisagra de cadera, apréndela antes con peso muerto rumano.':
+      'Do it in a clear space with a solid grip on the bell. If you have not got the hip hinge down, learn it first with the Romanian deadlift.',
+    'Hacer sentadilla en vez de bisagra': 'Squatting instead of hinging',
+    'Si las rodillas se flexionan mucho, la pesa baja demasiado. Manda la cadera hacia atrás y deja las rodillas casi quietas.':
+      'If your knees bend a lot, the bell drops too low. Send your hips back and keep your knees almost still.',
+    'Levantar la pesa con los brazos': 'Lifting the bell with your arms',
+    'Los brazos son cuerdas. Si notas hombro en vez de glúteo, estás tirando en lugar de proyectar.':
+      'Your arms are ropes. If you feel your shoulders instead of your glutes, you are pulling rather than projecting.',
+    'Arquear la lumbar arriba': 'Arching your lower back at the top',
+    'Termina de pie y firme, con las costillas hacia dentro y el glúteo apretado, sin echarte hacia atrás.':
+      'Finish standing tall and solid, ribs down and glutes squeezed, without leaning back.',
+    'Dejar que la pesa se aleje abajo': 'Letting the bell drift away at the bottom',
+    'Debe pasar alta y cerca de la ingle. Si baja hacia el suelo, la lumbar se lleva la carga.':
+      'It should pass high and close to your groin. If it drops towards the floor, your lower back takes the load.',
 
     /* ---------- lo que se repite en todas las guías ---------- */
     'Bajada': 'Lowering',

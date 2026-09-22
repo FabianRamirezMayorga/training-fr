@@ -17,24 +17,27 @@
     'bench press': {
       titulo: 'Press de banca',
       inicial: [
-        'Túmbate con los ojos justo debajo de la barra. Cinco puntos de apoyo: cabeza, espalda alta, glúteos y los dos pies en el suelo.',
+        'Túmbate en el banco con cinco puntos de apoyo: cabeza, espalda alta, glúteos y los dos pies en el suelo.',
         'Junta las escápulas y húndelas hacia los glúteos, como si quisieras guardarlas en los bolsillos traseros. El pecho queda alto y aparece un arco natural en la zona lumbar.',
-        'Agarra la barra algo más ancho que los hombros. Rodea con el pulgar, nunca por encima.'
+        'Agarra {carga} algo más ancho que los hombros. Rodea con el pulgar, nunca por encima.'
       ],
       recorrido: [
-        { fase: 'Bajada', texto: 'Baja la barra en 2 segundos hacia la parte baja del pecho, a la altura de los pezones. Los codos van a unos 45 grados del torso, no abiertos en cruz. La barra toca el pecho sin rebotar.' },
-        { fase: 'Subida', texto: 'Empuja el suelo con los pies y sube la barra en línea ligeramente diagonal, hacia los hombros. Termina con los codos extendidos pero sin bloquearlos de golpe.' }
+        { fase: 'Bajada', texto: 'Baja {carga} en 2 segundos hacia la parte baja del pecho, a la altura de los pezones. Los codos van a unos 45 grados del torso, no abiertos en cruz. Baja hasta el pecho sin rebotar.' },
+        { fase: 'Subida', texto: 'Empuja el suelo con los pies y sube {carga} en línea ligeramente diagonal, hacia los hombros. Termina con los codos extendidos pero sin bloquearlos de golpe.' }
       ],
       respiracion: 'Coge aire arriba, aguántalo durante la bajada y suelta al superar la mitad de la subida. Ese aire mantiene la caja torácica firme.',
       tempo: '2 s bajando · 0 s abajo · 1 s subiendo',
       errores: [
         { fallo: 'Abrir los codos a 90 grados', arreglo: 'Castiga el hombro y resta fuerza. Mantenlos a unos 45 grados del cuerpo.' },
-        { fallo: 'Rebotar la barra en el pecho', arreglo: 'Toca y empuja, sin impulso. Si necesitas rebote, tienes demasiado peso.' },
+        { fallo: 'Rebotar {carga} en el pecho', arreglo: 'Toca y empuja, sin impulso. Si necesitas rebote, tienes demasiado peso.' },
         { fallo: 'Despegar los glúteos del banco', arreglo: 'Deja los glúteos pegados. Si se levantan, baja el peso.' },
         { fallo: 'Perder la retracción de las escápulas', arreglo: 'Mantén el pecho alto durante toda la serie; si se redondea la espalda alta, el pectoral deja de trabajar.' }
       ],
       clave: 'Piensa en separar el suelo del banco con los pies mientras empujas. La fuerza sale de todo el cuerpo, no solo de los brazos.',
-      seguridad: 'Con barra libre y sin compañero, usa los seguros del rack a la altura del pecho.'
+      barra: {
+        inicial: ['Colócate con los ojos justo debajo de la barra antes de sacarla del soporte.'],
+        seguridad: 'Con barra libre y sin compañero, usa los seguros del rack a la altura del pecho.'
+      }
     },
 
     'push up': {
@@ -103,22 +106,22 @@
     'military press': {
       titulo: 'Press militar',
       inicial: [
-        'De pie, pies al ancho de las caderas, barra apoyada en la parte alta del pecho.',
-        'Manos algo más abiertas que los hombros, codos ligeramente por delante de la barra.',
+        'De pie, pies al ancho de las caderas, con {carga} a la altura de la parte alta del pecho.',
+        'Manos algo más abiertas que los hombros, codos ligeramente por delante.',
         'Aprieta glúteos y abdomen: son los que evitan que la espalda se arquee al empujar.'
       ],
       recorrido: [
-        { fase: 'Subida', texto: 'Mete la barbilla hacia atrás para dejar paso a la barra y empuja en vertical. Cuando la barra pase la frente, mete la cabeza hacia delante: la barra acaba justo encima de la coronilla, no por delante.' },
+        { fase: 'Subida', texto: 'Mete la barbilla hacia atrás para dejar paso a {carga} y empuja en vertical. Cuando {carga} pase la frente, mete la cabeza hacia delante: acaba justo encima de la coronilla, no por delante.' },
         { fase: 'Bajada', texto: 'Baja controlado por la misma línea hasta las clavículas.' }
       ],
       respiracion: 'Coge aire abajo, aguanta durante el empuje y suelta arriba.',
       tempo: '1 s subiendo · 2 s bajando',
       errores: [
         { fallo: 'Arquear la espalda baja', arreglo: 'Aprieta glúteos y costillas hacia abajo. Si sigue pasando, baja el peso o hazlo sentado con respaldo.' },
-        { fallo: 'Dejar la barra por delante arriba', arreglo: 'Termina con la barra sobre la cabeza; si queda adelantada, el hombro trabaja en desventaja.' },
+        { fallo: 'Dejar {carga} por delante arriba', arreglo: 'Termina con {carga} sobre la cabeza; si se queda por delante, el hombro trabaja en desventaja.' },
         { fallo: 'Empujar con las piernas', arreglo: 'En el militar estricto las piernas no ayudan. Si flexionas rodillas, estás haciendo push press.' }
       ],
-      clave: 'La cabeza se aparta y vuelve: ese pequeño movimiento es lo que permite que la barra suba recta.'
+      clave: 'La cabeza se aparta y vuelve: ese pequeño movimiento es lo que permite subir en línea recta.'
     },
 
     'shoulder press': { alias: 'military press' },
@@ -174,12 +177,12 @@
     'row': {
       titulo: 'Remo',
       inicial: [
-        'Con barra: pies al ancho de caderas, rodillas algo flexionadas, cadera hacia atrás hasta que el torso quede a unos 45 grados o algo más horizontal.',
+        'Pies al ancho de caderas, rodillas algo flexionadas, cadera hacia atrás hasta que el torso quede a unos 45 grados o algo más horizontal.',
         'Espalda recta y neutra: ni redondeada ni exageradamente arqueada. La mirada al suelo un metro por delante.',
-        'Barra colgando con los brazos extendidos, cerca de las espinillas.'
+        'Deja que {carga} cuelgue con los brazos extendidos, cerca de las espinillas.'
       ],
       recorrido: [
-        { fase: 'Tirón', texto: 'Lleva la barra hacia el ombligo o la parte baja del abdomen, con los codos pegados al cuerpo. Aprieta las escápulas al final, como si sujetaras un lápiz entre ellas.' },
+        { fase: 'Tirón', texto: 'Lleva {carga} hacia el ombligo o la parte baja del abdomen, con los codos pegados al cuerpo. Aprieta las escápulas al final, como si sujetaras un lápiz entre ellas.' },
         { fase: 'Vuelta', texto: 'Baja en 2 o 3 segundos hasta estirar los brazos, sin dejar que los hombros se vayan hacia delante en exceso ni que la espalda se redondee.' }
       ],
       respiracion: 'Espira al tirar, inspira al bajar.',
@@ -187,10 +190,14 @@
       errores: [
         { fallo: 'Incorporarse en cada repetición', arreglo: 'El torso mantiene su ángulo. Si te levantas para subir el peso, está pesando demasiado.' },
         { fallo: 'Redondear la espalda baja', arreglo: 'Riesgo real para la lumbar. Baja el peso y apoya el pecho en un banco inclinado si te cuesta mantener la posición.' },
-        { fallo: 'Tirar hacia el pecho con barra', arreglo: 'Con agarre prono, la barra va al abdomen. Al pecho es un ejercicio distinto y más incómodo.' }
       ],
       clave: 'La cadera va hacia atrás, no las rodillas hacia delante. Si notas la lumbar, revisa esa posición antes que el peso.',
-      seguridad: 'Con molestias lumbares, elige remo con apoyo en el pecho o remo sentado en polea.'
+      seguridad: 'Con molestias lumbares, elige remo con apoyo en el pecho o remo sentado en polea.',
+      barra: {
+        errores: [
+          { fallo: 'Tirar hacia el pecho con barra', arreglo: 'Con agarre prono, la barra va al abdomen. Al pecho es un ejercicio distinto y más incómodo.' }
+        ]
+      }
     },
 
     'face pull': {
@@ -235,7 +242,6 @@
     'squat': {
       titulo: 'Sentadilla',
       inicial: [
-        'Barra apoyada en la parte alta de la espalda, sobre los trapecios, no sobre el cuello.',
         'Pies al ancho de los hombros o algo más, puntas ligeramente hacia fuera, entre 15 y 30 grados.',
         'Coge aire, llena el abdomen y aprieta como si fueras a recibir un golpe. Mirada al frente o algo abajo.'
       ],
@@ -252,7 +258,10 @@
         { fallo: 'Mirar al techo', arreglo: 'Hiperextiende el cuello. Mirada al frente o ligeramente abajo, y que se mueva con el torso.' }
       ],
       clave: 'La profundidad útil es hasta donde mantienes la espalda neutra. Ganarás más bajando bien con menos peso.',
-      seguridad: 'Ajusta los seguros del rack a la altura de la posición más baja antes de empezar.'
+      barra: {
+        inicial: ['Barra apoyada en la parte alta de la espalda, sobre los trapecios, no sobre el cuello.'],
+        seguridad: 'Ajusta los seguros del rack a la altura de la posición más baja antes de empezar.'
+      }
     },
 
     'front squat': { alias: 'squat' },
@@ -280,7 +289,7 @@
       titulo: 'Zancadas',
       inicial: [
         'De pie, tronco erguido, abdomen firme y mirada al frente.',
-        'Peso en las manos a los lados o barra en la espalda.'
+        'Sujeta el peso con las manos a los lados, o sin peso mientras coges el gesto.'
       ],
       recorrido: [
         { fase: 'Bajada', texto: 'Da un paso largo al frente y baja en vertical hasta que la rodilla de atrás quede a un dedo del suelo y la de delante forme 90 grados. El torso se mantiene vertical.' },
@@ -319,22 +328,22 @@
     'deadlift': {
       titulo: 'Peso muerto',
       inicial: [
-        'Barra sobre el medio del pie, casi tocando la espinilla. Pies al ancho de las caderas.',
-        'Cadera atrás y baja hasta agarrar la barra por fuera de las piernas, con los brazos verticales.',
-        'Pecho alto, espalda neutra, hombros ligeramente por delante de la barra. Coge aire y aprieta el abdomen.',
-        'Antes de tirar, "quita la holgura" a la barra: tensa los brazos hasta oír cómo los discos asientan.'
+        'Coloca {carga} sobre el medio del pie, casi tocando la espinilla. Pies al ancho de las caderas.',
+        'Cadera atrás y baja hasta agarrar {carga} por fuera de las piernas, con los brazos verticales.',
+        'Pecho alto, espalda neutra, hombros ligeramente por delante de {carga}. Coge aire y aprieta el abdomen.',
+        'Antes de tirar, "quita la holgura": tensa los brazos hasta notar que ya no hay juego.'
       ],
       recorrido: [
-        { fase: 'Despegue', texto: 'Empuja el suelo con las piernas manteniendo la barra pegada al cuerpo. La cadera y el pecho suben a la vez; la espalda no cambia de ángulo.' },
+        { fase: 'Despegue', texto: 'Empuja el suelo con las piernas sin dejar que {carga} se separe del cuerpo. La cadera y el pecho suben a la vez; la espalda no cambia de ángulo.' },
         { fase: 'Bloqueo', texto: 'Al pasar las rodillas, lleva la cadera hacia delante y termina de pie, apretando glúteos. Sin echarte hacia atrás ni encoger los hombros.' },
-        { fase: 'Bajada', texto: 'Lleva primero la cadera atrás, y cuando la barra pase las rodillas, flexiónalas. La barra baja rozando las piernas.' }
+        { fase: 'Bajada', texto: 'Lleva primero la cadera atrás, y cuando {carga} pase las rodillas, flexiónalas. Baja rozando las piernas.' }
       ],
       respiracion: 'Coge aire abajo, aguántalo toda la repetición y suéltalo arriba. Vuelve a coger aire antes de la siguiente.',
       tempo: '1 s subiendo · 2 s bajando',
       errores: [
-        { fallo: 'La barra se separa del cuerpo', arreglo: 'Es la causa número uno de lumbares cargadas. Piensa en arrastrar la barra por las piernas.' },
+        { fallo: 'Que {carga} se separe del cuerpo', arreglo: 'Es la causa número uno de lumbares cargadas. Piensa en arrastrar {carga} por las piernas.' },
         { fallo: 'La cadera sube antes que el pecho', arreglo: 'Se convierte en un buenos días con mucho peso. Empuja el suelo en lugar de tirar con la espalda.' },
-        { fallo: 'Redondear la espalda', arreglo: 'Si no puedes mantenerla neutra abajo, eleva la barra sobre unos discos y trabaja desde ahí.' },
+        { fallo: 'Redondear la espalda', arreglo: 'Si no puedes mantenerla neutra abajo, eleva {carga} sobre un soporte y trabaja desde ahí.' },
         { fallo: 'Hiperextender arriba', arreglo: 'Termina de pie y firme, no arqueado hacia atrás.' }
       ],
       clave: 'Es un empuje de piernas con la espalda rígida, no un tirón de espalda. Cada repetición empieza de cero desde el suelo.',
@@ -344,20 +353,20 @@
     'romanian deadlift': {
       titulo: 'Peso muerto rumano',
       inicial: [
-        'De pie con la barra a la altura de la cadera, brazos extendidos, pies al ancho de las caderas.',
+        'De pie con {carga} a la altura de la cadera, brazos extendidos, pies al ancho de las caderas.',
         'Rodillas ligeramente flexionadas: ese ángulo se mantiene todo el ejercicio.',
         'Pecho alto y escápulas ligeramente juntas.'
       ],
       recorrido: [
-        { fase: 'Bajada', texto: 'Lleva la cadera hacia atrás, como si empujaras una puerta con el glúteo, mientras la barra baja rozando los muslos. Baja hasta notar un estiramiento fuerte en los isquios, normalmente a media espinilla. La espalda no se redondea.' },
-        { fase: 'Subida', texto: 'Empuja la cadera hacia delante y aprieta los glúteos para volver arriba. La barra sigue pegada a la pierna.' }
+        { fase: 'Bajada', texto: 'Lleva la cadera hacia atrás, como si empujaras una puerta con el glúteo, mientras {carga} baja rozando los muslos. Baja hasta notar un estiramiento fuerte en los isquios, normalmente a media espinilla. La espalda no se redondea.' },
+        { fase: 'Subida', texto: 'Empuja la cadera hacia delante y aprieta los glúteos para volver arriba, sin separar {carga} de la pierna.' }
       ],
       respiracion: 'Inspira arriba, aguanta durante la bajada y espira al terminar de subir.',
       tempo: '3 s bajando · 1 s subiendo',
       errores: [
         { fallo: 'Flexionar las rodillas al bajar', arreglo: 'Entonces es un peso muerto convencional. El ángulo de rodilla no cambia.' },
         { fallo: 'Bajar hasta el suelo', arreglo: 'El recorrido lo marca el estiramiento del isquio, no el suelo.' },
-        { fallo: 'Separar la barra del cuerpo', arreglo: 'Debe rozar el muslo. Si se aleja, la lumbar se lleva la carga.' }
+        { fallo: 'Separar {carga} del cuerpo', arreglo: 'Debe rozar el muslo. Si se aleja, la lumbar se lleva la carga.' }
       ],
       clave: 'El movimiento es de cadera hacia atrás, no de columna hacia delante. Si no notas los isquios, no estás llevando la cadera atrás.'
     },
@@ -369,7 +378,7 @@
       inicial: [
         'Espalda alta apoyada en el borde de un banco, justo debajo de las escápulas.',
         'Pies al ancho de las caderas, colocados de forma que al subir la tibia quede vertical.',
-        'Barra sobre el pliegue de la cadera, con una almohadilla.'
+        '{Carga} sobre el pliegue de la cadera.'
       ],
       recorrido: [
         { fase: 'Subida', texto: 'Empuja con los talones y sube la cadera hasta que el cuerpo forme una línea recta de rodillas a hombros. Aprieta el glúteo un segundo arriba.' },
@@ -382,8 +391,43 @@
         { fallo: 'Pies mal colocados', arreglo: 'Si quedan muy cerca trabaja el cuádriceps; muy lejos, los isquios. Busca la tibia vertical arriba.' },
         { fallo: 'Empujar con las puntas', arreglo: 'Presiona con el talón.' }
       ],
-      clave: 'Mira hacia delante durante todo el movimiento: si sigues la barra con la vista, la lumbar se arquea.'
+      clave: 'Mira hacia delante durante todo el movimiento: si sigues {carga} con la vista, la lumbar se arquea.',
+      barra: {
+        inicial: ['Con barra, ponle una almohadilla: el hueso de la cadera lo agradece.']
+      }
     },
+
+    /* ---------------- balanceo ----------------
+       El swing venía heredando la guía de la cargada olímpica, y no se parecen
+       en nada: leías «métete debajo de la barra y recíbela sobre los deltoides»
+       para un ejercicio en el que la pesa nunca sube por encima del hombro.
+       Comparten que el peso sale del suelo y poco más. */
+    'swing': {
+      titulo: 'Swing con kettlebell',
+      inicial: [
+        'Pesa en el suelo, un palmo por delante de los pies. Pies algo más abiertos que las caderas, puntas ligeramente hacia fuera.',
+        'Cadera atrás y agarra el asa con las dos manos, brazos largos. La espalda queda neutra y el pecho alto, no de cuclillas.',
+        'Inclina la pesa hacia ti y lánzala entre las piernas para coger impulso, como si pasaras un balón de rugby hacia atrás.'
+      ],
+      recorrido: [
+        { fase: 'Balanceo atrás', texto: 'Cadera hacia atrás y la pesa pasa por encima de las rodillas, alta y pegada a la ingle. Las rodillas apenas se flexionan: esto es una bisagra de cadera, no una sentadilla.' },
+        { fase: 'Empuje', texto: 'Extiende la cadera de golpe y aprieta glúteos y abdomen. La pesa sube sola por ese impulso; los brazos solo la acompañan. Arriba, el cuerpo queda en línea recta.' },
+        { fase: 'Vuelta', texto: 'Deja que caiga y espérala con la cadera: cuando los brazos toquen las costillas, vuelve a llevar la cadera atrás y encadena.' }
+      ],
+      respiracion: 'Espira con fuerza al extender la cadera e inspira mientras la pesa baja. El ritmo lo marca la respiración, no los brazos.',
+      tempo: 'Continuo, sin pausa entre repeticiones',
+      errores: [
+        { fallo: 'Hacer sentadilla en vez de bisagra', arreglo: 'Si las rodillas se flexionan mucho, la pesa baja demasiado. Manda la cadera hacia atrás y deja las rodillas casi quietas.' },
+        { fallo: 'Levantar la pesa con los brazos', arreglo: 'Los brazos son cuerdas. Si notas hombro en vez de glúteo, estás tirando en lugar de proyectar.' },
+        { fallo: 'Arquear la lumbar arriba', arreglo: 'Termina de pie y firme, con las costillas hacia dentro y el glúteo apretado, sin echarte hacia atrás.' },
+        { fallo: 'Dejar que la pesa se aleje abajo', arreglo: 'Debe pasar alta y cerca de la ingle. Si baja hacia el suelo, la lumbar se lleva la carga.' }
+      ],
+      clave: 'Es un salto sin despegar los pies: el peso lo proyecta la cadera, no los brazos.',
+      seguridad: 'Hazlo en un sitio despejado, con la pesa bien agarrada. Si no controlas la bisagra de cadera, apréndela antes con peso muerto rumano.'
+    },
+
+    'kettlebell swing': { alias: 'swing' },
+    'american swing': { alias: 'swing' },
 
     'glute bridge': { alias: 'hip thrust' },
     'bridge': { alias: 'hip thrust' },
@@ -458,7 +502,7 @@
       ],
       recorrido: [
         { fase: 'Subida', texto: 'Flexiona solo la muñeca, todo el recorrido, y aprieta arriba.' },
-        { fase: 'Bajada', texto: 'Baja despacio hasta el estiramiento completo, dejando incluso que la barra ruede hasta los dedos.' }
+        { fase: 'Bajada', texto: 'Baja despacio hasta el estiramiento completo, dejando incluso que {carga} ruede hasta los dedos.' }
       ],
       respiracion: 'Normal y continua.',
       tempo: '1 s subiendo · 2 s bajando',
@@ -630,22 +674,22 @@
     'clean': {
       titulo: 'Cargada',
       inicial: [
-        'Posición de peso muerto con la barra sobre el medio del pie.',
-        'Hombros ligeramente por delante de la barra, espalda neutra, brazos rectos y relajados.'
+        'Posición de peso muerto, con {carga} sobre el medio del pie.',
+        'Hombros ligeramente por delante de {carga}, espalda neutra, brazos rectos y relajados.'
       ],
       recorrido: [
-        { fase: 'Primer tirón', texto: 'Despega la barra del suelo empujando con las piernas, manteniendo el ángulo de la espalda. La barra sube pegada a las piernas.' },
-        { fase: 'Extensión', texto: 'Al pasar la rodilla, extiende cadera, rodilla y tobillo con potencia. Los brazos siguen relajados: la barra sube por el impulso, no por tirar con los brazos.' },
-        { fase: 'Recepción', texto: 'Métete debajo de la barra girando los codos hacia delante y recíbela sobre los deltoides, en media sentadilla frontal. Levántate.' }
+        { fase: 'Primer tirón', texto: 'Despega {carga} del suelo empujando con las piernas, manteniendo el ángulo de la espalda. Sube rozando las piernas.' },
+        { fase: 'Extensión', texto: 'Al pasar la rodilla, extiende cadera, rodilla y tobillo con potencia. Los brazos siguen relajados: {carga} sube por el impulso, no por tirar con los brazos.' },
+        { fase: 'Recepción', texto: 'Métete debajo de {carga} girando los codos hacia delante y recíbela sobre los deltoides, en media sentadilla frontal. Levántate.' }
       ],
       respiracion: 'Coge aire antes de cada repetición y suéltalo al terminar de incorporarte.',
       tempo: 'Explosivo al subir, sin prisa entre repeticiones',
       errores: [
         { fallo: 'Tirar con los brazos demasiado pronto', arreglo: 'Los brazos son cuerdas hasta la extensión completa de la cadera.' },
-        { fallo: 'La barra se separa del cuerpo', arreglo: 'Debe rozar el muslo. Si se aleja, se pierde toda la potencia.' },
-        { fallo: 'Recibir con los codos bajos', arreglo: 'Gira los codos rápido y alto; con codos bajos la barra cae sobre las muñecas.' }
+        { fallo: 'Que {carga} se separe del cuerpo', arreglo: 'Debe rozar el muslo. Si se aleja, se pierde toda la potencia.' },
+        { fallo: 'Recibir con los codos bajos', arreglo: 'Gira los codos rápido y alto; con codos bajos {carga} cae sobre las muñecas.' }
       ],
-      clave: 'Los levantamientos olímpicos son técnicos de verdad. Aprende con barra vacía y, a ser posible, con alguien que sepa mirándote.',
+      clave: 'Los levantamientos olímpicos son técnicos de verdad. Aprende con muy poco peso y, a ser posible, con alguien que sepa mirándote.',
       seguridad: 'Hazlos en una zona despejada y con discos que puedan soltarse sin peligro. Ante la duda, elige otro ejercicio.'
     },
 
@@ -724,6 +768,26 @@
     if (!GUIAS[k]) GUIAS[k] = { alias: EQUIVALENTES[k] };
   });
 
+  /* ---------- con qué se hace ----------
+     Las guías están escritas por patrón, y el patrón es el mismo con barra que
+     con mancuernas. Lo que cambia es cómo se llama lo que sujetas, y el texto
+     lo decía como «la barra» a secas: el press de banca con mancuernas
+     explicaba cómo bajar una barra, y eran 331 ejercicios del catálogo.
+
+     Ahora el texto escribe {carga} y se resuelve al pintarlo. Siempre en
+     singular —«la barra», «el peso»— y redactado para que ningún adjetivo
+     concuerde con el hueco: «la barra pegada» y «el peso pegado» no se
+     escriben igual, así que se dice «sin que {carga} se separe».
+
+     Y lo que solo existe con barra —los seguros del rack, colocarse con los
+     ojos debajo— vive en un bloque `barra` que solo se añade entonces. */
+  function conBarra(ex) {
+    const eq = String((ex && ex.equipment) || '').toLowerCase();
+    const n = String((ex && ex.name) || '').toLowerCase();
+    if (/barbell|olympic|smith|trap bar|e-z curl bar|ez curl/.test(eq)) return true;
+    return /barbell|smith machine/.test(n);
+  }
+
   /* Un ejercicio hereda la guía de su patrón; los alias apuntan a otra guía */
   function resolver(clave, saltos) {
     const gu = GUIAS[clave];
@@ -775,7 +839,22 @@
         if (ambiguo[musculos[i]]) { clave = ambiguo[musculos[i]]; break; }
       }
     }
-    return resolver(clave);
+    const base = resolver(clave);
+    if (!base) return null;
+
+    /* Copia y no la guía misma: quien la reciba puede leerla tranquilo sin que
+       lo que añada un ejercicio se le quede pegado al siguiente. */
+    const b = base.barra || {};
+    if (!conBarra(ex)) {
+      return Object.assign({}, base, { conBarra: false, barra: null });
+    }
+    return Object.assign({}, base, {
+      conBarra: true,
+      barra: null,
+      inicial: (b.inicial || []).concat(base.inicial || []),
+      errores: (base.errores || []).concat(b.errores || []),
+      seguridad: b.seguridad || base.seguridad
+    });
   }
 
   /* Cuántos ejercicios del catálogo tienen guía, para poder medirlo */

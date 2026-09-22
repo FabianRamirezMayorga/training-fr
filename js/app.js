@@ -2621,13 +2621,30 @@
      todas por aquí, así que es el único sitio donde hay que traducirlas. El
      tempo —«2 s bajando · 1 s subiendo»— también, porque lleva palabras. */
   function guiaHTML(gu) {
+    /* El texto de las guías no dice «la barra» a secas: escribe {carga}, y aquí
+       se rellena con lo que de verdad tienes en la mano. Después de traducir y
+       no antes: la clave del diccionario es la frase con el hueco puesto, así
+       que sustituir primero la dejaría sin traducción. */
+    /* Estas dos no pasan por el diccionario: no son una frase, son dos
+       palabras que se empalman dentro de otra, y el diccionario va por
+       frases enteras —«el peso» ya está en él queriendo decir otra cosa,
+       lo que pesas—. Singular en los dos idiomas, para que el verbo de la
+       frase que las recibe concuerde sin escribir dos versiones. */
+    const en = g.Idioma && Idioma.actual() === 'en';
+    const cual = gu.conBarra ? (en ? 'the bar' : 'la barra')
+                             : (en ? 'the weight' : 'el peso');
+    const Carga = cual.charAt(0).toUpperCase() + cual.slice(1);
+    const C = function (txt) {
+      return String(txt).split('{Carga}').join(Carga).split('{carga}').join(cual);
+    };
+
     return html`
       <div class="list-title">${Tn('Cómo se hace · {que}', { que: T(gu.titulo) })}</div>
 
       <div class="card guia-bloque">
         <h3 class="guia-h">${raw(icon('perfil'))} ${T('Posición inicial')}</h3>
         <ol class="instr">
-          ${raw(gu.inicial.map(function (p) { return '<li>' + esc(T(p)) + '</li>'; }).join(''))}
+          ${raw(gu.inicial.map(function (p) { return '<li>' + esc(C(T(p))) + '</li>'; }).join(''))}
         </ol>
       </div>
 
@@ -2635,14 +2652,14 @@
         <h3 class="guia-h">${raw(icon('grafica'))} ${T('El recorrido')}</h3>
         ${raw(gu.recorrido.map(function (f) {
           return '<div class="fase-txt"><b>' + esc(T(f.fase)) + '</b><p>' +
-            esc(T(f.texto)) + '</p></div>';
+            esc(C(T(f.texto))) + '</p></div>';
         }).join(''))}
       </div>
 
       <div class="card guia-bloque">
         <div class="guia-dato">
           <span class="row-icon">${raw(icon('gota'))}</span>
-          <div><b>${T('Respiración')}</b><p>${T(gu.respiracion)}</p></div>
+          <div><b>${T('Respiración')}</b><p>${C(T(gu.respiracion))}</p></div>
         </div>
         <div class="guia-dato">
           <span class="row-icon">${raw(icon('reloj'))}</span>
@@ -2653,14 +2670,14 @@
       <div class="card guia-bloque">
         <h3 class="guia-h">${raw(icon('close'))} ${T('Errores frecuentes')}</h3>
         ${raw(gu.errores.map(function (e) {
-          return '<div class="error-item"><b>' + esc(T(e.fallo)) + '</b><p>' +
-            esc(T(e.arreglo)) + '</p></div>';
+          return '<div class="error-item"><b>' + esc(C(T(e.fallo))) + '</b><p>' +
+            esc(C(T(e.arreglo))) + '</p></div>';
         }).join(''))}
       </div>
 
       <div class="card destacado-clave">
         <h3 class="guia-h">${raw(icon('chispa'))} ${T('La clave')}</h3>
-        <p style="margin:0">${T(gu.clave)}</p>
+        <p style="margin:0">${C(T(gu.clave))}</p>
       </div>
 
       ${raw(gu.seguridad ? html`
