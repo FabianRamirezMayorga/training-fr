@@ -843,11 +843,30 @@
 
        Y sin icono al lado del rótulo: el aro ya es el símbolo, y una llama
        diminuta encima de «CALORÍAS» no añade nada que la palabra no diga. */
+    /* El arco no es de un color plano: va de un extremo al otro del mismo
+       tono —verde a ámbar las calorías, cian a azul la proteína— y así el trozo
+       encendido tiene principio y final, que es lo que hace que se lea como un
+       medidor y no como un adorno.
+
+       El degradado se define aquí dentro y no en el CSS porque un `url(#id)`
+       escrito en una hoja de estilos externa lo resuelve mal Safari, que lo
+       busca al lado del css y no en la página. Por eso también el `stroke` va
+       en `style` y no en una regla: desde el atributo, el `#` es el de esta
+       página y funciona en todas partes. */
+    const rampa = prot ? 'g-prot' : 'g-kcal';
+    const deA = prot
+      ? ['var(--brand-1)', 'var(--agua)']
+      : ['var(--acc)', 'var(--warn)'];
     return '<div class="ca-caja">' +
       '<svg class="aro ca-aro' + (prot ? ' prot' : '') + '" viewBox="0 0 46 46" aria-hidden="true">' +
+        '<defs><linearGradient id="' + rampa + '" x1="0" y1="1" x2="1" y2="0">' +
+          '<stop offset="0" style="stop-color:' + deA[0] + '"/>' +
+          '<stop offset="1" style="stop-color:' + deA[1] + '"/>' +
+        '</linearGradient></defs>' +
         '<circle class="aro-fondo" cx="23" cy="23" r="' + R + '" ' +
           'stroke-dasharray="' + arco + ' ' + C + '"/>' +
         '<circle class="aro-arco" cx="23" cy="23" r="' + R + '" ' +
+          'style="stroke:url(#' + rampa + ')" ' +
           'stroke-dasharray="0 ' + C + '" data-arco="' + lleno + ' ' + C + '"/>' +
       '</svg>' +
       '<span class="grow">' +

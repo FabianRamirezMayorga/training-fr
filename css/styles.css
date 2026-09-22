@@ -1843,13 +1843,21 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
   background: color-mix(in srgb, var(--card2) 55%, transparent);
   border: 1px solid transparent;
 }
+/* Hoy va en verde macizo y no en un tinte con borde: en una tira de siete
+   fichas iguales, un fondo un 12% más claro se pierde de reojo, y lo primero
+   que uno busca al mirar la tira es dónde está hoy.
+
+   Lo de dentro —letra, número y guiones— se pinta del color que va sobre
+   verde, porque el verde del entreno sobre verde no se ve. Ese día pierde el
+   código de colores, y no importa: es el único de la tira que no hace falta
+   descifrar. */
 .ps-dia.es-hoy {
-  background: color-mix(in srgb, var(--acc) 12%, transparent);
-  border-color: color-mix(in srgb, var(--acc) 30%, transparent);
+  background: var(--acc);
+  border-color: var(--acc);
 }
 .ps-letra { font-size: .6rem; font-weight: 700; color: var(--dim2);
   text-transform: uppercase; letter-spacing: .03em; }
-.ps-dia.es-hoy .ps-letra { color: var(--acc); }
+.ps-dia.es-hoy .ps-letra { color: color-mix(in srgb, var(--on-acc) 72%, transparent); }
 /* El número es lo que se viene a leer, así que manda en la ficha: los puntos
    se miran de reojo para ver si están encendidos y el número se lee. Al bajar
    los puntos a cinco píxeles se quedó pequeño sin haberlo tocado —era el mismo
@@ -1864,6 +1872,8 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .ps-dia.entrenado .ps-num { color: var(--acc); }
 .ps-dia.sin-entrenar .ps-num { color: var(--bad); }
 .ps-dia.libre .ps-num { color: var(--dim2); }
+/* Detrás de los tres a propósito: sobre el verde macizo mandan estos. */
+.ps-dia.es-hoy .ps-num { color: var(--on-acc); }
 .ps-marcas { display: flex; gap: 3px; margin-top: 5px; }
 
 /* Cinco píxeles. Nueve era el tamaño de cuando la tira tenía siete días y los
@@ -1885,6 +1895,9 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .ps-punto.entreno.si { background: var(--acc); box-shadow: none; }
 .ps-punto.prote.si { background: var(--brand-1); box-shadow: none; }
 .ps-punto.agua.si { background: var(--agua); box-shadow: none; }
+.ps-dia.es-hoy .ps-punto {
+  background: color-mix(in srgb, var(--on-acc) 24%, transparent); }
+.ps-dia.es-hoy .ps-punto.si { background: var(--on-acc); }
 
 /* La ficha se toca y cuenta el día. */
 .ps-dia.tap { cursor: pointer; transition: transform .12s ease; }
@@ -7847,8 +7860,14 @@ html[data-theme="light"] .ag-ico {
 .comida-aros { display: flex; gap: 10px; }
 .ca-caja { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; }
 .ca-aro { width: 42px; height: 42px; flex: none; }
-.ca-aro .aro-arco { stroke: var(--acc); }
-.ca-aro.prot .aro-arco { stroke: var(--brand-1); }
+/* El carril ya no es gris: lleva el color de su aro rebajado, como un
+   termómetro apagado. En gris los dos se veían iguales hasta fijarse en el
+   trozo encendido; teñido, cada aro se reconoce entero aunque lleve poco.
+
+   El color del arco encendido no está aquí: es un degradado y viaja con el
+   svg, que un `url(#id)` desde una hoja externa lo resuelve mal Safari. */
+.ca-aro .aro-fondo { stroke: color-mix(in srgb, var(--warn) 17%, transparent); }
+.ca-aro.prot .aro-fondo { stroke: color-mix(in srgb, var(--agua) 17%, transparent); }
 .ca-caja .grow { min-width: 0; }
 .ca-cifra { display: block; line-height: 1.15; }
 .ca-cifra b { font-size: 1.15rem; font-weight: 800; letter-spacing: -.03em;
