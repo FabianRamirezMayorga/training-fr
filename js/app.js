@@ -895,7 +895,7 @@
      El hilo nace a cero y el montaje le pone el ancho un fotograma después:
      con la transición del CSS crece solo. Puesto ya en el HTML no habría de
      dónde animar. */
-  function rsDato(pct, cifra, etiqueta, tono) {
+  function rsDato(pct, ico, cifra, etiqueta, tono) {
     const parte = Math.round(Math.max(0, Math.min(1, pct)) * 100);
     return '<div class="rs-dato" style="--tono:' + tono + '">' +
       '<span class="rs-cifra">' +
@@ -903,7 +903,11 @@
            que empujar su palabra fuera de la columna. */
         '<b class="rs-num' + (String(cifra).length > 4 ? ' largo' : '') + '">' +
         esc(cifra) + '</b>' +
-        '<span class="rs-et">' + esc(etiqueta) + '</span>' +
+        /* El icono delante de la palabra y del color del dato: una tira de tres
+           cifras se recorre por la forma antes que por la letra, y «racha» y
+           «series» a este tamaño son dos manchas grises iguales. */
+        '<span class="rs-et"><i class="rs-ico">' + icon(ico) + '</i>' +
+          '<span class="rs-pal">' + esc(etiqueta) + '</span></span>' +
       '</span>' +
       '<span class="rs-linea"><i class="rs-llena" data-llena="' +
         parte + '%"></i></span>' +
@@ -932,12 +936,12 @@
            hay que leer las palabras para saber cuál es cuál; con la racha en
            ámbar, el entreno en verde y las series en azul, cada cifra tiene la
            cara de lo que cuenta. Son los tres colores que la app ya usa. */
-        rsDato(parte(st.streak, 7), UI.num(st.streak),
+        rsDato(parte(st.streak, 7), 'llama', UI.num(st.streak),
           T('Racha'), 'var(--warn)') +
-        rsDato(parte(st.week, meta.dias), UI.num(st.week),
+        rsDato(parte(st.week, meta.dias), 'dumbbell', UI.num(st.week),
           T('Entrenos'), 'var(--acc)') +
         rsDato(parte(porVolumen ? st.weekVolume : st.weekSets,
-          porVolumen ? 0 : meta.series),
+          porVolumen ? 0 : meta.series), 'grafica',
           porVolumen ? UI.kg(st.weekVolume) : UI.num(st.weekSets),
           porVolumen ? T('Volumen') : T('Series'), 'var(--brand-1)') +
       '</div></div>';

@@ -7737,11 +7737,17 @@ html[data-theme="light"] .ag-ico {
 /* Apretado a proposito: la portada tiene que caber sin rodar, y este bloque
    es de mirar, no de tocar, asi que no necesita aire de dedo. */
 .resumen-sem { padding: 8px 10px; display: flex; align-items: center; gap: 10px; }
-.rs-rotulo { flex: none; width: 52px; font-size: .55rem; font-weight: 700;
+/* Dos renglones centrados uno sobre otro: «esta» es la mitad de larga que
+   «semana», y alineadas a la izquierda el bloque quedaba en escalera. El ancho es
+   fijo y corto para que el corte caiga en el espacio; `min-content` aquí no
+   vale, que la app parte palabras por donde sea y dejaba una letra por
+   renglón. Con 48 caben «semana» y el «this week» del inglés. */
+.rs-rotulo { flex: none; width: 48px; font-size: .55rem; font-weight: 700;
   letter-spacing: .09em; text-transform: uppercase; color: var(--dim);
-  line-height: 1.25; }
+  line-height: 1.25; text-align: center;
+  overflow-wrap: normal; word-break: normal; }
 .rs-tira { flex: 1; min-width: 0; display: flex; justify-content: space-between;
-  gap: 10px; }
+  gap: 8px; }
 /* Cada dato ocupa lo que ocupa su texto, no un tercio fijo: en modo detallado
    la cifra es «68.400 kg» y en tres columnas iguales su palabra se cortaba,
    mientras a «Racha» le sobraba la mitad de la suya. */
@@ -7751,8 +7757,13 @@ html[data-theme="light"] .ag-ico {
   font-variant-numeric: tabular-nums; line-height: 1.1; flex: none;
   color: var(--tono, var(--acc)); }
 .rs-num.largo { font-size: .8rem; letter-spacing: -.02em; }
-.rs-et { font-size: .62rem; color: var(--dim); line-height: 1.2;
-  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rs-et { display: inline-flex; align-items: center; gap: 3px; min-width: 0;
+  font-size: .62rem; color: var(--dim); line-height: 1.2; }
+.rs-pal { min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }
+.rs-ico { flex: none; display: flex; color: var(--tono, var(--acc)); }
+.rs-ico svg { width: 11px; height: 11px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 /* El hilo: tres píxeles con el color del dato sobre el gris de la tarjeta.
    Nace a cero y crece al entrar, como crecían los aros. */
 /* Los tres hilos miden lo mismo y no estiran con su columna: el largo de una
@@ -7761,11 +7772,45 @@ html[data-theme="light"] .ag-ico {
 .rs-linea { display: block; height: 3px; margin-top: 4px; width: 48px;
   border-radius: 2px;
   background: var(--card2); overflow: hidden; }
-.rs-llena { display: block; height: 100%; width: 0; border-radius: 2px;
+.rs-llena { position: relative; overflow: hidden;
+  display: block; height: 100%; width: 0; border-radius: 2px;
   background: var(--tono, var(--acc));
   transition: width .9s cubic-bezier(.2,.9,.3,1); }
+/* Un destello recorre lo lleno, no el carril entero: así la luz marca hasta
+   dónde has llegado en vez de tapar la diferencia.
+
+   Va al mismo compás que el reflejo de «tu constancia» y el del botón de
+   «ver mi día» —2 s, misma curva, misma espera de 0,6 s y el mismo tramo de
+   barrido— para que la portada entera respire a la vez y no parpadee en tres
+   sitios a destiempo. Si se cambia el ritmo de uno, hay que cambiar los tres:
+   busca `realce` y `vidrio-pasa`. */
+.rs-llena::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 55%; left: -70%;
+  background: linear-gradient(100deg, transparent 0%,
+    color-mix(in srgb, #fff 62%, transparent) 50%, transparent 100%);
+  animation: hilo-pasa 2s cubic-bezier(.35,0,.2,1) .6s infinite;
+}
+@keyframes hilo-pasa {
+  0% { left: -70%; }
+  34%, 100% { left: 150%; }
+}
+
+/* En pantallas de 320 —las que quedan— la tira se aprieta: letra y iconos un
+   punto más pequeños y menos aire entre las piezas. Y a la cifra larga del modo
+   detallado se le quita la palabra: «68.400 kg» con su icono ya dice que es
+   volumen, y con la palabra se cortaban las tres. */
+@media (max-width: 360px) {
+  .resumen-sem { gap: 7px; }
+  .rs-rotulo { width: 40px; letter-spacing: .06em; }
+  .rs-tira { gap: 6px; }
+  .rs-cifra { gap: 3px; }
+  .rs-et { gap: 2px; font-size: .56rem; }
+  .rs-ico svg { width: 10px; height: 10px; }
+  .rs-num.largo ~ .rs-et .rs-pal { display: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .rs-llena { transition: none; }
+  .rs-llena::after { animation: none; opacity: 0; }
 }
 
 /* El aro sigue vivo en «lo que llevas comido», aquí debajo. */
@@ -7773,14 +7818,17 @@ html[data-theme="light"] .ag-ico {
   /* El hueco centrado abajo: girando -225 grados, el arco arranca a las siete
      en punto y termina a las cinco. */
   transform: rotate(-225deg); }
-.aro-fondo { fill: none; stroke: var(--card2); stroke-width: 6; stroke-linecap: round; }
+/* Trazo de 4,2 y no de 6: un 30% más fino. Con los aros del resumen fuera,
+   estos dos son los únicos que quedan y a ese tamaño el 6 los hacía parecer
+   dos anillos gordos en vez de dos medidores. */
+.aro-fondo { fill: none; stroke: var(--card2); stroke-width: 4.2; stroke-linecap: round; }
 @media (prefers-reduced-motion: reduce) {
   .aro-arco { transition: none; }
 }
 /* Cada aro con su color, que viene en --tono desde el HTML: tres verdes
    iguales se leen como un bloque y hay que leer las etiquetas para saber
    cual es cual. */
-.aro-arco { fill: none; stroke: var(--tono, var(--acc)); stroke-width: 6;
+.aro-arco { fill: none; stroke: var(--tono, var(--acc)); stroke-width: 4.2;
   stroke-linecap: round;
   transition: stroke-dasharray .9s cubic-bezier(.2,.9,.3,1); }
 
