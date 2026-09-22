@@ -836,15 +836,20 @@
     const arco = C * 0.75;
     const lleno = arco * Math.max(0, Math.min(1, pct / 100));
     const prot = ico === 'proteina';
+    /* Nace vacío y crece al pintarse, igual que los del resumen: el montaje les
+       pone el valor un fotograma después y la transición hace el resto.
+
+       Y sin icono al lado del rótulo: el aro ya es el símbolo, y una llama
+       diminuta encima de «CALORÍAS» no añade nada que la palabra no diga. */
     return '<div class="ca-caja">' +
       '<svg class="aro ca-aro' + (prot ? ' prot' : '') + '" viewBox="0 0 46 46" aria-hidden="true">' +
         '<circle class="aro-fondo" cx="23" cy="23" r="' + R + '" ' +
           'stroke-dasharray="' + arco + ' ' + C + '"/>' +
         '<circle class="aro-arco" cx="23" cy="23" r="' + R + '" ' +
-          'stroke-dasharray="' + lleno + ' ' + C + '"/>' +
+          'stroke-dasharray="0 ' + C + '" data-arco="' + lleno + ' ' + C + '"/>' +
       '</svg>' +
       '<span class="grow">' +
-        '<span class="pre-encima' + (prot ? ' prot' : '') + '">' + icon(ico) +
+        '<span class="pre-encima' + (prot ? ' prot' : '') + '">' +
           esc(etiqueta) + '</span>' +
         '<span class="ca-cifra"><b' + (prot ? ' style="color:var(--brand-1)"' : '') +
           '>' + esc(hecho) + '</b>' +

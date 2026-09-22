@@ -7891,3 +7891,63 @@ html[data-theme="light"] .ag-ico {
 .vista-inicio .hola { margin-bottom: clamp(1px, .4svh, 5px); }
 .vista-inicio .enlace-flojo { margin: clamp(3px, .6svh, 7px) 0;
   padding: clamp(3px, .6svh, 7px) 0; }
+
+/* ---------- el hueco entre la tarjeta del dia y el resumen ----------
+   Ahi vivian cuatro cosas seguidas -tarjeta, aviso, enlace, resumen- y cada una
+   traia su margen, asi que entre todas sumaban un dedo de aire sin contenido.
+   Se juntan: siguen separadas, pero por un hueco y no por cuatro. */
+.vista-inicio .aviso-carga { margin-top: clamp(3px, .5svh, 6px); margin-bottom: 0; }
+.vista-inicio .enlace-flojo { margin: 0; padding: clamp(4px, .7svh, 8px) 0; }
+.vista-inicio .aviso-carga + .enlace-flojo { margin-top: clamp(1px, .3svh, 4px); }
+.vista-inicio .carga-mas { margin-top: 1px; }
+
+/* El resumen, otro punto mas pequeno: es el bloque que menos se toca y el que
+   mas alto ocupaba por cabeza. */
+.vista-inicio .aros { --aro: clamp(42px, 6.4svh, 56px); }
+.vista-inicio .aro-num { font-size: clamp(.85rem, 1.7svh, 1.05rem); }
+.vista-inicio .aro-et { font-size: clamp(.58rem, 1.15svh, .64rem); }
+.vista-inicio .resumen-sem { padding: clamp(6px, .9svh, 9px) 10px clamp(5px, .8svh, 8px); }
+
+/* ---------- el vidrio de la constancia ----------
+   Un reflejo lento que cruza la tarjeta, como la luz sobre un cristal al
+   moverlo. Va en un pseudo-elemento y no en el fondo para no pelearse con el
+   degradado que la tarjeta ya tiene, y por encima de todo con `pointer-events`
+   apagado, que si no se come los toques de los dias. */
+.vista-inicio .semana-caja { position: relative; overflow: hidden; }
+.vista-inicio .semana-caja::after {
+  content: ''; position: absolute; top: -60%; bottom: -60%; width: 42%;
+  left: -60%; pointer-events: none;
+  background: linear-gradient(100deg,
+    transparent 0%,
+    color-mix(in srgb, #fff 16%, transparent) 45%,
+    color-mix(in srgb, #fff 24%, transparent) 50%,
+    color-mix(in srgb, #fff 16%, transparent) 55%,
+    transparent 100%);
+  transform: skewX(-14deg);
+  animation: vidrio-pasa 6.5s cubic-bezier(.4,0,.2,1) infinite;
+}
+@keyframes vidrio-pasa {
+  0% { left: -60%; }
+  55%, 100% { left: 140%; }
+}
+html[data-theme="light"] .vista-inicio .semana-caja::after,
+:root:not([data-theme="dark"]) .vista-inicio .semana-caja::after {
+  background: linear-gradient(100deg, transparent 0%,
+    color-mix(in srgb, #fff 55%, transparent) 50%, transparent 100%);
+}
+
+/* El dia de hoy respira: un halo que crece y se apaga. No parpadea ni cambia
+   de color, que eso en una tira de quince dias marea; solo se nota que ese es
+   el de hoy sin tener que buscar el numero. */
+.vista-inicio .ps-dia.es-hoy {
+  animation: hoy-late 2.6s ease-in-out infinite;
+}
+@keyframes hoy-late {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--acc) 34%, transparent); }
+  50% { box-shadow: 0 0 12px 2px color-mix(in srgb, var(--acc) 26%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vista-inicio .semana-caja::after { animation: none; opacity: 0; }
+  .vista-inicio .ps-dia.es-hoy { animation: none; }
+}
