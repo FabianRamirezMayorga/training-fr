@@ -273,7 +273,7 @@
       /* El nombre tal cual lo escribió él. «Jugué fútbol» dice bastante más que
          «deporte de equipo, 90 min» a quien luego tenga que estimar lo que costó,
          y el que estima es el entrenador, no la app. */
-      actividades.push({ nombre: String(s.routineName || '').trim(), min: min });
+      actividades.push({ nombre: Store.nombreDeSesion(s), min: min });
       juntos.forEach(function (m) {
         const z = zonaDe(m);
         if (z && zonas.indexOf(z) === -1) zonas.push(z);

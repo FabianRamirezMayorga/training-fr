@@ -652,7 +652,7 @@
     }).filter(Boolean).join(', ');
 
     const nombres = d.sesiones.map(function (x) {
-      return String(x.routineName || '').trim();
+      return Store.nombreDeSesion(x);
     }).filter(Boolean).join(', ');
 
     UI.modal(UI.html`

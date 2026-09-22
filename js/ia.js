@@ -2799,7 +2799,7 @@
       deGimnasio ? lineas.join(SALTO) : null,
       deGimnasio && series ? '- En total ' + series + ' series.' : null,
       deGimnasio && ses.volume ? '- Volumen total ' + Math.round(ses.volume) + ' kg.' : null,
-      !deGimnasio ? '- Actividad: "' + String(ses.routineName || '').trim() + '", ' +
+      !deGimnasio ? '- Actividad: "' + Store.nombreDeSesion(ses) + '", ' +
         minutos + ' minutos.' : null,
       !deGimnasio && musculos.length ? '- Mueve: ' + musculos.join(', ') + '.' : null,
       '',
@@ -3308,7 +3308,7 @@
   /* Lectura del progreso reciente */
   function analizarProgreso() {
     const sesiones = Store.sessions().slice(0, 20).map(function (s) {
-      return UI.fechaCorta(s.start) + ': ' + s.routineName + ', ' + s.setsDone +
+      return UI.fechaCorta(s.start) + ': ' + Store.nombreDeSesion(s) + ', ' + s.setsDone +
         ' series, ' + Math.round(s.volume) + ' kg';
     }).join(' | ');
 

@@ -809,7 +809,7 @@
       series += x.setsDone || 0;
       volumen += x.volume || 0;
       minutos += Math.round(((x.end || x.start) - x.start) / 60000);
-      const n = (x.routineName || '').trim();
+      const n = Store.nombreDeSesion(x);
       if (n && nombres.indexOf(n) === -1) nombres.push(n);
 
       (x.entries || []).forEach(function (e) {

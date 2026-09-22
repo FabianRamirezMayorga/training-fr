@@ -181,7 +181,7 @@
              actividad» no se puede convertir en «jugaste al fútbol». */
           if (!actsAct[z]) actsAct[z] = [];
           actsAct[z].push({
-            nombre: String(s.routineName || '').trim(),
+            nombre: Store.nombreDeSesion(s),
             min: min,
             musculos: s.musculos.filter(function (m) { return zonaDe(m) === z; })
           });
@@ -1223,7 +1223,7 @@
             return (e.sets || []).some(function (x) { return x.done; });
           });
           return '<div class="card">' +
-            '<div style="font-weight:700">' + esc(s.routineName) + '</div>' +
+            '<div style="font-weight:700">' + esc(Store.nombreDeSesion(s)) + '</div>' +
             '<div class="tiny" style="margin-top:2px">' + esc(lineaSesion(s)) + '</div>' +
             (musculos.length ? '<div class="ses-musculos">' + musculos.map(function (m) {
               return '<span class="chip tiny-chip">' + esc(T(m)) + '</span>';
@@ -1251,7 +1251,7 @@
       <div class="ses-fila">
         <div class="row between" style="gap:10px">
           <div class="grow" style="cursor:pointer;min-width:0" data-ses="${s.id}">
-            <div style="font-weight:700;font-size:.92rem">${s.routineName}</div>
+            <div style="font-weight:700;font-size:.92rem">${Store.nombreDeSesion(s)}</div>
             <div class="tiny">${UI.fecha(s.start)} · ${lineaSesion(s)}</div>
             <!-- Se apuntó sin cobertura y las cifras son las del chip. Se dice
                  en vez de callarlo: un número provisional que no avisa de que

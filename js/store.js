@@ -116,6 +116,25 @@
 
   function routine(id) { return state.routines.find(function (r) { return r.id === id; }) || null; }
 
+  /* Cómo se llama hoy lo que hiciste aquel día.
+
+     La sesión guarda el nombre que tenía la rutina al empezarla, y ese nombre
+     es el que viaja al historial y a los otros dispositivos. Pero renombrar una
+     rutina —o el plan entero, que renombra las suyas— no puede dejar lo de
+     antes hablando en pasado: la portada sigue diciendo que hoy entrenaste un
+     plan que ya no se llama así, y quien lo lee piensa que la app no se ha
+     enterado del cambio.
+
+     Así que al pintarlo manda el nombre de ahora, si la rutina sigue existiendo.
+     Lo guardado no se toca: hace de reserva para lo que ya se borró, que es lo
+     único que no se puede volver a mirar. */
+  function nombreDeSesion(s) {
+    const guardado = String((s && s.routineName) || '').trim();
+    if (!s || !s.routineId) return guardado;
+    const r = routine(s.routineId);
+    return (r && String(r.name || '').trim()) || guardado;
+  }
+
   /* Coloca la rutina delta posiciones más arriba o más abajo */
   function moverRutina(id, delta) {
     const lista = routines();
@@ -373,6 +392,7 @@
     settings: settings, setSetting: setSetting,
     isFav: isFav, toggleFav: toggleFav, favorites: favorites,
     routines: routines, routine: routine, saveRoutine: saveRoutine, moverRutina: moverRutina,
+    nombreDeSesion: nombreDeSesion,
     MINIMO_EJERCICIOS: MINIMO_EJERCICIOS,
     deleteRoutine: deleteRoutine, duplicateRoutine: duplicateRoutine,
     newRoutine: newRoutine, newRoutineExercise: newRoutineExercise,
