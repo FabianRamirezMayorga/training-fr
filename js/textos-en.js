@@ -460,6 +460,7 @@
     'La IA ha tardado demasiado en responder. Vuelve a intentarlo: suele ser cosa de la conexión o de que Google va cargado.':
       'The AI took too long to answer. Try again: it is usually the connection, or Google being busy.',
     'No se pudo conectar con el servicio de IA.': 'Could not reach the AI service.',
+    'No se pudo conectar con el servicio de IA. La petición no llegó a salir del móvil: prueba con otra red —los wifis de oficina, las VPN y algunas operadoras bloquean las llamadas a Google— y mira si tienes un bloqueador de contenido puesto en el navegador.': 'Could not reach the AI service. The request never left your phone: try another network —office Wi-Fi, VPNs and some carriers block calls to Google— and check whether you have a content blocker on in your browser.',
     'Los modelos de Gemini están saturados ahora mismo. Vuelve a intentarlo en un minuto: es cosa de Google, no de tu clave.':
       'Gemini\'s models are overloaded right now. Try again in a minute: it is Google, not your key.',
     'La clave de la IA no es válida.': 'The AI key is not valid.',

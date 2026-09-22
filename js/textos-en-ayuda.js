@@ -130,6 +130,21 @@
     '¿Pierdo todo si cambio de móvil o borro la app?':
       'Do I lose everything if I change phone or delete the app?',
     '¿Funciona sin internet?': 'Does it work offline?',
+
+    'El entrenador con IA no me contesta, ¿qué miro?':
+      'The AI coach is not answering. What should I check?',
+    'Lo que te salga escrito dice cuál de las cuatro cosas es. No hay una quinta.':
+      'Whatever message you get tells you which of the four it is. There is no fifth.',
+    '*No se pudo conectar con el servicio de IA.* La petición no llegó ni a salir del móvil. No es tu clave: es la red. Los wifis de oficina, las VPN de empresa, algunas operadoras y los bloqueadores de contenido del navegador cortan las llamadas a Google. Pruébalo con otra red —datos si estabas en wifi, o al revés— y, si usas bloqueador, apágalo un momento. Para salir de dudas, abre en el navegador *generativelanguage.googleapis.com/v1beta/models?key=TU_CLAVE*: si eso carga texto, la red va bien y el que corta es el bloqueador.':
+      '*Could not reach the AI service.* The request never even left your phone. It is not your key: it is the network. Office Wi-Fi, company VPNs, some carriers and browser content blockers cut off calls to Google. Try another network —mobile data if you were on Wi-Fi, or the other way round— and, if you use a blocker, switch it off for a moment. To settle it, open *generativelanguage.googleapis.com/v1beta/models?key=YOUR_KEY* in your browser: if that loads text, the network is fine and the blocker is what is cutting in.',
+    '*La clave de la IA no es válida.* Google la rechaza. O se borró en AI Studio, o el proyecto se quedó sin permisos, o la clave tiene puestas restricciones de sitio web y no incluye el de la app. Haz una nueva y pégala en la bóveda.':
+      '*The AI key is not valid.* Google is rejecting it. Either it was deleted in AI Studio, or the project lost its permissions, or the key has website restrictions that do not include the app. Make a new one and paste it into the vault.',
+    '*Has agotado la cuota.* Es lo normal con la capa gratuita. El límite por minuto se repone en un minuto; el diario, al día siguiente. Si tienes otro proveedor puesto, cambia a él mientras.':
+      '*You have used up your quota.* That is normal on the free tier. The per-minute limit comes back in a minute; the daily one, the next day. If you have another provider set up, switch to it meanwhile.',
+    '*El modelo ya no está disponible* o *ningún modelo respondió*. Google retira modelos por cuenta, no para todos a la vez. Abre la bóveda y pulsa *Ver los suyos*: la app le pregunta a Google qué admite tu clave y se queda con esos.':
+      '*The model is no longer available* or *no model answered*. Google retires models account by account, not for everyone at once. Open the vault and tap *See yours*: the app asks Google which ones your key accepts and keeps those.',
+    'Y pase lo que pase, la app entera sigue funcionando sin la IA. Lo que se calcula con reglas —el peso de hoy, la nota del plan, el reparto por zona— no se entera de nada.':
+      'And whatever happens, the whole app keeps working without the AI. Everything worked out by rules —today’s weight, the plan’s score, the split by area— never notices.',
     '¿Puedo entrenar sin crear ningún plan?': 'Can I train without creating a plan?',
     '¿Por qué no encuentro un ejercicio que sé que existe?':
       'Why can I not find an exercise I know exists?',

@@ -613,6 +613,15 @@
         'Si la IA acaba diciendo que eso no era una actividad física, se le quita la marca y se queda como lo apuntaste. No se te va a quedar preguntando lo mismo cada vez que haya red.'],
       ver: ['p-offline', 'g-ia'] },
 
+    { id: 'p-ia-calla', q: 'El entrenador con IA no me contesta, ¿qué miro?',
+      a: ['Lo que te salga escrito dice cuál de las cuatro cosas es. No hay una quinta.',
+        '*No se pudo conectar con el servicio de IA.* La petición no llegó ni a salir del móvil. No es tu clave: es la red. Los wifis de oficina, las VPN de empresa, algunas operadoras y los bloqueadores de contenido del navegador cortan las llamadas a Google. Pruébalo con otra red —datos si estabas en wifi, o al revés— y, si usas bloqueador, apágalo un momento. Para salir de dudas, abre en el navegador *generativelanguage.googleapis.com/v1beta/models?key=TU_CLAVE*: si eso carga texto, la red va bien y el que corta es el bloqueador.',
+        '*La clave de la IA no es válida.* Google la rechaza. O se borró en AI Studio, o el proyecto se quedó sin permisos, o la clave tiene puestas restricciones de sitio web y no incluye el de la app. Haz una nueva y pégala en la bóveda.',
+        '*Has agotado la cuota.* Es lo normal con la capa gratuita. El límite por minuto se repone en un minuto; el diario, al día siguiente. Si tienes otro proveedor puesto, cambia a él mientras.',
+        '*El modelo ya no está disponible* o *ningún modelo respondió*. Google retira modelos por cuenta, no para todos a la vez. Abre la bóveda y pulsa *Ver los suyos*: la app le pregunta a Google qué admite tu clave y se queda con esos.',
+        'Y pase lo que pase, la app entera sigue funcionando sin la IA. Lo que se calcula con reglas —el peso de hoy, la nota del plan, el reparto por zona— no se entera de nada.'],
+      ver: ['c-ia', 'g-ia'] },
+
     { id: 'p-datos', q: '¿Dónde se guardan mis datos?',
       a: ['En tu propio móvil, en el almacenamiento del navegador. Sin cuenta, no salen de ahí.',
         'Si creas una cuenta, además se copian a la nube para que vuelvan al entrar desde otro dispositivo.'],

@@ -632,18 +632,48 @@
       if (lim.thinking === false) delete cuerpo.generationConfig.thinkingConfig;
       if (lim.json === false) delete cuerpo.generationConfig.responseMimeType;
 
-      return fetch(BASE + modelos[i] + ':generateContent?key=' + encodeURIComponent(c.clave), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cuerpo),
-        signal: corte.signal
+      /* Dos maneras de pedir lo mismo.
+
+         La normal declara el cuerpo como `application/json`, y eso obliga al
+         navegador a preguntar antes con un OPTIONS —el preflight de CORS—. Hay
+         redes que dejan pasar el POST y tumban ese OPTIONS: wifis de oficina,
+         VPN corporativas, filtros de operador, bloqueadores de contenido del
+         navegador. Cuando pasa, la petición no llega a Google y el fetch se cae
+         en el navegador sin código ni mensaje; lo único que se sabe es «no se
+         pudo conectar».
+
+         La segunda manda exactamente el mismo JSON declarado como texto plano.
+         Para el navegador eso es una petición simple y va sin preguntar, y
+         Google lo acepta igual —comprobado contra su API—. No se usa de
+         primeras porque declarar mal el tipo es feo; se usa cuando la buena se
+         ha caído, que es justo el caso en el que salva la llamada. */
+      const pedir = function (simple) {
+        return fetch(BASE + modelos[i] + ':generateContent?key=' + encodeURIComponent(c.clave), {
+          method: 'POST',
+          headers: { 'Content-Type': simple ? 'text/plain;charset=UTF-8' : 'application/json' },
+          body: JSON.stringify(cuerpo),
+          signal: corte.signal
+        });
+      };
+
+      return pedir(false).catch(function (e) {
+        /* Que se haya agotado el tiempo no es cosa del preflight: reintentar
+           ahí solo alarga la espera. */
+        if (e && e.name === 'AbortError') throw e;
+        return pedir(true);
       }).catch(function (e) {
         clearTimeout(reloj);
         if (e && e.name === 'AbortError') {
           throw new Error(T('La IA ha tardado demasiado en responder. Vuelve a intentarlo: ' +
             'suele ser cosa de la conexión o de que Google va cargado.'));
         }
-        throw new Error(T('No se pudo conectar con el servicio de IA.'));
+        /* El mensaje dice dónde mirar. Aquí no hay respuesta de Google que
+           contar —no llegó—, así que lo único útil es la lista de lo que suele
+           cortar el camino. */
+        throw new Error(T('No se pudo conectar con el servicio de IA. La petición no llegó ' +
+          'a salir del móvil: prueba con otra red —los wifis de oficina, las VPN y ' +
+          'algunas operadoras bloquean las llamadas a Google— y mira si tienes un ' +
+          'bloqueador de contenido puesto en el navegador.'));
       }).then(function (r) { clearTimeout(reloj); return r; }).then(function (r) {
         return r.text().then(function (t) {
           let j = null;
