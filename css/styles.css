@@ -6039,6 +6039,40 @@ html[data-theme="light"] .fr-fila {
 }
 .dia-cabeza .grow { min-width: 0; }
 
+/* ---------- la cara de lo que toca hoy ----------
+   Una tarjeta que solo dice «Entrenar» se lee en medio segundo y se olvida en
+   otro medio. Con la imagen del primer ejercicio se reconoce el día de un
+   vistazo, antes de leer nada.
+
+   Se funde con la tarjeta en vez de ir en un recuadro: una máscara la va
+   apagando hacia la izquierda, así que no hay borde que recortar ni marco
+   dentro de otro marco. Sale del catálogo que ya está descargado, de modo que
+   no cuesta una petición más ni deja de verse sin conexión.
+
+   Va detrás de todo con z-index negativo: la tarjeta lleva `isolation`, así
+   que ese -1 se queda dentro y no se cuela por debajo del fondo. */
+.dc-foto {
+  position: absolute; right: 0; top: 0; height: 100%; width: 44%;
+  object-fit: cover; object-position: center 30%;
+  z-index: -1; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 72%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 72%);
+}
+/* El texto se aparta de la imagen. No hasta la mitad: la máscara ya deja el
+   primer tercio transparente, y reservar más partía el titular en dos
+   renglones sin ganar nada. */
+.dia-cabeza.con-foto .grow { padding-right: 26%; }
+
+/* Sobre el verde la foto no se funde, se ensucia: una foto de gimnasio es casi
+   toda gris oscura y el verde de debajo la vuelve barro. Se oscurece a propósito
+   y se mezcla en multiply, que la deja como una sombra con forma en vez de como
+   una foto mal puesta, y el titular sigue mandando. */
+.dia-cabeza.con-foto.btn-arranque .dc-foto {
+  opacity: .3; mix-blend-mode: multiply; filter: grayscale(1) contrast(1.15);
+}
+/* Y en las tarjetas oscuras, al revés: ahí la foto sí puede verse entera. */
+.dia-cabeza.con-foto:not(.btn-arranque) .dc-foto { opacity: .85; }
+
 /* Sin entrenar: el boton, verde y con su play. Es la accion de la pantalla y
    la unica que se pulsa ahi, asi que puede permitirse tres lineas. */
 button.dia-cabeza {

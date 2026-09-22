@@ -796,6 +796,27 @@
 
   /* De qué plan es y cuánto es, en una línea. Es lo que decía el cajón de
      «Hoy, lunes» y lo que ahora va dentro del botón. */
+  /* La cara de lo que toca hoy. Una tarjeta que solo dice «Entrenar» se lee en
+     medio segundo y se olvida en otro medio; con la imagen del ejercicio se
+     reconoce de un vistazo qué día es, antes de leer nada.
+
+     Se prefiere una foto a una ilustración: las ilustraciones van sobre fondo
+     claro y, fundidas contra una tarjeta oscura, dejan un halo blanco. Si la
+     rutina no tiene ninguna foto se usa la primera imagen que haya, que
+     cualquier cosa es mejor que un hueco.
+
+     La imagen sale del catálogo que ya está descargado, así que no cuesta ni
+     una petición más ni deja de verse sin conexión. */
+  function fotoDeRutina(r) {
+    if (!r || !g.Data) return '';
+    const ejs = (r.exercises || []).map(function (re) { return Data.get(re.exId); })
+      .filter(Boolean);
+    if (!ejs.length) return '';
+    const foto = ejs.filter(function (ex) { return !Data.esIlustracion(ex); })[0];
+    const elegido = foto || ejs[0];
+    return Data.img(elegido, 0) || '';
+  }
+
   function resumenRutina(r) {
     const n = (r.exercises || []).length;
     const series = (r.exercises || []).reduce(function (a, e) {
@@ -903,8 +924,13 @@
              decía «Entrenar pecho». Eran la misma cosa contada en dos sitios, y
              ese cajón no se pulsaba para nada que el botón no hiciera ya. Así
              que lo que decía se escribe dentro del botón. -->
-        <button class="card tarjeta-premium dia-cabeza portada-hueco btn-arranque"
+        <button class="card tarjeta-premium dia-cabeza portada-hueco btn-arranque${
+          raw(fotoDeRutina(deHoy[0]) ? ' con-foto' : '')}"
                 data-a="entrenarhoy">
+          ${raw(fotoDeRutina(deHoy[0])
+            ? '<img class="dc-foto" src="' + esc(fotoDeRutina(deHoy[0])) +
+              '" alt="" loading="lazy" aria-hidden="true">'
+            : '')}
           <span class="dc-play">${raw(icon('play'))}</span>
           <span class="grow">
             <span class="dc-rotulo">${Tn('Hoy, {d}',
