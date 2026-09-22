@@ -6053,14 +6053,21 @@ html[data-theme="light"] .fr-fila {
    que ese -1 se queda dentro y no se cuela por debajo del fondo. */
 .dc-foto {
   position: absolute; right: 0; top: 0; height: 100%; width: 58%;
-  object-fit: cover; object-position: center 30%;
+  /* Centrada y no por arriba: con `center 30%` el recorte se comia las piernas
+     de quien hace una sentadilla, y media persona no se reconoce. */
+  object-fit: cover; object-position: center center;
   z-index: -1; pointer-events: none;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 52%);
-  mask-image: linear-gradient(to right, transparent 0%, #000 52%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 58%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 58%);
 }
 /* El texto se aparta de la imagen. No hasta la mitad: la máscara ya deja el
    primer tercio transparente, y reservar más partía el titular en dos
    renglones sin ganar nada. */
+/* Con foto, la tarjeta crece. El hueco era de 218 x 107 px: casi el doble de
+   ancho que de alto, y ahi una persona de pie entra recortada por arriba y por
+   abajo se ponga donde se ponga. Con 132 el recorte es suave y se le ve entera.
+   Sin foto se queda como estaba, que no hay nada que encuadrar. */
+.dia-cabeza.con-foto { min-height: 132px; }
 .dia-cabeza.con-foto .grow { padding-right: 34%; }
 
 /* La tarjeta del dia libre no es un boton con su fila: es un bloque de texto,
@@ -6106,8 +6113,8 @@ html[data-theme="light"] .fr-fila {
 .dia-cabeza.con-foto.btn-arranque::before {
   content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: linear-gradient(to right,
-    var(--acc) 46%,
-    color-mix(in srgb, var(--acc) 12%, transparent) 100%);
+    var(--acc) 54%,
+    color-mix(in srgb, var(--acc) 10%, transparent) 100%);
 }
 /* Y en las tarjetas oscuras, al revés: ahí la foto sí puede verse entera. */
 .dia-cabeza.con-foto:not(.btn-arranque) .dc-foto { opacity: .85; }
