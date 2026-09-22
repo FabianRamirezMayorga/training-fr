@@ -4129,6 +4129,8 @@
 
     /* ---------- El historial de comidas y el menú de hoy ---------- */
     'Lo que has comido': 'What you have eaten',
+    'Ver más': 'See more',
+    'Ver menos': 'See less',
     'QUÉ DÍAS LA HAGO': 'WHICH DAYS I DO IT',
     'Tócalos para mover la rutina de día. Si el viernes quieres pecho en vez de pierna, quita el viernes de una y pónselo a la otra.':
       'Tap them to move the routine to another day. If you want chest on Friday instead of legs, take Friday off one and give it to the other.',

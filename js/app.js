@@ -496,7 +496,28 @@
       if (!partes.length) return;
       /* textContent y no innerHTML: esto viene de fuera y no se pinta como
          código por mucho que lo parezca. */
+      /* Plegado a un renglón. Son tres o cuatro líneas de letra pequeña justo
+         donde hay que decidir si entrenar, y casi siempre confirman lo que ya
+         dice el aviso de regla de encima. Quien quiera el detalle lo abre.
+
+         El botón para el toque para que no llegue a la tarjeta de detrás: esto
+         vive dentro de la portada y cualquier toque suelto por ahí arranca el
+         entrenamiento. */
       hueco.textContent = ' ' + partes.join(' ');
+      hueco.classList.add('recortada');
+
+      const mas = document.createElement('button');
+      mas.className = 'carga-mas';
+      mas.type = 'button';
+      mas.textContent = T('Ver más');
+      mas.onclick = function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const abierta = !hueco.classList.contains('recortada');
+        hueco.classList.toggle('recortada', abierta);
+        mas.textContent = abierta ? T('Ver más') : T('Ver menos');
+      };
+      hueco.parentNode.appendChild(mas);
     }).catch(function () { /* sin clave, sin red o sin cuota: el aviso vale solo */ })
       .then(function () { pidiendoCargaIA = false; });
   }
@@ -512,9 +533,31 @@
      cuenta sigue estando, como enlace debajo, igual que el día que sí hay
      rutina: quien quiera entrenar en su día libre lo tiene a un toque, pero no
      se lo pide la app. */
+  /* La siguiente rutina que toca, empezando por mañana. Sirve para ponerle
+     cara al día libre: la tarjeta decía «no toca nada» sobre un fondo vacío, y
+     un día de descanso también es parte del plan, no un hueco. */
+  function proximaRutina(rutinas) {
+    if (!rutinas || !rutinas.length) return null;
+    const orden = UI.DAY_NAMES ? DIAS : [];
+    const hoy = UI.DAY_NAMES ? UI.DAY_NAMES[new Date().getDay()] : '';
+    const desde = orden.indexOf(hoy);
+    for (let i = 1; i <= 7 && desde !== -1; i++) {
+      const d = orden[(desde + i) % 7];
+      const r = rutinas.filter(function (x) {
+        return (x.days || []).indexOf(d) !== -1;
+      })[0];
+      if (r) return r;
+    }
+    return rutinas[0];
+  }
+
   function diaLibreHTML(rutinas) {
+    const foto = fotoDeRutina(proximaRutina(rutinas));
     return html`
-      <div class="card tarjeta-premium tarjeta-libre portada-hueco">
+      <div class="card tarjeta-premium tarjeta-libre portada-hueco${
+        raw(foto ? ' con-foto' : '')}">
+        ${raw(foto ? '<img class="dc-foto" src="' + esc(foto) +
+          '" alt="" loading="lazy" aria-hidden="true">' : '')}
         <div class="hoy-encima">${T('Hoy')} · ${rutinas.length
           ? T('Día libre') : T('Empieza aquí')}</div>
         <div class="hoy-tit">${rutinas.length

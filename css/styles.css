@@ -6055,20 +6055,46 @@ html[data-theme="light"] .fr-fila {
   position: absolute; right: 0; top: 0; height: 100%; width: 44%;
   object-fit: cover; object-position: center 30%;
   z-index: -1; pointer-events: none;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 72%);
-  mask-image: linear-gradient(to right, transparent 0%, #000 72%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 55%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 55%);
 }
 /* El texto se aparta de la imagen. No hasta la mitad: la máscara ya deja el
    primer tercio transparente, y reservar más partía el titular en dos
    renglones sin ganar nada. */
 .dia-cabeza.con-foto .grow { padding-right: 26%; }
 
+/* La tarjeta del dia libre no es un boton con su fila: es un bloque de texto,
+   asi que el hueco se lo hace ella misma y la foto se recorta con el borde
+   redondeado de la tarjeta. */
+.tarjeta-libre.con-foto { position: relative; overflow: hidden; isolation: isolate; }
+.tarjeta-libre.con-foto .hoy-encima,
+.tarjeta-libre.con-foto .hoy-tit,
+.tarjeta-libre.con-foto .hoy-meta { padding-right: 30%; }
+/* Mas suave que en el boton verde: aqui la tarjeta lleva dos botones abajo, y
+   con la foto a plena luz el de la derecha quedaba flotando encima de una
+   imagen en vez de sobre la tarjeta. */
+.tarjeta-libre.con-foto .dc-foto { opacity: .34; filter: saturate(.7); }
+
+/* El texto de la IA, plegado a un renglon. Son tres o cuatro lineas de letra
+   pequena justo donde hay que decidir si entrenar, y casi siempre confirman lo
+   que ya dice el aviso de regla de encima. */
+.carga-ia.recortada {
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.carga-mas {
+  display: block; margin-top: 3px; padding: 0; border: 0; background: none;
+  color: var(--agua); font: inherit; font-weight: 600; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.carga-mas:active { opacity: .6; }
+
 /* Sobre el verde la foto no se funde, se ensucia: una foto de gimnasio es casi
    toda gris oscura y el verde de debajo la vuelve barro. Se oscurece a propósito
    y se mezcla en multiply, que la deja como una sombra con forma en vez de como
    una foto mal puesta, y el titular sigue mandando. */
 .dia-cabeza.con-foto.btn-arranque .dc-foto {
-  opacity: .3; mix-blend-mode: multiply; filter: grayscale(1) contrast(1.15);
+  opacity: .5; mix-blend-mode: multiply; filter: grayscale(1) contrast(1.35);
 }
 /* Y en las tarjetas oscuras, al revés: ahí la foto sí puede verse entera. */
 .dia-cabeza.con-foto:not(.btn-arranque) .dc-foto { opacity: .85; }
