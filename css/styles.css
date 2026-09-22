@@ -7898,21 +7898,22 @@ html[data-theme="light"] .ag-ico {
 
 /* El aro sigue vivo en «lo que llevas comido», aquí debajo. */
 .aro { width: 58px; height: 58px; display: block;
-  /* El hueco centrado abajo: girando -225 grados, el arco arranca a las siete
-     en punto y termina a las cinco. */
-  transform: rotate(-225deg); }
-/* Trazo de 3 y no de 6: la mitad. Con los aros del resumen fuera, estos dos
-   son los únicos que quedan, y a ese tamaño un trazo gordo los hacía parecer
-   dos anillos en vez de dos medidores. Fino se lee como una línea de gráfico,
-   que es lo que son. */
-.aro-fondo { fill: none; stroke: var(--card2); stroke-width: 3; stroke-linecap: round; }
+  /* A las doce en punto: girando -90 grados, el anillo arranca arriba y crece
+     en el sentido del reloj, que es por donde todo el mundo espera que crezca
+     algo que se llena. */
+  transform: rotate(-90deg); }
+/* Trazo gordo. Con el arco abierto fino quedaba bien —era una línea de
+   gráfico—, pero un anillo cerrado y fino no pesa: parece el borde de un
+   agujero. Nueve sobre un radio de 16 deja el hueco en algo más de la mitad
+   del diámetro, que es la proporción de los anillos de Actividad. */
+.aro-fondo { fill: none; stroke: var(--card2); stroke-width: 9; stroke-linecap: round; }
 @media (prefers-reduced-motion: reduce) {
   .aro-arco { transition: none; }
 }
 /* Cada aro con su color, que viene en --tono desde el HTML: tres verdes
    iguales se leen como un bloque y hay que leer las etiquetas para saber
    cual es cual. */
-.aro-arco { fill: none; stroke: var(--tono, var(--acc)); stroke-width: 3;
+.aro-arco { fill: none; stroke: var(--tono, var(--acc)); stroke-width: 9;
   stroke-linecap: round;
   transition: stroke-dasharray .9s cubic-bezier(.2,.9,.3,1); }
 
@@ -7930,14 +7931,15 @@ html[data-theme="light"] .ag-ico {
 .comida-aros { display: flex; gap: 10px; }
 .ca-caja { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; }
 .ca-aro { width: 42px; height: 42px; flex: none; }
-/* El carril ya no es gris: lleva el color de su aro rebajado, como un
-   termómetro apagado. En gris los dos se veían iguales hasta fijarse en el
-   trozo encendido; teñido, cada aro se reconoce entero aunque lleve poco.
+/* El carril es el mismo color del aro, apagado: verde oscuro el de calorías y
+   azul oscuro el de proteína. Y sólido, mezclado con el fondo de la tarjeta y
+   no transparente: al 17% de tinte apenas se veía, y con tan poco relleno el
+   anillo casi desaparecía. Así se reconoce entero aunque lleve dos dedos.
 
    El color del arco encendido no está aquí: es un degradado y viaja con el
    svg, que un `url(#id)` desde una hoja externa lo resuelve mal Safari. */
-.ca-aro .aro-fondo { stroke: color-mix(in srgb, var(--warn) 17%, transparent); }
-.ca-aro.prot .aro-fondo { stroke: color-mix(in srgb, var(--agua) 17%, transparent); }
+.ca-aro .aro-fondo { stroke: color-mix(in srgb, var(--acc) 26%, var(--card)); }
+.ca-aro.prot .aro-fondo { stroke: color-mix(in srgb, var(--brand-1) 26%, var(--card)); }
 .ca-caja .grow { min-width: 0; }
 .ca-cifra { display: block; line-height: 1.15; }
 .ca-cifra b { font-size: 1.15rem; font-weight: 800; letter-spacing: -.03em;

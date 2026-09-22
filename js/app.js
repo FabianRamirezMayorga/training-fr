@@ -838,9 +838,22 @@
      cifra y su objetivo. Mismo aro de 270 grados que el resumen de la semana,
      más pequeño, para que la portada hable con una sola voz. */
   function aroComidaHTML(pct, ico, etiqueta, hecho, meta, unidad) {
-    const R = 19;
+    /* Anillo cerrado, no el cuentakilómetros de 270 grados de antes. Un círculo
+       entero es la forma que usa iOS para esto —cuánto llevas de la meta de
+       hoy— y aquí el problema es el mismo, así que el parecido no es copia.
+
+       Lo que se perdía al cerrarlo era saber por dónde empieza y por dónde
+       acaba; eso lo devuelve el remate redondo del extremo, que hace de cabeza
+       y marca el avance.
+
+       El radio baja a 16 para que quepa el trazo gordo dentro del mismo lienzo
+       de 46: con 19 y un trazo de 9 el anillo se salía por los bordes. Y el
+       agujero se queda en torno a la mitad del diámetro —esa es la proporción
+       que hace que se lea como medidor—; más grueso y a 40 píxeles es una
+       mancha. */
+    const R = 16;
     const C = 2 * Math.PI * R;
-    const arco = C * 0.75;
+    const arco = C;
     const lleno = arco * Math.max(0, Math.min(1, pct / 100));
     const prot = ico === 'proteina';
     /* Nace vacío y crece al pintarse, igual que los del resumen: el montaje les
@@ -859,9 +872,12 @@
        en `style` y no en una regla: desde el atributo, el `#` es el de esta
        página y funciona en todas partes. */
     const rampa = prot ? 'g-prot' : 'g-kcal';
+    /* El degradado se queda dentro de su tono: antes las calorías acababan en
+       ámbar, y con el carril ahora verde el anillo lleno habría quedado ámbar
+       sobre verde. Verde a verde claro dice lo mismo sin cambiar de color. */
     const deA = prot
       ? ['var(--brand-1)', 'var(--agua)']
-      : ['var(--acc)', 'var(--warn)'];
+      : ['var(--acc)', 'color-mix(in srgb, var(--acc) 55%, var(--warn))'];
     return '<div class="ca-caja">' +
       '<svg class="aro ca-aro' + (prot ? ' prot' : '') + '" viewBox="0 0 46 46" aria-hidden="true">' +
         '<defs><linearGradient id="' + rampa + '" x1="0" y1="1" x2="1" y2="0">' +
