@@ -883,29 +883,30 @@
     return { dias: dias, series: series };
   }
 
-  /* Un aro de 270 grados con el hueco abajo, como un cuentakilómetros: el
-     círculo entero no deja ver dónde empieza y dónde acaba. */
-  function aroHTML(pct, ico, cifra, etiqueta, tono) {
-    const R = 26;
-    const C = 2 * Math.PI * R;
-    const arco = C * 0.75;
-    const lleno = arco * Math.max(0, Math.min(1, pct));
-    /* Nace vacío y crece al pintarse. El valor final viaja en un atributo y lo
-       pone el montaje un fotograma después: con la transición del CSS, el arco
-       se dibuja solo. Puesto ya en el HTML no habría de dónde animar. */
-    return '<div class="aro-caja" style="--tono:' + tono + '">' +
-      '<svg class="aro" viewBox="0 0 64 64" aria-hidden="true">' +
-        '<circle class="aro-fondo" cx="32" cy="32" r="' + R + '" ' +
-          'stroke-dasharray="' + arco + ' ' + C + '"/>' +
-        '<circle class="aro-arco" cx="32" cy="32" r="' + R + '" ' +
-          'stroke-dasharray="0 ' + C + '" data-arco="' + lleno + ' ' + C + '"/>' +
-      '</svg>' +
-      '<span class="aro-dentro"><span class="aro-ico">' + icon(ico) + '</span>' +
-      /* «kg» y los miles hacen cifras de ocho caracteres, y ahí dentro no caben
-         al tamaño de «5»: se encogen en vez de salirse del aro. */
-      '<b class="aro-num' + (String(cifra).length > 4 ? ' largo' : '') + '">' +
-      esc(cifra) + '</b></span>' +
-      '<span class="aro-et">' + esc(etiqueta) + '</span>' +
+  /* Un dato de la semana: la cifra y su palabra en un renglón, y debajo un
+     hilo con lo que llevas de lo que toca.
+
+     Antes eran tres aros de 58 píxeles con su icono dentro. Se veían bien, pero
+     costaban el alto de una tarjeta entera para tres cifras que se miran de
+     reojo al entrar y no se tocan nunca; y en una portada que no debe rodar,
+     el alto se paga con lo de más abajo. El hilo dice lo mismo que decía el
+     aro —cuánto de cuánto— en tres píxeles.
+
+     El hilo nace a cero y el montaje le pone el ancho un fotograma después:
+     con la transición del CSS crece solo. Puesto ya en el HTML no habría de
+     dónde animar. */
+  function rsDato(pct, cifra, etiqueta, tono) {
+    const parte = Math.round(Math.max(0, Math.min(1, pct)) * 100);
+    return '<div class="rs-dato" style="--tono:' + tono + '">' +
+      '<span class="rs-cifra">' +
+        /* «kg» y los miles hacen cifras de ocho caracteres: se encogen antes
+           que empujar su palabra fuera de la columna. */
+        '<b class="rs-num' + (String(cifra).length > 4 ? ' largo' : '') + '">' +
+        esc(cifra) + '</b>' +
+        '<span class="rs-et">' + esc(etiqueta) + '</span>' +
+      '</span>' +
+      '<span class="rs-linea"><i class="rs-llena" data-llena="' +
+        parte + '%"></i></span>' +
       '</div>';
   }
 
@@ -916,23 +917,29 @@
       return pide > 0 ? hecho / pide : (hecho > 0 ? 1 : 0);
     };
 
+    /* El rótulo va a la izquierda y no encima: encima costaba su renglón
+       entero, y ahí al lado cabe en el alto que ya ocupan los datos. Dice
+       «esta semana» porque sin eso «series» se lee como el total de la vida.
+
+       Las palabras son cortas a propósito —racha, entrenos, series—: en tres
+       columnas de ochenta y pico píxeles, «Entrenamientos» se corta. */
     return '<div class="card tarjeta-premium portada-hueco resumen-sem">' +
-      '<div class="pre-encima">' + esc(T('Resumen de la semana')) + '</div>' +
-      '<div class="aros">' +
+      '<span class="rs-rotulo">' + esc(T('Esta semana')) + '</span>' +
+      '<div class="rs-tira">' +
         /* La racha se mide contra siete: es lo que dura una semana, y es la
            única meta honesta para algo que no depende del plan. */
-        /* Un color por aro. Tres verdes iguales se leen como un solo bloque y
-           hay que leer las etiquetas para saber cuál es cuál; con la llama en
+        /* Un color por dato. Tres verdes iguales se leen como un solo bloque y
+           hay que leer las palabras para saber cuál es cuál; con la racha en
            ámbar, el entreno en verde y las series en azul, cada cifra tiene la
            cara de lo que cuenta. Son los tres colores que la app ya usa. */
-        aroHTML(parte(st.streak, 7), 'llama', UI.num(st.streak),
-          T('Días seguidos'), 'var(--warn)') +
-        aroHTML(parte(st.week, meta.dias), 'dumbbell', UI.num(st.week),
-          T('Entrenamientos'), 'var(--acc)') +
-        aroHTML(parte(porVolumen ? st.weekVolume : st.weekSets,
-          porVolumen ? 0 : meta.series), 'grafica',
+        rsDato(parte(st.streak, 7), UI.num(st.streak),
+          T('Racha'), 'var(--warn)') +
+        rsDato(parte(st.week, meta.dias), UI.num(st.week),
+          T('Entrenos'), 'var(--acc)') +
+        rsDato(parte(porVolumen ? st.weekVolume : st.weekSets,
+          porVolumen ? 0 : meta.series),
           porVolumen ? UI.kg(st.weekVolume) : UI.num(st.weekSets),
-          porVolumen ? T('Volumen') : T('Series totales'), 'var(--brand-1)') +
+          porVolumen ? T('Volumen') : T('Series'), 'var(--brand-1)') +
       '</div></div>';
   }
 
@@ -1955,12 +1962,17 @@
       };
     }
 
-    /* Los aros crecen al entrar. Un fotograma después de pintar, que si se pone
-       en el mismo el navegador junta los dos valores y no hay transición. */
+    /* Los aros y los hilos crecen al entrar. Un fotograma después de pintar,
+       que si se pone en el mismo el navegador junta los dos valores y no hay
+       transición. */
     requestAnimationFrame(function () {
       root.querySelectorAll('.aro-arco[data-arco]').forEach(function (arco, i) {
         arco.style.transitionDelay = (i * 90) + 'ms';
         arco.setAttribute('stroke-dasharray', arco.dataset.arco);
+      });
+      root.querySelectorAll('.rs-llena[data-llena]').forEach(function (hilo, i) {
+        hilo.style.transitionDelay = (i * 90) + 'ms';
+        hilo.style.width = hilo.dataset.llena;
       });
     });
 
