@@ -1204,7 +1204,8 @@
              El tic de fondo se queda solo para lo apuntado a mano, que no
              tiene rutina de la que sacar imagen. -->
         <div class="card tarjeta-premium dia-cabeza hecha portada-hueco${
-          raw(fotoDeRutina(hecho.rutina) ? ' con-foto' : '')}">
+          raw(fotoDeRutina(hecho.rutina) ? ' con-foto' : '')}"
+             data-a="verhecho" role="button" tabindex="0">
           ${raw(fotoDeRutina(hecho.rutina)
             ? '<img class="dc-foto" src="' + esc(fotoDeRutina(hecho.rutina)) +
               '" alt="" loading="lazy" aria-hidden="true">'
@@ -1213,8 +1214,11 @@
           <span class="grow">
             <span class="dc-rotulo">${Tn('Hoy, {d} · hecho',
               { d: UI.diaLargo(hoy).toLowerCase() })}</span>
+            <!-- El galón dice que la tarjeta se toca. Sin él no hay forma de
+                 saberlo: un cuadro que solo informa y otro que además abre algo
+                 se ven igual hasta que uno lo prueba. -->
             <span class="dc-tit">${hecho.n > 1 ? T('Ya entrenaste dos veces')
-              : T('Ya entrenaste')}</span>
+              : T('Ya entrenaste')}<i class="dc-mas">${raw(icon('chevron'))}</i></span>
             ${raw(musculosHechos(hecho)
               ? '<span class="dc-que">' + esc(Tn('Hiciste {q}',
                   { q: musculosHechos(hecho) })) + '</span>'
@@ -2002,6 +2006,13 @@
     bind(root, '[data-a=verprogreso]', function () { go('progreso'); });
     bind(root, '[data-a=irnutricion]', function () { go('nutricion'); });
     bind(root, '[data-a=verdia]', function () { go('dia'); });
+    /* Lo que hiciste hoy, entero: los ejercicios que marcaste, con sus pesos y
+       repeticiones, los músculos que tocaste y el resumen. Es la misma hoja que
+       abre un día del mapa de Progreso. */
+    bind(root, '[data-a=verhecho]', function () {
+      const v = g.VISTAS && g.VISTAS.progreso;
+      if (v && v.hojaDia) v.hojaDia(Store.dayKey(Date.now()));
+    });
     bind(root, '[data-a=comidamano]', function () {
       if (g.VISTAS && VISTAS.comidaAMano) VISTAS.comidaAMano();
     });

@@ -1378,6 +1378,12 @@
     }).catch(function () { hueco.remove(); });
   }
 
+  /* La portada también la abre. La tarjeta de «ya entrenaste» pregunta lo
+     mismo que un día del mapa de Progreso —qué hice ese día—, así que abre la
+     misma hoja en vez de tener su propia versión a medias. Va colgada de la
+     vista, como `mount`, para no estrenar un global por una función. */
+  V.progreso.hojaDia = hojaDiaEntrenado;
+
   V.progreso.mount = function (root) {
     bind(root, '[data-a=ir]', function () { go('rutinas'); });
 

@@ -6236,7 +6236,17 @@ button.dia-cabeza:active { transform: scale(.985); }
 .dc-play svg { width: 20px; height: 20px; fill: currentColor; margin-left: 3px; }
 
 /* Ya entrenado: la misma pieza apagada, con el disco del tic */
-.dia-cabeza.hecha { cursor: default; }
+/* Se toca: abre lo que hiciste hoy con todo el detalle. El hundido al pulsar
+   es el mismo de las fichas de la tira, que es lo que enseña que algo responde
+   antes de que se abra nada. */
+.dia-cabeza.hecha { cursor: pointer; transition: transform .12s ease; }
+.dia-cabeza.hecha:active { transform: scale(.985); }
+/* El galón, pegado al titular y a su altura: separado parecía otra cosa, y
+   más grande competía con «Ya entrenaste», que es lo que hay que leer. */
+.dc-mas { display: inline-flex; vertical-align: -1px; margin-left: 5px;
+  color: var(--dim2); }
+.dc-mas svg { width: 13px; height: 13px; fill: none; stroke: currentColor;
+  stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Lo hecho, con foto. Aquí el texto es mucho más largo que en el botón de
    entrenar —ahí pone «Entrenar» y aquí van los músculos, el plan, las series,
