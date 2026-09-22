@@ -68,9 +68,14 @@
     }
     const fn = views[route.name] || viewInicio;
 
+    /* El idioma y el tema van juntos dentro de una cápsula, no sueltos: son
+       dos ajustes que se tocan casi nunca y, cuando se tocan, se tocan a la
+       vez. En una sola pieza pesan menos en la cabecera, donde lo que manda es
+       el sitio donde entrena. */
+    const parChips = '<div class="par-chips">' + idiomaChip() + temaChip() + '</div>';
     actionsEl.innerHTML = route.name === 'bienvenida'
-      ? idiomaChip() + temaChip()
-      : lugarChip() + idiomaChip() + temaChip();
+      ? parChips
+      : lugarChip() + parChips;
 
     /* Subir al principio solo al cambiar de pantalla. Repintar es lo que hace
        esta app cada vez que se toca algo —marcar una opción, escribir un
