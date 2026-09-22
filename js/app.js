@@ -661,8 +661,11 @@
 
     return html`
       <div class="muelle"></div>
-      <div class="list-title portada-titulo">${T('Lo que llevas comido')}</div>
+      <!-- El rótulo va dentro y no encima: fuera costaba su renglón más el
+           hueco, y la portada se mide en renglones. Es el mismo sitio donde lo
+           lleva el resumen de la semana. -->
       <div class="card inicio-compacta comida-caja tarjeta-premium">
+        <div class="pre-encima comida-tit">${T('Lo que llevas comido')}</div>
         <!-- Dos aros con su cifra al lado. Eran dos barras con el número encima,
              y una barra de progreso hay que medirla con la vista para saber por
              dónde va; un aro se lee de reojo. Al lado y no debajo porque en la

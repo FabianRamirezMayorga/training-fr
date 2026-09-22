@@ -7791,3 +7791,103 @@ html[data-theme="light"] .ag-ico {
 .ca-cifra b { font-size: 1.15rem; font-weight: 800; letter-spacing: -.03em;
   font-variant-numeric: tabular-nums; }
 .comida-nota { margin: 6px 0 0; }
+
+/* ---------- la portada, sin scroll ----------
+   El lema es que sea un vistazo, no una página: si hay que rodar para ver lo de
+   hoy, ya no es un vistazo. Todo lo de aquí abajo recorta aire vertical, nunca
+   letra: lo que se lee se sigue leyendo igual.
+
+   Va en un bloque y al final del archivo a propósito, para que se vea de golpe
+   cuánto se ha apretado y desde dónde volver atrás si un día sobra sitio. */
+.vista-inicio .muelle { flex: .4 0 clamp(4px, .6svh, 11px); max-height: 13px; }
+.vista-inicio .portada-hueco { margin-top: 0; }
+.vista-inicio .portada-titulo { margin-top: 6px !important; }
+.vista-inicio .portada-titulo.list-head,
+.vista-inicio .portada-titulo.list-title { margin-bottom: 4px !important; }
+.vista-inicio .inicio-compacta { padding: 8px 12px; }
+.vista-inicio .aviso-carga { margin-top: 6px; }
+.vista-inicio .enlace-flojo { margin: 6px 0; }
+
+/* La constancia: la ficha del día ya es estrecha, lo que sobraba era el hueco
+   entre la tira y su leyenda. */
+.vista-inicio .plan-leyenda { margin-top: 7px; padding-top: 7px; }
+.vista-inicio .semana-caja .ps-marcas { margin-top: 3px; }
+
+/* La comida: los dos botones no necesitan tanto cuerpo en la portada, que ahí
+   se tocan de paso y no son la acción principal de la pantalla. */
+.vista-inicio .comida-caja .btn.sm { padding: .48em .7em; }
+.vista-inicio .comida-nota { margin-top: 5px; }
+
+/* ---------- las tarjetas entran, no aparecen ----------
+   Suben un dedo y se encienden, una detrás de otra. No es adorno: al entrar en
+   la portada el orden en que aparecen es el orden en que hay que mirarlas.
+
+   Con `backwards` para que no parpadeen antes de empezar, y sin transformar
+   nada que no sea opacidad y posición, que es lo único que el móvil mueve sin
+   pedirle la GPU. */
+@keyframes entra-tarjeta {
+  from { opacity: 0; transform: translateY(9px); }
+  to { opacity: 1; transform: none; }
+}
+.vista-inicio .dia-cabeza,
+.vista-inicio .resumen-sem,
+.vista-inicio .semana-caja,
+.vista-inicio .comida-caja,
+.vista-inicio .franja-invitado {
+  animation: entra-tarjeta .42s cubic-bezier(.2,.9,.3,1) backwards;
+}
+.vista-inicio .dia-cabeza { animation-delay: .02s; }
+.vista-inicio .resumen-sem { animation-delay: .09s; }
+.vista-inicio .franja-invitado { animation-delay: .14s; }
+.vista-inicio .semana-caja { animation-delay: .18s; }
+.vista-inicio .comida-caja { animation-delay: .24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .vista-inicio .dia-cabeza,
+  .vista-inicio .resumen-sem,
+  .vista-inicio .semana-caja,
+  .vista-inicio .comida-caja,
+  .vista-inicio .franja-invitado { animation: none; }
+}
+
+/* ---------- la portada se mide en pantallas, no en pixeles ----------
+   El lema es que no haya que rodar, y un movil de 667 px de alto y otro de 926
+   no son la misma pantalla: una medida fija que cabe en el grande deja al
+   pequeno con scroll, y una que cabe en el pequeno desperdicia el grande.
+
+   Asi que lo que ocupa alto se declara en svh con su suelo y su techo: en un
+   telefono pequeno todo baja a su minimo legible y en uno grande respira. El
+   `svh` y no `vh` a proposito, que en el movil `vh` cuenta con la barra del
+   navegador escondida y se pasa justo de largo. */
+
+/* La tarjeta del dia. El suelo son 92: por debajo la foto no reconoce a nadie. */
+.vista-inicio .dia-cabeza.con-foto { min-height: clamp(92px, 13.6svh, 124px); }
+
+/* Los aros del resumen. El tamano manda sobre el svg y sobre la capa de encima
+   -icono y cifra-, asi que va en una variable y no repetido en dos sitios. */
+.vista-inicio .aros { --aro: clamp(46px, 7.2svh, 62px); }
+.vista-inicio .aro { width: var(--aro); height: var(--aro); }
+.vista-inicio .aro-dentro { height: var(--aro); }
+.vista-inicio .aro-num { font-size: clamp(.9rem, 1.9svh, 1.15rem); }
+.vista-inicio .resumen-sem { padding: clamp(7px, 1.1svh, 11px) 10px clamp(6px, .9svh, 9px); }
+.vista-inicio .aros { margin-top: clamp(4px, .8svh, 8px); }
+
+/* Los aros de la comida, con la misma regla. */
+.vista-inicio .comida-aros { --ca: clamp(34px, 5.3svh, 44px); }
+.vista-inicio .ca-aro { width: var(--ca); height: var(--ca); }
+.vista-inicio .ca-cifra b { font-size: clamp(.95rem, 2svh, 1.15rem); }
+.vista-inicio .comida-tit { margin-bottom: clamp(4px, .7svh, 8px); }
+
+/* La tira de la constancia. */
+.vista-inicio .ps-dia { padding: clamp(4px, .7svh, 7px) 2px clamp(5px, .8svh, 8px); }
+.vista-inicio .ps-num { font-size: clamp(1rem, 2.1svh, 1.2rem); }
+
+/* La leyenda de los tres colores no sale en la portada: los mismos tres
+   colores estan explicados en «Ver mi dia», que es donde uno va a entender la
+   tira, y aqui costaba su renglon y su linea de separacion en cada visita. */
+.vista-inicio .plan-leyenda { display: none; }
+
+/* El saludo y el enlace flojo, que son texto suelto entre tarjetas. */
+.vista-inicio .hola { margin-bottom: clamp(1px, .4svh, 5px); }
+.vista-inicio .enlace-flojo { margin: clamp(3px, .6svh, 7px) 0;
+  padding: clamp(3px, .6svh, 7px) 0; }
