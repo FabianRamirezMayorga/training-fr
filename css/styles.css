@@ -183,12 +183,15 @@ a{color:var(--blue)}
   /* Nombre propio: ya había un @keyframes «destello» para el botón grande,
      y con dos iguales gana el segundo. El mío mueve transform y el suyo mueve
      left, así que el reflejo se quedaba parado fuera de la pantalla. */
-  /* Cada dos segundos y medio, no cada seis: a seis se notaba tan poco que
-     había que estar mirando el botón para pillarlo, y un reflejo que hay que
-     buscar no sirve para que un botón no se pierda. El barrido sigue durando
-     casi un segundo —más rápido parpadea— y deja más de un segundo de calma
-     entre pasada y pasada. */
-  animation:realce 2.6s cubic-bezier(.35,0,.2,1) .6s infinite}
+  /* Cada dos segundos, no cada seis: a seis se notaba tan poco que había que
+     estar mirando el botón para pillarlo, y un reflejo que hay que buscar no
+     sirve para que un botón no se pierda.
+
+     Dos y no dos y medio porque la tarjeta de constancia lleva el mismo
+     reflejo y tienen que ir a la vez: dos brillos con ritmos parecidos pero
+     distintos se cruzan y la pantalla parece que tiembla. Misma duración,
+     mismo retardo y misma curva en los dos sitios. */
+  animation:realce 2s cubic-bezier(.35,0,.2,1) .6s infinite}
 /* La inclinación va en los fotogramas y no en la regla: si la dejara en el
    transform del elemento, el translateX de la animación la pisaría entera y el
    reflejo cruzaría recto. */
@@ -2307,7 +2310,7 @@ html[data-theme="light"] .hoy-marca { opacity: .06; }
   background: linear-gradient(100deg, transparent,
               color-mix(in srgb, #fff 40%, transparent), transparent);
   pointer-events: none;
-  animation: realce 2.6s cubic-bezier(.35, 0, .2, 1) .6s infinite;
+  animation: realce 2s cubic-bezier(.35, 0, .2, 1) .6s infinite;
 }
 
 
@@ -7924,11 +7927,15 @@ html[data-theme="light"] .ag-ico {
     color-mix(in srgb, #fff 16%, transparent) 55%,
     transparent 100%);
   transform: skewX(-14deg);
-  animation: vidrio-pasa 6.5s cubic-bezier(.4,0,.2,1) infinite;
+  /* El mismo compás que el reflejo de los botones: misma duración, mismo
+     retardo, misma curva y el barrido en el mismo tramo -del 0 al 34%-, así
+     que cruzan a la vez y la portada respira de una pieza en vez de por
+     partes. Si se cambia uno hay que cambiar el otro. */
+  animation: vidrio-pasa 2s cubic-bezier(.35,0,.2,1) .6s infinite;
 }
 @keyframes vidrio-pasa {
   0% { left: -60%; }
-  55%, 100% { left: 140%; }
+  34%, 100% { left: 140%; }
 }
 html[data-theme="light"] .vista-inicio .semana-caja::after,
 :root:not([data-theme="dark"]) .vista-inicio .semana-caja::after {
