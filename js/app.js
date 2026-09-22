@@ -829,6 +829,76 @@
 
   /* De qué plan es y cuánto es, en una línea. Es lo que decía el cajón de
      «Hoy, lunes» y lo que ahora va dentro del botón. */
+  /* ---------- el resumen de la semana ----------
+     Eran tres cifras en tres cajas, y una cifra sola no dice si vas bien: «72
+     series» puede ser una semana redonda o media, según lo que pida tu plan.
+     Con el aro se ve de un vistazo cuánto llevas de lo que hay que hacer.
+
+     Cada aro tiene un contra qué de verdad, no un número redondo inventado:
+     los entrenos van contra los días que tu plan pide a la semana y las series
+     contra las que suman esas rutinas. Sin plan con días no hay contra qué
+     medir, así que el aro se llena con lo que llevas y no finge una meta. */
+  function metasSemana() {
+    const rutinas = Store.routines().filter(function (r) {
+      return (r.days || []).length;
+    });
+    let dias = 0;
+    let series = 0;
+    rutinas.forEach(function (r) {
+      const cuantos = (r.days || []).length;
+      dias += cuantos;
+      series += cuantos * (r.exercises || []).reduce(function (n, e) {
+        return n + (Number(e.sets) || 0);
+      }, 0);
+    });
+    return { dias: dias, series: series };
+  }
+
+  /* Un aro de 270 grados con el hueco abajo, como un cuentakilómetros: el
+     círculo entero no deja ver dónde empieza y dónde acaba. */
+  function aroHTML(pct, ico, cifra, etiqueta) {
+    const R = 26;
+    const C = 2 * Math.PI * R;
+    const arco = C * 0.75;
+    const lleno = arco * Math.max(0, Math.min(1, pct));
+    return '<div class="aro-caja">' +
+      '<svg class="aro" viewBox="0 0 64 64" aria-hidden="true">' +
+        '<circle class="aro-fondo" cx="32" cy="32" r="' + R + '" ' +
+          'stroke-dasharray="' + arco + ' ' + C + '"/>' +
+        '<circle class="aro-arco" cx="32" cy="32" r="' + R + '" ' +
+          'stroke-dasharray="' + lleno + ' ' + C + '"/>' +
+      '</svg>' +
+      '<span class="aro-dentro"><span class="aro-ico">' + icon(ico) + '</span>' +
+      /* «kg» y los miles hacen cifras de ocho caracteres, y ahí dentro no caben
+         al tamaño de «5»: se encogen en vez de salirse del aro. */
+      '<b class="aro-num' + (String(cifra).length > 4 ? ' largo' : '') + '">' +
+      esc(cifra) + '</b></span>' +
+      '<span class="aro-et">' + esc(etiqueta) + '</span>' +
+      '</div>';
+  }
+
+  function resumenSemanaHTML(st) {
+    const meta = metasSemana();
+    const porVolumen = Store.settings().registro === 'detallado' && st.totalVolume > 0;
+    const parte = function (hecho, pide) {
+      return pide > 0 ? hecho / pide : (hecho > 0 ? 1 : 0);
+    };
+
+    return '<div class="card tarjeta-premium portada-hueco resumen-sem">' +
+      '<div class="pre-encima">' + esc(T('Resumen de la semana')) + '</div>' +
+      '<div class="aros">' +
+        /* La racha se mide contra siete: es lo que dura una semana, y es la
+           única meta honesta para algo que no depende del plan. */
+        aroHTML(parte(st.streak, 7), 'llama', UI.num(st.streak), T('Días seguidos')) +
+        aroHTML(parte(st.week, meta.dias), 'dumbbell', UI.num(st.week),
+          T('Entrenamientos')) +
+        aroHTML(parte(porVolumen ? st.weekVolume : st.weekSets,
+          porVolumen ? 0 : meta.series), 'grafica',
+          porVolumen ? UI.kg(st.weekVolume) : UI.num(st.weekSets),
+          porVolumen ? T('Volumen') : T('Series totales')) +
+      '</div></div>';
+  }
+
   /* ---------- la cara de lo que toca hoy ----------
      Una tarjeta que solo dice «Entrenar» se lee en medio segundo y se olvida en
      otro medio. Con una foto se reconoce el día antes de leer nada.
@@ -1096,19 +1166,7 @@
         </button>`)}
 
       <div class="muelle"></div>
-      <div class="stats portada-hueco">
-        <div class="stat"><b>${st.streak}</b><span>${T('Días seguidos')}</span></div>
-        <div class="stat"><b>${st.total}</b><span>${T('Entrenos')}</span></div>
-        <!-- Con la unidad. Un «68.400» a secas no se lee como una cantidad de
-             nada: hay que saber ya que son kilos para entenderlo, y quien abre
-             la portada no viene a descifrar. -->
-        ${raw((function () {
-          const porVolumen = Store.settings().registro === 'detallado' && st.totalVolume > 0;
-          return '<div class="stat"><b>' +
-            esc(porVolumen ? UI.kg(st.weekVolume) : UI.num(st.weekSets)) + '</b><span>' +
-            esc(porVolumen ? T('Volumen semana') : T('Series semana')) + '</span></div>';
-        })())}
-      </div>
+      ${raw(resumenSemanaHTML(st))}
 
       ${raw(Modo.franjaInvitado())}
 

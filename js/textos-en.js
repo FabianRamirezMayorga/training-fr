@@ -3627,7 +3627,6 @@
     'Tu cuenta': 'Your account',
     'Sesión abierta en este dispositivo': 'Signed in on this device',
     'Qué se sincroniza': 'What gets synced',
-    'Entrenamientos': 'Workouts',
     'Menús de comida': 'Meal plans',
     'Perfil y hábitos': 'Profile and habits',
     'Completo': 'Complete',
@@ -4129,6 +4128,9 @@
 
     /* ---------- El historial de comidas y el menú de hoy ---------- */
     'Lo que has comido': 'What you have eaten',
+    'Resumen de la semana': 'This week at a glance',
+    'Series totales': 'Total sets',
+    'Entrenamientos': 'Workouts',
     'Ver más': 'See more',
     'Ver menos': 'See less',
     'QUÉ DÍAS LA HAGO': 'WHICH DAYS I DO IT',

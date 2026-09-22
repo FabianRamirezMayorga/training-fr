@@ -7715,3 +7715,44 @@ html[data-theme="light"] .ag-ico {
    derecho a saber cuál es cuál sin preguntar. */
 .aviso-carga .carga-ia{color:var(--agua)}
 .aviso-carga .carga-ia:empty{display:none}
+
+/* ---------- el resumen de la semana ----------
+   Eran tres cifras en tres cajas. Una cifra sola no dice si vas bien: «72
+   series» puede ser una semana redonda o media, según lo que pida tu plan. El
+   aro lo cuenta sin tener que leer nada.
+
+   Aro de 270 grados con el hueco abajo, como un cuentakilómetros: el círculo
+   entero no deja ver dónde empieza y dónde acaba. */
+.resumen-sem { padding: 14px 12px 12px; }
+.aros { display: flex; gap: 6px; margin-top: 10px; }
+.aro-caja {
+  flex: 1; min-width: 0; position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.aro { width: 76px; height: 76px; display: block;
+  /* El hueco centrado abajo: girando -225 grados, el arco arranca a las siete
+     en punto y termina a las cinco. */
+  transform: rotate(-225deg); }
+.aro-fondo { fill: none; stroke: var(--card2); stroke-width: 6; stroke-linecap: round; }
+.aro-arco { fill: none; stroke: var(--acc); stroke-width: 6; stroke-linecap: round;
+  transition: stroke-dasharray .7s cubic-bezier(.2,.9,.3,1); }
+
+/* El icono y la cifra van dentro del aro, superpuestos: el SVG ocupa su hueco y
+   esto se coloca encima, centrado sobre él y no sobre la caja entera, que la
+   etiqueta de abajo desplazaría el centro. */
+.aro-dentro {
+  position: absolute; top: 0; left: 0; right: 0; height: 76px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1px; pointer-events: none;
+}
+.aro-ico { display: flex; color: var(--acc); }
+.aro-ico svg { width: 16px; height: 16px; fill: none; stroke: currentColor;
+  stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.aro-num { font-size: 1.25rem; font-weight: 800; letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums; line-height: 1.1; }
+/* Las cifras largas —«68.400 kg»— no caben al tamaño de «5»: se encogen y
+   respiran por los lados, en vez de desbordar el aro. */
+.aro-num.largo { font-size: .82rem; letter-spacing: -.02em; padding: 0 4px;
+  text-align: center; }
+.aro-et { font-size: .68rem; color: var(--dim); text-align: center;
+  line-height: 1.25; }
