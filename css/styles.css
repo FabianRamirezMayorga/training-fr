@@ -7941,10 +7941,15 @@ html[data-theme="light"] .ag-ico {
 .vista-inicio .ps-dia { padding: clamp(4px, .7svh, 7px) 2px clamp(5px, .8svh, 8px); }
 .vista-inicio .ps-num { font-size: clamp(1rem, 2.1svh, 1.2rem); }
 
-/* La leyenda de los tres colores no sale en la portada: los mismos tres
-   colores estan explicados en «Ver mi dia», que es donde uno va a entender la
-   tira, y aqui costaba su renglon y su linea de separacion en cada visita. */
-.vista-inicio .plan-leyenda { display: none; }
+/* La leyenda vuelve a la portada. La quité por alto —los mismos tres colores
+   están explicados en «Ver mi día»— y era un mal cambio: nadie va a otra
+   pantalla a averiguar qué significan tres rayas de colores que tiene delante.
+   Una tira que no se sabe leer no informa de nada, y el renglón que cuesta es
+   menos que la tira entera.
+
+   Compacta y sin la raya de separación de arriba: eso ya lo pone la regla de
+   la tarjeta, unas líneas más arriba. */
+.vista-inicio .plan-leyenda { display: flex; }
 
 /* El saludo y el enlace flojo, que son texto suelto entre tarjetas. */
 .vista-inicio .hola { margin-bottom: clamp(1px, .4svh, 5px); }
