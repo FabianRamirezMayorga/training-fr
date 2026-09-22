@@ -7902,18 +7902,17 @@ html[data-theme="light"] .ag-ico {
      en el sentido del reloj, que es por donde todo el mundo espera que crezca
      algo que se llena. */
   transform: rotate(-90deg); }
-/* Trazo gordo. Con el arco abierto fino quedaba bien —era una línea de
-   gráfico—, pero un anillo cerrado y fino no pesa: parece el borde de un
-   agujero. Nueve sobre un radio de 16 deja el hueco en algo más de la mitad
-   del diámetro, que es la proporción de los anillos de Actividad. */
-.aro-fondo { fill: none; stroke: var(--card2); stroke-width: 9; stroke-linecap: round; }
+/* La banda del anillo. Va con el radio de `aroComidaHTML` —17,5 aquí, 6,5 de
+   trazo—: juntos dejan el anillo en 41 sobre un lienzo de 46, con el hueco
+   holgado. Tocar solo el trazo lo saca del lienzo o lo encoge. */
+.aro-fondo { fill: none; stroke: var(--card2); stroke-width: 6.5; stroke-linecap: round; }
 @media (prefers-reduced-motion: reduce) {
   .aro-arco { transition: none; }
 }
 /* Cada aro con su color, que viene en --tono desde el HTML: tres verdes
    iguales se leen como un bloque y hay que leer las etiquetas para saber
    cual es cual. */
-.aro-arco { fill: none; stroke: var(--tono, var(--acc)); stroke-width: 9;
+.aro-arco { fill: none; stroke: var(--tono, var(--acc)); stroke-width: 6.5;
   stroke-linecap: round;
   transition: stroke-dasharray .9s cubic-bezier(.2,.9,.3,1); }
 

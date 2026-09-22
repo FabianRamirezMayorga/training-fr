@@ -846,12 +846,13 @@
        acaba; eso lo devuelve el remate redondo del extremo, que hace de cabeza
        y marca el avance.
 
-       El radio baja a 16 para que quepa el trazo gordo dentro del mismo lienzo
-       de 46: con 19 y un trazo de 9 el anillo se salía por los bordes. Y el
-       agujero se queda en torno a la mitad del diámetro —esa es la proporción
-       que hace que se lea como medidor—; más grueso y a 40 píxeles es una
-       mancha. */
-    const R = 16;
+       El radio y el trazo van juntos: lo que se mira de un anillo es el ancho
+       de la banda contra el hueco, no el trazo a solas. 17,5 y 6,5 dejan el
+       anillo del mismo tamaño de fuera —41 sobre un lienzo de 46— con la banda
+       más fina y el hueco más abierto. Si se toca uno hay que tocar el otro, o
+       el anillo se sale del lienzo o se encoge sin querer; el trazo está en el
+       css, en `.aro-fondo` y `.aro-arco`. */
+    const R = 17.5;
     const C = 2 * Math.PI * R;
     const arco = C;
     const lleno = arco * Math.max(0, Math.min(1, pct / 100));
