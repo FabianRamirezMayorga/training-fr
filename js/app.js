@@ -847,12 +847,12 @@
        y marca el avance.
 
        El radio y el trazo van juntos: lo que se mira de un anillo es el ancho
-       de la banda contra el hueco, no el trazo a solas. 17,5 y 6,5 dejan el
+       de la banda contra el hueco, no el trazo a solas. 18,75 y 3,5 dejan el
        anillo del mismo tamaño de fuera —41 sobre un lienzo de 46— con la banda
-       más fina y el hueco más abierto. Si se toca uno hay que tocar el otro, o
-       el anillo se sale del lienzo o se encoge sin querer; el trazo está en el
-       css, en `.aro-fondo` y `.aro-arco`. */
-    const R = 17.5;
+       reducida a un hilo. Si se toca uno hay que tocar el otro, o el anillo se
+       sale del lienzo o se encoge sin querer; el trazo está en el css, en
+       `.aro-fondo` y `.aro-arco`. */
+    const R = 18.75;
     const C = 2 * Math.PI * R;
     const arco = C;
     const lleno = arco * Math.max(0, Math.min(1, pct / 100));
