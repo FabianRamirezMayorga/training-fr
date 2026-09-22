@@ -4129,6 +4129,7 @@
     /* ---------- El historial de comidas y el menú de hoy ---------- */
     'Lo que has comido': 'What you have eaten',
     'Resumen de la semana': 'This week at a glance',
+    'Te faltan {n} g de proteína': '{n} g of protein to go',
     'Series totales': 'Total sets',
     'Entrenamientos': 'Workouts',
     'Ver más': 'See more',

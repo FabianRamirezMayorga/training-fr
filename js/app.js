@@ -663,28 +663,23 @@
       <div class="muelle"></div>
       <div class="list-title portada-titulo">${T('Lo que llevas comido')}</div>
       <div class="card inicio-compacta comida-caja tarjeta-premium">
-        <div class="row" style="gap:16px;align-items:flex-start">
-          <div class="grow">
-            <div class="pre-encima">${raw(icon('llama'))}${T('Calorías')}</div>
-            <div><b class="pre-num">${UI.num(h.kcal)}</b>
-              <span class="tiny"> / ${UI.num(m.kcal)}</span></div>
-            <div class="prog" style="margin-top:5px"><i style="width:${pk}%"></i></div>
-          </div>
-          <div class="grow">
-            <div class="pre-encima prot">${raw(icon('proteina'))}${T('Proteína')}</div>
-            <div><b class="pre-num" style="color:var(--brand-1)">${h.prot}</b>
-              <span class="tiny"> / ${m.prot} g</span></div>
-            <div class="prog" style="margin-top:5px">
-              <i style="width:${pp}%;background:var(--brand-1)"></i></div>
-          </div>
+        <!-- Dos aros con su cifra al lado. Eran dos barras con el número encima,
+             y una barra de progreso hay que medirla con la vista para saber por
+             dónde va; un aro se lee de reojo. Al lado y no debajo porque en la
+             portada lo que sobra es alto, no ancho. -->
+        <div class="comida-aros">
+          ${raw(aroComidaHTML(pk, 'llama', T('Calorías'),
+            UI.num(h.kcal), UI.num(m.kcal), ''))}
+          ${raw(aroComidaHTML(pp, 'proteina', T('Proteína'),
+            String(h.prot), String(m.prot), 'g'))}
         </div>
-        <p class="tiny" style="margin:4px 0 0">${h.kcal === 0
+        <p class="tiny comida-nota">${h.kcal === 0
           ? T('Hoy no has apuntado nada. Una foto del plato basta.')
           : faltaProt > 0
-            ? Tn('Te faltan {n} g de proteína para el objetivo del día.', { n: faltaProt })
+            ? Tn('Te faltan {n} g de proteína', { n: faltaProt })
             : T('Proteína del día cubierta.')}</p>
 
-        <div class="row" style="margin-top:5px">
+        <div class="row" style="margin-top:8px">
           <label class="btn primary grow sm" for="foto-inicio" style="cursor:pointer">
             ${raw(icon('camara'))} ${T('Foto')}</label>
           <button class="btn grow sm" data-a="comidamano">${raw(icon('plus'))} ${T('A mano')}</button>
@@ -829,6 +824,32 @@
 
   /* De qué plan es y cuánto es, en una línea. Es lo que decía el cajón de
      «Hoy, lunes» y lo que ahora va dentro del botón. */
+  /* Un aro de comida: el aro a la izquierda y, a su derecha, el rótulo con la
+     cifra y su objetivo. Mismo aro de 270 grados que el resumen de la semana,
+     más pequeño, para que la portada hable con una sola voz. */
+  function aroComidaHTML(pct, ico, etiqueta, hecho, meta, unidad) {
+    const R = 19;
+    const C = 2 * Math.PI * R;
+    const arco = C * 0.75;
+    const lleno = arco * Math.max(0, Math.min(1, pct / 100));
+    const prot = ico === 'proteina';
+    return '<div class="ca-caja">' +
+      '<svg class="aro ca-aro' + (prot ? ' prot' : '') + '" viewBox="0 0 46 46" aria-hidden="true">' +
+        '<circle class="aro-fondo" cx="23" cy="23" r="' + R + '" ' +
+          'stroke-dasharray="' + arco + ' ' + C + '"/>' +
+        '<circle class="aro-arco" cx="23" cy="23" r="' + R + '" ' +
+          'stroke-dasharray="' + lleno + ' ' + C + '"/>' +
+      '</svg>' +
+      '<span class="grow">' +
+        '<span class="pre-encima' + (prot ? ' prot' : '') + '">' + icon(ico) +
+          esc(etiqueta) + '</span>' +
+        '<span class="ca-cifra"><b' + (prot ? ' style="color:var(--brand-1)"' : '') +
+          '>' + esc(hecho) + '</b>' +
+        '<span class="tiny"> / ' + esc(meta) + (unidad ? ' ' + esc(unidad) : '') +
+        '</span></span>' +
+      '</span></div>';
+  }
+
   /* ---------- el resumen de la semana ----------
      Eran tres cifras en tres cajas, y una cifra sola no dice si vas bien: «72
      series» puede ser una semana redonda o media, según lo que pida tu plan.
@@ -856,17 +877,20 @@
 
   /* Un aro de 270 grados con el hueco abajo, como un cuentakilómetros: el
      círculo entero no deja ver dónde empieza y dónde acaba. */
-  function aroHTML(pct, ico, cifra, etiqueta) {
+  function aroHTML(pct, ico, cifra, etiqueta, tono) {
     const R = 26;
     const C = 2 * Math.PI * R;
     const arco = C * 0.75;
     const lleno = arco * Math.max(0, Math.min(1, pct));
-    return '<div class="aro-caja">' +
+    /* Nace vacío y crece al pintarse. El valor final viaja en un atributo y lo
+       pone el montaje un fotograma después: con la transición del CSS, el arco
+       se dibuja solo. Puesto ya en el HTML no habría de dónde animar. */
+    return '<div class="aro-caja" style="--tono:' + tono + '">' +
       '<svg class="aro" viewBox="0 0 64 64" aria-hidden="true">' +
         '<circle class="aro-fondo" cx="32" cy="32" r="' + R + '" ' +
           'stroke-dasharray="' + arco + ' ' + C + '"/>' +
         '<circle class="aro-arco" cx="32" cy="32" r="' + R + '" ' +
-          'stroke-dasharray="' + lleno + ' ' + C + '"/>' +
+          'stroke-dasharray="0 ' + C + '" data-arco="' + lleno + ' ' + C + '"/>' +
       '</svg>' +
       '<span class="aro-dentro"><span class="aro-ico">' + icon(ico) + '</span>' +
       /* «kg» y los miles hacen cifras de ocho caracteres, y ahí dentro no caben
@@ -889,13 +913,18 @@
       '<div class="aros">' +
         /* La racha se mide contra siete: es lo que dura una semana, y es la
            única meta honesta para algo que no depende del plan. */
-        aroHTML(parte(st.streak, 7), 'llama', UI.num(st.streak), T('Días seguidos')) +
+        /* Un color por aro. Tres verdes iguales se leen como un solo bloque y
+           hay que leer las etiquetas para saber cuál es cuál; con la llama en
+           ámbar, el entreno en verde y las series en azul, cada cifra tiene la
+           cara de lo que cuenta. Son los tres colores que la app ya usa. */
+        aroHTML(parte(st.streak, 7), 'llama', UI.num(st.streak),
+          T('Días seguidos'), 'var(--warn)') +
         aroHTML(parte(st.week, meta.dias), 'dumbbell', UI.num(st.week),
-          T('Entrenamientos')) +
+          T('Entrenamientos'), 'var(--acc)') +
         aroHTML(parte(porVolumen ? st.weekVolume : st.weekSets,
           porVolumen ? 0 : meta.series), 'grafica',
           porVolumen ? UI.kg(st.weekVolume) : UI.num(st.weekSets),
-          porVolumen ? T('Volumen') : T('Series totales')) +
+          porVolumen ? T('Volumen') : T('Series totales'), 'var(--brand-1)') +
       '</div></div>';
   }
 
@@ -1917,6 +1946,15 @@
         masCarga.textContent = abierto ? T('Ver más') : T('Ver menos');
       };
     }
+
+    /* Los aros crecen al entrar. Un fotograma después de pintar, que si se pone
+       en el mismo el navegador junta los dos valores y no hay transición. */
+    requestAnimationFrame(function () {
+      root.querySelectorAll('.aro-arco[data-arco]').forEach(function (arco, i) {
+        arco.style.transitionDelay = (i * 90) + 'ms';
+        arco.setAttribute('stroke-dasharray', arco.dataset.arco);
+      });
+    });
 
     pintarCargaIA(root);
 

@@ -1836,7 +1836,7 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .ps-dia {
   flex: 0 0 auto; width: 52px; scroll-snap-align: end;
   display: flex; flex-direction: column; align-items: center;
-  gap: 1px; padding: 8px 2px 9px; border-radius: 13px;
+  gap: 1px; padding: 6px 2px 7px; border-radius: 13px;
   background: color-mix(in srgb, var(--card2) 55%, transparent);
   border: 1px solid transparent;
 }
@@ -1871,10 +1871,13 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 
    El aro del punto apagado no baja proporcional: a 0,8 px desaparecía sobre el
    fondo oscuro y el día parecía no tener punto en vez de tenerlo apagado. */
+/* Guiones y no puntos. A este tamano un circulo de 5 px es casi un pixel
+   suelto; un guion de 8 x 2,5 tiene la misma discrecion y se ve, porque lo que
+   se lee de el es el color y el largo, no la forma. */
 .ps-punto {
-  display: inline-block; width: 5px; height: 5px; border-radius: 50%;
-  background: transparent;
-  box-shadow: inset 0 0 0 1.2px color-mix(in srgb, var(--dim2) 55%, transparent);
+  display: inline-block; width: 8px; height: 2.5px; border-radius: 2px;
+  background: color-mix(in srgb, var(--dim2) 42%, transparent);
+  box-shadow: none;
 }
 .ps-punto.entreno.si { background: var(--acc); box-shadow: none; }
 .ps-punto.prote.si { background: var(--brand-1); box-shadow: none; }
@@ -6067,7 +6070,12 @@ html[data-theme="light"] .fr-fila {
    ancho que de alto, y ahi una persona de pie entra recortada por arriba y por
    abajo se ponga donde se ponga. Con 132 el recorte es suave y se le ve entera.
    Sin foto se queda como estaba, que no hay nada que encuadrar. */
-.dia-cabeza.con-foto { min-height: 132px; }
+/* Mas baja de lo que pedia el encuadre perfecto. La portada tiene que caber
+   entera sin rodar: es un vistazo, no una pagina. A 112 el hueco queda en
+   proporcion 1,78 frente al 1,50 de las fotos, asi que recorta por los lados
+   -y a una persona de pie eso no le quita nada- en vez de por arriba y abajo,
+   que es lo que la dejaba sin cabeza ni pies. */
+.dia-cabeza.con-foto { min-height: 112px; }
 .dia-cabeza.con-foto .grow { padding-right: 34%; }
 
 /* La tarjeta del dia libre no es un boton con su fila: es un bloque de texto,
@@ -7723,36 +7731,63 @@ html[data-theme="light"] .ag-ico {
 
    Aro de 270 grados con el hueco abajo, como un cuentakilómetros: el círculo
    entero no deja ver dónde empieza y dónde acaba. */
-.resumen-sem { padding: 14px 12px 12px; }
-.aros { display: flex; gap: 6px; margin-top: 10px; }
+/* Apretado a proposito: la portada tiene que caber sin rodar, y este bloque
+   es de mirar, no de tocar, asi que no necesita aire de dedo. */
+.resumen-sem { padding: 10px 10px 8px; }
+.aros { display: flex; gap: 6px; margin-top: 7px; }
 .aro-caja {
   flex: 1; min-width: 0; position: relative;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
-.aro { width: 76px; height: 76px; display: block;
+.aro { width: 58px; height: 58px; display: block;
   /* El hueco centrado abajo: girando -225 grados, el arco arranca a las siete
      en punto y termina a las cinco. */
   transform: rotate(-225deg); }
 .aro-fondo { fill: none; stroke: var(--card2); stroke-width: 6; stroke-linecap: round; }
-.aro-arco { fill: none; stroke: var(--acc); stroke-width: 6; stroke-linecap: round;
-  transition: stroke-dasharray .7s cubic-bezier(.2,.9,.3,1); }
+@media (prefers-reduced-motion: reduce) {
+  .aro-arco { transition: none; }
+}
+/* Cada aro con su color, que viene en --tono desde el HTML: tres verdes
+   iguales se leen como un bloque y hay que leer las etiquetas para saber
+   cual es cual. */
+.aro-arco { fill: none; stroke: var(--tono, var(--acc)); stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dasharray .9s cubic-bezier(.2,.9,.3,1); }
 
 /* El icono y la cifra van dentro del aro, superpuestos: el SVG ocupa su hueco y
    esto se coloca encima, centrado sobre él y no sobre la caja entera, que la
    etiqueta de abajo desplazaría el centro. */
 .aro-dentro {
-  position: absolute; top: 0; left: 0; right: 0; height: 76px;
+  position: absolute; top: 0; left: 0; right: 0; height: 58px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 1px; pointer-events: none;
 }
-.aro-ico { display: flex; color: var(--acc); }
-.aro-ico svg { width: 16px; height: 16px; fill: none; stroke: currentColor;
+.aro-ico { display: flex; color: var(--tono, var(--acc)); }
+.aro-ico svg { width: 14px; height: 14px; fill: none; stroke: currentColor;
   stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.aro-num { font-size: 1.25rem; font-weight: 800; letter-spacing: -.03em;
+.aro-num { font-size: 1.1rem; font-weight: 800; letter-spacing: -.03em;
   font-variant-numeric: tabular-nums; line-height: 1.1; }
 /* Las cifras largas —«68.400 kg»— no caben al tamaño de «5»: se encogen y
    respiran por los lados, en vez de desbordar el aro. */
 .aro-num.largo { font-size: .82rem; letter-spacing: -.02em; padding: 0 4px;
   text-align: center; }
-.aro-et { font-size: .68rem; color: var(--dim); text-align: center;
-  line-height: 1.25; }
+.aro-et { font-size: .62rem; color: var(--dim); text-align: center;
+  line-height: 1.2; }
+
+/* ---------- lo que llevas comido, con aros ----------
+   Eran dos barras con el número encima. Una barra hay que medirla con la vista
+   para saber por dónde va; un aro se lee de reojo y ocupa menos alto, que es lo
+   que falta en la portada.
+
+   El aro a la izquierda y el rótulo a su derecha: en la portada lo que sobra es
+   ancho, no alto. */
+.comida-aros { display: flex; gap: 10px; }
+.ca-caja { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; }
+.ca-aro { width: 42px; height: 42px; flex: none; }
+.ca-aro .aro-arco { stroke: var(--acc); }
+.ca-aro.prot .aro-arco { stroke: var(--brand-1); }
+.ca-caja .grow { min-width: 0; }
+.ca-cifra { display: block; line-height: 1.15; }
+.ca-cifra b { font-size: 1.15rem; font-weight: 800; letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums; }
+.comida-nota { margin: 6px 0 0; }
