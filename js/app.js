@@ -1338,7 +1338,12 @@
     const partes = [];
     if (h.nombres.length) partes.push(esc(h.nombres.join(' · ')));
     if (h.series) partes.push(Tp(h.series, '{n} serie', '{n} series'));
-    if (h.volumen) partes.push(Tn('{v} levantados', { v: UI.kg(h.volumen) }));
+    /* El volumen solo si lleva el peso anotado. Con «solo series» puesto, un
+       «14.160 kg levantados» es de cuando anotaba pesos y ya no es la vara con
+       la que mide. */
+    if (h.volumen && Store.settings().registro === 'detallado') {
+      partes.push(Tn('{v} levantados', { v: UI.kg(h.volumen) }));
+    }
     if (h.minutos >= 1) partes.push(Tn('{n} min', { n: h.minutos }));
     return partes.length ? partes.join(' · ') : T('Queda apuntado en tu historial.');
   }

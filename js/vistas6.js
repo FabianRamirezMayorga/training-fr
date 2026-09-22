@@ -1173,13 +1173,31 @@
     return fuera.slice(0, 4).map(function (m) { return I18N.muscle(m); });
   }
 
+  /* Si tiene puesto «solo cuento las series», el peso no se enseña en ninguna
+     parte. En ese modo él no anota kilos, así que un «63,8×10» es un número que
+     no puso; y si viene de cuando sí los anotaba, es un número que ya no mide
+     su progreso, porque eligió medirlo por series. Lo guardado no se toca: deja
+     de pintarse, que no es lo mismo.
+
+     Se mira el ajuste de ahora y no lo que traiga la sesión: la pregunta es
+     cómo quiere leer su historial hoy, no cómo lo escribió entonces. */
+  function conPesos() { return Store.settings().registro === 'detallado'; }
+
+  function seriesHechasHTML(hechas) {
+    if (conPesos()) {
+      return hechas.map(function (x) { return UI.num(x.weight) + '×' + x.reps; }).join(' · ');
+    }
+    return Tp(hechas.length, '{n} serie', '{n} series');
+  }
+
   function lineaSesion(s) {
     const dura = UI.mmss(((s.end || s.start) - s.start) / 1000);
     const que = s.manual
       ? T('apuntado a mano') + (s.kcal ? ' · ' + Tn('~{n} kcal', { n: UI.num(s.kcal) }) : '')
       : s.actividad && !s.setsDone
       ? Tn('~{n} kcal', { n: UI.num(s.kcal || 0) })
-      : Tn('{n} series', { n: s.setsDone }) + (s.volume ? ' · ' + UI.kg(s.volume) : '');
+      : Tn('{n} series', { n: s.setsDone }) +
+        (conPesos() && s.volume ? ' · ' + UI.kg(s.volume) : '');
     return que + ' · ' + dura;
   }
 
@@ -1232,9 +1250,8 @@
               const st = (e.sets || []).filter(function (x) { return x.done; });
               return '<div class="row between" style="font-size:.84rem;gap:10px">' +
                 '<span class="grow">' + esc(nombreEj(e)) + '</span>' +
-                '<span class="tiny nowrap">' + esc(st.map(function (x) {
-                  return UI.num(x.weight) + '×' + x.reps;
-                }).join(' · ')) + '</span></div>';
+                '<span class="tiny nowrap">' + esc(seriesHechasHTML(st)) +
+                '</span></div>';
             }).join('') + '</div>' : '') +
             '</div>';
         }).join(''))}
@@ -1274,9 +1291,7 @@
             if (!hechas.length) return '';
             return html`<div class="row between" style="font-size:.82rem">
               <span class="grow">${nombreEj(e)}</span>
-              <span class="tiny">${hechas.map(function (x) {
-                return UI.num(x.weight) + '×' + x.reps;
-              }).join(' · ')}</span></div>`;
+              <span class="tiny">${seriesHechasHTML(hechas)}</span></div>`;
           }).join(''))}
         </div>
       </div>`;
