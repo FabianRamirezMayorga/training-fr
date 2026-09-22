@@ -6052,16 +6052,16 @@ html[data-theme="light"] .fr-fila {
    Va detrás de todo con z-index negativo: la tarjeta lleva `isolation`, así
    que ese -1 se queda dentro y no se cuela por debajo del fondo. */
 .dc-foto {
-  position: absolute; right: 0; top: 0; height: 100%; width: 44%;
+  position: absolute; right: 0; top: 0; height: 100%; width: 58%;
   object-fit: cover; object-position: center 30%;
   z-index: -1; pointer-events: none;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 55%);
-  mask-image: linear-gradient(to right, transparent 0%, #000 55%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 42%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 42%);
 }
 /* El texto se aparta de la imagen. No hasta la mitad: la máscara ya deja el
    primer tercio transparente, y reservar más partía el titular en dos
    renglones sin ganar nada. */
-.dia-cabeza.con-foto .grow { padding-right: 26%; }
+.dia-cabeza.con-foto .grow { padding-right: 34%; }
 
 /* La tarjeta del dia libre no es un boton con su fila: es un bloque de texto,
    asi que el hueco se lo hace ella misma y la foto se recorta con el borde
@@ -6075,10 +6075,14 @@ html[data-theme="light"] .fr-fila {
    imagen en vez de sobre la tarjeta. */
 .tarjeta-libre.con-foto .dc-foto { opacity: .34; filter: saturate(.7); }
 
-/* El texto de la IA, plegado a un renglon. Son tres o cuatro lineas de letra
-   pequena justo donde hay que decidir si entrenar, y casi siempre confirman lo
-   que ya dice el aviso de regla de encima. */
-.carga-ia.recortada {
+/* El aviso de carga, plegado a un renglon. Eran cinco lineas de letra pequena
+   justo donde hay que decidir si entrenar: el titular ya dice lo unico que hay
+   que saber de un vistazo y el resto es para quien lo quiera.
+
+   Se pliega el cuerpo entero -la regla y lo que anade la IA- y no solo una de
+   las dos mitades: lo que cansa es el bloque. */
+.carga-cuerpo { display: block; }
+.carga-cuerpo.recortada {
   display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -6089,12 +6093,21 @@ html[data-theme="light"] .fr-fila {
 }
 .carga-mas:active { opacity: .6; }
 
-/* Sobre el verde la foto no se funde, se ensucia: una foto de gimnasio es casi
-   toda gris oscura y el verde de debajo la vuelve barro. Se oscurece a propósito
-   y se mezcla en multiply, que la deja como una sombra con forma en vez de como
-   una foto mal puesta, y el titular sigue mandando. */
+/* La foto se ve, no se intuye. El primer intento la fundia en multiply y gris
+   para no ensuciar el verde, y acababa siendo una mancha: lo que hace que la
+   tarjeta se reconozca de un vistazo es reconocer el ejercicio.
+
+   Asi que va casi entera, en color, y quien cede es el verde: la mascara deja
+   limpio el lado del texto y de la mitad a la derecha manda la imagen. Un
+   velo verde muy suave por encima la cose al resto de la tarjeta. */
 .dia-cabeza.con-foto.btn-arranque .dc-foto {
-  opacity: .5; mix-blend-mode: multiply; filter: grayscale(1) contrast(1.35);
+  opacity: .95; filter: saturate(.85) contrast(1.05);
+}
+.dia-cabeza.con-foto.btn-arranque::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(to right,
+    color-mix(in srgb, var(--acc) 92%, transparent) 40%,
+    color-mix(in srgb, var(--acc) 18%, transparent) 100%);
 }
 /* Y en las tarjetas oscuras, al revés: ahí la foto sí puede verse entera. */
 .dia-cabeza.con-foto:not(.btn-arranque) .dc-foto { opacity: .85; }

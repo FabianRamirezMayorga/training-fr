@@ -455,9 +455,14 @@
        raw() devuelve un objeto que se pinta como [object Object]. */
     return '<p class="aviso-carga tiny">' +
       icon('chispa') +
-      '<span><b class="carga-tit">' +
+      '<span class="grow"><b class="carga-tit">' +
       esc(Tn('{cuando} cargaste {zonas}',
         { cuando: c.ayer ? T('Ayer') : T('Hoy'), zonas: listaDias(zonas) })) + '</b>' +
+      /* Todo lo que no es el titular va dentro del cuerpo, y el cuerpo nace
+         plegado a un renglón. Eran cinco líneas de letra pequeña justo donde hay
+         que decidir si entrenar: el titular ya dice lo único que hay que saber
+         de un vistazo, y el resto es para quien lo quiera. */
+      '<span class="carga-cuerpo recortada" id="carga-cuerpo">' +
       esc(Tn('{min} min de actividad. Si lo notas pesado, baja una serie por ' +
         'ejercicio o quita algo de peso: rendir menos hoy es normal.',
         { min: c.minutos })) +
@@ -465,6 +470,9 @@
          cuando conteste la IA. Si no hay entrenador puesto o falla, no se nota
          nada, que es como tiene que ser algo opcional. */
       '<span class="carga-ia" id="carga-ia"></span>' +
+      '</span>' +
+      '<button type="button" class="carga-mas" id="carga-mas">' +
+      esc(T('Ver más')) + '</button>' +
       '</span></p>';
   }
 
@@ -496,28 +504,10 @@
       if (!partes.length) return;
       /* textContent y no innerHTML: esto viene de fuera y no se pinta como
          código por mucho que lo parezca. */
-      /* Plegado a un renglón. Son tres o cuatro líneas de letra pequeña justo
-         donde hay que decidir si entrenar, y casi siempre confirman lo que ya
-         dice el aviso de regla de encima. Quien quiera el detalle lo abre.
-
-         El botón para el toque para que no llegue a la tarjeta de detrás: esto
-         vive dentro de la portada y cualquier toque suelto por ahí arranca el
-         entrenamiento. */
+      /* textContent y no innerHTML: esto viene de fuera y no se pinta como
+         código por mucho que lo parezca. Se añade dentro del cuerpo, que ya está
+         plegado, así que la respuesta no alarga la portada al llegar. */
       hueco.textContent = ' ' + partes.join(' ');
-      hueco.classList.add('recortada');
-
-      const mas = document.createElement('button');
-      mas.className = 'carga-mas';
-      mas.type = 'button';
-      mas.textContent = T('Ver más');
-      mas.onclick = function (ev) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        const abierta = !hueco.classList.contains('recortada');
-        hueco.classList.toggle('recortada', abierta);
-        mas.textContent = abierta ? T('Ver más') : T('Ver menos');
-      };
-      hueco.parentNode.appendChild(mas);
     }).catch(function () { /* sin clave, sin red o sin cuota: el aviso vale solo */ })
       .then(function () { pidiendoCargaIA = false; });
   }
@@ -1755,6 +1745,23 @@
        sale la tira: dos sitios acordándose de lo mismo por separado es un
        sitio que se olvida. */
     if (g.VISTAS && VISTAS.dia && VISTAS.dia.bindTira) VISTAS.dia.bindTira(root);
+
+    /* El aviso de carga se abre y se cierra. Va aquí y no donde contesta la IA
+       porque el aviso de regla sale siempre, con entrenador o sin él.
+
+       Se para el toque: esto vive pegado a la tarjeta de entrenar, y cualquier
+       toque suelto por ahí arranca el entrenamiento. */
+    const masCarga = root.querySelector('#carga-mas');
+    const cuerpoCarga = root.querySelector('#carga-cuerpo');
+    if (masCarga && cuerpoCarga) {
+      masCarga.onclick = function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const abierto = !cuerpoCarga.classList.contains('recortada');
+        cuerpoCarga.classList.toggle('recortada', abierto);
+        masCarga.textContent = abierto ? T('Ver más') : T('Ver menos');
+      };
+    }
 
     pintarCargaIA(root);
 
