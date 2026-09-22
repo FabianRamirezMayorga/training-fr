@@ -796,6 +796,10 @@
     let minutos = 0;
     const nombres = [];
     const musculos = [];
+    /* La rutina de lo que hizo, para ponerle cara a la tarjeta. La primera que
+       siga existiendo: si entrenó dos veces manda la de arriba, y si lo
+       apuntó a mano no hay ninguna y la tarjeta se queda sin foto. */
+    let rutina = null;
 
     /* Qué tocaste, sacado de los ejercicios que apuntaste, no de la rutina:
        si te saltaste la mitad, la rutina seguiría diciendo que hiciste pecho y
@@ -818,6 +822,7 @@
          escribirlo otra vez dos renglones más abajo no añade nada. */
       const n = sinDia(Store.nombreDeSesion(x));
       if (n && nombres.indexOf(n) === -1) nombres.push(n);
+      if (!rutina && x.routineId) rutina = Store.routine(x.routineId);
 
       (x.entries || []).forEach(function (e) {
         const ex = Data.get(e.exId);
@@ -829,7 +834,7 @@
     });
 
     return { n: ses.length, series: series, volumen: volumen,
-      minutos: minutos, nombres: nombres, musculos: musculos };
+      minutos: minutos, nombres: nombres, musculos: musculos, rutina: rutina };
   }
 
   /* De qué plan es y cuánto es, en una línea. Es lo que decía el cajón de
@@ -1192,8 +1197,18 @@
              Ocupa el mismo hueco y tiene la misma forma que el botón: el disco
              a la izquierda, el rótulo, el titular y la línea de debajo. Nunca
              están los dos a la vez, así que la pantalla no da un salto. -->
-        <div class="card tarjeta-premium dia-cabeza hecha portada-hueco">
-          <span class="hh-silueta" aria-hidden="true">${raw(icon('check'))}</span>
+        <!-- La misma foto que llevaba el botón de entrenar esta mañana: la
+             portada no cambia de cara al terminar, cambia de mensaje. Antes
+             aquí había un tic gigante de fondo y un tic dentro del disco, que
+             era decir dos veces lo mismo y no decía nada del entrenamiento.
+             El tic de fondo se queda solo para lo apuntado a mano, que no
+             tiene rutina de la que sacar imagen. -->
+        <div class="card tarjeta-premium dia-cabeza hecha portada-hueco${
+          raw(fotoDeRutina(hecho.rutina) ? ' con-foto' : '')}">
+          ${raw(fotoDeRutina(hecho.rutina)
+            ? '<img class="dc-foto" src="' + esc(fotoDeRutina(hecho.rutina)) +
+              '" alt="" loading="lazy" aria-hidden="true">'
+            : '<span class="hh-silueta" aria-hidden="true">' + icon('check') + '</span>')}
           <span class="dc-disco">${raw(icon('check'))}</span>
           <span class="grow">
             <span class="dc-rotulo">${Tn('Hoy, {d} · hecho',

@@ -6237,6 +6237,22 @@ button.dia-cabeza:active { transform: scale(.985); }
 
 /* Ya entrenado: la misma pieza apagada, con el disco del tic */
 .dia-cabeza.hecha { cursor: default; }
+
+/* Lo hecho, con foto. Aquí el texto es mucho más largo que en el botón de
+   entrenar —ahí pone «Entrenar» y aquí van los músculos, el plan, las series,
+   el volumen y los minutos—, así que la imagen se queda con menos sitio y las
+   dos líneas largas se cortan al segundo renglón.
+
+   Sin esto la tarjeta pasaba de 157 a 212 píxeles —cada línea se partía en
+   tres— y la portada dejaba de caber sin rodar, que es el límite de esta
+   pantalla. */
+.dia-cabeza.hecha.con-foto .dc-foto { width: 46%; }
+.dia-cabeza.hecha.con-foto .grow { padding-right: 24%; }
+.dia-cabeza.hecha.con-foto .dc-que,
+.dia-cabeza.hecha.con-foto .dc-sub {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .dc-disco {
   flex: none; width: 50px; height: 50px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
