@@ -6055,8 +6055,8 @@ html[data-theme="light"] .fr-fila {
   position: absolute; right: 0; top: 0; height: 100%; width: 58%;
   object-fit: cover; object-position: center 30%;
   z-index: -1; pointer-events: none;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 42%);
-  mask-image: linear-gradient(to right, transparent 0%, #000 42%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 52%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 52%);
 }
 /* El texto se aparta de la imagen. No hasta la mitad: la máscara ya deja el
    primer tercio transparente, y reservar más partía el titular en dos
@@ -6106,8 +6106,8 @@ html[data-theme="light"] .fr-fila {
 .dia-cabeza.con-foto.btn-arranque::before {
   content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: linear-gradient(to right,
-    color-mix(in srgb, var(--acc) 92%, transparent) 40%,
-    color-mix(in srgb, var(--acc) 18%, transparent) 100%);
+    var(--acc) 46%,
+    color-mix(in srgb, var(--acc) 12%, transparent) 100%);
 }
 /* Y en las tarjetas oscuras, al revés: ahí la foto sí puede verse entera. */
 .dia-cabeza.con-foto:not(.btn-arranque) .dc-foto { opacity: .85; }

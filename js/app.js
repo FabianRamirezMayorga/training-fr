@@ -830,24 +830,62 @@
   /* De qué plan es y cuánto es, en una línea. Es lo que decía el cajón de
      «Hoy, lunes» y lo que ahora va dentro del botón. */
   /* La cara de lo que toca hoy. Una tarjeta que solo dice «Entrenar» se lee en
-     medio segundo y se olvida en otro medio; con la imagen del ejercicio se
-     reconoce de un vistazo qué día es, antes de leer nada.
+     medio segundo y se olvida en otro medio; con la imagen se reconoce de un
+     vistazo qué día es, antes de leer nada.
 
-     Se prefiere una foto a una ilustración: las ilustraciones van sobre fondo
-     claro y, fundidas contra una tarjeta oscura, dejan un halo blanco. Si la
-     rutina no tiene ninguna foto se usa la primera imagen que haya, que
-     cualquier cosa es mejor que un hueco.
+     Personas, nunca un dibujo. Antes, si la rutina no tenía ninguna foto se
+     tiraba de la ilustración del catálogo, y en un día de pierna —cuyos seis
+     ejercicios son todos ilustrados— la portada se llenaba de un muñeco sobre
+     fondo blanco. Un dibujo no invita a entrenar.
+
+     Si ninguno de sus ejercicios tiene foto se busca una de otro ejercicio del
+     mismo músculo: en un día de pierna sale alguien haciendo pierna, que es lo
+     que la tarjeta quiere decir. De los 1460 del catálogo, 777 llevan foto y
+     cubren los diecisiete grupos, así que siempre hay alguna.
 
      La imagen sale del catálogo que ya está descargado, así que no cuesta ni
      una petición más ni deja de verse sin conexión. */
+  let fotoVista = { clave: '', url: '' };
+
   function fotoDeRutina(r) {
     if (!r || !g.Data) return '';
     const ejs = (r.exercises || []).map(function (re) { return Data.get(re.exId); })
       .filter(Boolean);
     if (!ejs.length) return '';
-    const foto = ejs.filter(function (ex) { return !Data.esIlustracion(ex); })[0];
-    const elegido = foto || ejs[0];
-    return Data.img(elegido, 0) || '';
+
+    /* Se recuerda la última: la plantilla la pide varias veces por repintado y
+       el rodeo por el catálogo entero no hace falta repetirlo. La clave lleva
+       los ejercicios, así que cambiar uno cambia la foto. */
+    const clave = r.id + '|' + (r.exercises || []).map(function (x) {
+      return x.exId;
+    }).join(',');
+    if (fotoVista.clave === clave) return fotoVista.url;
+
+    const conFoto = function (ex) {
+      return ex && ex.images && ex.images.length && !Data.esIlustracion(ex);
+    };
+
+    let elegido = ejs.filter(conFoto)[0];
+
+    if (!elegido) {
+      const musculos = [];
+      ejs.forEach(function (ex) {
+        (ex.primaryMuscles || []).forEach(function (m) {
+          if (musculos.indexOf(m) === -1) musculos.push(m);
+        });
+      });
+      if (musculos.length) {
+        elegido = Data.all().filter(function (ex) {
+          return conFoto(ex) && (ex.primaryMuscles || []).some(function (m) {
+            return musculos.indexOf(m) !== -1;
+          });
+        })[0];
+      }
+    }
+
+    const url = elegido ? (Data.img(elegido, 0) || '') : '';
+    fotoVista = { clave: clave, url: url };
+    return url;
   }
 
   function resumenRutina(r) {
