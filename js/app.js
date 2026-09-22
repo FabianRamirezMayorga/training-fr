@@ -809,7 +809,9 @@
       series += x.setsDone || 0;
       volumen += x.volume || 0;
       minutos += Math.round(((x.end || x.start) - x.start) / 60000);
-      const n = Store.nombreDeSesion(x);
+      /* Sin el día de delante: el rótulo de la tarjeta ya dice «hoy, martes» y
+         escribirlo otra vez dos renglones más abajo no añade nada. */
+      const n = sinDia(Store.nombreDeSesion(x));
       if (n && nombres.indexOf(n) === -1) nombres.push(n);
 
       (x.entries || []).forEach(function (e) {
@@ -1434,9 +1436,14 @@
     });
   }
 
-  function nombreRutina(r) {
-    const n = String(r.name || '').trim();
-    if (!n) return T('Rutina sin nombre');
+  /* Le quita el día de delante a un nombre: «Martes · Rutina Fabián» queda en
+     «Rutina Fabián». Solo si lo de delante son días de verdad y queda algo
+     detrás: un plan llamado «Fuerza · bloque 2» se queda entero.
+
+     Vale para un nombre suelto y no solo para una rutina porque lo que guarda
+     una sesión es una cadena, y esa cadena también se pinta. */
+  function sinDia(nombre) {
+    const n = String(nombre || '').trim();
     const corte = n.indexOf(' · ');
     if (corte === -1) return n;
 
@@ -1449,6 +1456,12 @@
     const soloDias = cabeza.split(/\s*,\s*|\s+(?:y|and)\s+/i).filter(Boolean)
       .every(function (t) { return !!UI.claveDeDia(t); });
     return soloDias ? resto : n;
+  }
+
+  function nombreRutina(r) {
+    const n = String(r.name || '').trim();
+    if (!n) return T('Rutina sin nombre');
+    return sinDia(n);
   }
 
   /* Qué rutina está desplegada, y en qué pantalla. Es por pantalla a propósito:
