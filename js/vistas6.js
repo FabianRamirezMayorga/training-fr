@@ -1162,15 +1162,60 @@
   /* Qué se trabajó en una sesión. De los ejercicios si los hubo, y de lo que
      dijo la IA si fue una actividad de fuera del gimnasio. Sin esto el historial
      decía «19 series» y había que abrirlo para saber de qué. */
-  function musculosDeSesion(s) {
-    const fuera = [];
-    const mete = function (m) { if (m && fuera.indexOf(m) === -1) fuera.push(m); };
+  /* De qué hora a qué hora. La duración ya estaba —«75:07»— pero un rato no
+     dice cuándo: entrenar setenta y cinco minutos a las seis de la mañana y
+     hacerlo a las nueve de la noche son dos días distintos, y al mirar atrás
+     eso es justo lo que uno reconoce.
+
+     Se pinta solo si la sesión llegó a cerrarse: sin final no hay franja que
+     contar, y repetir la hora de inicio dos veces no añade nada. */
+  function horaDe(t) {
+    const d = new Date(t);
+    return UI.hora(d.getHours() + ':' + ('0' + d.getMinutes()).slice(-2));
+  }
+
+  function franjaHorasHTML(s) {
+    if (!s.end || s.end <= s.start) return '';
+    return '<div class="ses-horas">' + icon('timer') +
+      esc(horaDe(s.start)) + '<span>→</span>' + esc(horaDe(s.end)) + '</div>';
+  }
+
+  /* Los músculos de una sesión, con cuántas series se llevó cada uno.
+
+     Una serie cuenta entera para cada músculo principal del ejercicio, que es
+     como las cuenta el reparto por zona: media serie de pecho no existe, y
+     repartirla haría que seis series de press sumaran tres.
+
+     Ordenados de más a menos, porque así el primero dice de qué fue la sesión
+     sin tener que sumar nada. Lo apuntado a mano dice qué movió pero no en
+     cuántas series, y entonces el chip se queda sin cifra. */
+  function musculosConSeries(s) {
+    const cuenta = {};
     (s.entries || []).forEach(function (e) {
       const ex = g.Data ? Data.get(e.exId) : null;
-      if (ex) (ex.primaryMuscles || []).forEach(mete);
+      if (!ex) return;
+      const hechas = (e.sets || []).filter(function (x) { return x.done; }).length;
+      if (!hechas) return;
+      (ex.primaryMuscles || []).forEach(function (m) {
+        cuenta[m] = (cuenta[m] || 0) + hechas;
+      });
     });
-    (s.musculos || []).forEach(mete);
-    return fuera.slice(0, 4).map(function (m) { return I18N.muscle(m); });
+    (s.musculos || []).forEach(function (m) {
+      if (!Object.prototype.hasOwnProperty.call(cuenta, m)) cuenta[m] = 0;
+    });
+    return Object.keys(cuenta)
+      .sort(function (a, b) { return cuenta[b] - cuenta[a]; })
+      .slice(0, 6)
+      .map(function (m) { return { nombre: I18N.muscle(m), series: cuenta[m] }; });
+  }
+
+  function chipsMusculosHTML(s) {
+    const lista = musculosConSeries(s);
+    if (!lista.length) return '';
+    return '<div class="ses-musculos">' + lista.map(function (x) {
+      return '<span class="chip-musculo">' + esc(x.nombre) +
+        (x.series ? '<i>' + esc(UI.num(x.series)) + '</i>' : '') + '</span>';
+    }).join('') + '</div>';
   }
 
   /* Si tiene puesto «solo cuento las series», el peso no se enseña en ninguna
@@ -1230,22 +1275,29 @@
       minutos ? Tn('{n} min', { n: minutos }) : ''
     ].filter(Boolean).join(' · ') : '';
 
+    /* El título sin la hora: es el resumen de un día entero y cada sesión trae
+       la suya debajo. Con «Hoy · 13:11» arriba, esa hora se lee como si todo lo
+       de abajo hubiera pasado a esa hora. */
+    const ahora = new Date();
+    const prim = new Date(delDia[0].start);
+    const titulo = prim.toDateString() === ahora.toDateString() ? T('Hoy')
+      : new Date(ahora.getTime() - 864e5).toDateString() === prim.toDateString() ? T('Ayer')
+      : UI.fechaCorta(delDia[0].start);
+
     UI.modal(html`
-      <h2>${UI.fecha(delDia[0].start)}</h2>
+      <h2>${titulo}</h2>
       ${raw(total ? '<p class="muted" style="margin:-4px 0 12px">' +
         esc(total) + '</p>' : '')}
       <div class="stack">
         ${raw(delDia.map(function (s) {
-          const musculos = musculosDeSesion(s);
           const hechos = (s.entries || []).filter(function (e) {
             return (e.sets || []).some(function (x) { return x.done; });
           });
           return '<div class="card">' +
             '<div style="font-weight:700">' + esc(Store.nombreDeSesion(s)) + '</div>' +
             '<div class="tiny" style="margin-top:2px">' + esc(lineaSesion(s)) + '</div>' +
-            (musculos.length ? '<div class="ses-musculos">' + musculos.map(function (m) {
-              return '<span class="chip tiny-chip">' + esc(T(m)) + '</span>';
-            }).join('') + '</div>' : '') +
+            franjaHorasHTML(s) +
+            chipsMusculosHTML(s) +
             (hechos.length ? '<div class="stack dia-ejes">' + hechos.map(function (e) {
               const st = (e.sets || []).filter(function (x) { return x.done; });
               return '<div class="row between" style="font-size:.84rem;gap:10px">' +
@@ -1263,7 +1315,6 @@
   }
 
   function sesionHTML(s) {
-    const musculos = musculosDeSesion(s);
     return html`
       <div class="ses-fila">
         <div class="row between" style="gap:10px">
@@ -1276,11 +1327,7 @@
             ${raw(g.Pendientes && Pendientes.esPendiente(s)
               ? '<div class="ses-medias">' + T('A falta de afinar con internet') + '</div>'
               : '')}
-            ${raw(musculos.length
-              ? '<div class="ses-musculos">' + musculos.map(function (m) {
-                  return '<span class="chip tiny-chip">' + esc(T(m)) + '</span>';
-                }).join('') + '</div>'
-              : '')}
+            ${raw(chipsMusculosHTML(s))}
           </div>
           <button class="btn icon sm danger" data-delses="${s.id}"
                   aria-label="${T('Borrar')}">${raw(icon('trash'))}</button>

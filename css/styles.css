@@ -1982,8 +1982,42 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .sem-caja[open] > summary { color: var(--txt); }
 .ses-fila { padding: 9px 0; }
 .ses-fila + .ses-fila { border-top: 1px solid var(--line); }
-.ses-musculos { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.ses-musculos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
 .ses-musculos .chip { padding: 1px 7px; font-size: .7rem; background: var(--card2); }
+
+/* El músculo con lo que se llevó. Antes eran pastillas grises con un nombre:
+   decían qué tocaste pero no cuánto, y «pecho» y «tríceps» pesaban igual
+   aunque uno se llevara siete series y el otro dos.
+
+   La cifra va en su propio disco pegada al nombre, no detrás de un punto: así
+   el chip se lee de un golpe —qué y cuánto— y no hay que separar con la vista
+   lo que es nombre de lo que es número. */
+.chip-musculo {
+  display: inline-flex; align-items: center; gap: 6px; line-height: 1;
+  padding: 4px 5px 4px 11px; border-radius: 999px;
+  background: color-mix(in srgb, var(--acc) 11%, var(--card2));
+  border: 1px solid color-mix(in srgb, var(--acc) 20%, transparent);
+  font-size: .74rem; font-weight: 600; color: var(--txt);
+}
+.chip-musculo i {
+  font-style: normal; font-size: .66rem; font-weight: 800;
+  min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--acc); color: var(--on-acc);
+  font-variant-numeric: tabular-nums;
+}
+
+/* De qué hora a qué hora. En gris y pequeño: es contexto, no el dato que se
+   viene a mirar. La flecha se separa un poco para que no se pegue a las
+   cifras, que con tabular-nums ya van justas. */
+.ses-horas {
+  display: flex; align-items: center; gap: 5px; margin-top: 4px;
+  font-size: .78rem; color: var(--dim); font-variant-numeric: tabular-nums;
+}
+.ses-horas span { color: var(--dim2); margin: 0 1px; }
+.ses-horas svg { width: 13px; height: 13px; flex: none; fill: none;
+  stroke: currentColor; stroke-width: 2; stroke-linecap: round;
+  stroke-linejoin: round; }
 
 /* Un apunte que se hizo sin cobertura y está a falta de afinar. En ámbar y no
    en rojo: no está mal, está a medias, y cuenta en el historial desde ya. El
