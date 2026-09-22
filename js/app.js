@@ -829,22 +829,71 @@
 
   /* De qué plan es y cuánto es, en una línea. Es lo que decía el cajón de
      «Hoy, lunes» y lo que ahora va dentro del botón. */
-  /* La cara de lo que toca hoy. Una tarjeta que solo dice «Entrenar» se lee en
-     medio segundo y se olvida en otro medio; con la imagen se reconoce de un
-     vistazo qué día es, antes de leer nada.
+  /* ---------- la cara de lo que toca hoy ----------
+     Una tarjeta que solo dice «Entrenar» se lee en medio segundo y se olvida en
+     otro medio. Con una foto se reconoce el día antes de leer nada.
 
-     Personas, nunca un dibujo. Antes, si la rutina no tenía ninguna foto se
-     tiraba de la ilustración del catálogo, y en un día de pierna —cuyos seis
-     ejercicios son todos ilustrados— la portada se llenaba de un muñeco sobre
-     fondo blanco. Un dibujo no invita a entrenar.
+     Estas están elegidas mirando las 777 fotos del catálogo una por una, no por
+     descarte. El criterio es uno: que se vea a una persona haciendo el
+     ejercicio, de cuerpo entero y con luz. Sirve de poco un primer plano de un
+     antebrazo o un gimnasio a oscuras con alguien al fondo.
 
-     Si ninguno de sus ejercicios tiene foto se busca una de otro ejercicio del
-     mismo músculo: en un día de pierna sale alguien haciendo pierna, que es lo
-     que la tarjeta quiere decir. De los 1460 del catálogo, 777 llevan foto y
-     cubren los diecisiete grupos, así que siempre hay alguna.
+     Varias por zona y se turnan por día: la misma foto todos los lunes deja de
+     verse a la semana de ponerla. Rota con el día del año, así que cambia cada
+     día pero no cambia mientras estás mirando la pantalla.
 
-     La imagen sale del catálogo que ya está descargado, así que no cuesta ni
-     una petición más ni deja de verse sin conexión. */
+     Se guardan por identificador del catálogo y no por URL: si un día cambia de
+     sitio la imagen, sigue saliendo. */
+  const CARAS = {
+    pecho: ['Pushups', 'Barbell_Bench_Press_-_Medium_Grip',
+      'Barbell_Incline_Bench_Press_-_Medium_Grip', 'Around_The_Worlds',
+      'Front_Raise_And_Pullover', 'Push_Up_to_Side_Plank'],
+    espalda: ['Chin-Up', 'Wide-Grip_Rear_Pull-Up', 'One-Arm_Dumbbell_Row',
+      'Stiff_Leg_Barbell_Good_Morning', 'V-Bar_Pullup'],
+    pierna: ['Barbell_Squat', 'Barbell_Step_Ups', 'Dumbbell_Rear_Lunge',
+      'Kettlebell_Dead_Clean', 'One-Arm_Open_Palm_Kettlebell_Clean',
+      'Open_Palm_Kettlebell_Clean', 'One-Arm_Side_Deadlift',
+      'Kettlebell_One-Legged_Deadlift', 'Stiff-Legged_Barbell_Deadlift',
+      'Stiff-Legged_Dumbbell_Deadlift', 'Alternating_Hang_Clean',
+      'Kettlebell_Hang_Clean', 'Front_Squat_Clean_Grip'],
+    hombro: ['Standing_Military_Press', 'One-Arm_Kettlebell_Snatch',
+      'One-Arm_Kettlebell_Split_Snatch', 'Double_Kettlebell_Snatch',
+      'Two-Arm_Kettlebell_Clean', 'One-Arm_Kettlebell_Clean_and_Jerk',
+      'Two-Arm_Kettlebell_Jerk', 'Dumbbell_Raise',
+      'Barbell_Incline_Shoulder_Raise'],
+    brazo: ['Wide-Grip_Standing_Barbell_Curl', 'Close-Grip_Standing_Barbell_Curl',
+      'Alternate_Hammer_Curl', 'Bottoms-Up_Clean_From_The_Hang_Position',
+      'Push-Ups_-_Close_Triceps_Position'],
+    core: ['Gorilla_Chin_Crunch', 'Bent-Knee_Hip_Raise', 'Butt-Ups',
+      'Decline_Reverse_Crunch', '3_4_Sit-Up', 'Landmine_180s']
+  };
+
+  /* Qué zona es la de estos ejercicios: la que más veces aparece.
+
+     No se llama `zonaDeRutina` aunque sea lo que hace: ese nombre ya existe más
+     abajo en este mismo archivo, y en JavaScript la última declaración gana. Se
+     llamaba a la otra sin enterarse, con lo que la zona salía mal y el día de
+     pierna se quedaba sin portada. `node --check` no ve esto. */
+  function zonaDeEjercicios(ejs) {
+    const cuenta = {};
+    ejs.forEach(function (ex) {
+      (ex.primaryMuscles || []).forEach(function (m) {
+        const gr = I18N.GROUPS.filter(function (x) {
+          return x.muscles.indexOf(m) !== -1;
+        })[0];
+        if (gr) cuenta[gr.id] = (cuenta[gr.id] || 0) + 1;
+      });
+    });
+    return Object.keys(cuenta).sort(function (a, b) {
+      return cuenta[b] - cuenta[a];
+    })[0] || '';
+  }
+
+  function diaDelAno() {
+    const h = new Date();
+    return Math.floor((h - new Date(h.getFullYear(), 0, 0)) / 86400000);
+  }
+
   let fotoVista = { clave: '', url: '' };
 
   function fotoDeRutina(r) {
@@ -853,34 +902,44 @@
       .filter(Boolean);
     if (!ejs.length) return '';
 
-    /* Se recuerda la última: la plantilla la pide varias veces por repintado y
-       el rodeo por el catálogo entero no hace falta repetirlo. La clave lleva
-       los ejercicios, así que cambiar uno cambia la foto. */
-    const clave = r.id + '|' + (r.exercises || []).map(function (x) {
-      return x.exId;
-    }).join(',');
+    /* Se recuerda la última: la plantilla la pide varias veces por repintado.
+       La clave lleva los ejercicios y el día, que son las dos cosas que la
+       cambian. */
+    const clave = r.id + '|' + diaDelAno() + '|' +
+      (r.exercises || []).map(function (x) { return x.exId; }).join(',');
     if (fotoVista.clave === clave) return fotoVista.url;
 
-    const conFoto = function (ex) {
-      return ex && ex.images && ex.images.length && !Data.esIlustracion(ex);
+    const buena = function (id) {
+      const ex = Data.get(id);
+      return ex && ex.images && ex.images.length && !Data.esIlustracion(ex) ? ex : null;
     };
 
-    let elegido = ejs.filter(conFoto)[0];
+    const zona = zonaDeEjercicios(ejs);
+    const caras = CARAS[zona] || [];
+    let elegido = null;
 
-    if (!elegido) {
-      const musculos = [];
-      ejs.forEach(function (ex) {
-        (ex.primaryMuscles || []).forEach(function (m) {
-          if (musculos.indexOf(m) === -1) musculos.push(m);
-        });
-      });
-      if (musculos.length) {
-        elegido = Data.all().filter(function (ex) {
-          return conFoto(ex) && (ex.primaryMuscles || []).some(function (m) {
-            return musculos.indexOf(m) !== -1;
-          });
-        })[0];
+    /* Se turnan por día, siempre. Antes miraba primero si uno de los ejercicios
+       del día estaba entre los elegidos y, como la rutina no cambia, esa portada
+       se quedaba clavada para siempre: la misma foto todos los lunes hasta el
+       fin de los tiempos. Con trece opciones en pierna y nueve en hombro, dos
+       semanas seguidas no repiten.
+
+       Rota con el día del año y con la rutina, para que dos rutinas del mismo
+       grupo el mismo día no salgan con la misma foto. */
+    if (caras.length) {
+      const salto = diaDelAno() + String(r.id || '').length;
+      for (let k = 0; k < caras.length && !elegido; k++) {
+        elegido = buena(caras[(salto + k) % caras.length]);
       }
+    }
+
+    /* Y si esa zona no tiene elegidas —o el catálogo no está entero—, la
+       primera foto de la propia rutina. Nunca una ilustración: un muñeco sobre
+       fondo blanco no invita a entrenar. */
+    if (!elegido) {
+      elegido = ejs.filter(function (ex) {
+        return ex.images && ex.images.length && !Data.esIlustracion(ex);
+      })[0] || null;
     }
 
     const url = elegido ? (Data.img(elegido, 0) || '') : '';
@@ -7483,6 +7542,9 @@
   }
 
   g.App = {
+    /* Expuesta para poder comprobarla desde fuera: que salga la foto correcta
+       en cada rutina es de las cosas que hay que mirar una por una. */
+    fotoDeRutina: fotoDeRutina,
     go: go, irYHacer: irYHacer, render: render, exerciseSheet: exerciseSheet, pickExercise: pickExerciseSheet,
     bind: bind, bindAll: bindAll, aplicarTema: aplicarTema,
     lugarSheet: lugarSheet, cuantosEn: cuantosEn, CARAS_LUGAR: CARAS_LUGAR,
