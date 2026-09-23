@@ -1772,7 +1772,7 @@ img[src^="data/img/"] {
 .vista-inicio .semana-caja .ps-marcas { margin-top: 4px; }
 /* Sin la raya de separación: en una tarjeta de resumen de cien píxeles, una
    línea más es una división que no hace falta. */
-.vista-inicio .semana-caja .plan-leyenda { margin-top: 6px; padding-top: 0;
+.vista-inicio .semana-caja .plan-leyenda { margin-top: 4px; padding-top: 0;
   border-top: 0; gap: 10px; font-size: .6rem; }
 .vista-inicio .semana-caja .sem-dia { justify-content: flex-end; }
 .vista-inicio .semana-caja .sem-dia i { flex: 1; height: auto; min-height: 16px; }
@@ -1910,23 +1910,25 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 /* Guiones y no puntos. A este tamano un circulo de 5 px es casi un pixel
    suelto; un guion de 8 x 2,5 tiene la misma discrecion y se ve, porque lo que
    se lee de el es el color y el largo, no la forma. */
-/* El habito, de un solo gris a dos intensidades. Antes eran tres colores por
-   dia —veintiuno en pantalla con quince dias— y el color no decia nada que no
-   dijera ya la posicion: el primero siempre es el entreno, el segundo la
-   proteina y el tercero el agua. Lo unico que hay que ver es si esta encendido.
+/* El habito, un icono de un trazo y todos del mismo gris. No hay que
+   reconocerlos uno a uno —a once pixeles no se distingue una mancuerna de un
+   bote— y no hace falta: cual es cual lo dice la posicion, que es fija, y la
+   leyenda de debajo, que los nombra con el mismo dibujo al lado. En la ficha lo
+   unico que hay que ver es si estan encendidos.
 
-   Se probo con un icono por habito en vez del guion y no vale: a once pixeles
-   la mancuerna, el pescado y la gota son la misma mancha. El guion no pretende
-   dibujar nada, y por eso sobrevive al tamano. */
+   Un solo gris a dos intensidades y no tres colores: con quince dias eran
+   cuarenta y cinco manchas de color en pantalla. */
 .ps-punto {
-  display: inline-block; width: 8px; height: 2.5px; border-radius: 2px;
-  background: color-mix(in srgb, var(--txt) 24%, transparent);
-  box-shadow: none;
+  display: inline-flex; width: 10px; height: 10px; background: none;
+  color: color-mix(in srgb, var(--txt) 26%, transparent); box-shadow: none;
 }
-.ps-punto.si { background: color-mix(in srgb, var(--txt) 82%, transparent); }
-.ps-dia.es-hoy .ps-punto {
-  background: color-mix(in srgb, var(--on-acc) 26%, transparent); }
-.ps-dia.es-hoy .ps-punto.si { background: var(--on-acc); }
+.ps-punto svg { width: 100%; height: 100%; fill: none; stroke: currentColor;
+  stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.ps-punto.si { color: color-mix(in srgb, var(--txt) 86%, transparent); }
+.ps-dia.es-hoy .ps-punto { color: color-mix(in srgb, var(--on-acc) 30%, transparent); }
+.ps-dia.es-hoy .ps-punto.si { color: var(--on-acc); }
+/* La leyenda los ensena siempre encendidos, que ahi son el ejemplo. */
+.plan-leyenda .ps-punto { width: 11px; height: 11px; }
 .ps-dia.es-hoy .ps-punto.si { background: var(--on-acc); }
 
 /* La ficha se toca y cuenta el día. */
@@ -6197,8 +6199,13 @@ html[data-theme="light"] .fr-fila {
      de quien hace una sentadilla, y media persona no se reconoce. */
   object-fit: cover; object-position: center center;
   z-index: -1; pointer-events: none;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 58%);
-  mask-image: linear-gradient(to right, transparent 0%, #000 58%);
+  /* Tres paradas y no dos: con una sola rampa el ojo veia una linea vertical
+     justo donde la foto llegaba a opaca. Empezando antes y acabando despues, y
+     con un punto intermedio a media luz, la union deja de tener borde. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%,
+    rgba(0,0,0,.28) 30%, rgba(0,0,0,.78) 58%, #000 82%);
+  mask-image: linear-gradient(to right, transparent 0%,
+    rgba(0,0,0,.28) 30%, rgba(0,0,0,.78) 58%, #000 82%);
 }
 /* El texto se aparta de la imagen. No hasta la mitad: la máscara ya deja el
    primer tercio transparente, y reservar más partía el titular en dos
@@ -6358,14 +6365,16 @@ button.dia-cabeza:active { transform: scale(.985); }
   color: color-mix(in srgb, var(--txt) 82%, transparent);
   letter-spacing: -.008em;
 }
+/* La chispa, suelta y del color del texto. El disco verde la convertia en un
+   boton que no lo es, y el verde de la portada es del boton de entrenar. */
 .hf-ico {
-  flex: none; width: 20px; height: 20px; border-radius: 7px; margin-top: 1px;
-  display: flex; align-items: center; justify-content: center; color: var(--acc);
-  background: color-mix(in srgb, var(--acc) 14%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 13%, transparent);
+  flex: none; width: 15px; height: 15px; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; box-shadow: none;
+  color: color-mix(in srgb, var(--txt) 42%, transparent);
 }
-.hf-ico svg { width: 11px; height: 11px; fill: none; stroke: currentColor;
-  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hf-ico svg { width: 100%; height: 100%; fill: none; stroke: currentColor;
+  stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 
 /* El boton lleva «tarjeta-premium» para heredar su forma, y en tema claro esa
    clase repinta el fondo en blanco con mas especificidad que la del boton:
@@ -7926,8 +7935,10 @@ html[data-theme="light"] .ag-ico {
   font-variant-numeric: tabular-nums; line-height: 1.1; flex: none;
   color: var(--txt); }
 .rs-num.largo { font-size: .8rem; letter-spacing: -.02em; }
+/* La etiqueta cede tamano para que mande la cifra: lo que se lee de un vistazo
+   es el numero, y la palabra solo hace falta para saber de que es. */
 .rs-et { display: inline-flex; align-items: center; gap: 3px; min-width: 0;
-  font-size: .62rem; line-height: 1.2;
+  font-size: .56rem; line-height: 1.2;
   color: color-mix(in srgb, var(--txt) 78%, transparent); }
 .rs-pal { min-width: 0; overflow: hidden; text-overflow: ellipsis;
   white-space: nowrap; }
@@ -8053,7 +8064,7 @@ html[data-theme="light"] .ag-ico {
 /* La constancia: la ficha del día ya es estrecha, lo que sobraba era el hueco
    entre la tira y su leyenda. */
 .vista-inicio .plan-leyenda { margin-top: 7px; padding-top: 7px; }
-.vista-inicio .semana-caja .ps-marcas { margin-top: 3px; }
+.vista-inicio .semana-caja .ps-marcas { margin-top: 1px; }
 
 /* La comida: los dos botones no necesitan tanto cuerpo en la portada, que ahí
    se tocan de paso y no son la acción principal de la pantalla. */
@@ -8117,7 +8128,7 @@ html[data-theme="light"] .ag-ico {
 .vista-inicio .comida-tit { margin-bottom: clamp(4px, .7svh, 8px); }
 
 /* La tira de la constancia. */
-.vista-inicio .ps-dia { padding: clamp(4px, .7svh, 7px) 2px clamp(5px, .8svh, 8px); }
+.vista-inicio .ps-dia { padding: clamp(3px, .6svh, 6px) 2px clamp(3px, .6svh, 6px); }
 .vista-inicio .ps-num { font-size: clamp(1rem, 2.1svh, 1.2rem); }
 
 /* La leyenda vuelve a la portada. La quité por alto —los mismos tres colores
@@ -8368,3 +8379,18 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
   border-color: color-mix(in srgb, var(--txt) 15%, transparent);
   color: var(--txt);
 }
+
+/* El bote al lado de «te faltan 55 g de proteína»: la meta con su cara. Aquí
+   sí cabe un dibujo —va junto a un texto, no dentro de un aro de diecisiete
+   píxeles— y con la frase al lado no tiene que nombrar nada por sí solo. */
+.cn-ico { display: inline-flex; width: 12px; height: 12px; vertical-align: -1px;
+  margin-right: 5px; color: var(--brand-1); }
+.cn-ico svg { width: 100%; height: 100%; fill: none; stroke: currentColor;
+  stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- la barra de abajo, mas ligera ----------
+   Los iconos que no estan activos adelgazan. Tres de los cinco son de trazo y
+   ahi baja el grosor; los otros dos son macizos y no tienen trazo que
+   adelgazar, asi que ceden opacidad para que el conjunto pese lo mismo. */
+.tab:not(.on) svg [stroke], .tab:not(.on) svg[stroke] { stroke-width: 1.6; }
+.tab:not(.on) svg { opacity: .82; }

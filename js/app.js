@@ -694,7 +694,8 @@
           ${raw(aroComidaHTML(pp, 'proteina', T('Proteína'),
             String(h.prot), String(m.prot), 'g'))}
         </div>
-        <p class="tiny comida-nota">${h.kcal === 0
+        <p class="tiny comida-nota">${raw(h.kcal === 0 ? '' :
+          '<i class="cn-ico">' + icon('batido') + '</i>')}${h.kcal === 0
           ? T('Hoy no has apuntado nada. Una foto del plato basta.')
           : faltaProt > 0
             ? Tn('Te faltan {n} g de proteína', { n: faltaProt })

@@ -97,6 +97,10 @@
      del día: el agua —que se marca a cada rato—, lo que toca comer, lo que toca
      entrenar y, al final, el recuento de lo que llevas, que es para mirar y no
      para hacer. Cada uno se abre tocándolo y se queda como lo dejes. */
+  /* El dibujo de cada habito. Uno por los tres sitios donde salen —la ficha
+     del dia, la leyenda y el detalle— para que no puedan decir cosas distintas. */
+  const HABITO = { entreno: 'dumbbell', prote: 'batido', agua: 'gota' };
+
   const seccionesDia = {};
 
   /* Un cajón. Lleva su título, lo que dice plegado, una frase que explica para
@@ -540,9 +544,15 @@
     return html`
         <div class="plan-sem">
           ${raw(dias.map(function (d) {
+            /* Un icono de un trazo por habito, todos del mismo gris. No hace
+               falta reconocerlos uno a uno —a once pixeles no se distingue una
+               mancuerna de un bote— y no importa: lo que dice cual es cual es la
+               posicion, que es fija, y la leyenda de debajo, que los nombra con
+               el mismo dibujo al lado. Lo unico que hay que ver en la ficha es
+               si estan encendidos o apagados. */
             const punto = function (ok, clase, titulo) {
               return '<span class="ps-punto ' + clase + (ok ? ' si' : '') + '" ' +
-                'title="' + esc(titulo) + '"></span>';
+                'title="' + esc(titulo) + '">' + icon(HABITO[clase]) + '</span>';
             };
             /* El color del número habla SOLO del entreno: verde si entrenó,
                tocase o no; rojo el día que pedía entreno y no lo hubo; gris el
@@ -581,9 +591,9 @@
           }).join(''))}
         </div>
         <div class="plan-leyenda">
-          <span><i class="ps-punto entreno si"></i> ${T('Entreno')}</span>
-          <span><i class="ps-punto prote si"></i> ${T('Proteína')}</span>
-          <span><i class="ps-punto agua si"></i> ${T('Agua')}</span>
+          <span><i class="ps-punto entreno si">${raw(icon(HABITO.entreno))}</i> ${T('Entreno')}</span>
+          <span><i class="ps-punto prote si">${raw(icon(HABITO.prote))}</i> ${T('Proteína')}</span>
+          <span><i class="ps-punto agua si">${raw(icon(HABITO.agua))}</i> ${T('Agua')}</span>
         </div>
         ${raw(conNota && dias.some(function (d) { return !d.tocaba; })
           ? '<p class="tiny" style="margin:9px 0 0;text-align:center">' +

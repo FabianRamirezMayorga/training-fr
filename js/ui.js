@@ -124,6 +124,12 @@
       '<circle cx="16.6" cy="10.8" r=".9"/>' +
       '</svg>',
     musica: '<svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
+    /* Un bote de batido, de contorno. Aqui va al lado de un texto y no dentro
+       de un agujero de diecisiete pixeles, que es donde fallaba: con la palabra
+       delante, un dibujo aproximado basta porque no tiene que nombrar nada. */
+    batido: '<svg viewBox="0 0 24 24"><path d="M8.4 3h7.2M9 3l-.6 3v12.4'
+      + 'a2.6 2.6 0 0 0 2.6 2.6h2a2.6 2.6 0 0 0 2.6-2.6V6L15 3"/>'
+      + '<path d="M8.6 9.4h6.8"/></svg>',
     compartir: '<svg viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M12 3v13"/><path d="m8 7 4-4 4 4"/></svg>',
     copiar: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
     chispa: '<svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/></svg>',
