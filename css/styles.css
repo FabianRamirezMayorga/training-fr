@@ -7900,9 +7900,13 @@ html[data-theme="light"] .ag-ico {
    mientras a «Racha» le sobraba la mitad de la suya. */
 .rs-dato { min-width: 0; }
 .rs-cifra { display: flex; align-items: baseline; gap: 4px; min-width: 0; }
+/* Las tres cifras en blanco y el color solo en su icono. Tres números grandes
+   en ámbar, verde y azul son tres cosas gritando a la vez en una tira que se
+   mira de reojo; y el color ya lo lleva el icono de al lado, que es de quien
+   es. Lo que se lee aquí es el número, y para eso no hace falta pintarlo. */
 .rs-num { font-size: 1.05rem; font-weight: 800; letter-spacing: -.03em;
   font-variant-numeric: tabular-nums; line-height: 1.1; flex: none;
-  color: var(--tono, var(--acc)); }
+  color: var(--txt); }
 .rs-num.largo { font-size: .8rem; letter-spacing: -.02em; }
 .rs-et { display: inline-flex; align-items: center; gap: 3px; min-width: 0;
   font-size: .62rem; color: var(--dim); line-height: 1.2; }
@@ -7921,7 +7925,9 @@ html[data-theme="light"] .ag-ico {
   background: var(--card2); overflow: hidden; }
 .rs-llena { position: relative; overflow: hidden;
   display: block; height: 100%; width: 0; border-radius: 2px;
-  background: var(--tono, var(--acc));
+  /* Neutro, por lo mismo: el color de la tira vive en los iconos. El hilo
+     sigue diciendo cuánto llevas, que para eso el largo ya basta. */
+  background: color-mix(in srgb, var(--txt) 42%, transparent);
   transition: width .9s cubic-bezier(.2,.9,.3,1); }
 /* Un destello recorre lo lleno, no el carril entero: así la luz marca hasta
    dónde has llegado en vez de tapar la diferencia.
@@ -8298,3 +8304,43 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .cab-abre .chevron { flex: none; color: var(--dim2); display: flex; }
 .cab-abre .chevron svg { width: 9px; height: 15px; fill: none; stroke: currentColor;
   stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- la tarjeta de lo hecho, con su pie ----------
+   La tarjeta pasa a columna: arriba la fila de siempre —el disco, el titular y
+   lo que hiciste— y abajo el pie con la acción. La fila es la que abre el
+   detalle; el pie tiene lo suyo, y por eso son dos cosas y no una.
+
+   El pie se sale de la caja por los lados con margen negativo para que su línea
+   llegue de borde a borde, como las separaciones de una lista de iOS. */
+.dia-cabeza.con-pie { flex-direction: column; align-items: stretch; gap: 0;
+  padding-bottom: 0; }
+.hh-cuerpo { display: flex; align-items: center; gap: 15px; min-width: 0;
+  cursor: pointer; }
+.hh-cuerpo .grow { min-width: 0; }
+.hh-pie {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  margin: 12px -17px 0; padding: 11px 17px;
+  border: 0; border-top: 1px solid color-mix(in srgb, var(--txt) 9%, transparent);
+  background: none; font: inherit; font-size: .88rem; font-weight: 600;
+  color: var(--dim); cursor: pointer; width: auto;
+  transition: opacity .12s ease;
+}
+.hh-pie:active { opacity: .55; }
+.hh-pie svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- los dos botones de la comida, del mismo alto ----------
+   Uno es <label> —es el que abre la cámara— y el otro <button>. Con el mismo
+   padding en em salían de altos distintos, porque un botón no hereda la
+   interlinea de la página y una etiqueta sí. Con alto fijo dejan de depender
+   de eso.
+
+   Y el de «a mano» estrena borde: al lado de uno verde macizo, un botón sin
+   contorno sobre una tarjeta oscura no parece un botón, parece texto. */
+.comida-acciones { display: flex; gap: 10px; margin-top: 8px; }
+.comida-acciones .btn {
+  flex: 1 1 0; min-width: 0; height: 38px; padding: 0 .7em; line-height: 1;
+}
+.comida-acciones .btn:not(.primary) {
+  border-color: color-mix(in srgb, var(--txt) 15%, transparent);
+}

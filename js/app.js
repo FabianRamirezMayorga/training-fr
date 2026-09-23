@@ -700,10 +700,13 @@
             ? Tn('Te faltan {n} g de proteína', { n: faltaProt })
             : T('Proteína del día cubierta.')}</p>
 
-        <div class="row" style="margin-top:8px">
-          <label class="btn primary grow sm" for="foto-inicio" style="cursor:pointer">
+        <!-- Uno es <label> —abre la cámara— y el otro <button>, y eso los
+             dejaba de altos distintos: un botón no hereda la interlinea de la
+             página y una etiqueta sí. Se les pone alto fijo a los dos. -->
+        <div class="comida-acciones">
+          <label class="btn primary sm" for="foto-inicio" style="cursor:pointer">
             ${raw(icon('camara'))} ${T('Foto')}</label>
-          <button class="btn grow sm" data-a="comidamano">${raw(icon('plus'))} ${T('A mano')}</button>
+          <button class="btn sm" data-a="comidamano">${raw(icon('plus'))} ${T('A mano')}</button>
         </div>
 
         <input type="file" id="foto-inicio" accept="image/*" hidden>
@@ -1223,13 +1226,21 @@
              era decir dos veces lo mismo y no decía nada del entrenamiento.
              El tic de fondo se queda solo para lo apuntado a mano, que no
              tiene rutina de la que sacar imagen. -->
-        <div class="card tarjeta-premium dia-cabeza hecha portada-hueco${
-          raw(fotoDeRutina(hecho.rutina) ? ' con-foto' : '')}"
-             data-a="verhecho" role="button" tabindex="0">
+        <!-- Apuntar otro entra dentro, como pie. Suelto entre dos tarjetas
+             flotaba con su aire arriba y abajo, y es una acción de ESTA tarjeta:
+             apuntar otro entrenamiento de hoy. Dentro cuesta la mitad de alto y
+             se entiende de qué va sin leerlo dos veces.
+
+             La tarjeta pasa a columna y lo que era su fila se envuelve: es esa
+             fila la que abre el detalle, no el pie, que tiene lo suyo. Y un
+             botón dentro de otro botón no es HTML válido. -->
+        <div class="card tarjeta-premium dia-cabeza hecha con-pie portada-hueco${
+          raw(fotoDeRutina(hecho.rutina) ? ' con-foto' : '')}">
           ${raw(fotoDeRutina(hecho.rutina)
             ? '<img class="dc-foto" src="' + esc(fotoDeRutina(hecho.rutina)) +
               '" alt="" loading="lazy" aria-hidden="true">'
             : '<span class="hh-silueta" aria-hidden="true">' + icon('check') + '</span>')}
+          <div class="hh-cuerpo" data-a="verhecho" role="button" tabindex="0">
           <span class="dc-disco">${raw(icon('check'))}</span>
           <span class="grow">
             <span class="dc-rotulo">${Tn('Hoy, {d} · hecho',
@@ -1245,9 +1256,10 @@
               : '')}
             <span class="dc-sub">${raw(resumenHechoHTML(hecho))}</span>
           </span>
-        </div>
-        <button class="enlace-flojo" data-a="empezarlibre">
-          ${T('Apuntar otro entrenamiento')}</button>`
+          </div>
+          <button class="hh-pie" data-a="empezarlibre">
+            ${raw(icon('plus'))} ${T('Apuntar otro entrenamiento')}</button>
+        </div>`
       : deHoy.length ? html`
         <!-- El cajón de «Hoy, lunes» decía de qué plan es la rutina y cuántos
              ejercicios tiene, y justo encima había un botón verde que solo
