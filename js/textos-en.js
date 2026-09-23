@@ -369,6 +369,7 @@
     'Queda apuntado en tu historial.': "It's logged in your history.",
 
     'Tu semana': 'Your week',
+    'Nutrición': 'Nutrition',
     '{c} de {p} días del plan': '{c} of {p} plan days',
     '{n} suelto': '{n} extra',
     '{n} sueltos': '{n} extra',

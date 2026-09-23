@@ -8276,7 +8276,16 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
    que leerlas para saber cuál es cuál. Con el calendario y los cubiertos
    delante, la tarjeta se reconoce antes de llegar a la primera letra. */
 .cab-seccion { display: flex; align-items: center; gap: 7px; min-width: 0; }
-.cab-ico { display: flex; flex: none; color: var(--acc); }
+
+/* El rótulo de la tarjeta, en el color del texto y no en verde. El verde de
+   esta app significa «esto es lo que has venido a hacer», y con cada cabecera
+   en verde esa señal se gasta: el botón de entrenar deja de destacar porque
+   todo lo de alrededor tiene su color.
+
+   `--txt` y no un blanco fijo: de día ese token es casi negro, así que el
+   rótulo se ajusta solo a los dos temas sin una segunda regla. */
+.cab-seccion .pre-encima { color: var(--txt); }
+.cab-ico { display: flex; flex: none; color: var(--txt); }
 .cab-ico svg { width: 15px; height: 15px; fill: none; stroke: currentColor;
   stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 

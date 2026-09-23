@@ -638,11 +638,12 @@
       <div class="card inicio-compacta semana-caja portada-titulo tarjeta-premium"
            data-a="verprogreso" role="button" tabindex="0">
         <div class="row between" style="margin-bottom:6px">
-          <!-- «Tu semana» con treinta días dentro era mentira. «Constancia» es
-               además la palabra que ya usa Progreso para esto mismo. -->
+          <!-- «Tu semana» aunque la tira traiga quince días: es como él la llama.
+               La cuenta de al lado —«6 de 15 días entrenados»— dice el periodo de
+               verdad, así que el rótulo no tiene que cargar con eso. -->
           <span class="cab-seccion">
             <span class="cab-ico">${raw(icon('calendario'))}</span>
-            <span class="pre-encima">${tira ? T('Tu constancia') : T('Tu semana')}</span>
+            <span class="pre-encima">${T('Tu semana')}</span>
           </span>
           <span class="tiny nowrap">${tira
             ? Tn('{n} de {total} días entrenados',
@@ -680,7 +681,7 @@
              parte que abre. -->
         <button class="cab-seccion cab-abre comida-tit" data-a="vernutricion">
           <span class="cab-ico">${raw(icon('nutricion'))}</span>
-          <span class="pre-encima grow">${T('Lo que llevas comido')}</span>
+          <span class="pre-encima grow">${T('Nutrición')}</span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
         <!-- Dos aros con su cifra al lado. Eran dos barras con el número encima,
