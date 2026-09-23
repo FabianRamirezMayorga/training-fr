@@ -640,7 +640,10 @@
         <div class="row between" style="margin-bottom:6px">
           <!-- «Tu semana» con treinta días dentro era mentira. «Constancia» es
                además la palabra que ya usa Progreso para esto mismo. -->
-          <span class="pre-encima">${tira ? T('Tu constancia') : T('Tu semana')}</span>
+          <span class="cab-seccion">
+            <span class="cab-ico">${raw(icon('calendario'))}</span>
+            <span class="pre-encima">${tira ? T('Tu constancia') : T('Tu semana')}</span>
+          </span>
           <span class="tiny nowrap">${tira
             ? Tn('{n} de {total} días entrenados',
                  { n: tira.entrenados, total: tira.total })
@@ -670,7 +673,16 @@
            hueco, y la portada se mide en renglones. Es el mismo sitio donde lo
            lleva el resumen de la semana. -->
       <div class="card inicio-compacta comida-caja tarjeta-premium">
-        <div class="pre-encima comida-tit">${T('Lo que llevas comido')}</div>
+        <!-- La cabecera se toca y lleva a Alimentación. La tarjeta entera no
+             puede: dentro hay tres botones suyos —foto, a mano y el menú— y un
+             cuadro que hace una cosa con tres cosas dentro que hacen otras es
+             un cuadro que no se sabe dónde tocar. El galón dice cuál es la
+             parte que abre. -->
+        <button class="cab-seccion cab-abre comida-tit" data-a="vernutricion">
+          <span class="cab-ico">${raw(icon('nutricion'))}</span>
+          <span class="pre-encima grow">${T('Lo que llevas comido')}</span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
         <!-- Dos aros con su cifra al lado. Eran dos barras con el número encima,
              y una barra de progreso hay que medirla con la vista para saber por
              dónde va; un aro se lee de reojo. Al lado y no debajo porque en la
@@ -884,7 +896,15 @@
     const deA = prot
       ? ['var(--brand-1)', 'var(--agua)']
       : ['var(--acc)', 'color-mix(in srgb, var(--acc) 55%, var(--warn))'];
+    /* El símbolo va dentro del aro, no al lado del rótulo. Al lado sobraba —la
+       palabra ya decía qué era— y aquí hace otra cosa: llena el hueco del
+       centro, que estaba vacío, y convierte el aro en una moneda que se
+       reconoce de reojo sin leer nada.
+
+       Va fuera del svg y encima: el svg está girado -90 grados para que el arco
+       empiece a las doce, y un icono dentro saldría tumbado. */
     return '<div class="ca-caja">' +
+      '<span class="ca-aro-caja">' +
       '<svg class="aro ca-aro' + (prot ? ' prot' : '') + '" viewBox="0 0 46 46" aria-hidden="true">' +
         '<defs><linearGradient id="' + rampa + '" x1="0" y1="1" x2="1" y2="0">' +
           '<stop offset="0" style="stop-color:' + deA[0] + '"/>' +
@@ -896,6 +916,8 @@
           'style="stroke:url(#' + rampa + ')" ' +
           'stroke-dasharray="0 ' + C + '" data-arco="' + lleno + ' ' + C + '"/>' +
       '</svg>' +
+      '<i class="ca-ico' + (prot ? ' prot' : '') + '">' + icon(ico) + '</i>' +
+      '</span>' +
       '<span class="grow">' +
         '<span class="pre-encima' + (prot ? ' prot' : '') + '">' +
           esc(etiqueta) + '</span>' +
@@ -2013,6 +2035,7 @@
     bind(root, '[data-a=verprogreso]', function () { go('progreso'); });
     bind(root, '[data-a=irnutricion]', function () { go('nutricion'); });
     bind(root, '[data-a=verdia]', function () { go('dia'); });
+    bind(root, '[data-a=vernutricion]', function () { go('nutricion'); });
     if (g.Guia) Guia.montarAviso(root);
     /* Lo que hiciste hoy, entero: los ejercicios que marcaste, con sus pesos y
        repeticiones, los músculos que tocaste y el resumen. Es la misma hoja que

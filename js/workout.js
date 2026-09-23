@@ -604,7 +604,8 @@
           </div>
           <div class="center nowrap">
             <b id="wo-clock" style="font-variant-numeric:tabular-nums">0:00</b>
-            <div class="tiny"><span id="wo-count">${doneSets}</span>/${totalSets} ${T('series')}</div>
+            <div class="tiny"><span id="wo-count">${doneSets}</span>/<span
+              id="wo-total">${totalSets}</span> ${T('series')}</div>
           </div>
         </div>
         <div class="prog"><i style="width:${pct}%"></i></div>
@@ -997,32 +998,73 @@
     act('rest', function () { startRest(entry.rest); });
 
     /* Modo "marcar el ejercicio y ya": un toque da por hechas todas sus series */
+    /* ---------- corregir series y repeticiones sin repintar ----------
+       Repintar la pantalla entera por un toque en el más daba un salto feo: se
+       recarga la foto del ejercicio, se rehace el bloque de arriba y la página
+       se mueve con el dedo todavía encima del botón. Y es un botón que se pulsa
+       tres veces seguidas, no una.
+
+       Así que aquí se cambia solo lo que cambia: el bloque de la cifra y la
+       cuenta de series de la cabecera. Nada más se mueve. */
+    const modoAhora = Store.settings().registro || 'detallado';
+
+    function refrescarCuenta() {
+      const viva = Store.active();
+      if (!viva) return;
+      let hechas = 0;
+      let todas = 0;
+      viva.entries.forEach(function (e) {
+        todas += (e.sets || []).length;
+        hechas += (e.sets || []).filter(function (x) { return x.done; }).length;
+      });
+      const nHechas = root.querySelector('#wo-count');
+      const nTodas = root.querySelector('#wo-total');
+      if (nHechas) nHechas.textContent = hechas;
+      if (nTodas) nTodas.textContent = todas;
+      const barra = root.querySelector('.wo-head .prog i');
+      if (barra) barra.style.width = (todas ? Math.round(hechas / todas * 100) : 0) + '%';
+    }
+
+    function pintarObjetivo() {
+      const caja = root.querySelector('.objetivo');
+      if (!caja) { rerender(); return; }
+      const tmp = document.createElement('div');
+      tmp.innerHTML = objetivoHTML(entry, modoAhora === 'ejercicio');
+      caja.parentNode.replaceChild(tmp.firstElementChild, caja);
+      /* Los botones son otros nodos, así que hay que volver a atarlos. */
+      atarPasos();
+      refrescarCuenta();
+    }
+
     /* Una serie más se copia de la última —mismo peso, mismas repeticiones— y
        nace marcada si el ejercicio ya lo estaba: quien añade una sexta después
        de darlo por hecho es porque la hizo, no porque le quede pendiente. */
-    act('serieMas', function () {
-      const ultima = entry.sets[entry.sets.length - 1] || {};
-      entry.sets.push({ weight: ultima.weight, reps: repsReales(entry),
-        done: !!ultima.done });
-      Store.setActive(a);
-      rerender();
-    });
+    function atarPasos() {
+      act('serieMas', function () {
+        const ultima = entry.sets[entry.sets.length - 1] || {};
+        entry.sets.push({ weight: ultima.weight, reps: repsReales(entry),
+          done: !!ultima.done });
+        Store.setActive(a);
+        pintarObjetivo();
+      });
 
-    act('serieMenos', function () {
-      if (entry.sets.length <= 1) return;
-      entry.sets.pop();
-      Store.setActive(a);
-      rerender();
-    });
+      act('serieMenos', function () {
+        if (entry.sets.length <= 1) return;
+        entry.sets.pop();
+        Store.setActive(a);
+        pintarObjetivo();
+      });
 
-    const cambiarReps = function (d) {
-      const n = Math.max(1, repsReales(entry) + d);
-      entry.sets.forEach(function (x) { x.reps = n; });
-      Store.setActive(a);
-      rerender();
-    };
-    act('repMas', function () { cambiarReps(1); });
-    act('repMenos', function () { cambiarReps(-1); });
+      const cambiarReps = function (d) {
+        const n = Math.max(1, repsReales(entry) + d);
+        entry.sets.forEach(function (x) { x.reps = n; });
+        Store.setActive(a);
+        pintarObjetivo();
+      };
+      act('repMas', function () { cambiarReps(1); });
+      act('repMenos', function () { cambiarReps(-1); });
+    }
+    atarPasos();
 
     act('hechoya', function () {
       const todas = entry.sets.every(function (x) { return x.done; });
