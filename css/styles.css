@@ -8289,20 +8289,3 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .cab-abre .chevron { flex: none; color: var(--dim2); display: flex; }
 .cab-abre .chevron svg { width: 9px; height: 15px; fill: none; stroke: currentColor;
   stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-
-/* ---------- el símbolo dentro del aro ----------
-   El centro del anillo estaba vacío y el icono lo llena sin robarle sitio a
-   nada. Encima del svg y no dentro: el svg va girado -90 grados para que el
-   arco arranque a las doce, y ahí dentro el icono saldría tumbado. */
-.ca-aro-caja { position: relative; flex: none; display: block;
-  width: var(--ca, 42px); height: var(--ca, 42px); }
-.ca-aro-caja .ca-aro { width: 100%; height: 100%; }
-/* `ca-simbolo` y no `ca-ico`: ese nombre ya estaba cogido —es el disco de 30
-   px de «mi día»— y ponerle position:absolute lo mandaba a la esquina. */
-.ca-simbolo {
-  position: absolute; inset: 0; display: flex; align-items: center;
-  justify-content: center; pointer-events: none; color: var(--acc);
-}
-.ca-simbolo.prot { color: var(--brand-1); }
-.ca-simbolo svg { width: 42%; height: 42%; fill: none; stroke: currentColor;
-  stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }

@@ -896,15 +896,14 @@
     const deA = prot
       ? ['var(--brand-1)', 'var(--agua)']
       : ['var(--acc)', 'color-mix(in srgb, var(--acc) 55%, var(--warn))'];
-    /* El símbolo va dentro del aro, no al lado del rótulo. Al lado sobraba —la
-       palabra ya decía qué era— y aquí hace otra cosa: llena el hueco del
-       centro, que estaba vacío, y convierte el aro en una moneda que se
-       reconoce de reojo sin leer nada.
+    /* Sin símbolo dentro del aro. Se probó —venía de un boceto suyo— y el hueco
+       del centro son diecisiete píxeles: ahí dentro el brazo flexionado no se
+       lee de ninguna de las cuatro maneras en que lo dibujé, el huevo se
+       confunde con la gota del agua y el bote de batido tampoco convenció.
 
-       Va fuera del svg y encima: el svg está girado -90 grados para que el arco
-       empiece a las doce, y un icono dentro saldría tumbado. */
+       Y con uno solo, el par queda cojo. Así que ninguno: lo que nombra cada
+       aro es su rótulo de al lado, que además va del color del aro. */
     return '<div class="ca-caja">' +
-      '<span class="ca-aro-caja">' +
       '<svg class="aro ca-aro' + (prot ? ' prot' : '') + '" viewBox="0 0 46 46" aria-hidden="true">' +
         '<defs><linearGradient id="' + rampa + '" x1="0" y1="1" x2="1" y2="0">' +
           '<stop offset="0" style="stop-color:' + deA[0] + '"/>' +
@@ -916,9 +915,6 @@
           'style="stroke:url(#' + rampa + ')" ' +
           'stroke-dasharray="0 ' + C + '" data-arco="' + lleno + ' ' + C + '"/>' +
       '</svg>' +
-      '<i class="ca-simbolo' + (prot ? ' prot' : '') + '">' +
-        icon(prot ? 'batido' : ico) + '</i>' +
-      '</span>' +
       '<span class="grow">' +
         '<span class="pre-encima' + (prot ? ' prot' : '') + '">' +
           esc(etiqueta) + '</span>' +
