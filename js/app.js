@@ -916,7 +916,8 @@
           'style="stroke:url(#' + rampa + ')" ' +
           'stroke-dasharray="0 ' + C + '" data-arco="' + lleno + ' ' + C + '"/>' +
       '</svg>' +
-      '<i class="ca-ico' + (prot ? ' prot' : '') + '">' + icon(ico) + '</i>' +
+      '<i class="ca-simbolo' + (prot ? ' prot' : '') + '">' +
+        icon(prot ? 'biceps' : ico) + '</i>' +
       '</span>' +
       '<span class="grow">' +
         '<span class="pre-encima' + (prot ? ' prot' : '') + '">' +
