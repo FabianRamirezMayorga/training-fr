@@ -128,12 +128,20 @@
        de eso es para el músculo. El pescado de antes contaba de dónde sale, que
        es otra pregunta y además deja fuera el huevo, el pollo y el batido.
 
-       De una sola línea y sin el puño suelto: probado con el puño como pieza
-       aparte, a 18 píxeles se lee como una caja pegada al brazo. */
+       Relleno y por piezas —brazo, bulto, antebrazo y puño, cuatro formas que se
+       solapan— y no de contorno. El contorno lo intenté primero, a una línea y
+       a dos, y salía una bota: las formas del cuerpo a 18 píxeles necesitan
+       silueta, igual que la figura de correr.
+
+       El relleno va en `style` y no en atributo porque el css de los iconos
+       pone `fill:none` para todos, y un atributo pierde contra una regla. */
     biceps: '<svg viewBox="0 0 24 24">'
-      + '<path d="M5.8 19c-1.3-3.4.3-6.7 3.8-7.8 2.4-.8 4.8-.3 6.6 1.3"/>'
-      + '<path d="M16.2 12.5V8.2a2.1 2.1 0 0 1 2.1-2.1 2.1 2.1 0 0 1 2.1 2.1v5.2'
-      + 'a5.6 5.6 0 0 1-5.6 5.6H5.8"/></svg>',
+      + '<rect x="4" y="12.6" width="12" height="5.6" rx="2.8" '
+      + 'style="fill:currentColor;stroke:none"/>'
+      + '<circle cx="10.2" cy="11.4" r="4.2" style="fill:currentColor;stroke:none"/>'
+      + '<rect x="14.2" y="5.4" width="5.4" height="12.8" rx="2.7" '
+      + 'style="fill:currentColor;stroke:none"/>'
+      + '<circle cx="16.9" cy="5" r="3" style="fill:currentColor;stroke:none"/></svg>',
     compartir: '<svg viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M12 3v13"/><path d="m8 7 4-4 4 4"/></svg>',
     copiar: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
     chispa: '<svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/></svg>',
