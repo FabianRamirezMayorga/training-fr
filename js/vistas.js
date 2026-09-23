@@ -26,7 +26,9 @@
         <span class="fp-ico${raw(o.pendiente ? ' pendiente' : '')}">${raw(icon(o.icono))}</span>
         <span class="grow">
           <span class="fp-tit">${o.titulo}</span>
-          ${raw(o.sub ? '<span class="fp-sub">' + esc(o.sub) + '</span>' : '')}
+          ${raw(o.sub ? '<span class="fp-sub' + (o.subTono ? ' fp-sub-tono' : '') +
+            '"' + (o.subTono ? ' style="--fps:' + o.subTono + '"' : '') + '>' +
+            esc(o.sub) + '</span>' : '')}
         </span>
         ${raw(o.valor ? '<span class="fp-val">' + esc(o.valor) + '</span>' : '')}
         <span class="chevron">${raw(icon('chevron'))}</span>
@@ -188,8 +190,12 @@
         ${raw(filaPerfil({ icono: 'chispa', titulo: T('Entrenador con IA'), accion: 'entrenador',
           tono: 'var(--acc)', pendiente: !IA.activa(),
           sub: IA.activa() ? T('Listo para usar') : T('Sin configurar') }))}
+        <!-- Conectado se dice con el verde de Spotify en el texto, no pintando la
+             fila entera: una fila con fondo propio en una lista de doce rompe la
+             lista, y lo que hay que ver es el estado, no la marca. -->
         ${raw(filaPerfil({ icono: 'musica', titulo: T('Música'), accion: 'musica',
           tono: '#1db954', pendiente: !Spotify.activa(),
+          subTono: Spotify.activa() ? '#1db954' : '',
           sub: Spotify.activa() ? T('Spotify conectado')
             : Spotify.configurado() ? T('Sin conectar') : T('Sin configurar') }))}
         ${raw(filaPerfil({ icono: cara.icono, titulo: T('Dónde entrenas'), accion: 'lugar',
@@ -201,9 +207,15 @@
 
       <div class="list-title">${T('Aplicación')}</div>
       <div class="plan-acciones indice" style="margin:10px 0 0">
+        <!-- El titulo se queda en «tu cuenta» y lo que cambia es lo de debajo.
+             Dentro no solo se sincroniza: se pone contraseña, se cierra sesion y
+             se borra la cuenta, asi que llamarlo «respaldo» o «sincronizacion»
+             dejaria esas tres escondidas detras de una palabra que no las
+             nombra. Lo que faltaba era decir que hay ahi, y eso si. -->
         ${raw(filaPerfil({ icono: 'nube', titulo: T('Tu cuenta'), accion: 'cuenta',
           tono: '#4f8cf5', pendiente: !Sync.activa(),
-          sub: Sync.activa() ? T('Todo guardado en la nube') : T('Sin sincronizar') }))}
+          sub: Sync.activa() ? T('Sincronización, contraseña y cierre de sesión')
+            : T('Sin sincronizar') }))}
         ${raw(filaPerfil({ icono: 'ajustes', titulo: T('Ajustes'), accion: 'ajustes',
           tono: '#c06bf0',
           sub: T('Unidades, tema, idioma y copias de seguridad') }))}
@@ -232,8 +244,13 @@
 
       <!-- La ayuda va al final y sola. Metida entre la cuenta y los ajustes
            parecia una opcion mas que configurar; aqui abajo es lo que es: el
-           sitio al que se baja cuando algo no se entiende. -->
-      <div class="plan-acciones indice" style="margin:22px 0 0">
+           sitio al que se baja cuando algo no se entiende.
+
+           Con su titulo de seccion, que sin el era una tarjeta huerfana colgando
+           debajo de la lista: sola por decision se ve igual que sola por
+           descuido, y el titulo es lo que las distingue. -->
+      <div class="list-title">${T('Soporte')}</div>
+      <div class="plan-acciones indice" style="margin:10px 0 0">
         ${raw(filaPerfil({ icono: 'ayuda', titulo: T('Ayuda'), accion: 'ayuda',
           tono: 'var(--dim2)',
           sub: T('Cómo se hace cada cosa, cómo funciona y las dudas de siempre') }))}

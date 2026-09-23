@@ -95,10 +95,19 @@ a{color:var(--blue)}
   background:color-mix(in srgb,var(--bg2) 78%,transparent);
   backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
   border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+/* Los apagados suben de claridad. Estaban en `--dim2`, que es el gris de un
+   texto de tercera, y esto no es texto de tercera: es la navegacion, lo unico
+   que hay que poder ver siempre. Y cuanto mas se ven ellos, mas se entiende que
+   el verde del activo es el verde de la marca y no un color raro suelto. */
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;
-  color:var(--dim2);font-size:.63rem;font-weight:500;letter-spacing:0;transition:color .15s}
+  color:color-mix(in srgb,var(--txt) 58%,transparent);
+  font-size:.63rem;font-weight:500;letter-spacing:0;transition:color .15s}
 .tab svg{width:25px;height:25px;fill:currentColor}
+/* El activo, el verde de la marca sin rebajar. Con la opacidad de los apagados
+   aplicada tambien aqui —que es lo que pasaba antes de separarlos— el verde
+   salia apagado y se leia como oliva. */
 .tab.on{color:var(--acc)}
+.tab.on svg{opacity:1}
 .tab:active{transform:scale(.94)}
 
 /* Logotipo tipográfico: FR pequeño y elevado, al modo de un símbolo de marca */
@@ -2787,6 +2796,9 @@ html[data-theme="light"] .plan-caja .desliza-cara > .dia-grupo {
   background: none; box-shadow: none;
   transition: transform .2s cubic-bezier(.2, .9, .3, 1);
 }
+/* El subtitulo de una fila puede llevar su color cuando dice un estado y no un
+   dato: «Spotify conectado» en el verde de Spotify se lee sin leerlo. */
+.fp-sub-tono { color: var(--fps); }
 .fila-plan:active .fp-ico { transform: scale(.9); }
 /* Algo mas grandes y algo mas finos: sin el cuadro detras, un dibujo de quince
    pixeles a trazo grueso se queda pequeno y duro a la vez. */
@@ -8430,4 +8442,5 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
    ahi baja el grosor; los otros dos son macizos y no tienen trazo que
    adelgazar, asi que ceden opacidad para que el conjunto pese lo mismo. */
 .tab:not(.on) svg [stroke], .tab:not(.on) svg[stroke] { stroke-width: 1.6; }
-.tab:not(.on) svg { opacity: .82; }
+/* Sin rebajar la opacidad: los iconos apagados ya adelgazaron el trazo, y
+   quitarles ademas luz los dejaba por debajo de lo que se ve de un vistazo. */
