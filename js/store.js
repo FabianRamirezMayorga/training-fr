@@ -318,8 +318,18 @@
 
   function stats() {
     const now = Date.now();
-    const weekAgo = now - 7 * 864e5;
-    const week = state.sessions.filter(function (s) { return s.start >= weekAgo; });
+    /* La semana va de lunes a hoy, no los ultimos siete dias rodando. Rodando,
+       un miercoles decia «seis entrenamientos esta semana», que es imposible si
+       se entrena una vez al dia: el numero era correcto y la frase no, y lo que
+       lee uno es la frase.
+
+       Ademas asi cuadra con el resto de la app: el grafico de volumen por
+       semanas ya agrupaba de lunes a domingo, y la meta semanal del plan se
+       cuenta sobre los dias que pide, que tambien son de una semana. */
+    const hoy = new Date(now);
+    const desde = new Date(hoy.getFullYear(), hoy.getMonth(),
+      hoy.getDate() - ((hoy.getDay() + 6) % 7)).getTime();
+    const week = state.sessions.filter(function (s) { return s.start >= desde; });
     const totalVol = state.sessions.reduce(function (a, s) { return a + (s.volume || 0); }, 0);
     const totalMin = state.sessions.reduce(function (a, s) {
       return a + Math.round(((s.end || s.start) - s.start) / 60000);

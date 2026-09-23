@@ -1790,8 +1790,9 @@
       { id: 'idea', peso: 2, que: 'una idea para pensar en el día, corta y que se quede. ' +
         'Si es de alguien, dices de quién; si no estás completamente seguro de quién lo ' +
         'dijo, la escribes como tuya y sin atribuirla a nadie' },
-      { id: 'empujon', peso: 2, que: 'un empujón para hoy, enganchado a algo suyo de los ' +
-        'datos de arriba: lo que levanta, lo que ya ha conseguido, lo que tiene a tiro' },
+      { id: 'empujon', peso: 2, que: 'una verdad corta sobre el esfuerzo de hoy: lo que ' +
+        'cuesta empezar, lo que pasa cuando uno aparece sin ganas, por qué el dia que ' +
+        'menos apetece es el que mas cuenta' },
       { id: 'dato', peso: 1, que: 'un dato que no sepa y que le sirva, de fisiología del ' +
         'entrenamiento o de nutrición; algo concreto, no una obviedad de revista' },
       { id: 'tecnica', peso: 1, que: 'un detalle de técnica de alguno de los ejercicios ' +
@@ -1850,7 +1851,7 @@
     const clase = CLASES_PILDORA[(Number(Store.dayKey(Date.now()).replace(/\D/g, '')) + bloque) %
       CLASES_PILDORA.length];
 
-    /* El «2» es la versión de las instrucciones. Al cambiarlas, lo guardado con
+    /* El «3» es la versión de las instrucciones. Al cambiarlas, lo guardado con
        las viejas deja de valer: si no, la frase que ya no quieres se te queda
        en pantalla hasta que pase el bloque. */
     /* Ya ha entrenado hoy o no. Va en la clave y en el prompt: en la clave
@@ -1864,7 +1865,7 @@
     const deHoy = ses.filter(function (x) { return Store.dayKey(x.start) === hoyClave; });
     const idioma = g.Idioma ? Idioma.actual() : 'es';
 
-    const clave = 'pildora2:' + hoyClave + ':' + bloque + ':' + clase.id +
+    const clave = 'pildora3:' + hoyClave + ':' + bloque + ':' + clase.id +
       ':' + Store.routines().length + ':' + ses.length +
       ':' + (deHoy.length ? 'hecho' : 'pendiente') + ':' + idioma;
     const guardado = leerCache(clave, horasPildora());
@@ -1881,17 +1882,27 @@
       'Escríbele UNA cosa, y que sea ' + clase.que + '.\n' +
       (nombre ? '- Llámale ' + nombre + ' por su nombre. No es opcional: esto lo lee ' +
         'solo, en su móvil, y sin su nombre suena a circular.\n' : '') +
-      '- Máximo 25 palabras. Una frase o dos cortas, no un párrafo.\n' +
-      '- Que sea suyo: si apenas tiene datos, empújale a entrenar hoy, que el primer ' +
-      'registro es el que pone todo lo demás en marcha.\n' +
-      (deHoy.length
-        ? '- HOY YA HA ENTRENADO, y hace un rato. No le mandes al gimnasio, no le ' +
-          'digas que entrene ni que «asegure» la sesión de hoy: eso ya está hecho y ' +
-          'quedaría como si la app no se hubiera enterado. Si hablas de entrenar, que ' +
-          'sea de lo que viene mañana o de recuperar bien lo de hoy.' + SALTO
-        : '') +
-      '- Si va bien, díselo y dile qué viene ahora. Si lleva tiempo parado, que sea una ' +
-      'invitación a volver, no un reproche.\n' +
+      '- MÁXIMO 18 PALABRAS. Una frase. Si te sale una segunda, sobra.\n' +
+      /* Lo que se colaba una y otra vez: «ya tienes seis entrenamientos esta
+         semana; ve al gimnasio hoy». Eso no es un pensamiento, es el parte de
+         estado que la pantalla ya da tres veces mas abajo, y encima con los
+         numeros mal leidos. */
+      '- NO LE CUENTES LO QUE HA HECHO. Nada de cuantos entrenamientos lleva, ni ' +
+      'cuantos dias, ni si va bien o mal de racha: todo eso lo tiene en la misma ' +
+      'pantalla, debajo de tu frase, y en cifras exactas. Tu frase es lo unico de ' +
+      'esta pantalla que NO es un dato, y ese es su trabajo.\n' +
+      '- Tampoco le mandes a entrenar ni le digas que descanse. No eres un aviso ni ' +
+      'una tarea: para eso estan los botones.\n' +
+      '- Lo que quiere leer ahi es un pensamiento corto y con fondo, de los que se ' +
+      'quedan. Algo que le sirva hoy y que tambien sirviera dentro de un ano.\n' +
+      '- Sus datos son para que aciertes con el tono —si lleva meses o acaba de ' +
+      'empezar, si viene de una racha o de un parón—, no para que se los cuentes.\n' +
+      /* Aunque ya no se le deja mandar a entrenar, esto se queda: sin decirselo,
+         de vez en cuando escribia como si el dia estuviera por empezar. */
+      (deHoy.length ? '- Hoy ya ha entrenado, hace un rato. No escribas como si el ' +
+        'dia estuviera por empezar.' + SALTO : '') +
+      '- Si lleva tiempo parado, que sea una invitación a volver, no un reproche; y ' +
+      'sin nombrar el parón.\n' +
       '- Nada de signos de exclamación, emojis, ni «tú puedes» de calendario.\n' +
       '- No te inventes citas ni se las cuelgues a nadie. Si no estás seguro de quién ' +
       'dijo algo, dilo con tus palabras y sin firma.\n' +

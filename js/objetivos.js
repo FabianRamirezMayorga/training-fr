@@ -15,7 +15,7 @@
     },
     entrenos: {
       label: 'Entrenar por semana', unidad: 'sesiones', icono: 'dumbbell',
-      note: 'Cuenta los entrenamientos de los últimos 7 días',
+      note: 'Cuenta los entrenamientos de esta semana, de lunes a hoy',
       actual: function () { return Store.stats().week; },
       inicio: function () { return 0; },
       formato: function (v) { return Tp(Math.round(v), '{n} sesión', '{n} sesiones'); }

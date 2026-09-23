@@ -2181,8 +2181,8 @@
     'Llegar a un peso': 'Reach a weight',
     'Se actualiza con cada pesaje que registres': 'Updates with every weigh-in you log',
     'Entrenar por semana': 'Train per week',
-    'Cuenta los entrenamientos de los últimos 7 días':
-      'Counts the workouts from the last 7 days',
+    'Cuenta los entrenamientos de esta semana, de lunes a hoy':
+      'Counts this week’s workouts, Monday to today',
     'Mantener una racha': 'Keep a streak going',
     'Días seguidos entrenando': 'Days training in a row',
     'Volumen semanal': 'Weekly volume',
