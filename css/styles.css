@@ -955,8 +955,11 @@ body.con-crono{--pad-abajo:134px}
 }
 
 /* El "Hola, Fabián" de la portada, más contenido que un titular */
-.hola{font-size:1.35rem;font-weight:700;letter-spacing:-.022em;margin:0 0 2px}
-.hola .nombre{color:var(--acc)}
+/* El nombre se distingue por el grosor y no por el color. En verde competia
+   con el boton de entrenar, que es la unica cosa de la portada que deberia
+   llevar ese verde; y el saludo no es una accion, es un saludo. */
+.hola{font-size:1.35rem;font-weight:600;letter-spacing:-.022em;margin:0 0 2px}
+.hola .nombre{color:inherit;font-weight:800}
 
 /* Punto de estado de la sincronización */
 .punto-sync{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 0 3px rgba(255,255,255,.06)}
@@ -1727,7 +1730,8 @@ img[src^="data/img/"] {
 .muelle { flex: .55 0 clamp(7px, .95svh, 19px); max-height: clamp(18px, 2.6svh, 27px); }
 
 .vista-inicio .hola { margin-bottom: clamp(1px, .25svh, 4px); }
-.vista-inicio .hola-sub { margin: 0; }
+.vista-inicio .hola-sub { margin: 0;
+  color: color-mix(in srgb, var(--txt) 82%, transparent); }
 
 .vista-inicio .portada-hueco { margin-top: 0; }
 .vista-inicio .portada-titulo { margin-top: 0 !important; }
@@ -1906,16 +1910,23 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 /* Guiones y no puntos. A este tamano un circulo de 5 px es casi un pixel
    suelto; un guion de 8 x 2,5 tiene la misma discrecion y se ve, porque lo que
    se lee de el es el color y el largo, no la forma. */
+/* El habito, de un solo gris a dos intensidades. Antes eran tres colores por
+   dia —veintiuno en pantalla con quince dias— y el color no decia nada que no
+   dijera ya la posicion: el primero siempre es el entreno, el segundo la
+   proteina y el tercero el agua. Lo unico que hay que ver es si esta encendido.
+
+   Se probo con un icono por habito en vez del guion y no vale: a once pixeles
+   la mancuerna, el pescado y la gota son la misma mancha. El guion no pretende
+   dibujar nada, y por eso sobrevive al tamano. */
 .ps-punto {
   display: inline-block; width: 8px; height: 2.5px; border-radius: 2px;
-  background: color-mix(in srgb, var(--dim2) 42%, transparent);
+  background: color-mix(in srgb, var(--txt) 24%, transparent);
   box-shadow: none;
 }
-.ps-punto.entreno.si { background: var(--acc); box-shadow: none; }
-.ps-punto.prote.si { background: var(--brand-1); box-shadow: none; }
-.ps-punto.agua.si { background: var(--agua); box-shadow: none; }
+.ps-punto.si { background: color-mix(in srgb, var(--txt) 82%, transparent); }
 .ps-dia.es-hoy .ps-punto {
-  background: color-mix(in srgb, var(--on-acc) 24%, transparent); }
+  background: color-mix(in srgb, var(--on-acc) 26%, transparent); }
+.ps-dia.es-hoy .ps-punto.si { background: var(--on-acc); }
 .ps-dia.es-hoy .ps-punto.si { background: var(--on-acc); }
 
 /* La ficha se toca y cuenta el día. */
@@ -5109,7 +5120,9 @@ html[data-theme="light"] .lg-efecto {
    salvo el del tema, que lleva su disco. Mismo alto que la pastilla del sitio
    —36 px— para que la cabecera tenga una sola línea de horizonte. */
 .par-chips {
-  display: inline-flex; align-items: center; gap: 2px; flex: none;
+  /* Seis de hueco y no dos: pegados, el disco del tema parecia el final del
+     boton del idioma y no otro boton. */
+  display: inline-flex; align-items: center; gap: 6px; flex: none;
   padding: 3px; border-radius: 999px;
   border: 1px solid color-mix(in srgb, #fff 9%, transparent);
   background:
@@ -6335,9 +6348,14 @@ button.dia-cabeza:active { transform: scale(.985); }
 /* Letra más pequeña y menos hueco. Es un consejo, no un titular: con tres
    renglones a tamaño de texto normal se comía el sitio del botón de entrenar,
    que es a lo que se viene. */
+/* Mas contraste que el `--dim` de un texto secundario cualquiera: esto es la
+   frase del entrenador y la linea que dice como va la semana, o sea lo primero
+   que se lee despues del saludo. En gris de nota al pie se leia como letra
+   pequena de contrato. */
 .hola-frase {
   display: flex; align-items: flex-start; gap: 8px;
-  margin: 5px 0 0; font-size: .84rem; line-height: 1.4; color: var(--dim);
+  margin: 5px 0 0; font-size: .84rem; line-height: 1.4;
+  color: color-mix(in srgb, var(--txt) 82%, transparent);
   letter-spacing: -.008em;
 }
 .hf-ico {
@@ -7909,7 +7927,8 @@ html[data-theme="light"] .ag-ico {
   color: var(--txt); }
 .rs-num.largo { font-size: .8rem; letter-spacing: -.02em; }
 .rs-et { display: inline-flex; align-items: center; gap: 3px; min-width: 0;
-  font-size: .62rem; color: var(--dim); line-height: 1.2; }
+  font-size: .62rem; line-height: 1.2;
+  color: color-mix(in srgb, var(--txt) 78%, transparent); }
 .rs-pal { min-width: 0; overflow: hidden; text-overflow: ellipsis;
   white-space: nowrap; }
 .rs-ico { flex: none; display: flex; color: var(--tono, var(--acc)); }
@@ -8321,8 +8340,12 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
   display: flex; align-items: center; justify-content: center; gap: 7px;
   margin: 12px -17px 0; padding: 11px 17px;
   border: 0; border-top: 1px solid color-mix(in srgb, var(--txt) 9%, transparent);
-  background: none; font: inherit; font-size: .88rem; font-weight: 600;
-  color: var(--dim); cursor: pointer; width: auto;
+  /* Fondo propio y no transparente: debajo pasa la foto del gimnasio, y un
+     texto gris sobre una barra de pesas no se lee. Con `--card2` la franja se
+     separa sola de la tarjeta en los dos temas. */
+  background: var(--card2);
+  font: inherit; font-size: .88rem; font-weight: 600;
+  color: var(--txt); cursor: pointer; width: auto;
   transition: opacity .12s ease;
 }
 .hh-pie:active { opacity: .55; }
@@ -8343,4 +8366,5 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 }
 .comida-acciones .btn:not(.primary) {
   border-color: color-mix(in srgb, var(--txt) 15%, transparent);
+  color: var(--txt);
 }
