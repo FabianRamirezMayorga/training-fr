@@ -99,7 +99,8 @@
      para hacer. Cada uno se abre tocándolo y se queda como lo dejes. */
   /* El dibujo de cada habito. Uno por los tres sitios donde salen —la ficha
      del dia, la leyenda y el detalle— para que no puedan decir cosas distintas. */
-  const HABITO = { entreno: 'dumbbell', prote: 'batido', agua: 'gota' };
+  const HABITO = { entreno: 'dumbbell', prote: 'batido', agua: 'gota',
+    kcal: 'llama' };
 
   const seccionesDia = {};
 
@@ -647,7 +648,8 @@
 
     const fila = function (clase, et, valor, ok, debajo) {
       return '<div class="dd-fila"><span class="ps-punto ' + clase + (ok ? ' si' : '') +
-        '"></span><span class="grow"><b>' + esc(et) + '</b>' +
+        '">' + icon(HABITO[clase] || 'check') + '</span>' +
+        '<span class="grow"><b>' + esc(et) + '</b>' +
         '<span class="dd-val">' + esc(valor) + '</span>' +
         (debajo ? '<span class="dd-sub">' + esc(debajo) + '</span>' : '') +
         '</span></div>';

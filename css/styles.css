@@ -1925,11 +1925,17 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .ps-punto svg { width: 100%; height: 100%; fill: none; stroke: currentColor;
   stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .ps-punto.si { color: color-mix(in srgb, var(--txt) 86%, transparent); }
-.ps-dia.es-hoy .ps-punto { color: color-mix(in srgb, var(--on-acc) 30%, transparent); }
+/* En la ficha de hoy, que es verde, la tinta es oscura. Lo que falta por hacer
+   va en gris —mezclado con blanco, que un oscuro al 30% sobre verde sigue
+   leyendose como verde apagado y no como gris— y lo hecho, en oscuro entero.
+
+   Aqui vivia un `background: var(--on-acc)` de cuando la marca era un guion
+   macizo. Con el guion convertido en icono, ese fondo pintaba un cuadro negro
+   de diez por diez con el dibujo encima, invisible. */
+.ps-dia.es-hoy .ps-punto { color: color-mix(in srgb, var(--on-acc) 34%, #ffffff); }
 .ps-dia.es-hoy .ps-punto.si { color: var(--on-acc); }
 /* La leyenda los ensena siempre encendidos, que ahi son el ejemplo. */
 .plan-leyenda .ps-punto { width: 11px; height: 11px; }
-.ps-dia.es-hoy .ps-punto.si { background: var(--on-acc); }
 
 /* La ficha se toca y cuenta el día. */
 .ps-dia.tap { cursor: pointer; transition: transform .12s ease; }
@@ -1948,9 +1954,9 @@ html[data-theme="light"] .sec-silueta { opacity: .05; }
 .dd-val { display: block; margin-top: 2px; font-size: .92rem; line-height: 1.35; }
 .dd-sub { display: block; margin-top: 3px; font-size: .78rem; color: var(--dim);
   line-height: 1.4; }
-/* Las calorías no tienen punto en la tira —no son una de las tres cosas que el
-   plan pide— pero aquí cuentan igual, así que llevan su marca apagada. */
-.ps-punto.kcal.si { background: var(--llama, var(--warn)); box-shadow: none; }
+/* Las calorías no tienen marca en la tira —no son una de las tres cosas que el
+   plan pide— pero en el detalle del día cuentan igual, y ahí llevan la suya. */
+.ps-punto.kcal.si { background: none; color: var(--warn); }
 
 .plan-leyenda {
   display: flex; gap: 14px; justify-content: center; margin-top: 11px;
