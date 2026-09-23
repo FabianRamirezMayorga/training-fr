@@ -29,6 +29,12 @@
         exId: re.exId,
         name: ex ? ex.nameEs : re.exId,
         targetReps: re.reps,
+        /* Cuántas series pide la rutina. Se guarda aparte del array porque el
+           array es lo que HIZO y esto es lo que pedía: sin las dos no hay forma
+           de saber si cuatro series son las de siempre o las que se quedó
+           corto. Las sesiones que ya estuvieran en marcha no lo traen, y ahí se
+           da por hecho que lo planeado era lo que hay. */
+        targetSets: Math.max(1, re.sets),
         rest: re.rest || Store.settings().rest,
         note: re.note || '',
         /* Se guarda el porqué con la sesión en marcha: si la pantalla se
@@ -41,6 +47,64 @@
         })
       };
     });
+  }
+
+  /* Las repeticiones que ha apuntado de verdad. Si todas las series llevan el
+     mismo número —que es lo normal— ese es el dato; si las cambió una a una y
+     no coinciden, no hay una sola cifra que enseñar y manda la de la rutina. */
+  function repsReales(entry) {
+    const r = (entry.sets || []).map(function (x) { return Number(x.reps) || 0; })
+      .filter(Boolean);
+    if (!r.length) return Number(entry.targetReps) || 0;
+    const primera = r[0];
+    return r.every(function (x) { return x === primera; }) ? primera
+      : Number(entry.targetReps) || 0;
+  }
+
+  function seriesPlan(entry) {
+    return Number(entry.targetSets) || (entry.sets || []).length;
+  }
+
+  function tocado(entry) {
+    return (entry.sets || []).length !== seriesPlan(entry) ||
+      repsReales(entry) !== (Number(entry.targetReps) || 0);
+  }
+
+  /* ---------- corregir lo que de verdad hizo ----------
+     La rutina propone cuatro por siete y uno saca cinco por ocho, o tres por
+     seis el día que no iba. Hasta ahora esa cifra era de solo lectura y lo que
+     quedaba apuntado era la propuesta, no lo hecho: el historial contaba una
+     sesión que no pasó y la progresión se apoyaba en ella.
+
+     Los botones van a los lados de cada cifra, con el mismo más y menos que ya
+     llevan las series una a una. Sin teclado: en mitad de una serie, con las
+     manos ocupadas, un campo de texto que abre el teclado del móvil es lo
+     último que uno quiere. */
+  function pasoHTML(que, valor, etiqueta, menos, mas) {
+    return '<span class="obj-paso">' +
+      '<button class="sf-pm" data-w="' + que + 'Menos" ' +
+        'aria-label="' + UI.esc(menos) + '">' + icon('menos') + '</button>' +
+      '<span class="obj-val"><b>' + UI.esc(String(valor)) + '</b>' +
+        '<i>' + UI.esc(etiqueta) + '</i></span>' +
+      '<button class="sf-pm" data-w="' + que + 'Mas" ' +
+        'aria-label="' + UI.esc(mas) + '">' + icon('plus') + '</button>' +
+      '</span>';
+  }
+
+  function objetivoHTML(entry, conReps) {
+    const reps = repsReales(entry);
+    const cambiado = tocado(entry);
+    return '<div class="objetivo' + (cambiado ? ' corregido' : '') + '">' +
+      '<b>' + entry.sets.length + ' × ' + reps + '</b>' +
+      '<span>' + UI.esc(cambiado ? Tn('lo que has hecho · pedía {n}',
+        { n: seriesPlan(entry) + ' × ' + (Number(entry.targetReps) || 0) })
+        : T('lo que te propongo')) + '</span>' +
+      '<span class="obj-pasos">' +
+        pasoHTML('serie', entry.sets.length, Tp(entry.sets.length, 'serie', 'series'),
+          T('Una serie menos'), T('Una serie más')) +
+        (conReps ? pasoHTML('rep', reps, T('reps'),
+          T('Una repetición menos'), T('Una repetición más')) : '') +
+      '</span></div>';
   }
 
   function start(routine) {
@@ -601,10 +665,7 @@
 
       ${raw(soloEjercicio ? html`
         <div class="card wo-solo ${hecho ? 'listo' : ''}">
-          <div class="objetivo">
-            <b>${entry.sets.length} × ${entry.targetReps}</b>
-            <span>${T('lo que te propongo')}</span>
-          </div>
+          ${raw(objetivoHTML(entry, true))}
 
           <!-- Las dos, la misma pieza: casilla o icono a la izquierda, lo que
                hace en el centro, y el dato a la derecha. El subtitulo que
@@ -627,11 +688,10 @@
         </div>` : html`
       <div class="card">
         ${raw(simple ? html`
-          <div class="objetivo">
-            <b>${entry.sets.length} × ${entry.targetReps}</b>
-            <span>${T('series por repeticiones')}${raw(entry.rest
-              ? ' · ' + UI.esc(Tn('descanso {n} s', { n: entry.rest })) : '')}</span>
-          </div>` : html`
+          <!-- Aqui las repeticiones se corrigen serie a serie, ahi abajo, asi
+               que arriba solo va el numero de series: dos sitios para el mismo
+               dato es un sitio de mas. -->
+          ${raw(objetivoHTML(entry, false))}` : html`
           <div class="objetivo">
             <b>${entry.sets.length} × ${entry.targetReps}</b>
             <span>${T('lo que te propongo')}${raw(entry.rest
@@ -937,6 +997,33 @@
     act('rest', function () { startRest(entry.rest); });
 
     /* Modo "marcar el ejercicio y ya": un toque da por hechas todas sus series */
+    /* Una serie más se copia de la última —mismo peso, mismas repeticiones— y
+       nace marcada si el ejercicio ya lo estaba: quien añade una sexta después
+       de darlo por hecho es porque la hizo, no porque le quede pendiente. */
+    act('serieMas', function () {
+      const ultima = entry.sets[entry.sets.length - 1] || {};
+      entry.sets.push({ weight: ultima.weight, reps: repsReales(entry),
+        done: !!ultima.done });
+      Store.setActive(a);
+      rerender();
+    });
+
+    act('serieMenos', function () {
+      if (entry.sets.length <= 1) return;
+      entry.sets.pop();
+      Store.setActive(a);
+      rerender();
+    });
+
+    const cambiarReps = function (d) {
+      const n = Math.max(1, repsReales(entry) + d);
+      entry.sets.forEach(function (x) { x.reps = n; });
+      Store.setActive(a);
+      rerender();
+    };
+    act('repMas', function () { cambiarReps(1); });
+    act('repMenos', function () { cambiarReps(-1); });
+
     act('hechoya', function () {
       const todas = entry.sets.every(function (x) { return x.done; });
       entry.sets.forEach(function (x) {

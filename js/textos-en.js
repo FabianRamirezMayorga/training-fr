@@ -392,6 +392,14 @@
     /* ---------- entrenar ---------- */
     'Hecho': 'Done',
     'Marcar como hecho': 'Mark as done',
+
+    /* Corregir las series y las repeticiones de verdad */
+    'lo que has hecho · pedía {n}': 'what you did · it asked for {n}',
+    'serie': 'set',
+    'Una serie menos': 'One set fewer',
+    'Una serie más': 'One more set',
+    'Una repetición menos': 'One rep fewer',
+    'Una repetición más': 'One more rep',
     'deshacer': 'undo',
     'Descansar': 'Rest',
     'lo que te propongo': 'what I suggest',

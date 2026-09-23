@@ -8245,3 +8245,27 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .guia-aviso .tiny { display: block; color: var(--dim); margin-top: 1px; }
 .guia-aviso .row-icon { color: var(--warn);
   background: color-mix(in srgb, var(--warn) 15%, transparent); }
+
+/* ---------- corregir lo que de verdad hizo ----------
+   La cifra grande sigue mandando y los pasos van debajo, más pequeños: lo que
+   se mira en mitad de una serie es el «4 × 7», y los botones son para el rato
+   en que uno decide que hoy salen cinco. */
+.obj-pasos {
+  display: flex; justify-content: center; gap: 18px; margin-top: 12px;
+  flex-wrap: wrap;
+}
+.obj-paso { display: inline-flex; align-items: center; gap: 4px; }
+.obj-val { display: flex; flex-direction: column; align-items: center;
+  min-width: 46px; line-height: 1.05; }
+.obj-val b { font-size: 1.05rem; font-weight: 800; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums; }
+.obj-val i { font-style: normal; font-size: .6rem; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--dim2); }
+.obj-pasos .sf-pm { width: 32px; height: 32px; border-radius: 10px; }
+.obj-pasos .sf-pm svg { width: 15px; height: 15px; }
+
+/* Corregido: la cifra deja de ser una propuesta y pasa a ser lo que hizo, y se
+   dice con el color de la app en vez de con una palabra más. Debajo se queda
+   lo que pedía la rutina, que sin eso no hay con qué comparar. */
+.objetivo.corregido b { color: var(--acc); }
+.objetivo.corregido > span { color: var(--dim); }
