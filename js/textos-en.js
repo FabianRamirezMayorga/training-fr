@@ -163,13 +163,11 @@
     'Sirven para calcular tus calorías y ajustar lo que te propongo. No salen de tu dispositivo salvo que actives la sincronización o el entrenador con IA.':
       'These are used to work out your calories and tailor what I suggest. They never leave your device unless you turn on sync or the AI coach.',
     'Quién soy': 'About me',
-    'Mi nombre': 'My name',
     'Para saludarte al abrir la app y para que el entrenador con IA te hable a ti, no a un usuario.':
       'To greet you when you open the app, and so the AI coach talks to you and not to "a user".',
     'País': 'Country',
     'De aquí salen el menú y la lista de la compra: los nombres, los cortes de carne y lo que hay en el súper cambian de un país a otro.':
       'Your meal plan and shopping list come from this: names, cuts of meat and what the supermarket stocks change from country to country.',
-    'Mi cuerpo': 'My body',
     'Sexo biológico': 'Biological sex',
     'Cambia la fórmula del metabolismo basal.': 'Changes the basal metabolism formula.',
     'Hombre': 'Male',
@@ -181,7 +179,6 @@
     'Grasa corporal': 'Body fat',
     'Opcional. Si la sabes, afina el cálculo del metabolismo.':
       'Optional. If you know it, it sharpens the metabolism estimate.',
-    'Mi actividad diaria': 'My daily activity',
     'Lo que me muevo al día': 'How much I move each day',
     'Sin contar el entrenamiento: es el trabajo, los recados y lo que andas.':
       'Not counting training: work, errands and how much you walk.',
@@ -237,7 +234,6 @@
     'Spotify conectado': 'Spotify connected',
     'Sin conectar': 'Not connected',
 
-    'Mi cuenta': 'My account',
     'Sin sincronizar': 'Not syncing',
     'Unidades, tema, idioma y copias de seguridad': 'Units, theme, language and backups',
     'Comprobando si estás al día…': 'Checking whether you are up to date…',
@@ -392,6 +388,16 @@
     /* ---------- entrenar ---------- */
     'Hecho': 'Done',
     'Marcar como hecho': 'Mark as done',
+
+    /* Una sola voz: la app habla en segunda persona, y dentro de «Datos y
+       habitos» el pronombre se cae porque ahi todo es suyo ya. */
+    'Tus planes de entrenamiento': 'Your training plans',
+    'Tus números': 'Your numbers',
+    'Tus recordatorios': 'Your reminders',
+    'Tus menús': 'Your meal plans',
+    'Cuerpo': 'Body',
+    'Actividad diaria': 'Daily activity',
+    'Horarios y sueño': 'Hours and sleep',
 
     /* Corregir las series y las repeticiones de verdad */
     'lo que has hecho · pedía {n}': 'what you did · it asked for {n}',
@@ -551,7 +557,6 @@
       '{n} routines repeat another one’s plan and day, from generating the programme more than once. They can be removed in one go.',
     'Revisar y limpiar': 'Review and clean up',
 
-    'Mis rutinas': 'My routines',
     'Ordena y borra lo que sobre': 'Reorder and delete what you don’t need',
     'Editar lista': 'Edit list',
     'Aún no tienes rutinas propias. Copia una plantilla de abajo para empezar.':
@@ -584,7 +589,6 @@
     'con IA': 'with AI',
     'Duplicar': 'Duplicate',
     'Compartir': 'Share',
-    'Mis planes de entrenamiento': 'My training plans',
 
     /* ---------- Ejercicios ---------- */
     'Filtro': 'Filter',
@@ -756,7 +760,6 @@
     'El siguiente, «{t}» a las {h}.': 'Next up, "{t}" at {h}.',
     'Las horas salen de tus datos: tu peso, a qué hora te levantas y cuándo entrenas.':
       'The times come from your data: your weight, when you get up and when you train.',
-    'Mis recordatorios': 'My reminders',
     'Sin recordatorios todavía. Abajo tienes los que te propongo con tus datos, con las horas ya calculadas.':
       'No reminders yet. Below are the ones I suggest from your data, with the times already worked out.',
     'Crear desde mis rutinas': 'Create from my routines',
@@ -844,7 +847,6 @@
     'Completar mis datos': 'Fill in my details',
     'Calculado a partir de tus datos con la fórmula de Mifflin-St Jeor. Es una orientación, no una pauta médica.':
       'Worked out from your data with the Mifflin-St Jeor formula. It is a guide, not medical advice.',
-    'Mis números': 'My numbers',
     'Gasto diario estimado': 'Estimated daily burn',
     'Objetivo': 'Goal',
     'Agua al día': 'Water a day',
@@ -862,7 +864,6 @@
       'Above is what you have; this is instructions. It overrides everything else except your allergies and health conditions.',
     'Ej. nada de pescado; la cena siempre ligera; el desayuno que se prepare en cinco minutos; los domingos cocino para toda la semana':
       'e.g. no fish; dinner always light; breakfast ready in five minutes; on Sundays I cook for the whole week',
-    'Mis menús': 'My meal plans',
     'Nuevo': 'New',
     'Un menú semanal que cuadre con tus calorías, tu dieta, lo que no puedes comer y lo que tienes en casa. Lo prepara el entrenador con IA, o se hace uno genérico con tus números si prefieres poner tú los platos. Puedes guardar los que quieras —el de la semana fuerte, el de cuando viajas— y marcar cuál manda.':
       'A weekly plan that fits your calories, your diet, what you can’t eat and what you have at home. The AI coach builds it, or a generic one is made from your numbers if you would rather pick the dishes yourself. You can save as many as you like — the heavy week, the travelling one — and mark which one counts.',
@@ -1056,8 +1057,6 @@
     'Me acuesto': 'I go to bed',
     'Me levanto': 'I get up',
     'Metabolismo basal': 'Basal metabolism',
-    'Mi día': 'My day',
-    'Mi objetivo': 'My goal',
     'Moverme, dormir y comer bien, sin una meta de báscula':
       'Moving, sleeping and eating well, with no target on the scales',
     'Ni subir ni bajar; sostener lo que ya tienes':

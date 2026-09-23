@@ -194,7 +194,7 @@
 
       <div class="list-title">${T('Aplicación')}</div>
       <div class="plan-acciones indice" style="margin:10px 0 0">
-        ${raw(filaPerfil({ icono: 'nube', titulo: T('Mi cuenta'), accion: 'cuenta',
+        ${raw(filaPerfil({ icono: 'nube', titulo: T('Tu cuenta'), accion: 'cuenta',
           tono: '#4f8cf5', pendiente: !Sync.activa(),
           sub: Sync.activa() ? Sync.email() : T('Sin sincronizar') }))}
         ${raw(filaPerfil({ icono: 'ajustes', titulo: T('Ajustes'), accion: 'ajustes',
@@ -394,7 +394,7 @@
 
       ${raw(grupo('Quién soy',
         campo({
-          tit: 'Mi nombre',
+          tit: 'Nombre',
           control: valor('id="p-nombre" value="' + esc(Store.settings().name || '') +
             '" placeholder="' + esc(T('Tu nombre')) + '" autocomplete="given-name"', '', 132,
             Store.settings().name),
@@ -424,7 +424,7 @@
             '</button>'
         })))}
 
-      ${raw(grupo('Mi cuerpo',
+      ${raw(grupo('Cuerpo',
         campo({
           tit: 'Sexo biológico',
           nota: 'Cambia la fórmula del metabolismo basal.',
@@ -455,14 +455,14 @@
             p.grasa ? UI.dec(p.grasa) : '')
         })))}
 
-      ${raw(grupo('Mi actividad diaria',
+      ${raw(grupo('Actividad diaria',
         campo({
           tit: 'Lo que me muevo al día',
           nota: 'Sin contar el entrenamiento: es el trabajo, los recados y lo que andas.',
           abajo: filasOpcion('actividad', Perfil.ACTIVIDAD, p.actividad)
         })))}
 
-      ${raw(grupo('Mi objetivo',
+      ${raw(grupo('Objetivo',
         campo({
           tit: 'Qué busco',
           abajo: filasOpcion('objetivo', Perfil.OBJETIVO, p.objetivo)
@@ -496,7 +496,7 @@
             })
           : '')))}
 
-      ${raw(grupo('Mi día',
+      ${raw(grupo('Horarios y sueño',
         campo({
           tit: 'Me levanto',
           control: valor('type="time" value="' + (p.despertar || '07:00') +
@@ -563,7 +563,7 @@
         })))}
 
       ${raw(Perfil.completo(p) ? html`
-        <div class="list-title">${T('Mis números')}</div>
+        <div class="list-title">${T('Tus números')}</div>
         <div class="card tarjeta-premium campos">
           <div class="campo">
             <div class="campo-cab">
@@ -1193,7 +1193,7 @@
 
       ${raw(permisoHTML())}
 
-      ${raw(lista.length ? '<div class="list-title">' + esc(T('Mis recordatorios')) + '</div>' +
+      ${raw(lista.length ? '<div class="list-title">' + esc(T('Tus recordatorios')) + '</div>' +
         '<div class="stack">' + lista.map(tarjetaAlerta).join('') + '</div>'
         : html`<div class="empty" style="padding-top:28px">${raw(icon('campana'))}
             <p>${T('Sin recordatorios todavía. Abajo tienes los que te propongo con tus datos, con las horas ya calculadas.')}</p>

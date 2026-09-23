@@ -229,7 +229,7 @@
     if (!Sync.puedeConfigurar()) {
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-          ${raw(icon('back'))} ${T('Mi cuenta')}</button>
+          ${raw(icon('back'))} ${T('Tu cuenta')}</button>
         <h1>${T('Tu base de datos')}</h1>
         <p class="muted">${T('Tus datos se guardan en el proyecto de quien te dio el ' +
         'acceso, y solo los ves tú: la base de datos no deja que nadie lea lo de otra ' +
@@ -240,7 +240,7 @@
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} ${T('Mi cuenta')}</button>
+        ${raw(icon('back'))} ${T('Tu cuenta')}</button>
       <h1>${T('Tu base de datos')}</h1>
       <p class="muted">${T('Se crea una vez, es gratis, no pide tarjeta y es tuya: los ' +
       'datos van a tu propio Supabase, no a ningún servidor mío. Ocho pasos y unos diez ' +
@@ -264,7 +264,7 @@
               <div style="font-weight:600;font-size:.88rem">${T('Si ya tienes cuenta en esta app')}</div>
               <div class="tiny">${raw(Tn('Tampoco. Ve a {donde} y entra con tu correo; la ' +
               'conexión ya está puesta.',
-              { donde: '<b>' + esc(T('Perfil')) + ' &rarr; ' + esc(T('Mi cuenta')) + '</b>' }))}</div>
+              { donde: '<b>' + esc(T('Perfil')) + ' &rarr; ' + esc(T('Tu cuenta')) + '</b>' }))}</div>
             </div>
             <div>
               <div style="font-weight:600;font-size:.88rem">${T('Si quieres tus datos en ' +

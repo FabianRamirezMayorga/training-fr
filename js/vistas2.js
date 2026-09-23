@@ -154,7 +154,7 @@
       ${raw(comidasHoyHTML(m))}
       ${raw(semanaComidaHTML(m))}
 
-      <div class="list-title">${T('Mis números')}</div>
+      <div class="list-title">${T('Tus números')}</div>
       <div class="card tarjeta-premium campos">
         ${raw(filaSimple(T('Gasto diario estimado'), UI.num(Math.round(Perfil.tdee(p))) + ' kcal'))}
         ${raw(filaSimple(T('Objetivo'), T((Perfil.OBJETIVO[p.objetivo] || {}).label)))}
@@ -184,7 +184,7 @@
            no vive dentro de una de sus pantallas. -->
 
       <div class="row between" style="margin-top:20px;align-items:center">
-        <span class="list-title" style="margin:0">${T('Mis menús')}</span>
+        <span class="list-title" style="margin:0">${T('Tus menús')}</span>
         <!-- Siempre el mismo botón, con IA o sin ella: desde que se puede crear
              un menú genérico, mandar a configurar el entrenador era negarle a
              quien no lo tiene la única forma que sí podía usar. La hoja ya

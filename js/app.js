@@ -1673,7 +1673,7 @@
         </div>`;
     }).join('');
 
-    return arriba + html`<div class="list-title">${T('Mis planes de entrenamiento')}</div>` + bloques;
+    return arriba + html`<div class="list-title">${T('Tus planes de entrenamiento')}</div>` + bloques;
   }
 
   /* Lo que se puede hacer con un plan entero.
@@ -3387,7 +3387,7 @@
       ${raw(rutinas.length ? html`
         <div class="list-head">
           <span class="list-title">${ordenando ? T('Ordena y borra lo que sobre')
-            : T('Mis rutinas')}</span>
+            : T('Tus rutinas')}</span>
           <button class="btn sm ${ordenando ? 'primary' : 'ghost'}" data-a="ordenar">
             ${ordenando ? T('Hecho') : T('Editar lista')}</button>
         </div>` : '')}
@@ -6015,7 +6015,7 @@
         </button>
         <button class="fila-plan" data-a="ircuenta" style="--fp:#4f8cf5">
           <span class="fp-ico">${raw(icon('nube'))}</span>
-          <span class="grow"><span class="fp-tit">${T('Mi cuenta')}</span>
+          <span class="grow"><span class="fp-tit">${T('Tu cuenta')}</span>
             <span class="fp-sub">${raw(esc(Sync.activa() ? Sync.email()
               : T('Entra con tu correo para tenerlo todo en cada dispositivo')))}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
@@ -6212,7 +6212,7 @@
       <div class="plan-acciones" style="margin:10px 0 0">
         <button class="fila-plan" data-dl="rutinas" style="--fp:var(--acc)">
           <span class="fp-ico">${raw(icon('dumbbell'))}</span>
-          <span class="grow"><span class="fp-tit">${T('Mis rutinas')}</span>
+          <span class="grow"><span class="fp-tit">${T('Tus rutinas')}</span>
             <span class="fp-sub">${T('Solo los ejercicios que usas. Lo más rápido.')}</span></span>
           <span class="chevron">${raw(icon('chevron'))}</span>
         </button>
@@ -6687,7 +6687,7 @@
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Perfil')}</button>
-      <h1>${T('Mi cuenta')}</h1>
+      <h1>${T('Tu cuenta')}</h1>
       <p class="muted">${T('Entra con tu correo y la app queda igual en todos tus ' +
       'dispositivos: rutinas, historial, perfil, objetivos, alertas y ajustes.')}</p>
 
