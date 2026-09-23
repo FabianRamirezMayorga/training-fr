@@ -124,24 +124,23 @@
       '<circle cx="16.6" cy="10.8" r=".9"/>' +
       '</svg>',
     musica: '<svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
-    /* Un brazo flexionado. Es lo que dice «proteína» sin rodeos: lo que se come
-       de eso es para el músculo. El pescado de antes contaba de dónde sale, que
-       es otra pregunta y además deja fuera el huevo, el pollo y el batido.
+    /* Un bote de batido. Para «proteína» probé antes el brazo flexionado —que
+       es lo que se pide siempre— en cuatro versiones, de contorno y de silueta,
+       y ninguna aguanta el tamaño al que se ve: dentro del aro son diecisiete
+       píxeles, y aí un brazo es una mancha que cada uno interpreta a su manera.
+       El huevo tampoco vale: a ese tamaño es una gota y ya hay una gota, la del
+       agua, tres centímetros más arriba.
 
-       Relleno y por piezas —brazo, bulto, antebrazo y puño, cuatro formas que se
-       solapan— y no de contorno. El contorno lo intenté primero, a una línea y
-       a dos, y salía una bota: las formas del cuerpo a 18 píxeles necesitan
-       silueta, igual que la figura de correr.
+       El bote se reconoce por la tapa y el cuerpo que se estrecha, que son dos
+       rasgos que sobreviven a cualquier reducción. Y es de gimnasio, que es
+       donde vive esto.
 
        El relleno va en `style` y no en atributo porque el css de los iconos
        pone `fill:none` para todos, y un atributo pierde contra una regla. */
-    biceps: '<svg viewBox="0 0 24 24">'
-      + '<rect x="4" y="12.6" width="12" height="5.6" rx="2.8" '
-      + 'style="fill:currentColor;stroke:none"/>'
-      + '<circle cx="10.2" cy="11.4" r="4.2" style="fill:currentColor;stroke:none"/>'
-      + '<rect x="14.2" y="5.4" width="5.4" height="12.8" rx="2.7" '
-      + 'style="fill:currentColor;stroke:none"/>'
-      + '<circle cx="16.9" cy="5" r="3" style="fill:currentColor;stroke:none"/></svg>',
+    batido: '<svg viewBox="0 0 24 24"><path d="M8.4 2.6h7.2a1 1 0 0 1 1 1v1.2'
+      + 'a1 1 0 0 1-1 1h-.3l.6 2.4v9.6a3.2 3.2 0 0 1-3.2 3.2h-1.4'
+      + 'a3.2 3.2 0 0 1-3.2-3.2V8.2l.6-2.4h-.3a1 1 0 0 1-1-1V3.6a1 1 0 0 1 1-1z" '
+      + 'style="fill:currentColor;stroke:none"/></svg>',
     compartir: '<svg viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M12 3v13"/><path d="m8 7 4-4 4 4"/></svg>',
     copiar: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
     chispa: '<svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/></svg>',
