@@ -363,6 +363,7 @@
     };
 
     return html`
+      ${raw(g.Guia ? Guia.bandaDatos() : '')}
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Perfil')}</button>
 
@@ -596,7 +597,11 @@
         <div class="barra-edicion">
           <button class="btn grow" data-a="cancelar">${T('Cancelar')}</button>
           <button class="btn primary grow" data-a="guardar">${raw(icon('check'))} ${T('Guardar')}</button>
-        </div>` : '')}`;
+        </div>` : '')}
+
+      <!-- Recien creada la cuenta, esta pantalla es el paso 1 de 2 y lleva su
+           boton de seguir. El resto del tiempo no sale nada. -->
+      ${raw(!edita && g.Guia ? Guia.pieDatos() : '')}`;
   };
 
   function pesoHistorial() {
@@ -735,6 +740,7 @@
 
   V.datos.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('perfil'); });
+    if (g.Guia) Guia.montarDatos(root);
     bind(root, '[data-a=pais]', paisSheet);
 
     /* Editar, guardar y cancelar. La copia se hace al entrar en edicion y

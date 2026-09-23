@@ -131,6 +131,18 @@
       'Do I lose everything if I change phone or delete the app?',
     '¿Funciona sin internet?': 'Does it work offline?',
 
+    'Los dos pasos al crear tu cuenta': 'The two steps when you create your account',
+    'Tus datos y, si quieres, las dos conexiones': 'Your details and, if you want, the two connections',
+    'Recién creada la cuenta, la app te lleva por dos pantallas antes de soltarte. No son un trámite: son lo que separa una app que calcula lo tuyo de una que enseña números genéricos.': 'With your account just created, the app walks you through two screens before letting you go. They are not paperwork: they are what separates an app that works out your numbers from one that shows generic ones.',
+    'Rellena tus datos.': 'Fill in your details.',
+    'Sexo, edad, altura y peso son los cuatro con los que se calcula todo lo demás: tus calorías, tus macros, el IMC y lo que te propongo entrenar. El resto de esa pantalla —país, sueño, actividad diaria, limitaciones— afina el menú y las rutinas, y se puede rellenar otro día.': 'Sex, age, height and weight are the four everything else is worked out from: your calories, your macros, your BMI and what I suggest you train. The rest of that screen —country, sleep, daily activity, limitations— fine-tunes the meal plan and the routines, and can wait for another day.',
+    'Abrir mis datos': 'Open my details',
+    'Mira las dos conexiones.': 'Look at the two connections.',
+    'El entrenador con IA y la música. Las dos son gratis, las dos van con una clave tuya y las dos son opcionales de verdad: el catálogo, las rutinas, el cronómetro, el historial y las estadísticas funcionan sin ninguna de ellas.': 'The AI coach and the music. Both are free, both run on a key of your own, and both are genuinely optional: the catalogue, the routines, the timer, your history and the stats all work without either.',
+    'Y ya está.': 'And that is it.',
+    'De ahí sales a la app normal, a crear tus rutinas.': 'From there you land in the app proper, ready to build your routines.',
+    'Puedes salirte a mitad cuando quieras, que la barra de abajo sigue funcionando: la guía se queda pendiente y te espera en la portada, con un aviso que la retoma por donde ibas. Y si entras en otro móvil con la misma cuenta no te sale nada, porque tus datos llegan con la sincronización antes de que la app pregunte.': 'You can step out halfway whenever you like —the bottom bar still works—: the guide stays pending and waits for you on the home screen, with a notice that picks it up where you left it. And if you sign in on another phone with the same account nothing shows up, because your details arrive with the sync before the app asks.',
+
     'El entrenador con IA no me contesta, ¿qué miro?':
       'The AI coach is not answering. What should I check?',
     'Lo que te salga escrito dice cuál de las cuatro cosas es. No hay una quinta.':

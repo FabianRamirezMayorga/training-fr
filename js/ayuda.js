@@ -457,6 +457,21 @@
       cierre: 'A partir de ahí, cada foto se cruza con la comida que tocaba a esa hora, y los avisos de comer suenan a tus horas y no a las de un horario estándar.',
       ver: ['g-comida', 'c-autoalertas'] },
 
+    { id: 'c-empezar', titulo: 'Los dos pasos al crear tu cuenta',
+      resumen: 'Tus datos y, si quieres, las dos conexiones',
+      intro: 'Recién creada la cuenta, la app te lleva por dos pantallas antes de soltarte. No son un trámite: son lo que separa una app que calcula lo tuyo de una que enseña números genéricos.',
+      pasos: [
+        { t: 'Rellena tus datos.',
+          d: 'Sexo, edad, altura y peso son los cuatro con los que se calcula todo lo demás: tus calorías, tus macros, el IMC y lo que te propongo entrenar. El resto de esa pantalla —país, sueño, actividad diaria, limitaciones— afina el menú y las rutinas, y se puede rellenar otro día.',
+          ir: { ruta: 'datos', label: 'Abrir mis datos' } },
+        { t: 'Mira las dos conexiones.',
+          d: 'El entrenador con IA y la música. Las dos son gratis, las dos van con una clave tuya y las dos son opcionales de verdad: el catálogo, las rutinas, el cronómetro, el historial y las estadísticas funcionan sin ninguna de ellas.' },
+        { t: 'Y ya está.',
+          d: 'De ahí sales a la app normal, a crear tus rutinas.' }
+      ],
+      cierre: 'Puedes salirte a mitad cuando quieras, que la barra de abajo sigue funcionando: la guía se queda pendiente y te espera en la portada, con un aviso que la retoma por donde ibas. Y si entras en otro móvil con la misma cuenta no te sale nada, porque tus datos llegan con la sincronización antes de que la app pregunte.',
+      ver: ['c-ia', 'g-datos'] },
+
     { id: 'c-ia', titulo: 'Activar el entrenador con IA',
       resumen: 'Elegir proveedor y guardar tu clave',
       pasos: [

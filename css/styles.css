@@ -8177,3 +8177,71 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
   .vista-inicio .semana-caja::after { animation: none; opacity: 0; }
   .vista-inicio .ps-dia.es-hoy { animation: none; }
 }
+
+/* ---------- los primeros pasos de una cuenta nueva ----------
+   Una banda arriba que dice en qué paso va y para qué sirve, y un pie con el
+   botón de seguir. Nada de esto sale el resto del tiempo: es andamio, y el
+   andamio se quita cuando el edificio está en pie. */
+.guia-banda {
+  background: linear-gradient(152deg, color-mix(in srgb, var(--acc) 12%, var(--card)) 0%,
+              var(--card) 62%);
+  border-radius: 22px; padding: 14px 16px 15px; margin-bottom: 14px;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent), var(--sombra-carta);
+}
+.guia-banda b { display: block; font-size: 1.12rem; letter-spacing: -.022em;
+  margin-top: 3px; }
+.guia-banda p { margin: 6px 0 0; font-size: .86rem; color: var(--dim); line-height: 1.4; }
+.guia-cuenta {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .64rem; font-weight: 800; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--acc);
+}
+/* Dos puntos en vez de una barra de progreso: con dos pasos, una barra a medias
+   es más aparato que información. */
+.guia-bolas { display: inline-flex; gap: 4px; }
+.guia-bolas i {
+  width: 16px; height: 4px; border-radius: 2px;
+  background: color-mix(in srgb, var(--acc) 26%, transparent);
+}
+.guia-bolas i.si { background: var(--acc); }
+
+.guia-pie { margin-top: 18px; padding-bottom: 6px; }
+.guia-pie .btn svg { width: 15px; height: 15px; }
+.guia-falta { margin: 0 0 9px; color: var(--warn); line-height: 1.4; }
+
+/* Las dos conexiones. Comparten la fila de lista de toda la app; lo que cambia
+   es que el icono lleva el color de lo suyo —verde el entrenador, cian la
+   música— porque son dos cosas distintas y no dos opciones de una lista. */
+.guia-con { align-items: flex-start; padding: 13px 14px; }
+.guia-con .row-icon { flex: none; }
+/* Aqui el texto es el argumento, no una cola: la fila de lista corta a un
+   renglón con puntos suspensivos y eso dejaba «Lee tus entrenamientos y te dice
+   qué ajust…», que no convence a nadie de nada. */
+.guia-con .grow > div { white-space: normal; overflow: visible; text-overflow: clip; }
+.guia-con .tiny { line-height: 1.4; margin-top: 3px; }
+.guia-con-tit { font-weight: 700; display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; }
+.guia-ok {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: .6rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--acc); background: color-mix(in srgb, var(--acc) 14%, transparent);
+  padding: 2px 7px 2px 5px; border-radius: 999px;
+}
+.guia-ok svg { width: 11px; height: 11px; fill: none; stroke: currentColor;
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+/* El recordatorio de la portada: se fue a mitad y se le deja esto, que retoma
+   por donde iba. Va arriba del todo porque es lo único pendiente que tiene. */
+.guia-aviso {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  margin-top: 10px; padding: 12px 14px; cursor: pointer; font: inherit;
+  color: var(--txt);
+  background: linear-gradient(152deg, color-mix(in srgb, var(--warn) 10%, var(--card)) 0%,
+              var(--card) 60%);
+  transition: transform .12s ease;
+}
+.guia-aviso:active { transform: scale(.985); }
+.guia-aviso b { display: block; font-size: .95rem; }
+.guia-aviso .tiny { display: block; color: var(--dim); margin-top: 1px; }
+.guia-aviso .row-icon { color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 15%, transparent); }

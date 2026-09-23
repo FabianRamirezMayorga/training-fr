@@ -1281,6 +1281,8 @@
           ${raw(icon('correr'))} ${T('Iniciar una actividad rápida')}
         </button>`)}
 
+      ${raw(g.Guia ? Guia.avisoHTML() : '')}
+
       <div class="muelle"></div>
       ${raw(resumenSemanaHTML(st))}
 
@@ -2011,6 +2013,7 @@
     bind(root, '[data-a=verprogreso]', function () { go('progreso'); });
     bind(root, '[data-a=irnutricion]', function () { go('nutricion'); });
     bind(root, '[data-a=verdia]', function () { go('dia'); });
+    if (g.Guia) Guia.montarAviso(root);
     /* Lo que hiciste hoy, entero: los ejercicios que marcaste, con sus pesos y
        repeticiones, los músculos que tocaste y el resumen. Es la misma hoja que
        abre un día del mapa de Progreso. */
@@ -7217,6 +7220,15 @@
        así que entrar en un dispositivo nunca le cuesta datos a ninguno. */
     return Sync.sincronizar().then(function () {
       aplicarTema();
+      /* Cuenta recién creada: lo primero son sus datos. Se mira DESPUÉS de
+         sincronizar, que es cuando se sabe de verdad si los tiene: al entrar en
+         un móvil nuevo la nube se los acaba de traer y entonces no hay nada que
+         preguntarle. */
+      if (g.Guia && Guia.arrancar()) {
+        go('datos');
+        UI.toast(T('Cuenta lista. Vamos con tus datos.'));
+        return;
+      }
       go('cuenta');
       const piezas = [];
       if (Store.routines().length) {
@@ -7581,6 +7593,11 @@
          que se enseñe la pantalla de cuentas y la configuración de la base de
          datos, y hace falta saberlo en cualquier pantalla, no solo en Perfil. */
       if (g.Admin) Admin.comprobar().then(function (si) { if (si) render(); });
+      /* Se dejó la guia a medias: al abrir la app se le devuelve a su paso. Una
+         vez por apertura, que si fuera en cada pintado no habría forma de salir
+         de ahí. */
+      const pendiente = g.Guia ? Guia.alAbrir() : '';
+      if (pendiente) location.hash = '#/' + pendiente;
       render();
       /* El aviso de instalar decide solo si toca y cuándo; aquí solo se le
          dice que la app ya está en pie. */
