@@ -370,6 +370,7 @@
 
     'Tu semana': 'Your week',
     'Nutrición': 'Nutrition',
+    'Todo guardado en la nube': 'All saved to the cloud',
     '{c} de {p} días del plan': '{c} of {p} plan days',
     '{n} suelto': '{n} extra',
     '{n} sueltos': '{n} extra',

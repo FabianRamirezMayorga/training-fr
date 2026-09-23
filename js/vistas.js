@@ -77,9 +77,16 @@
     return html`
       <div class="card tarjeta-premium perfil-cab" data-a="datos" role="button" tabindex="0">
         <div class="row" style="gap:12px;align-items:center">
-          <span class="pc-avatar">${raw(inicial || icon('perfil'))}</span>
+          <!-- El lápiz dice que esto se edita. Un icono de cámara sería mentir:
+               aquí no hay foto que cambiar, la inicial sale del nombre. -->
+          <span class="pc-avatar">${raw(inicial || icon('perfil'))}
+            <i class="pc-lapiz">${raw(icon('edit'))}</i></span>
           <span class="grow" style="min-width:0">
             <span class="pc-nombre">${nombre || T('Sin nombre')}</span>
+            <!-- El correo, aquí y no tres listas más abajo: quién eres es una
+                 sola cosa y estaba contada en dos sitios. -->
+            ${raw(g.Sync && Sync.activa() && Sync.email()
+              ? '<span class="pc-correo">' + esc(Sync.email()) + '</span>' : '')}
             <span class="pc-sub">${partes.join(' · ') || T('Completa tus datos')}</span>
           </span>
           <span class="chevron">${raw(icon('chevron'))}</span>
@@ -196,7 +203,7 @@
       <div class="plan-acciones indice" style="margin:10px 0 0">
         ${raw(filaPerfil({ icono: 'nube', titulo: T('Tu cuenta'), accion: 'cuenta',
           tono: '#4f8cf5', pendiente: !Sync.activa(),
-          sub: Sync.activa() ? Sync.email() : T('Sin sincronizar') }))}
+          sub: Sync.activa() ? T('Todo guardado en la nube') : T('Sin sincronizar') }))}
         ${raw(filaPerfil({ icono: 'ajustes', titulo: T('Ajustes'), accion: 'ajustes',
           tono: '#c06bf0',
           sub: T('Unidades, tema, idioma y copias de seguridad') }))}
