@@ -96,6 +96,19 @@
       ],
       ver: ['c-entrenar', 'c-libre'] },
 
+    { id: 'g-reloj', titulo: 'Qué puede leer la app de tu reloj',
+      resumen: 'Por qué hay tres caminos y no uno solo',
+      cuerpo: [
+        'La app puede traer lo que mide tu reloj —pasos, pulso, sueño, calorías, peso— y enseñarlo junto a lo que entrenas. Pero hay una realidad que conviene saber de entrada: *una página web no puede leer el Apple Watch*. Safari no da acceso a Salud ni a Bluetooth, y eso no es un fallo de la app ni algo que se arregle con código.',
+        'Por eso hay tres caminos, y cada uno se enciende cuando tu dispositivo lo permite:',
+        '*Bluetooth en vivo*: cualquier banda de pecho, pulsera o reloj que emita pulso se conecta directamente y verás las pulsaciones mientras entrenas, con el medio y el máximo guardados en la sesión. Funciona en Chrome y Edge, en Android, Windows, Mac y Linux. En iPhone y iPad no existe en ningún navegador.',
+        '*Un archivo*: el export.xml de Salud de Apple, o los .gpx, .tcx, .csv y .json que exporta cualquier reloj. Esto funciona en todos los dispositivos, siempre.',
+        '*Un atajo de iOS*: Atajos sí puede leer Salud. Le dices qué quieres, lo copia y lo pegas en la app. Es la única vía cómoda con Apple Watch, y se monta una vez.',
+        'Cada fuente rellena lo que sabe y no pisa lo que ya había: si el atajo trae los pasos de la mañana y por la tarde importas un archivo con el pulso, el día queda con las dos cosas. Del pulso máximo se queda siempre el mayor.',
+        'El día se guarda tal y como lo escribió el reloj, no convertido a tu hora: si exportas en Madrid y abres el archivo en otro país, los datos siguen en el día en que los mediste.'
+      ],
+      ver: ['c-reloj', 'p-applewatch'] },
+
     { id: 'g-registro', titulo: 'Las tres formas de apuntar',
       resumen: 'Cuánto detalle quieres llevar, y qué se pierde con cada uno',
       cuerpo: [
@@ -364,6 +377,65 @@
       ],
       cierre: 'Para algo que hiciste otro día —una caminata el domingo, la pachanga del sábado—, en Rutinas tienes *Apuntar algo que ya hice*. Ahí no hay series que apuntar, así que ese día sale en azul con los minutos debajo en vez del número de series; y la app sabe qué músculos mueve cada actividad, y no solo de pierna: nadar y remar van a la espalda, la escalada a espalda y antebrazos, y el boxeo a hombro, core y brazo. Si lo escribes con tus palabras, la app reconoce lo que pone y elige el esfuerzo sola: «Jugué fútbol» es un deporte de equipo, «subida al cerro» es senderismo y «clase de muay thai» es boxeo. La ficha de debajo del campo enseña siempre lo que ha entendido y qué músculos va a apuntar, para que no haya que guardarlo para enterarse. Si no reconoce nada se queda en «Otra cosa», que no apunta músculos porque puede ser cualquier cosa; toca *Cambiar* y elige de la lista, donde cada una dice lo que registra. Escribe también el rato y el día si quieres: «trote una hora» o «jugué fútbol ayer 90 minutos» rellenan solos el cuándo y el cuánto. Y si lo tuyo no cabe en la rueda —una caminata de hace tres semanas, cuarenta y siete minutos justos— debajo tienes la fecha y los minutos para escribirlos a mano; entonces la rueda se apaga, porque marcar «45» con 47 puestos al lado sería mentir. Y con el entrenador puesto no hay que pedírselo: en cuanto dejas de escribir lo mira solo y te lo afina —distingue un partido de once de una pachanga, y el botón de esfuerzo no—, y lo que diga sale abajo, encima del botón de guardar. Lo mismo al empezar algo con el cronómetro: escribes qué estás haciendo y te dice los músculos antes de arrancar, sin pedirle nada. Y al terminar cualquier entrenamiento —de pesas o de fuera— tienes *Guardar y analizarlo con la IA*, que lo guarda y te lo lee: cómo de exigente fue, qué te deja tocado, si construye músculo y qué vigilar en la próxima, contando las series de tu semana. Ahí mismo, al lado de *Apuntar*, tienes *Analizar*: con la actividad y el rato ya puestos, te dice cómo de duro fue de verdad, qué te deja cargado y cuánto dura, si eso construye músculo o solo lo mantiene, y qué vigilar mañana. Y si en lo que escribiste hay un sitio que conoce —un cerro, una carrera, una ruta— abre con eso: qué es, cuánto desnivel tiene y cómo queda tu tiempo frente al normal de allí. Si no lo conoce, esa línea no sale: se le pide callarse antes que inventarse un desnivel, porque un número falso sobre un sitio real suena a dato y te lo crees. Cuenta con las series que llevas esta semana en esas zonas, que es lo que separa un consejo tuyo de un horóscopo. Es una lectura para leerla y cerrarla: no se guarda ni entra en ninguna gráfica.',
       ver: ['g-entrenar'] },
+
+    { id: 'c-reloj', titulo: 'Traer los datos de tu reloj',
+      resumen: 'Bluetooth, un archivo o un atajo de iOS',
+      intro: 'Tres caminos, y el que te sirve depende del móvil desde el que abras la app. ' +
+        'Puedes usar los tres a la vez: cada uno rellena lo que sabe sin pisar al otro.',
+      ramas: [
+        { id: 'bt', titulo: 'Pulso en vivo por Bluetooth',
+          sub: 'Android, Windows, Mac y Linux. En iPhone no existe',
+          pasos: [
+            { t: 'Abre Reloj y salud.',
+              d: 'Está en Perfil, en el grupo de Entrenamiento.',
+              ir: { ruta: 'reloj', label: 'Abrir Reloj y salud' } },
+            { t: 'Pon el sensor a emitir.',
+              d: 'Banda de pecho: humedece la tira y póntela. Pulsera o reloj: activa el modo de difusión de pulso (suele llamarse «Emitir frecuencia cardiaca» o «Broadcast»). Si el reloj está emparejado con otro móvil, ciérralo allí primero: solo emite a uno.' },
+            { t: 'Pulsa *Buscar* en el bloque de arriba.',
+              d: 'El navegador enseña su propia lista de dispositivos cercanos. Elige el tuyo y acepta. Esa ventana es del navegador, no de la app: la app nunca ve más dispositivos que el que tú elijas.' },
+            { t: 'Entrena.',
+              d: 'Durante la sesión verás las pulsaciones junto al cronómetro. Al terminar, el pulso medio y el máximo se guardan con ese entrenamiento y en el día.' },
+            { t: 'Suéltalo cuando acabes.',
+              d: 'Botón *Soltar*. Si no, la conexión sigue gastando batería del sensor.' }
+          ],
+          cierre: 'Si el bloque de arriba dice «Pulso en vivo: aquí no», es el navegador el que no lo trae. Ahí te dice cuál es el motivo y te quedan los otros dos caminos.',
+          ver: ['p-nobluetooth', 'g-reloj'] },
+
+        { id: 'archivo', titulo: 'Desde un archivo',
+          sub: 'Funciona en cualquier móvil y con cualquier marca',
+          pasos: [
+            { t: 'Exporta desde donde estén tus datos.',
+              d: 'Salud de Apple: tu foto arriba a la derecha › *Exportar todos los datos de salud*. Garmin, Polar, Suunto, Coros y similares: exporta la actividad en .tcx o .gpx. Otros: cualquier .csv o .json con una fila por día vale.' },
+            { t: 'Si lo que te dan es un .zip, descomprímelo.',
+              d: 'El de Salud de Apple viene comprimido y dentro está el *export.xml*, que es el que hay que traer. Un .fit no sirve: es binario cerrado y el navegador no puede abrirlo; exporta en .tcx o .gpx en su lugar.' },
+            { t: 'Abre Reloj y salud y pulsa *Elegir archivo*.',
+              ir: { ruta: 'reloj', sel: '[data-a=elegir]', label: 'Elegir un archivo ahora' } },
+            { t: 'Espera a que termine de leer.',
+              d: 'El export de Salud puede pesar cientos de megas, así que se lee a trozos y verás el porcentaje. Se puede seguir usando la app mientras tanto.' }
+          ],
+          cierre: 'Al acabar te dice cuántos días ha traído. Los días se guardan con la fecha que escribió el reloj, no con la hora de donde abras el archivo.',
+          ver: ['g-reloj', 'p-fit'] },
+
+        { id: 'atajo', titulo: 'Con un atajo de iOS',
+          sub: 'La única vía cómoda con Apple Watch',
+          pasos: [
+            { t: 'Abre Reloj y salud y despliega *Ver cómo* en el bloque del atajo.',
+              d: 'Ahí tienes el texto exacto que hay que escribir, listo para copiar.',
+              ir: { ruta: 'reloj', arg: 'atajo', label: 'Ver cómo se monta' } },
+            { t: 'En la app Atajos del iPhone, crea uno nuevo.',
+              d: 'Botón *+* arriba a la derecha.' },
+            { t: 'Añade una acción *Obtener muestras de salud* por cada dato.',
+              d: 'Pasos con tipo Suma y periodo Hoy; pulso en reposo con Promedio; calorías activas con Suma; sueño con Suma; peso con El más reciente. Los que no te interesen, no los pongas.' },
+            { t: 'Añade una acción *Texto* con una línea por dato.',
+              d: 'Nombre del dato, dos puntos, y detrás el resultado de su acción. La app entiende los nombres en español y en inglés, y le da igual el orden de las líneas.' },
+            { t: 'Termina con *Copiar al portapapeles*.',
+              d: 'Ejecuta el atajo, vuelve a la app y pega en el recuadro. Botón *Guardar estos datos*.' },
+            { t: 'Si quieres que se haga solo, ponle una automatización diaria.',
+              d: 'En Atajos › Automatización, a la hora que quieras. Con sesión iniciada puedes ir más lejos: en vez de copiar y pegar, la acción *Obtener contenido de URL* sube los datos directamente. La dirección sale en esa misma pantalla.' }
+          ],
+          cierre: 'Se monta una vez y ya no se toca. Es la forma de que un Apple Watch acabe dentro de la app, porque Safari no deja leer Salud desde una página web.',
+          ver: ['p-applewatch', 'g-reloj'] }
+      ] },
 
     { id: 'c-auditar', titulo: 'Pasar tu plan por la auditoría',
       resumen: 'Qué falla y cómo arreglarlo de una vez',
@@ -636,6 +708,40 @@
         '*El modelo ya no está disponible* o *ningún modelo respondió*. Google retira modelos por cuenta, no para todos a la vez. Abre la bóveda y pulsa *Ver los suyos*: la app le pregunta a Google qué admite tu clave y se queda con esos.',
         'Y pase lo que pase, la app entera sigue funcionando sin la IA. Lo que se calcula con reglas —el peso de hoy, la nota del plan, el reparto por zona— no se entera de nada.'],
       ver: ['c-ia', 'g-ia'] },
+
+    { id: 'p-applewatch', q: '¿Por qué no puedo conectar mi Apple Watch a la app?',
+      a: ['Porque ningún navegador del iPhone puede. Safari no da acceso ni a Salud ni a Bluetooth, y en iOS todos los navegadores —Chrome, Firefox, el que sea— son Safari por dentro. No es un permiso que se pueda pedir ni algo que se arregle con código: esa puerta no existe.',
+        'Lo que sí existe es Atajos, que es de Apple y sí lee Salud. Montas un atajo una vez, le dices qué datos quieres, y con un toque los deja en la app. Si le pones una automatización diaria, ni eso.',
+        'Y siempre queda exportar Salud entera a un archivo y traerlo aquí: eso funciona en cualquier móvil.',
+        'El pulso en vivo por Bluetooth sí funciona con cualquier banda de pecho o pulsera que emita, pero solo desde Android, Windows, Mac o Linux.'],
+      ver: ['c-reloj', 'g-reloj', 'p-nobluetooth'] },
+
+    { id: 'p-nobluetooth', q: '¿Por qué no me sale el botón de buscar por Bluetooth?',
+      a: ['El bloque de arriba te dice el motivo concreto, que siempre es uno de estos cuatro.',
+        '*Estás en iPhone o iPad.* Ningún navegador de iOS trae Bluetooth. No hay vuelta a esto; usa el atajo o un archivo.',
+        '*Estás en Firefox.* Firefox decidió no implementarlo. Con Chrome o Edge en el mismo ordenador o móvil funciona.',
+        '*La página no va por https.* Bluetooth solo se ofrece en conexiones seguras. Si abriste la app por una dirección normal de internet, ya va por https; si la abriste desde un archivo local, no.',
+        '*Tu navegador no lo trae.* Algunos navegadores de escritorio lo traen apagado o directamente no lo tienen.',
+        'En todos los casos los otros dos caminos siguen ahí, y traen más cosas que el pulso: pasos, sueño, calorías y peso.'],
+      ver: ['c-reloj', 'g-reloj'] },
+
+    { id: 'p-fit', q: 'Mi reloj exporta en .fit y la app no lo acepta, ¿qué hago?',
+      a: ['Un .fit es un formato binario cerrado de Garmin. Leerlo en el navegador necesitaría una librería pesada solo para eso, y todos los relojes que exportan .fit exportan también .tcx o .gpx, que son texto y llevan lo mismo.',
+        'En Garmin Connect: abre la actividad, menú de los tres puntos, *Exportar a TCX* o *Exportar a GPX*. En Strava y en casi cualquier otro sitio hay una opción equivalente.',
+        'Del .tcx sale la distancia, las calorías, los minutos y el pulso medio y máximo. Del .gpx sale la distancia calculada punto a punto, y el pulso si el archivo lo lleva dentro.'],
+      ver: ['c-reloj'] },
+
+    { id: 'p-relojpisa', q: 'Si importo dos veces o mezclo fuentes, ¿se pisan los datos?',
+      a: ['No. Cada fuente rellena lo que sabe y deja en paz lo demás. Si el atajo de por la mañana trae los pasos y por la tarde importas un archivo con el pulso y el sueño, ese día acaba con las tres cosas.',
+        'Un dato repetido se queda con el valor nuevo, salvo el pulso máximo: de ese se queda siempre el mayor, porque un máximo menor casi nunca significa que el anterior estuviera mal, sino que esa fuente vio menos rato.',
+        'Los ceros y los vacíos no cuentan como dato: si una fuente no trae los pasos, no te borra los que ya tenías.',
+        'Así que importar dos veces el mismo archivo no duplica nada ni estropea nada: deja el día como estaba.'],
+      ver: ['c-reloj', 'g-reloj'] },
+
+    { id: 'p-relojdia', q: 'Importé el archivo y los días salen corridos, ¿por qué?',
+      a: ['No deberían. La app guarda cada dato en el día que escribió el reloj, tal cual, sin convertirlo a la hora del sitio donde abras el archivo. Un pulso en reposo medido a las seis de la mañana en Madrid se queda en ese día aunque abras el archivo en Bogotá.',
+        'Si aun así ves algo corrido, el sitio donde mirar es el archivo. La app entiende *2026-09-24* y *24/09/2026*, y si el segundo número pasa de 12 —*09/24/2026*— sabe que viene en orden americano y lo endereza. Lo que no puede adivinar nadie es un *03/04*: ahí no hay forma de saber si es el tres de abril o el cuatro de marzo. Si tu reloj exporta así, pásalo a *2026-09-24*, que no es ambiguo en ningún país.'],
+      ver: ['c-reloj', 'g-reloj'] },
 
     { id: 'p-datos', q: '¿Dónde se guardan mis datos?',
       a: ['En tu propio móvil, en el almacenamiento del navegador. Sin cuenta, no salen de ahí.',

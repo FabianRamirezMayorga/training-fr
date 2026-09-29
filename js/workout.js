@@ -270,6 +270,19 @@
     };
     session.volume = Store.volumeOf(session);
 
+    /* Lo que midió la banda durante la sesión se guarda con ella y también en
+       el día: en el historial sirve para saber cómo de duro fue ese día, y en
+       la pantalla del reloj para la media de la semana. */
+    if (g.Reloj) {
+      const m = Reloj.cerrarMedicion();
+      if (m) {
+        session.pulsoMedio = m.medio;
+        session.pulsoMax = m.max;
+        Reloj.anotar(Store.dayKey(a.start),
+          { pulsoMedio: m.medio, pulsoMax: m.max }, 'Bluetooth');
+      }
+    }
+
     /* Una actividad no deja series ni volumen, pero sí calorías y músculos:
        sin esto el partido no contaba para nada y «lo que llevas abandonado»
        seguía diciendo que hace un mes que no tocas la pierna. */
@@ -607,6 +620,13 @@
             <div class="tiny"><span id="wo-count">${doneSets}</span>/<span
               id="wo-total">${totalSets}</span> ${T('series')}</div>
           </div>
+          <!-- El pulso solo aparece si hay banda conectada: un hueco vacio con
+               guiones en cada entrenamiento seria un recordatorio constante de
+               algo que la mayoria no va a usar. -->
+          <div class="wo-pulso" id="wo-pulso" hidden>
+            <span>${raw(icon('corazon'))}</span>
+            <b data-bpm>--</b>
+          </div>
         </div>
         <div class="prog"><i style="width:${pct}%"></i></div>
       </div>
@@ -827,6 +847,7 @@
 
     UI.mountDemos(root);
     pintarMusica(root);
+    pintarPulso(root);
 
     /* cronómetro total */
     const clock = root.querySelector('#wo-clock');
@@ -1419,6 +1440,32 @@
       a.entries[a.idx] = entrada;
     }
     Store.setActive(a);
+  }
+
+  /* ---------- pulso de la banda ----------
+     Se engancha a las lecturas del reloj y solo cambia el numero: repintar la
+     cabecera entera con cada latido reiniciaria las animaciones y pelearia con
+     el cronometro. */
+  let soltarPulso = null;
+
+  function pintarPulso(root) {
+    if (soltarPulso) { soltarPulso(); soltarPulso = null; }
+    if (!g.Reloj) return;
+
+    const caja = root.querySelector('#wo-pulso');
+    if (!caja) return;
+
+    const pintar = function (e) {
+      const viva = document.getElementById('wo-pulso');
+      if (!viva) { if (soltarPulso) { soltarPulso(); soltarPulso = null; } return; }
+      viva.hidden = !e.conectado;
+      const b = viva.querySelector('[data-bpm]');
+      if (b) b.textContent = e.pulso || '--';
+      viva.classList.toggle('late', !!e.pulso);
+    };
+
+    pintar(Reloj.estado());
+    soltarPulso = Reloj.alPulso(pintar);
   }
 
   function pintarMusica(root) {

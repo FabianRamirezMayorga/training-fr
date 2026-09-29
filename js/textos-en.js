@@ -4310,6 +4310,121 @@
     '{n} entreno': '{n} workout',
     '{n} entrenos': '{n} workouts',
 
+    /* ---------- Reloj y salud ---------- */
+    'Reloj y salud': 'Watch and health',
+    'Pasos, pulso y sueño': 'Steps, heart rate and sleep',
+    'Sin conectar ni importar': 'Nothing connected or imported',
+    'Conectado': 'Connected',
+    '{n} día con datos': '{n} day with data',
+    '{n} días con datos': '{n} days with data',
+    'Pasos, pulso, sueño y calorías de tu reloj, dentro de la app y junto a tus entrenamientos. Ningún dato sale de aquí.':
+      'Steps, heart rate, sleep and calories from your watch, inside the app and next to your workouts. No data leaves this device.',
+    'Lo que ha medido tu reloj, junto a lo que entrenas. Última entrada: {f}.':
+      'What your watch measured, next to what you train. Last entry: {f}.',
+    'Fuentes usadas: {f}.': 'Sources used: {f}.',
+    'Borrar lo importado': 'Delete what was imported',
+    'Se quitan los datos traídos del reloj. Tus entrenamientos no se tocan.':
+      'This removes the data brought in from the watch. Your workouts are not touched.',
+
+    /* Las medidas y de dónde vino cada día. Las fuentes se guardan escritas
+       en español dentro de los datos, así que se traducen al enseñarlas. */
+    'Pasos': 'Steps',
+    'Pulso en reposo': 'Resting heart rate',
+    'Pulso medio': 'Average heart rate',
+    'Sueño': 'Sleep',
+    'Calorías activas': 'Active calories',
+    'Distancia': 'Distance',
+    'Minutos de ejercicio': 'Exercise minutes',
+    'Salud': 'Health',
+    'Atajo': 'Shortcut',
+    'Báscula': 'Scale',
+
+    /* El pulso en vivo */
+    'Pulso en vivo': 'Live heart rate',
+    'Pulso en vivo: aquí no': 'Live heart rate: not here',
+    'Conecta una banda de pecho, una pulsera o un reloj que emita pulso y lo verás mientras entrenas, con el medio y el máximo guardados en la sesión.':
+      'Connect a chest strap, a band or a watch that broadcasts heart rate and you will see it while you train, with the average and the maximum saved in the session.',
+    'Buscar': 'Search',
+    'Soltar': 'Disconnect',
+    'Medio': 'Average',
+    'Máximo': 'Maximum',
+    '{n} lectura': '{n} reading',
+    '{n} lecturas': '{n} readings',
+    'Conectado. El pulso se verá también mientras entrenas.':
+      'Connected. You will see your heart rate while you train too.',
+
+    /* Lo medido */
+    'Lo que ha medido': 'What it measured',
+    'Media': 'Average',
+    'Con un solo día todavía no hay curva que dibujar.':
+      'With a single day there is no curve to draw yet.',
+
+    /* Traer datos */
+    'Traer datos del reloj': 'Bring in watch data',
+    'Desde un archivo': 'From a file',
+    'Vale el export.xml de Salud de Apple, y los .gpx, .tcx, .csv o .json que exporte cualquier reloj.':
+      'The export.xml from Apple Health works, and so do the .gpx, .tcx, .csv or .json any watch exports.',
+    'Elegir archivo': 'Choose a file',
+    'Leyendo… {p}%': 'Reading… {p}%',
+    'Listo: {n} día importado.': 'Done: {n} day imported.',
+    'Listo: {n} días importados.': 'Done: {n} days imported.',
+    'El archivo se leyó bien, pero no traía ningún dato nuevo.':
+      'The file was read fine, but there was no new data in it.',
+    'Guardado.': 'Saved.',
+    'Ahí no había nada que guardar.': 'There was nothing to save in there.',
+
+    /* El atajo de iOS */
+    'Desde Salud, con un atajo (iPhone)': 'From Health, with a Shortcut (iPhone)',
+    'Es la única forma automática con Apple Watch: un atajo lee Salud y deja aquí los datos. Se monta una vez.':
+      'It is the only automatic way with an Apple Watch: a shortcut reads Health and drops the data here. You set it up once.',
+    'Abre <b>Atajos</b> en el iPhone y pulsa <b>+</b> para crear uno nuevo.':
+      'Open <b>Shortcuts</b> on the iPhone and tap <b>+</b> to create a new one.',
+    'Añade la acción <b>Obtener muestras de salud</b>. Elige <b>Pasos</b>, tipo <b>Suma</b>, periodo <b>Hoy</b>.':
+      'Add the <b>Find Health Samples</b> action. Choose <b>Steps</b>, type <b>Sum</b>, period <b>Today</b>.',
+    'Repite la acción para lo que quieras traer: pulso en reposo (Promedio), calorías activas (Suma), sueño (Suma) y peso (El más reciente).':
+      'Repeat the action for whatever you want to bring in: resting heart rate (Average), active calories (Sum), sleep (Sum) and weight (Latest).',
+    'Añade <b>Texto</b> y escribe una línea por dato, con el resultado de cada acción detrás de los dos puntos:':
+      'Add <b>Text</b> and write one line per figure, with the result of each action after the colon:',
+    'Termina con <b>Copiar al portapapeles</b>. Ejecuta el atajo y vuelve aquí a pegarlo. Si quieres que te lo recuerde solo, en Atajos puedes ponerle una automatización diaria.':
+      'Finish with <b>Copy to Clipboard</b>. Run the shortcut and come back here to paste it. If you want it to remind you on its own, Shortcuts lets you give it a daily automation.',
+    'PEGA AQUÍ LO QUE COPIÓ EL ATAJO': 'PASTE WHAT THE SHORTCUT COPIED HERE',
+    'Guardar estos datos': 'Save this data',
+    'Si te manejas con Atajos, en vez de copiar y pegar puedes usar <b>Obtener contenido de URL</b> y que suba solo a tu base de datos. Esta es la dirección:':
+      'If you are comfortable with Shortcuts, instead of copying and pasting you can use <b>Get Contents of URL</b> and have it upload straight to your database. This is the address:',
+
+    /* Lo que dice el módulo cuando algo no se puede */
+    'En iPhone y iPad ningún navegador puede usar Bluetooth: Apple no lo permite. Usa la importación de archivo o el atajo de Salud.':
+      'On iPhone and iPad no browser can use Bluetooth: Apple does not allow it. Use the file import or the Health shortcut.',
+    'Firefox no tiene Bluetooth. Abre la app en Chrome o Edge y aquí estará.':
+      'Firefox has no Bluetooth. Open the app in Chrome or Edge and it will be here.',
+    'El Bluetooth solo funciona en páginas seguras (https).':
+      'Bluetooth only works on secure pages (https).',
+    'Este navegador no tiene Bluetooth. Chrome o Edge en Android, Windows, Mac o Linux sí lo tienen.':
+      'This browser has no Bluetooth. Chrome or Edge on Android, Windows, Mac or Linux do.',
+    'No se eligió ningún dispositivo. Enciende la banda o el reloj y ponlo a emitir pulso antes de buscar.':
+      'No device was chosen. Switch the strap or the watch on and set it to broadcast heart rate before searching.',
+    'No se pudo conectar.': 'Could not connect.',
+    'No hay archivo.': 'There is no file.',
+    'Ese es el zip que exporta Salud. Descomprímelo y trae el archivo export.xml que hay dentro.':
+      'That is the zip Health exports. Unzip it and bring the export.xml file inside it.',
+    'Los .fit vienen en binario cerrado. En tu reloj o en Garmin Connect puedes exportar el mismo entrenamiento en .tcx o .gpx.':
+      'A .fit is closed binary. On your watch or in Garmin Connect you can export the same workout as .tcx or .gpx.',
+    'No reconozco ese archivo. Valen .gpx, .tcx, el export.xml de Salud, .csv y .json.':
+      'I do not recognise that file. What works: .gpx, .tcx, the export.xml from Health, .csv and .json.',
+    'El .tcx está dañado.': 'That .tcx is damaged.',
+    'Ese .tcx no traía entrenamientos.': 'That .tcx had no workouts in it.',
+    'El .gpx está dañado.': 'That .gpx is damaged.',
+    'Ese .gpx no traía recorrido.': 'That .gpx had no route in it.',
+    'Ese .gpx no traía horas.': 'That .gpx had no times in it.',
+    'Ese CSV no tiene datos.': 'That CSV has no data.',
+    'El CSV necesita una columna de fecha.': 'The CSV needs a date column.',
+    'No pude leer ninguna fila con fecha.': 'I could not read a single row with a date.',
+    'Ese JSON no se puede leer.': 'That JSON cannot be read.',
+    'No encuentro la lista de días.': 'I cannot find the list of days.',
+    'Ahí no venía ningún dato reconocible.': 'There was nothing recognisable in there.',
+    'No has pegado nada.': 'You have not pasted anything.',
+    'No reconocí ningún dato en ese texto.': 'I did not recognise any data in that text.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };

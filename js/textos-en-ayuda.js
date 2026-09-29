@@ -1051,7 +1051,152 @@
     'El aviso es una regla: se calcula con lo que tienes apuntado y funciona sin conexión.':
       'The warning is a rule: it is worked out from what you have logged and works offline.',
     'Si tienes el entrenador puesto, detrás te añade *en azul* a cuántas series de gimnasio equivale, más o menos, lo que ya llevas encima. Eso sí es una opinión, y por eso va en otro color y no entra en el reparto ni en ninguna gráfica: no hay tabla que diga cuánto vale un partido, y meter ahí un número inventado ensuciaría la única cifra con la que comparas una semana con otra.':
-      'If you have the AI coach set up, after it you get *in blue* roughly how many gym sets what you already have on you is worth. That one is an opinion, which is why it is a different colour and never enters the split or any chart: no table says what a football match is worth, and putting a made-up number in there would spoil the one figure you compare one week against another with.'
+      'If you have the AI coach set up, after it you get *in blue* roughly how many gym sets what you already have on you is worth. That one is an opinion, which is why it is a different colour and never enters the split or any chart: no table says what a football match is worth, and putting a made-up number in there would spoil the one figure you compare one week against another with.',
+    /* ---------- Qué puede leer la app de tu reloj ---------- */
+    'Qué puede leer la app de tu reloj': 'What the app can read from your watch',
+    'Por qué hay tres caminos y no uno solo': 'Why there are three routes and not just one',
+    'La app puede traer lo que mide tu reloj —pasos, pulso, sueño, calorías, peso— y enseñarlo junto a lo que entrenas. Pero hay una realidad que conviene saber de entrada: *una página web no puede leer el Apple Watch*. Safari no da acceso a Salud ni a Bluetooth, y eso no es un fallo de la app ni algo que se arregle con código.':
+      'The app can bring in what your watch measures —steps, heart rate, sleep, calories, weight— and show it next to what you train. But there is one fact worth knowing up front: *a web page cannot read the Apple Watch*. Safari gives access to neither Health nor Bluetooth, and that is not a bug in the app nor something code can fix.',
+    'Por eso hay tres caminos, y cada uno se enciende cuando tu dispositivo lo permite:':
+      'That is why there are three routes, and each one lights up when your device allows it:',
+    '*Bluetooth en vivo*: cualquier banda de pecho, pulsera o reloj que emita pulso se conecta directamente y verás las pulsaciones mientras entrenas, con el medio y el máximo guardados en la sesión. Funciona en Chrome y Edge, en Android, Windows, Mac y Linux. En iPhone y iPad no existe en ningún navegador.':
+      '*Live Bluetooth*: any chest strap, band or watch that broadcasts heart rate connects directly and you will see your beats while you train, with the average and the maximum saved in the session. It works in Chrome and Edge, on Android, Windows, Mac and Linux. On iPhone and iPad it exists in no browser at all.',
+    '*Un archivo*: el export.xml de Salud de Apple, o los .gpx, .tcx, .csv y .json que exporta cualquier reloj. Esto funciona en todos los dispositivos, siempre.':
+      '*A file*: the export.xml from Apple Health, or the .gpx, .tcx, .csv and .json any watch exports. This works on every device, always.',
+    '*Un atajo de iOS*: Atajos sí puede leer Salud. Le dices qué quieres, lo copia y lo pegas en la app. Es la única vía cómoda con Apple Watch, y se monta una vez.':
+      '*An iOS Shortcut*: Shortcuts can read Health. You tell it what you want, it copies it and you paste it into the app. It is the only comfortable route with an Apple Watch, and you set it up once.',
+    'Cada fuente rellena lo que sabe y no pisa lo que ya había: si el atajo trae los pasos de la mañana y por la tarde importas un archivo con el pulso, el día queda con las dos cosas. Del pulso máximo se queda siempre el mayor.':
+      'Each source fills in what it knows and does not tread on what was already there: if the shortcut brings in the morning steps and in the afternoon you import a file with your heart rate, the day ends up with both. Of the maximum heart rate it always keeps the higher one.',
+    'El día se guarda tal y como lo escribió el reloj, no convertido a tu hora: si exportas en Madrid y abres el archivo en otro país, los datos siguen en el día en que los mediste.':
+      'The day is saved exactly as the watch wrote it, not converted to your time: if you export in Madrid and open the file in another country, the data stays on the day you measured it.',
+
+    /* ---------- Traer los datos de tu reloj ---------- */
+    'Traer los datos de tu reloj': 'Bring in your watch data',
+    'Bluetooth, un archivo o un atajo de iOS': 'Bluetooth, a file or an iOS Shortcut',
+    'Tres caminos, y el que te sirve depende del móvil desde el que abras la app. Puedes usar los tres a la vez: cada uno rellena lo que sabe sin pisar al otro.':
+      'Three routes, and which one serves you depends on the phone you open the app from. You can use all three at once: each fills in what it knows without treading on the others.',
+
+    /* La rama del Bluetooth */
+    'Pulso en vivo por Bluetooth': 'Live heart rate over Bluetooth',
+    'Android, Windows, Mac y Linux. En iPhone no existe':
+      'Android, Windows, Mac and Linux. On iPhone it does not exist',
+    'Abre Reloj y salud.': 'Open Watch and health.',
+    'Está en Perfil, en el grupo de Entrenamiento.': 'It is in Profile, in the Training group.',
+    'Abrir Reloj y salud': 'Open Watch and health',
+    'Pon el sensor a emitir.': 'Set the sensor to broadcast.',
+    'Banda de pecho: humedece la tira y póntela. Pulsera o reloj: activa el modo de difusión de pulso (suele llamarse «Emitir frecuencia cardiaca» o «Broadcast»). Si el reloj está emparejado con otro móvil, ciérralo allí primero: solo emite a uno.':
+      'Chest strap: wet the band and put it on. Band or watch: turn on heart-rate broadcast mode (it is usually called «Broadcast heart rate»). If the watch is paired with another phone, close it there first: it only broadcasts to one.',
+    'Pulsa *Buscar* en el bloque de arriba.': 'Tap *Search* in the block at the top.',
+    'El navegador enseña su propia lista de dispositivos cercanos. Elige el tuyo y acepta. Esa ventana es del navegador, no de la app: la app nunca ve más dispositivos que el que tú elijas.':
+      'The browser shows its own list of nearby devices. Pick yours and accept. That window belongs to the browser, not to the app: the app never sees any device other than the one you choose.',
+    'Entrena.': 'Train.',
+    'Durante la sesión verás las pulsaciones junto al cronómetro. Al terminar, el pulso medio y el máximo se guardan con ese entrenamiento y en el día.':
+      'During the session you will see your beats next to the timer. When you finish, the average and maximum heart rate are saved with that workout and in the day.',
+    'Suéltalo cuando acabes.': 'Disconnect it when you are done.',
+    'Botón *Soltar*. Si no, la conexión sigue gastando batería del sensor.':
+      '*Disconnect* button. Otherwise the connection keeps draining the sensor battery.',
+    'Si el bloque de arriba dice «Pulso en vivo: aquí no», es el navegador el que no lo trae. Ahí te dice cuál es el motivo y te quedan los otros dos caminos.':
+      'If the block at the top says «Live heart rate: not here», it is the browser that does not bring it. It tells you the reason there, and the other two routes are still open.',
+
+    /* La rama del archivo */
+    'Funciona en cualquier móvil y con cualquier marca':
+      'Works on any phone and with any brand',
+    'Exporta desde donde estén tus datos.': 'Export from wherever your data lives.',
+    'Salud de Apple: tu foto arriba a la derecha › *Exportar todos los datos de salud*. Garmin, Polar, Suunto, Coros y similares: exporta la actividad en .tcx o .gpx. Otros: cualquier .csv o .json con una fila por día vale.':
+      'Apple Health: your photo at the top right › *Export All Health Data*. Garmin, Polar, Suunto, Coros and the like: export the activity as .tcx or .gpx. Others: any .csv or .json with one row per day will do.',
+    'Si lo que te dan es un .zip, descomprímelo.': 'If what you get is a .zip, unzip it.',
+    'El de Salud de Apple viene comprimido y dentro está el *export.xml*, que es el que hay que traer. Un .fit no sirve: es binario cerrado y el navegador no puede abrirlo; exporta en .tcx o .gpx en su lugar.':
+      'The one from Apple Health comes compressed, and inside is the *export.xml*, which is the one to bring. A .fit is no good: it is closed binary and the browser cannot open it; export as .tcx or .gpx instead.',
+    'Abre Reloj y salud y pulsa *Elegir archivo*.': 'Open Watch and health and tap *Choose a file*.',
+    'Elegir un archivo ahora': 'Choose a file now',
+    'Espera a que termine de leer.': 'Wait for it to finish reading.',
+    'El export de Salud puede pesar cientos de megas, así que se lee a trozos y verás el porcentaje. Se puede seguir usando la app mientras tanto.':
+      'The Health export can weigh hundreds of megabytes, so it is read in chunks and you will see the percentage. You can keep using the app in the meantime.',
+    'Al acabar te dice cuántos días ha traído. Los días se guardan con la fecha que escribió el reloj, no con la hora de donde abras el archivo.':
+      'When it is done it tells you how many days it brought in. Days are saved with the date the watch wrote, not with the time of wherever you open the file.',
+
+    /* La rama del atajo */
+    'Con un atajo de iOS': 'With an iOS Shortcut',
+    'La única vía cómoda con Apple Watch': 'The only comfortable route with an Apple Watch',
+    'Abre Reloj y salud y despliega *Ver cómo* en el bloque del atajo.':
+      'Open Watch and health and open up *See how* in the shortcut block.',
+    'Ahí tienes el texto exacto que hay que escribir, listo para copiar.':
+      'The exact text to write is there, ready to copy.',
+    'Ver cómo se monta': 'See how it is set up',
+    'En la app Atajos del iPhone, crea uno nuevo.': 'In the Shortcuts app on the iPhone, create a new one.',
+    'Botón *+* arriba a la derecha.': '*+* button at the top right.',
+    'Añade una acción *Obtener muestras de salud* por cada dato.':
+      'Add one *Find Health Samples* action per figure.',
+    'Pasos con tipo Suma y periodo Hoy; pulso en reposo con Promedio; calorías activas con Suma; sueño con Suma; peso con El más reciente. Los que no te interesen, no los pongas.':
+      'Steps with type Sum and period Today; resting heart rate with Average; active calories with Sum; sleep with Sum; weight with Latest. The ones you do not care about, leave out.',
+    'Añade una acción *Texto* con una línea por dato.':
+      'Add a *Text* action with one line per figure.',
+    'Nombre del dato, dos puntos, y detrás el resultado de su acción. La app entiende los nombres en español y en inglés, y le da igual el orden de las líneas.':
+      'The name of the figure, a colon, and after it the result of its action. The app understands the names in Spanish and in English, and the order of the lines makes no difference.',
+    'Termina con *Copiar al portapapeles*.': 'Finish with *Copy to Clipboard*.',
+    'Ejecuta el atajo, vuelve a la app y pega en el recuadro. Botón *Guardar estos datos*.':
+      'Run the shortcut, come back to the app and paste into the box. *Save this data* button.',
+    'Si quieres que se haga solo, ponle una automatización diaria.':
+      'If you want it to happen on its own, give it a daily automation.',
+    'En Atajos › Automatización, a la hora que quieras. Con sesión iniciada puedes ir más lejos: en vez de copiar y pegar, la acción *Obtener contenido de URL* sube los datos directamente. La dirección sale en esa misma pantalla.':
+      'In Shortcuts › Automation, at whatever time you like. Signed in you can go further: instead of copying and pasting, the *Get Contents of URL* action uploads the data straight away. The address is shown on that same screen.',
+    'Se monta una vez y ya no se toca. Es la forma de que un Apple Watch acabe dentro de la app, porque Safari no deja leer Salud desde una página web.':
+      'You set it up once and never touch it again. It is the way an Apple Watch ends up inside the app, because Safari does not let a web page read Health.',
+
+    /* ---------- Las dudas del reloj ---------- */
+    '¿Por qué no puedo conectar mi Apple Watch a la app?':
+      'Why can I not connect my Apple Watch to the app?',
+    'Porque ningún navegador del iPhone puede. Safari no da acceso ni a Salud ni a Bluetooth, y en iOS todos los navegadores —Chrome, Firefox, el que sea— son Safari por dentro. No es un permiso que se pueda pedir ni algo que se arregle con código: esa puerta no existe.':
+      'Because no browser on the iPhone can. Safari gives access to neither Health nor Bluetooth, and on iOS every browser —Chrome, Firefox, whichever— is Safari underneath. It is not a permission that can be asked for nor something code can fix: that door does not exist.',
+    'Lo que sí existe es Atajos, que es de Apple y sí lee Salud. Montas un atajo una vez, le dices qué datos quieres, y con un toque los deja en la app. Si le pones una automatización diaria, ni eso.':
+      'What does exist is Shortcuts, which is Apple\'s own and can read Health. You build a shortcut once, tell it which figures you want, and with one tap it drops them into the app. Give it a daily automation and not even that.',
+    'Y siempre queda exportar Salud entera a un archivo y traerlo aquí: eso funciona en cualquier móvil.':
+      'And there is always exporting the whole of Health to a file and bringing it here: that works on any phone.',
+    'El pulso en vivo por Bluetooth sí funciona con cualquier banda de pecho o pulsera que emita, pero solo desde Android, Windows, Mac o Linux.':
+      'Live heart rate over Bluetooth does work with any chest strap or band that broadcasts, but only from Android, Windows, Mac or Linux.',
+
+    '¿Por qué no me sale el botón de buscar por Bluetooth?':
+      'Why is there no Bluetooth search button?',
+    'El bloque de arriba te dice el motivo concreto, que siempre es uno de estos cuatro.':
+      'The block at the top tells you the exact reason, which is always one of these four.',
+    '*Estás en iPhone o iPad.* Ningún navegador de iOS trae Bluetooth. No hay vuelta a esto; usa el atajo o un archivo.':
+      '*You are on iPhone or iPad.* No iOS browser carries Bluetooth. There is no way around this; use the shortcut or a file.',
+    '*Estás en Firefox.* Firefox decidió no implementarlo. Con Chrome o Edge en el mismo ordenador o móvil funciona.':
+      '*You are on Firefox.* Firefox chose not to implement it. It works with Chrome or Edge on the same computer or phone.',
+    '*La página no va por https.* Bluetooth solo se ofrece en conexiones seguras. Si abriste la app por una dirección normal de internet, ya va por https; si la abriste desde un archivo local, no.':
+      '*The page is not on https.* Bluetooth is only offered on secure connections. If you opened the app from a normal internet address it is already on https; if you opened it from a local file, it is not.',
+    '*Tu navegador no lo trae.* Algunos navegadores de escritorio lo traen apagado o directamente no lo tienen.':
+      '*Your browser does not carry it.* Some desktop browsers ship it switched off or simply do not have it.',
+    'En todos los casos los otros dos caminos siguen ahí, y traen más cosas que el pulso: pasos, sueño, calorías y peso.':
+      'In every case the other two routes are still there, and they bring in more than heart rate: steps, sleep, calories and weight.',
+
+    'Mi reloj exporta en .fit y la app no lo acepta, ¿qué hago?':
+      'My watch exports .fit and the app will not take it, what do I do?',
+    'Un .fit es un formato binario cerrado de Garmin. Leerlo en el navegador necesitaría una librería pesada solo para eso, y todos los relojes que exportan .fit exportan también .tcx o .gpx, que son texto y llevan lo mismo.':
+      'A .fit is a closed binary format from Garmin. Reading it in the browser would need a heavy library just for that, and every watch that exports .fit also exports .tcx or .gpx, which are text and carry the same thing.',
+    'En Garmin Connect: abre la actividad, menú de los tres puntos, *Exportar a TCX* o *Exportar a GPX*. En Strava y en casi cualquier otro sitio hay una opción equivalente.':
+      'In Garmin Connect: open the activity, the three-dot menu, *Export to TCX* or *Export to GPX*. Strava and almost anywhere else has an equivalent option.',
+    'Del .tcx sale la distancia, las calorías, los minutos y el pulso medio y máximo. Del .gpx sale la distancia calculada punto a punto, y el pulso si el archivo lo lleva dentro.':
+      'From a .tcx come the distance, the calories, the minutes and the average and maximum heart rate. From a .gpx comes the distance worked out point by point, and the heart rate if the file carries it inside.',
+
+    'Si importo dos veces o mezclo fuentes, ¿se pisan los datos?':
+      'If I import twice or mix sources, does the data get overwritten?',
+    'No. Cada fuente rellena lo que sabe y deja en paz lo demás. Si el atajo de por la mañana trae los pasos y por la tarde importas un archivo con el pulso y el sueño, ese día acaba con las tres cosas.':
+      'No. Each source fills in what it knows and leaves the rest alone. If the morning shortcut brings in the steps and in the afternoon you import a file with heart rate and sleep, that day ends up with all three.',
+    'Un dato repetido se queda con el valor nuevo, salvo el pulso máximo: de ese se queda siempre el mayor, porque un máximo menor casi nunca significa que el anterior estuviera mal, sino que esa fuente vio menos rato.':
+      'A repeated figure keeps the new value, except the maximum heart rate: of that it always keeps the higher one, because a lower maximum almost never means the earlier one was wrong, only that this source watched for less time.',
+    'Los ceros y los vacíos no cuentan como dato: si una fuente no trae los pasos, no te borra los que ya tenías.':
+      'Zeros and blanks do not count as data: if a source does not bring in the steps, it will not wipe the ones you already had.',
+    'Así que importar dos veces el mismo archivo no duplica nada ni estropea nada: deja el día como estaba.':
+      'So importing the same file twice duplicates nothing and spoils nothing: it leaves the day as it was.',
+
+    'Importé el archivo y los días salen corridos, ¿por qué?':
+      'I imported the file and the days are shifted, why?',
+    'No deberían. La app guarda cada dato en el día que escribió el reloj, tal cual, sin convertirlo a la hora del sitio donde abras el archivo. Un pulso en reposo medido a las seis de la mañana en Madrid se queda en ese día aunque abras el archivo en Bogotá.':
+      'They should not be. The app saves every figure on the day the watch wrote, as it stands, without converting it to the time of wherever you open the file. A resting heart rate measured at six in the morning in Madrid stays on that day even if you open the file in Bogotá.',
+    'Si aun así ves algo corrido, el sitio donde mirar es el archivo. La app entiende *2026-09-24* y *24/09/2026*, y si el segundo número pasa de 12 —*09/24/2026*— sabe que viene en orden americano y lo endereza. Lo que no puede adivinar nadie es un *03/04*: ahí no hay forma de saber si es el tres de abril o el cuatro de marzo. Si tu reloj exporta así, pásalo a *2026-09-24*, que no es ambiguo en ningún país.':
+      'If you still see something shifted, the place to look is the file. The app understands *2026-09-24* and *24/09/2026*, and if the second number goes above 12 —*09/24/2026*— it knows it comes in American order and straightens it out. What nobody can guess is a *03/04*: there is no way of telling the third of April from the fourth of March. If your watch exports like that, convert it to *2026-09-24*, which is ambiguous in no country.',
+
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

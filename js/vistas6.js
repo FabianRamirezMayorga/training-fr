@@ -1446,6 +1446,11 @@
      vista, como `mount`, para no estrenar un global por una función. */
   V.progreso.hojaDia = hojaDiaEntrenado;
 
+  /* La curva la usa también la pantalla del reloj: una sola forma de dibujar
+     una serie en toda la app, en vez de dos parecidas que se separan con el
+     tiempo. */
+  g.Graficos = { grafica: grafica };
+
   V.progreso.mount = function (root) {
     bind(root, '[data-a=ir]', function () { go('rutinas'); });
 

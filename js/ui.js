@@ -965,6 +965,7 @@
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,
     rodillo: rodillo, alFinal: alFinal,
     num: num, dec: dec, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
+    diaCorto: diaCorto,
     beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos,
     claveDeDia: claveDeDia,
     hora: hora, INICIALES: INICIALES, inicialDia: inicialDia

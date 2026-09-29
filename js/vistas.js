@@ -198,6 +198,19 @@
           subTono: Spotify.activa() ? '#1db954' : '',
           sub: Spotify.activa() ? T('Spotify conectado')
             : Spotify.configurado() ? T('Sin conectar') : T('Sin configurar') }))}
+        <!-- El reloj va en Entrenamiento y no en «Tú»: lo que mide (pulso,
+             pasos, sueño) se lee junto a lo que entrenas, no junto al peso y
+             la altura, que se rellenan una vez y no se vuelven a mirar. -->
+        ${raw(filaPerfil({ icono: 'corazon', titulo: T('Reloj y salud'), accion: 'reloj',
+          tono: '#e0679a',
+          sub: (function () {
+            if (!g.Reloj) return T('Pasos, pulso y sueño');
+            const e = Reloj.estado();
+            if (e.conectado) return T('Conectado') + ' · ' + (e.pulso || '--') + ' ppm';
+            const dias = Reloj.dias().length;
+            return dias ? Tp(dias, '{n} día con datos', '{n} días con datos')
+              : T('Sin conectar ni importar');
+          })() }))}
         ${raw(filaPerfil({ icono: cara.icono, titulo: T('Dónde entrenas'), accion: 'lugar',
           tono: cara.tono,
           sub: sitio ? T(sitio.label) + ' · ' +
@@ -263,7 +276,7 @@
     const ir = { datos: 'datos', objetivos: 'objetivos', nutricion: 'nutricion',
       alertas: 'alertas', entrenador: 'entrenador', musica: 'musica',
       cuenta: 'cuenta', ajustes: 'ajustes', usuarios: 'usuarios', version: 'version',
-      ayuda: 'ayuda', suplementos: 'suplementos' };
+      ayuda: 'ayuda', suplementos: 'suplementos', reloj: 'reloj' };
 
     /* La primera vez que se entra en Perfil se pregunta si hay versión nueva y
        se repinta con la respuesta. Después ya está sabida y no se vuelve a

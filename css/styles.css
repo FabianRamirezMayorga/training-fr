@@ -8444,3 +8444,32 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .tab:not(.on) svg [stroke], .tab:not(.on) svg[stroke] { stroke-width: 1.6; }
 /* Sin rebajar la opacidad: los iconos apagados ya adelgazaron el trazo, y
    quitarles ademas luz los dejaba por debajo de lo que se ve de un vistazo. */
+
+/* ---------- reloj y pulso ---------- */
+/* El pulso en la cabecera del entrenamiento: pequeño y al lado del reloj, que
+   compite con el cronómetro por la misma mirada. */
+.wo-pulso{display:flex;align-items:center;gap:6px;flex:none;margin-left:12px;color:#e0679a}
+.wo-pulso svg{width:17px;height:17px;fill:currentColor;stroke:none}
+.wo-pulso b{font-size:1.05rem;font-variant-numeric:tabular-nums}
+.wo-pulso.late svg{animation:latido-pulso 1s ease-in-out infinite}
+@keyframes latido-pulso{0%,100%{transform:scale(1)}18%{transform:scale(1.22)}36%{transform:scale(1)}}
+
+/* Tarjeta del pulso en vivo dentro de la pantalla del reloj */
+.vivo{border-color:#e0679a}
+.vivo-pulso{display:flex;color:#e0679a}
+.vivo-pulso svg{width:30px;height:30px;fill:currentColor;stroke:none;
+  animation:latido-pulso 1s ease-in-out infinite}
+.vivo-bpm{font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1;
+  font-variant-numeric:tabular-nums}
+.vivo-bpm span{font-size:.8rem;font-weight:600;margin-left:5px;color:var(--dim)}
+
+/* La plantilla del atajo se copia tal cual, asi que va en monoespaciada y sin
+   partir lineas: si no cabe, se desliza ella sola en vez de ensanchar la
+   pantalla entera, que en el movil dejaba media app fuera del borde */
+.atajo-plantilla{margin:8px 0 0;max-width:100%;overflow-x:auto;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;
+  line-height:1.5;white-space:pre;-webkit-overflow-scrolling:touch}
+
+/* Lo que este dispositivo no puede hacer se cuenta en gris, sin alarma */
+.reloj-nope{background:var(--card2)}
+.reloj-nope .row-icon{color:var(--dim2)}
