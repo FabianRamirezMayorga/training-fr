@@ -101,7 +101,7 @@
       cuerpo: [
         'La app puede traer lo que mide tu reloj —pasos, pulso, sueño, calorías, peso— y enseñarlo junto a lo que entrenas. Pero hay una realidad que conviene saber de entrada: *una página web no puede leer el Apple Watch*. Safari no da acceso a Salud ni a Bluetooth, y eso no es un fallo de la app ni algo que se arregle con código.',
         'Por eso hay tres caminos, y cada uno se enciende cuando tu dispositivo lo permite:',
-        '*Bluetooth en vivo*: cualquier banda de pecho, pulsera o reloj que emita pulso se conecta directamente y verás las pulsaciones mientras entrenas, con el medio y el máximo guardados en la sesión. Funciona en Chrome y Edge, en Android, Windows, Mac y Linux. En iPhone y iPad no existe en ningún navegador.',
+        '*Bluetooth en vivo*: cualquier banda de pecho, pulsera o reloj que emita pulso se conecta directamente y verás las pulsaciones mientras entrenas, con el medio y el máximo guardados en la sesión. El aparato queda guardado con su nombre, así que la segunda vez es un toque y no una búsqueda, y dentro de un entrenamiento se engancha solo. Funciona en Chrome y Edge, en Android, Windows, Mac y Linux. En iPhone y iPad no existe en ningún navegador.',
         '*Un archivo*: el export.xml de Salud de Apple, o los .gpx, .tcx, .csv y .json que exporta cualquier reloj. Esto funciona en todos los dispositivos, siempre.',
         '*Un atajo de iOS*: Atajos sí puede leer Salud. Le dices qué quieres, lo copia y lo pegas en la app. Es la única vía cómoda con Apple Watch, y se monta una vez.',
         'Cada fuente rellena lo que sabe y no pisa lo que ya había: si el atajo trae los pasos de la mañana y por la tarde importas un archivo con el pulso, el día queda con las dos cosas. Del pulso máximo se queda siempre el mayor.',
@@ -391,15 +391,17 @@
               ir: { ruta: 'reloj', label: 'Abrir Reloj y salud' } },
             { t: 'Pon el sensor a emitir.',
               d: 'Banda de pecho: humedece la tira y póntela. Pulsera o reloj: activa el modo de difusión de pulso (suele llamarse «Emitir frecuencia cardiaca» o «Broadcast»). Si el reloj está emparejado con otro móvil, ciérralo allí primero: solo emite a uno.' },
-            { t: 'Pulsa *Buscar* en el bloque de arriba.',
+            { t: 'La primera vez, pulsa *Buscar*.',
               d: 'El navegador enseña su propia lista de dispositivos cercanos. Elige el tuyo y acepta. Esa ventana es del navegador, no de la app: la app nunca ve más dispositivos que el que tú elijas.' },
+            { t: 'Las siguientes, tócalo en *Los tuyos*.',
+              d: 'Desde la primera vez queda guardado con su nombre, y aparece en una lista debajo. Un toque y se vuelve a enganchar. Si ya no lo usas, *Olvidar* lo quita de ahí; lo que midió se queda.' },
             { t: 'Entrena.',
-              d: 'Durante la sesión verás las pulsaciones junto al cronómetro. Al terminar, el pulso medio y el máximo se guardan con ese entrenamiento y en el día.' },
+              d: 'Durante la sesión verás las pulsaciones junto al cronómetro, y si tienes uno guardado se engancha solo al empezar. Al terminar, el pulso medio y el máximo se guardan con ese entrenamiento y en el día.' },
             { t: 'Suéltalo cuando acabes.',
-              d: 'Botón *Soltar*. Si no, la conexión sigue gastando batería del sensor.' }
+              d: 'Botón *Soltar*. Si no, la conexión sigue gastando batería del sensor. Un corte a mitad de serie no hace falta soltarlo: se vuelve a enganchar solo.' }
           ],
           cierre: 'Si el bloque de arriba dice «Pulso en vivo: aquí no», es el navegador el que no lo trae. Ahí te dice cuál es el motivo y te quedan los otros dos caminos.',
-          ver: ['p-nobluetooth', 'g-reloj'] },
+          ver: ['p-nobluetooth', 'p-recordar', 'g-reloj'] },
 
         { id: 'archivo', titulo: 'Desde un archivo',
           sub: 'Funciona en cualquier móvil y con cualquier marca',
@@ -724,6 +726,13 @@
         '*Tu navegador no lo trae.* Algunos navegadores de escritorio lo traen apagado o directamente no lo tienen.',
         'En todos los casos los otros dos caminos siguen ahí, y traen más cosas que el pulso: pasos, sueño, calorías y peso.'],
       ver: ['c-reloj', 'g-reloj'] },
+
+    { id: 'p-recordar', q: 'Guardé mi banda, ¿por qué me la sigue preguntando al conectar?',
+      a: ['Porque eso no lo decide la app, lo decide el navegador. Volver a un aparato ya autorizado sin preguntar nada necesita una función que solo traen Chrome en Android y en ChromeOS; el de escritorio la lleva detrás de un ajuste que viene apagado.',
+        'Donde está, tocar el tuyo en *Los tuyos* conecta directamente y no sale ninguna ventana. Donde no está, sale la del navegador, pero filtrada por el nombre que guardaste: en vez de una lista de diez cosas aparece él solo, y es un toque más, no una búsqueda.',
+        'La lista sirve igual en los dos casos, y vale la pena por otra cosa: viaja con tu cuenta. Lo que enganches en el móvil aparece en el portátil.',
+        'Dentro de un entrenamiento sí se engancha solo, sin preguntar, cuando el navegador lo permite. Cuando no lo permite, la app prefiere quedarse sin pulso antes que abrirte una ventana en medio de una serie.'],
+      ver: ['c-reloj', 'p-nobluetooth'] },
 
     { id: 'p-fit', q: 'Mi reloj exporta en .fit y la app no lo acepta, ¿qué hago?',
       a: ['Un .fit es un formato binario cerrado de Garmin. Leerlo en el navegador necesitaría una librería pesada solo para eso, y todos los relojes que exportan .fit exportan también .tcx o .gpx, que son texto y llevan lo mismo.',

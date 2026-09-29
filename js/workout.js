@@ -1466,6 +1466,15 @@
 
     pintar(Reloj.estado());
     soltarPulso = Reloj.alPulso(pintar);
+
+    /* Y si hay un aparato conocido, se vuelve a el solo. Nunca abre el
+       selector del navegador: engancharse sin que nadie lo pida esta bien,
+       pero sacarle una ventana al usuario en medio de un entrenamiento que
+       acaba de empezar, no. Donde el navegador no deje reconectar en
+       silencio, esto no hace nada y la banda se conecta desde su pantalla. */
+    if (!Reloj.estado().conectado && Reloj.reconectarSolo) {
+      Reloj.reconectarSolo().then(function (e) { if (e) pintar(e); });
+    }
   }
 
   function pintarMusica(root) {

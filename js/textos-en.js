@@ -25,6 +25,7 @@
 
     'Guardar': 'Save',
     'Cancelar': 'Cancel',
+    'Aceptar': 'OK',
     'Guardado': 'Saved',
     'Sin cambios': 'No changes',
     'Quitar': 'Remove',
@@ -4338,6 +4339,23 @@
     'Salud': 'Health',
     'Atajo': 'Shortcut',
     'Báscula': 'Scale',
+
+    /* El mapa de aparatos */
+    'Los tuyos': 'Yours',
+    'Buscar otro': 'Find another',
+    'Olvidar': 'Forget',
+    'Dispositivo': 'Device',
+    'Última vez: {d}': 'Last used: {d}',
+    'Sin usar todavía': 'Not used yet',
+    'Toca el tuyo y vuelve a engancharse. Durante el entrenamiento verás las pulsaciones junto al cronómetro.':
+      'Tap yours and it hooks back up. During a workout you will see your beats next to the timer.',
+    'Este navegador pide confirmar cada vez que se conecta. Sale solo el tuyo, así que es un toque más, no una búsqueda.':
+      'This browser asks you to confirm every time it connects. Only yours comes up, so it is one more tap, not a search.',
+    'El Bluetooth de este equipo está apagado. Enciéndelo y vuelve.':
+      'Bluetooth is switched off on this device. Turn it on and come back.',
+    'Olvidar este dispositivo': 'Forget this device',
+    'Se quita {n} de la lista. Lo que ya midió se queda; para volver a usarlo habrá que buscarlo otra vez.':
+      '{n} is removed from the list. What it already measured stays; to use it again you will have to find it once more.',
 
     /* El pulso en vivo */
     'Pulso en vivo': 'Live heart rate',

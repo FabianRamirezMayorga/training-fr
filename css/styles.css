@@ -8470,6 +8470,20 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;
   line-height:1.5;white-space:pre;-webkit-overflow-scrolling:touch}
 
+/* El mapa de aparatos. La fila entera es el botón de conectar y «Olvidar» va
+   aparte a la derecha: meter un botón dentro de otro no es HTML válido, y con
+   toda la fila como zona de toque se acierta a la primera con el pulgar. */
+.equipo-fila{gap:6px;margin-top:4px}
+.equipo-fila + .equipo-fila{margin-top:2px}
+.equipo-tap{justify-content:flex-start;text-align:left;padding:9px 11px;
+  min-height:44px}
+.equipo-tap .grow{display:flex;flex-direction:column;gap:1px;align-items:flex-start}
+.equipo-nombre{font-weight:600;font-size:.88rem}
+
+/* El aviso de adaptador apagado: es una condición del equipo, no un error de
+   la app, así que va del color de los avisos y no del de los fallos */
+.reloj-apagado{margin:9px 0 0;color:var(--warn)}
+
 /* Lo que este dispositivo no puede hacer se cuenta en gris, sin alarma */
 .reloj-nope{background:var(--card2)}
 .reloj-nope .row-icon{color:var(--dim2)}

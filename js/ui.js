@@ -384,8 +384,8 @@
              <h2 class="conf-tit">${title}</h2>
              <p class="muted conf-txt">${message}</p>
              <div class="row" style="margin-top:18px">
-               <button class="btn grow vidrio" data-x="no">Cancelar</button>
-               <button class="btn grow ${danger ? 'danger' : 'primary'}" data-x="si">${okLabel || 'Aceptar'}</button>
+               <button class="btn grow vidrio" data-x="no">${T('Cancelar')}</button>
+               <button class="btn grow ${danger ? 'danger' : 'primary'}" data-x="si">${okLabel || T('Aceptar')}</button>
              </div>`,
         function (el) {
           el.querySelector('[data-x=no]').onclick = function () { closeModal(); resolve(false); };

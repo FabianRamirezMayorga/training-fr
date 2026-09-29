@@ -155,8 +155,92 @@
   const muestras = [];                // para la media y el máximo de la sesión
   const oyentes = [];
 
+  /* A qué aparato queremos estar pegados. Sirve para distinguir un corte
+     -se alejó, le falló la señal- de un «suelta», que es cuando esto se pone
+     a null: sin esa distinción, el reintento pelearía con el usuario. */
+  let queridoId = null;
+  let reintento = 0;
+  let temporizador = 0;
+
   function soportaBluetooth() {
     return !!(navigator.bluetooth && navigator.bluetooth.requestDevice);
+  }
+
+  /* Volver a un aparato conocido sin preguntar solo se puede si el navegador
+     trae getDevices(), que devuelve aquellos a los que ya se dio permiso. Lo
+     tienen Chrome en Android y en ChromeOS; el de escritorio lo lleva detrás
+     de una bandera. Donde no está, la lista de aparatos sigue valiendo: lo que
+     cambia es que el navegador pide confirmar, y eso se dice en pantalla en
+     vez de dejar que parezca que la app se olvidó del reloj. */
+  function soportaMapeo() {
+    return !!(navigator.bluetooth && navigator.bluetooth.getDevices);
+  }
+
+  /* Si el Bluetooth del equipo está apagado, el buscador sale vacío y parece
+     que el reloj no emite. Preguntarlo antes ahorra ese viaje. */
+  function hayAdaptador() {
+    if (!navigator.bluetooth || !navigator.bluetooth.getAvailability) {
+      return Promise.resolve(true);
+    }
+    return navigator.bluetooth.getAvailability().catch(function () { return true; });
+  }
+
+  /* ---------- el mapa de aparatos ----------
+     Se guarda con los ajustes, así que viaja con la cuenta y está en todos sus
+     dispositivos. Lo que se guarda es el id que da el navegador y el nombre:
+     el id no sirve en otro navegador -cada uno se inventa el suyo- pero el
+     nombre sí, y es lo que permite filtrar el buscador para que salga su banda
+     y no una lista de diez cosas. */
+  function equipos() {
+    const e = datos().equipos;
+    return Array.isArray(e) ? e : [];
+  }
+
+  function recordar(dev) {
+    if (!dev || !dev.id) return;
+    const d = datos();
+    const lista = Array.isArray(d.equipos) ? d.equipos.slice() : [];
+    const ya = lista.filter(function (x) { return x.id === dev.id; })[0];
+    if (ya) {
+      if (dev.name) ya.nombre = dev.name;
+      ya.visto = Date.now();
+    } else {
+      lista.push({ id: dev.id, nombre: dev.name || T('Dispositivo'), visto: Date.now() });
+    }
+    /* el último primero: es el que casi siempre se quiere otra vez */
+    lista.sort(function (a, b) { return (b.visto || 0) - (a.visto || 0); });
+    if (lista.length > 8) lista.length = 8;
+    d.equipos = lista;
+    guardar(d);
+  }
+
+  function olvidar(id) {
+    const d = datos();
+    d.equipos = equipos().filter(function (x) { return x.id !== id; });
+    guardar(d);
+    /* Y quitarle también el permiso al navegador, si sabe hacerlo: si no, la
+       app diría que lo olvidó mientras el navegador lo sigue recordando. */
+    if (dispositivo && dispositivo.id === id) {
+      if (queridoId === id) desconectar();
+      if (dispositivo.forget) { try { dispositivo.forget(); } catch (e) { /* nada */ } }
+      dispositivo = null;
+      return Promise.resolve();
+    }
+    if (!soportaMapeo()) return Promise.resolve();
+    return navigator.bluetooth.getDevices().then(function (ds) {
+      const dev = ds.filter(function (x) { return x.id === id; })[0];
+      if (dev && dev.forget) return dev.forget();
+    }).catch(function () { /* el permiso se queda; la lista ya está limpia */ });
+  }
+
+  /* El aparato de verdad detrás de un id guardado, sin abrir ningún buscador.
+     Devuelve null cuando no se puede, y entonces toca preguntar. */
+  function recuperar(id) {
+    if (dispositivo && dispositivo.id === id) return Promise.resolve(dispositivo);
+    if (!soportaMapeo()) return Promise.resolve(null);
+    return navigator.bluetooth.getDevices().then(function (ds) {
+      return ds.filter(function (x) { return x.id === id; })[0] || null;
+    }).catch(function () { return null; });
   }
 
   /* Por qué no se puede aquí, dicho de forma útil y no como un "no soportado" */
@@ -200,7 +284,9 @@
       bateria: bateria,
       medio: media(),
       max: muestras.length ? Math.max.apply(null, muestras) : 0,
-      muestras: muestras.length
+      muestras: muestras.length,
+      id: dispositivo ? dispositivo.id : '',
+      volviendo: !!(queridoId && reintento > 0 && !(servidor && servidor.connected))
     };
   }
 
@@ -216,6 +302,8 @@
     return (plano & 0x01) ? valor.getUint16(1, true) : valor.getUint8(1);
   }
 
+  /* Buscar uno nuevo: esto sí abre el selector del navegador, que es una
+     ventana suya y no de la app. Es el único momento en que se pregunta. */
   function conectar() {
     if (!soportaBluetooth()) return Promise.reject(new Error(porQueNoBluetooth()));
 
@@ -224,16 +312,62 @@
          ratón y los auriculares, y no sirven para nada aquí */
       filters: [{ services: [SERV_PULSO] }],
       optionalServices: [SERV_BATERIA]
-    }).then(function (dev) {
-      dispositivo = dev;
-      dev.addEventListener('gattserverdisconnected', function () {
-        servidor = null; pulso = 0; avisar();
+    }).then(engancharse).catch(traducirFallo);
+  }
+
+  /* Volver a uno del mapa. Sin preguntar cuando el navegador deja; y cuando no
+     deja, el selector sale filtrado por su nombre, así que en vez de una lista
+     aparece él solo y es un toque igual. */
+  function conectarA(id) {
+    if (!soportaBluetooth()) return Promise.reject(new Error(porQueNoBluetooth()));
+    const guardado = equipos().filter(function (x) { return x.id === id; })[0];
+
+    return recuperar(id).then(function (dev) {
+      if (dev) return dev;
+      const filtros = guardado && guardado.nombre
+        ? [{ name: guardado.nombre }]
+        : [{ services: [SERV_PULSO] }];
+      return navigator.bluetooth.requestDevice({
+        filters: filtros,
+        /* con un filtro por nombre hay que pedir los servicios aparte: el
+           filtro elige el aparato, no da permiso para leerle nada */
+        optionalServices: [SERV_PULSO, SERV_BATERIA]
       });
-      return dev.gatt.connect();
-    }).then(function (serv) {
+    }).then(engancharse).catch(traducirFallo);
+  }
+
+  /* Reconectar solo al último, para el arranque de un entrenamiento. Si hiciera
+     falta preguntar no hace nada: abrir un selector sin que nadie lo pida es
+     peor que quedarse sin pulso. */
+  function reconectarSolo() {
+    const ultimo = equipos()[0];
+    if (!soportaBluetooth() || !ultimo) return Promise.resolve(null);
+    if (servidor && servidor.connected) return Promise.resolve(estado());
+    return recuperar(ultimo.id).then(function (dev) {
+      if (!dev) return null;
+      return engancharse(dev);
+    }).catch(function () { return null; });
+  }
+
+  /* Todo lo que hay que hacer con un aparato ya elegido. Lo comparten las tres
+     formas de llegar a él, que solo se diferencian en cómo lo encuentran. */
+  function engancharse(dev, volviendo) {
+    dispositivo = dev;
+    queridoId = dev.id;
+    if (!dev._enganchado) {
+      dev._enganchado = true;
+      dev.addEventListener('gattserverdisconnected', alCortarse);
+    }
+    return dev.gatt.connect().then(function (serv) {
       servidor = serv;
-      desde = Date.now();
-      muestras.length = 0;
+      /* Volver de un corte no empieza una medición nueva: si se vaciaran las
+         lecturas, un microcorte a mitad de entrenamiento borraría el pulso
+         medio de toda la sesión y el máximo de la serie dura. */
+      if (!volviendo) { desde = Date.now(); muestras.length = 0; }
+      /* El contador se reinicia al conseguirlo, no al intentarlo: puesto a
+         cero al entrar, una conexión que va y viene reintentaba sin fin. */
+      reintento = 0;
+      recordar(dev);
       return serv.getPrimaryService(SERV_PULSO);
     }).then(function (s) {
       return s.getCharacteristic(CAR_PULSO);
@@ -252,14 +386,35 @@
       leerBateria();
       avisar();
       return estado();
-    }).catch(function (e) {
-      if (e && e.name === 'NotFoundError') {
-        throw new Error(T('No se eligió ningún dispositivo. Enciende la banda o ' +
-          'el reloj y ponlo a emitir pulso antes de buscar.'));
-      }
-      if (e && e.name === 'SecurityError') throw new Error(porQueNoBluetooth());
-      throw new Error(e && e.message ? e.message : T('No se pudo conectar.'));
     });
+  }
+
+  /* Un corte a mitad de serie no puede obligar a sacar el móvil del bolsillo:
+     mientras el usuario no haya soltado el aparato, se vuelve a intentar solo.
+     Cinco veces espaciadas y se para: si a los treinta segundos no ha vuelto,
+     es que se apagó o se quedó sin batería, y reintentar para siempre solo
+     gasta la del móvil. */
+  function alCortarse() {
+    servidor = null;
+    pulso = 0;
+    avisar();
+    if (!queridoId || !dispositivo || dispositivo.id !== queridoId) return;
+    if (reintento >= 5) return;
+    reintento++;
+    clearTimeout(temporizador);
+    temporizador = setTimeout(function () {
+      if (!queridoId || !dispositivo) return;
+      engancharse(dispositivo, true).catch(function () { /* el siguiente lo reintenta */ });
+    }, 2000 * reintento);
+  }
+
+  function traducirFallo(e) {
+    if (e && e.name === 'NotFoundError') {
+      throw new Error(T('No se eligió ningún dispositivo. Enciende la banda o ' +
+        'el reloj y ponlo a emitir pulso antes de buscar.'));
+    }
+    if (e && e.name === 'SecurityError') throw new Error(porQueNoBluetooth());
+    throw new Error(e && e.message ? e.message : T('No se pudo conectar.'));
   }
 
   function leerBateria() {
@@ -272,6 +427,9 @@
   }
 
   function desconectar() {
+    queridoId = null;                  // soltar es soltar: nada de reintentos
+    reintento = 0;
+    clearTimeout(temporizador);
     try { if (servidor && servidor.connected) servidor.disconnect(); } catch (e) { /* nada */ }
     servidor = null; pulso = 0; bateria = null;
     avisar();
@@ -689,6 +847,9 @@
     dias: dias, dia: dia, resumen: resumen, hayDatos: hayDatos,
     anotar: anotar, anotarVarios: anotarVarios, borrarTodo: borrarTodo, datos: datos,
     soportaBluetooth: soportaBluetooth, porQueNoBluetooth: porQueNoBluetooth,
+    soportaMapeo: soportaMapeo, hayAdaptador: hayAdaptador,
+    equipos: equipos, olvidar: olvidar, conectarA: conectarA,
+    reconectarSolo: reconectarSolo,
     conectar: conectar, desconectar: desconectar, estado: estado, alPulso: alPulso,
     cerrarMedicion: cerrarMedicion,
     importarArchivo: importarArchivo, pegar: pegar, destinoAtajo: destinoAtajo

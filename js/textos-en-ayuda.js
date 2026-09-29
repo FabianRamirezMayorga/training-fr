@@ -750,18 +750,10 @@
       'It tells you how much you have saved. Do it on wi-fi.',
     'A partir de ahí puedes entrenar sin datos y sin wifi, con las imágenes y todo.':
       'From then on you can train with no data and no wi-fi, images and all.',
-    'Abre Training FR en el navegador del móvil.':
-      'Open Training FR in your phone’s browser.',
-    'En Android: menú del navegador › *Añadir a la pantalla de inicio*.':
-      'On Android: browser menu › *Add to Home screen*.',
-    'En iPhone: botón Compartir › *Añadir a pantalla de inicio*.':
-      'On iPhone: Share button › *Add to Home Screen*.',
     'Ábrela desde el icono nuevo.':
       'Open it from the new icon.',
     'Arranca a pantalla completa, sin barra de navegador, y funciona sin conexión.':
       'It starts full screen, with no browser bar, and works offline.',
-    'En Ajustes hay también un botón de instalar, que aparece si tu navegador lo permite.':
-      'There is an install button in Settings too, which appears if your browser allows it.',
     'Sí, entera. Las rutinas, el entrenamiento, el cronómetro, el historial y las estadísticas no necesitan conexión.':
       'Yes, all of it. Routines, workouts, the timer, history and stats need no connection.',
     'Solo necesitan internet tres cosas: el entrenador con IA, sincronizar con tu cuenta y actualizar la app. Las imágenes de los ejercicios hay que bajarlas una vez.':
@@ -1059,8 +1051,6 @@
       'The app can bring in what your watch measures —steps, heart rate, sleep, calories, weight— and show it next to what you train. But there is one fact worth knowing up front: *a web page cannot read the Apple Watch*. Safari gives access to neither Health nor Bluetooth, and that is not a bug in the app nor something code can fix.',
     'Por eso hay tres caminos, y cada uno se enciende cuando tu dispositivo lo permite:':
       'That is why there are three routes, and each one lights up when your device allows it:',
-    '*Bluetooth en vivo*: cualquier banda de pecho, pulsera o reloj que emita pulso se conecta directamente y verás las pulsaciones mientras entrenas, con el medio y el máximo guardados en la sesión. Funciona en Chrome y Edge, en Android, Windows, Mac y Linux. En iPhone y iPad no existe en ningún navegador.':
-      '*Live Bluetooth*: any chest strap, band or watch that broadcasts heart rate connects directly and you will see your beats while you train, with the average and the maximum saved in the session. It works in Chrome and Edge, on Android, Windows, Mac and Linux. On iPhone and iPad it exists in no browser at all.',
     '*Un archivo*: el export.xml de Salud de Apple, o los .gpx, .tcx, .csv y .json que exporta cualquier reloj. Esto funciona en todos los dispositivos, siempre.':
       '*A file*: the export.xml from Apple Health, or the .gpx, .tcx, .csv and .json any watch exports. This works on every device, always.',
     '*Un atajo de iOS*: Atajos sí puede leer Salud. Le dices qué quieres, lo copia y lo pegas en la app. Es la única vía cómoda con Apple Watch, y se monta una vez.':
@@ -1086,15 +1076,10 @@
     'Pon el sensor a emitir.': 'Set the sensor to broadcast.',
     'Banda de pecho: humedece la tira y póntela. Pulsera o reloj: activa el modo de difusión de pulso (suele llamarse «Emitir frecuencia cardiaca» o «Broadcast»). Si el reloj está emparejado con otro móvil, ciérralo allí primero: solo emite a uno.':
       'Chest strap: wet the band and put it on. Band or watch: turn on heart-rate broadcast mode (it is usually called «Broadcast heart rate»). If the watch is paired with another phone, close it there first: it only broadcasts to one.',
-    'Pulsa *Buscar* en el bloque de arriba.': 'Tap *Search* in the block at the top.',
     'El navegador enseña su propia lista de dispositivos cercanos. Elige el tuyo y acepta. Esa ventana es del navegador, no de la app: la app nunca ve más dispositivos que el que tú elijas.':
       'The browser shows its own list of nearby devices. Pick yours and accept. That window belongs to the browser, not to the app: the app never sees any device other than the one you choose.',
     'Entrena.': 'Train.',
-    'Durante la sesión verás las pulsaciones junto al cronómetro. Al terminar, el pulso medio y el máximo se guardan con ese entrenamiento y en el día.':
-      'During the session you will see your beats next to the timer. When you finish, the average and maximum heart rate are saved with that workout and in the day.',
     'Suéltalo cuando acabes.': 'Disconnect it when you are done.',
-    'Botón *Soltar*. Si no, la conexión sigue gastando batería del sensor.':
-      '*Disconnect* button. Otherwise the connection keeps draining the sensor battery.',
     'Si el bloque de arriba dice «Pulso en vivo: aquí no», es el navegador el que no lo trae. Ahí te dice cuál es el motivo y te quedan los otros dos caminos.':
       'If the block at the top says «Live heart rate: not here», it is the browser that does not bring it. It tells you the reason there, and the other two routes are still open.',
 
@@ -1142,6 +1127,30 @@
       'In Shortcuts › Automation, at whatever time you like. Signed in you can go further: instead of copying and pasting, the *Get Contents of URL* action uploads the data straight away. The address is shown on that same screen.',
     'Se monta una vez y ya no se toca. Es la forma de que un Apple Watch acabe dentro de la app, porque Safari no deja leer Salud desde una página web.':
       'You set it up once and never touch it again. It is the way an Apple Watch ends up inside the app, because Safari does not let a web page read Health.',
+
+    /* ---------- El mapa de aparatos ---------- */
+    'La primera vez, pulsa *Buscar*.': 'The first time, tap *Search*.',
+    'Las siguientes, tócalo en *Los tuyos*.': 'After that, tap it under *Yours*.',
+    'Desde la primera vez queda guardado con su nombre, y aparece en una lista debajo. Un toque y se vuelve a enganchar. Si ya no lo usas, *Olvidar* lo quita de ahí; lo que midió se queda.':
+      'From the first time it is saved with its name and shows up in a list below. One tap and it hooks back up. If you no longer use it, *Forget* takes it off that list; what it measured stays.',
+    'Durante la sesión verás las pulsaciones junto al cronómetro, y si tienes uno guardado se engancha solo al empezar. Al terminar, el pulso medio y el máximo se guardan con ese entrenamiento y en el día.':
+      'During the session you will see your beats next to the timer, and if you have one saved it hooks up by itself when you start. When you finish, the average and maximum heart rate are saved with that workout and in the day.',
+    'Botón *Soltar*. Si no, la conexión sigue gastando batería del sensor. Un corte a mitad de serie no hace falta soltarlo: se vuelve a enganchar solo.':
+      '*Disconnect* button. Otherwise the connection keeps draining the sensor battery. A drop mid-set needs no disconnecting: it hooks back up on its own.',
+
+    'Guardé mi banda, ¿por qué me la sigue preguntando al conectar?':
+      'I saved my strap, why does it keep asking me when I connect?',
+    'Porque eso no lo decide la app, lo decide el navegador. Volver a un aparato ya autorizado sin preguntar nada necesita una función que solo traen Chrome en Android y en ChromeOS; el de escritorio la lleva detrás de un ajuste que viene apagado.':
+      'Because the app does not decide that, the browser does. Going back to an already authorised device without asking anything needs a feature only Chrome on Android and on ChromeOS carry; the desktop one keeps it behind a setting that ships switched off.',
+    'Donde está, tocar el tuyo en *Los tuyos* conecta directamente y no sale ninguna ventana. Donde no está, sale la del navegador, pero filtrada por el nombre que guardaste: en vez de una lista de diez cosas aparece él solo, y es un toque más, no una búsqueda.':
+      'Where it is there, tapping yours under *Yours* connects straight away and no window appears. Where it is not, the browser\'s window comes up, but filtered by the name you saved: instead of a list of ten things, only it appears, and that is one more tap, not a search.',
+    'La lista sirve igual en los dos casos, y vale la pena por otra cosa: viaja con tu cuenta. Lo que enganches en el móvil aparece en el portátil.':
+      'The list is just as useful either way, and it earns its keep for another reason: it travels with your account. What you hook up on your phone shows up on your laptop.',
+    'Dentro de un entrenamiento sí se engancha solo, sin preguntar, cuando el navegador lo permite. Cuando no lo permite, la app prefiere quedarse sin pulso antes que abrirte una ventana en medio de una serie.':
+      'Inside a workout it does hook up by itself, without asking, when the browser allows it. When it does not, the app would rather go without a heart rate than open a window on you in the middle of a set.',
+
+    '*Bluetooth en vivo*: cualquier banda de pecho, pulsera o reloj que emita pulso se conecta directamente y verás las pulsaciones mientras entrenas, con el medio y el máximo guardados en la sesión. El aparato queda guardado con su nombre, así que la segunda vez es un toque y no una búsqueda, y dentro de un entrenamiento se engancha solo. Funciona en Chrome y Edge, en Android, Windows, Mac y Linux. En iPhone y iPad no existe en ningún navegador.':
+      '*Live Bluetooth*: any chest strap, band or watch that broadcasts heart rate connects directly and you will see your beats while you train, with the average and the maximum saved in the session. The device is saved with its name, so the second time is a tap and not a search, and inside a workout it hooks up by itself. It works in Chrome and Edge, on Android, Windows, Mac and Linux. On iPhone and iPad it exists in no browser at all.',
 
     /* ---------- Las dudas del reloj ---------- */
     '¿Por qué no puedo conectar mi Apple Watch a la app?':

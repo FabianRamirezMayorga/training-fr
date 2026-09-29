@@ -26,6 +26,9 @@
   let error = '';
   let verAtajo = false;
   let metrica = 'pasos';
+  /* null mientras no se ha preguntado; el navegador contesta en una promesa y
+     no se va a bloquear el primer pintado por esto */
+  let adaptador = null;
 
   /* Qué se puede enseñar de cada medida, y cómo se escribe */
   const MEDIDAS = {
@@ -84,17 +87,37 @@
     }
 
     if (!e.conectado) {
+      const mios = Reloj.equipos();
       return html`
         <div class="card">
           <div class="row between" style="align-items:flex-start;gap:12px">
             <div class="grow">
               <b>${T('Pulso en vivo')}</b>
-              <p class="tiny" style="margin:5px 0 0">${T('Conecta una banda de pecho, ' +
-                'una pulsera o un reloj que emita pulso y lo verás mientras entrenas, ' +
-                'con el medio y el máximo guardados en la sesión.')}</p>
+              <p class="tiny" style="margin:5px 0 0">${mios.length
+                ? T('Toca el tuyo y vuelve a engancharse. Durante el entrenamiento ' +
+                    'verás las pulsaciones junto al cronómetro.')
+                : T('Conecta una banda de pecho, una pulsera o un reloj que emita ' +
+                    'pulso y lo verás mientras entrenas, con el medio y el máximo ' +
+                    'guardados en la sesión.')}</p>
             </div>
-            <button class="btn primary sm" data-a="conectar">${T('Buscar')}</button>
+            <button class="btn ${mios.length ? '' : 'primary'} sm" data-a="conectar">
+              ${mios.length ? T('Buscar otro') : T('Buscar')}</button>
           </div>
+
+          ${raw(adaptador === false
+            ? '<p class="tiny reloj-apagado">' +
+              esc(T('El Bluetooth de este equipo está apagado. Enciéndelo y vuelve.')) +
+              '</p>'
+            : '')}
+
+          ${raw(mios.length ? html`
+            <div class="hr"></div>
+            <div class="list-title" style="margin:0 0 7px">${T('Los tuyos')}</div>
+            ${raw(mios.map(filaEquipo).join(''))}
+            ${raw(Reloj.soportaMapeo() ? '' : '<p class="tiny">' +
+              esc(T('Este navegador pide confirmar cada vez que se conecta. Sale ' +
+                'solo el tuyo, así que es un toque más, no una búsqueda.')) + '</p>')}
+          ` : '')}
         </div>`;
     }
 
@@ -117,6 +140,23 @@
             <span class="chip">${T('Máximo')} ${e.max} ppm</span>
             <span class="tiny">${Tp(e.muestras, '{n} lectura', '{n} lecturas')}</span>
           </div>` : '')}
+      </div>`;
+  }
+
+  /* Una fila del mapa. El nombre es el que le puso el fabricante -«Polar H10»,
+     «Amazfit Band»- y es lo que el usuario reconoce; debajo, cuándo fue la
+     última vez, que es lo que distingue el de casa del del gimnasio. */
+  function filaEquipo(q) {
+    return html`
+      <div class="row between equipo-fila">
+        <button class="btn ghost grow equipo-tap" data-equipo="${esc(q.id)}">
+          <span class="grow">
+            <span class="equipo-nombre">${esc(q.nombre)}</span>
+            <span class="tiny">${q.visto ? Tn('Última vez: {d}', { d: etiquetaDia(q.visto) })
+              : T('Sin usar todavía')}</span>
+          </span>
+        </button>
+        <button class="btn sm ghost" data-olvidar="${esc(q.id)}">${T('Olvidar')}</button>
       </div>`;
   }
 
@@ -313,11 +353,47 @@
       });
     });
 
+    bindAll(root, '[data-equipo]', function (el) {
+      el.disabled = true;
+      error = '';
+      Reloj.conectarA(el.dataset.equipo).then(function () {
+        aviso = T('Conectado. El pulso se verá también mientras entrenas.');
+        render();
+      }).catch(function (e) {
+        error = e.message;
+        render();
+      });
+    });
+
+    bindAll(root, '[data-olvidar]', function (el) {
+      const id = el.dataset.olvidar;
+      const q = Reloj.equipos().filter(function (x) { return x.id === id; })[0];
+      UI.confirm(
+        T('Olvidar este dispositivo'),
+        Tn('Se quita {n} de la lista. Lo que ya midió se queda; para volver a ' +
+          'usarlo habrá que buscarlo otra vez.', { n: q ? q.nombre : T('Dispositivo') }),
+        T('Olvidar'), true
+      ).then(function (si) {
+        if (!si) return;
+        Promise.resolve(Reloj.olvidar(id)).then(function () { render(); });
+      });
+    });
+
     bind(root, '[data-a=desconectar]', function () {
       guardarMedicion();
       Reloj.desconectar();
       render();
     });
+
+    /* Si el Bluetooth del equipo está apagado, el buscador sale vacío y parece
+       que el reloj no emite. Se pregunta al llegar y se repinta solo si hay
+       algo que decir: preguntarlo antes de pintar retrasaría la pantalla. */
+    if (Reloj.soportaBluetooth() && adaptador === null) {
+      Reloj.hayAdaptador().then(function (hay) {
+        adaptador = !!hay;
+        if (!adaptador) render();
+      });
+    }
 
     /* mientras está conectado, el número se refresca solo */
     if (Reloj.estado().conectado) {
