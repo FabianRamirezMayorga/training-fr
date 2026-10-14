@@ -19,14 +19,30 @@
       { name: 'Tracción', muscles: ['lats', 'middle back', 'biceps', 'traps'] },
       { name: 'Pierna', muscles: ['quadriceps', 'hamstrings', 'glutes', 'calves'] }
     ],
+    /* El de cuatro dias era un musculo por dia disfrazado: pecho el lunes,
+       espalda el martes, pierna el jueves, hombro el viernes. Medido sobre un
+       plan generado, los doce musculos salian *una sola vez por semana* —los
+       doce—, que es exactamente el reparto que la auditoria de esta misma app
+       marca como fallo, con el argumento de que el estimulo de una sesion dura
+       unas 48 horas. La app se suspendia a si misma.
+
+       Ahora es empuje, traccion, pierna y un cuarto dia de cuerpo entero. Ese
+       cuarto dia es el que da la segunda pasada: pecho, dorsal, hombro,
+       cuadriceps y femoral pasan de una vez a dos. Brazos y gemelo se quedan en
+       una directa, pero el empuje y la traccion ya se los llevan de arrastre,
+       que es lo que distingue un dia de brazos de un brazo que trabaja. */
     4: [
-      { name: 'Pecho y tríceps', muscles: ['chest', 'triceps'] },
-      { name: 'Espalda y bíceps', muscles: ['lats', 'middle back', 'biceps'] },
+      { name: 'Empuje', muscles: ['chest', 'shoulders', 'triceps'] },
+      { name: 'Tracción', muscles: ['lats', 'middle back', 'biceps'] },
       { name: 'Pierna', muscles: ['quadriceps', 'hamstrings', 'glutes', 'calves'] },
-      { name: 'Hombro y core', muscles: ['shoulders', 'traps', 'abdominals'] }
+      { name: 'Cuerpo completo', muscles: ['chest', 'lats', 'shoulders', 'quadriceps', 'hamstrings', 'abdominals'] }
     ],
+    /* En el de cinco, el hombro entra tambien en el dia de empuje. Estaba solo
+       el jueves, con el mismo problema en pequeno; y los repartos de tres y de
+       seis dias ya lo metian ahi, asi que ademas era el unico que iba por
+       libre. */
     5: [
-      { name: 'Pecho y tríceps', muscles: ['chest', 'triceps'] },
+      { name: 'Empuje', muscles: ['chest', 'shoulders', 'triceps'] },
       { name: 'Espalda y bíceps', muscles: ['lats', 'middle back', 'biceps'] },
       { name: 'Pierna', muscles: ['quadriceps', 'hamstrings', 'calves'] },
       { name: 'Hombro y trapecio', muscles: ['shoulders', 'traps'] },
