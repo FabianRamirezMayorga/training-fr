@@ -4634,8 +4634,17 @@
     '{n} cosas': '{n} items',
     'Sale de tu menú: cuando tengas uno generado, aquí estará lo que hay que comprar para la semana.':
       'It comes from your menu: once you have one generated, this is where the week\u2019s shopping will be.',
-    'De {menu}. Elige para cuánto compras y las cantidades se ajustan solas.':
-      'From {menu}. Pick how long you are shopping for and the amounts adjust themselves.',
+    'Elige para cuánto compras y las cantidades se ajustan solas.':
+      'Pick how long you are shopping for and the amounts adjust themselves.',
+    'De tu menú, agrupada por zonas del súper': 'From your menu, grouped by supermarket aisle',
+    '«{menu}» todavía no tiene lista. Se saca de sus propios platos, sin tocar el menú.':
+      '«{menu}» has no list yet. It is worked out from its own dishes, without touching the menu.',
+    'Generar la lista': 'Build the list',
+    'Sumando los platos de la semana…': 'Adding up the week’s dishes…',
+    'Se agrupa por zonas del súper.': 'It gets grouped by supermarket aisle.',
+    'No he podido sacar la lista de ese menú.': 'I could not work out the list from that menu.',
+    'Lista lista.': 'List ready.',
+    'Ese menú no tiene días.': 'That menu has no days.',
     'Lo tachado se guarda: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Al renovar el menú, la lista empieza limpia.':
       'What you tick is saved: you can leave the shop, come back in and carry on where you left off. When the menu is refreshed, the list starts clean.',
     'Fruta y verdura': 'Fruit and veg',

@@ -8893,6 +8893,18 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 
 
 /* ---- la lista de la compra ----
+   El acceso, arriba de Alimentacion: estaba al final del menu, detras de
+   siete dias de comidas desplegadas, y para encontrarlo habia que saber que
+   existia. Es ademas de lo poco de esa pantalla que se usa fuera de casa.
+   Los selectores —de menu y de dias— se desplazan de lado en vez de partirse
+   en dos filas: con tres menus de nombre largo, `wrap` dejaba una fila de uno
+   y media de otro, que se lee como un descuadre y no como una lista. */
+.compra-acceso{margin-bottom:11px}
+.compra-menus,.compra-sem{gap:7px;margin:0 0 12px;overflow-x:auto;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.compra-menus::-webkit-scrollbar,.compra-sem::-webkit-scrollbar{display:none}
+.compra-menus .chip,.compra-sem .chip{flex:none}
+
    Filas altas y con la casilla a la izquierda: esto se usa con una mano, en un
    pasillo y con el carro en la otra, asi que el objetivo tactil manda sobre lo
    compacto. */

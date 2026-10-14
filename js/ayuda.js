@@ -534,9 +534,11 @@
     { id: 'c-compra', titulo: 'La lista de la compra',
       intro: 'Sale de tu menú, agrupada por zonas del súper y con casillas para ir tachando.',
       pasos: [
-        { t: 'Abre Alimentación y baja a tu menú.',
-          d: 'Al final de él está *Lista de la compra*, con cuántas cosas lleva.',
+        { t: 'Abre Alimentación: está arriba del todo.',
+          d: 'Si tienes varios menús guardados, dentro puedes elegir de cuál la quieres: a veces se compra para el que empieza el lunes, no para el que está acabando.',
           ir: { ruta: 'nutricion', label: 'Abrir Alimentación' } },
+        { t: 'Si ese menú aún no tiene lista, púlsale a *Generar la lista*.',
+          d: 'La saca el entrenador de los propios platos del menú, sin tocarlo: suma las raciones de todos los días, redondea a lo que de verdad se vende —560 g de avena son un paquete de kilo— y lo agrupa por zonas. Queda guardada en ese menú.' },
         { t: 'Elige para cuántos días compras.',
           d: 'Tu menú cubre una semana; si eliges catorce días es darle dos vueltas, y las cantidades se doblan solas. Esa cuenta la hace la app, no la IA: multiplicar tiene un solo resultado y tiene que dar siempre el mismo, también sin cobertura.' },
         { t: 'Ve tachando mientras compras.',

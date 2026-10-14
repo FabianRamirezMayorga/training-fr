@@ -3644,6 +3644,42 @@
     return llamarJSON(prompt, { imagen: imagen, maxTokens: 4096, temperatura: 0.3 });
   }
 
+  /* La lista de la compra de un menú que no la trae.
+
+     Los menús de antes de que esto existiera no la llevan, y rehacer el menú
+     entero para conseguirla sería cobrar muy caro algo que se saca de lo que ya
+     hay: los platos, con sus cantidades, están escritos ahí. */
+  function listaDeCompra(plan) {
+    const dias = (plan && plan.dias) || [];
+    if (!dias.length) return Promise.reject(new Error(T('Ese menú no tiene días.')));
+
+    const texto = dias.map(function (d) {
+      return (d.dia || '') + ': ' + (d.comidas || []).map(function (c) {
+        return c.plato || '';
+      }).filter(Boolean).join(' | ');
+    }).join(SALTO);
+
+    const p = Perfil.datos ? Perfil.datos() : {};
+
+    const prompt = PERSONA + SALTO + SALTO +
+      'Esta es la comida de ' + dias.length + ' días:' + SALTO + texto + SALTO + SALTO +
+      'Saca la lista de la compra para esos días.' + SALTO +
+      '- SUMA las cantidades de un mismo alimento en todos los días y da el total de una ' +
+      'vez. Ochenta gramos de avena siete días no son siete líneas de avena, son 560 g.' + SALTO +
+      '- Agrupa por zona del supermercado, que es como se recorre una tienda. Una lista ' +
+      'ordenada por días obliga a dar cuatro vueltas.' + SALTO +
+      '- Redondea a lo que de verdad se vende: si salen 560 g de avena, pon 1 kg y ya ' +
+      'sobrará; si salen 13 huevos, pon una docena y media o dos docenas.' + SALTO +
+      '- Lo que todo el mundo tiene en casa —sal, aceite, especias— solo si el menú lo ' +
+      'usa en cantidad.' + SALTO +
+      (p.pais ? 'Con los nombres y los formatos de venta de ' + p.pais + '.' + SALTO : '') +
+      SALTO +
+      'Devuelve JSON: {"compra":[{"zona":"Fruta y verdura|Carne y pescado|Lácteos y huevos|' +
+      'Despensa|Congelados|Otros","cosas":["alimento con la cantidad total"]}]}';
+
+    return llamarJSON(prompt, { maxTokens: 4096, temperatura: 0.2 });
+  }
+
   /* Lectura del progreso reciente */
   function analizarProgreso() {
     const sesiones = Store.sessions().slice(0, 20).map(function (s) {
@@ -3847,7 +3883,7 @@
     clavesDe: clavesDe, anadirClave: anadirClave, quitarClave: quitarClave,
     reiniciarClaves: reiniciarClaves,
     analizarComida: analizarComida, estimarComida: estimarComida,
-    cartaRestaurante: cartaRestaurante,
+    cartaRestaurante: cartaRestaurante, listaDeCompra: listaDeCompra,
     analizarSuplementos: analizarSuplementos,
     revisarCambioComida: revisarCambioComida,
     estimarActividad: estimarActividad, estimarCarga: estimarCarga,

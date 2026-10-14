@@ -1377,9 +1377,13 @@
     'La lista de la compra': 'The shopping list',
     'Sale de tu menú, agrupada por zonas del súper y con casillas para ir tachando.':
       'It comes from your menu, grouped by supermarket aisle and with boxes to tick off.',
-    'Abre Alimentación y baja a tu menú.': 'Open Food and scroll down to your menu.',
-    'Al final de él está *Lista de la compra*, con cuántas cosas lleva.':
-      'At the end of it is *Shopping list*, with how many items it holds.',
+    'Abre Alimentación: está arriba del todo.': 'Open Food: it is right at the top.',
+    'Si tienes varios menús guardados, dentro puedes elegir de cuál la quieres: a veces se compra para el que empieza el lunes, no para el que está acabando.':
+      'If you have several menus saved, inside you can pick which one it comes from: sometimes you shop for the one starting on Monday, not the one finishing.',
+    'Si ese menú aún no tiene lista, púlsale a *Generar la lista*.':
+      'If that menu has no list yet, tap *Build the list*.',
+    'La saca el entrenador de los propios platos del menú, sin tocarlo: suma las raciones de todos los días, redondea a lo que de verdad se vende —560 g de avena son un paquete de kilo— y lo agrupa por zonas. Queda guardada en ese menú.':
+      'The coach works it out from the menu’s own dishes, without touching it: it adds up the portions across every day, rounds to what is actually sold —560 g of oats is a one-kilo bag— and groups it by aisle. It stays saved in that menu.',
     'Elige para cuántos días compras.': 'Pick how many days you are shopping for.',
     'Tu menú cubre una semana; si eliges catorce días es darle dos vueltas, y las cantidades se doblan solas. Esa cuenta la hace la app, no la IA: multiplicar tiene un solo resultado y tiene que dar siempre el mismo, también sin cobertura.':
       'Your menu covers a week; choosing fourteen days means going round it twice, and the amounts double by themselves. That sum is done by the app, not the AI: multiplying has one single answer and has to give the same one every time, with no signal too.',

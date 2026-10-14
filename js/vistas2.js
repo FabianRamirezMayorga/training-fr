@@ -150,6 +150,21 @@
       <h1>${T('Alimentación')}</h1>
       <p class="muted">${T('Calculado a partir de tus datos con la fórmula de Mifflin-St Jeor. Es una orientación, no una pauta médica.')}</p>
 
+      <!-- La lista de la compra, arriba. Estaba al final del menú, después de
+           siete días de comidas desplegadas: para encontrarla había que saber
+           que existía. Y es de lo poco de esta pantalla que se usa *fuera de
+           casa*, con el carro delante, así que no puede estar a diez pantallazos
+           de distancia. -->
+      ${raw(g.Menus && Menus.lista().length ? html`
+        <button class="card fila-plan compra-acceso" data-a="vercompra">
+          <span class="fp-ico" style="--fp:#f0a23c">${raw(icon('lista'))}</span>
+          <span class="grow">
+            <span class="fp-tit">${T('Lista de la compra')}</span>
+            <span class="fp-sub">${T('De tu menú, agrupada por zonas del súper')}</span>
+          </span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>` : '')}
+
       ${raw(numerosHTML(m))}
       ${raw(comidasHoyHTML(m))}
       ${raw(semanaComidaHTML(m))}
@@ -3329,12 +3344,27 @@
       multiplica: multiplica, semanas: semanas, ponerSemanas: ponerSemanas };
   })();
 
+  /* De qué menú se mira la lista. Por defecto el activo, pero se puede cambiar:
+     quien tiene tres menús guardados a veces compra para el que va a empezar el
+     lunes, no para el que está acabando. */
+  let menuCompra = '';
+
   V.compra = function () {
-    const menu = g.Menus ? Menus.activo() : null;
+    const lista = g.Menus ? Menus.lista() : [];
+    const menu = lista.filter(function (x) { return x.id === menuCompra; })[0] ||
+      (g.Menus ? Menus.activo() : null) || lista[0] || null;
     const plan = menu && menu.plan;
     const gs = Compra.grupos(plan);
 
-    if (!gs.length) {
+    const selector = lista.length > 1 ? html`
+      <div class="row compra-menus">
+        ${raw(lista.map(function (x) {
+          return '<button class="chip' + (menu && x.id === menu.id ? ' on' : '') +
+            '" data-menu="' + esc(x.id) + '">' + esc(x.nombre) + '</button>';
+        }).join(''))}
+      </div>` : '';
+
+    if (!menu) {
       return html`
         <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
           ${raw(icon('back'))} ${T('Alimentación')}</button>
@@ -3344,6 +3374,24 @@
             'que comprar para la semana.')}</p>
           <button class="btn primary" data-a="atras">${T('Ir a Alimentación')}</button>
         </div>`;
+    }
+
+    /* Menú sin lista: los de antes de que esto existiera no la traen, y pedirle
+       al usuario que rehaga el menú entero para conseguirla sería cobrarle muy
+       caro algo que se saca de lo que ya tiene. */
+    if (!gs.length) {
+      return html`
+        <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+          ${raw(icon('back'))} ${T('Alimentación')}</button>
+        <h1>${T('Lista de la compra')}</h1>
+        ${raw(selector)}
+        <div class="empty">${raw(icon('lista'))}
+          <p>${Tn('«{menu}» todavía no tiene lista. Se saca de sus propios platos, sin ' +
+            'tocar el menú.', { menu: menu.nombre })}</p>
+          <button class="btn primary" data-a="generarcompra">${raw(icon('chispa'))}
+            ${T('Generar la lista')}</button>
+        </div>
+        <div id="compra-pensando"></div>`;
     }
 
     const ya = Compra.hechas(menu.id);
@@ -3358,8 +3406,8 @@
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Alimentación')}</button>
       <h1>${T('Lista de la compra')}</h1>
-      <p class="muted">${Tn('De {menu}. Elige para cuánto compras y las cantidades se ' +
-        'ajustan solas.', { menu: menu.nombre })}</p>
+      <p class="muted">${T('Elige para cuánto compras y las cantidades se ajustan solas.')}</p>
+      ${raw(selector)}
 
       <!-- Para cuánto. El menú cubre unos días; comprar para dos semanas es
            darle dos vueltas, y entonces las cantidades se doblan. -->
@@ -3404,8 +3452,47 @@
   V.compra.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('nutricion'); });
 
-    const menu = g.Menus ? Menus.activo() : null;
+    const lista = g.Menus ? Menus.lista() : [];
+    const menu = lista.filter(function (x) { return x.id === menuCompra; })[0] ||
+      (g.Menus ? Menus.activo() : null) || lista[0] || null;
     if (!menu) return;
+
+    bindAll(root, '[data-menu]', function (el) {
+      menuCompra = el.getAttribute('data-menu');
+      render();
+    });
+
+    bind(root, '[data-a=generarcompra]', function () {
+      if (!IA.activa()) {
+        UI.toast(T('Esto necesita un proveedor de IA con su clave, en la bóveda de Ajustes.'));
+        go('entrenador');
+        return;
+      }
+      const caja = root.querySelector('#compra-pensando');
+      if (caja) {
+        caja.innerHTML = '<div class="card row" style="gap:12px;align-items:center">' +
+          '<div class="spinner" style="flex:none"></div>' +
+          '<div class="grow"><div style="font-weight:600;font-size:.9rem">' +
+          esc(T('Sumando los platos de la semana…')) + '</div>' +
+          '<div class="tiny">' + esc(T('Se agrupa por zonas del súper.')) + '</div></div></div>';
+      }
+      IA.listaDeCompra(menu.plan).then(function (r) {
+        if (!r || !(r.compra || []).length) {
+          if (caja) caja.innerHTML = '';
+          UI.toast(T('No he podido sacar la lista de ese menú.'));
+          return;
+        }
+        /* Se guarda dentro del menú: es suya, y asi no hay que volver a
+           pedirla cada vez que se abre la pantalla. */
+        const plan = Object.assign({}, menu.plan, { compra: r.compra });
+        Menus.actualizar(menu.id, { plan: plan });
+        render();
+        UI.toast(T('Lista lista.'));
+      }).catch(function (e) {
+        if (caja) caja.innerHTML = '';
+        UI.toast((e && e.message) || T('No he podido sacar la lista de ese menú.'));
+      });
+    });
 
     bindAll(root, '[data-compra]', function (el) {
       const cosa = el.getAttribute('data-compra');
