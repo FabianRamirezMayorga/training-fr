@@ -7607,6 +7607,28 @@
       el.onclick = function () { go(el.dataset.nav); };
     });
 
+    /* El rebote de la marca. La clase se quita para que el segundo toque vuelva
+       a animar: dejarla puesta hacía que solo rebotara una vez y pareciera que
+       el botón se había gastado.
+
+       Y se quita por tiempo, no esperando a `animationend`: con «reducir
+       movimiento» puesto en el sistema no hay animación, así que ese evento no
+       llega nunca y la clase se quedaba pegada para siempre. */
+    const marca = document.getElementById('marca');
+    if (marca) {
+      let reloj = null;
+      marca.addEventListener('pointerdown', function () {
+        clearTimeout(reloj);
+        marca.classList.remove('late');
+        /* Leer una medida fuerza al navegador a rehacer el cálculo antes de
+           volver a poner la clase; sin esto, quitar y poner en el mismo
+           instante no reinicia la animación. */
+        void marca.offsetWidth;
+        marca.classList.add('late');
+        reloj = setTimeout(function () { marca.classList.remove('late'); }, 460);
+      });
+    }
+
     /* ---------- dónde estabas en cada pantalla ----------
        render() no tocaba el scroll: al abrir una rutina aterrizabas a media
        página, y al volver atrás con el gesto tampoco recuperabas el sitio, así

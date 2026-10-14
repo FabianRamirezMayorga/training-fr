@@ -84,7 +84,37 @@ a{color:var(--blue)}
 .topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 72%,transparent);
   backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
   border-bottom:1px solid var(--line);padding-top:var(--safe-t)}
-.topbar-inner{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;min-height:52px}
+.topbar-inner{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;min-height:52px;position:relative}
+
+/* El botón mide 44 aunque el dibujo mida 21: es lo que hay que poder acertar
+   con el pulgar sin mirar, y antes el área tocable era exactamente el logo. */
+.brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:44px;height:44px;padding:0;cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+/* La animación va en la imagen y no en el botón: el botón ya gasta su
+   `transform` en estar centrado, y tocarlo le habría quitado el centrado. */
+.brand-logo{width:21px;height:27px;object-fit:contain;flex:none;
+  transition:transform .18s cubic-bezier(.2,.9,.3,1),filter .18s}
+.brand:active .brand-logo{transform:scale(.86)}
+@media (hover:hover){.brand:hover .brand-logo{filter:brightness(1.14)}}
+/* Al pulsar, se hunde y vuelve con un rebote corto. Es lo único que distingue
+   un logotipo decorativo de un botón: que conteste. */
+@keyframes marca-late{0%{transform:scale(1)}30%{transform:scale(.84)}
+  62%{transform:scale(1.07)}100%{transform:scale(1)}}
+.brand.late .brand-logo{animation:marca-late .42s cubic-bezier(.2,.9,.3,1)}
+@media (prefers-reduced-motion:reduce){
+  .brand.late .brand-logo{animation:none}
+}
+
+/* El sitio cede el texto para que la marca tenga el centro. Antes cedía la
+   marca y se escondía entera; ahora que se queda, el que se aprieta es el chip
+   —y pierde poco: el disco de color con su icono ya dice si entrenas en el
+   gimnasio, en casa o con bandas, y el nombre entero sigue a un toque. Sin
+   esto, el logo centrado caía veinte píxeles dentro del chip. */
+@media (max-width: 560px){
+  .lugar-chip .lc-txt{display:none}
+  .lugar-chip{padding-left:5px;padding-right:5px}
+}
 .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
 /* La inicial, del tamano de los otros botones de la cabecera. Redonda porque
    es lo unico de la fila que representa a una persona y no una funcion.
