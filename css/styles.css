@@ -40,11 +40,22 @@ body{
   background:var(--bg); color:var(--txt);
   font:400 17px/1.47 var(--sans);
   letter-spacing:-.01em;
-  /* deja hueco a la barra de pestañas y, si entrena, al cronómetro. Se dice
-     en una variable porque la portada la necesita para saber cuánta pantalla
-     tiene de verdad. */
-  --pad-abajo:78px;
-  padding-bottom:calc(var(--pad-abajo) + var(--safe-b));
+  /* Lo que la barra flota sobre el borde de abajo.
+
+     No es el área segura entera, y ahí estaba el hueco muerto: en un iPhone el
+     área segura de abajo son 34 píxeles, pensados para que no pongas *texto*
+     encima de la raya de inicio. Sumándolos enteros, la barra quedaba flotando
+     a 44 del borde y debajo se veía un palmo de fondo sin usar. Restando 20 se
+     apoya justo encima de la raya, que es donde la pone cualquier app, y la
+     pantalla recupera esos 30 píxeles. El mínimo de 10 es para los móviles sin
+     raya, donde el área segura vale cero. */
+  --barra-abajo:max(10px, calc(var(--safe-b) - 20px));
+
+  /* El hueco que el contenido le deja a la barra: su alto más un poco de aire.
+     Se dice en una variable porque la portada la necesita para saber cuánta
+     pantalla tiene de verdad. */
+  --pad-abajo:68px;
+  padding-bottom:calc(var(--pad-abajo) + var(--barra-abajo));
   overflow-wrap:anywhere;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
@@ -181,19 +192,27 @@ html[data-theme="light"] .av-perfil{
 
    El ancho se limita a 430 para que en una tablet no salga una pastilla de
    palmo y medio con cuatro iconos perdidos dentro. */
-.tabbar{position:fixed;bottom:calc(var(--safe-b) + 10px);left:50%;
-  transform:translateX(-50%);width:calc(100% - 26px);max-width:430px;
-  z-index:60;display:flex;border-radius:24px;overflow:hidden;
-  background:color-mix(in srgb,var(--bg2) 58%,transparent);
-  backdrop-filter:saturate(180%) blur(28px);-webkit-backdrop-filter:saturate(180%) blur(28px);
-  border:1px solid color-mix(in srgb,var(--txt) 11%,transparent);
-  box-shadow:0 10px 30px rgba(0,0,0,.30),0 2px 8px rgba(0,0,0,.16)}
+.tabbar{position:fixed;bottom:var(--barra-abajo);left:50%;
+  transform:translateX(-50%);width:calc(100% - 24px);max-width:430px;
+  z-index:60;display:flex;border-radius:26px;overflow:hidden;
+  /* Menos relleno y más desenfoque. Al 58 por ciento el cristal era casi
+     opaco y no se veía pasar nada por debajo; lo que hace que una pieza
+     parezca de vidrio no es el desenfoque, es *ver algo* desenfocado. */
+  background:color-mix(in srgb,var(--bg2) 46%,transparent);
+  backdrop-filter:saturate(190%) blur(30px);-webkit-backdrop-filter:saturate(190%) blur(30px);
+  border:1px solid color-mix(in srgb,var(--txt) 13%,transparent);
+  /* La raya de luz de dentro es lo que de verdad lo convierte en cristal: es
+     el canto de la pieza cogiendo luz, y sin ella un fondo translucido se lee
+     como un plastico sucio. */
+  box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 14%,transparent),
+             0 10px 30px rgba(0,0,0,.34),0 2px 8px rgba(0,0,0,.18)}
 /* En claro la misma sombra tapaba: el fondo es blanco y lo que hay debajo no
    es una sombra, es suciedad. Mas suave y el cristal mas opaco, que sobre
    blanco el desenfoque solo no separa nada. */
 html[data-theme="light"] .tabbar{
-  background:color-mix(in srgb,var(--bg2) 72%,transparent);
-  box-shadow:0 8px 24px rgba(16,24,40,.12),0 1px 4px rgba(16,24,40,.08)}
+  background:color-mix(in srgb,var(--bg2) 60%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),
+             0 8px 26px rgba(16,24,40,.14),0 1px 4px rgba(16,24,40,.09)}
 /* Los apagados suben de claridad. Estaban en `--dim2`, que es el gris de un
    texto de tercera, y esto no es texto de tercera: es la navegacion, lo unico
    que hay que poder ver siempre. Y cuanto mas se ven ellos, mas se entiende que
@@ -503,7 +522,7 @@ html[data-theme="light"] .chip.on{
 .prog i{display:block;height:100%;background:var(--acc);transition:width .35s}
 /* Pila fija sobre la barra de pestañas: cronómetro arriba, descanso debajo.
    Sin puntero salvo en sus hijos, para no tapar la página que hay detrás. */
-.hud{position:fixed;left:0;right:0;bottom:calc(76px + var(--safe-b));z-index:55;
+.hud{position:fixed;left:0;right:0;bottom:calc(var(--barra-abajo) + 66px);z-index:55;
   padding:0 16px;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .hud>*{pointer-events:auto}
 .hud:empty{display:none}
@@ -830,7 +849,7 @@ html[data-theme="light"] .clave-panel{
 .crono-fin{flex:none;font-weight:700;font-size:.8rem;background:rgba(0,0,0,.16);color:inherit;
   padding:.5em .85em;border-radius:9px}
 .crono-fin:active{transform:scale(.95)}
-body.con-crono{--pad-abajo:134px}
+body.con-crono{--pad-abajo:124px}
 
 /* ---------- programa personal ---------- */
 /* Cabecera plegable de cada día del programa */
@@ -1155,8 +1174,8 @@ body.con-crono{--pad-abajo:134px}
   justify-content:center;background:none;color:var(--txt);padding:0}
 .bm-b svg{width:21px;height:21px;fill:currentColor;stroke:none}
 .bm-b:active{transform:scale(.9)}
-body.con-musica{--pad-abajo:120px}
-body.con-musica.con-crono{--pad-abajo:196px}
+body.con-musica{--pad-abajo:110px}
+body.con-musica.con-crono{--pad-abajo:186px}
 /* Aleatorio y corazón: más pequeños, que son secundarios */
 .player-b.chico{width:38px;height:38px;color:var(--dim2)}
 .player-b.chico svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;
@@ -1827,7 +1846,7 @@ img[src^="data/img/"] {
 
 .vista-inicio {
   display: flex; flex-direction: column;
-  min-height: calc(100svh - 57px - var(--pad-abajo) - var(--safe-t) - var(--safe-b));
+  min-height: calc(100svh - 57px - var(--pad-abajo) - var(--safe-t) - var(--barra-abajo));
   /* El relleno de abajo de una pantalla por la que se baja aqui no hace falta:
      debajo del ultimo bloque ya estan las pestanas. */
   padding-bottom: 8px;
@@ -3758,7 +3777,7 @@ html[data-theme="light"] .campo-largo { background: #fff; border-color: var(--li
    fija abajo, encima de las pestanas. */
 .barra-edicion {
   position: fixed; left: 0; right: 0; z-index: 58;
-  bottom: calc(76px + var(--safe-b));
+  bottom: calc(var(--barra-abajo) + 66px);
   display: flex; gap: 9px; padding: 10px 16px;
   max-width: 900px; margin: 0 auto;
 }
