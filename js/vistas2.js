@@ -726,19 +726,6 @@
         }).join(''))}
       </div>
 
-      <!-- La lista estaba aqui, al fondo y como una nube de etiquetas: se podia
-           leer pero no usar. Comprar es ir tachando, y una etiqueta no se tacha.
-           Ahora es una pantalla, y aqui queda el camino. -->
-      ${raw(Compra.cuantas(plan) ? html`
-        <button class="card fila-plan" data-a="vercompra" style="margin-top:14px">
-          <span class="fp-ico" style="--fp:#f0a23c">${raw(icon('lista'))}</span>
-          <span class="grow">
-            <span class="fp-tit">${T('Lista de la compra')}</span>
-            <span class="fp-sub">${Tp(Compra.cuantas(plan), '{n} cosa', '{n} cosas')}</span>
-          </span>
-          <span class="chevron">${raw(icon('chevron'))}</span>
-        </button>` : '')}
-
       ${raw(plan.flexibilidad ? html`
         <div class="card destacado-clave" style="margin-top:14px">
           <h3 class="guia-h">${raw(icon('chispa'))} Hasta dónde puedes salirte</h3>
@@ -3244,287 +3231,362 @@
   };
   /* ================= la lista de la compra =================
 
-     El menú ya traía esta lista desde siempre —la IA la devuelve con el plan—
-     pero se pintaba como una nube de etiquetas al final de la pantalla del
-     menú. Se podía leer y no se podía usar: comprar es ir tachando, y una
-     etiqueta no se tacha.
+     El recorrido es el que se hace de verdad: eliges de qué menú, para cuántos
+     días, la IA la monta, la guardas, y a partir de ahí vives en ella mientras
+     compras. Lo de antes pintaba el campo «compra» del menú tal cual, que sirve
+     para mirar y no para usar: en el súper decides tú cuánto compras y la mitad
+     de las veces acabas cambiando algo. */
 
-     Tres decisiones:
+  let compraMenu = '';
+  let compraDias = 0;
+  let compraPreview = null;
+  let compraPensando = false;
 
-     - Pantalla propia. En el súper se mira el móvil con una mano y el carro con
-       la otra; lo último que hace falta es bajar por siete días de menú para
-       llegar a la lista.
-     - Lo tachado se guarda por menú, no por sesión. Se sale uno del
-       supermercado, vuelve a entrar, y la lista sigue como la dejó. Y al
-       renovar el menú empieza limpia, porque es otra compra.
-     - Agrupada por zona del súper cuando el menú la trae así. Una lista
-       ordenada por días obliga a recorrer la tienda cuatro veces. */
-  const Compra = (function () {
-    /* Comprar para dos semanas es el mismo menú dos veces, así que las
-       cantidades se multiplican. Y multiplicar es una regla, no una opinión:
-       se hace aquí y no pidiéndole a la IA que rehaga la lista, que tardaría,
-       costaría cuota y daría un resultado distinto cada vez para una cuenta que
-       solo tiene un resultado.
+  function menuDeCompra() {
+    const lista = g.Menus ? Menus.lista() : [];
+    return lista.filter(function (x) { return x.id === compraMenu; })[0] ||
+      (g.Menus ? Menus.activo() : null) || lista[0] || null;
+  }
 
-       Se multiplica *el último número* del texto porque es donde va siempre la
-       cantidad —«Pechuga de pollo 1,1 kg», «Huevos 12 uds»— y no el primero,
-       que a veces forma parte del nombre: «3 quesitos light 200 g» son 200
-       gramos de un producto que se llama así. */
-    const NUM = /(\d+(?:[.,]\d+)?)(\s*)([a-zA-Záéíóúñ]*)\s*$/;
-
-    function multiplica(texto, n) {
-      if (n <= 1) return texto;
-      const m = String(texto).match(NUM);
-      if (!m) {
-        /* Sin cantidad que multiplicar —«sal», «aceite de oliva»— se deja tal
-           cual: duplicar «sal» no significa nada. */
-        return texto;
-      }
-      const valor = parseFloat(m[1].replace(',', '.')) * n;
-      let uni = m[3] || '';
-      let out = valor;
-      /* Mil gramos son un kilo. Sin esto, comprar para un mes pedía «4000 g de
-         avena», que es correcto y no lo dice nadie en una tienda. */
-      if (/^g$/i.test(uni) && out >= 1000) { out = out / 1000; uni = 'kg'; }
-      else if (/^ml$/i.test(uni) && out >= 1000) { out = out / 1000; uni = 'L'; }
-      const txt = (Math.round(out * 100) / 100).toString().replace('.', ',');
-      return texto.slice(0, m.index) + txt + (m[2] || ' ') + uni;
-    }
-
-    function semanas(menuId) {
-      try { return Math.min(4, Math.max(1,
-        Number((Store.settings().compraSemanas || {})[menuId]) || 1)); }
-      catch (e) { return 1; }
-    }
-
-    function ponerSemanas(menuId, n) {
-      const todo = Object.assign({}, Store.settings().compraSemanas || {});
-      todo[menuId] = n;
-      Store.setSetting('compraSemanas', todo);
-    }
-
-    function grupos(plan) {
-      const raw = (plan && plan.compra) || [];
-      if (!raw.length) return [];
-      /* Dos formas: la de siempre —una lista de textos— y la agrupada por zona.
-         Se leen las dos para que los menús de antes sigan sirviendo. */
-      if (typeof raw[0] === 'string') {
-        return [{ zona: '', cosas: raw.slice() }];
-      }
-      return raw.map(function (g) {
-        return { zona: String(g.zona || ''), cosas: (g.cosas || []).slice() };
-      }).filter(function (g) { return g.cosas.length; });
-    }
-
-    function cuantas(plan) {
-      return grupos(plan).reduce(function (n, g) { return n + g.cosas.length; }, 0);
-    }
-
-    function hechas(menuId) {
-      try { return (Store.settings().compraHecha || {})[menuId] || {}; }
-      catch (e) { return {}; }
-    }
-
-    function marcar(menuId, cosa, si) {
-      const todo = Object.assign({}, Store.settings().compraHecha || {});
-      const mia = Object.assign({}, todo[menuId] || {});
-      if (si) mia[cosa] = 1; else delete mia[cosa];
-      todo[menuId] = mia;
-      Store.setSetting('compraHecha', todo);
-    }
-
-    function limpiar(menuId) {
-      const todo = Object.assign({}, Store.settings().compraHecha || {});
-      delete todo[menuId];
-      Store.setSetting('compraHecha', todo);
-    }
-
-    return { grupos: grupos, cuantas: cuantas, hechas: hechas,
-      marcar: marcar, limpiar: limpiar,
-      multiplica: multiplica, semanas: semanas, ponerSemanas: ponerSemanas };
-  })();
-
-  /* De qué menú se mira la lista. Por defecto el activo, pero se puede cambiar:
-     quien tiene tres menús guardados a veces compra para el que va a empezar el
-     lunes, no para el que está acabando. */
-  let menuCompra = '';
+  function diasDelMenu(menu) {
+    return ((menu && menu.plan && menu.plan.dias) || []).length || 7;
+  }
 
   V.compra = function () {
     const lista = g.Menus ? Menus.lista() : [];
-    const menu = lista.filter(function (x) { return x.id === menuCompra; })[0] ||
-      (g.Menus ? Menus.activo() : null) || lista[0] || null;
-    const plan = menu && menu.plan;
-    const gs = Compra.grupos(plan);
+    const menu = menuDeCompra();
 
-    const selector = lista.length > 1 ? html`
-      <div class="row compra-menus">
-        ${raw(lista.map(function (x) {
-          return '<button class="chip' + (menu && x.id === menu.id ? ' on' : '') +
-            '" data-menu="' + esc(x.id) + '">' + esc(x.nombre) + '</button>';
-        }).join(''))}
-      </div>` : '';
+    const atras = html`
+      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+        ${raw(icon('back'))} ${T('Alimentación')}</button>
+      <h1>${T('Lista de la compra')}</h1>`;
 
     if (!menu) {
-      return html`
-        <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-          ${raw(icon('back'))} ${T('Alimentación')}</button>
-        <h1>${T('Lista de la compra')}</h1>
+      return html`${raw(atras)}
         <div class="empty">${raw(icon('lista'))}
           <p>${T('Sale de tu menú: cuando tengas uno generado, aquí estará lo que hay ' +
-            'que comprar para la semana.')}</p>
+            'que comprar.')}</p>
           <button class="btn primary" data-a="atras">${T('Ir a Alimentación')}</button>
         </div>`;
     }
 
-    /* Menú sin lista: los de antes de que esto existiera no la traen, y pedirle
-       al usuario que rehaga el menú entero para conseguirla sería cobrarle muy
-       caro algo que se saca de lo que ya tiene. */
-    if (!gs.length) {
-      return html`
-        <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-          ${raw(icon('back'))} ${T('Alimentación')}</button>
-        <h1>${T('Lista de la compra')}</h1>
-        ${raw(selector)}
-        <div class="empty">${raw(icon('lista'))}
-          <p>${Tn('«{menu}» todavía no tiene lista. Se saca de sus propios platos, sin ' +
-            'tocar el menú.', { menu: menu.nombre })}</p>
-          <button class="btn primary" data-a="generarcompra">${raw(icon('chispa'))}
-            ${T('Generar la lista')}</button>
+    const guardada = g.ListaCompra ? ListaCompra.de(menu.id) : null;
+
+    /* ---- la lista ya hecha: lo que se mira en el supermercado ---- */
+    if (guardada && !compraPreview) {
+      const n = ListaCompra.cuenta(guardada);
+      return html`${raw(atras)}
+        <p class="muted">${Tn('{menu} · {dias}',
+          { menu: guardada.menuNombre || menu.nombre,
+            dias: Tp(guardada.dias, '{n} día', '{n} días') })}</p>
+
+        <div class="card compra-cuenta">
+          <div class="row between">
+            <b>${Tn('{a} de {b}', { a: n.hechas, b: n.total })}</b>
+            <span class="row" style="gap:7px;flex:none">
+              ${raw(n.hechas ? '<button class="btn sm vidrio" data-a="limpiarmarcas">' +
+                esc(T('Destachar')) + '</button>' : '')}
+              <button class="btn sm vidrio" data-a="otralista">${T('Rehacer')}</button>
+            </span>
+          </div>
+          <div class="prog" style="margin-top:9px"><i style="width:${
+            raw(n.total ? Math.round(n.hechas / n.total * 100) : 0)}%"></i></div>
         </div>
-        <div id="compra-pensando"></div>`;
+
+        ${raw(guardada.zonas.map(function (z, zi) {
+          return (z.zona ? '<div class="list-title">' + esc(T(z.zona)) + '</div>'
+            : '<div style="height:14px"></div>') +
+            '<div class="list">' + z.cosas.map(function (c, ci) {
+              return '<div class="list-row compra-fila' + (c.hecho ? ' ya' : '') + '">' +
+                '<button class="compra-caja" data-marcar="' + zi + ',' + ci + '" ' +
+                  'aria-label="' + esc(T('Marcar')) + '">' +
+                  (c.hecho ? icon('check') : '') + '</button>' +
+                '<span class="grow compra-txt">' + esc(c.que) +
+                  (c.cuanto ? ' <i class="compra-cuanto">' + esc(c.cuanto) + '</i>' : '') +
+                  (c.antes ? '<span class="compra-antes">' +
+                    esc(Tn('antes: {que}', { que: c.antes })) + '</span>' : '') +
+                '</span>' +
+                '<button class="compra-cambiar" data-cambiar="' + zi + ',' + ci + '" ' +
+                  'aria-label="' + esc(T('Sustituir')) + '">' + icon('cambiar') + '</button>' +
+              '</div>';
+            }).join('') + '</div>';
+        }).join(''))}
+
+        <p class="tiny" style="margin-top:14px">${T('Lo tachado se guarda: puedes salir del ' +
+          'súper, volver a entrar y seguir donde lo dejaste. Y con el botón de la derecha ' +
+          'cambias cualquier cosa por otra.')}</p>`;
     }
 
-    const ya = Compra.hechas(menu.id);
-    const total = Compra.cuantas(plan);
-    const sem = Compra.semanas(menu.id);
-    const dias = (plan.dias || []).length || 7;
-    const puestas = gs.reduce(function (n, gr) {
-      return n + gr.cosas.filter(function (x) { return ya[x]; }).length;
-    }, 0);
+    /* ---- el asistente: de qué menú, para cuántos días ---- */
+    const base = diasDelMenu(menu);
+    const dias = compraDias || base;
+    const sugeridos = [base, base * 2, base * 3, 30];
 
-    return html`
-      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
-        ${raw(icon('back'))} ${T('Alimentación')}</button>
-      <h1>${T('Lista de la compra')}</h1>
-      <p class="muted">${T('Elige para cuánto compras y las cantidades se ajustan solas.')}</p>
-      ${raw(selector)}
+    return html`${raw(atras)}
+      <p class="muted">${T('Dime de qué menú y para cuántos días, y el entrenador monta ' +
+        'la lista sumando los platos.')}</p>
 
-      <!-- Para cuánto. El menú cubre unos días; comprar para dos semanas es
-           darle dos vueltas, y entonces las cantidades se doblan. -->
+      ${raw(lista.length > 1 ? html`
+        <div class="list-title">${T('De qué menú')}</div>
+        <div class="row compra-menus">
+          ${raw(lista.map(function (x) {
+            return '<button class="chip' + (x.id === menu.id ? ' on' : '') +
+              '" data-menu="' + esc(x.id) + '">' + esc(x.nombre) + '</button>';
+          }).join(''))}
+        </div>` : '')}
+
+      <div class="list-title">${T('Para cuántos días')}</div>
       <div class="row compra-sem">
-        ${raw([1, 2, 3, 4].map(function (n) {
-          return '<button class="chip' + (n === sem ? ' on' : '') + '" data-sem="' + n + '">' +
-            esc(Tp(n * dias, '{n} día', '{n} días')) + '</button>';
+        ${raw(sugeridos.filter(function (v, i, a) { return a.indexOf(v) === i; })
+          .map(function (nd) {
+            return '<button class="chip' + (nd === dias ? ' on' : '') +
+              '" data-dias="' + nd + '">' + esc(Tp(nd, '{n} día', '{n} días')) + '</button>';
+          }).join(''))}
+      </div>
+      <div class="row" style="gap:9px;margin-bottom:14px">
+        <input id="compra-dias" class="grow" type="number" min="1" max="60"
+               inputmode="numeric" value="${raw(dias)}" style="margin:0">
+        <span class="tiny nowrap" style="flex:none">${T('días')}</span>
+      </div>
+
+      ${raw(compraPreview ? html`
+        <div class="list-title">${T('Así queda')}</div>
+        ${raw(compraPreview.zonas.map(function (z) {
+          return '<div class="card compra-prev"><b class="compra-prev-z">' +
+            esc(T(z.zona || T('Otros'))) + '</b><p>' +
+            esc(z.cosas.map(function (c) {
+              return c.que + (c.cuanto ? ' (' + c.cuanto + ')' : '');
+            }).join(' · ')) + '</p></div>';
         }).join(''))}
-      </div>
+        <div class="row" style="gap:9px;margin-top:14px">
+          <button class="btn primary grow" data-a="guardarlista">${raw(icon('check'))}
+            ${T('Crear la lista')}</button>
+          <button class="btn vidrio" data-a="generarlista">${raw(icon('actualizar'))}</button>
+        </div>` : html`
+        <button class="btn primary block btn-arranque" data-a="generarlista"
+                ${raw(compraPensando ? 'disabled' : '')}>
+          ${raw(icon('chispa'))} ${compraPensando
+            ? T('Sumando los platos…') : T('Generar la lista')}</button>`)}
 
-      <div class="card compra-cuenta">
-        <div class="row between">
-          <b>${Tn('{a} de {b}', { a: puestas, b: total })}</b>
-          ${raw(puestas ? '<button class="btn sm vidrio" data-a="limpiarcompra">' +
-            esc(T('Empezar de cero')) + '</button>' : '')}
-        </div>
-        <div class="prog" style="margin-top:9px"><i style="width:${
-          raw(total ? Math.round(puestas / total * 100) : 0)}%"></i></div>
-      </div>
-
-      ${raw(gs.map(function (gr) {
-        return (gr.zona ? '<div class="list-title">' + esc(T(gr.zona)) + '</div>'
-          : '<div style="height:14px"></div>') +
-          '<div class="list">' + gr.cosas.map(function (x) {
-            const on = !!ya[x];
-            /* Lo tachado se guarda con el texto original, no con el ya
-               multiplicado: si no, cambiar de una semana a dos destachaba la
-               lista entera porque «500 g» y «1 kg» no son la misma cadena. */
-            return '<button class="list-row compra-fila' + (on ? ' ya' : '') +
-              '" data-compra="' + esc(x) + '">' +
-              '<span class="compra-caja">' + (on ? icon('check') : '') + '</span>' +
-              '<span class="grow compra-txt">' + esc(Compra.multiplica(x, sem)) + '</span>' +
-            '</button>';
-          }).join('') + '</div>';
-      }).join(''))}
-
-      <p class="tiny" style="margin-top:14px">${T('Lo tachado se guarda: puedes salir del ' +
-        'súper, volver a entrar y seguir donde lo dejaste. Al renovar el menú, la lista ' +
-        'empieza limpia.')}</p>`;
+      <div id="compra-pensando"></div>`;
   };
 
   V.compra.mount = function (root) {
     bind(root, '[data-a=atras]', function () { go('nutricion'); });
 
-    const lista = g.Menus ? Menus.lista() : [];
-    const menu = lista.filter(function (x) { return x.id === menuCompra; })[0] ||
-      (g.Menus ? Menus.activo() : null) || lista[0] || null;
+    const menu = menuDeCompra();
     if (!menu) return;
 
     bindAll(root, '[data-menu]', function (el) {
-      menuCompra = el.getAttribute('data-menu');
+      compraMenu = el.getAttribute('data-menu');
+      compraPreview = null;
+      compraDias = 0;
       render();
     });
 
-    bind(root, '[data-a=generarcompra]', function () {
-      if (!IA.activa()) {
-        UI.toast(T('Esto necesita un proveedor de IA con su clave, en la bóveda de Ajustes.'));
-        go('entrenador');
-        return;
-      }
-      const caja = root.querySelector('#compra-pensando');
-      if (caja) {
-        caja.innerHTML = '<div class="card row" style="gap:12px;align-items:center">' +
-          '<div class="spinner" style="flex:none"></div>' +
-          '<div class="grow"><div style="font-weight:600;font-size:.9rem">' +
-          esc(T('Sumando los platos de la semana…')) + '</div>' +
-          '<div class="tiny">' + esc(T('Se agrupa por zonas del súper.')) + '</div></div></div>';
-      }
-      IA.listaDeCompra(menu.plan).then(function (r) {
-        if (!r || !(r.compra || []).length) {
-          if (caja) caja.innerHTML = '';
-          UI.toast(T('No he podido sacar la lista de ese menú.'));
-          return;
-        }
-        /* Se guarda dentro del menú: es suya, y asi no hay que volver a
-           pedirla cada vez que se abre la pantalla. */
-        const plan = Object.assign({}, menu.plan, { compra: r.compra });
-        Menus.actualizar(menu.id, { plan: plan });
+    bindAll(root, '[data-dias]', function (el) {
+      compraDias = Number(el.getAttribute('data-dias'));
+      compraPreview = null;
+      render();
+    });
+
+    const campo = root.querySelector('#compra-dias');
+    if (campo) campo.onchange = function () {
+      const n = Math.min(60, Math.max(1, Number(campo.value) || 1));
+      compraDias = n;
+      campo.value = n;
+      compraPreview = null;
+      render();
+    };
+
+    bind(root, '[data-a=generarlista]', function () {
+      const n = compraDias || diasDelMenu(menu);
+      compraPensando = true;
+      render();
+      ListaCompra.generar(menu, n).then(function (l) {
+        compraPensando = false;
+        compraPreview = l;
         render();
-        UI.toast(T('Lista lista.'));
       }).catch(function (e) {
-        if (caja) caja.innerHTML = '';
+        compraPensando = false;
+        render();
         UI.toast((e && e.message) || T('No he podido sacar la lista de ese menú.'));
       });
     });
 
-    bindAll(root, '[data-compra]', function (el) {
-      const cosa = el.getAttribute('data-compra');
-      const on = el.classList.contains('ya');
-      Compra.marcar(menu.id, cosa, !on);
-      /* Se repinta en el sitio y no la pantalla entera: tachando quince cosas
-         seguidas, un repintado completo por toque te manda arriba del todo en
-         cada una. */
-      el.classList.toggle('ya', !on);
-      el.querySelector('.compra-caja').innerHTML = !on ? icon('check') : '';
-      const cuenta = root.querySelector('.compra-cuenta');
-      if (cuenta) {
-        const hechas = root.querySelectorAll('.compra-fila.ya').length;
-        const total = root.querySelectorAll('.compra-fila').length;
-        const b = cuenta.querySelector('b');
-        if (b) b.textContent = Tn('{a} de {b}', { a: hechas, b: total });
-        const barra = cuenta.querySelector('.prog i');
-        if (barra) barra.style.width = (total ? Math.round(hechas / total * 100) : 0) + '%';
+    bind(root, '[data-a=guardarlista]', function () {
+      if (!compraPreview) return;
+      ListaCompra.poner(menu.id, compraPreview);
+      compraPreview = null;
+      render();
+      UI.toast(T('Lista guardada.'));
+    });
+
+    bind(root, '[data-a=otralista]', function () {
+      UI.confirm(T('Rehacer la lista'),
+        T('Se pierde lo que lleves tachado y las sustituciones que hayas hecho.'),
+        T('Rehacer'), true).then(function (si) {
+          if (!si) return;
+          ListaCompra.borrar(menu.id);
+          compraPreview = null;
+          render();
+        });
+    });
+
+    bind(root, '[data-a=limpiarmarcas]', function () {
+      ListaCompra.limpiarMarcas(menu.id);
+      render();
+    });
+
+    bindAll(root, '[data-marcar]', function (el) {
+      const p = el.getAttribute('data-marcar').split(',');
+      const l = ListaCompra.de(menu.id);
+      const c = l.zonas[p[0]].cosas[p[1]];
+      ListaCompra.marcar(menu.id, Number(p[0]), Number(p[1]), !c.hecho);
+      /* En el sitio y no repintando: tachando veinte cosas seguidas, un
+         repintado por toque te manda arriba del todo en cada una. */
+      const fila = el.closest('.compra-fila');
+      fila.classList.toggle('ya', !c.hecho);
+      el.innerHTML = !c.hecho ? icon('check') : '';
+      const caja = root.querySelector('.compra-cuenta');
+      if (caja) {
+        const n = ListaCompra.cuenta(ListaCompra.de(menu.id));
+        const b = caja.querySelector('b');
+        if (b) b.textContent = Tn('{a} de {b}', { a: n.hechas, b: n.total });
+        const barra = caja.querySelector('.prog i');
+        if (barra) barra.style.width = (n.total ? Math.round(n.hechas / n.total * 100) : 0) + '%';
       }
     });
 
-    bindAll(root, '[data-sem]', function (el) {
-      Compra.ponerSemanas(menu.id, Number(el.getAttribute('data-sem')));
-      render();
-    });
-
-    bind(root, '[data-a=limpiarcompra]', function () {
-      Compra.limpiar(menu.id);
-      render();
+    bindAll(root, '[data-cambiar]', function (el) {
+      const p = el.getAttribute('data-cambiar').split(',');
+      hojaSustituir(menu, Number(p[0]), Number(p[1]));
     });
   };
 
+  /* ---------- sustituir una cosa ----------
+     Dos caminos y los dos hacen falta: el que ya sabe por qué lo cambia solo
+     quiere escribirlo, y el que está delante del lineal sin saber por qué
+     cambiarlo quiere que se lo digan. Lo que no puede pasar es que elegir una
+     alternativa deje el menú hablando de pollo cuando compraste pavo: por eso,
+     al final, el cambio se arrastra a los platos. */
+  function hojaSustituir(menu, zi, ci) {
+    const l = ListaCompra.de(menu.id);
+    const cosa = l.zonas[zi].cosas[ci];
+
+    UI.modal(html`
+      <h2 class="conf-tit">${cosa.que}</h2>
+      <p class="muted conf-txt">${T('Cámbialo por otra cosa. Si no sabes por cuál, ' +
+        'pregúntale al entrenador: mira lo que te cambia en tus números.')}</p>
+
+      <div class="row" style="gap:8px;margin-top:16px">
+        <input id="sust-txt" class="grow" placeholder="${T('Escribe con qué lo cambias')}"
+               autocomplete="off" style="margin:0">
+        <button class="btn vidrio" data-x="mano">${raw(icon('check'))}</button>
+      </div>
+
+      <button class="btn block" data-x="ia" style="margin-top:10px">
+        ${raw(icon('chispa'))} ${T('¿Por cuál puedo cambiarlo?')}</button>
+
+      ${raw(cosa.antes ? '<button class="btn block vidrio" data-x="deshacer" ' +
+        'style="margin-top:10px">' + esc(Tn('Volver a {que}', { que: cosa.antes })) +
+        '</button>' : '')}
+
+      <div id="sust-salida"></div>`,
+      function (el) {
+        const salida = el.querySelector('#sust-salida');
+
+        const aplicar = function (nuevo) {
+          const r = ListaCompra.sustituir(menu.id, zi, ci, nuevo);
+          UI.closeModal();
+          render();
+          if (!r) return;
+          UI.toast(Tn('Cambiado por {que}', { que: r.nuevo }));
+          propagarAlMenu(menu, r.viejo, r.nuevo);
+        };
+
+        el.querySelector('[data-x=mano]').onclick = function () {
+          const v = el.querySelector('#sust-txt').value.trim();
+          if (!v) { UI.toast(T('Escribe con qué lo cambias.')); return; }
+          aplicar(v);
+        };
+
+        const deshacer = el.querySelector('[data-x=deshacer]');
+        if (deshacer) deshacer.onclick = function () {
+          ListaCompra.deshacerSustitucion(menu.id, zi, ci);
+          UI.closeModal();
+          render();
+        };
+
+        el.querySelector('[data-x=ia]').onclick = function () {
+          if (!IA.activa()) {
+            UI.toast(T('Esto necesita un proveedor de IA con su clave, en la bóveda de Ajustes.'));
+            return;
+          }
+          salida.innerHTML = '<div class="row" style="gap:10px;margin-top:14px;' +
+            'align-items:center"><div class="spinner" style="flex:none"></div>' +
+            '<span class="tiny">' + esc(T('Mirando por qué puedes cambiarlo…')) +
+            '</span></div>';
+          IA.alternativasDe(cosa.que, menu.plan).then(function (r) {
+            const ops = (r && r.opciones) || [];
+            if (!ops.length) {
+              salida.innerHTML = '<p class="tiny" style="margin-top:14px">' +
+                esc(T('No se me ocurre nada que encaje igual.')) + '</p>';
+              return;
+            }
+            salida.innerHTML = '<div class="stack" style="margin-top:14px;text-align:left">' +
+              ops.slice(0, 3).map(function (o, i) {
+                return '<button class="card sust-op" data-op="' + i + '">' +
+                  '<div class="row between" style="gap:9px;align-items:flex-start">' +
+                    '<b>' + esc(o.que || '') + '</b>' +
+                    (o.igual ? '<span class="sust-igual">' + esc(T('igual')) + '</span>' : '') +
+                  '</div>' +
+                  (o.porque ? '<p>' + esc(o.porque) + '</p>' : '') +
+                '</button>';
+              }).join('') + '</div>';
+            salida.querySelectorAll('[data-op]').forEach(function (b) {
+              b.onclick = function () { aplicar(ops[Number(b.dataset.op)].que); };
+            });
+          }).catch(function (e) {
+            salida.innerHTML = '<p class="tiny" style="margin-top:14px">' +
+              esc((e && e.message) || T('No he podido preguntarlo.')) + '</p>';
+          });
+        };
+      });
+  }
+
+  /* El cambio llega al menú. Se pregunta antes porque reescribe platos que tú
+     no has tocado, y porque cuesta una llamada: quien cambia una marca de arroz
+     por otra no quiere que le reescriban la semana. */
+  function propagarAlMenu(menu, viejo, nuevo) {
+    if (!g.IA || !IA.activa()) return;
+    UI.confirm(T('¿Lo cambio también en el menú?'),
+      Tn('Los platos que llevan {viejo} pasarían a {nuevo}, con las cantidades y las ' +
+        'calorías ajustadas.', { viejo: viejo, nuevo: nuevo }),
+      T('Sí, cámbialo')).then(function (si) {
+        if (!si) return;
+        UI.toast(T('Reescribiendo los platos…'));
+        IA.cambiarEnMenu(menu.plan, viejo, nuevo).then(function (r) {
+          const cambios = (r && r.cambios) || [];
+          if (!cambios.length) { UI.toast(T('En el menú no salía, así que no hay nada que tocar.')); return; }
+          const plan = JSON.parse(JSON.stringify(menu.plan));
+          cambios.forEach(function (c) {
+            const d = plan.dias[c.dia];
+            if (!d || !d.comidas || !d.comidas[c.comida]) return;
+            const com = d.comidas[c.comida];
+            com.plato = c.plato || com.plato;
+            ['kcal', 'prot', 'carbo', 'grasa'].forEach(function (k) {
+              if (typeof c[k] === 'number') com[k] = c[k];
+            });
+          });
+          Menus.actualizar(menu.id, { plan: plan });
+          render();
+          UI.toast(Tp(cambios.length, '{n} plato actualizado', '{n} platos actualizados'));
+        }).catch(function (e) {
+          UI.toast((e && e.message) || T('No he podido cambiarlo en el menú.'));
+        });
+      });
+  }
+
   V.franjasSheet = franjasSheet;
-  g.Compra = Compra;
 })(window);

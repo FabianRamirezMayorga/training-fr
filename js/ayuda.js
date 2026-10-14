@@ -539,12 +539,18 @@
           ir: { ruta: 'nutricion', label: 'Abrir Alimentación' } },
         { t: 'Si ese menú aún no tiene lista, púlsale a *Generar la lista*.',
           d: 'La saca el entrenador de los propios platos del menú, sin tocarlo: suma las raciones de todos los días, redondea a lo que de verdad se vende —560 g de avena son un paquete de kilo— y lo agrupa por zonas. Queda guardada en ese menú.' },
-        { t: 'Elige para cuántos días compras.',
-          d: 'Tu menú cubre una semana; si eliges catorce días es darle dos vueltas, y las cantidades se doblan solas. Esa cuenta la hace la app, no la IA: multiplicar tiene un solo resultado y tiene que dar siempre el mismo, también sin cobertura.' },
+        { t: 'Di para cuántos días.',
+          d: 'Hay atajos de una, dos, tres semanas y un mes, y un campo para escribir el número que quieras. Si pides veinte días de un menú de siete, se multiplican las cantidades antes de redondear.' },
+        { t: 'Mira cómo queda y pulsa *Crear la lista*.',
+          d: 'Primero se te enseña el resumen por zonas. Si no te convence, se vuelve a pedir sin guardar nada.' },
         { t: 'Ve tachando mientras compras.',
-          d: 'Lo tachado se queda guardado: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Lo comprado no desaparece, se apaga, porque la lista también sirve para ver lo que ya llevas.' }
+          d: 'Lo tachado se queda guardado: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Lo comprado no desaparece, se apaga, porque la lista también sirve para ver lo que ya llevas.' },
+        { t: 'Si algo no lo vas a llevar, toca el botón de la derecha.',
+          d: 'Escribes tú con qué lo cambias, o le preguntas al entrenador por cuál puedes cambiarlo: te da hasta tres opciones con la cantidad equivalente y lo que te mueve en tus números, y eliges una tocando.' },
+        { t: 'Y el cambio llega al menú si quieres.',
+          d: 'Después de sustituir se te pregunta si lo cambio también en los platos. Se pregunta y no se hace solo porque reescribe comidas que tú no has tocado: quien cambia una marca de arroz por otra no quiere que le reescriban la semana.' }
       ],
-      cierre: 'Al renovar el menú la lista empieza limpia, porque es otra compra. Lo que no lleva cantidad —la sal, el aceite— no se multiplica: duplicar «sal» no significa nada.',
+      cierre: 'La lista se guarda aparte del menú, así que sustituir algo en el súper no te toca el plan salvo que lo digas. Y *Rehacer* empieza de cero cuando cambies de menú o de semana.',
       ver: ['g-ciclos', 'c-pais'] },
 
     { id: 'c-fuera', titulo: 'Comer fuera sin salirte',

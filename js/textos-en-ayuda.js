@@ -1384,14 +1384,26 @@
       'If that menu has no list yet, tap *Build the list*.',
     'La saca el entrenador de los propios platos del menú, sin tocarlo: suma las raciones de todos los días, redondea a lo que de verdad se vende —560 g de avena son un paquete de kilo— y lo agrupa por zonas. Queda guardada en ese menú.':
       'The coach works it out from the menu’s own dishes, without touching it: it adds up the portions across every day, rounds to what is actually sold —560 g of oats is a one-kilo bag— and groups it by aisle. It stays saved in that menu.',
-    'Elige para cuántos días compras.': 'Pick how many days you are shopping for.',
+    'Di para cuántos días.': 'Say how many days.',
+    'Hay atajos de una, dos, tres semanas y un mes, y un campo para escribir el número que quieras. Si pides veinte días de un menú de siete, se multiplican las cantidades antes de redondear.':
+      'There are shortcuts for one, two, three weeks and a month, plus a field to type any number. If you ask for twenty days from a seven-day menu, the amounts are multiplied before rounding.',
+    'Mira cómo queda y pulsa *Crear la lista*.': 'See how it looks and tap *Create the list*.',
+    'Primero se te enseña el resumen por zonas. Si no te convence, se vuelve a pedir sin guardar nada.':
+      'First you get the summary by aisle. If you do not like it, it is asked again without saving anything.',
+    'Si algo no lo vas a llevar, toca el botón de la derecha.':
+      'If you are not taking something, tap the button on the right.',
+    'Escribes tú con qué lo cambias, o le preguntas al entrenador por cuál puedes cambiarlo: te da hasta tres opciones con la cantidad equivalente y lo que te mueve en tus números, y eliges una tocando.':
+      'You type what you are swapping it for, or ask the coach what you can swap it for: it gives up to three options with the equivalent amount and what it moves in your numbers, and you pick one by tapping.',
+    'Y el cambio llega al menú si quieres.': 'And the change reaches the menu if you want.',
+    'Después de sustituir se te pregunta si lo cambio también en los platos. Se pregunta y no se hace solo porque reescribe comidas que tú no has tocado: quien cambia una marca de arroz por otra no quiere que le reescriban la semana.':
+      'After a swap you are asked whether to change it in the dishes too. You are asked rather than it happening on its own because it rewrites meals you have not touched: someone swapping one brand of rice for another does not want their week rewritten.',
     'Tu menú cubre una semana; si eliges catorce días es darle dos vueltas, y las cantidades se doblan solas. Esa cuenta la hace la app, no la IA: multiplicar tiene un solo resultado y tiene que dar siempre el mismo, también sin cobertura.':
       'Your menu covers a week; choosing fourteen days means going round it twice, and the amounts double by themselves. That sum is done by the app, not the AI: multiplying has one single answer and has to give the same one every time, with no signal too.',
     'Ve tachando mientras compras.': 'Tick things off as you shop.',
     'Lo tachado se queda guardado: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Lo comprado no desaparece, se apaga, porque la lista también sirve para ver lo que ya llevas.':
       'What you tick stays saved: you can leave the shop, come back in and carry on where you left off. What is bought does not vanish, it dims, because the list is also there to show what is already in the trolley.',
-    'Al renovar el menú la lista empieza limpia, porque es otra compra. Lo que no lleva cantidad —la sal, el aceite— no se multiplica: duplicar «sal» no significa nada.':
-      'When the menu is refreshed the list starts clean, because it is a different shop. Anything with no amount —salt, oil— is not multiplied: doubling «salt» means nothing.',
+    'La lista se guarda aparte del menú, así que sustituir algo en el súper no te toca el plan salvo que lo digas. Y *Rehacer* empieza de cero cuando cambies de menú o de semana.':
+      'The list is saved separately from the menu, so swapping something at the shop does not touch your plan unless you say so. And *Redo* starts from scratch when you change menu or week.',
 
   };
 

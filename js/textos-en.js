@@ -4654,6 +4654,47 @@
     'Congelados': 'Frozen',
     'Otros': 'Other',
 
+    /* ---------- La compra: generar, comprar, sustituir ---------- */
+    'Sale de tu menú: cuando tengas uno generado, aquí estará lo que hay que comprar.':
+      'It comes from your menu: once you have one generated, this is where the shopping will be.',
+    '{menu} · {dias}': '{menu} · {dias}',
+    'Destachar': 'Clear ticks',
+    'Rehacer': 'Redo',
+    'antes: {que}': 'was: {que}',
+    'Lo tachado se guarda: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Y con el botón de la derecha cambias cualquier cosa por otra.':
+      'What you tick is saved: you can leave the shop, come back and carry on where you left off. And the button on the right swaps any item for another.',
+    'Dime de qué menú y para cuántos días, y el entrenador monta la lista sumando los platos.':
+      'Tell me which menu and how many days, and the coach builds the list by adding up the dishes.',
+    'De qué menú': 'Which menu',
+    'Para cuántos días': 'For how many days',
+    'días': 'days',
+    'Crear la lista': 'Create the list',
+    'Sumando los platos…': 'Adding up the dishes…',
+    'Lista guardada.': 'List saved.',
+    'Rehacer la lista': 'Redo the list',
+    'Se pierde lo que lleves tachado y las sustituciones que hayas hecho.':
+      'You lose what you have ticked and any swaps you made.',
+    'Cámbialo por otra cosa. Si no sabes por cuál, pregúntale al entrenador: mira lo que te cambia en tus números.':
+      'Swap it for something else. If you are not sure what for, ask the coach: it looks at what changes in your numbers.',
+    'Escribe con qué lo cambias': 'Type what you are swapping it for',
+    'Escribe con qué lo cambias.': 'Type what you are swapping it for.',
+    '¿Por cuál puedo cambiarlo?': 'What can I swap it for?',
+    'Volver a {que}': 'Back to {que}',
+    'Mirando por qué puedes cambiarlo…': 'Looking at what you can swap it for…',
+    'No se me ocurre nada que encaje igual.': 'I cannot think of anything that fits the same.',
+    'igual': 'same',
+    'No he podido preguntarlo.': 'I could not ask that.',
+    '¿Lo cambio también en el menú?': 'Change it in the menu too?',
+    'Los platos que llevan {viejo} pasarían a {nuevo}, con las cantidades y las calorías ajustadas.':
+      'Dishes with {viejo} would become {nuevo}, with amounts and calories adjusted.',
+    'Sí, cámbialo': 'Yes, change it',
+    'Reescribiendo los platos…': 'Rewriting the dishes…',
+    'En el menú no salía, así que no hay nada que tocar.':
+      'It did not appear in the menu, so there is nothing to touch.',
+    '{n} plato actualizado': '{n} dish updated',
+    '{n} platos actualizados': '{n} dishes updated',
+    'No he podido cambiarlo en el menú.': 'I could not change it in the menu.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };

@@ -3649,7 +3649,7 @@
      Los menús de antes de que esto existiera no la llevan, y rehacer el menú
      entero para conseguirla sería cobrar muy caro algo que se saca de lo que ya
      hay: los platos, con sus cantidades, están escritos ahí. */
-  function listaDeCompra(plan) {
+  function listaDeCompra(plan, diasPedidos) {
     const dias = (plan && plan.dias) || [];
     if (!dias.length) return Promise.reject(new Error(T('Ese menú no tiene días.')));
 
@@ -3660,10 +3660,18 @@
     }).join(SALTO);
 
     const p = Perfil.datos ? Perfil.datos() : {};
+    /* Los días los pide el usuario y pueden no ser los del menú: un menú de
+       siete días da una compra de veinte si eso es lo que va a durar. La cuenta
+       de cuantas vueltas son se la damos hecha, que es aritmética, y lo que se
+       le pide a ella es que redondee a formatos de venta sobre el total. */
+    const n = Math.max(1, Number(diasPedidos) || dias.length);
+    const vueltas = n / dias.length;
 
     const prompt = PERSONA + SALTO + SALTO +
       'Esta es la comida de ' + dias.length + ' días:' + SALTO + texto + SALTO + SALTO +
-      'Saca la lista de la compra para esos días.' + SALTO +
+      'Saca la lista de la compra PARA ' + n + ' DÍAS. El menú cubre ' + dias.length +
+      ', así que es repetirlo ' + (Math.round(vueltas * 100) / 100) + ' veces: multiplica ' +
+      'las cantidades por esa cifra ANTES de redondear.' + SALTO +
       '- SUMA las cantidades de un mismo alimento en todos los días y da el total de una ' +
       'vez. Ochenta gramos de avena siete días no son siete líneas de avena, son 560 g.' + SALTO +
       '- Agrupa por zona del supermercado, que es como se recorre una tienda. Una lista ' +
@@ -3676,6 +3684,71 @@
       SALTO +
       'Devuelve JSON: {"compra":[{"zona":"Fruta y verdura|Carne y pescado|Lácteos y huevos|' +
       'Despensa|Congelados|Otros","cosas":["alimento con la cantidad total"]}]}';
+
+    return llamarJSON(prompt, { maxTokens: 4096, temperatura: 0.2 });
+  }
+
+  /* ---------- cambiar un alimento ----------
+
+     En el súper la mitad de las veces falta algo, o está caro, o no apetece. Lo
+     que hace falta ahí no es una lista de sustitutos cualquiera: es saber por
+     cuál se puede cambiar *sin romper el menú*, que es otra cosa. Cambiar pollo
+     por pavo no mueve nada; cambiarlo por chorizo sí. */
+  function alternativasDe(alimento, plan) {
+    const p = Perfil.datos ? Perfil.datos() : {};
+    const m = Perfil.macros ? Perfil.macros() : null;
+
+    const donde = ((plan && plan.dias) || []).map(function (d) {
+      return (d.comidas || []).map(function (c) { return c.plato || ''; }).join(' | ');
+    }).join(' ').slice(0, 1200);
+
+    const prompt = PERSONA + SALTO + SALTO +
+      'Está en el supermercado y no va a llevarse esto: "' + alimento + '".' + SALTO +
+      (donde ? 'Lo usa en estos platos de su menú: ' + donde + SALTO : '') +
+      (m ? 'Al día le tocan ' + m.kcal + ' kcal y ' + m.prot + ' g de proteína.' + SALTO : '') +
+      (p.dieta && p.dieta !== 'omnivora'
+        ? 'Dieta ' + (Perfil.DIETA[p.dieta] || p.dieta) + '.' + SALTO : '') +
+      (p.alergias ? 'NO PUEDE COMER: ' + p.alergias + '. Ninguna alternativa lo lleva.' +
+        SALTO : '') +
+      (p.pais ? 'Compra en ' + p.pais + ': usa nombres y formatos de allí.' + SALTO : '') +
+      SALTO +
+      '- Tres alternativas como mucho, la mejor primero.' + SALTO +
+      '- Cada una con la CANTIDAD equivalente, que no es la misma: 100 g de pollo no ' +
+      'son 100 g de lentejas.' + SALTO +
+      '- Y con lo que cambia de verdad en sus números. Si algo sube las grasas o baja la ' +
+      'proteína, se dice con la cifra; si no cambia nada, se dice también, que eso es lo ' +
+      'que uno quiere oír.' + SALTO +
+      '- Nada que no se encuentre en un supermercado normal.' + SALTO + SALTO +
+      'Devuelve JSON: {"opciones":[{"que":"nombre con la cantidad","porque":"1 frase con ' +
+      'lo que cambia","igual":true si no mueve sus números}]}';
+
+    return llamarJSON(prompt, { maxTokens: 2048, temperatura: 0.3 });
+  }
+
+  /* Reescribe los platos del menú que llevaban un alimento, para que el menú no
+     siga diciendo pollo cuando has comprado pavo. Devuelve solo los días y
+     comidas que cambian: pedirle el menú entero de vuelta era la forma segura de
+     perder por el camino algo que estaba bien. */
+  function cambiarEnMenu(plan, viejo, nuevo) {
+    const dias = (plan && plan.dias) || [];
+    if (!dias.length) return Promise.resolve({ cambios: [] });
+
+    const mapa = dias.map(function (d, i) {
+      return (d.comidas || []).map(function (c, j) {
+        return i + ',' + j + ': ' + (c.plato || '');
+      }).join(SALTO);
+    }).join(SALTO);
+
+    const prompt = PERSONA + SALTO + SALTO +
+      'Ha cambiado "' + viejo + '" por "' + nuevo + '".' + SALTO + SALTO +
+      'Estos son los platos de su menú, con su posición delante:' + SALTO + mapa +
+      SALTO + SALTO +
+      '- Reescribe SOLO los platos donde aparezca lo viejo. Los demás no se tocan.' + SALTO +
+      '- Ajusta la cantidad a lo equivalente y recalcula kcal y macros de esa comida.' + SALTO +
+      '- Mantén el estilo del plato: si decía cómo se cocina, el nuevo también.' + SALTO +
+      '- Si no aparece en ninguno, devuelve "cambios" vacío.' + SALTO + SALTO +
+      'Devuelve JSON: {"cambios":[{"dia":número,"comida":número,"plato":"texto nuevo",' +
+      '"kcal":número,"prot":número,"carbo":número,"grasa":número}]}';
 
     return llamarJSON(prompt, { maxTokens: 4096, temperatura: 0.2 });
   }
@@ -3884,6 +3957,7 @@
     reiniciarClaves: reiniciarClaves,
     analizarComida: analizarComida, estimarComida: estimarComida,
     cartaRestaurante: cartaRestaurante, listaDeCompra: listaDeCompra,
+    alternativasDe: alternativasDe, cambiarEnMenu: cambiarEnMenu,
     analizarSuplementos: analizarSuplementos,
     revisarCambioComida: revisarCambioComida,
     estimarActividad: estimarActividad, estimarCarga: estimarCarga,

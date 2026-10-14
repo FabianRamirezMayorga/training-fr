@@ -8967,3 +8967,30 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .clave-nueva{gap:8px;margin-top:9px}
 .clave-nueva input{margin:0}
 .clave-pie{margin:9px 0 0;line-height:1.45}
+
+
+/* ---- la compra: sustituir y previsualizar ----
+   El boton de cambiar va a la derecha de cada fila y en gris: en el super lo
+   que se toca cien veces es la casilla, y lo que se toca dos es esto. Si los
+   dos pesaran igual, cada fila obligaria a apuntar. */
+.compra-cambiar{flex:none;width:32px;height:32px;border-radius:50%;padding:0;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  background:none;color:var(--dim2);transition:color .15s,background .15s}
+.compra-cambiar svg{width:16px;height:16px;fill:none;stroke:currentColor;
+  stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.compra-cambiar:active{background:var(--card2);color:var(--txt)}
+.compra-caja{cursor:pointer;background:none}
+.compra-cuanto{font-style:normal;color:var(--dim2);font-size:.86rem}
+/* Lo que venia antes, debajo y pequeno: sin eso, la lista dice pavo y nadie
+   recuerda que el menu hablaba de pollo. */
+.compra-antes{display:block;font-size:.72rem;color:var(--dim2);margin-top:2px}
+.compra-prev{padding:12px 13px}
+.compra-prev+.compra-prev{margin-top:9px}
+.compra-prev-z{display:block;font-size:.72rem;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--dim)}
+.compra-prev p{margin:5px 0 0;font-size:.88rem;line-height:1.5}
+.sust-op{padding:12px 13px;cursor:pointer;text-align:left;width:100%}
+.sust-op b{font-size:.95rem;line-height:1.3}
+.sust-op p{margin:6px 0 0;font-size:.84rem;line-height:1.45;color:var(--dim)}
+.sust-igual{flex:none;font-size:.7rem;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--acc)}
