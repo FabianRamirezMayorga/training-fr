@@ -350,11 +350,24 @@
     }
 
     const c = config();
-    /* Guardar una clave suelta reemplaza la lista entera: es lo que espera
-       quien escribe en el campo de siempre. Para sumar sin perder las otras
-       está `anadirClave`. */
-    if (clave) c.claves[prov.id] = [clave]; else delete c.claves[prov.id];
     c.claveIdx = c.claveIdx || {};
+
+    /* El campo de siempre edita *la primera* clave, no la lista entera.
+
+       Reemplazarla entera era lo que parecía natural al escribirlo y resultó
+       ser una trampa: quien añade cinco claves de repuesto y luego pulsa
+       «Guardar» —porque acaba de tocar el modelo, por ejemplo— se quedaba con
+       una sola y sin saber por qué. Las de repuesto se añaden por su botón y
+       solo se van por el suyo. */
+    if (clave) {
+      const l = comoLista(c.claves[prov.id]);
+      if (l.length) l[0] = clave; else l.push(clave);
+      /* Si la que acaba de escribir ya estaba más abajo, no se duplica: se
+         queda arriba, que es donde la ha puesto. */
+      c.claves[prov.id] = l.filter(function (k, i) { return i === 0 || k !== clave; });
+    } else {
+      delete c.claves[prov.id];
+    }
     c.claveIdx[prov.id] = 0;
     c.modelos[prov.id] = modelo || prov.modelos[0];
     if (clave) c.proveedor = prov.id;
