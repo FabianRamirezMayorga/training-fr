@@ -8908,6 +8908,55 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
    Filas altas y con la casilla a la izquierda: esto se usa con una mano, en un
    pasillo y con el carro en la otra, asi que el objetivo tactil manda sobre lo
    compacto. */
+/* ---- elegir el menú: lista agrupada, no fichas ----
+   Con fichas no se sabe de qué menú se habla —solo el nombre— y justo eso es
+   lo que hay que ver antes de comprar: cuántos días cubre y cuánto se come. */
+.menu-op{width:100%;text-align:left;background:none;border:0;color:var(--txt);
+  font:inherit;cursor:pointer}
+.menu-op .grow{display:flex;flex-direction:column;gap:1px}
+.menu-op:active{background:var(--card2)}
+.menu-op[disabled]{cursor:default;opacity:1}
+.menu-tic{flex:none;width:24px;height:24px;border-radius:50%;display:grid;
+  place-items:center;border:1.5px solid var(--line);box-sizing:border-box;
+  transition:background .14s ease,border-color .14s ease}
+.menu-tic svg{width:13px;height:13px;fill:none;stroke:var(--on-acc);
+  stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.menu-op.on .menu-tic{background:var(--acc);border-color:var(--acc)}
+.menu-op.on .menu-tic svg{opacity:1}
+
+/* ---- el rodillo de los días ---- */
+.rodillo{position:relative;height:220px;margin:0 0 2px;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 24%,#000 76%,transparent);
+  mask-image:linear-gradient(to bottom,transparent,#000 24%,#000 76%,transparent)}
+.rodillo-pista{position:relative;z-index:1;height:100%;overflow-y:scroll;
+  scroll-snap-type:y mandatory;padding:88px 0;outline:none;
+  overscroll-behavior:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.rodillo-pista::-webkit-scrollbar{display:none}
+.rodillo-op{display:flex;align-items:center;justify-content:flex-end;
+  width:100%;height:44px;padding:0 calc(50% + 6px) 0 0;scroll-snap-align:center;
+  background:none;border:0;cursor:pointer;color:var(--txt);
+  font:600 26px/1 var(--sans);letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;opacity:.16;transform:scale(.58)}
+.rodillo-op.eje{font-weight:700}
+.rodillo-banda{position:absolute;left:0;right:0;top:50%;height:44px;
+  transform:translateY(-50%);border-radius:12px;background:var(--card2);
+  box-shadow:inset 0 0 0 1px var(--line);pointer-events:none}
+.rodillo-unidad{position:absolute;z-index:2;top:50%;left:calc(50% + 16px);
+  transform:translateY(-50%);color:var(--dim);font-size:.95rem;pointer-events:none}
+/* Los atajos van debajo y en pequeño: son un salto, no la forma normal de
+   elegir. Si fueran fichas volverían a competir con el rodillo. */
+.rodillo-atajos{display:flex;align-items:center;justify-content:center;
+  margin:0 0 16px}
+.rod-atajo{position:relative;background:none;border:0;padding:7px 14px;
+  color:var(--dim);font:600 .9rem var(--sans);cursor:pointer;
+  font-variant-numeric:tabular-nums}
+.rod-atajo.on{color:var(--acc)}
+.rod-atajo+.rod-atajo::before{content:"";position:absolute;left:0;top:50%;
+  width:3px;height:3px;margin-top:-1.5px;border-radius:50%;background:var(--line)}
+@media (prefers-reduced-motion:reduce){
+  .menu-tic{transition:none}
+}
+
 .compra-cuenta{padding:13px}
 .compra-fila{padding:13px;gap:12px;cursor:pointer;width:100%;text-align:left}
 .compra-caja{flex:none;width:22px;height:22px;border-radius:7px;

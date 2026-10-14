@@ -3237,6 +3237,122 @@
      para mirar y no para usar: en el súper decides tú cuánto compras y la mitad
      de las veces acabas cambiando algo. */
 
+  /* Sesenta días de tope: por encima, lo que compras no cabe en una nevera y
+     la lista deja de ser una lista de la compra. */
+  const TOPE_DIAS = 60;
+  const ROD_ALTO = 44;
+
+  /* El rodillo, como el del reloj de iOS. Un número que importa se elige
+     mejor viéndolo entre sus vecinos que escribiéndolo: no hay teclado de por
+     medio, se pasa de 14 a 15 sin volver a empezar, y la unidad está fija al
+     lado como el «a.m.» del despertador.
+
+     Sin rotateX a propósito. La perspectiva sobre un contenedor que a la vez
+     hace scroll y snap va mal en WebKit —desajusta el punto de parada—, y el
+     fundido de los bordes con una máscara, más la escala por distancia al
+     centro, dan el mismo efecto sin esa deuda. */
+  function montarRodillo(caja, valor, alElegir) {
+    const pista = caja.querySelector('.rodillo-pista');
+    const ops = [].slice.call(caja.querySelectorAll('.rodillo-op'));
+    if (!pista || !ops.length) return null;
+    let tic = 0, quieto = 0, ultimo = valor, vDesde = 0, vHasta = -1;
+
+    function lejos(o) {
+      o.style.transform = 'scale(.58)';
+      o.style.opacity = '.16';
+      o.classList.remove('eje');
+    }
+
+    function pintar() {
+      const centro = pista.scrollTop / ROD_ALTO;
+      /* Solo la ventana visible: tocar los sesenta en cada cuadro de scroll se
+         nota en el móvil. Pero hay que devolver a su sitio los que salen de
+         ella: con un impulso largo el navegador se salta cuadros, y los que
+         quedaron a medio camino se quedaban grandes y opacos en mitad de la
+         lista, como si hubiera dos números elegidos. */
+      const desde = Math.max(0, Math.floor(centro) - 3);
+      const hasta = Math.min(ops.length - 1, Math.ceil(centro) + 3);
+      for (let i = vDesde; i <= vHasta; i++) {
+        if (i < desde || i > hasta) lejos(ops[i]);
+      }
+      for (let i = desde; i <= hasta; i++) {
+        const d = Math.min(3, Math.abs(i - centro));
+        ops[i].style.transform = 'scale(' + (1 - d * 0.14).toFixed(3) + ')';
+        ops[i].style.opacity = Math.max(0.16, 1 - d * 0.28).toFixed(3);
+        ops[i].classList.toggle('eje', d < 0.5);
+      }
+      vDesde = desde;
+      vHasta = hasta;
+    }
+
+    /* Colocarlo no es elegir. Se separan porque al montar hay que ponerlo en
+       su sitio sin que eso cuente como que el usuario ha tocado nada. */
+    function colocar(i) {
+      const j = Math.max(0, Math.min(ops.length - 1, i));
+      pista.scrollTop = j * ROD_ALTO;
+      pintar();
+    }
+
+    function irA(i, suave) {
+      const j = Math.max(0, Math.min(ops.length - 1, i));
+      pista.scrollTo({ top: j * ROD_ALTO, behavior: suave ? 'smooth' : 'auto' });
+      /* Y se confirma por nuestra cuenta al llegar. Mover el rodillo desde un
+         atajo o tocando un número no siempre emite eventos de scroll —depende
+         del navegador—, y sin ellos el rodillo se colocaba en el número bueno
+         mientras el valor elegido seguía siendo el de antes. Si el dedo lo
+         mueve mientras tanto, el temporizador del scroll pisa a este. */
+      clearTimeout(quieto);
+      quieto = setTimeout(confirmar, suave ? 420 : 0);
+    }
+
+    function confirmar() {
+      const i = Math.max(0, Math.min(ops.length - 1,
+        Math.round(pista.scrollTop / ROD_ALTO)));
+      const n = Number(ops[i].getAttribute('data-v'));
+      pista.setAttribute('aria-valuenow', n);
+      /* Y se repinta aquí también, que esto corre con un temporizador: si el
+         scroll acabó con la pestaña en segundo plano, el cuadro de animación
+         no llegó a correr y el rodillo se quedaba señalando otro número. */
+      pintar();
+      if (n === ultimo) return;
+      ultimo = n;
+      alElegir(n);
+    }
+
+    pista.addEventListener('scroll', function () {
+      if (tic) cancelAnimationFrame(tic);
+      tic = requestAnimationFrame(pintar);
+      /* El valor se da por elegido cuando para, no mientras pasa: avisar en
+         cada número que cruza es lo que hacía que al soltar un impulso largo
+         se repintara la pantalla diez veces. */
+      clearTimeout(quieto);
+      quieto = setTimeout(confirmar, 130);
+    }, { passive: true });
+
+    pista.addEventListener('keydown', function (e) {
+      const d = e.key === 'ArrowUp' ? -1 : e.key === 'ArrowDown' ? 1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      irA(Math.round(pista.scrollTop / ROD_ALTO) + d, true);
+    });
+
+    ops.forEach(function (o, i) {
+      o.addEventListener('click', function () { irA(i, true); });
+    });
+
+    const i0 = Math.max(0, ops.map(function (o) { return o.getAttribute('data-v'); })
+      .indexOf(String(valor)));
+    colocar(i0);
+    /* Y otra vez en el cuadro siguiente. Si la pantalla se acaba de repintar,
+       el rodillo todavía no tiene altura y fijarle el scroll no hace nada: el
+       snap lo dejaba en el primer número y el rodillo acababa marcando 1 día
+       mientras el elegido de verdad era otro —y, al confirmarlo, se llevaba
+       por delante la lista que acabas de generar—. */
+    requestAnimationFrame(function () { colocar(i0); });
+
+    return { ir: function (n) { irA(n - 1, true); } };
+  }
+
   let compraMenu = '';
   let compraDias = 0;
   let compraPreview = null;
@@ -3319,34 +3435,51 @@
 
     /* ---- el asistente: de qué menú, para cuántos días ---- */
     const base = diasDelMenu(menu);
-    const dias = compraDias || base;
-    const sugeridos = [base, base * 2, base * 3, 30];
+    const dias = Math.min(TOPE_DIAS, compraDias || base);
+    const atajos = [base, base * 2, base * 3, 30].filter(function (v, i, a) {
+      return v <= TOPE_DIAS && a.indexOf(v) === i;
+    });
 
     return html`${raw(atras)}
       <p class="muted">${T('Dime de qué menú y para cuántos días, y el entrenador monta ' +
         'la lista sumando los platos.')}</p>
 
-      ${raw(lista.length > 1 ? html`
-        <div class="list-title">${T('De qué menú')}</div>
-        <div class="row compra-menus">
-          ${raw(lista.map(function (x) {
-            return '<button class="chip' + (x.id === menu.id ? ' on' : '') +
-              '" data-menu="' + esc(x.id) + '">' + esc(x.nombre) + '</button>';
-          }).join(''))}
-        </div>` : '')}
+      <div class="list-title">${T('De qué menú')}</div>
+      <div class="list">
+        ${raw(lista.map(function (x) {
+          const dd = (x.plan && x.plan.dias) || [];
+          const nc = dd.reduce(function (t, d) { return t + ((d.comidas || []).length); }, 0);
+          const on = x.id === menu.id;
+          return '<button class="list-row menu-op' + (on ? ' on' : '') + '"' +
+            (lista.length > 1 ? ' data-menu="' + esc(x.id) + '"' : ' disabled') + '>' +
+            '<span class="grow">' +
+              '<span class="list-row-title">' + esc(x.nombre) + '</span>' +
+              '<span class="list-row-sub">' +
+                esc(Tp(dd.length, '{n} día', '{n} días')) + ' · ' +
+                esc(Tp(nc, '{n} comida', '{n} comidas')) + '</span>' +
+            '</span>' +
+            '<i class="menu-tic">' + icon('check') + '</i></button>';
+        }).join(''))}
+      </div>
 
       <div class="list-title">${T('Para cuántos días')}</div>
-      <div class="row compra-sem">
-        ${raw(sugeridos.filter(function (v, i, a) { return a.indexOf(v) === i; })
-          .map(function (nd) {
-            return '<button class="chip' + (nd === dias ? ' on' : '') +
-              '" data-dias="' + nd + '">' + esc(Tp(nd, '{n} día', '{n} días')) + '</button>';
+      <div class="rodillo" id="rod-dias">
+        <div class="rodillo-banda" aria-hidden="true"></div>
+        <div class="rodillo-pista" tabindex="0" role="spinbutton"
+             aria-label="${T('Para cuántos días')}" aria-valuemin="1"
+             aria-valuemax="${raw(TOPE_DIAS)}" aria-valuenow="${raw(dias)}">
+          ${raw(Array.from({ length: TOPE_DIAS }, function (_, i) {
+            return '<button class="rodillo-op" data-v="' + (i + 1) + '">' +
+              (i + 1) + '</button>';
           }).join(''))}
+        </div>
+        <span class="rodillo-unidad" aria-hidden="true">${T('días')}</span>
       </div>
-      <div class="row" style="gap:9px;margin-bottom:14px">
-        <input id="compra-dias" class="grow" type="number" min="1" max="60"
-               inputmode="numeric" value="${raw(dias)}" style="margin:0">
-        <span class="tiny nowrap" style="flex:none">${T('días')}</span>
+      <div class="rodillo-atajos">
+        ${raw(atajos.map(function (nd) {
+          return '<button class="rod-atajo' + (nd === dias ? ' on' : '') +
+            '" data-dias="' + nd + '">' + nd + '</button>';
+        }).join(''))}
       </div>
 
       ${raw(compraPreview ? html`
@@ -3384,20 +3517,28 @@
       render();
     });
 
+    function marcarAtajos(n) {
+      [].forEach.call(root.querySelectorAll('[data-dias]'), function (el) {
+        el.classList.toggle('on', Number(el.getAttribute('data-dias')) === n);
+      });
+    }
+
+    const rodillo = montarRodillo(root, compraDias || diasDelMenu(menu), function (n) {
+      compraDias = n;
+      marcarAtajos(n);
+      /* Mover el rodillo no repinta la pantalla: repintarla se llevaría por
+         delante el propio rodillo que estás tocando. Solo si había una lista
+         en pantalla, que con otros días ya no vale. */
+      if (compraPreview) { compraPreview = null; render(); }
+    });
+
     bindAll(root, '[data-dias]', function (el) {
-      compraDias = Number(el.getAttribute('data-dias'));
+      const n = Number(el.getAttribute('data-dias'));
+      if (rodillo) { rodillo.ir(n); return; }
+      compraDias = n;
       compraPreview = null;
       render();
     });
-
-    const campo = root.querySelector('#compra-dias');
-    if (campo) campo.onchange = function () {
-      const n = Math.min(60, Math.max(1, Number(campo.value) || 1));
-      compraDias = n;
-      campo.value = n;
-      compraPreview = null;
-      render();
-    };
 
     bind(root, '[data-a=generarlista]', function () {
       const n = compraDias || diasDelMenu(menu);

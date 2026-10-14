@@ -1374,6 +1374,14 @@
 
 
     /* ---------- La lista de la compra ---------- */
+    'La lista vive ahí dentro, encima de tus menús.':
+      'The list lives in there, above your menus.',
+    'Elige de qué menú.': 'Pick which menu.',
+    'Cada uno te dice cuántos días cubre y cuántas comidas trae, que es lo que hace falta saber antes de comprar: a veces se compra para el que empieza el lunes, no para el que está acabando.':
+      'Each one tells you how many days it covers and how many meals it brings, which is what you need to know before shopping: sometimes you shop for the one starting on Monday, not the one finishing.',
+    'El rodillo va de uno a sesenta y debajo están los saltos de una, dos y tres semanas y un mes. Si pides veinte días de un menú de siete, se multiplican las cantidades antes de redondear.':
+      'The wheel runs from one to sixty, and below it are the jumps for one, two and three weeks and a month. If you ask for twenty days from a seven-day menu, the amounts are multiplied before rounding.',
+    'Púlsale a *Generar la lista*.': 'Tap *Build the list*.',
     'La lista de la compra': 'The shopping list',
     'Sale de tu menú, agrupada por zonas del súper y con casillas para ir tachando.':
       'It comes from your menu, grouped by supermarket aisle and with boxes to tick off.',
