@@ -8487,3 +8487,65 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 /* Lo que este dispositivo no puede hacer se cuenta en gris, sin alarma */
 .reloj-nope{background:var(--card2)}
 .reloj-nope .row-icon{color:var(--dim2)}
+
+
+/* ================= medir con el GPS =================
+   Lo que se mira andando, con el brazo en movimiento: los kilómetros enormes y
+   todo lo demás por debajo. El orden no es decorativo, es el orden en el que se
+   miran las cosas —cuánto llevo, cuánto tiempo, a qué ritmo— y poner el tiempo
+   del mismo tamaño que la distancia obligaba a leer la tarjeta entera para
+   encontrar el único número que se busca de reojo. */
+
+.med-elige{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.med-opcion{display:flex;flex-direction:column;align-items:center;gap:9px;
+  padding:18px 10px;border-radius:var(--r);border:1px solid var(--line);
+  background:var(--card);color:var(--txt);font:inherit;font-size:.88rem;
+  font-weight:600;cursor:pointer;transition:border-color .15s,background .15s,transform .12s}
+.med-opcion svg{width:30px;height:30px;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.med-opcion:active{transform:scale(.97)}
+/* La elegida se marca con el borde y no con el fondo verde: el verde sólido
+   está reservado al botón que lanza la acción, y con dos verdes en pantalla
+   ninguno de los dos decía «pulsa aquí». */
+.med-opcion.on{border-color:var(--acc);color:var(--acc);
+  background:color-mix(in srgb,var(--acc) 9%,var(--card))}
+
+.med-tit{display:flex;align-items:center;gap:10px;margin:2px 0 14px}
+.med-tit svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;color:var(--acc);flex:none}
+
+.med-panel{text-align:center;padding:20px 15px 15px}
+.med-panel.en-pausa{opacity:.72}
+.med-km{display:flex;align-items:baseline;justify-content:center;gap:7px}
+.med-km b{font-size:3.4rem;line-height:1;font-weight:800;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums}
+.med-km i{font-style:normal;font-size:1.05rem;font-weight:600;color:var(--dim)}
+
+.med-fila{display:flex;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.med-fila2{margin-top:12px;padding-top:12px}
+.med-dato{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.med-dato b{font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em}
+.med-dato i{font-style:normal;font-size:.66rem;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--dim)}
+/* Una línea entre dato y dato, pero no en el último: el separador suelto al
+   borde de la tarjeta parecía que faltaba una columna. */
+.med-dato+.med-dato{border-left:1px solid var(--line)}
+
+/* El recorrido dibujado. Sin relleno y con las puntas redondas, que una ruta
+   es un hilo y no una figura. */
+.med-traza{display:block;width:100%;height:120px;margin-top:16px;overflow:visible}
+.med-traza path{fill:none;stroke:var(--acc);stroke-width:2.6;
+  stroke-linecap:round;stroke-linejoin:round}
+
+.med-aviso{margin:14px 0 0;font-size:.78rem;color:var(--dim);line-height:1.4}
+.med-aviso.mal{color:var(--warn)}
+
+.med-botones{gap:10px;margin-top:14px}
+
+/* ---- contar repeticiones con el movil ---- */
+.rep-contar{display:flex;align-items:center;gap:10px;margin-top:10px;
+  padding:10px 13px;border-radius:14px;background:var(--card2)}
+.rep-contar b{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums;
+  min-width:34px;text-align:center}
+.rep-contar span{flex:1;min-width:0;font-size:.76rem;color:var(--dim);line-height:1.35}

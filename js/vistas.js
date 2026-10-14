@@ -211,6 +211,12 @@
             return dias ? Tp(dias, '{n} día con datos', '{n} días con datos')
               : T('Sin conectar ni importar');
           })() }))}
+        <!-- Debajo del reloj a propósito: las dos son «de dónde salen los
+             números que no escribes tú», y separarlas obligaba a buscar en dos
+             sitios lo mismo. Esta es la que no necesita ningún aparato. -->
+        ${raw(filaPerfil({ icono: 'ubicacion', titulo: T('Medir con el GPS'), accion: 'medir',
+          tono: '#4f8cf5',
+          sub: T('Distancia y ritmo de una salida') }))}
         ${raw(filaPerfil({ icono: cara.icono, titulo: T('Dónde entrenas'), accion: 'lugar',
           tono: cara.tono,
           sub: sitio ? T(sitio.label) + ' · ' +
@@ -276,7 +282,7 @@
     const ir = { datos: 'datos', objetivos: 'objetivos', nutricion: 'nutricion',
       alertas: 'alertas', entrenador: 'entrenador', musica: 'musica',
       cuenta: 'cuenta', ajustes: 'ajustes', usuarios: 'usuarios', version: 'version',
-      ayuda: 'ayuda', suplementos: 'suplementos', reloj: 'reloj' };
+      ayuda: 'ayuda', suplementos: 'suplementos', reloj: 'reloj', medir: 'medir' };
 
     /* La primera vez que se entra en Perfil se pregunta si hay versión nueva y
        se repinta con la respuesta. Después ya está sabida y no se vuelve a

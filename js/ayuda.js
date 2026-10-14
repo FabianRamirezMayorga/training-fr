@@ -107,7 +107,19 @@
         'Cada fuente rellena lo que sabe y no pisa lo que ya había: si el atajo trae los pasos de la mañana y por la tarde importas un archivo con el pulso, el día queda con las dos cosas. Del pulso máximo se queda siempre el mayor.',
         'El día se guarda tal y como lo escribió el reloj, no convertido a tu hora: si exportas en Madrid y abres el archivo en otro país, los datos siguen en el día en que los mediste.'
       ],
-      ver: ['c-reloj', 'p-applewatch'] },
+      ver: ['c-reloj', 'p-applewatch', 'g-medir'] },
+
+    { id: 'g-medir', titulo: 'Qué hace la app con el GPS',
+      resumen: 'De dónde salen los kilómetros y por qué tira la mitad de los puntos',
+      cuerpo: [
+        'Cuando apuntas un paseo a mano, las calorías salen de los minutos: la app sabe cuánto anduviste pero no a qué paso, así que usa el ritmo medio de andar. Midiendo con el GPS deja de hacer falta suponerlo.',
+        'Lo importante es que *el GPS no sustituye la cuenta, se la completa*. Las calorías siguen saliendo de lo de siempre —tu peso por el esfuerzo por el tiempo—, pero el esfuerzo ya no es el de una tabla: sale de la velocidad que de verdad llevaste. Andar a 4 por hora y andar a 7 dejan de valer lo mismo, que es justo lo que pasaba antes.',
+        '*La app tira puntos a propósito, y eso es lo que hace que el número valga.* Un GPS de móvil, entre edificios o recién encendido, da posiciones que se van cien metros y vuelven. Si se sumaran todas, un café sentado en una terraza serían dos kilómetros. Por eso no se suma nada cuando la precisión es peor que veinticinco metros, ni los saltos que implicarían ir más rápido de lo humano, ni los movimientos de menos de cuatro metros, que son el aparato respirando en el sitio.',
+        'Cuando eso pasa te lo dice en pantalla, para que no parezca que la app no cuenta por su cuenta.',
+        'El senderismo se queda con su esfuerzo fijo aunque midas la velocidad. Lo que lo hace duro es la cuesta, no el paso, y la altura que da el GPS se mueve veinte metros estando quieto: con un dato así, afinar sería inventar con más decimales.',
+        'El recorrido se guarda como una forma, no como un mapa: un punto cada veinticinco metros, para verlo dibujado sin llenarte el móvil de coordenadas.'
+      ],
+      ver: ['c-medir', 'p-medirparado', 'g-reloj'] },
 
     { id: 'g-registro', titulo: 'Las tres formas de apuntar',
       resumen: 'Cuánto detalle quieres llevar, y qué se pierde con cada uno',
@@ -377,6 +389,25 @@
       ],
       cierre: 'Para algo que hiciste otro día —una caminata el domingo, la pachanga del sábado—, en Rutinas tienes *Apuntar algo que ya hice*. Ahí no hay series que apuntar, así que ese día sale en azul con los minutos debajo en vez del número de series; y la app sabe qué músculos mueve cada actividad, y no solo de pierna: nadar y remar van a la espalda, la escalada a espalda y antebrazos, y el boxeo a hombro, core y brazo. Si lo escribes con tus palabras, la app reconoce lo que pone y elige el esfuerzo sola: «Jugué fútbol» es un deporte de equipo, «subida al cerro» es senderismo y «clase de muay thai» es boxeo. La ficha de debajo del campo enseña siempre lo que ha entendido y qué músculos va a apuntar, para que no haya que guardarlo para enterarse. Si no reconoce nada se queda en «Otra cosa», que no apunta músculos porque puede ser cualquier cosa; toca *Cambiar* y elige de la lista, donde cada una dice lo que registra. Escribe también el rato y el día si quieres: «trote una hora» o «jugué fútbol ayer 90 minutos» rellenan solos el cuándo y el cuánto. Y si lo tuyo no cabe en la rueda —una caminata de hace tres semanas, cuarenta y siete minutos justos— debajo tienes la fecha y los minutos para escribirlos a mano; entonces la rueda se apaga, porque marcar «45» con 47 puestos al lado sería mentir. Y con el entrenador puesto no hay que pedírselo: en cuanto dejas de escribir lo mira solo y te lo afina —distingue un partido de once de una pachanga, y el botón de esfuerzo no—, y lo que diga sale abajo, encima del botón de guardar. Lo mismo al empezar algo con el cronómetro: escribes qué estás haciendo y te dice los músculos antes de arrancar, sin pedirle nada. Y al terminar cualquier entrenamiento —de pesas o de fuera— tienes *Guardar y analizarlo con la IA*, que lo guarda y te lo lee: cómo de exigente fue, qué te deja tocado, si construye músculo y qué vigilar en la próxima, contando las series de tu semana. Ahí mismo, al lado de *Apuntar*, tienes *Analizar*: con la actividad y el rato ya puestos, te dice cómo de duro fue de verdad, qué te deja cargado y cuánto dura, si eso construye músculo o solo lo mantiene, y qué vigilar mañana. Y si en lo que escribiste hay un sitio que conoce —un cerro, una carrera, una ruta— abre con eso: qué es, cuánto desnivel tiene y cómo queda tu tiempo frente al normal de allí. Si no lo conoce, esa línea no sale: se le pide callarse antes que inventarse un desnivel, porque un número falso sobre un sitio real suena a dato y te lo crees. Cuenta con las series que llevas esta semana en esas zonas, que es lo que separa un consejo tuyo de un horóscopo. Es una lectura para leerla y cerrarla: no se guarda ni entra en ninguna gráfica.',
       ver: ['g-entrenar'] },
+
+    { id: 'c-medir', titulo: 'Medir una salida con el GPS',
+      intro: 'Para andar, correr, bici y senderismo, que es donde la distancia significa algo. ' +
+        'Nadar no entra: el GPS no atraviesa el agua.',
+      pasos: [
+        { t: 'Abre Medir con el GPS.',
+          d: 'Está en Perfil, debajo de Reloj y salud.',
+          ir: { ruta: 'medir', label: 'Abrir Medir con el GPS' } },
+        { t: 'Elige qué vas a hacer y pulsa Empezar a medir.',
+          d: 'El navegador te pedirá permiso de ubicación la primera vez. Si también das permiso al sensor de movimiento, cuenta los pasos y las zancadas por minuto.' },
+        { t: 'Lleva el móvil a la vista o en la mano.',
+          d: 'Mientras mide, la app impide que la pantalla se apague sola. Pero si bloqueas el móvil, el navegador congela la página y se deja de contar: eso no tiene arreglo desde una web.' },
+        { t: 'Pausa si paras de verdad.',
+          d: 'En pausa no se suma distancia ni tiempo, y el GPS se apaga para no gastar batería. Al seguir, el camino que hiciste con la medición parada no se cuenta.' },
+        { t: 'Pulsa Terminar y queda guardado.',
+          d: 'Se guarda como una actividad más: entra en tu historial, en tu racha y en los músculos de la semana, y encima con los kilómetros, el ritmo y el dibujo del recorrido.' }
+      ],
+      cierre: 'Si no quieres guardarla, *Descartar sin guardar* la tira entera.',
+      ver: ['g-medir', 'p-medirparado'] },
 
     { id: 'c-reloj', titulo: 'Traer los datos de tu reloj',
       resumen: 'Bluetooth, un archivo o un atajo de iOS',
@@ -683,6 +714,13 @@
         'Y si abriste el enlace dentro de WhatsApp, Instagram o parecidos, ahí no se puede instalar de ninguna manera: hay que abrirlo antes en el navegador de verdad.',
         'También desaparece cuando ya la tienes instalada, que es lo normal si arrancaste desde el icono.'],
       ver: ['c-instalar'] },
+
+    { id: 'p-medirparado', q: '¿Por qué dejó de contar al bloquear el móvil?',
+      a: ['Porque esto es una página web, y cuando bloqueas el móvil el navegador congela la página entera para ahorrar batería. No hay forma de evitarlo desde una web: lo que cuenta con la pantalla apagada es una app instalada de las de la tienda.',
+        'Mientras mides, la app sí impide que la pantalla se apague sola, que es la mitad del problema. La otra mitad es no pulsar el botón de bloqueo.',
+        'Si lo que quieres son los pasos de todo el día sin llevar nada abierto, eso sí se puede: lo trae el atajo de Salud o un archivo de tu reloj.',
+        'Y si al volver ves menos kilómetros de los que esperabas, mira si la app te avisó de señal floja: lo que se mueve con mala precisión no se suma a propósito, porque sumarlo es como acaban saliendo paseos de dos kilómetros sin levantarse de la silla.'],
+      ver: ['g-medir', 'c-medir', 'c-reloj'] },
 
     { id: 'p-idioma', q: '¿Puedo poner la app en inglés?',
       a: ['Sí, entera. El botón *ES / EN* de arriba a la derecha la cambia de un toque, y también está en Ajustes › Idioma.',

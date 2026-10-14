@@ -1206,6 +1206,57 @@
     'Si aun así ves algo corrido, el sitio donde mirar es el archivo. La app entiende *2026-09-24* y *24/09/2026*, y si el segundo número pasa de 12 —*09/24/2026*— sabe que viene en orden americano y lo endereza. Lo que no puede adivinar nadie es un *03/04*: ahí no hay forma de saber si es el tres de abril o el cuatro de marzo. Si tu reloj exporta así, pásalo a *2026-09-24*, que no es ambiguo en ningún país.':
       'If you still see something shifted, the place to look is the file. The app understands *2026-09-24* and *24/09/2026*, and if the second number goes above 12 —*09/24/2026*— it knows it comes in American order and straightens it out. What nobody can guess is a *03/04*: there is no way of telling the third of April from the fourth of March. If your watch exports like that, convert it to *2026-09-24*, which is ambiguous in no country.',
 
+
+    /* ---------- Medir con el GPS ---------- */
+    'Qué hace la app con el GPS': 'What the app does with GPS',
+    'De dónde salen los kilómetros y por qué tira la mitad de los puntos':
+      'Where the kilometres come from and why it throws half the points away',
+    'Cuando apuntas un paseo a mano, las calorías salen de los minutos: la app sabe cuánto anduviste pero no a qué paso, así que usa el ritmo medio de andar. Midiendo con el GPS deja de hacer falta suponerlo.':
+      'When you log a walk by hand, the calories come from the minutes: the app knows how long you walked but not how fast, so it uses an average walking pace. Measuring with GPS, there is no longer anything to assume.',
+    'Lo importante es que *el GPS no sustituye la cuenta, se la completa*. Las calorías siguen saliendo de lo de siempre —tu peso por el esfuerzo por el tiempo—, pero el esfuerzo ya no es el de una tabla: sale de la velocidad que de verdad llevaste. Andar a 4 por hora y andar a 7 dejan de valer lo mismo, que es justo lo que pasaba antes.':
+      'The important part is that *GPS does not replace the sum, it completes it*. The calories still come from the usual thing —your weight times the effort times the time— but the effort no longer comes from a table: it comes from the speed you actually kept. Walking at 4 an hour and walking at 7 stop being worth the same, which is exactly what used to happen.',
+    '*La app tira puntos a propósito, y eso es lo que hace que el número valga.* Un GPS de móvil, entre edificios o recién encendido, da posiciones que se van cien metros y vuelven. Si se sumaran todas, un café sentado en una terraza serían dos kilómetros. Por eso no se suma nada cuando la precisión es peor que veinticinco metros, ni los saltos que implicarían ir más rápido de lo humano, ni los movimientos de menos de cuatro metros, que son el aparato respirando en el sitio.':
+      '*The app throws points away on purpose, and that is what makes the number worth anything.* A phone GPS, among buildings or freshly switched on, gives positions that wander a hundred metres and come back. If they were all added up, a coffee sitting on a terrace would be two kilometres. So nothing is added when the accuracy is worse than twenty-five metres, nor jumps that would mean going faster than a human can, nor movements under four metres, which are the device breathing on the spot.',
+    'Cuando eso pasa te lo dice en pantalla, para que no parezca que la app no cuenta por su cuenta.':
+      'When that happens it tells you on screen, so it does not look as if the app had stopped counting on its own.',
+    'El senderismo se queda con su esfuerzo fijo aunque midas la velocidad. Lo que lo hace duro es la cuesta, no el paso, y la altura que da el GPS se mueve veinte metros estando quieto: con un dato así, afinar sería inventar con más decimales.':
+      'Hiking keeps its fixed effort even when you measure the speed. What makes it hard is the slope, not the pace, and the altitude GPS gives moves twenty metres while you stand still: with a figure like that, refining would be inventing with more decimals.',
+    'El recorrido se guarda como una forma, no como un mapa: un punto cada veinticinco metros, para verlo dibujado sin llenarte el móvil de coordenadas.':
+      'The route is saved as a shape, not as a map: one point every twenty-five metres, so you can see it drawn without filling your phone with coordinates.',
+
+    'Medir una salida con el GPS': 'Measuring an outing with GPS',
+    'Para andar, correr, bici y senderismo, que es donde la distancia significa algo. Nadar no entra: el GPS no atraviesa el agua.':
+      'For walking, running, cycling and hiking, which is where distance means something. Swimming is out: GPS does not go through water.',
+    'Abre Medir con el GPS.': 'Open Measure with GPS.',
+    'Está en Perfil, debajo de Reloj y salud.': 'It is in Profile, below Watch and health.',
+    'Abrir Medir con el GPS': 'Open Measure with GPS',
+    'Elige qué vas a hacer y pulsa Empezar a medir.':
+      'Pick what you are going to do and tap Start measuring.',
+    'El navegador te pedirá permiso de ubicación la primera vez. Si también das permiso al sensor de movimiento, cuenta los pasos y las zancadas por minuto.':
+      'The browser will ask for location permission the first time. If you also allow the motion sensor, it counts your steps and your strides per minute.',
+    'Lleva el móvil a la vista o en la mano.': 'Keep the phone visible or in your hand.',
+    'Mientras mide, la app impide que la pantalla se apague sola. Pero si bloqueas el móvil, el navegador congela la página y se deja de contar: eso no tiene arreglo desde una web.':
+      'While it measures, the app stops the screen going off by itself. But if you lock the phone, the browser freezes the page and counting stops: there is no fixing that from a web page.',
+    'Pausa si paras de verdad.': 'Pause if you really stop.',
+    'En pausa no se suma distancia ni tiempo, y el GPS se apaga para no gastar batería. Al seguir, el camino que hiciste con la medición parada no se cuenta.':
+      'Paused, neither distance nor time is added, and GPS switches off so it does not drain the battery. When you resume, the ground you covered with the measurement stopped does not count.',
+    'Pulsa Terminar y queda guardado.': 'Tap Finish and it is saved.',
+    'Se guarda como una actividad más: entra en tu historial, en tu racha y en los músculos de la semana, y encima con los kilómetros, el ritmo y el dibujo del recorrido.':
+      'It is saved as one more activity: it goes into your history, your streak and the muscles of the week, and on top of that with the kilometres, the pace and the drawing of the route.',
+    'Si no quieres guardarla, *Descartar sin guardar* la tira entera.':
+      'If you do not want to keep it, *Discard without saving* throws the whole thing away.',
+
+    '¿Por qué dejó de contar al bloquear el móvil?':
+      'Why did it stop counting when I locked the phone?',
+    'Porque esto es una página web, y cuando bloqueas el móvil el navegador congela la página entera para ahorrar batería. No hay forma de evitarlo desde una web: lo que cuenta con la pantalla apagada es una app instalada de las de la tienda.':
+      'Because this is a web page, and when you lock the phone the browser freezes the whole page to save battery. There is no way round it from a web page: what counts with the screen off is an installed app from a store.',
+    'Mientras mides, la app sí impide que la pantalla se apague sola, que es la mitad del problema. La otra mitad es no pulsar el botón de bloqueo.':
+      'While you measure, the app does stop the screen going off by itself, which is half the problem. The other half is not pressing the lock button.',
+    'Si lo que quieres son los pasos de todo el día sin llevar nada abierto, eso sí se puede: lo trae el atajo de Salud o un archivo de tu reloj.':
+      'If what you want is the steps for the whole day without keeping anything open, that can be done: the Health shortcut or a file from your watch brings them.',
+    'Y si al volver ves menos kilómetros de los que esperabas, mira si la app te avisó de señal floja: lo que se mueve con mala precisión no se suma a propósito, porque sumarlo es como acaban saliendo paseos de dos kilómetros sin levantarse de la silla.':
+      'And if you come back to fewer kilometres than you expected, check whether the app warned you of a weak signal: what moves with poor accuracy is not added on purpose, because adding it is how you end up with two-kilometre walks without getting out of the chair.',
+
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

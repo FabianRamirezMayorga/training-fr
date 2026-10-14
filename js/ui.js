@@ -71,6 +71,33 @@
       + '<path d="M17.2 10.4L19.4 8.6" style="stroke-width:1.9"/>'
       + '<path d="M14.2 8.6L10.8 8" style="stroke-width:2.2"/>'
       + '<path d="M10.8 8L9 10.2" style="stroke-width:1.9"/></svg>',
+    /* Andando: la misma figura con cuerpo que la de correr, porque van juntas
+       en la misma fila y dos dibujos de distinta familia ahí se notan. Lo que
+       las separa es el tronco: el que corre va inclinado y éste va recto, que
+       es lo único que de verdad distingue andar de correr en una silueta. */
+    caminar: '<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;'
+      + 'stroke-linecap:round;stroke-linejoin:round">'
+      + '<circle cx="12.8" cy="4" r="2.4" style="fill:currentColor;stroke:none"/>'
+      + '<path d="M12.6 7.2L11.4 13.4" style="stroke-width:3.2"/>'
+      + '<path d="M11.4 13.4L9 17.4" style="stroke-width:2.9"/>'
+      + '<path d="M9 17.4L8.2 20.6" style="stroke-width:2.3"/>'
+      + '<path d="M11.4 13.4L14.2 16.6" style="stroke-width:2.9"/>'
+      + '<path d="M14.2 16.6L14.6 20.4" style="stroke-width:2.3"/>'
+      + '<path d="M12.3 8.8L9.6 12" style="stroke-width:2.2"/>'
+      + '<path d="M12.3 8.8L15 11.4" style="stroke-width:2.2"/></svg>',
+    /* La bici de contorno y no con cuerpo: es un objeto, no una persona, y los
+       objetos se reconocen por su silueta —dos ruedas y un triángulo— sin que
+       haga falta rellenarlos. */
+    bici: '<svg viewBox="0 0 24 24"><circle cx="5.6" cy="16.6" r="3.6"/>'
+      + '<circle cx="18.4" cy="16.6" r="3.6"/>'
+      + '<path d="M5.6 16.6L10.4 9.2h4.8M10.4 9.2l3 7.4h5M15.2 9.2l1.8-2.8M8.8 7.6h2.8"/></svg>',
+    senderismo: '<svg viewBox="0 0 24 24">'
+      + '<path d="M2.6 19.4h18.8L14.6 7.6l-3.2 5.2-2.2-3z"/></svg>',
+    /* Una cruz de puntería y no una chincheta: la chincheta dice «este sitio» y
+       aquí no hay un sitio, hay un aparato buscándose a sí mismo. */
+    ubicacion: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.8"/>'
+      + '<circle cx="12" cy="12" r="7.4"/>'
+      + '<path d="M12 1.6v3M12 19.4v3M1.6 12h3M19.4 12h3"/></svg>',
     youtube: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="M10.5 9.5l5 2.5-5 2.5z"/></svg>',
     share: '<svg viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4M4 14v5a2 2 0 002 2h12a2 2 0 002-2v-5"/></svg>',
     sol: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>',

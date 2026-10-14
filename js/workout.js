@@ -107,6 +107,38 @@
       '</span></div>';
   }
 
+  /* Contar las repeticiones con el movil encima. Esto propone, nunca escribe
+     solo: el acelerometro acierta en un movimiento grande —un press, una
+     dominada— y se pierde en un curl lento, y un número equivocado dentro del
+     historial es peor que ninguno, porque de ahí salen el volumen de la semana
+     y lo que la app te sugiere mañana. Así que cuenta en voz alta y al parar te
+     pregunta si eso es lo que hiciste.
+
+     Va solo en el modo de contar series, que es donde no se escribe peso: ahí
+     el móvil está en el suelo o en el bolsillo y no en la mano apuntando, que
+     es justo cuando sirve de algo que cuente él. */
+  function contadorHTML() {
+    if (!g.Medir || !Medir.soporta().movimiento) return '';
+    return '<div class="rep-contar" id="rep-contar">' +
+      '<b id="rep-n">0</b>' +
+      '<span>' + UI.esc(T('Con el móvil encima, cuenta las repeticiones. Lo que ' +
+        'salga te lo propongo: no se guarda solo.')) + '</span>' +
+      '<button class="btn sm" data-w="contar" id="rep-btn">' +
+        UI.esc(T('Contar')) + '</button>' +
+      '</div>';
+  }
+
+  /* Fuera de `mount` para poder cortarlo al volver a entrar: no hay gancho de
+     «al salir de la pantalla», y un oyente de movimiento olvidado se queda
+     sumando toda la tarde con la pantalla en otra cosa. */
+  let contador = null;
+
+  function pararContador() {
+    if (!contador) return;
+    contador.parar();
+    contador = null;
+  }
+
   function start(routine) {
     Store.setActive({
       routineId: routine.id,
@@ -687,6 +719,7 @@
       ${raw(soloEjercicio ? html`
         <div class="card wo-solo ${hecho ? 'listo' : ''}">
           ${raw(objetivoHTML(entry, true))}
+          ${raw(contadorHTML())}
 
           <!-- Las dos, la misma pieza: casilla o icono a la izquierda, lo que
                hace en el centro, y el dato a la derecha. El subtitulo que
@@ -1086,6 +1119,45 @@
       act('repMenos', function () { cambiarReps(-1); });
     }
     atarPasos();
+
+    pararContador();
+    act('contar', function () {
+      const btn = root.querySelector('#rep-btn');
+      const hueco = root.querySelector('#rep-n');
+      const tira = root.querySelector('#rep-contar');
+
+      /* Segundo toque: parar y proponer lo contado. */
+      if (contador) {
+        const total = contador.parar();
+        contador = null;
+        if (btn) btn.textContent = T('Contar');
+        if (tira) tira.classList.remove('on');
+        if (total > 0) {
+          entry.sets.forEach(function (x) { x.reps = total; });
+          Store.setActive(a);
+          pintarObjetivo();
+          UI.toast(Tp(total, 'Anotada {n} repetición', 'Anotadas {n} repeticiones'));
+        } else {
+          UI.toast(T('No he contado nada. Prueba con el móvil más pegado al cuerpo.'));
+        }
+        return;
+      }
+
+      contador = Medir.contarReps(function (v) {
+        if (v === null) {
+          contador = null;
+          if (btn) btn.textContent = T('Contar');
+          if (tira) tira.classList.remove('on');
+          UI.toast(T('Sin permiso para el sensor de movimiento.'));
+          return;
+        }
+        if (hueco) hueco.textContent = v;
+      });
+      if (!contador) return;
+      if (hueco) hueco.textContent = '0';
+      if (btn) btn.textContent = T('Usar');
+      if (tira) tira.classList.add('on');
+    });
 
     act('hechoya', function () {
       const todas = entry.sets.every(function (x) { return x.done; });

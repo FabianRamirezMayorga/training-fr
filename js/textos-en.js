@@ -4443,6 +4443,46 @@
     'No has pegado nada.': 'You have not pasted anything.',
     'No reconocí ningún dato en ese texto.': 'I did not recognise any data in that text.',
 
+    /* ---------- Medir con el GPS ---------- */
+    'Medir con el GPS': 'Measure with GPS',
+    'Distancia y ritmo de una salida': 'Distance and pace of an outing',
+    'Mide la distancia, el ritmo y lo que gastas de verdad, en vez de estimarlo por los minutos. Lo que midas se guarda como una actividad más.':
+      'It measures the distance, the pace and what you really burn, instead of estimating it from the minutes. What you measure is saved as one more activity.',
+    'Empezar a medir': 'Start measuring',
+    'Mientras mide, la pantalla se queda encendida y el GPS gasta batería. Con el móvil bloqueado el navegador congela la página y se deja de contar, así que esto es para llevarlo en la mano o con la pantalla visible.':
+      'While it measures, the screen stays on and GPS drains the battery. With the phone locked the browser freezes the page and counting stops, so this is for carrying in your hand or with the screen visible.',
+    'Si das permiso al sensor de movimiento, cuenta también los pasos y el ritmo de zancada.':
+      'If you allow the motion sensor, it also counts your steps and your stride rate.',
+    'Este navegador no da acceso a la ubicación, así que aquí no se puede medir. Puedes apuntar la salida a mano con los minutos que fueron.':
+      'This browser gives no access to your location, so there is nothing to measure here. You can log the outing by hand with the minutes it took.',
+    'No se pudo arrancar el GPS.': 'GPS could not be started.',
+    'No has dado permiso de ubicación. Hace falta para medir la distancia.':
+      'You have not allowed location. It is needed to measure the distance.',
+    'El GPS no está dando señal. Prueba a salir a cielo abierto.':
+      'GPS is not getting a signal. Try going out under open sky.',
+    'Señal floja ({m} m). Lo que se mueva ahora no se suma, para no inventar metros.':
+      'Weak signal ({m} m). Nothing that moves now is added, so no metres get invented.',
+    'En pausa. No se está sumando distancia.': 'Paused. No distance is being added.',
+    'Velocidad': 'Speed',
+    'Pasos/min': 'Steps/min',
+    'Seguir': 'Resume',
+    'Descartar sin guardar': 'Discard without saving',
+    'Descartar esta salida': 'Discard this outing',
+    'No se guardará nada de lo medido.': 'Nothing you measured will be saved.',
+    'No se ha medido casi nada, así que no se guarda.':
+      'Almost nothing was measured, so nothing is saved.',
+    '{que}: {km} km en {min} min': '{que}: {km} km in {min} min',
+
+    /* ---------- Contar repeticiones con el móvil ---------- */
+    'Con el móvil encima, cuenta las repeticiones. Lo que salga te lo propongo: no se guarda solo.':
+      'With the phone on you, it counts your reps. Whatever comes out is a suggestion: nothing is saved on its own.',
+    'Contar': 'Count',
+    'Anotada {n} repetición': '{n} rep logged',
+    'Anotadas {n} repeticiones': '{n} reps logged',
+    'No he contado nada. Prueba con el móvil más pegado al cuerpo.':
+      'I counted nothing. Try with the phone closer to your body.',
+    'Sin permiso para el sensor de movimiento.': 'No permission for the motion sensor.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };

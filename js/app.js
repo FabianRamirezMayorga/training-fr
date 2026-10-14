@@ -110,6 +110,11 @@
     UI.mountDemos(viewEl);
     UI.cerrarDeslizadas();
     UI.deslizables(viewEl);
+    /* Aquí y no en la vista del entrenamiento: no hay gancho de «al salir de
+       una pantalla» donde soltar el candado, y el entrenamiento sigue abierto
+       aunque te vayas a mirar el catálogo. Mirando el estado en cada repintado
+       no hace falta acordarse de soltarlo en ningún sitio. */
+    if (g.Medir) Medir.cuidarPantalla();
     pintarAvisos();
     /* el cronómetro y la música acompañan al usuario por toda la app */
     Workout.pintarBanner();
@@ -7827,6 +7832,13 @@
     /* La hoja de «apuntar algo que ya hice», para que el «Ya lo hice» del
        entrenamiento abra esta misma y no una versión suya más pobre. */
     apuntarActividad: apuntarActividad,
+    /* Por id, que es como la pide quien ya sabe cuál es: la pantalla de medir
+       no tiene un texto que interpretar, tiene el botón que acabas de pulsar. */
+    actividadPorId: function (id) {
+      const a = ACTIVIDADES.filter(function (x) { return x.id === id; })[0];
+      return a ? { id: a.id, label: a.label, met: a.met,
+        musculos: (a.musculos || []).slice() } : null;
+    },
     actividadDe: function (texto) {
       const id = actividadDelTexto(texto || '');
       const a = ACTIVIDADES.filter(function (x) { return x.id === id; })[0];
