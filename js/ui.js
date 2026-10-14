@@ -41,7 +41,25 @@
     up: '<svg viewBox="0 0 24 24"><path d="M12 19V6M6 11l6-6 6 6"/></svg>',
     timer: '<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>',
     flag: '<svg viewBox="0 0 24 24"><path d="M6 21V4h12l-2.5 4L18 12H6"/></svg>',
-    dumbbell: '<svg viewBox="0 0 24 24"><path d="M4 8v8M8 6v12M16 6v12M20 8v8M8 12h8"/></svg>',
+    /* Una mancuerna de verdad y no cinco palos. La de antes eran cinco líneas
+       verticales y una horizontal, y a diecisiete píxeles —que es el tamaño al
+       que se ve en el chip del sitio, no el de la hoja de pruebas— no se leía
+       una mancuerna: se leía «IHI».
+
+       Maciza y de tres piezas a propósito. En contorno, dos discos pequeños con
+       trazo de dos píxeles se llenan de tinta solos y acaban pareciendo
+       rellenos pero sucios; y a los diez píxeles de la tira de constancia, las
+       piezas finas desaparecen del todo. Lo que aguanta ahí es la silueta.
+
+       Las proporciones salieron de mirar cuatro versiones a 11, 17, 25 y 46
+       píxeles, que son los tamaños donde se usa de verdad. Con las cabezas más
+       bajas parecía un hueso; con los discos exteriores de una mancuerna de
+       verdad —cinco piezas— volvía a ser ruido a los tamaños pequeños, que es
+       exactamente el fallo que veníamos a arreglar. */
+    dumbbell: '<svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none">'
+      + '<rect x="3.4" y="4.4" width="4.6" height="15.2" rx="2.3"/>'
+      + '<rect x="7.6" y="10.7" width="8.8" height="2.6" rx="1.3"/>'
+      + '<rect x="16" y="4.4" width="4.6" height="15.2" rx="2.3"/></svg>',
     /* Una figura corriendo con cuerpo, no un palito.
 
        La diferencia con el resto de iconos es que aquí cada parte lleva su

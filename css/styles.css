@@ -85,8 +85,6 @@ a{color:var(--blue)}
   backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
   border-bottom:1px solid var(--line);padding-top:var(--safe-t)}
 .topbar-inner{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;min-height:52px}
-.brand{display:flex;align-items:center;gap:9px;cursor:pointer;padding:0;color:var(--txt)}
-.brand-logo{width:21px;height:27px;object-fit:contain;flex:none}
 .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
 /* La inicial, del tamano de los otros botones de la cabecera. Redonda porque
    es lo unico de la fila que representa a una persona y no una funcion.
@@ -5328,12 +5326,9 @@ html[data-theme="light"] .lugar-chip::after {
 /* En un movil estrecho no caben la marca, el sitio y el tema: el boton del tema
    se salia por el canto derecho. La marca es lo unico prescindible de los tres
    —el logo sigue ahi y lleva al inicio igual—, asi que es la que se va. */
-/* Sube de 400 a 460 porque ahora delante va el avatar: con la inicial, la
-   marca, el sitio, el idioma y el tema, el boton del tema volvia a salirse
-   por el canto en un movil normal. */
-@media (max-width: 460px) {
-  .topbar .wordmark { display: none; }
-}
+/* La marca ya no esta en la cabecera —se presenta al abrir la app y se quita
+   de en medio—, asi que no hace falta esconderla en pantallas estrechas. El
+   `wordmark` sigue vivo en el arranque, que es su sitio. */
 .topbar-actions { min-width: 0; }
 .lugar-chip { min-width: 0; }
 .lc-txt { overflow: hidden; text-overflow: ellipsis; }
