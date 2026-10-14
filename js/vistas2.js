@@ -711,15 +711,18 @@
         }).join(''))}
       </div>
 
-      ${raw((plan.compra || []).length ? html`
-        <div class="list-title">Lista de la compra</div>
-        <div class="card">
-          <div class="row wrap" style="gap:6px">
-            ${raw(plan.compra.map(function (x) {
-              return '<span class="chip">' + esc(x) + '</span>';
-            }).join(''))}
-          </div>
-        </div>` : '')}
+      <!-- La lista estaba aqui, al fondo y como una nube de etiquetas: se podia
+           leer pero no usar. Comprar es ir tachando, y una etiqueta no se tacha.
+           Ahora es una pantalla, y aqui queda el camino. -->
+      ${raw(Compra.cuantas(plan) ? html`
+        <button class="card fila-plan" data-a="vercompra" style="margin-top:14px">
+          <span class="fp-ico" style="--fp:#f0a23c">${raw(icon('lista'))}</span>
+          <span class="grow">
+            <span class="fp-tit">${T('Lista de la compra')}</span>
+            <span class="fp-sub">${Tp(Compra.cuantas(plan), '{n} cosa', '{n} cosas')}</span>
+          </span>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>` : '')}
 
       ${raw(plan.flexibilidad ? html`
         <div class="card destacado-clave" style="margin-top:14px">
@@ -1050,6 +1053,8 @@
       });
       campo.onchange = guardar;
     });
+
+    bind(root, '[data-a=vercompra]', function () { go('compra'); });
 
     const campoCarta = root.querySelector('#foto-carta');
     if (campoCarta) campoCarta.onchange = function () {
@@ -3222,5 +3227,217 @@
   g.Reproductor = {
     html: reproductorHTML, montar: montarReproductor, barra: pintarBarraMusica
   };
+  /* ================= la lista de la compra =================
+
+     El menú ya traía esta lista desde siempre —la IA la devuelve con el plan—
+     pero se pintaba como una nube de etiquetas al final de la pantalla del
+     menú. Se podía leer y no se podía usar: comprar es ir tachando, y una
+     etiqueta no se tacha.
+
+     Tres decisiones:
+
+     - Pantalla propia. En el súper se mira el móvil con una mano y el carro con
+       la otra; lo último que hace falta es bajar por siete días de menú para
+       llegar a la lista.
+     - Lo tachado se guarda por menú, no por sesión. Se sale uno del
+       supermercado, vuelve a entrar, y la lista sigue como la dejó. Y al
+       renovar el menú empieza limpia, porque es otra compra.
+     - Agrupada por zona del súper cuando el menú la trae así. Una lista
+       ordenada por días obliga a recorrer la tienda cuatro veces. */
+  const Compra = (function () {
+    /* Comprar para dos semanas es el mismo menú dos veces, así que las
+       cantidades se multiplican. Y multiplicar es una regla, no una opinión:
+       se hace aquí y no pidiéndole a la IA que rehaga la lista, que tardaría,
+       costaría cuota y daría un resultado distinto cada vez para una cuenta que
+       solo tiene un resultado.
+
+       Se multiplica *el último número* del texto porque es donde va siempre la
+       cantidad —«Pechuga de pollo 1,1 kg», «Huevos 12 uds»— y no el primero,
+       que a veces forma parte del nombre: «3 quesitos light 200 g» son 200
+       gramos de un producto que se llama así. */
+    const NUM = /(\d+(?:[.,]\d+)?)(\s*)([a-zA-Záéíóúñ]*)\s*$/;
+
+    function multiplica(texto, n) {
+      if (n <= 1) return texto;
+      const m = String(texto).match(NUM);
+      if (!m) {
+        /* Sin cantidad que multiplicar —«sal», «aceite de oliva»— se deja tal
+           cual: duplicar «sal» no significa nada. */
+        return texto;
+      }
+      const valor = parseFloat(m[1].replace(',', '.')) * n;
+      let uni = m[3] || '';
+      let out = valor;
+      /* Mil gramos son un kilo. Sin esto, comprar para un mes pedía «4000 g de
+         avena», que es correcto y no lo dice nadie en una tienda. */
+      if (/^g$/i.test(uni) && out >= 1000) { out = out / 1000; uni = 'kg'; }
+      else if (/^ml$/i.test(uni) && out >= 1000) { out = out / 1000; uni = 'L'; }
+      const txt = (Math.round(out * 100) / 100).toString().replace('.', ',');
+      return texto.slice(0, m.index) + txt + (m[2] || ' ') + uni;
+    }
+
+    function semanas(menuId) {
+      try { return Math.min(4, Math.max(1,
+        Number((Store.settings().compraSemanas || {})[menuId]) || 1)); }
+      catch (e) { return 1; }
+    }
+
+    function ponerSemanas(menuId, n) {
+      const todo = Object.assign({}, Store.settings().compraSemanas || {});
+      todo[menuId] = n;
+      Store.setSetting('compraSemanas', todo);
+    }
+
+    function grupos(plan) {
+      const raw = (plan && plan.compra) || [];
+      if (!raw.length) return [];
+      /* Dos formas: la de siempre —una lista de textos— y la agrupada por zona.
+         Se leen las dos para que los menús de antes sigan sirviendo. */
+      if (typeof raw[0] === 'string') {
+        return [{ zona: '', cosas: raw.slice() }];
+      }
+      return raw.map(function (g) {
+        return { zona: String(g.zona || ''), cosas: (g.cosas || []).slice() };
+      }).filter(function (g) { return g.cosas.length; });
+    }
+
+    function cuantas(plan) {
+      return grupos(plan).reduce(function (n, g) { return n + g.cosas.length; }, 0);
+    }
+
+    function hechas(menuId) {
+      try { return (Store.settings().compraHecha || {})[menuId] || {}; }
+      catch (e) { return {}; }
+    }
+
+    function marcar(menuId, cosa, si) {
+      const todo = Object.assign({}, Store.settings().compraHecha || {});
+      const mia = Object.assign({}, todo[menuId] || {});
+      if (si) mia[cosa] = 1; else delete mia[cosa];
+      todo[menuId] = mia;
+      Store.setSetting('compraHecha', todo);
+    }
+
+    function limpiar(menuId) {
+      const todo = Object.assign({}, Store.settings().compraHecha || {});
+      delete todo[menuId];
+      Store.setSetting('compraHecha', todo);
+    }
+
+    return { grupos: grupos, cuantas: cuantas, hechas: hechas,
+      marcar: marcar, limpiar: limpiar,
+      multiplica: multiplica, semanas: semanas, ponerSemanas: ponerSemanas };
+  })();
+
+  V.compra = function () {
+    const menu = g.Menus ? Menus.activo() : null;
+    const plan = menu && menu.plan;
+    const gs = Compra.grupos(plan);
+
+    if (!gs.length) {
+      return html`
+        <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+          ${raw(icon('back'))} ${T('Alimentación')}</button>
+        <h1>${T('Lista de la compra')}</h1>
+        <div class="empty">${raw(icon('lista'))}
+          <p>${T('Sale de tu menú: cuando tengas uno generado, aquí estará lo que hay ' +
+            'que comprar para la semana.')}</p>
+          <button class="btn primary" data-a="atras">${T('Ir a Alimentación')}</button>
+        </div>`;
+    }
+
+    const ya = Compra.hechas(menu.id);
+    const total = Compra.cuantas(plan);
+    const sem = Compra.semanas(menu.id);
+    const dias = (plan.dias || []).length || 7;
+    const puestas = gs.reduce(function (n, gr) {
+      return n + gr.cosas.filter(function (x) { return ya[x]; }).length;
+    }, 0);
+
+    return html`
+      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+        ${raw(icon('back'))} ${T('Alimentación')}</button>
+      <h1>${T('Lista de la compra')}</h1>
+      <p class="muted">${Tn('De {menu}. Elige para cuánto compras y las cantidades se ' +
+        'ajustan solas.', { menu: menu.nombre })}</p>
+
+      <!-- Para cuánto. El menú cubre unos días; comprar para dos semanas es
+           darle dos vueltas, y entonces las cantidades se doblan. -->
+      <div class="row compra-sem">
+        ${raw([1, 2, 3, 4].map(function (n) {
+          return '<button class="chip' + (n === sem ? ' on' : '') + '" data-sem="' + n + '">' +
+            esc(Tp(n * dias, '{n} día', '{n} días')) + '</button>';
+        }).join(''))}
+      </div>
+
+      <div class="card compra-cuenta">
+        <div class="row between">
+          <b>${Tn('{a} de {b}', { a: puestas, b: total })}</b>
+          ${raw(puestas ? '<button class="btn sm vidrio" data-a="limpiarcompra">' +
+            esc(T('Empezar de cero')) + '</button>' : '')}
+        </div>
+        <div class="prog" style="margin-top:9px"><i style="width:${
+          raw(total ? Math.round(puestas / total * 100) : 0)}%"></i></div>
+      </div>
+
+      ${raw(gs.map(function (gr) {
+        return (gr.zona ? '<div class="list-title">' + esc(T(gr.zona)) + '</div>'
+          : '<div style="height:14px"></div>') +
+          '<div class="list">' + gr.cosas.map(function (x) {
+            const on = !!ya[x];
+            /* Lo tachado se guarda con el texto original, no con el ya
+               multiplicado: si no, cambiar de una semana a dos destachaba la
+               lista entera porque «500 g» y «1 kg» no son la misma cadena. */
+            return '<button class="list-row compra-fila' + (on ? ' ya' : '') +
+              '" data-compra="' + esc(x) + '">' +
+              '<span class="compra-caja">' + (on ? icon('check') : '') + '</span>' +
+              '<span class="grow compra-txt">' + esc(Compra.multiplica(x, sem)) + '</span>' +
+            '</button>';
+          }).join('') + '</div>';
+      }).join(''))}
+
+      <p class="tiny" style="margin-top:14px">${T('Lo tachado se guarda: puedes salir del ' +
+        'súper, volver a entrar y seguir donde lo dejaste. Al renovar el menú, la lista ' +
+        'empieza limpia.')}</p>`;
+  };
+
+  V.compra.mount = function (root) {
+    bind(root, '[data-a=atras]', function () { go('nutricion'); });
+
+    const menu = g.Menus ? Menus.activo() : null;
+    if (!menu) return;
+
+    bindAll(root, '[data-compra]', function (el) {
+      const cosa = el.getAttribute('data-compra');
+      const on = el.classList.contains('ya');
+      Compra.marcar(menu.id, cosa, !on);
+      /* Se repinta en el sitio y no la pantalla entera: tachando quince cosas
+         seguidas, un repintado completo por toque te manda arriba del todo en
+         cada una. */
+      el.classList.toggle('ya', !on);
+      el.querySelector('.compra-caja').innerHTML = !on ? icon('check') : '';
+      const cuenta = root.querySelector('.compra-cuenta');
+      if (cuenta) {
+        const hechas = root.querySelectorAll('.compra-fila.ya').length;
+        const total = root.querySelectorAll('.compra-fila').length;
+        const b = cuenta.querySelector('b');
+        if (b) b.textContent = Tn('{a} de {b}', { a: hechas, b: total });
+        const barra = cuenta.querySelector('.prog i');
+        if (barra) barra.style.width = (total ? Math.round(hechas / total * 100) : 0) + '%';
+      }
+    });
+
+    bindAll(root, '[data-sem]', function (el) {
+      Compra.ponerSemanas(menu.id, Number(el.getAttribute('data-sem')));
+      render();
+    });
+
+    bind(root, '[data-a=limpiarcompra]', function () {
+      Compra.limpiar(menu.id);
+      render();
+    });
+  };
+
   V.franjasSheet = franjasSheet;
+  g.Compra = Compra;
 })(window);

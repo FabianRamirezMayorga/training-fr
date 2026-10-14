@@ -4628,6 +4628,23 @@
     'Sin claves de {prov}: la IA deja de funcionar.': 'No {prov} keys left: the AI stops working.',
     'Pega antes una clave de {prov}.': 'Paste a {prov} key first.',
 
+    /* ---------- Lista de la compra ---------- */
+    'Lista de la compra': 'Shopping list',
+    '{n} cosa': '{n} item',
+    '{n} cosas': '{n} items',
+    'Sale de tu menú: cuando tengas uno generado, aquí estará lo que hay que comprar para la semana.':
+      'It comes from your menu: once you have one generated, this is where the week\u2019s shopping will be.',
+    'De {menu}. Elige para cuánto compras y las cantidades se ajustan solas.':
+      'From {menu}. Pick how long you are shopping for and the amounts adjust themselves.',
+    'Lo tachado se guarda: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Al renovar el menú, la lista empieza limpia.':
+      'What you tick is saved: you can leave the shop, come back in and carry on where you left off. When the menu is refreshed, the list starts clean.',
+    'Fruta y verdura': 'Fruit and veg',
+    'Carne y pescado': 'Meat and fish',
+    'Lácteos y huevos': 'Dairy and eggs',
+    'Despensa': 'Pantry',
+    'Congelados': 'Frozen',
+    'Otros': 'Other',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };

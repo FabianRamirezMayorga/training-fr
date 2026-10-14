@@ -1372,6 +1372,23 @@
     'Al abrir la app al día siguiente vuelve a la primera, porque la cuota se repone sola y quedarse en la última sería desperdiciar las otras.':
       'When you open the app the next day it goes back to the first one, because the quota refills by itself and staying on the last one would waste the others.',
 
+
+    /* ---------- La lista de la compra ---------- */
+    'La lista de la compra': 'The shopping list',
+    'Sale de tu menú, agrupada por zonas del súper y con casillas para ir tachando.':
+      'It comes from your menu, grouped by supermarket aisle and with boxes to tick off.',
+    'Abre Alimentación y baja a tu menú.': 'Open Food and scroll down to your menu.',
+    'Al final de él está *Lista de la compra*, con cuántas cosas lleva.':
+      'At the end of it is *Shopping list*, with how many items it holds.',
+    'Elige para cuántos días compras.': 'Pick how many days you are shopping for.',
+    'Tu menú cubre una semana; si eliges catorce días es darle dos vueltas, y las cantidades se doblan solas. Esa cuenta la hace la app, no la IA: multiplicar tiene un solo resultado y tiene que dar siempre el mismo, también sin cobertura.':
+      'Your menu covers a week; choosing fourteen days means going round it twice, and the amounts double by themselves. That sum is done by the app, not the AI: multiplying has one single answer and has to give the same one every time, with no signal too.',
+    'Ve tachando mientras compras.': 'Tick things off as you shop.',
+    'Lo tachado se queda guardado: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Lo comprado no desaparece, se apaga, porque la lista también sirve para ver lo que ya llevas.':
+      'What you tick stays saved: you can leave the shop, come back in and carry on where you left off. What is bought does not vanish, it dims, because the list is also there to show what is already in the trolley.',
+    'Al renovar el menú la lista empieza limpia, porque es otra compra. Lo que no lleva cantidad —la sal, el aceite— no se multiplica: duplicar «sal» no significa nada.':
+      'When the menu is refreshed the list starts clean, because it is a different shop. Anything with no amount —salt, oil— is not multiplied: doubling «salt» means nothing.',
+
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

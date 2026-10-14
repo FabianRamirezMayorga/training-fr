@@ -531,6 +531,20 @@
       cierre: 'Para una rutina suelta hay auditoría también, dentro del editor, y se salta las reglas que solo tienen sentido sobre una semana entera.',
       ver: ['g-nota'] },
 
+    { id: 'c-compra', titulo: 'La lista de la compra',
+      intro: 'Sale de tu menú, agrupada por zonas del súper y con casillas para ir tachando.',
+      pasos: [
+        { t: 'Abre Alimentación y baja a tu menú.',
+          d: 'Al final de él está *Lista de la compra*, con cuántas cosas lleva.',
+          ir: { ruta: 'nutricion', label: 'Abrir Alimentación' } },
+        { t: 'Elige para cuántos días compras.',
+          d: 'Tu menú cubre una semana; si eliges catorce días es darle dos vueltas, y las cantidades se doblan solas. Esa cuenta la hace la app, no la IA: multiplicar tiene un solo resultado y tiene que dar siempre el mismo, también sin cobertura.' },
+        { t: 'Ve tachando mientras compras.',
+          d: 'Lo tachado se queda guardado: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Lo comprado no desaparece, se apaga, porque la lista también sirve para ver lo que ya llevas.' }
+      ],
+      cierre: 'Al renovar el menú la lista empieza limpia, porque es otra compra. Lo que no lleva cantidad —la sal, el aceite— no se multiplica: duplicar «sal» no significa nada.',
+      ver: ['g-ciclos', 'c-pais'] },
+
     { id: 'c-fuera', titulo: 'Comer fuera sin salirte',
       intro: 'Una foto de la carta y la app te dice qué pedir, mirando lo que ya has comido hoy.',
       pasos: [

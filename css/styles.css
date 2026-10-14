@@ -8892,6 +8892,25 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .franja-ciclo.toca .row-icon{color:var(--acc)}
 
 
+/* ---- la lista de la compra ----
+   Filas altas y con la casilla a la izquierda: esto se usa con una mano, en un
+   pasillo y con el carro en la otra, asi que el objetivo tactil manda sobre lo
+   compacto. */
+.compra-cuenta{padding:13px}
+.compra-fila{padding:13px;gap:12px;cursor:pointer;width:100%;text-align:left}
+.compra-caja{flex:none;width:22px;height:22px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  border:1.5px solid color-mix(in srgb,var(--txt) 24%,transparent);
+  transition:background .14s,border-color .14s}
+.compra-caja svg{width:13px;height:13px;fill:none;stroke:var(--on-acc);
+  stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.compra-txt{font-size:.95rem;line-height:1.35}
+/* Lo comprado no desaparece, se apaga: tachar sirve para ver lo que falta, y
+   para eso hay que seguir viendo lo que ya esta en el carro. */
+.compra-fila.ya .compra-caja{background:var(--acc);border-color:var(--acc)}
+.compra-fila.ya .compra-txt{color:var(--dim2);text-decoration:line-through;
+  text-decoration-color:color-mix(in srgb,var(--dim2) 60%,transparent)}
+
 /* ---- nucleo inteligente: los proveedores ----
    Rejilla de dos y no una nube de etiquetas sueltas. Con `wrap` cada fila
    acababa con un ancho distinto segun la longitud del nombre, y siete cosas

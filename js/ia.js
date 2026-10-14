@@ -1855,7 +1855,10 @@
       '"plato":"descripcion con cantidades","alternativas":["opcion equivalente"],' +
       '"kcal":000,"prot":00,"carbo":00,"grasa":00}],' +
       '"total":{"kcal":000,"prot":00,"carbo":00,"grasa":00}}],' +
-      '"compra":["item con cantidad semanal"],' +
+      /* Agrupada por zona del super: una lista ordenada por dias obliga a
+         recorrer la tienda cuatro veces, y entonces no se usa. */
+      '"compra":[{"zona":"Fruta y verdura|Carne y pescado|Lacteos y huevos|"' +
+      '"Despensa|Congelados|Otros","cosas":["item con la cantidad de toda la semana"]}],' +
       '"flexibilidad":"1 o 2 frases sobre hasta dónde se puede salir del plan sin romperlo",' +
       '"consejos":["consejo breve"]}\n\n' +
       'En "consejos" van, si hay algo que decir: cómo se colocan en el día los ' +
