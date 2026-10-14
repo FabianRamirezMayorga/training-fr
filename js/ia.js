@@ -369,7 +369,9 @@
       delete c.claves[prov.id];
     }
     c.claveIdx[prov.id] = 0;
-    c.modelos[prov.id] = modelo || prov.modelos[0];
+    /* Sin modelo se respeta el que hubiera: lo contrario es que guardar una
+       clave te devuelva al modelo por defecto sin haberlo pedido. */
+    c.modelos[prov.id] = modelo || c.modelos[prov.id] || prov.modelos[0];
     if (clave) c.proveedor = prov.id;
     guardarCrudo(c);
   }
@@ -3946,6 +3948,7 @@
     config: config, guardarConfig: guardarConfig, borrarConfig: borrarConfig, activa: activa,
     PROVEEDORES: PROVEEDORES, proveedor: proveedor, proveedorActual: proveedorActual,
     proveedorPorId: proveedorPorId, claveDe: claveDe, modeloDe: modeloDe,
+    recordarModelo: recordarModelo,
     guardarProveedor: guardarProveedor, elegirProveedor: elegirProveedor,
     configurados: configurados, borrarTodo: borrarTodo,
     llamar: llamar, llamarJSON: llamarJSON, contexto: contexto, limpiarCache: limpiarCache,
