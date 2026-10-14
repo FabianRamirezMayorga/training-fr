@@ -213,36 +213,39 @@ html[data-theme="light"] .av-perfil.on{box-shadow:0 0 0 2px var(--bg),
 .tabbar{position:fixed;bottom:var(--barra-abajo);left:14px;right:14px;
   margin:0 auto;max-width:426px;
   z-index:60;display:flex;border-radius:26px;
-  /* El desenfoque sigue puesto y funciona —se nota al pasar el catálogo por
-     debajo—, pero ya no es lo único que sostiene el vidrio, y ahí estaba el
-     error: en la portada, que cabe sin desplazar, debajo de la barra no hay
-     mas que el fondo liso de la página. Desenfocar un color plano da el mismo
-     color plano, asi que la pieza salía opaca por mucho `blur` que llevara.
+  /* Vidrio, no vidrio esmerilado. Esta es la corrección que faltaba: treinta
+     píxeles de desenfoque con un 42 por ciento de relleno convertían lo de
+     detrás en una papilla gris uniforme —daba igual que pasaran fotos a todo
+     color—, y una papilla uniforme es indistinguible de una pieza opaca. Que
+     es justo lo que se veía.
 
-     Lo que falta es lo que un cristal de verdad tiene aunque esté sobre una
-     pared lisa: luz cenital. Un degradado de arriba abajo y los dos cantos
-     —claro arriba, oscuro abajo— le dan grosor, y el grosor es lo que se lee
-     como vidrio. */
+     Lo que hace que se lea como cristal es *reconocer* lo de detrás aunque esté
+     borroso: distinguir que ahí pasa una foto, un avatar, un titular. Asi que
+     la mitad de desenfoque y poco más de un cuarto de relleno, que es la
+     proporción de las barras del sistema.
+
+     El degradado se queda, pero muy flojo: añade la luz cenital que da grosor
+     sobre un fondo liso, y subido era otra capa de leche encima. */
   background:
-    linear-gradient(180deg,color-mix(in srgb,#fff 11%,transparent),transparent 48%),
-    color-mix(in srgb,var(--bg2) 42%,transparent);
-  backdrop-filter:saturate(190%) blur(30px);-webkit-backdrop-filter:saturate(190%) blur(30px);
-  border:1px solid color-mix(in srgb,var(--txt) 13%,transparent);
-  box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 20%,transparent),
-             inset 0 -1px 0 color-mix(in srgb,#000 14%,transparent),
+    linear-gradient(180deg,color-mix(in srgb,#fff 6%,transparent),transparent 42%),
+    color-mix(in srgb,var(--bg2) 26%,transparent);
+  backdrop-filter:saturate(170%) blur(16px);-webkit-backdrop-filter:saturate(170%) blur(16px);
+  border:1px solid color-mix(in srgb,var(--txt) 14%,transparent);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 18%,transparent),
+             inset 0 -1px 0 color-mix(in srgb,#000 16%,transparent),
              0 10px 30px rgba(0,0,0,.34),0 2px 8px rgba(0,0,0,.18)}
 /* En claro la misma sombra tapaba: el fondo es blanco y lo que hay debajo no
    es una sombra, es suciedad. Mas suave y el cristal mas opaco, que sobre
    blanco el desenfoque solo no separa nada. */
-/* En claro el degradado pesa más, porque sobre blanco un borde de luz blanco
-   no se ve: lo que separa la pieza del fondo es el canto de abajo y la sombra,
-   no el brillo de arriba. */
+/* En claro hace falta algo más de relleno que en oscuro, pero poco: lo que
+   separa la pieza del fondo blanco es el canto de abajo y la sombra, no el
+   brillo de arriba, que sobre blanco no se ve. */
 html[data-theme="light"] .tabbar{
   background:
-    linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,255,255,.14) 54%),
-    color-mix(in srgb,var(--bg2) 40%,transparent);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
-             inset 0 -1px 0 rgba(16,24,40,.07),
+    linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.06) 48%),
+    color-mix(in srgb,var(--bg2) 34%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),
+             inset 0 -1px 0 rgba(16,24,40,.09),
              0 8px 26px rgba(16,24,40,.16),0 1px 4px rgba(16,24,40,.1)}
 /* Los apagados suben de claridad. Estaban en `--dim2`, que es el gris de un
    texto de tercera, y esto no es texto de tercera: es la navegacion, lo unico
