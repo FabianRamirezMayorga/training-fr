@@ -364,9 +364,31 @@
     return '<button class="btn sm" data-perm="' + id + '">' + esc(T('Permitir')) + '</button>';
   }
 
-  V.permisos = function () {
-    const dudoso = PERMISOS.filter(function (p) { return estados[p.id] === 'no'; }).length;
+  function filasHTML() {
+    return PERMISOS.map(function (p) {
+      const est = estados[p.id] || 'preguntar';
+      return '<div class="list-row perm-fila' + (est === 'imposible' ? ' apagada' : '') + '">' +
+        '<span class="row-icon">' + icon(p.ico) + '</span>' +
+        '<div class="grow">' +
+          '<div class="list-row-title">' + esc(T(p.titulo)) + '</div>' +
+          '<div class="list-row-sub">' + esc(T(p.para)) + '</div>' +
+        '</div>' +
+        ladoHTML(p.id, est) +
+      '</div>';
+    }).join('');
+  }
 
+  function notaHTML() {
+    const dudoso = PERMISOS.filter(function (p) { return estados[p.id] === 'no'; }).length;
+    if (!dudoso) return '';
+    return '<div class="card perm-nota"><p style="margin:0">' +
+      esc(T('Lo bloqueado no lo puede desbloquear la app: una página web pide ' +
+        'permisos, pero no se los quita ni se los devuelve. Eso se cambia en el ' +
+        'navegador, en el candado o la «i» de la barra de direcciones, en ' +
+        '«Ajustes del sitio».')) + '</p></div>';
+  }
+
+  V.permisos = function () {
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
         ${raw(icon('back'))} ${T('Perfil')}</button>
@@ -374,25 +396,8 @@
       <p class="muted">${T('Lo que le has dado a la app en este navegador, y lo que ' +
         'hace falta para cada cosa. Nada de esto se enciende solo.')}</p>
 
-      <div class="list" style="margin-top:16px">
-        ${raw(PERMISOS.map(function (p) {
-          const est = estados[p.id] || 'preguntar';
-          return '<div class="list-row perm-fila' + (est === 'imposible' ? ' apagada' : '') + '">' +
-            '<span class="row-icon">' + icon(p.ico) + '</span>' +
-            '<div class="grow">' +
-              '<div class="list-row-title">' + esc(T(p.titulo)) + '</div>' +
-              '<div class="list-row-sub">' + esc(T(p.para)) + '</div>' +
-            '</div>' +
-            ladoHTML(p.id, est) +
-          '</div>';
-        }).join(''))}
-      </div>
-
-      ${raw(dudoso ? '<div class="card perm-nota"><p style="margin:0">' +
-        esc(T('Lo bloqueado no lo puede desbloquear la app: una página web pide ' +
-          'permisos, pero no se los quita ni se los devuelve. Eso se cambia en el ' +
-          'navegador, en el candado o la «i» de la barra de direcciones, en ' +
-          '«Ajustes del sitio».')) + '</p></div>' : '')}
+      <div class="list" id="perm-lista" style="margin-top:16px">${raw(filasHTML())}</div>
+      <div id="perm-nota">${raw(notaHTML())}</div>
 
       <div class="list-title">${T('De dónde salen')}</div>
       <div class="list">
@@ -421,24 +426,52 @@
         'kilómetros y se queda contigo, igual que el resto.')}</p>`;
   };
 
+  /* Se guarda la raíz para poder repintar solo la lista después, sin pasar por
+     el repintado general. */
+  let raiz = null;
+
+  function atarBotones() {
+    if (!raiz) return;
+    bindAll(raiz, '[data-perm]', function (el) {
+      pedir(el.getAttribute('data-perm'));
+    });
+  }
+
+  /* Mira cómo está cada permiso y actualiza *solo la lista*.
+
+     Antes esto terminaba en `App.render()`, y ahí estaba el fallo gordo: el
+     repintado general vuelve a llamar a `mount`, `mount` volvía a mirar, y
+     mirar volvía a repintar. Un bucle infinito que dejaba el móvil clavado y,
+     de paso, hacía que los botones no respondieran —el nodo que estabas
+     pulsando desaparecía a mitad del toque, sustituido por otro igual—. Las
+     dos cosas que se veían eran el mismo fallo. */
+  function refrescar() {
+    return mirarPermisos().then(function () {
+      if (!raiz) return;
+      const lista = raiz.querySelector('#perm-lista');
+      const nota = raiz.querySelector('#perm-nota');
+      if (lista) lista.innerHTML = filasHTML();
+      if (nota) nota.innerHTML = notaHTML();
+      /* Los botones son nodos nuevos: hay que volver a atarlos. */
+      atarBotones();
+    });
+  }
+
   V.permisos.mount = function (root) {
+    raiz = root;
     bind(root, '[data-a=atras]', function () { go('perfil'); });
     bind(root, '[data-a=ir-alertas]', function () { go('alertas'); });
     bind(root, '[data-a=ir-reloj]', function () { go('reloj'); });
     bind(root, '[data-a=ir-medir]', function () { go('medir'); });
+    atarBotones();
 
-    bindAll(root, '[data-perm]', function (el) {
-      pedir(el.getAttribute('data-perm'));
-    });
-
-    /* Se mira al entrar y se repinta con lo que salga: con los valores de la
-       última visita, la pantalla de permisos miente justo en lo único que
-       cuenta. */
-    mirarPermisos().then(function () { App.render(); });
+    /* Con los valores de la última visita, la pantalla de permisos mentiría
+       justo en lo único que cuenta, así que se vuelve a mirar al entrar. */
+    refrescar();
   };
 
   function pedir(id) {
-    const luego = function () { mirarPermisos().then(function () { App.render(); }); };
+    const luego = refrescar;
 
     if (id === 'avisos') {
       Notification.requestPermission().then(luego);
