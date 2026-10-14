@@ -8577,6 +8577,25 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 
 .med-botones{gap:10px;margin-top:14px}
 
+/* ---- permisos ----
+   El estado a la derecha no es un botón: es una etiqueta, y tiene que verse que
+   no se pulsa. Por eso va sin fondo de boton y en el gris de los valores de
+   lista, como el «80 kg» de cualquier otra fila. El verde se lo queda solo lo
+   concedido, que es lo único que de verdad distingue una fila de otra. */
+.perm-estado{display:inline-flex;align-items:center;gap:5px;flex:none;
+  font-size:.82rem;font-weight:600;color:var(--dim2);white-space:nowrap}
+.perm-estado svg{width:13px;height:13px;fill:none;stroke:currentColor;
+  stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.perm-estado.si{color:var(--acc)}
+.perm-estado.no{color:var(--warn)}
+.perm-fila .btn.sm{flex:none}
+/* Lo que este aparato no puede hacer se cuenta en gris y sin alarma, igual
+   que en Reloj y salud: no es un fallo, es que aquí no existe. */
+.perm-fila.apagada .row-icon{color:var(--dim2);opacity:.6}
+.perm-fila.apagada .list-row-title{color:var(--dim)}
+.perm-nota{margin-top:11px;border-color:var(--warn)}
+.perm-nota p{font-size:.85rem;line-height:1.45;color:var(--dim)}
+
 /* ---- contar repeticiones con el movil ---- */
 .rep-contar{display:flex;align-items:center;gap:10px;margin-top:10px;
   padding:10px 13px;border-radius:14px;background:var(--card2)}

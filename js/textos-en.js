@@ -4483,6 +4483,42 @@
       'I counted nothing. Try with the phone closer to your body.',
     'Sin permiso para el sensor de movimiento.': 'No permission for the motion sensor.',
 
+    /* ---------- Permisos ---------- */
+    'Permisos': 'Permissions',
+    'Avisos, ubicación, cámara y Bluetooth': 'Alerts, location, camera and Bluetooth',
+    'Lo que le has dado a la app en este navegador, y lo que hace falta para cada cosa. Nada de esto se enciende solo.':
+      'What you have given the app in this browser, and what each thing needs. None of it switches itself on.',
+    'Avisos': 'Alerts',
+    'Recordatorios de entrenar, beber y comer mientras la app esté abierta.':
+      'Reminders to train, drink and eat while the app is open.',
+    'Ubicación': 'Location',
+    'Distancia y ritmo al medir una salida con el GPS.':
+      'Distance and pace when measuring an outing with GPS.',
+    'Movimiento': 'Motion',
+    'Pasos y zancadas, y contar repeticiones con el móvil encima.':
+      'Steps and strides, and counting reps with the phone on you.',
+    'Cámara': 'Camera',
+    'Calcular un plato desde la foto.': 'Working out a plate from the photo.',
+    'Bluetooth': 'Bluetooth',
+    'Leer el pulso de una banda, una pulsera o un reloj.':
+      'Reading the heart rate of a strap, a band or a watch.',
+    'Guardado permanente': 'Permanent storage',
+    'Que el navegador no borre tus rutinas si se queda sin espacio.':
+      'So the browser does not delete your routines if it runs out of room.',
+    'Concedido': 'Granted',
+    'Bloqueado': 'Blocked',
+    'Aquí no': 'Not here',
+    'Permitir': 'Allow',
+    'Lo bloqueado no lo puede desbloquear la app: una página web pide permisos, pero no se los quita ni se los devuelve. Eso se cambia en el navegador, en el candado o la «i» de la barra de direcciones, en «Ajustes del sitio».':
+      'What is blocked, the app cannot unblock: a web page asks for permissions, but it neither takes them back nor gives them back. That is changed in the browser, in the padlock or the «i» in the address bar, under «Site settings».',
+    'De dónde salen': 'Where they come from',
+    'Qué avisos hay puestos y a qué hora': 'Which reminders are set and at what time',
+    'El Bluetooth se concede aparato a aparato, al buscarlo':
+      'Bluetooth is granted device by device, as you search for it',
+    'Donde se usan la ubicación y el movimiento': 'Where location and motion are used',
+    'Ninguno de estos datos sale de tu dispositivo por darlo aquí: la ubicación se usa para la cuenta de kilómetros y se queda contigo, igual que el resto.':
+      'None of this data leaves your device by giving it here: your location is used for the kilometre count and stays with you, like everything else.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };

@@ -1257,6 +1257,36 @@
     'Y si al volver ves menos kilómetros de los que esperabas, mira si la app te avisó de señal floja: lo que se mueve con mala precisión no se suma a propósito, porque sumarlo es como acaban saliendo paseos de dos kilómetros sin levantarse de la silla.':
       'And if you come back to fewer kilometres than you expected, check whether the app warned you of a weak signal: what moves with poor accuracy is not added on purpose, because adding it is how you end up with two-kilometre walks without getting out of the chair.',
 
+
+    /* ---------- Permisos ---------- */
+    'Dar o quitar un permiso': 'Giving or taking back a permission',
+    'Avisos, ubicación, movimiento, cámara y Bluetooth: todos están en la misma pantalla, con el estado de cada uno.':
+      'Alerts, location, motion, camera and Bluetooth: they are all on the same screen, each with its state.',
+    'Abre Perfil › Permisos.': 'Open Profile › Permissions.',
+    'Cada fila dice para qué hace falta y cómo está: concedido, bloqueado, sin pedir, o que en este aparato no existe.':
+      'Each row says what it is needed for and how it stands: granted, blocked, not yet asked, or that it does not exist on this device.',
+    'Abrir Permisos': 'Open Permissions',
+    'Para darlo, pulsa *Permitir*.': 'To give it, tap *Allow*.',
+    'Sale el cartel del navegador y contestas ahí. La app no puede responder por ti.':
+      'The browser prompt comes up and you answer there. The app cannot answer for you.',
+    'Para quitarlo, hay que ir al navegador.': 'To take it back, you have to go to the browser.',
+    'Esto no se hace desde la app: toca el candado —o la «i», o «Aa» en Safari— en la barra de direcciones, entra en *Ajustes del sitio* y ahí están todos, con su interruptor de verdad.':
+      'This is not done from the app: tap the padlock —or the «i», or «Aa» in Safari— in the address bar, go into *Site settings* and they are all there, with a switch that really is one.',
+    'El Bluetooth no se da de una vez.': 'Bluetooth is not given once and for all.',
+    'Se concede aparato a aparato, cuando buscas uno desde Reloj y salud. Por eso en Permisos no sale como concedido aunque ya tengas una banda guardada.':
+      'It is granted device by device, when you search for one from Watch and health. That is why Permissions does not show it as granted even when you already have a strap saved.',
+    'Dar un permiso no manda nada a ningún sitio: lo que midas se queda en tu dispositivo igual que el resto.':
+      'Giving a permission sends nothing anywhere: what you measure stays on your device like everything else.',
+    '¿Por qué la app no puede quitarme un permiso?': 'Why can the app not take a permission back?',
+    'Porque una página web puede *pedir* un permiso y puede *mirar* cómo está, pero no puede dárselo ni quitárselo a sí misma. Eso lo decide el navegador, y a propósito: si una web pudiera concederse la cámara sola, el permiso no valdría para nada.':
+      'Because a web page can *ask* for a permission and can *look* at how it stands, but it cannot grant or revoke one for itself. The browser decides that, and on purpose: if a site could grant itself the camera, the permission would be worth nothing.',
+    'Por eso en Permisos no hay interruptores. Un interruptor promete que al apagarlo se apaga, y el de la ubicación se habría quedado encendido solo, que es la peor forma de enterarse de que un control era de mentira. Lo que hay es el estado de verdad, el botón donde todavía se puede pedir, y dónde ir cuando ya no.':
+      'That is why Permissions has no switches. A switch promises that turning it off turns it off, and the location one would have stayed on by itself, which is the worst way to find out a control was fake. What there is instead is the real state, a button where it can still be asked for, and where to go when it cannot.',
+    'Para quitarlo: el candado de la barra de direcciones —en Safari de iPhone es la *Aa* de la izquierda— y de ahí a los ajustes del sitio.':
+      'To take it back: the padlock in the address bar —in Safari on iPhone it is the *Aa* on the left— and from there into site settings.',
+    'Y si una fila dice *Aquí no*, no es que lo hayas bloqueado: es que ese navegador no lo tiene. El Bluetooth en iPhone es el caso de siempre.':
+      'And if a row says *Not here*, it is not that you blocked it: that browser does not have it. Bluetooth on iPhone is the usual case.',
+
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

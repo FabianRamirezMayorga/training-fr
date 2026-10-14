@@ -213,4 +213,202 @@
     }));
     go('progreso');
   }
+
+  /* ================= los permisos del navegador =================
+
+     Lo primero que hay que decir, y lo dice la propia pantalla: *una página web
+     no puede quitar un permiso*. Puede pedirlo una vez y puede mirar cómo
+     está, pero retirarlo se hace en los ajustes del navegador y punto.
+
+     Por eso aquí no hay interruptores. Un interruptor promete que al apagarlo
+     se apaga, y el de «ubicación» no apagaría nada: se quedaría encendido
+     solo, que es la peor forma de enterarse de que un control era de mentira.
+     Lo que hay es el estado de verdad de cada cosa, un botón donde todavía se
+     puede pedir, y dónde se va a quitarlo cuando ya no.
+
+     Y está todo junto porque la pregunta que trae aquí es «qué le he dado yo a
+     esta app». Esa pregunta no se responde recorriendo seis pantallas para ver
+     en cuál salió un cartel del navegador hace tres meses. */
+
+  const PERMISOS = [
+    { id: 'avisos', ico: 'campana', titulo: 'Avisos',
+      para: 'Recordatorios de entrenar, beber y comer mientras la app esté abierta.' },
+    { id: 'ubicacion', ico: 'ubicacion', titulo: 'Ubicación',
+      para: 'Distancia y ritmo al medir una salida con el GPS.' },
+    { id: 'movimiento', ico: 'correr', titulo: 'Movimiento',
+      para: 'Pasos y zancadas, y contar repeticiones con el móvil encima.' },
+    { id: 'camara', ico: 'camara', titulo: 'Cámara',
+      para: 'Calcular un plato desde la foto.' },
+    { id: 'bluetooth', ico: 'banda', titulo: 'Bluetooth',
+      para: 'Leer el pulso de una banda, una pulsera o un reloj.' },
+    { id: 'guardado', ico: 'llave', titulo: 'Guardado permanente',
+      para: 'Que el navegador no borre tus rutinas si se queda sin espacio.' }
+  ];
+
+  /* Lo que sabemos de cada uno. `preguntar` significa que todavía se puede
+     pedir; `no` que el usuario dijo que no y hay que ir a los ajustes. */
+  let estados = {};
+
+  function mirarPermisos() {
+    const pide = function (nombre) {
+      if (!g.navigator || !navigator.permissions || !navigator.permissions.query) {
+        return Promise.resolve('');
+      }
+      return navigator.permissions.query({ name: nombre })
+        .then(function (r) { return r.state; })
+        .catch(function () { return ''; });
+    };
+
+    const fin = {};
+
+    fin.avisos = !('Notification' in g) ? 'imposible'
+      : Notification.permission === 'granted' ? 'si'
+      : Notification.permission === 'denied' ? 'no' : 'preguntar';
+
+    fin.bluetooth = (g.navigator && navigator.bluetooth) ? 'preguntar' : 'imposible';
+
+    /* En iOS el permiso de movimiento no se puede consultar: no hay API que lo
+       diga, solo pedirlo. Lo que sí se puede es acordarse de lo que contestó,
+       que es lo que se guarda al pedirlo desde aquí. */
+    fin.movimiento = !(g.DeviceMotionEvent) ? 'imposible'
+      : typeof DeviceMotionEvent.requestPermission !== 'function' ? 'si'
+      : (Store.settings().permisoMovimiento || 'preguntar');
+
+    return Promise.all([
+      pide('geolocation'), pide('camera'),
+      (g.navigator && navigator.storage && navigator.storage.persisted)
+        ? navigator.storage.persisted().catch(function () { return false; })
+        : Promise.resolve(null)
+    ]).then(function (r) {
+      fin.ubicacion = !(g.navigator && navigator.geolocation) ? 'imposible'
+        : r[0] === 'granted' ? 'si' : r[0] === 'denied' ? 'no' : 'preguntar';
+      fin.camara = !(g.navigator && navigator.mediaDevices) ? 'imposible'
+        : r[1] === 'granted' ? 'si' : r[1] === 'denied' ? 'no' : 'preguntar';
+      fin.guardado = r[2] === null ? 'imposible' : r[2] ? 'si' : 'preguntar';
+      estados = fin;
+      return fin;
+    });
+  }
+
+  function ladoHTML(id, est) {
+    if (est === 'si') {
+      return '<span class="perm-estado si">' + icon('check') + esc(T('Concedido')) + '</span>';
+    }
+    if (est === 'no') {
+      return '<span class="perm-estado no">' + esc(T('Bloqueado')) + '</span>';
+    }
+    if (est === 'imposible') {
+      return '<span class="perm-estado">' + esc(T('Aquí no')) + '</span>';
+    }
+    return '<button class="btn sm" data-perm="' + id + '">' + esc(T('Permitir')) + '</button>';
+  }
+
+  V.permisos = function () {
+    const dudoso = PERMISOS.filter(function (p) { return estados[p.id] === 'no'; }).length;
+
+    return html`
+      <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">
+        ${raw(icon('back'))} ${T('Perfil')}</button>
+      <h1>${T('Permisos')}</h1>
+      <p class="muted">${T('Lo que le has dado a la app en este navegador, y lo que ' +
+        'hace falta para cada cosa. Nada de esto se enciende solo.')}</p>
+
+      <div class="list" style="margin-top:16px">
+        ${raw(PERMISOS.map(function (p) {
+          const est = estados[p.id] || 'preguntar';
+          return '<div class="list-row perm-fila' + (est === 'imposible' ? ' apagada' : '') + '">' +
+            '<span class="row-icon">' + icon(p.ico) + '</span>' +
+            '<div class="grow">' +
+              '<div class="list-row-title">' + esc(T(p.titulo)) + '</div>' +
+              '<div class="list-row-sub">' + esc(T(p.para)) + '</div>' +
+            '</div>' +
+            ladoHTML(p.id, est) +
+          '</div>';
+        }).join(''))}
+      </div>
+
+      ${raw(dudoso ? '<div class="card perm-nota"><p style="margin:0">' +
+        esc(T('Lo bloqueado no lo puede desbloquear la app: una página web pide ' +
+          'permisos, pero no se los quita ni se los devuelve. Eso se cambia en el ' +
+          'navegador, en el candado o la «i» de la barra de direcciones, en ' +
+          '«Ajustes del sitio».')) + '</p></div>' : '')}
+
+      <div class="list-title">${T('De dónde salen')}</div>
+      <div class="list">
+        <button class="list-row tap" data-a="ir-alertas">
+          <span class="row-icon">${raw(icon('campana'))}</span>
+          <div class="grow"><div class="list-row-title">${T('Alertas')}</div>
+            <div class="list-row-sub">${T('Qué avisos hay puestos y a qué hora')}</div></div>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="list-row tap" data-a="ir-reloj">
+          <span class="row-icon">${raw(icon('corazon'))}</span>
+          <div class="grow"><div class="list-row-title">${T('Reloj y salud')}</div>
+            <div class="list-row-sub">${T('El Bluetooth se concede aparato a aparato, al buscarlo')}</div></div>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+        <button class="list-row tap" data-a="ir-medir">
+          <span class="row-icon">${raw(icon('ubicacion'))}</span>
+          <div class="grow"><div class="list-row-title">${T('Medir con el GPS')}</div>
+            <div class="list-row-sub">${T('Donde se usan la ubicación y el movimiento')}</div></div>
+          <span class="chevron">${raw(icon('chevron'))}</span>
+        </button>
+      </div>
+
+      <p class="tiny muted" style="margin-top:14px">${T('Ninguno de estos datos sale de ' +
+        'tu dispositivo por darlo aquí: la ubicación se usa para la cuenta de ' +
+        'kilómetros y se queda contigo, igual que el resto.')}</p>`;
+  };
+
+  V.permisos.mount = function (root) {
+    bind(root, '[data-a=atras]', function () { go('perfil'); });
+    bind(root, '[data-a=ir-alertas]', function () { go('alertas'); });
+    bind(root, '[data-a=ir-reloj]', function () { go('reloj'); });
+    bind(root, '[data-a=ir-medir]', function () { go('medir'); });
+
+    bindAll(root, '[data-perm]', function (el) {
+      pedir(el.getAttribute('data-perm'));
+    });
+
+    /* Se mira al entrar y se repinta con lo que salga: con los valores de la
+       última visita, la pantalla de permisos miente justo en lo único que
+       cuenta. */
+    mirarPermisos().then(function () { App.render(); });
+  };
+
+  function pedir(id) {
+    const luego = function () { mirarPermisos().then(function () { App.render(); }); };
+
+    if (id === 'avisos') {
+      Notification.requestPermission().then(luego);
+      return;
+    }
+    if (id === 'ubicacion') {
+      /* No hay forma de pedir la ubicación sin pedir una posición: el cartel
+         del navegador sale con la primera consulta, no con una llamada aparte. */
+      navigator.geolocation.getCurrentPosition(luego, luego, { timeout: 15000 });
+      return;
+    }
+    if (id === 'movimiento') {
+      Medir.pidePermisoMovimiento().then(function (ok) {
+        Store.setSetting('permisoMovimiento', ok ? 'si' : 'no');
+        luego();
+      });
+      return;
+    }
+    if (id === 'camara') {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(function (flujo) {
+        /* Apagar la cámara en cuanto la concede: aquí no se graba nada, solo se
+           preguntaba. Dejarla viva encendería la luz del móvil en una pantalla
+           de ajustes, que es justo lo que hace desconfiar de una app. */
+        flujo.getTracks().forEach(function (t) { t.stop(); });
+        luego();
+      }).catch(luego);
+      return;
+    }
+    if (id === 'bluetooth') { go('reloj'); return; }
+    if (id === 'guardado') {
+      navigator.storage.persist().then(luego).catch(luego);
+    }
+  }
 })(window);

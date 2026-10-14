@@ -238,6 +238,12 @@
         ${raw(filaPerfil({ icono: 'ajustes', titulo: T('Ajustes'), accion: 'ajustes',
           tono: '#c06bf0',
           sub: T('Unidades, tema, idioma y copias de seguridad') }))}
+        <!-- Debajo de Ajustes: las dos van de cómo se comporta la app, y la
+             pregunta «qué le he dado yo a esto» se hace aquí, no en la pantalla
+             donde salió el cartel del navegador hace tres meses. -->
+        ${raw(filaPerfil({ icono: 'llave', titulo: T('Permisos'), accion: 'permisos',
+          tono: '#f0a23c',
+          sub: T('Avisos, ubicación, cámara y Bluetooth') }))}
         ${raw(filaPerfil({ icono: 'actualizar', titulo: T('Actualizaciones'), accion: 'version',
           tono: '#4f8cf5', pendiente: !!(ver && ver.local && !ver.alDia && !ver.sinRed),
           /* El punto naranja solo cuando se ha podido comprobar. Sin red el
@@ -282,7 +288,8 @@
     const ir = { datos: 'datos', objetivos: 'objetivos', nutricion: 'nutricion',
       alertas: 'alertas', entrenador: 'entrenador', musica: 'musica',
       cuenta: 'cuenta', ajustes: 'ajustes', usuarios: 'usuarios', version: 'version',
-      ayuda: 'ayuda', suplementos: 'suplementos', reloj: 'reloj', medir: 'medir' };
+      ayuda: 'ayuda', suplementos: 'suplementos', reloj: 'reloj', medir: 'medir',
+      permisos: 'permisos' };
 
     /* La primera vez que se entra en Perfil se pregunta si hay versión nueva y
        se repinta con la respuesta. Después ya está sabida y no se vuelve a

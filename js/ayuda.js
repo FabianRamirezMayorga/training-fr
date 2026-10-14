@@ -390,6 +390,23 @@
       cierre: 'Para algo que hiciste otro día —una caminata el domingo, la pachanga del sábado—, en Rutinas tienes *Apuntar algo que ya hice*. Ahí no hay series que apuntar, así que ese día sale en azul con los minutos debajo en vez del número de series; y la app sabe qué músculos mueve cada actividad, y no solo de pierna: nadar y remar van a la espalda, la escalada a espalda y antebrazos, y el boxeo a hombro, core y brazo. Si lo escribes con tus palabras, la app reconoce lo que pone y elige el esfuerzo sola: «Jugué fútbol» es un deporte de equipo, «subida al cerro» es senderismo y «clase de muay thai» es boxeo. La ficha de debajo del campo enseña siempre lo que ha entendido y qué músculos va a apuntar, para que no haya que guardarlo para enterarse. Si no reconoce nada se queda en «Otra cosa», que no apunta músculos porque puede ser cualquier cosa; toca *Cambiar* y elige de la lista, donde cada una dice lo que registra. Escribe también el rato y el día si quieres: «trote una hora» o «jugué fútbol ayer 90 minutos» rellenan solos el cuándo y el cuánto. Y si lo tuyo no cabe en la rueda —una caminata de hace tres semanas, cuarenta y siete minutos justos— debajo tienes la fecha y los minutos para escribirlos a mano; entonces la rueda se apaga, porque marcar «45» con 47 puestos al lado sería mentir. Y con el entrenador puesto no hay que pedírselo: en cuanto dejas de escribir lo mira solo y te lo afina —distingue un partido de once de una pachanga, y el botón de esfuerzo no—, y lo que diga sale abajo, encima del botón de guardar. Lo mismo al empezar algo con el cronómetro: escribes qué estás haciendo y te dice los músculos antes de arrancar, sin pedirle nada. Y al terminar cualquier entrenamiento —de pesas o de fuera— tienes *Guardar y analizarlo con la IA*, que lo guarda y te lo lee: cómo de exigente fue, qué te deja tocado, si construye músculo y qué vigilar en la próxima, contando las series de tu semana. Ahí mismo, al lado de *Apuntar*, tienes *Analizar*: con la actividad y el rato ya puestos, te dice cómo de duro fue de verdad, qué te deja cargado y cuánto dura, si eso construye músculo o solo lo mantiene, y qué vigilar mañana. Y si en lo que escribiste hay un sitio que conoce —un cerro, una carrera, una ruta— abre con eso: qué es, cuánto desnivel tiene y cómo queda tu tiempo frente al normal de allí. Si no lo conoce, esa línea no sale: se le pide callarse antes que inventarse un desnivel, porque un número falso sobre un sitio real suena a dato y te lo crees. Cuenta con las series que llevas esta semana en esas zonas, que es lo que separa un consejo tuyo de un horóscopo. Es una lectura para leerla y cerrarla: no se guarda ni entra en ninguna gráfica.',
       ver: ['g-entrenar'] },
 
+    { id: 'c-permisos', titulo: 'Dar o quitar un permiso',
+      intro: 'Avisos, ubicación, movimiento, cámara y Bluetooth: todos están en la ' +
+        'misma pantalla, con el estado de cada uno.',
+      pasos: [
+        { t: 'Abre Perfil › Permisos.',
+          d: 'Cada fila dice para qué hace falta y cómo está: concedido, bloqueado, sin pedir, o que en este aparato no existe.',
+          ir: { ruta: 'permisos', label: 'Abrir Permisos' } },
+        { t: 'Para darlo, pulsa *Permitir*.',
+          d: 'Sale el cartel del navegador y contestas ahí. La app no puede responder por ti.' },
+        { t: 'Para quitarlo, hay que ir al navegador.',
+          d: 'Esto no se hace desde la app: toca el candado —o la «i», o «Aa» en Safari— en la barra de direcciones, entra en *Ajustes del sitio* y ahí están todos, con su interruptor de verdad.' },
+        { t: 'El Bluetooth no se da de una vez.',
+          d: 'Se concede aparato a aparato, cuando buscas uno desde Reloj y salud. Por eso en Permisos no sale como concedido aunque ya tengas una banda guardada.' }
+      ],
+      cierre: 'Dar un permiso no manda nada a ningún sitio: lo que midas se queda en tu dispositivo igual que el resto.',
+      ver: ['p-permisos', 'c-medir', 'c-reloj'] },
+
     { id: 'c-medir', titulo: 'Medir una salida con el GPS',
       intro: 'Para andar, correr, bici y senderismo, que es donde la distancia significa algo. ' +
         'Nadar no entra: el GPS no atraviesa el agua.',
@@ -714,6 +731,13 @@
         'Y si abriste el enlace dentro de WhatsApp, Instagram o parecidos, ahí no se puede instalar de ninguna manera: hay que abrirlo antes en el navegador de verdad.',
         'También desaparece cuando ya la tienes instalada, que es lo normal si arrancaste desde el icono.'],
       ver: ['c-instalar'] },
+
+    { id: 'p-permisos', q: '¿Por qué la app no puede quitarme un permiso?',
+      a: ['Porque una página web puede *pedir* un permiso y puede *mirar* cómo está, pero no puede dárselo ni quitárselo a sí misma. Eso lo decide el navegador, y a propósito: si una web pudiera concederse la cámara sola, el permiso no valdría para nada.',
+        'Por eso en Permisos no hay interruptores. Un interruptor promete que al apagarlo se apaga, y el de la ubicación se habría quedado encendido solo, que es la peor forma de enterarse de que un control era de mentira. Lo que hay es el estado de verdad, el botón donde todavía se puede pedir, y dónde ir cuando ya no.',
+        'Para quitarlo: el candado de la barra de direcciones —en Safari de iPhone es la *Aa* de la izquierda— y de ahí a los ajustes del sitio.',
+        'Y si una fila dice *Aquí no*, no es que lo hayas bloqueado: es que ese navegador no lo tiene. El Bluetooth en iPhone es el caso de siempre.'],
+      ver: ['c-permisos', 'g-reloj'] },
 
     { id: 'p-medirparado', q: '¿Por qué dejó de contar al bloquear el móvil?',
       a: ['Porque esto es una página web, y cuando bloqueas el móvil el navegador congela la página entera para ahorrar batería. No hay forma de evitarlo desde una web: lo que cuenta con la pantalla apagada es una app instalada de las de la tienda.',
