@@ -234,7 +234,7 @@ html[data-theme="light"] .av-perfil.on{box-shadow:0 0 0 2px var(--bg),
 .tabbar{position:fixed;bottom:var(--barra-abajo);left:14px;right:14px;
   margin:0 auto;max-width:426px;
   z-index:60;display:flex;border-radius:28px;padding:5px;
-  background:color-mix(in srgb,var(--bg2) 26%,transparent);
+  background:color-mix(in srgb,var(--bg2) 20%,transparent);
   backdrop-filter:saturate(170%) blur(16px);-webkit-backdrop-filter:saturate(170%) blur(16px);
   border:0;
   box-shadow:0 12px 34px rgba(0,0,0,.40),0 2px 10px rgba(0,0,0,.22)}
@@ -283,9 +283,12 @@ html[data-theme="light"] .av-perfil.on{box-shadow:0 0 0 2px var(--bg),
 .tabbar.sin-activa .tab-pastilla{opacity:0}
 @media (prefers-reduced-motion:reduce){.tab-pastilla{transition:opacity .2s}}
 
+/* Baja de 34 a 22 ahora que la letra se defiende sola. En claro hacia falta
+   relleno para que el texto no se perdiera sobre las fotos, y ese relleno era
+   justo lo que dejaba la barra en un blanco plano. */
 html[data-theme="light"] .tabbar{
-  background:color-mix(in srgb,var(--bg2) 34%,transparent);
-  box-shadow:0 10px 30px rgba(16,24,40,.18),0 2px 8px rgba(16,24,40,.10)}
+  background:color-mix(in srgb,var(--bg2) 22%,transparent);
+  box-shadow:0 10px 30px rgba(16,24,40,.20),0 2px 8px rgba(16,24,40,.12)}
 /* En claro la luz del canto es casi blanca y la diagonal se nota menos, asi
    que el canto de abajo lo marca una sombra en vez de un brillo: sobre blanco
    lo que separa es la sombra. */
@@ -304,13 +307,31 @@ html[data-theme="light"] .tab-pastilla{
   box-shadow:0 1px 3px rgba(16,24,40,.14),0 4px 12px rgba(16,24,40,.10)}
 /* Los apagados suben de claridad. Estaban en `--dim2`, que es el gris de un
    texto de tercera, y esto no es texto de tercera: es la navegacion, lo unico
-   que hay que poder ver siempre. Y cuanto mas se ven ellos, mas se entiende que
-   el verde del activo es el verde de la marca y no un color raro suelto. */
+   que hay que poder ver siempre.
+
+   Y cada uno lleva su propia sombra, que es lo que resuelve el pulso entre el
+   vidrio y la letra: cuanto mas transparente es la barra, mas se ve lo de
+   detras —que es lo que se busca— pero mas se come el texto, porque debajo
+   pasan fotos de todos los colores. Subir el relleno para salvar la letra era
+   volver a tapar el cristal; protegiendo la letra, el cristal puede ser mas
+   transparente sin que se pierda nada.
+
+   Es lo mismo que hace un subtitulo sobre un video: no se le pone una caja
+   detras, se le pone un contorno. */
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;
   position:relative;z-index:1;border-radius:23px;
-  color:color-mix(in srgb,var(--txt) 58%,transparent);
-  font-size:.63rem;font-weight:500;letter-spacing:0;transition:color .22s}
-.tab svg{width:25px;height:25px;fill:currentColor}
+  color:color-mix(in srgb,var(--txt) 80%,transparent);
+  text-shadow:0 1px 2px color-mix(in srgb,var(--bg) 72%,transparent);
+  font-size:.63rem;font-weight:600;letter-spacing:0;transition:color .22s}
+.tab svg{width:25px;height:25px;fill:currentColor;
+  filter:drop-shadow(0 1px 1.5px color-mix(in srgb,var(--bg) 62%,transparent))}
+/* En claro la sombra es de luz, no de oscuridad: lo que se come la letra ahi
+   son las fotos claras, y contra claro protege un halo blanco. */
+html[data-theme="light"] .tab{
+  color:color-mix(in srgb,var(--txt) 78%,transparent);
+  text-shadow:0 1px 2px rgba(255,255,255,.9),0 0 6px rgba(255,255,255,.7)}
+html[data-theme="light"] .tab svg{
+  filter:drop-shadow(0 1px 1.5px rgba(255,255,255,.95))}
 /* El activo, el verde de la marca sin rebajar. Con la opacidad de los apagados
    aplicada tambien aqui —que es lo que pasaba antes de separarlos— el verde
    salia apagado y se leia como oliva. */
