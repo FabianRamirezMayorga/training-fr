@@ -1328,6 +1328,38 @@
     'Nada se cambia a tus espaldas: la app avisa y propone, pero el plan nuevo lo guardas tú. Tus rutinas viejas no se borran solas.':
       'Nothing is changed behind your back: the app warns and proposes, but you are the one who saves the new plan. Your old routines are not deleted on their own.',
 
+
+    /* ---------- Comer fuera ---------- */
+    'Comer fuera sin salirte': 'Eating out without going off track',
+    'Una foto de la carta y la app te dice qué pedir, mirando lo que ya has comido hoy.':
+      'A photo of the menu and the app tells you what to order, looking at what you have already eaten today.',
+    'En Alimentación, pulsa *Voy a comer fuera*.': 'In Food, tap *Eating out*.',
+    'Haz la foto a la carta. Vale una de papel, una pizarra o el menú del día escrito a mano: lo que hace falta es que se lea.':
+      'Photograph the menu. A paper one, a chalkboard or the handwritten set menu all work: what matters is that it can be read.',
+    'Abrir Alimentación': 'Open Food',
+    'Mira la primera opción, que es la que te cuadra mejor.':
+      'Look at the first option, which is the one that fits you best.',
+    'No están ordenadas por sanas, sino por lo que te queda hoy: un plato que sería perfecto a mediodía puede no caber a las nueve de la noche.':
+      'They are not ordered by how healthy they are, but by what you have left today: a dish that would be perfect at lunchtime may not fit at nine in the evening.',
+    'Lee el *pídelo así*, que es lo que más cambia.':
+      'Read the *ask for it like this*, which is what changes the most.',
+    'Cambiar la guarnición o pedir la salsa aparte mueve el plato más que elegir otro, y se pide sin quedar raro.':
+      'Swapping the side or asking for the sauce on the side moves the dish more than picking another one, and you can ask for it without feeling awkward.',
+    'Cuando te lo sirvan, apúntalo con la foto de siempre.':
+      'When it arrives, log it with the usual photo.',
+    'La carta solo sugiere; lo que cuenta en tu día es lo que te comes. Esto aún no se apunta solo.':
+      'The menu only suggests; what counts in your day is what you eat. This does not log itself yet.',
+    'La foto se encoge en tu móvil, se manda para leerla y se suelta: no se guarda en ningún sitio.':
+      'The photo is shrunk on your phone, sent to be read and released: it is not stored anywhere.',
+    '¿Por qué las calorías de la carta salen con un rango?':
+      'Why do the menu calories come as a range?',
+    'Porque una carta no dice los gramos. Un entrecot son doscientos o cuatrocientos según la casa, y una paella «para uno» varía el doble de un sitio a otro.':
+      'Because a menu does not give grams. A steak is two hundred or four hundred depending on the place, and a paella «for one» varies twofold from one spot to another.',
+    'Dar una cifra exacta ahí quedaría mejor y sería mentira. Y es la clase de mentira que se paga cara: la primera vez que te pasas por quinientas calorías dejas de creerte el resto, incluido lo que sí está bien calculado.':
+      'Giving an exact figure there would look better and would be a lie. And it is the kind of lie you pay for: the first time you overshoot by five hundred calories you stop believing the rest, including what is properly worked out.',
+    'Por eso ves un rango y a veces un aviso de que es una estimación. Cuando te sirvan el plato y le hagas la foto, ahí sí hay algo que medir: el tamaño de la ración se ve contra el plato y los cubiertos.':
+      'That is why you see a range and sometimes a note saying it is an estimate. Once the dish is in front of you and you photograph it, there is something to measure: portion size shows against the plate and the cutlery.',
+
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

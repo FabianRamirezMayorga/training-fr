@@ -531,6 +531,22 @@
       cierre: 'Para una rutina suelta hay auditoría también, dentro del editor, y se salta las reglas que solo tienen sentido sobre una semana entera.',
       ver: ['g-nota'] },
 
+    { id: 'c-fuera', titulo: 'Comer fuera sin salirte',
+      intro: 'Una foto de la carta y la app te dice qué pedir, mirando lo que ya has comido hoy.',
+      pasos: [
+        { t: 'En Alimentación, pulsa *Voy a comer fuera*.',
+          d: 'Haz la foto a la carta. Vale una de papel, una pizarra o el menú del día escrito a mano: lo que hace falta es que se lea.',
+          ir: { ruta: 'nutricion', label: 'Abrir Alimentación' } },
+        { t: 'Mira la primera opción, que es la que te cuadra mejor.',
+          d: 'No están ordenadas por sanas, sino por lo que te queda hoy: un plato que sería perfecto a mediodía puede no caber a las nueve de la noche.' },
+        { t: 'Lee el *pídelo así*, que es lo que más cambia.',
+          d: 'Cambiar la guarnición o pedir la salsa aparte mueve el plato más que elegir otro, y se pide sin quedar raro.' },
+        { t: 'Cuando te lo sirvan, apúntalo con la foto de siempre.',
+          d: 'La carta solo sugiere; lo que cuenta en tu día es lo que te comes. Esto aún no se apunta solo.' }
+      ],
+      cierre: 'La foto se encoge en tu móvil, se manda para leerla y se suelta: no se guarda en ningún sitio.',
+      ver: ['p-raciones', 'c-foto'] },
+
     { id: 'c-foto', titulo: 'Apuntar una comida con foto',
       resumen: 'Y cruzarla con tu menú',
       pasos: [
@@ -760,6 +776,12 @@
         'Y si abriste el enlace dentro de WhatsApp, Instagram o parecidos, ahí no se puede instalar de ninguna manera: hay que abrirlo antes en el navegador de verdad.',
         'También desaparece cuando ya la tienes instalada, que es lo normal si arrancaste desde el icono.'],
       ver: ['c-instalar'] },
+
+    { id: 'p-raciones', q: '¿Por qué las calorías de la carta salen con un rango?',
+      a: ['Porque una carta no dice los gramos. Un entrecot son doscientos o cuatrocientos según la casa, y una paella «para uno» varía el doble de un sitio a otro.',
+        'Dar una cifra exacta ahí quedaría mejor y sería mentira. Y es la clase de mentira que se paga cara: la primera vez que te pasas por quinientas calorías dejas de creerte el resto, incluido lo que sí está bien calculado.',
+        'Por eso ves un rango y a veces un aviso de que es una estimación. Cuando te sirvan el plato y le hagas la foto, ahí sí hay algo que medir: el tamaño de la ración se ve contra el plato y los cubiertos.'],
+      ver: ['c-fuera', 'c-foto'] },
 
     { id: 'p-permisos', q: '¿Por qué la app no puede quitarme un permiso?',
       a: ['Porque una página web puede *pedir* un permiso y puede *mirar* cómo está, pero no puede dárselo ni quitárselo a sí misma. Eso lo decide el navegador, y a propósito: si una web pudiera concederse la cámara sola, el permiso no valdría para nada.',

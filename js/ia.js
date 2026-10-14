@@ -3435,6 +3435,87 @@
     });
   }
 
+  /* ---------- la carta de un restaurante ----------
+
+     La misma maquinaria que lee un plato, con la foto al revés: en vez de
+     «qué me acabo de comer», «qué de esto me conviene pedir».
+
+     Lo que hace que esto valga algo —y lo que no puede hacer una web de
+     nutrición— es que el plato no se juzga en abstracto, se juzga contra *lo
+     que le queda hoy*: con 1.800 kcal ya comidas y 60 g de proteína pendientes
+     la respuesta es otra que a las dos de la tarde en ayunas. Esa cuenta la app
+     ya la tenía; solo faltaba usarla mirando una carta.
+
+     Foto y no QR a propósito: un QR lleva a la web del restaurante, que puede
+     ser un PDF, una página que carga con JavaScript o una app propia. Una carta
+     fotografiada es texto, y además funciona con las de papel, las pizarras y
+     el menú del día escrito a mano, que es justo donde no hay QR. */
+  function cartaRestaurante(imagen, pista) {
+    const m = Perfil.macros ? Perfil.macros() : null;
+    const p = Perfil.datos ? Perfil.datos() : {};
+
+    let suyo = '';
+    if (m) {
+      suyo = 'Al día le tocan ' + m.kcal + ' kcal y ' + m.prot + ' g de proteína' +
+        (p.objetivo ? ', con el objetivo de ' + (Perfil.OBJETIVO[p.objetivo] || {}).label : '') +
+        '.' + SALTO;
+      if (g.Comidas) {
+        const h = Comidas.hoy();
+        suyo += h.kcal > 0
+          ? 'HOY LLEVA YA ' + h.kcal + ' kcal y ' + h.prot + ' g de proteína, así que ' +
+            'le quedan ' + Math.max(0, m.kcal - h.kcal) + ' kcal y ' +
+            Math.max(0, m.prot - h.prot) + ' g de proteína para lo que queda de día, ' +
+            'esta comida incluida.' + SALTO
+          : 'Hoy no ha apuntado nada todavía: tiene el día entero por delante.' + SALTO;
+      }
+    }
+    if (p.dieta && p.dieta !== 'omnivora') {
+      suyo += 'Sigue una dieta ' + (Perfil.DIETA[p.dieta] || p.dieta) + '.' + SALTO;
+    }
+    if (p.alergias) {
+      suyo += 'NO PUEDE COMER: ' + p.alergias + '. Esto manda sobre todo lo demás: ' +
+        'ningún plato que lo lleve entra en la lista, por bien que encaje.' + SALTO;
+    }
+    if (p.condiciones) suyo += 'Condiciones de salud: ' + p.condiciones + '.' + SALTO;
+
+    /* Lo que suele comer, para desempatar. Entre dos platos que cuadran igual,
+       gana el que se parece a lo que ya le gusta: comer fuera no es el momento
+       de descubrir que la quinoa no te entra. */
+    const habitual = g.Comidas ? Comidas.resumenFrecuentes(30) : '';
+    if (habitual) {
+      suyo += 'Lo que suele comer: ' + habitual + '. ÚSALO SOLO PARA DESEMPATAR ' +
+        'entre platos que cuadren parecido; no fuerces que se parezcan.' + SALTO;
+    }
+
+    const prompt = PERSONA + SALTO + SALTO +
+      'Estás mirando la foto de la carta de un restaurante, y tu trabajo es decirle ' +
+      'qué pedir.' + SALTO + suyo +
+      (pista ? 'Añade: "' + pista + '".' + SALTO : '') + SALTO +
+      '- NO JUZGUES LOS PLATOS EN ABSTRACTO. Júzgalos contra las cifras de arriba: lo ' +
+      'que le queda hoy es lo que decide si la paella entra o no entra. Un plato que ' +
+      'sería perfecto a mediodía puede no caber a las nueve de la noche.' + SALTO +
+      '- Lo más útil no es qué plato, es CÓMO PEDIRLO. Cambiar la guarnición, la ' +
+      'salsa aparte, a la plancha en vez de rebozado, media ración. Eso cambia un ' +
+      'plato más que elegir otro, y se pide sin quedar raro.' + SALTO +
+      '- LAS RACIONES NO LAS SABES Y NO LAS INVENTES. Una carta no dice los gramos: un ' +
+      'entrecot son 200 o 400 según la casa. Da un rango y baja la confianza antes que ' +
+      'dar una cifra bonita que luego no se cumple.' + SALTO +
+      '- Tres opciones como mucho, la mejor primero. Si la carta tiene poco que ' +
+      'rascar, dilo y da dos, o una.' + SALTO +
+      '- En "evita" va el plato que *parece* buena opción y no lo es —la ensalada con ' +
+      'medio litro de salsa, el pollo rebozado—, que es donde de verdad se falla.' + SALTO +
+      '- Si la foto no es una carta, o no se lee, devuelve "opciones" vacío y dilo en ' +
+      '"nota" sin adornar.' + SALTO + SALTO +
+      'Devuelve JSON: {"sitio":"qué clase de sitio parece, 2-4 palabras",' +
+      '"opciones":[{"plato":"cómo viene en la carta","kcal":número aproximado,' +
+      '"prot":número aproximado,"rango":"500-700 kcal","porque":"1 frase con SUS ' +
+      'números de arriba","pide":"cómo pedirlo para que cuadre mejor"}],' +
+      '"evita":{"plato":"","porque":""},"confianza":"alta|media|baja",' +
+      '"nota":"lo que no has podido leer o lo que das por supuesto"}';
+
+    return llamarJSON(prompt, { imagen: imagen, maxTokens: 4096, temperatura: 0.3 });
+  }
+
   /* Lectura del progreso reciente */
   function analizarProgreso() {
     const sesiones = Store.sessions().slice(0, 20).map(function (s) {
@@ -3636,6 +3717,7 @@
     revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
     crearPrograma: crearPrograma, pildora: pildora, horasPildora: horasPildora,
     analizarComida: analizarComida, estimarComida: estimarComida,
+    cartaRestaurante: cartaRestaurante,
     analizarSuplementos: analizarSuplementos,
     revisarCambioComida: revisarCambioComida,
     estimarActividad: estimarActividad, estimarCarga: estimarCarga,

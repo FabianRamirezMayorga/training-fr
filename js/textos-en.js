@@ -4578,6 +4578,22 @@
       '{n} days old. Your body has already adapted.',
     'Renovar': 'Refresh',
 
+    /* ---------- Comer fuera ---------- */
+    'Voy a comer fuera: leer la carta': 'Eating out: read the menu',
+    'Leyendo la carta…': 'Reading the menu…',
+    'Mirando qué te cuadra con lo que llevas hoy.': 'Working out what fits what you have had today.',
+    'No he podido leer la carta. Prueba con más luz o más cerca.':
+      'I could not read the menu. Try more light or closer up.',
+    'No he podido leer la carta.': 'I could not read the menu.',
+    'La carta': 'The menu',
+    'Ordenado por lo que mejor te cuadra con lo que te queda hoy.':
+      'Ordered by what best fits what you have left today.',
+    '~{n} g de proteína': '~{n} g of protein',
+    'Pídelo así:': 'Ask for it like this:',
+    'Parece buena opción y no lo es:': 'Looks like a good choice and is not:',
+    'Las raciones de una carta no se saben: esto es una estimación, no una cuenta.':
+      'Portion sizes are not knowable from a menu: this is an estimate, not a count.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };

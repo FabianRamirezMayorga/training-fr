@@ -435,10 +435,97 @@
                   title="${T('Apuntar a mano')}">${raw(icon('plus'))}</button>
         </div>
         <input type="file" id="foto-comida" accept="image/*" hidden>
+        <!-- Comer fuera va aquí, debajo de apuntar lo que comes, porque es la
+             misma pregunta en otro momento: una vez es «qué me he comido» y la
+             otra «qué me conviene pedir». -->
+        <label class="btn block btn-fuera" for="foto-carta" style="cursor:pointer;margin-top:9px">
+          ${raw(icon('camara'))} ${T('Voy a comer fuera: leer la carta')}</label>
+        <input type="file" id="foto-carta" accept="image/*" hidden>
         <p class="tiny" style="margin:9px 0 0">${T('La foto se encoge en el móvil, se manda para que la IA la lea y se suelta: no se guarda ni aquí ni en ningún sitio. Solo quedan el nombre del plato y los números.')}</p>
       </div>
 
       <div id="comida-pensando"></div>`;
+  }
+
+  /* ---------- comer fuera ----------
+     La foto de la carta se trata igual que la de un plato —se encoge aquí, se
+     manda, se suelta— y lo que vuelve no son calorías: es qué pedir. */
+  function mirarCarta(file) {
+    if (!IA.activa()) {
+      UI.toast(T('Esto necesita un proveedor de IA con su clave, en la bóveda de Ajustes.'));
+      go('entrenador');
+      return;
+    }
+    if (navigator.onLine === false) { sinRedParaLaFoto(); return; }
+
+    const caja = document.getElementById('comida-pensando');
+    const soltar = function () { if (caja) caja.innerHTML = ''; };
+
+    Comidas.prepararFoto(file).then(function (f) {
+      if (caja) {
+        caja.innerHTML = html`
+          <div class="card row" style="margin-top:11px;gap:12px;align-items:center">
+            <img src="${f.vista}" alt="" style="width:64px;height:64px;object-fit:cover;
+                 border-radius:10px;flex:none">
+            <div class="grow">
+              <div style="font-weight:600;font-size:.9rem">${T('Leyendo la carta…')}</div>
+              <div class="tiny">${T('Mirando qué te cuadra con lo que llevas hoy.')}</div>
+            </div>
+            <div class="spinner" style="flex:none"></div>
+          </div>`;
+      }
+      return IA.cartaRestaurante({ mime: f.mime, datos: f.datos });
+    }).then(function (r) {
+      soltar();
+      if (!r || !(r.opciones || []).length) {
+        UI.toast((r && r.nota) ||
+          T('No he podido leer la carta. Prueba con más luz o más cerca.'));
+        return;
+      }
+      hojaCarta(r);
+    }).catch(function (e) {
+      soltar();
+      UI.toast((e && e.message) || T('No he podido leer la carta.'));
+    });
+  }
+
+  function hojaCarta(r) {
+    const ev = r.evita || {};
+    UI.modal(html`
+      <h2 class="conf-tit">${r.sitio || T('La carta')}</h2>
+      <p class="muted conf-txt">${T('Ordenado por lo que mejor te cuadra con lo que te queda hoy.')}</p>
+
+      <div class="stack" style="margin-top:16px;text-align:left">
+        ${raw((r.opciones || []).slice(0, 3).map(function (o, i) {
+          return '<div class="card carta-op' + (i === 0 ? ' mejor' : '') + '">' +
+            '<div class="row between" style="align-items:flex-start;gap:10px">' +
+              '<b style="font-size:1rem;line-height:1.25">' + esc(o.plato || '') + '</b>' +
+              (o.rango || o.kcal ? '<span class="carta-kcal">' +
+                esc(o.rango || (Math.round(o.kcal) + ' kcal')) + '</span>' : '') +
+            '</div>' +
+            (o.prot ? '<div class="tiny" style="margin-top:3px">' +
+              esc(Tn('~{n} g de proteína', { n: Math.round(o.prot) })) + '</div>' : '') +
+            (o.porque ? '<p class="carta-porque">' + esc(o.porque) + '</p>' : '') +
+            (o.pide ? '<p class="carta-pide"><b>' + esc(T('Pídelo así:')) + '</b> ' +
+              esc(o.pide) + '</p>' : '') +
+          '</div>';
+        }).join(''))}
+      </div>
+
+      ${raw(ev.plato ? '<div class="card carta-evita"><p style="margin:0">' +
+        '<b>' + esc(T('Parece buena opción y no lo es:')) + '</b> ' + esc(ev.plato) +
+        (ev.porque ? '. ' + esc(ev.porque) : '') + '</p></div>' : '')}
+
+      ${raw(r.nota ? '<p class="tiny" style="margin-top:12px">' + esc(r.nota) + '</p>' : '')}
+      ${raw(r.confianza === 'baja' ? '<p class="tiny" style="margin-top:6px">' +
+        esc(T('Las raciones de una carta no se saben: esto es una estimación, no una cuenta.')) +
+        '</p>' : '')}
+
+      <button class="btn primary block" data-x="ok" style="margin-top:16px">
+        ${T('Entendido')}</button>`,
+      function (el) {
+        el.querySelector('[data-x=ok]').onclick = UI.closeModal;
+      });
   }
 
   /* Qué días quedan abiertos. Vive fuera del pintado porque la app repinta la
@@ -963,6 +1050,13 @@
       });
       campo.onchange = guardar;
     });
+
+    const campoCarta = root.querySelector('#foto-carta');
+    if (campoCarta) campoCarta.onchange = function () {
+      const file = campoCarta.files && campoCarta.files[0];
+      campoCarta.value = '';
+      if (file) mirarCarta(file);
+    };
 
     const campoFoto = root.querySelector('#foto-comida');
     if (campoFoto) campoFoto.onchange = function () {

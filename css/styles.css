@@ -8865,6 +8865,22 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 }
 
 
+/* ---- comer fuera ----
+   La primera opcion lleva el acento y las otras no: si las tres se ven igual,
+   la lista obliga a leerlas enteras para saber cual recomienda, que es justo el
+   trabajo que venia a ahorrar. */
+.carta-op{padding:13px}
+.carta-op.mejor{border:1px solid color-mix(in srgb,var(--acc) 42%,transparent)}
+.carta-kcal{flex:none;font-size:.8rem;font-weight:600;color:var(--dim);white-space:nowrap}
+.carta-porque{margin:8px 0 0;font-size:.86rem;line-height:1.45;color:var(--dim)}
+/* Como pedirlo va destacado porque es lo que de verdad cambia el plato, y es lo
+   unico de la ficha que hay que recordar al hablar con el camarero. */
+.carta-pide{margin:9px 0 0;font-size:.86rem;line-height:1.45;
+  padding:9px 11px;border-radius:12px;background:var(--card2)}
+.carta-evita{margin-top:11px;border:1px solid color-mix(in srgb,var(--warn) 34%,transparent)}
+.carta-evita p{font-size:.85rem;line-height:1.45;color:var(--dim)}
+.btn-fuera{background:var(--card2)}
+
 /* La franja de «toca renovar». Discreta mientras solo avisa y con el acento
    cuando ya toca: es la diferencia entre un recordatorio y una tarea. */
 .franja-ciclo{display:flex;align-items:center;gap:11px;padding:11px 13px}
