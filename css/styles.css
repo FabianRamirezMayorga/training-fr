@@ -173,14 +173,21 @@ html[data-theme="light"] .av-perfil{
 /* La foto tapa el grafito entero: un borde del degradado asomando por un lado
    es lo que hace que una foto redonda parezca mal recortada. */
 .av-foto{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
-.av-perfil.con-foto{box-shadow:0 2px 7px rgba(0,0,0,.26)}
+.av-perfil.con-foto,
+html[data-theme="light"] .av-perfil.con-foto{box-shadow:0 2px 7px rgba(0,0,0,.26)}
 .av-perfil:active{transform:scale(.93)}
 /* Dentro de Perfil se enciende con un aro y no cambiando el fondo: el fondo
    pintado lo convertia en un boton pulsado, y esto no se pulsa, se visita. El
    aro va separado del disco, como el de las historias, para que no parezca que
-   a la foto le han puesto un marco. */
-.av-perfil.on{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--acc),
-  inset 0 1px 0 rgba(255,255,255,.26)}
+   a la foto le han puesto un marco.
+
+   El tema va repetido en el selector por lo de siempre en este archivo: la
+   regla de claro del avatar lleva un atributo dentro y pesa mas que una clase
+   suelta, asi que sin esto el aro se veia en oscuro y en claro no. Es el mismo
+   enredo del chip del sitio y del par de idioma y tema. */
+.av-perfil.on,
+html[data-theme="light"] .av-perfil.on{box-shadow:0 0 0 2px var(--bg),
+  0 0 0 3.5px var(--acc),inset 0 1px 0 rgba(255,255,255,.26)}
 .view{max-width:900px;margin:0 auto;padding:10px 16px 24px;animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}}
 

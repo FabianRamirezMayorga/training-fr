@@ -656,16 +656,43 @@
 
     if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
 
+    /* El interruptor de silencio del iPhone calla el audio de una página web, y
+       durante versiones esto fue el final del camino: la web no podía ni
+       saberlo ni evitarlo, y el pitío del descanso no sonaba aunque todo lo
+       demás estuviera bien.
+
+       `audioSession` es la salida que trae WebKit. Diciendo que lo nuestro es
+       `playback` —sonido que el usuario ha pedido oír, no ambiente— el sistema
+       lo deja sonar con el móvil en silencio, que es justo lo que quiere quien
+       enciende el aviso del descanso: si te suena el cronómetro es porque se lo
+       has pedido.
+
+       Y se devuelve a lo que estaba en cuanto termina. Mientras está en
+       `playback` la sesión de audio es nuestra, y dejarla tomada le quitaría el
+       sonido a lo que estuviera sonando antes —la música, un vídeo— durante el
+       resto de la sesión por un pitío de dos décimas. */
+    const ses = navigator.audioSession;
+    let antes = null;
+    if (ses) {
+      try { antes = ses.type; ses.type = 'playback'; } catch (e) { antes = null; }
+    }
+    const soltar = function () {
+      if (!ses || antes === null) return;
+      setTimeout(function () {
+        try { ses.type = antes; } catch (e) { /* nada */ }
+      }, 400 + (times || 1) * 230);
+    };
+
     const listo = audioCtx.state === 'suspended'
       ? audioCtx.resume() : Promise.resolve();
     return Promise.resolve(listo).then(function () {
       sonar();
-      /* `running` dice que el navegador nos deja sonar. Lo que no puede decir
-         nadie desde aquí es si el móvil está en silencio: en iOS, el
-         interruptor de la izquierda calla el audio de la web y la página no se
-         entera. Por eso lo pregunta el aviso en vez de darlo por hecho. */
+      soltar();
+      /* `running` dice que el navegador nos deja sonar. Si el aparato es viejo
+         y no trae `audioSession`, el interruptor de silencio sigue mandando y
+         eso no hay forma de consultarlo: por eso el aviso lo pregunta. */
       return audioCtx.state === 'running';
-    }).catch(function () { return false; });
+    }).catch(function () { soltar(); return false; });
   }
 
   /* ---------- reproductor de la animación del movimiento ----------

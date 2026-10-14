@@ -4562,6 +4562,9 @@
     'El navegador no deja sonar aquí. Prueba a tocar algo primero y vuelve.':
       'The browser will not let it play here. Try tapping something first and come back.',
 
+    'Si no lo has oído, sube el volumen: el interruptor de silencio ya no lo tapa.':
+      'If you did not hear it, turn the volume up: the silent switch no longer covers it.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };

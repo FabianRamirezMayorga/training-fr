@@ -566,10 +566,17 @@
          dejado sonar, porque no es lo mismo «no se oye porque el móvil está en
          silencio» que «no se oye porque el audio está bloqueado», y antes las
          dos daban el mismo mensaje. */
+      /* Tres casos y tres avisos distintos. Antes los tres decían lo mismo, y
+         un diagnóstico que da siempre la misma respuesta no diagnostica nada. */
+      const mandaElSilencio = !(g.navigator && navigator.audioSession);
       Promise.resolve(UI.beep()).then(function (sono) {
-        UI.toast(sono
+        if (!sono) {
+          UI.toast(T('El navegador no deja sonar aquí. Prueba a tocar algo primero y vuelve.'));
+          return;
+        }
+        UI.toast(mandaElSilencio
           ? T('Si no has oído nada, mira el interruptor de silencio del móvil.')
-          : T('El navegador no deja sonar aquí. Prueba a tocar algo primero y vuelve.'));
+          : T('Si no lo has oído, sube el volumen: el interruptor de silencio ya no lo tapa.'));
       });
       return;
     }
