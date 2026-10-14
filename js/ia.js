@@ -210,6 +210,36 @@
     c.proveedor = c.proveedor && proveedorPorId(c.proveedor).id === c.proveedor
       ? c.proveedor : 'gemini';
 
+    /* Un modelo que el proveedor ya ha apagado se suelta de lo guardado. Hacen
+       falta las dos cosas: cambiar el de serie no sirve de nada si lo guardado
+       manda siempre, y es lo que pasa —`c.modelo` gana a la lista—, así que a
+       quien abrió la app hace un año «por defecto» no le significaba nada. Y
+       mientras siga guardado, cada llamada lo pide primero y se come un 404
+       antes de que la cascada la rescate: un viaje de ida y vuelta perdido en
+       cada frase del inicio.
+
+       Al soltarlo, `c.modelo` cae en `modelos[0]` del proveedor, que es el de
+       serie de ahora. No se guarda nada nuevo: la próxima lista viva que
+       devuelva su clave es la que decide, y es la única que sabe de verdad qué
+       puede usar esa cuenta.
+
+       Solo lo que el proveedor cerró, no lo que a mí me parezca mejor: elegir
+       un modelo concreto es una decisión del usuario, y esto está para repararla
+       cuando se rompe, no para llevarle a donde yo crea que debería estar. */
+    const CERRADOS = {
+      /* 2.0 apagado, y 2.5 cerrado a quien ya lo usaba: dos generaciones atrás
+         y sin camino de vuelta para una clave nueva. */
+      gemini: /^gemini-(1\.|2\.)/,
+      /* En Groq los Llama, los Mixtral y los Gemma se apagaron todos. */
+      groq: /^(llama|mixtral|gemma|meta-llama|moonshotai|qwen-)/
+    };
+    Object.keys(CERRADOS).forEach(function (id) {
+      if (c.modelos[id] && CERRADOS[id].test(c.modelos[id])) {
+        delete c.modelos[id];
+        guardarCrudo(c);
+      }
+    });
+
     /* lo que el resto de la app sigue leyendo como si solo hubiera uno */
     c.clave = c.claves[c.proveedor] || '';
     c.modelo = c.modelos[c.proveedor] || proveedorPorId(c.proveedor).modelos[0];
