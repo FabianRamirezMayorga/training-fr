@@ -84,6 +84,13 @@
        pantalla es la misma, uno sigue donde estaba. */
     const donde = route.name + '/' + (route.arg || '');
     const mismaPantalla = donde === pantallaPintada;
+    /* El menu de hoy se pliega al salir de la portada. Estar desplegado no es
+       una preferencia tuya, es «lo que estoy mirando ahora»: al volver de
+       Rutinas esperas la portada como esta siempre, no como la dejaste hace
+       media hora con una lista de seis comidas abierta empujando el resto.
+       Dentro de la propia portada se queda abierto, que ahi si lo acabas de
+       abrir tu. */
+    if (!mismaPantalla && route.name !== 'inicio') delete seccionesAbiertas.menu;
     const alturaPrevia = window.scrollY;
     pantallaPintada = donde;
 

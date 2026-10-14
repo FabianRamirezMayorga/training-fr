@@ -8890,3 +8890,49 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .franja-ciclo .btn.sm:not(.primary) svg{width:13px;height:13px}
 .franja-ciclo.toca{border:1px solid color-mix(in srgb,var(--acc) 38%,transparent)}
 .franja-ciclo.toca .row-icon{color:var(--acc)}
+
+
+/* ---- nucleo inteligente: los proveedores ----
+   Rejilla de dos y no una nube de etiquetas sueltas. Con `wrap` cada fila
+   acababa con un ancho distinto segun la longitud del nombre, y siete cosas
+   descolocadas se leen como un desorden, no como una eleccion. */
+.provs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.prov{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:1px;
+  padding:11px 13px;border-radius:15px;cursor:pointer;text-align:left;
+  background:var(--card2);border:1px solid transparent;color:var(--txt);
+  transition:border-color .15s,background .15s,transform .12s}
+.prov:active{transform:scale(.97)}
+.prov-nom{font-size:.92rem;font-weight:600;letter-spacing:-.01em}
+.prov-sub{font-size:.7rem;color:var(--dim2)}
+.prov.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,var(--card2))}
+.prov.on .prov-nom{color:var(--acc)}
+/* El tilde dice «este ya tiene clave», que es distinto de «este es el que
+   contesta»: se puede tener cuatro puestos y usar uno. */
+.prov-ok{position:absolute;top:9px;right:10px;width:14px;height:14px;
+  display:flex;align-items:center;justify-content:center;color:var(--acc)}
+.prov-ok svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:3;
+  stroke-linecap:round;stroke-linejoin:round}
+.prov-nota{margin:0 0 13px;font-size:.82rem;line-height:1.45;color:var(--dim)}
+
+/* ---- las claves, en una sola lista ---- */
+.claves-caja{margin-bottom:13px}
+.clave-fila{padding:10px 13px;gap:11px}
+/* La posicion a la izquierda: un punto para la que esta en uso y el numero de
+   turno para las demas. Dice de un vistazo que hay un orden, que es justo lo
+   que el usuario necesita entender para que «salta a la siguiente» signifique
+   algo. */
+.clave-pos{flex:none;width:18px;display:flex;align-items:center;justify-content:center;
+  font-size:.76rem;font-weight:600;color:var(--dim2);font-variant-numeric:tabular-nums}
+.clave-punto{width:8px;height:8px;border-radius:50%;background:var(--acc);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.clave-txt{font-size:.9rem;font-weight:600;letter-spacing:.01em;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.clave-x{flex:none;width:30px;height:30px;border-radius:50%;padding:0;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  background:none;color:var(--dim2);transition:color .15s,background .15s}
+.clave-x svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.clave-x:active{background:var(--card2);color:var(--bad)}
+.clave-nueva{gap:8px;margin-top:9px}
+.clave-nueva input{margin:0}
+.clave-pie{margin:9px 0 0;line-height:1.45}

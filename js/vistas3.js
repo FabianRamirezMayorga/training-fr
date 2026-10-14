@@ -110,39 +110,61 @@
 
      Solo en los proveedores con capa gratuita: en los de pago no hay cuota que
      agotar, hay factura, y ahi tener cinco claves no arregla nada. */
-  function repuestoHTML(prov) {
-    if (!prov.gratis) return '';
+  /* Las claves, en una sola lista.
+
+     Antes había dos sitios: un campo de contraseña arriba con su chip de
+     «guardada» y, debajo, una lista de repuesto que volvía a enseñar esa misma
+     clave con la etiqueta «la primera que se usa». La misma cosa contada dos
+     veces en la misma pantalla, y en dos formatos distintos: imposible saber si
+     eran una o dos.
+
+     Ahora es una lista y ya está. La de arriba es la que se usa; las de abajo
+     entran cuando esa agota su cuota. Añadir y quitar se hace en el mismo
+     sitio, que es como se entiende que son lo mismo en distinto turno. */
+  function clavesHTML(prov, claveProv) {
     const claves = IA.clavesDe(prov.id);
-    if (!claves.length) return '';
+    const puede = prov.gratis || !claves.length;
 
     return html`
-      <div class="clave-bloque">
+      <div class="claves-caja">
         <div class="cb-cab">
-          <span class="cb-lab">${T('Claves de repuesto')}</span>
-          <span class="tiny">${Tp(claves.length, '{n} clave', '{n} claves')}</span>
+          <span class="cb-lab">${Tn('Claves de {prov}', { prov: prov.label })}</span>
+          ${raw(claves.length > 1
+            ? '<span class="tiny">' + esc(Tp(claves.length, '{n} clave', '{n} claves')) +
+              '</span>' : '')}
         </div>
-        <div class="list" style="margin-bottom:8px">
-          ${raw(claves.map(function (k, i) {
-            return '<div class="list-row">' +
-              '<div class="grow"><div class="list-row-title" style="font-size:.88rem">' +
-                esc(k.slice(0, 8)) + '…' + esc(k.slice(-4)) + '</div>' +
-              (i === 0 ? '<div class="list-row-sub">' + esc(T('La primera que se usa')) +
-                '</div>' : '') + '</div>' +
-              (claves.length > 1
-                ? '<button class="btn sm" data-quitark="' + i + '" aria-label="' +
-                  esc(T('Quitar')) + '">' + icon('trash') + '</button>'
-                : '') +
-            '</div>';
-          }).join(''))}
-        </div>
-        <div class="row" style="gap:8px">
-          <input id="k-extra" class="grow" placeholder="${T('Pega otra clave gratis')}"
-                 autocomplete="off" spellcheck="false" style="margin:0">
-          <button class="btn vidrio" data-a="anadirClave">${raw(icon('plus'))}</button>
-        </div>
-        <p class="tiny" style="margin:8px 0 0">${T('Si una agota su cuota del día, la app ' +
-          'salta sola a la siguiente y sigue funcionando. Cada clave tiene su propia cuota ' +
-          'gratis.')}</p>
+
+        ${raw(claves.length ? '<div class="list">' + claves.map(function (k, i) {
+          return '<div class="list-row clave-fila">' +
+            '<span class="clave-pos">' + (i === 0
+              ? '<i class="clave-punto"></i>'
+              : String(i + 1)) + '</span>' +
+            '<div class="grow"><div class="clave-txt">' +
+              esc(k.slice(0, 6)) + '…' + esc(k.slice(-4)) + '</div>' +
+            (i === 0 ? '<div class="list-row-sub">' + esc(T('En uso')) + '</div>' : '') +
+            '</div>' +
+            '<button class="clave-x" data-quitark="' + i + '" aria-label="' +
+              esc(T('Quitar')) + '">' + icon('trash') + '</button>' +
+          '</div>';
+        }).join('') + '</div>' : '')}
+
+        ${raw(puede ? '<div class="row clave-nueva">' +
+          '<input id="k-extra" class="grow" placeholder="' +
+            esc(claves.length ? T('Pega otra clave') : T('Pega aquí tu clave')) +
+            '" autocomplete="off" spellcheck="false">' +
+          '<button class="btn vidrio" data-a="anadirClave" aria-label="' +
+            esc(T('Añadir')) + '">' + icon('plus') + '</button>' +
+        '</div>' : '')}
+
+        <p class="tiny clave-pie">${raw(claves.length > 1
+          ? esc(T('Si la de arriba agota su cuota del día, la app baja sola a la ' +
+              'siguiente. Cada clave tiene la suya.'))
+          : (prov.gratis
+            ? esc(T('Puedes pegar varias: cuando una agota su cuota del día, la app ' +
+                'salta sola a la siguiente.'))
+            : '') + ' ' + Tn('Se saca en {donde}.',
+              { donde: '<a href="' + esc(prov.donde) + '" target="_blank" ' +
+                'rel="noopener noreferrer">' + esc(prov.dondeTxt) + '</a>' }))}</p>
       </div>`;
   }
 
@@ -266,9 +288,14 @@
 
     /* La línea que se lee sin abrir. Dice lo único que uno quiere saber de un
        vistazo: si está puesto y con qué. */
+    /* El modelo entero y «clave guardada» ocupaban tres renglones en un movil
+       para decir lo que cabe en uno. Lo que de verdad se mira de un vistazo es
+       quien contesta y con cuantas claves; el nombre del modelo va completo
+       dentro, en su campo. */
+    const nClaves = IA.clavesDe(prov.id).length;
     const resumenIA = claveProv
-      ? esc(Tn('{prov} · clave guardada · {modelo}',
-          { prov: prov.label, modelo: IA.modeloDe(prov.id) }))
+      ? esc(prov.label + ' · ' + Tp(nClaves, '{n} clave', '{n} claves') +
+          ' · ' + String(IA.modeloDe(prov.id)).replace(/^gemini-/, ''))
       : (puestos.length
         ? esc(Tn('Activo con otro proveedor; {prov} aún sin clave', { prov: prov.label }))
         : esc(T('Sin clave: el entrenador y el plan de comidas no funcionan')));
@@ -302,42 +329,27 @@
         chip: estado(IA.activa(), 'Activo', 'Sin configurar'),
         probar: claveProv ? 'ia' : '',
         cuerpo: html`
-        <p class="tiny" style="margin:0 0 9px">${T('Auditoría de rutinas, plan de ' +
-        'comidas, foto del plato, entrenador y listas de música.')}</p>
-
-        <p class="tiny" style="margin:0 0 9px">${T('Elige quién contesta. Cada uno guarda ' +
-        'su propia clave, así que puedes tener varios puestos y cambiar de uno a otro con ' +
-        'un toque; lo que cambies aquí vale para toda la app.')}</p>
-
-        <div class="row wrap" style="gap:6px;margin-bottom:12px" id="ia-provs">
+        <!-- Los proveedores primero y sin prólogo. Antes había dos párrafos
+             explicando qué es esto antes de dejarte tocar nada, y para cuando
+             llegabas a los botones ya habías leído cuatro renglones de teoría.
+             Lo que hace falta saber —qué contesta y qué cuesta— lo dice cada
+             uno en su propia ficha, y solo el elegido. -->
+        <div class="provs" id="ia-provs">
           ${raw(IA.PROVEEDORES.map(function (pv) {
             const tiene = puestos.indexOf(pv.id) !== -1;
-            return '<button class="chip ' + (pv.id === provId ? 'on' : '') +
-              '" data-prov="' + pv.id + '">' + esc(pv.label) +
-              (pv.gratis ? ' <span class="tiny" style="opacity:.7">' +
-                esc(T('gratis')) + '</span>' : '') +
-              (tiene ? ' <span class="punto-ok"></span>' : '') + '</button>';
+            return '<button class="prov' + (pv.id === provId ? ' on' : '') +
+              '" data-prov="' + pv.id + '">' +
+              '<span class="prov-nom">' + esc(pv.label) + '</span>' +
+              '<span class="prov-sub">' + esc(pv.gratis ? T('gratis') : T('de pago')) +
+              '</span>' +
+              (tiene ? '<i class="prov-ok">' + icon('check') + '</i>' : '') +
+            '</button>';
           }).join(''))}
         </div>
 
-        <div class="nota-prov">
-          <span class="np-ico">${raw(icon('chispa'))}</span>
-          <span class="grow">
-            <span class="np-txt">${T(prov.nota)}</span>
-            <span class="np-txt">${raw(Tn('La clave se saca en {donde}.',
-              { donde: '<a href="' + esc(prov.donde) + '" target="_blank" ' +
-                'rel="noopener noreferrer">' + esc(prov.dondeTxt) + '</a>' }))}
-              ${raw(prov.imagen ? '' : Tn('{no}, así que el cálculo de la comida por foto ' +
-                'necesita Gemini o Anthropic.',
-                { no: '<b>' + esc(T('No lee fotos')) + '</b>' }))}</span>
-          </span>
-        </div>
+        <p class="prov-nota">${T(prov.nota)}</p>
 
-        ${raw(campoClave(Tn('Clave de {prov}', { prov: prov.label }),
-          'k-ia', claveProv, prov.pista === 'sin prefijo fijo'
-            ? T(prov.pista) : prov.pista))}
-
-        ${raw(repuestoHTML(prov))}
+        ${raw(clavesHTML(prov, claveProv))}
 
         <div class="clave-bloque">
           <div class="cb-cab">
@@ -690,8 +702,22 @@
       try {
         const n = IA.anadirClave(prov.id, campo.value);
         campo.value = '';
+        /* Recién puesta la primera, se le pregunta al proveedor qué modelos
+           admite esa clave: el de serie puede no estar en su cuenta, y
+           enterarse en la primera pregunta de verdad es enterarse tarde. */
+        if (n === 1) {
+          IA.listarModelos(true).then(function (lista) {
+            if (lista && lista.length && lista.indexOf(IA.modeloDe(prov.id)) === -1) {
+              IA.recordarModelo(prov.id, lista[0]);
+              render();
+              UI.toast(Tn('Modelo ajustado a {m}', { m: lista[0] }));
+            }
+          }).catch(function () { /* nada */ });
+        }
         render();
-        UI.toast(Tp(n, 'Ya tienes {n} clave', 'Ya tienes {n} claves'));
+        UI.toast(n === 1
+          ? Tn('{prov} listo. Ahora piensa por toda la app.', { prov: prov.label })
+          : Tp(n, 'Ya tienes {n} clave', 'Ya tienes {n} claves'));
       } catch (e) {
         UI.toast(e.message);
       }
@@ -699,34 +725,31 @@
 
     bindAll(root, '[data-quitark]', function (el) {
       const prov = IA.proveedorActual();
-      IA.quitarClave(prov.id, Number(el.getAttribute('data-quitark')));
+      const quedan = IA.quitarClave(prov.id, Number(el.getAttribute('data-quitark')));
       render();
-      UI.toast(T('Clave quitada.'));
+      UI.toast(quedan
+        ? T('Clave quitada.')
+        : Tn('Sin claves de {prov}: la IA deja de funcionar.', { prov: prov.label }));
     });
 
+    /* Guardar ya no toca la clave: las claves se ponen y se quitan en su lista,
+       de una en una, y no hay nada que «guardar» después. Esto guarda el
+       modelo, que es lo único que queda en un campo editable —y es, de paso, lo
+       que arregla que pulsarlo te borrara las claves de repuesto. */
     bind(root, '[data-a=guardarIA]', function () {
       const prov = IA.proveedorActual();
-      const campo = root.querySelector('#k-ia');
       const libre = root.querySelector('#k-ia-modelo-libre');
-      const modelo = (libre && libre.value.trim()) ||
-        root.querySelector('#k-ia-modelo').value;
-      const clave = campo.value.trim() || IA.claveDe(prov.id) || '';
+      const sel = root.querySelector('#k-ia-modelo');
+      const modelo = (libre && libre.value.trim()) || (sel && sel.value) || '';
+      if (!modelo) return;
 
-      if (!clave) { UI.toast('Pega la clave de ' + prov.label); return; }
-      try {
-        IA.guardarProveedor(prov.id, clave, modelo);
-        {
-          IA.listarModelos(true).then(function (lista) {
-            if (lista && lista.length && lista.indexOf(IA.modeloDe(prov.id)) === -1) {
-              IA.guardarProveedor(prov.id, clave, lista[0]);
-              UI.toast('Clave guardada. Modelo ajustado a ' + lista[0]);
-              render();
-            }
-          }).catch(function () { /* nada */ });
-        }
-        render();
-        UI.toast(prov.label + ' guardado. Ahora piensa por toda la app.');
-      } catch (e) { UI.toast(e.message); }
+      if (!IA.claveDe(prov.id)) {
+        UI.toast(Tn('Pega antes una clave de {prov}.', { prov: prov.label }));
+        return;
+      }
+      IA.recordarModelo(prov.id, modelo);
+      render();
+      UI.toast(Tn('Modelo guardado: {m}', { m: modelo }));
     });
 
     /* El test comprueba las dos cosas de las que depende la app, no una.

@@ -4611,6 +4611,23 @@
     'Has agotado la cuota de todos los modelos de Gemini por ahora. Suele reponerse en un minuto si es el límite por minuto, o mañana si es el diario. Puedes añadir otra clave gratis en la bóveda y la app saltará sola a ella.':
       'You have used up the quota on every Gemini model for now. It usually comes back in a minute if it is the per-minute limit, or tomorrow if it is the daily one. You can add another free key in the vault and the app will move to it by itself.',
 
+    /* ---------- Bóveda: las claves ---------- */
+    'Claves de {prov}': '{prov} keys',
+    'En uso': 'In use',
+    'Pega otra clave': 'Paste another key',
+    'Pega aquí tu clave': 'Paste your key here',
+    'de pago': 'paid',
+    'Si la de arriba agota su cuota del día, la app baja sola a la siguiente. Cada clave tiene la suya.':
+      'If the top one runs out of its daily quota, the app moves down to the next one by itself. Each key has its own.',
+    'Puedes pegar varias: cuando una agota su cuota del día, la app salta sola a la siguiente.':
+      'You can paste several: when one runs out of its daily quota, the app moves to the next by itself.',
+    'Se saca en {donde}.': 'You get it at {donde}.',
+    'Modelo ajustado a {m}': 'Model set to {m}',
+    'Modelo guardado: {m}': 'Model saved: {m}',
+    '{prov} listo. Ahora piensa por toda la app.': '{prov} is ready. It now thinks for the whole app.',
+    'Sin claves de {prov}: la IA deja de funcionar.': 'No {prov} keys left: the AI stops working.',
+    'Pega antes una clave de {prov}.': 'Paste a {prov} key first.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };
