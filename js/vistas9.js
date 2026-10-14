@@ -346,8 +346,18 @@
     if (est === 'si') {
       return '<span class="perm-estado si">' + icon('check') + esc(T('Concedido')) + '</span>';
     }
+    /* Bloqueado con botón, no como un cartel. Hacen falta las dos cosas:
+
+       - Si lo que está desfasado es *lo que yo recuerdo* —porque lo arreglaste
+         en los ajustes del sistema, donde la app no ve nada— volver a pedirlo
+         lo arregla al instante y la fila pasa a concedido sola. Sin botón se
+         quedaba diciendo «Bloqueado» para siempre, que es mentir.
+       - Y si lo denegaste solo «esta vez», que es lo que hace Safari por
+         defecto, el navegador vuelve a preguntar sin más. */
     if (est === 'no') {
-      return '<span class="perm-estado no">' + esc(T('Bloqueado')) + '</span>';
+      return '<span class="perm-estado no">' + esc(T('Bloqueado')) + '</span>' +
+        '<button class="btn sm perm-reintentar" data-perm="' + id + '">' +
+        esc(T('Reintentar')) + '</button>';
     }
     if (est === 'imposible') {
       return '<span class="perm-estado">' + esc(T('Aquí no')) + '</span>';
@@ -382,10 +392,14 @@
     const dudoso = PERMISOS.filter(function (p) { return estados[p.id] === 'no'; }).length;
     if (!dudoso) return '';
     return '<div class="card perm-nota"><p style="margin:0">' +
-      esc(T('Lo bloqueado no lo puede desbloquear la app: una página web pide ' +
-        'permisos, pero no se los quita ni se los devuelve. Eso se cambia en el ' +
-        'navegador, en el candado o la «i» de la barra de direcciones, en ' +
-        '«Ajustes del sitio».')) + '</p></div>';
+      esc(T('Prueba primero con *Reintentar*: si lo denegaste solo esta vez, o si ya ' +
+        'lo arreglaste en los ajustes del móvil, con eso vuelve.')) + '</p>' +
+      '<p style="margin:8px 0 0">' +
+      esc(T('Si no, hay que ir al sistema, porque una página web pide permisos pero ' +
+        'no se los quita ni se los devuelve. Con la app instalada en la pantalla de ' +
+        'inicio: Ajustes del iPhone › Aplicaciones › Training FR. En el navegador: ' +
+        'Ajustes › Safari › Ubicación, o el candado de la barra de direcciones en ' +
+        'Chrome.')) + '</p></div>';
   }
 
   V.permisos = function () {

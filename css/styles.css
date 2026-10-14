@@ -192,13 +192,23 @@ html[data-theme="light"] .av-perfil{
 
    El ancho se limita a 430 para que en una tablet no salga una pastilla de
    palmo y medio con cuatro iconos perdidos dentro. */
-.tabbar{position:fixed;bottom:var(--barra-abajo);left:50%;
-  transform:translateX(-50%);width:calc(100% - 24px);max-width:430px;
-  z-index:60;display:flex;border-radius:26px;overflow:hidden;
-  /* Menos relleno y más desenfoque. Al 58 por ciento el cristal era casi
-     opaco y no se veía pasar nada por debajo; lo que hace que una pieza
-     parezca de vidrio no es el desenfoque, es *ver algo* desenfocado. */
-  background:color-mix(in srgb,var(--bg2) 46%,transparent);
+/* Centrada con `left` y `right`, no con `transform`, y sin `overflow`.
+
+   Las dos cosas son por Safari, y son la razón de que el cristal se viera en
+   las pruebas y no en el iPhone: en WebKit, un elemento que se mueve con
+   `transform` —o que recorta con `overflow`— deja de capturar bien lo que
+   tiene detrás, y `backdrop-filter` se queda en un fondo plano. En Chrome
+   funciona igual con transform, que es exactamente por lo que no se vio
+   probando.
+
+   El recorte no hace falta: el radio del contenedor ya redondea, y dentro no
+   hay nada con fondo propio que se salga por las esquinas. */
+.tabbar{position:fixed;bottom:var(--barra-abajo);left:12px;right:12px;
+  margin:0 auto;max-width:430px;
+  z-index:60;display:flex;border-radius:26px;
+  /* Menos relleno y más desenfoque: lo que hace que una pieza parezca de
+     vidrio no es el desenfoque, es *ver algo* desenfocado. */
+  background:color-mix(in srgb,var(--bg2) 44%,transparent);
   backdrop-filter:saturate(190%) blur(30px);-webkit-backdrop-filter:saturate(190%) blur(30px);
   border:1px solid color-mix(in srgb,var(--txt) 13%,transparent);
   /* La raya de luz de dentro es lo que de verdad lo convierte en cristal: es
@@ -210,8 +220,8 @@ html[data-theme="light"] .av-perfil{
    es una sombra, es suciedad. Mas suave y el cristal mas opaco, que sobre
    blanco el desenfoque solo no separa nada. */
 html[data-theme="light"] .tabbar{
-  background:color-mix(in srgb,var(--bg2) 60%,transparent);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),
+  background:color-mix(in srgb,var(--bg2) 52%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),
              0 8px 26px rgba(16,24,40,.14),0 1px 4px rgba(16,24,40,.09)}
 /* Los apagados suben de claridad. Estaban en `--dim2`, que es el gris de un
    texto de tercera, y esto no es texto de tercera: es la navegacion, lo unico
@@ -8696,6 +8706,12 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .perm-estado.si{color:var(--acc)}
 .perm-estado.no{color:var(--warn)}
 .perm-fila .btn.sm{flex:none}
+/* El botón de reintentar va pegado a su etiqueta y más pequeño: lo que manda
+   en esa fila es el estado, y el botón es la salida, no el titular. */
+.perm-fila .perm-estado.no + .perm-reintentar{margin-left:8px;
+  padding:.32em .72em;font-size:.78rem;
+  background:color-mix(in srgb,var(--warn) 16%,transparent);
+  color:var(--warn)}
 /* Lo que este aparato no puede hacer se cuenta en gris y sin alarma, igual
    que en Reloj y salud: no es un fallo, es que aquí no existe. */
 .perm-fila.apagada .row-icon{color:var(--dim2);opacity:.6}

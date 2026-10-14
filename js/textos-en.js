@@ -4547,6 +4547,11 @@
     'Si no has oído nada, mira el interruptor de silencio del móvil.':
       'If you heard nothing, check the silent switch on your phone.',
 
+    'Prueba primero con *Reintentar*: si lo denegaste solo esta vez, o si ya lo arreglaste en los ajustes del móvil, con eso vuelve.':
+      'Try *Retry* first: if you only denied it that once, or you have already sorted it out in your phone settings, that brings it back.',
+    'Si no, hay que ir al sistema, porque una página web pide permisos pero no se los quita ni se los devuelve. Con la app instalada en la pantalla de inicio: Ajustes del iPhone › Aplicaciones › Training FR. En el navegador: Ajustes › Safari › Ubicación, o el candado de la barra de direcciones en Chrome.':
+      'Otherwise you have to go to the system, because a web page asks for permissions but neither takes them back nor gives them back. With the app installed on your home screen: iPhone Settings › Apps › Training FR. In the browser: Settings › Safari › Location, or the padlock in the address bar in Chrome.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };
