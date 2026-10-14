@@ -624,11 +624,21 @@
 
   /* ---------- sonido y vibración ---------- */
   let audioCtx = null;
+  /* Devuelve una promesa que dice si el pitido ha llegado a sonar. Quien no
+     lo necesite puede llamarla y olvidarse, que es lo que hace el cronómetro.
+
+     Lo de esperar al `resume()` no es un detalle: en iOS el contexto de audio
+     nace dormido y despertarlo tarda. Programándolo justo después de pedir el
+     despertar —que es lo que hacía antes— los osciladores se colocaban en un
+     reloj que aún no corría, y no sonaba nada. En el ordenador sí, porque ahí
+     el contexto suele estar despierto desde el primer clic. */
   function beep(times) {
-    if (!Store.settings().sound) return;
+    if (!Store.settings().sound) return Promise.resolve(false);
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) { return Promise.resolve(false); }
+
+    const sonar = function () {
       const n = times || 1;
       for (let i = 0; i < n; i++) {
         const osc = audioCtx.createOscillator();
@@ -636,14 +646,26 @@
         osc.connect(gainNode); gainNode.connect(audioCtx.destination);
         osc.frequency.value = 880;
         osc.type = 'sine';
-        const t0 = audioCtx.currentTime + i * 0.22;
+        const t0 = audioCtx.currentTime + 0.02 + i * 0.22;
         gainNode.gain.setValueAtTime(0.0001, t0);
         gainNode.gain.exponentialRampToValueAtTime(0.25, t0 + 0.02);
         gainNode.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
         osc.start(t0); osc.stop(t0 + 0.2);
       }
-    } catch (e) { /* el navegador puede bloquear el audio hasta la primera interacción */ }
+    };
+
     if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+
+    const listo = audioCtx.state === 'suspended'
+      ? audioCtx.resume() : Promise.resolve();
+    return Promise.resolve(listo).then(function () {
+      sonar();
+      /* `running` dice que el navegador nos deja sonar. Lo que no puede decir
+         nadie desde aquí es si el móvil está en silencio: en iOS, el
+         interruptor de la izquierda calla el audio de la web y la página no se
+         entera. Por eso lo pregunta el aviso en vez de darlo por hecho. */
+      return audioCtx.state === 'running';
+    }).catch(function () { return false; });
   }
 
   /* ---------- reproductor de la animación del movimiento ----------

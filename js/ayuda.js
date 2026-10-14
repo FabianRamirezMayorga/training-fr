@@ -415,8 +415,10 @@
           ir: { ruta: 'permisos', label: 'Abrir Permisos' } },
         { t: 'Para darlo, pulsa *Permitir*.',
           d: 'Sale el cartel del navegador y contestas ahí. La app no puede responder por ti.' },
-        { t: 'Para quitarlo, hay que ir al navegador.',
-          d: 'Esto no se hace desde la app: toca el candado —o la «i», o «Aa» en Safari— en la barra de direcciones, entra en *Ajustes del sitio* y ahí están todos, con su interruptor de verdad.' },
+        { t: 'Si lo bloqueaste por error, pulsa *Reintentar*.',
+          d: 'Si lo denegaste solo esa vez, el navegador vuelve a preguntar. Y si ya lo arreglaste en los ajustes del móvil, con eso la app se entera: desde fuera no puede verlo sola.' },
+        { t: 'Para quitarlo de verdad, hay que ir al sistema.',
+          d: 'Con la app abierta desde su icono: *Ajustes del iPhone › Aplicaciones › Training FR*. Desde Safari: la *Aa* de la barra de direcciones › *Configuración para este sitio web*. El candado que se suele buscar no existe cuando la app está instalada en la pantalla de inicio.' },
         { t: 'El Bluetooth no se da de una vez.',
           d: 'Se concede aparato a aparato, cuando buscas uno desde Reloj y salud. Por eso en Permisos no sale como concedido aunque ya tengas una banda guardada.' }
       ],

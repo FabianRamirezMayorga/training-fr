@@ -8706,12 +8706,17 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .perm-estado.si{color:var(--acc)}
 .perm-estado.no{color:var(--warn)}
 .perm-fila .btn.sm{flex:none}
-/* El botón de reintentar va pegado a su etiqueta y más pequeño: lo que manda
-   en esa fila es el estado, y el botón es la salida, no el titular. */
-.perm-fila .perm-estado.no + .perm-reintentar{margin-left:8px;
-  padding:.32em .72em;font-size:.78rem;
+/* Los botones que cuelgan de un estado van pegados a su etiqueta y más
+   pequeños: lo que manda en esa fila es el estado, y el botón es la salida, no
+   el titular. */
+.perm-fila .perm-estado + .btn.sm{margin-left:8px;
+  padding:.32em .72em;font-size:.78rem}
+.perm-fila .perm-estado.no + .perm-reintentar{
   background:color-mix(in srgb,var(--warn) 16%,transparent);
   color:var(--warn)}
+/* El de quitar, en gris: deshacer algo que ya funciona no se anuncia con
+   color. */
+.perm-fila .perm-quitar{background:var(--card2);color:var(--dim)}
 /* Lo que este aparato no puede hacer se cuenta en gris y sin alarma, igual
    que en Reloj y salud: no es un fallo, es que aquí no existe. */
 .perm-fila.apagada .row-icon{color:var(--dim2);opacity:.6}

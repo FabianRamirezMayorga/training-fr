@@ -4552,6 +4552,16 @@
     'Si no, hay que ir al sistema, porque una página web pide permisos pero no se los quita ni se los devuelve. Con la app instalada en la pantalla de inicio: Ajustes del iPhone › Aplicaciones › Training FR. En el navegador: Ajustes › Safari › Ubicación, o el candado de la barra de direcciones en Chrome.':
       'Otherwise you have to go to the system, because a web page asks for permissions but neither takes them back nor gives them back. With the app installed on your home screen: iPhone Settings › Apps › Training FR. In the browser: Settings › Safari › Location, or the padlock in the address bar in Chrome.',
 
+    'La app no puede quitarte un permiso: solo puede pedirlo. Se quita donde lo dio el sistema, y son dos sitios distintos según por dónde abras la app.':
+      'The app cannot take a permission away from you: it can only ask for one. It is taken away where the system gave it, and that is two different places depending on how you open the app.',
+    'Desde el icono de la pantalla de inicio': 'From the home screen icon',
+    'Ajustes del iPhone › Aplicaciones › Training FR': 'iPhone Settings › Apps › Training FR',
+    'Desde Safari': 'From Safari',
+    'Toca la «Aa» de la barra de direcciones › Configuración para este sitio web. Ahí cada permiso se pone en «Preguntar» o «Denegar».':
+      'Tap the «Aa» in the address bar › Settings for this website. Each permission is set there to «Ask» or «Deny».',
+    'El navegador no deja sonar aquí. Prueba a tocar algo primero y vuelve.':
+      'The browser will not let it play here. Try tapping something first and come back.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };

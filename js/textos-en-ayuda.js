@@ -1305,6 +1305,13 @@
     'Sin foto no se queda vacío: sale la inicial de tu nombre sobre un grafito. La foto se guarda en este dispositivo como el resto, pesa unos quince kilobytes y no sale de aquí salvo que tengas la sincronización puesta.':
       'With no photo it is not left empty: your name initial shows on graphite. The photo is saved on this device like everything else, it weighs about fifteen kilobytes and it does not leave here unless you have sync switched on.',
 
+    'Si lo bloqueaste por error, pulsa *Reintentar*.': 'If you blocked it by mistake, tap *Retry*.',
+    'Si lo denegaste solo esa vez, el navegador vuelve a preguntar. Y si ya lo arreglaste en los ajustes del móvil, con eso la app se entera: desde fuera no puede verlo sola.':
+      'If you only denied it that once, the browser asks again. And if you already sorted it out in your phone settings, that is how the app finds out: it cannot see it from outside on its own.',
+    'Para quitarlo de verdad, hay que ir al sistema.': 'To really take it away, you have to go to the system.',
+    'Con la app abierta desde su icono: *Ajustes del iPhone › Aplicaciones › Training FR*. Desde Safari: la *Aa* de la barra de direcciones › *Configuración para este sitio web*. El candado que se suele buscar no existe cuando la app está instalada en la pantalla de inicio.':
+      'With the app opened from its icon: *iPhone Settings › Apps › Training FR*. From Safari: the *Aa* in the address bar › *Settings for this website*. The padlock people look for does not exist once the app is installed on the home screen.',
+
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

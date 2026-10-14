@@ -343,8 +343,15 @@
   }
 
   function ladoHTML(id, est) {
+    /* Concedido también lleva botón. La app no puede quitar un permiso —solo
+       pedirlo— pero sí puede decirte dónde se quita, que es la mitad del
+       problema: lo difícil no es tocar el interruptor, es saber que existe y
+       en qué pantalla está. Sin esto, lo concedido era un callejón sin salida
+       igual que lo bloqueado. */
     if (est === 'si') {
-      return '<span class="perm-estado si">' + icon('check') + esc(T('Concedido')) + '</span>';
+      return '<span class="perm-estado si">' + icon('check') + esc(T('Concedido')) + '</span>' +
+        '<button class="btn sm perm-quitar" data-quitar="' + id + '">' +
+        esc(T('Quitar')) + '</button>';
     }
     /* Bloqueado con botón, no como un cartel. Hacen falta las dos cosas:
 
@@ -449,6 +456,9 @@
     bindAll(raiz, '[data-perm]', function (el) {
       pedir(el.getAttribute('data-perm'));
     });
+    bindAll(raiz, '[data-quitar]', function (el) {
+      comoQuitar(el.getAttribute('data-quitar'));
+    });
   }
 
   /* Mira cómo está cada permiso y actualiza *solo la lista*.
@@ -484,6 +494,40 @@
     refrescar();
   };
 
+  /* Dónde se quita cada cosa. Los dos caminos que existen de verdad en un
+     iPhone, y ninguno es el que uno supone: con la app en la pantalla de
+     inicio no hay barra de direcciones donde buscar un candado. */
+  function comoQuitar(id) {
+    const p = PERMISOS.filter(function (x) { return x.id === id; })[0];
+    const nombre = p ? T(p.titulo) : T('Permisos');
+    UI.modal(html`
+      <h2 class="conf-tit">${Tn('Quitar {que}', { que: nombre })}</h2>
+      <p class="muted conf-txt">${T('La app no puede quitarte un permiso: solo ' +
+        'puede pedirlo. Se quita donde lo dio el sistema, y son dos sitios ' +
+        'distintos según por dónde abras la app.')}</p>
+      <div class="list" style="margin-top:16px;text-align:left">
+        <div class="list-row">
+          <div class="grow">
+            <div class="list-row-title">${T('Desde el icono de la pantalla de inicio')}</div>
+            <div class="list-row-sub">${T('Ajustes del iPhone › Aplicaciones › Training FR')}</div>
+          </div>
+        </div>
+        <div class="list-row">
+          <div class="grow">
+            <div class="list-row-title">${T('Desde Safari')}</div>
+            <div class="list-row-sub">${T('Toca la «Aa» de la barra de direcciones › ' +
+              'Configuración para este sitio web. Ahí cada permiso se pone en ' +
+              '«Preguntar» o «Denegar».')}</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn primary block" data-x="ok" style="margin-top:16px">
+        ${T('Entendido')}</button>`,
+      function (el) {
+        el.querySelector('[data-x=ok]').onclick = UI.closeModal;
+      });
+  }
+
   function pedir(id) {
     const luego = refrescar;
 
@@ -518,11 +562,15 @@
          falla el móvil. Ahí lo que hace falta es el interruptor, que vive en
          Ajustes. */
       if (Store.settings().sound === false) { go('ajustes'); return; }
-      /* Y encendido, suena: con eso se responde de una vez a las tres cosas que
-         no se pueden consultar —el interruptor de la app, el de silencio del
-         móvil y si el navegador ha soltado ya el audio—. */
-      try { UI.beep(); } catch (e) { /* nada */ }
-      UI.toast(T('Si no has oído nada, mira el interruptor de silencio del móvil.'));
+      /* Y encendido, suena. El aviso espera a saber si el navegador nos ha
+         dejado sonar, porque no es lo mismo «no se oye porque el móvil está en
+         silencio» que «no se oye porque el audio está bloqueado», y antes las
+         dos daban el mismo mensaje. */
+      Promise.resolve(UI.beep()).then(function (sono) {
+        UI.toast(sono
+          ? T('Si no has oído nada, mira el interruptor de silencio del móvil.')
+          : T('El navegador no deja sonar aquí. Prueba a tocar algo primero y vuelve.'));
+      });
       return;
     }
     if (id === 'camara') {
