@@ -210,50 +210,106 @@ html[data-theme="light"] .av-perfil.on{box-shadow:0 0 0 2px var(--bg),
 
    El recorte no hace falta: el radio del contenedor ya redondea, y dentro no
    hay nada con fondo propio que se salga por las esquinas. */
+/* ================= la barra de abajo =================
+
+   Rehecha de cero después de cuatro intentos de arreglarla subiendo y bajando
+   el desenfoque. El problema no eran los números: era que la pieza no tenía
+   más idea que «un rectángulo translucido», y un rectángulo translúcido sobre
+   un fondo oscuro se ve gris se mire como se mire.
+
+   Lo que la hace parecer vidrio son tres cosas que no estaban:
+
+   1. *El canto refracta.* Un cristal no tiene un borde uniforme: coge luz en
+      dos esquinas opuestas y se apaga en las otras dos. Eso se hace con un
+      borde degradado en diagonal, y es lo que da el grosor que el ojo lee como
+      material en vez de como capa de pintura.
+   2. *El activo vive en su propia pastilla*, y la pastilla se desliza de una
+      pestaña a otra en vez de aparecer y desaparecer. Es lo que hace que la
+      barra parezca una pieza con algo dentro, y no cuatro botones pegados.
+   3. *Un reflejo arriba*, corto y a un lado, no un degradado de arriba abajo
+      que lo único que hacía era lechar la pieza entera.
+
+   El relleno y el desenfoque se quedan donde estaban, que esa parte si estaba
+   bien: ver lo de detras borroso pero reconocible. */
 .tabbar{position:fixed;bottom:var(--barra-abajo);left:14px;right:14px;
   margin:0 auto;max-width:426px;
-  z-index:60;display:flex;border-radius:26px;
-  /* Vidrio, no vidrio esmerilado. Esta es la corrección que faltaba: treinta
-     píxeles de desenfoque con un 42 por ciento de relleno convertían lo de
-     detrás en una papilla gris uniforme —daba igual que pasaran fotos a todo
-     color—, y una papilla uniforme es indistinguible de una pieza opaca. Que
-     es justo lo que se veía.
-
-     Lo que hace que se lea como cristal es *reconocer* lo de detrás aunque esté
-     borroso: distinguir que ahí pasa una foto, un avatar, un titular. Asi que
-     la mitad de desenfoque y poco más de un cuarto de relleno, que es la
-     proporción de las barras del sistema.
-
-     El degradado se queda, pero muy flojo: añade la luz cenital que da grosor
-     sobre un fondo liso, y subido era otra capa de leche encima. */
-  background:
-    linear-gradient(180deg,color-mix(in srgb,#fff 6%,transparent),transparent 42%),
-    color-mix(in srgb,var(--bg2) 26%,transparent);
+  z-index:60;display:flex;border-radius:28px;padding:5px;
+  background:color-mix(in srgb,var(--bg2) 26%,transparent);
   backdrop-filter:saturate(170%) blur(16px);-webkit-backdrop-filter:saturate(170%) blur(16px);
-  border:1px solid color-mix(in srgb,var(--txt) 14%,transparent);
-  box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 18%,transparent),
-             inset 0 -1px 0 color-mix(in srgb,#000 16%,transparent),
-             0 10px 30px rgba(0,0,0,.34),0 2px 8px rgba(0,0,0,.18)}
-/* En claro la misma sombra tapaba: el fondo es blanco y lo que hay debajo no
-   es una sombra, es suciedad. Mas suave y el cristal mas opaco, que sobre
-   blanco el desenfoque solo no separa nada. */
-/* En claro hace falta algo más de relleno que en oscuro, pero poco: lo que
-   separa la pieza del fondo blanco es el canto de abajo y la sombra, no el
-   brillo de arriba, que sobre blanco no se ve. */
+  border:0;
+  box-shadow:0 12px 34px rgba(0,0,0,.40),0 2px 10px rgba(0,0,0,.22)}
+
+/* El canto. Va en un pseudo-elemento porque un `border` no admite degradado,
+   y la diagonal es el truco entero: claro arriba a la izquierda, apagado en
+   medio, claro otra vez abajo a la derecha. Asi es como se comporta la luz en
+   el canto de una pieza curva, y por eso se lee como canto y no como linea. */
+.tabbar::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  padding:1px;
+  background:linear-gradient(142deg,
+    color-mix(in srgb,#fff 42%,transparent) 0%,
+    color-mix(in srgb,#fff 7%,transparent) 28%,
+    color-mix(in srgb,#fff 4%,transparent) 60%,
+    color-mix(in srgb,#fff 24%,transparent) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+}
+
+/* El reflejo: corto, arriba y a la izquierda, como el brillo de una lente. Un
+   degradado de arriba abajo cubriendo la pieza entera era lo que la volvia
+   lechosa; un reflejo ocupa una esquina y deja ver el resto. */
+.tabbar::after{
+  content:'';position:absolute;left:6%;right:38%;top:1px;height:42%;
+  border-radius:28px 28px 60% 60%/28px 28px 100% 100%;
+  background:linear-gradient(180deg,color-mix(in srgb,#fff 13%,transparent),transparent);
+  pointer-events:none;
+}
+
+/* La pastilla del activo, que se desliza. `--tab-i` lo pone la app con el
+   indice de la pestaña encendida; sin ella —en las pantallas que no son
+   ninguna de las cuatro— se esconde en vez de quedarse mintiendo en la
+   primera. */
+.tab-pastilla{
+  position:absolute;top:5px;bottom:5px;left:5px;
+  width:calc((100% - 10px) / 4);border-radius:23px;pointer-events:none;
+  background:color-mix(in srgb,#fff 11%,transparent);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 20%,transparent),
+             0 2px 8px rgba(0,0,0,.18);
+  transform:translateX(calc(var(--tab-i,0) * 100%));
+  transition:transform .38s cubic-bezier(.32,1.14,.4,1),opacity .2s;
+}
+.tabbar.sin-activa .tab-pastilla{opacity:0}
+@media (prefers-reduced-motion:reduce){.tab-pastilla{transition:opacity .2s}}
+
 html[data-theme="light"] .tabbar{
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.06) 48%),
-    color-mix(in srgb,var(--bg2) 34%,transparent);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),
-             inset 0 -1px 0 rgba(16,24,40,.09),
-             0 8px 26px rgba(16,24,40,.16),0 1px 4px rgba(16,24,40,.1)}
+  background:color-mix(in srgb,var(--bg2) 34%,transparent);
+  box-shadow:0 10px 30px rgba(16,24,40,.18),0 2px 8px rgba(16,24,40,.10)}
+/* En claro la luz del canto es casi blanca y la diagonal se nota menos, asi
+   que el canto de abajo lo marca una sombra en vez de un brillo: sobre blanco
+   lo que separa es la sombra. */
+html[data-theme="light"] .tabbar::before{
+  background:linear-gradient(142deg,
+    rgba(255,255,255,.95) 0%,
+    rgba(255,255,255,.35) 26%,
+    rgba(16,24,40,.07) 62%,
+    rgba(16,24,40,.13) 100%);
+}
+html[data-theme="light"] .tabbar::after{
+  background:linear-gradient(180deg,rgba(255,255,255,.5),transparent);
+}
+html[data-theme="light"] .tab-pastilla{
+  background:#fff;
+  box-shadow:0 1px 3px rgba(16,24,40,.14),0 4px 12px rgba(16,24,40,.10)}
 /* Los apagados suben de claridad. Estaban en `--dim2`, que es el gris de un
    texto de tercera, y esto no es texto de tercera: es la navegacion, lo unico
    que hay que poder ver siempre. Y cuanto mas se ven ellos, mas se entiende que
    el verde del activo es el verde de la marca y no un color raro suelto. */
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;
+  position:relative;z-index:1;border-radius:23px;
   color:color-mix(in srgb,var(--txt) 58%,transparent);
-  font-size:.63rem;font-weight:500;letter-spacing:0;transition:color .15s}
+  font-size:.63rem;font-weight:500;letter-spacing:0;transition:color .22s}
 .tab svg{width:25px;height:25px;fill:currentColor}
 /* El activo, el verde de la marca sin rebajar. Con la opacidad de los apagados
    aplicada tambien aqui —que es lo que pasaba antes de separarlos— el verde

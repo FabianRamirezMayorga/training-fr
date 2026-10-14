@@ -164,12 +164,25 @@
        encima de su propia barra—, así que el CSS tiene que saberlo. */
     document.body.classList.toggle('sin-barra', sinBarra);
 
-    document.querySelectorAll('.tab').forEach(function (t) {
+    /* Y de paso se apunta cuál está encendida, que es lo que mueve la pastilla
+       del fondo. Va por índice y no por posición medida: las cuatro pestañas
+       miden lo mismo, así que la cuenta es exacta y no hay que volver a
+       medirla cuando gira el móvil. */
+    let encendida = -1;
+    document.querySelectorAll('.tab').forEach(function (t, i) {
       const target = t.dataset.nav;
-      t.classList.toggle('on',
-        target === route.name ||
+      const on = target === route.name ||
         (target === 'rutinas' && (route.name === 'rutina' || route.name === 'entrenar')) ||
-        (target === 'ejercicios' && route.name === 'ejercicio'));
+        (target === 'ejercicios' && route.name === 'ejercicio');
+      t.classList.toggle('on', on);
+      if (on) encendida = i;
+    });
+    document.querySelectorAll('.tabbar').forEach(function (b) {
+      /* En las pantallas que no son ninguna de las cuatro —Perfil y todo lo que
+         cuelga de él— la pastilla se esconde. Dejarla en la primera diría que
+         estás en Inicio, que es peor que no decir nada. */
+      b.classList.toggle('sin-activa', encendida < 0);
+      if (encendida >= 0) b.style.setProperty('--tab-i', encendida);
     });
   }
 
