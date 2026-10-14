@@ -101,6 +101,51 @@
      debajo. Antes el rótulo iba en una línea, el campo en otra y «Guardada:
      AQ.Ab8…o01g» en una tercera, con lo que cada clave ocupaba tres renglones
      para decir dos cosas. */
+  /* Las claves de repuesto.
+
+     La cuota gratis de Google va por clave y por dia, no por persona: el dia
+     que se agota, la app se quedaba sin entrenador hasta manana. Con varias
+     puestas salta sola a la siguiente y no se entera nadie. Son gratis y se
+     sacan en un minuto, asi que el limite era nuestro, no de Google.
+
+     Solo en los proveedores con capa gratuita: en los de pago no hay cuota que
+     agotar, hay factura, y ahi tener cinco claves no arregla nada. */
+  function repuestoHTML(prov) {
+    if (!prov.gratis) return '';
+    const claves = IA.clavesDe(prov.id);
+    if (!claves.length) return '';
+
+    return html`
+      <div class="clave-bloque">
+        <div class="cb-cab">
+          <span class="cb-lab">${T('Claves de repuesto')}</span>
+          <span class="tiny">${Tp(claves.length, '{n} clave', '{n} claves')}</span>
+        </div>
+        <div class="list" style="margin-bottom:8px">
+          ${raw(claves.map(function (k, i) {
+            return '<div class="list-row">' +
+              '<div class="grow"><div class="list-row-title" style="font-size:.88rem">' +
+                esc(k.slice(0, 8)) + '…' + esc(k.slice(-4)) + '</div>' +
+              (i === 0 ? '<div class="list-row-sub">' + esc(T('La primera que se usa')) +
+                '</div>' : '') + '</div>' +
+              (claves.length > 1
+                ? '<button class="btn sm" data-quitark="' + i + '" aria-label="' +
+                  esc(T('Quitar')) + '">' + icon('trash') + '</button>'
+                : '') +
+            '</div>';
+          }).join(''))}
+        </div>
+        <div class="row" style="gap:8px">
+          <input id="k-extra" class="grow" placeholder="${T('Pega otra clave gratis')}"
+                 autocomplete="off" spellcheck="false" style="margin:0">
+          <button class="btn vidrio" data-a="anadirClave">${raw(icon('plus'))}</button>
+        </div>
+        <p class="tiny" style="margin:8px 0 0">${T('Si una agota su cuota del día, la app ' +
+          'salta sola a la siguiente y sigue funcionando. Cada clave tiene su propia cuota ' +
+          'gratis.')}</p>
+      </div>`;
+  }
+
   function campoClave(etiqueta, id, valor, marcador) {
     return html`
       <div class="clave-bloque">
@@ -291,6 +336,8 @@
         ${raw(campoClave(Tn('Clave de {prov}', { prov: prov.label }),
           'k-ia', claveProv, prov.pista === 'sin prefijo fijo'
             ? T(prov.pista) : prov.pista))}
+
+        ${raw(repuestoHTML(prov))}
 
         <div class="clave-bloque">
           <div class="cb-cab">
@@ -635,6 +682,26 @@
         btn.textContent = 'Actualizar lista';
         UI.toast('No se pudo consultar la lista');
       });
+    });
+
+    bind(root, '[data-a=anadirClave]', function () {
+      const campo = root.querySelector('#k-extra');
+      const prov = IA.proveedorActual();
+      try {
+        const n = IA.anadirClave(prov.id, campo.value);
+        campo.value = '';
+        render();
+        UI.toast(Tp(n, 'Ya tienes {n} clave', 'Ya tienes {n} claves'));
+      } catch (e) {
+        UI.toast(e.message);
+      }
+    });
+
+    bindAll(root, '[data-quitark]', function (el) {
+      const prov = IA.proveedorActual();
+      IA.quitarClave(prov.id, Number(el.getAttribute('data-quitark')));
+      render();
+      UI.toast(T('Clave quitada.'));
     });
 
     bind(root, '[data-a=guardarIA]', function () {

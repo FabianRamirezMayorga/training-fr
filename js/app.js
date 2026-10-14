@@ -7740,6 +7740,12 @@
       setTimeout(function () { splash.remove(); }, 400);
       if (!location.hash) location.hash = '#/inicio';
       normalizarNombres();
+      /* Al abrir la app se vuelve a la primera clave de IA. La cuota de
+         Google se repone sola cada dia, asi que quedarse en la tercera
+         porque ayer se agotaron las dos primeras seria desperdiciarlas. Si
+         siguen agotadas, la rotacion las vuelve a saltar en la primera
+         pregunta y sin que se note. */
+      if (g.IA && IA.reiniciarClaves) IA.reiniciarClaves();
       /* Se pregunta al servidor si esta cuenta administra. De ello depende
          que se enseñe la pantalla de cuentas y la configuración de la base de
          datos, y hace falta saberlo en cualquier pantalla, no solo en Perfil. */

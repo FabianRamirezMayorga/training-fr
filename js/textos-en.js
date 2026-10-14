@@ -4594,6 +4594,23 @@
     'Las raciones de una carta no se saben: esto es una estimación, no una cuenta.':
       'Portion sizes are not knowable from a menu: this is an estimate, not a count.',
 
+    /* ---------- Claves de repuesto ---------- */
+    'Claves de repuesto': 'Spare keys',
+    '{n} clave': '{n} key',
+    '{n} claves': '{n} keys',
+    'La primera que se usa': 'The first one used',
+    'Pega otra clave gratis': 'Paste another free key',
+    'Si una agota su cuota del día, la app salta sola a la siguiente y sigue funcionando. Cada clave tiene su propia cuota gratis.':
+      'If one runs out of its daily quota, the app moves to the next one by itself and keeps working. Each key has its own free quota.',
+    'Ya tienes {n} clave': 'You now have {n} key',
+    'Ya tienes {n} claves': 'You now have {n} keys',
+    'Clave quitada.': 'Key removed.',
+    'Esa clave ya está puesta.': 'That key is already there.',
+    'Has agotado la cuota de todas tus claves de Gemini por ahora. Suele reponerse en un minuto si es el límite por minuto, o mañana si es el diario.':
+      'You have used up the quota on all your Gemini keys for now. It usually comes back in a minute if it is the per-minute limit, or tomorrow if it is the daily one.',
+    'Has agotado la cuota de todos los modelos de Gemini por ahora. Suele reponerse en un minuto si es el límite por minuto, o mañana si es el diario. Puedes añadir otra clave gratis en la bóveda y la app saltará sola a ella.':
+      'You have used up the quota on every Gemini model for now. It usually comes back in a minute if it is the per-minute limit, or tomorrow if it is the daily one. You can add another free key in the vault and the app will move to it by itself.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };

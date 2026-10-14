@@ -240,15 +240,98 @@
       }
     });
 
+    c.claveIdx = c.claveIdx || {};
+
     /* lo que el resto de la app sigue leyendo como si solo hubiera uno */
-    c.clave = c.claves[c.proveedor] || '';
+    c.clave = claveActivaDe(c, c.proveedor);
     c.modelo = c.modelos[c.proveedor] || proveedorPorId(c.proveedor).modelos[0];
     return c;
   }
 
+  /* ---------- varias claves por proveedor ----------
+
+     Gemini regala cuota, pero por clave y por día. Con una sola, el día que se
+     agota la app se queda sin entrenador hasta mañana; con tres, sigue andando.
+     Son gratis y se sacan en un minuto, así que la limitación era nuestra, no
+     de Google.
+
+     Se guarda una lista, pero lo de antes era una cadena suelta: se lee de las
+     dos formas para no obligar a nadie a volver a pegar su clave. */
+  function comoLista(v) {
+    if (!v) return [];
+    return (Array.isArray(v) ? v : [v])
+      .map(function (x) { return String(x || '').trim(); })
+      .filter(Boolean);
+  }
+
+  function clavesDe(id) { return comoLista(config().claves[id]); }
+
+  /* La que toca ahora. El índice se guarda porque, agotada una, no tiene
+     sentido volver a empezar por ella en la siguiente pregunta: sería gastar
+     un viaje de ida y vuelta para recibir el mismo 429. */
+  function claveActivaDe(c, id) {
+    const l = comoLista(c.claves[id]);
+    if (!l.length) return '';
+    const i = Math.min(l.length - 1, Math.max(0, Number((c.claveIdx || {})[id]) || 0));
+    return l[i];
+  }
+
+  /* Pasa a la siguiente. Devuelve false cuando ya no queda ninguna por probar,
+     que es cuando toca rendirse de verdad. */
+  function rotarClave(id) {
+    const c = config();
+    const l = comoLista(c.claves[id]);
+    if (l.length < 2) return false;
+    const i = (Number(c.claveIdx[id]) || 0) + 1;
+    if (i >= l.length) return false;
+    c.claveIdx[id] = i;
+    guardarCrudo(c);
+    return true;
+  }
+
+  function anadirClave(id, clave) {
+    const prov = proveedorPorId(id);
+    clave = String(clave || '').trim();
+    if (clave.length < 20) throw new Error(T('Esa clave no parece válida.'));
+    if (prov.forma && !prov.forma.test(clave)) {
+      throw new Error(Tn('Eso no parece una clave de {prov}.', { prov: prov.label }) +
+        ' ' + (prov.formaTxt || ''));
+    }
+    const c = config();
+    const l = comoLista(c.claves[id]);
+    if (l.indexOf(clave) !== -1) throw new Error(T('Esa clave ya está puesta.'));
+    l.push(clave);
+    c.claves[id] = l;
+    c.modelos[id] = c.modelos[id] || prov.modelos[0];
+    c.proveedor = id;
+    guardarCrudo(c);
+    return l.length;
+  }
+
+  function quitarClave(id, i) {
+    const c = config();
+    const l = comoLista(c.claves[id]);
+    l.splice(i, 1);
+    if (l.length) c.claves[id] = l; else delete c.claves[id];
+    /* El indice puede haberse quedado señalando a una clave que ya no existe. */
+    c.claveIdx[id] = 0;
+    guardarCrudo(c);
+    return l.length;
+  }
+
+  /* Se llama al arrancar la app: la cuota de Google se repone sola, asi que
+     empezar siempre por la primera es lo correcto. Si sigue agotada, la
+     rotacion la vuelve a saltar en la primera pregunta y sin que se note. */
+  function reiniciarClaves() {
+    const c = config();
+    if (!c.claveIdx || !Object.keys(c.claveIdx).length) return;
+    c.claveIdx = {};
+    guardarCrudo(c);
+  }
+
   function proveedor() { return config().proveedor; }
   function proveedorActual() { return proveedorPorId(proveedor()); }
-  function claveDe(id) { return config().claves[id] || ''; }
+  function claveDe(id) { return claveActivaDe(config(), id); }
   function modeloDe(id) { return config().modelos[id] || proveedorPorId(id).modelos[0]; }
 
   /* Guarda la clave y el modelo de UN proveedor, sin tocar los demás */
@@ -267,7 +350,12 @@
     }
 
     const c = config();
-    if (clave) c.claves[prov.id] = clave; else delete c.claves[prov.id];
+    /* Guardar una clave suelta reemplaza la lista entera: es lo que espera
+       quien escribe en el campo de siempre. Para sumar sin perder las otras
+       está `anadirClave`. */
+    if (clave) c.claves[prov.id] = [clave]; else delete c.claves[prov.id];
+    c.claveIdx = c.claveIdx || {};
+    c.claveIdx[prov.id] = 0;
     c.modelos[prov.id] = modelo || prov.modelos[0];
     if (clave) c.proveedor = prov.id;
     guardarCrudo(c);
@@ -793,10 +881,34 @@
                otro modelo. */
             if (r.status === 429) huboCuota = true;
             if (r.status === 429 && i < modelos.length - 1) return intentar(i + 1);
+
+            /* Agotados todos los modelos con esta clave, se prueba la
+               siguiente. La cuota gratis de Google va por clave, no por
+               persona: con tres claves puestas, el día que se acaba una la app
+               sigue andando y no se entera nadie.
+
+               El contador va en las opciones y no fuera porque dos preguntas a
+               la vez —la píldora del inicio y el menú— comparten el módulo: con
+               una variable suelta, la segunda heredaba las vueltas de la
+               primera y se rendía antes de tiempo. */
+            if (r.status === 429 || (retirado && huboCuota)) {
+              const vueltas = (opciones._clave || 0) + 1;
+              if (vueltas < clavesDe('gemini').length && rotarClave('gemini')) {
+                return llamarGemini(prompt,
+                  Object.assign({}, opciones, { _clave: vueltas }),
+                  claveDe('gemini'), modeloIA);
+              }
+            }
+
             if (r.status === 429) {
-              throw new Error(T('Has agotado la cuota de todos los modelos de Gemini por ahora. ' +
-                'Suele reponerse en un minuto si es el límite por minuto, o mañana si es el ' +
-                'diario. Si tienes otro proveedor puesto en la bóveda, cambia a él mientras.'));
+              throw new Error(clavesDe('gemini').length > 1
+                ? T('Has agotado la cuota de todas tus claves de Gemini por ahora. Suele ' +
+                  'reponerse en un minuto si es el límite por minuto, o mañana si es el ' +
+                  'diario.')
+                : T('Has agotado la cuota de todos los modelos de Gemini por ahora. ' +
+                  'Suele reponerse en un minuto si es el límite por minuto, o mañana si es el ' +
+                  'diario. Puedes añadir otra clave gratis en la bóveda y la app saltará ' +
+                  'sola a ella.'));
             }
             if (retirado && huboCuota) {
               throw new Error(T('Has agotado la cuota gratuita de Gemini por ahora. Suele ' +
@@ -3716,6 +3828,8 @@
     planNutricion: planNutricion, revisarRutinas: revisarRutinas,
     revisarRutina: revisarRutina, afinarPrograma: afinarPrograma,
     crearPrograma: crearPrograma, pildora: pildora, horasPildora: horasPildora,
+    clavesDe: clavesDe, anadirClave: anadirClave, quitarClave: quitarClave,
+    reiniciarClaves: reiniciarClaves,
     analizarComida: analizarComida, estimarComida: estimarComida,
     cartaRestaurante: cartaRestaurante,
     analizarSuplementos: analizarSuplementos,

@@ -1360,6 +1360,18 @@
     'Por eso ves un rango y a veces un aviso de que es una estimación. Cuando te sirvan el plato y le hagas la foto, ahí sí hay algo que medir: el tamaño de la ración se ve contra el plato y los cubiertos.':
       'That is why you see a range and sometimes a note saying it is an estimate. Once the dish is in front of you and you photograph it, there is something to measure: portion size shows against the plate and the cutlery.',
 
+
+    /* ---------- Cuando se agota la cuota ---------- */
+    '¿Qué hago cuando se agota la cuota de la IA?': 'What do I do when the AI quota runs out?',
+    'Ponerle otra clave. La cuota gratis de Google va *por clave y por día*, no por persona, así que con dos o tres puestas la app salta sola a la siguiente cuando una se acaba, y tú no te enteras.':
+      'Give it another key. Google\u2019s free quota goes *per key and per day*, not per person, so with two or three in place the app moves to the next one by itself when one runs out, and you never notice.',
+    'Se añaden en Ajustes › Bóveda de claves, en *Claves de repuesto*. Son gratis y se sacan en un minuto en la misma página de siempre.':
+      'You add them in Settings › Key vault, under *Spare keys*. They are free and take a minute to get on the same page as always.',
+    'La app prueba primero todos los modelos con la clave que esté en uso —cada modelo tiene su propia cuota— y solo cuando se le acaban todos cambia de clave. Y se queda en la que funcione, para no gastar un viaje de ida y vuelta en la agotada cada vez que preguntas.':
+      'The app first tries every model with the key in use —each model has its own quota— and only changes key once they are all spent. And it stays on the one that works, so it does not waste a round trip on the exhausted one every time you ask.',
+    'Al abrir la app al día siguiente vuelve a la primera, porque la cuota se repone sola y quedarse en la última sería desperdiciar las otras.':
+      'When you open the app the next day it goes back to the first one, because the quota refills by itself and staying on the last one would waste the others.',
+
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

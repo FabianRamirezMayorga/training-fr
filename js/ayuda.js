@@ -777,6 +777,13 @@
         'También desaparece cuando ya la tienes instalada, que es lo normal si arrancaste desde el icono.'],
       ver: ['c-instalar'] },
 
+    { id: 'p-cuota', q: '¿Qué hago cuando se agota la cuota de la IA?',
+      a: ['Ponerle otra clave. La cuota gratis de Google va *por clave y por día*, no por persona, así que con dos o tres puestas la app salta sola a la siguiente cuando una se acaba, y tú no te enteras.',
+        'Se añaden en Ajustes › Bóveda de claves, en *Claves de repuesto*. Son gratis y se sacan en un minuto en la misma página de siempre.',
+        'La app prueba primero todos los modelos con la clave que esté en uso —cada modelo tiene su propia cuota— y solo cuando se le acaban todos cambia de clave. Y se queda en la que funcione, para no gastar un viaje de ida y vuelta en la agotada cada vez que preguntas.',
+        'Al abrir la app al día siguiente vuelve a la primera, porque la cuota se repone sola y quedarse en la última sería desperdiciar las otras.'],
+      ver: ['c-ia'] },
+
     { id: 'p-raciones', q: '¿Por qué las calorías de la carta salen con un rango?',
       a: ['Porque una carta no dice los gramos. Un entrecot son doscientos o cuatrocientos según la casa, y una paella «para uno» varía el doble de un sitio a otro.',
         'Dar una cifra exacta ahí quedaría mejor y sería mentira. Y es la clase de mentira que se paga cara: la primera vez que te pasas por quinientas calorías dejas de creerte el resto, incluido lo que sí está bien calculado.',
