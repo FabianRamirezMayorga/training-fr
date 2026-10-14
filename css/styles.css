@@ -89,11 +89,19 @@ a{color:var(--blue)}
 /* El botón mide 44 aunque el dibujo mida 21: es lo que hay que poder acertar
    con el pulgar sin mirar, y antes el área tocable era exactamente el logo. */
 .brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:44px;height:44px;padding:0;cursor:pointer;
-  display:flex;align-items:center;justify-content:center}
+  min-width:56px;height:46px;padding:0;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+/* El nombre, muy pequeño y muy espaciado. A este tamaño la letra deja de
+   leerse palabra a palabra y se lee como una firma: por eso aguanta debajo del
+   símbolo sin competir con él, y por eso necesita el espaciado —apretada a
+   seis píxeles sería una mancha. */
+.brand-txt{font-size:6.5px;font-weight:700;letter-spacing:.17em;line-height:1;
+  color:var(--dim2);white-space:nowrap;text-indent:.17em;
+  transition:color .18s}
+@media (hover:hover){.brand:hover .brand-txt{color:var(--dim)}}
 /* La animación va en la imagen y no en el botón: el botón ya gasta su
    `transform` en estar centrado, y tocarlo le habría quitado el centrado. */
-.brand-logo{width:21px;height:27px;object-fit:contain;flex:none;
+.brand-logo{width:19px;height:24px;object-fit:contain;flex:none;
   transition:transform .18s cubic-bezier(.2,.9,.3,1),filter .18s}
 .brand:active .brand-logo{transform:scale(.86)}
 @media (hover:hover){.brand:hover .brand-logo{filter:brightness(1.14)}}
@@ -111,10 +119,6 @@ a{color:var(--blue)}
    —y pierde poco: el disco de color con su icono ya dice si entrenas en el
    gimnasio, en casa o con bandas, y el nombre entero sigue a un toque. Sin
    esto, el logo centrado caía veinte píxeles dentro del chip. */
-@media (max-width: 560px){
-  .lugar-chip .lc-txt{display:none}
-  .lugar-chip{padding-left:5px;padding-right:5px}
-}
 .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
 /* La inicial, del tamano de los otros botones de la cabecera. Redonda porque
    es lo unico de la fila que representa a una persona y no una funcion.
@@ -5353,9 +5357,9 @@ html[data-theme="light"] .lugar-chip::after {
               color-mix(in srgb, #fff 75%, transparent) 48%, transparent 64%);
 }
 
-/* En un movil estrecho no caben la marca, el sitio y el tema: el boton del tema
-   se salia por el canto derecho. La marca es lo unico prescindible de los tres
-   —el logo sigue ahi y lleva al inicio igual—, asi que es la que se va. */
+/* Aqui vivia la regla que escondia la marca en pantallas estrechas. Ahora la
+   marca se queda —centrada y con su nombre debajo— y el que cede es el chip
+   del sitio, al final de este archivo. */
 /* La marca ya no esta en la cabecera —se presenta al abrir la app y se quita
    de en medio—, asi que no hace falta esconderla en pantallas estrechas. El
    `wordmark` sigue vivo en el arranque, que es su sitio. */
@@ -8686,3 +8690,35 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .rep-contar b{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums;
   min-width:34px;text-align:center}
 .rep-contar span{flex:1;min-width:0;font-size:.76rem;color:var(--dim);line-height:1.35}
+
+/* El chip del sitio, apretado. Va al final del archivo y con el tema repetido
+   en el selector, y las dos cosas hacen falta:
+
+   - al final, porque su regla normal vive ochocientas líneas más abajo que la
+     cabecera y, a igual peso, gana la última;
+   - con `html[data-theme="light"]` repetido, porque en claro el chip tiene su
+     propia regla con un atributo dentro, y esa pesa más que una clase suelta
+     se ponga donde se ponga. Sin esto, en modo oscuro se quitaba la cápsula y
+     en claro se quedaba —que es justo donde se vio el problema.
+
+   Es el mismo enredo que ya tuvo el par de idioma y tema unas líneas más
+   arriba: una regla de tema devolviéndole el fondo a algo que lo había perdido
+   a propósito. */
+@media (max-width: 560px){
+  .lugar-chip .lc-txt{display:none}
+  /* Sin texto, la pastilla de vidrio sobraba: quedaba una cápsula dentro de
+     otra cápsula, y dos contenedores concentricos para una sola cosa es lo que
+     hacía que el botón se viera mal. El disco con su icono ya es el botón: ya
+     tiene forma, color y relieve propios. */
+  .lugar-chip,
+  html[data-theme="light"] .lugar-chip{padding:0;height:auto;border:0;
+    background:none;box-shadow:none;
+    -webkit-backdrop-filter:none;backdrop-filter:none}
+  .lugar-chip::after,
+  html[data-theme="light"] .lugar-chip::after{display:none}
+  .lugar-chip:hover{border-color:transparent;box-shadow:none}
+  /* Y crece hasta el tamaño de los demás botones de la fila: a veintiséis se
+     quedaba pequeño al lado del avatar y del disco del tema. */
+  .lc-ico{width:34px;height:34px}
+  .lc-ico svg{width:17px;height:17px}
+}
