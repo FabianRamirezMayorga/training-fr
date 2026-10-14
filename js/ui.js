@@ -51,15 +51,23 @@
        rellenos pero sucios; y a los diez píxeles de la tira de constancia, las
        piezas finas desaparecen del todo. Lo que aguanta ahí es la silueta.
 
-       Las proporciones salieron de mirar cuatro versiones a 11, 17, 25 y 46
-       píxeles, que son los tamaños donde se usa de verdad. Con las cabezas más
-       bajas parecía un hueso; con los discos exteriores de una mancuerna de
-       verdad —cinco piezas— volvía a ser ruido a los tamaños pequeños, que es
-       exactamente el fallo que veníamos a arreglar. */
+       Y en diagonal, que es lo que resuelve el problema de verdad. Derecha, con
+       dos barras verticales y una horizontal en medio, *es* una H: da igual lo
+       bien dibujada que esté, el ojo lee la letra antes que el objeto. Girada,
+       esa lectura desaparece sola, porque ninguna letra va inclinada.
+
+       Y como la diagonal ya hace el trabajo de distinguirla, ahora sí caben los
+       discos exteriores de una mancuerna de verdad: lo que antes era ruido
+       —cinco piezas en horizontal— en diagonal se lee. Comprobado rasterizando a
+       11 y 17 píxeles y ampliando el resultado, que es la única forma de ver lo
+       que ve el ojo y no lo que uno cree que dibujó. */
     dumbbell: '<svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none">'
-      + '<rect x="3.4" y="4.4" width="4.6" height="15.2" rx="2.3"/>'
-      + '<rect x="7.6" y="10.7" width="8.8" height="2.6" rx="1.3"/>'
-      + '<rect x="16" y="4.4" width="4.6" height="15.2" rx="2.3"/></svg>',
+      + '<g transform="rotate(-38 12 12)">'
+      + '<rect x="2.6" y="8.4" width="2.6" height="7.2" rx="1.3"/>'
+      + '<rect x="5.8" y="6" width="3.6" height="12" rx="1.8"/>'
+      + '<rect x="9" y="10.8" width="6" height="2.4" rx="1.2"/>'
+      + '<rect x="14.6" y="6" width="3.6" height="12" rx="1.8"/>'
+      + '<rect x="18.8" y="8.4" width="2.6" height="7.2" rx="1.3"/></g></svg>',
     /* Una figura corriendo con cuerpo, no un palito.
 
        La diferencia con el resto de iconos es que aquí cada parte lleva su
