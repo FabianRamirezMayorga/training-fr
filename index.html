@@ -31,6 +31,11 @@
 
 <header class="topbar">
   <div class="topbar-inner">
+    <!-- El perfil, aquí arriba y fuera de la barra de abajo: abajo solo caben
+         cuatro o cinco sitios y los que valen son a los que se entra a diario.
+         Al perfil se entra a configurar algo, que es cosa de una vez al mes. -->
+    <button class="av-perfil" id="av-perfil" data-nav="perfil"
+            aria-label="Perfil" data-t-aria="Perfil"></button>
     <button class="brand" data-nav="inicio" aria-label="Ir al inicio"
             data-t-aria="Ir al inicio">
       <img class="brand-logo" src="icons/logo.svg" alt="" width="21" height="27">
@@ -59,10 +64,6 @@
   <button class="tab" data-nav="progreso">
     <svg viewBox="0 0 24 24"><path d="M4 19h16M6 16V9M11 16V5M16 16v-4M21 16v-7" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
     <span data-t="Progreso">Progreso</span>
-  </button>
-  <button class="tab" data-nav="perfil">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20v-.6A5.4 5.4 0 0110.4 14h3.2A5.4 5.4 0 0119 19.4v.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    <span data-t="Perfil">Perfil</span>
   </button>
 </nav>
 

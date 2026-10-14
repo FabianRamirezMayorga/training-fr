@@ -88,18 +88,49 @@ a{color:var(--blue)}
 .brand{display:flex;align-items:center;gap:9px;cursor:pointer;padding:0;color:var(--txt)}
 .brand-logo{width:21px;height:27px;object-fit:contain;flex:none}
 .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+/* La inicial, del tamano de los otros botones de la cabecera. Redonda porque
+   es lo unico de la fila que representa a una persona y no una funcion. */
+.av-perfil{width:32px;height:32px;flex:none;border-radius:50%;padding:0;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:var(--card2);color:var(--txt);border:1px solid var(--line);
+  font-size:.86rem;font-weight:700;letter-spacing:0;
+  transition:box-shadow .15s,border-color .15s,transform .12s}
+.av-perfil svg{width:18px;height:18px;fill:none;stroke:currentColor;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.av-perfil.sin-nombre{color:var(--dim2)}
+.av-perfil:active{transform:scale(.93)}
+/* Dentro de Perfil se enciende con un aro y no cambiando el fondo: el fondo
+   pintado lo convertia en un boton pulsado, y esto no se pulsa, se visita. */
+.av-perfil.on{border-color:transparent;box-shadow:0 0 0 2px var(--acc)}
 .view{max-width:900px;margin:0 auto;padding:10px 16px 24px;animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}}
 
-.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:60;display:flex;
-  background:color-mix(in srgb,var(--bg2) 78%,transparent);
-  backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
-  border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+/* Una pastilla flotante y no una pared pegada al canto. Lo que cambia de
+   verdad no es el borde redondo: es que al despegarse del fondo el desenfoque
+   se nota: por debajo pasa la pantalla y se ve pasar. Pegada abajo, el mismo
+   `backdrop-filter` no desenfocaba nada la mayor parte del tiempo, porque
+   debajo no habia contenido que desenfocar.
+
+   El ancho se limita a 430 para que en una tablet no salga una pastilla de
+   palmo y medio con cuatro iconos perdidos dentro. */
+.tabbar{position:fixed;bottom:calc(var(--safe-b) + 10px);left:50%;
+  transform:translateX(-50%);width:calc(100% - 26px);max-width:430px;
+  z-index:60;display:flex;border-radius:24px;overflow:hidden;
+  background:color-mix(in srgb,var(--bg2) 58%,transparent);
+  backdrop-filter:saturate(180%) blur(28px);-webkit-backdrop-filter:saturate(180%) blur(28px);
+  border:1px solid color-mix(in srgb,var(--txt) 11%,transparent);
+  box-shadow:0 10px 30px rgba(0,0,0,.30),0 2px 8px rgba(0,0,0,.16)}
+/* En claro la misma sombra tapaba: el fondo es blanco y lo que hay debajo no
+   es una sombra, es suciedad. Mas suave y el cristal mas opaco, que sobre
+   blanco el desenfoque solo no separa nada. */
+html[data-theme="light"] .tabbar{
+  background:color-mix(in srgb,var(--bg2) 72%,transparent);
+  box-shadow:0 8px 24px rgba(16,24,40,.12),0 1px 4px rgba(16,24,40,.08)}
 /* Los apagados suben de claridad. Estaban en `--dim2`, que es el gris de un
    texto de tercera, y esto no es texto de tercera: es la navegacion, lo unico
    que hay que poder ver siempre. Y cuanto mas se ven ellos, mas se entiende que
    el verde del activo es el verde de la marca y no un color raro suelto. */
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;
   color:color-mix(in srgb,var(--txt) 58%,transparent);
   font-size:.63rem;font-weight:500;letter-spacing:0;transition:color .15s}
 .tab svg{width:25px;height:25px;fill:currentColor}
@@ -404,7 +435,7 @@ html[data-theme="light"] .chip.on{
 .prog i{display:block;height:100%;background:var(--acc);transition:width .35s}
 /* Pila fija sobre la barra de pestañas: cronómetro arriba, descanso debajo.
    Sin puntero salvo en sus hijos, para no tapar la página que hay detrás. */
-.hud{position:fixed;left:0;right:0;bottom:calc(64px + var(--safe-b));z-index:55;
+.hud{position:fixed;left:0;right:0;bottom:calc(76px + var(--safe-b));z-index:55;
   padding:0 16px;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .hud>*{pointer-events:auto}
 .hud:empty{display:none}
@@ -3636,7 +3667,7 @@ html[data-theme="light"] .campo-largo { background: #fff; border-color: var(--li
    fija abajo, encima de las pestanas. */
 .barra-edicion {
   position: fixed; left: 0; right: 0; z-index: 58;
-  bottom: calc(64px + var(--safe-b));
+  bottom: calc(76px + var(--safe-b));
   display: flex; gap: 9px; padding: 10px 16px;
   max-width: 900px; margin: 0 auto;
 }
@@ -5238,7 +5269,10 @@ html[data-theme="light"] .lugar-chip::after {
 /* En un movil estrecho no caben la marca, el sitio y el tema: el boton del tema
    se salia por el canto derecho. La marca es lo unico prescindible de los tres
    —el logo sigue ahi y lleva al inicio igual—, asi que es la que se va. */
-@media (max-width: 400px) {
+/* Sube de 400 a 460 porque ahora delante va el avatar: con la inicial, la
+   marca, el sitio, el idioma y el tema, el boton del tema volvia a salirse
+   por el canto en un movil normal. */
+@media (max-width: 460px) {
   .topbar .wordmark { display: none; }
 }
 .topbar-actions { min-width: 0; }

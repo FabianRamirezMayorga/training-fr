@@ -136,6 +136,24 @@
       render();
     };
 
+    /* La inicial del nombre, la misma que saluda en la portada. Sin nombre
+       todavía, el muñeco: una inicial inventada sería peor que ninguna.
+
+       Se pregunta a `Saludo` y no a `Perfil`: el nombre vive en los ajustes
+       —es lo único que se pide antes de rellenar nada— y buscarlo en los datos
+       del perfil dejaba el muñeco puesto para alguien que sí tiene nombre. */
+    const av = document.getElementById('av-perfil');
+    if (av) {
+      const nom = g.Saludo ? Saludo.nombre()
+        : String(Store.settings().name || '').trim();
+      av.innerHTML = nom ? UI.esc(nom.charAt(0).toUpperCase()) : UI.icon('perfil');
+      av.classList.toggle('sin-nombre', !nom);
+      /* Marcado también en las pantallas que cuelgan de Perfil: desde Ajustes
+         o desde Datos, nada en pantalla decía por dónde habías entrado. */
+      av.classList.toggle('on', DE_PERFIL.indexOf(route.name) !== -1);
+      av.hidden = route.name === 'bienvenida';
+    }
+
     const sinBarra = route.name === 'bienvenida' ||
       (route.name === 'ver' && !Store.settings().gear);
     document.querySelectorAll('.tabbar').forEach(function (t) { t.hidden = sinBarra; });
@@ -152,6 +170,13 @@
         (target === 'ejercicios' && route.name === 'ejercicio'));
     });
   }
+
+  /* Lo que cuelga de Perfil, para que el avatar se quede encendido mientras
+     andas por dentro. Es la misma idea que «Rutinas» quedandose encendida
+     dentro de un entrenamiento. */
+  const DE_PERFIL = ['perfil', 'datos', 'objetivos', 'nutricion', 'alertas',
+    'entrenador', 'musica', 'cuenta', 'ajustes', 'usuarios', 'version', 'ayuda',
+    'suplementos', 'reloj', 'medir', 'lugar', 'conexiones', 'permisos'];
 
   /* ================= dónde entrenas ================= */
 
