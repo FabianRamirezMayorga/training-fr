@@ -18,16 +18,29 @@
   const CFG = 'trainingfr.ia';
   const CACHE = 'trainingfr.ia.cache';
   const BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
-  /* Google retira modelos cada pocos meses y los nuevos usuarios dejan de poder
-     usar los viejos. Esta lista es solo el punto de partida: la app pregunta a
-     Google qué modelos tiene disponibles tu clave y se queda con los que existan. */
-  /* Google retira modelos por cuenta, no para todos a la vez: una clave nueva
-     puede no tener gemini-2.5-flash y sí gemini-3.6-flash, y al revés. Por eso
-     la lista es solo el punto de partida —la app pregunta cuáles admite tu
-     clave— y los alias «latest», que Google mantiene apuntando a lo vigente,
-     van de red al final. */
-  const MODELOS = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-flash-latest',
-    'gemini-2.0-flash'];
+  /* Google retira modelos cada pocos meses, y por cuenta: una clave nueva puede
+     no tener lo que tiene la vieja. Por eso esta lista es solo el punto de
+     partida —la app pregunta a Google qué admite tu clave y se queda con eso— y
+     el alias «latest», que Google mantiene apuntando a lo vigente, va de red al
+     final.
+
+     Repasada el 13/10/2026 contra la página de retiradas de Google:
+
+     - `gemini-2.0-flash` se apagó el 1/6/2026. Estaba aquí de última red, que es
+       el peor sitio para un modelo muerto: la red que se usa cuando todo lo
+       demás ha fallado no puede ser la que tampoco contesta.
+     - `gemini-2.5-flash` sigue sirviéndose, pero Google lo ha cerrado a las
+       cuentas que ya lo usaban. Como punto de partida para una clave nueva no
+       vale, y quien lo tenga lo seguirá viendo igual: la lista de verdad sale de
+       su clave, no de aquí.
+     - De serie, los dos que Google recomienda ahora para empezar: `3.8-flash`
+       —el flash vigente— y `3.5-flash-lite`, el de más cuota gratis.
+
+     Gemini 4 (`gemini-4-argon`) se queda fuera a propósito: va con suscripción
+     de pago, y lo que trae la app de serie tiene que funcionar con una clave
+     gratis. A quien la tenga le saldrá igual en la lista de su clave. */
+  const MODELOS = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite',
+    'gemini-flash-latest'];
   const CACHE_MODELOS = 'trainingfr.ia.modelos';
 
   const INSTRUCCIONES =
@@ -73,8 +86,8 @@
     {
       id: 'groq',
       label: 'Groq',
-      nota: 'Capa gratuita sin tarjeta y muy rápido: corre modelos abiertos (Llama, ' +
-        'Qwen, GPT-OSS). Ojo, los de texto no leen fotos. El límite que te toca lo ves ' +
+      nota: 'Capa gratuita sin tarjeta y muy rápido: corre modelos abiertos (GPT-OSS, ' +
+        'Qwen). Ojo, los de texto no leen fotos. El límite que te toca lo ves ' +
         'en tu consola.',
       donde: 'https://console.groq.com/keys',
       dondeTxt: 'console.groq.com/keys',
@@ -82,7 +95,11 @@
       forma: /^gsk_[\w-]{20,}$/,
       formaTxt: 'Las de Groq empiezan por gsk_.',
       base: 'https://api.groq.com/openai/v1',
-      modelos: ['llama-3.3-70b-versatile'],
+      /* `llama-3.3-70b-versatile` se apagó el 16/8/2026 y devuelve
+         `model_decommissioned`: en Groq los Llama ya no están. El que recomienda
+         Groq en su sitio es este, y no es de los «preview» que avisan que
+         pueden desaparecer de un día para otro. */
+      modelos: ['openai/gpt-oss-120b'],
       imagen: false,
       gratis: true
     },
@@ -114,7 +131,8 @@
       forma: /^sk-ant-[\w-]{20,}$/,
       formaTxt: 'Las de Anthropic empiezan por sk-ant-. Ojo: la de tu suscripción de Claude ' +
         'Pro no sirve, la API se factura aparte.',
-      modelos: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5'],
+      /* Haiku iba por el 4-5, que es de la generación anterior. */
+      modelos: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-5-5'],
       imagen: true
     },
     {
@@ -151,7 +169,10 @@
       forma: /^xai-[\w-]{20,}$/,
       formaTxt: 'Las de xAI empiezan por xai-.',
       base: 'https://api.x.ai/v1',
-      modelos: ['grok-4'],
+      /* `grok-4` aún responde, pero porque xAI redirige los nombres que retiró
+         el 15/5/2026 —y cobrando lo que cuesta el nuevo. Mejor pedir por su
+         nombre lo que de verdad va a contestar. */
+      modelos: ['grok-4.3'],
       imagen: true
     }
   ];

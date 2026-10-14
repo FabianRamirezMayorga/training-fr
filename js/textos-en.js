@@ -1339,8 +1339,8 @@
     /* ---------- las notas de cada proveedor de IA ---------- */
     'Capa gratuita generosa y sin tarjeta, y lee fotos. Es el que trae la app de serie y el que recomiendo si no quieres pagar nada. El límite que te toca lo ves en tu consola de AI Studio.':
       'A generous free tier with no card, and it reads photos. It is what the app ships with and what I recommend if you do not want to pay anything. Your particular limit is in your AI Studio console.',
-    'Capa gratuita sin tarjeta y muy rápido: corre modelos abiertos (Llama, Qwen, GPT-OSS). Ojo, los de texto no leen fotos. El límite que te toca lo ves en tu consola.':
-      'A free tier with no card and very fast: it runs open models (Llama, Qwen, GPT-OSS). Careful, the text ones do not read photos. Your particular limit is in your console.',
+    'Capa gratuita sin tarjeta y muy rápido: corre modelos abiertos (GPT-OSS, Qwen). Ojo, los de texto no leen fotos. El límite que te toca lo ves en tu consola.':
+      'A free tier with no card and very fast: it runs open models (GPT-OSS, Qwen). Careful, the text ones do not read photos. Your particular limit is in your console.',
     'De pago por uso y de lo más barato que hay. No lee fotos: para el cálculo de la comida por foto hace falta otro.':
       'Pay-as-you-go and about the cheapest there is. It does not read photos: working out food from a photo needs another one.',
     'De pago por uso.': 'Pay-as-you-go.',
