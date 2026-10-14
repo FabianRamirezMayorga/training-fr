@@ -89,19 +89,55 @@ a{color:var(--blue)}
 .brand-logo{width:21px;height:27px;object-fit:contain;flex:none}
 .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
 /* La inicial, del tamano de los otros botones de la cabecera. Redonda porque
-   es lo unico de la fila que representa a una persona y no una funcion. */
+   es lo unico de la fila que representa a una persona y no una funcion.
+
+   El monograma de los contactos de iOS: grafito con la luz arriba y la letra
+   en blanco, de peso medio. Antes era una letra gris sobre un disco plano del
+   color de las tarjetas y se notaba a la legua al lado del chip del sitio y
+   del boton del tema, que si tienen relieve.
+
+   Grafito y no verde: al lado del logotipo y del chip del gimnasio ya hay dos
+   verdes, y un tercero no distingue a nadie. El color lo pone la foto. */
+.monograma{
+  background:linear-gradient(158deg,#98a1b4,#646c7e);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.26),
+             inset 0 0 0 .5px rgba(255,255,255,.10),
+             0 2px 7px rgba(0,0,0,.26);
+}
+html[data-theme="light"] .monograma{
+  background:linear-gradient(158deg,#aab2c2,#767e90);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34),
+             0 2px 7px rgba(16,24,40,.16);
+}
+.av-letra{color:#fff;font-weight:500;letter-spacing:.005em;line-height:1}
+
 .av-perfil{width:32px;height:32px;flex:none;border-radius:50%;padding:0;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
-  background:var(--card2);color:var(--txt);border:1px solid var(--line);
-  font-size:.86rem;font-weight:700;letter-spacing:0;
-  transition:box-shadow .15s,border-color .15s,transform .12s}
-.av-perfil svg{width:18px;height:18px;fill:none;stroke:currentColor;
-  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.av-perfil.sin-nombre{color:var(--dim2)}
+  overflow:hidden;position:relative;
+  background:linear-gradient(158deg,#98a1b4,#646c7e);
+  color:#fff;border:0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.26),
+             inset 0 0 0 .5px rgba(255,255,255,.10),
+             0 2px 7px rgba(0,0,0,.26);
+  font-size:.95rem;font-weight:500;letter-spacing:.005em;
+  transition:box-shadow .15s,transform .12s}
+html[data-theme="light"] .av-perfil{
+  background:linear-gradient(158deg,#aab2c2,#767e90);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34),0 2px 7px rgba(16,24,40,.16)}
+.av-perfil .av-letra{font-size:.95rem}
+.av-perfil svg{width:17px;height:17px;fill:none;stroke:#fff;
+  stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+/* La foto tapa el grafito entero: un borde del degradado asomando por un lado
+   es lo que hace que una foto redonda parezca mal recortada. */
+.av-foto{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.av-perfil.con-foto{box-shadow:0 2px 7px rgba(0,0,0,.26)}
 .av-perfil:active{transform:scale(.93)}
 /* Dentro de Perfil se enciende con un aro y no cambiando el fondo: el fondo
-   pintado lo convertia en un boton pulsado, y esto no se pulsa, se visita. */
-.av-perfil.on{border-color:transparent;box-shadow:0 0 0 2px var(--acc)}
+   pintado lo convertia en un boton pulsado, y esto no se pulsa, se visita. El
+   aro va separado del disco, como el de las historias, para que no parezca que
+   a la foto le han puesto un marco. */
+.av-perfil.on{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--acc),
+  inset 0 1px 0 rgba(255,255,255,.26)}
 .view{max-width:900px;margin:0 auto;padding:10px 16px 24px;animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}}
 
@@ -3493,22 +3529,45 @@ html[data-theme="light"] .sem-caja.es-ahora {
 .perfil-cab { cursor: pointer; }
 .perfil-cab:active { transform: scale(.995); }
 
+/* El mismo monograma que arriba, en grande. Antes este era verde y el de la
+   cabecera gris: dos caras distintas para la misma persona en dos sitios que
+   se ven casi a la vez. */
 .pc-avatar {
-  flex: none; width: 46px; height: 46px; border-radius: 50%;
+  flex: none; width: 46px; height: 46px; border-radius: 50%; padding: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.25rem; font-weight: 800; letter-spacing: -.02em;
-  color: var(--on-acc);
-  background: linear-gradient(150deg,
-              color-mix(in srgb, var(--acc) 88%, #fff), var(--acc));
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent),
-              0 4px 12px color-mix(in srgb, var(--acc) 30%, transparent);
+  font-size: 1.3rem; font-weight: 500; letter-spacing: .005em;
+  color: #fff; border: 0; cursor: pointer;
+  background: linear-gradient(158deg, #98a1b4, #646c7e);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.26),
+              inset 0 0 0 .5px rgba(255,255,255,.10),
+              0 3px 10px rgba(0,0,0,.26);
 }
+html[data-theme="light"] .pc-avatar {
+  background: linear-gradient(158deg, #aab2c2, #767e90);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.34), 0 3px 10px rgba(16,24,40,.16);
+}
+.pc-avatar .av-letra { font-size: 1.3rem; }
+.pc-avatar .av-foto { border-radius: 50%; }
+.pc-avatar:active { transform: scale(.95); }
+/* Con foto, el disco entero es la foto: el degradado detras solo asomaria por
+   el canto. */
+.pc-avatar.con-foto { background: none; box-shadow: 0 3px 10px rgba(0,0,0,.26); }
 .pc-avatar { position: relative; }
 .pc-avatar > svg { width: 22px; height: 22px; fill: none; stroke: currentColor;
   stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-/* El lapiz, colgado del avatar: dice que la tarjeta se toca para editar. Un
-   disco propio con el fondo de la tarjeta detras, para que se recorte del
-   verde y no se confunda con el. */
+/* La camara, colgada del avatar: dice que la foto se cambia ahi. Disco propio
+   con el fondo de la tarjeta detras, para que se recorte del avatar y no se
+   confunda con el. */
+.pc-camara {
+  position: absolute; right: -3px; bottom: -3px;
+  width: 19px; height: 19px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card2); color: var(--txt);
+  box-shadow: 0 0 0 2px var(--card);
+}
+.pc-camara svg { width: 11px; height: 11px; fill: none; stroke: currentColor;
+  stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
 .pc-lapiz {
   position: absolute; right: -3px; bottom: -3px;
   width: 19px; height: 19px; border-radius: 50%;

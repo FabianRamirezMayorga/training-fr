@@ -144,10 +144,12 @@
        del perfil dejaba el muñeco puesto para alguien que sí tiene nombre. */
     const av = document.getElementById('av-perfil');
     if (av) {
+      const foto = UI.fotoPerfil();
       const nom = g.Saludo ? Saludo.nombre()
         : String(Store.settings().name || '').trim();
-      av.innerHTML = nom ? UI.esc(nom.charAt(0).toUpperCase()) : UI.icon('perfil');
-      av.classList.toggle('sin-nombre', !nom);
+      av.innerHTML = UI.avatarHTML();
+      av.classList.toggle('con-foto', !!foto);
+      av.classList.toggle('sin-nombre', !foto && !nom);
       /* Marcado también en las pantallas que cuelgan de Perfil: desde Ajustes
          o desde Datos, nada en pantalla decía por dónde habías entrado. */
       av.classList.toggle('on', DE_PERFIL.indexOf(route.name) !== -1);

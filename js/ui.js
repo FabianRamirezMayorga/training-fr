@@ -985,8 +985,90 @@
     poner();
   }
 
+  /* ---------- la foto de perfil ----------
+     Recortada en cuadrado desde el centro y reducida a 192, que es el doble
+     del sitio más grande donde se enseña: así se ve nítida en una pantalla
+     retina y no ocupa nada. Encogerla a lo ancho sin recortar dejaba caras
+     aplastadas dentro de un círculo, que es lo que pasa cuando una foto
+     apaisada se mete en un hueco cuadrado.
+
+     Va a `localStorage` como el resto: son unos quince kilobytes y no sale de
+     aquí. Una foto de la galería sin tocar son cuatro megas y llenaría el
+     almacén donde viven las rutinas. */
+  function fotoCuadrada(file, lado) {
+    return new Promise(function (ok, mal) {
+      if (!file || !/^image\//.test(file.type || '')) {
+        mal(new Error(T('Eso no es una imagen.')));
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = function () {
+        try {
+          const corte = Math.min(img.width, img.height);
+          const x = (img.width - corte) / 2;
+          const y = (img.height - corte) / 2;
+          const lienzo = document.createElement('canvas');
+          lienzo.width = lado; lienzo.height = lado;
+          const ctx = lienzo.getContext('2d');
+          ctx.drawImage(img, x, y, corte, corte, 0, 0, lado, lado);
+          URL.revokeObjectURL(url);
+          ok(lienzo.toDataURL('image/jpeg', 0.82));
+        } catch (e) {
+          URL.revokeObjectURL(url);
+          mal(new Error(T('No he podido leer esa foto.')));
+        }
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        mal(new Error(T('No he podido leer esa foto.')));
+      };
+      img.src = url;
+    });
+  }
+
+  /* Abre la galería y devuelve la foto ya recortada. El `input` se crea y se
+     tira: dejarlo en el documento se quedaba con el archivo anterior y al
+     elegir dos veces la misma foto no saltaba el `change`. */
+  function pedirFoto(lado) {
+    return new Promise(function (ok, mal) {
+      const inp = document.createElement('input');
+      inp.type = 'file';
+      inp.accept = 'image/*';
+      inp.onchange = function () {
+        const f = inp.files && inp.files[0];
+        if (!f) { mal(new Error(T('No has elegido ninguna foto.'))); return; }
+        fotoCuadrada(f, lado || 192).then(ok, mal);
+      };
+      inp.click();
+    });
+  }
+
+  function fotoPerfil() {
+    try { return String(Store.settings().foto || ''); } catch (e) { return ''; }
+  }
+
+  /* El avatar de quien usa la app, en un solo sitio. Con foto es la foto; sin
+     ella, la inicial sobre un grafito con luz arriba —el monograma de los
+     contactos de iOS— y no una letra gris sobre un disco plano, que es lo que
+     había y se notaba al lado de los demás botones de la cabecera.
+
+     Grafito y no verde a propósito: al lado del logotipo y del chip del sitio
+     ya hay dos verdes, y un tercero no distingue a nadie. El color lo pone la
+     foto cuando la hay. */
+  function avatarHTML() {
+    const foto = fotoPerfil();
+    if (foto) return '<img class="av-foto" src="' + esc(foto) + '" alt="">';
+    const nom = g.Saludo ? Saludo.nombre()
+      : String((Store.settings() || {}).name || '').trim();
+    return nom ? '<span class="av-letra">' + esc(nom.charAt(0).toUpperCase()) + '</span>'
+      : icon('perfil');
+  }
+
   g.UI = {
     esc: esc, html: html, raw: raw, icon: icon,
+    fotoCuadrada: fotoCuadrada, pedirFoto: pedirFoto,
+    fotoPerfil: fotoPerfil, avatarHTML: avatarHTML,
     demoHTML: demoHTML, mountDemos: mountDemos, clearDemos: clearDemos,
     deslizables: deslizables, cerrarDeslizadas: cerrarDeslizadas,
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,

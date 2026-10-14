@@ -239,24 +239,64 @@
       para: 'Pasos y zancadas, y contar repeticiones con el móvil encima.' },
     { id: 'camara', ico: 'camara', titulo: 'Cámara',
       para: 'Calcular un plato desde la foto.' },
+    { id: 'fotos', ico: 'compartir', titulo: 'Galería',
+      para: 'Elegir una foto del carrete, para tu perfil o para un plato.' },
+    { id: 'sonido', ico: 'altavoz', titulo: 'Sonido',
+      para: 'El pitido del descanso y de los avisos.' },
     { id: 'bluetooth', ico: 'banda', titulo: 'Bluetooth',
       para: 'Leer el pulso de una banda, una pulsera o un reloj.' },
     { id: 'guardado', ico: 'llave', titulo: 'Guardado permanente',
       para: 'Que el navegador no borre tus rutinas si se queda sin espacio.' }
   ];
 
+  /* Lo que contestó el usuario la última vez que se lo pedimos nosotros.
+
+     Hace falta porque *Safari no tiene la API de permisos para la ubicación ni
+     para la cámara*: preguntarle cómo están no devuelve un estado, devuelve un
+     error. Resultado en el iPhone: dabas permiso, salía el cartel del sistema,
+     lo aceptabas, y la fila seguía diciendo «Permitir» como si no hubiera
+     pasado nada. Pareció un botón roto y era una pantalla ciega.
+
+     Cuando el navegador sabe responder, manda el navegador —es la verdad de
+     ahora, y recoge también lo que el usuario cambie por su cuenta en los
+     ajustes del sitio—. Cuando no sabe, vale esto, que es lo único que nos
+     consta. */
+  function recordado(id) {
+    try { return (Store.settings().permisos || {})[id] || ''; }
+    catch (e) { return ''; }
+  }
+
+  function recordar(id, valor) {
+    const t = Object.assign({}, Store.settings().permisos || {});
+    t[id] = valor;
+    Store.setSetting('permisos', t);
+  }
+
   /* Lo que sabemos de cada uno. `preguntar` significa que todavía se puede
      pedir; `no` que el usuario dijo que no y hay que ir a los ajustes. */
   let estados = {};
 
   function mirarPermisos() {
+    /* Algunos navegadores no rechazan la promesa: lanzan de golpe al no
+       conocer el nombre. Sin el try, la pantalla entera se quedaba sin
+       estados. */
     const pide = function (nombre) {
       if (!g.navigator || !navigator.permissions || !navigator.permissions.query) {
         return Promise.resolve('');
       }
-      return navigator.permissions.query({ name: nombre })
-        .then(function (r) { return r.state; })
-        .catch(function () { return ''; });
+      try {
+        return navigator.permissions.query({ name: nombre })
+          .then(function (r) { return r.state; })
+          .catch(function () { return ''; });
+      } catch (e) { return Promise.resolve(''); }
+    };
+
+    /* El navegador manda cuando sabe; si no sabe, lo que nos conste. */
+    const juntar = function (vivo, id) {
+      if (vivo === 'granted') return 'si';
+      if (vivo === 'denied') return 'no';
+      if (vivo === 'prompt') return 'preguntar';
+      return recordado(id) || 'preguntar';
     };
 
     const fin = {};
@@ -272,7 +312,19 @@
        que es lo que se guarda al pedirlo desde aquí. */
     fin.movimiento = !(g.DeviceMotionEvent) ? 'imposible'
       : typeof DeviceMotionEvent.requestPermission !== 'function' ? 'si'
-      : (Store.settings().permisoMovimiento || 'preguntar');
+      : (recordado('movimiento') || 'preguntar');
+
+    /* La galería no es un permiso del navegador: el carrete lo abre el sistema
+       cuando pulsas «elegir foto», y pregunta ahí. No hay nada que dar por
+       adelantado, y poner un botón de «permitir» que no permite nada sería
+       exactamente el botón que no hace nada. */
+    fin.fotos = 'alusar';
+
+    /* El sonido tampoco se concede: se prueba. Depende del interruptor de la
+       app, del de silencio del móvil —que no hay forma de consultar— y de que
+       el navegador haya «desbloqueado» el audio con un toque. Con tres cosas
+       invisibles, lo honrado es un botón que suena. */
+    fin.sonido = Store.settings().sound === false ? 'apagado' : 'probar';
 
     return Promise.all([
       pide('geolocation'), pide('camera'),
@@ -281,9 +333,9 @@
         : Promise.resolve(null)
     ]).then(function (r) {
       fin.ubicacion = !(g.navigator && navigator.geolocation) ? 'imposible'
-        : r[0] === 'granted' ? 'si' : r[0] === 'denied' ? 'no' : 'preguntar';
+        : juntar(r[0], 'ubicacion');
       fin.camara = !(g.navigator && navigator.mediaDevices) ? 'imposible'
-        : r[1] === 'granted' ? 'si' : r[1] === 'denied' ? 'no' : 'preguntar';
+        : juntar(r[1], 'camara');
       fin.guardado = r[2] === null ? 'imposible' : r[2] ? 'si' : 'preguntar';
       estados = fin;
       return fin;
@@ -299,6 +351,15 @@
     }
     if (est === 'imposible') {
       return '<span class="perm-estado">' + esc(T('Aquí no')) + '</span>';
+    }
+    if (est === 'alusar') {
+      return '<span class="perm-estado">' + esc(T('Al usarlo')) + '</span>';
+    }
+    if (est === 'apagado') {
+      return '<button class="btn sm" data-perm="' + id + '">' + esc(T('Encender')) + '</button>';
+    }
+    if (est === 'probar') {
+      return '<button class="btn sm" data-perm="' + id + '">' + esc(T('Probar')) + '</button>';
     }
     return '<button class="btn sm" data-perm="' + id + '">' + esc(T('Permitir')) + '</button>';
   }
@@ -385,30 +446,64 @@
     }
     if (id === 'ubicacion') {
       /* No hay forma de pedir la ubicación sin pedir una posición: el cartel
-         del navegador sale con la primera consulta, no con una llamada aparte. */
-      navigator.geolocation.getCurrentPosition(luego, luego, { timeout: 15000 });
+         del navegador sale con la primera consulta, no con una llamada aparte.
+         Y el resultado se apunta, que en Safari es lo único que lo sabrá. */
+      navigator.geolocation.getCurrentPosition(
+        function () { recordar('ubicacion', 'si'); UI.toast(T('Ubicación concedida.')); luego(); },
+        function (err) {
+          recordar('ubicacion', err && err.code === 1 ? 'no' : '');
+          if (err && err.code === 1) UI.toast(T('No la has concedido.'));
+          luego();
+        },
+        { timeout: 15000, enableHighAccuracy: false });
       return;
     }
     if (id === 'movimiento') {
       Medir.pidePermisoMovimiento().then(function (ok) {
-        Store.setSetting('permisoMovimiento', ok ? 'si' : 'no');
+        recordar('movimiento', ok ? 'si' : 'no');
+        UI.toast(ok ? T('Movimiento concedido.') : T('No la has concedido.'));
         luego();
       });
       return;
     }
+    if (id === 'sonido') {
+      /* Apagado en la app, pitar no es una prueba: no sonaría y parecería que
+         falla el móvil. Ahí lo que hace falta es el interruptor, que vive en
+         Ajustes. */
+      if (Store.settings().sound === false) { go('ajustes'); return; }
+      /* Y encendido, suena: con eso se responde de una vez a las tres cosas que
+         no se pueden consultar —el interruptor de la app, el de silencio del
+         móvil y si el navegador ha soltado ya el audio—. */
+      try { UI.beep(); } catch (e) { /* nada */ }
+      UI.toast(T('Si no has oído nada, mira el interruptor de silencio del móvil.'));
+      return;
+    }
     if (id === 'camara') {
       navigator.mediaDevices.getUserMedia({ video: true }).then(function (flujo) {
+        recordar('camara', 'si');
+        UI.toast(T('Cámara concedida.'));
         /* Apagar la cámara en cuanto la concede: aquí no se graba nada, solo se
            preguntaba. Dejarla viva encendería la luz del móvil en una pantalla
            de ajustes, que es justo lo que hace desconfiar de una app. */
         flujo.getTracks().forEach(function (t) { t.stop(); });
         luego();
-      }).catch(luego);
+      }).catch(function (e) {
+        recordar('camara', e && e.name === 'NotAllowedError' ? 'no' : '');
+        UI.toast(T('No la has concedido.'));
+        luego();
+      });
       return;
     }
     if (id === 'bluetooth') { go('reloj'); return; }
+    if (id === 'fotos') { return; }
     if (id === 'guardado') {
-      navigator.storage.persist().then(luego).catch(luego);
+      navigator.storage.persist().then(function (ok) {
+        /* Safari lo decide él y casi siempre dice que no, así que se cuenta lo
+           que ha pasado en vez de dejar el botón igual que estaba. */
+        UI.toast(ok ? T('Guardado permanente concedido.')
+          : T('El navegador no lo ha concedido. Lo da solo cuando usas la app a menudo.'));
+        luego();
+      }).catch(luego);
     }
   }
 })(window);

@@ -1287,6 +1287,24 @@
     'Y si una fila dice *Aquí no*, no es que lo hayas bloqueado: es que ese navegador no lo tiene. El Bluetooth en iPhone es el caso de siempre.':
       'And if a row says *Not here*, it is not that you blocked it: that browser does not have it. Bluetooth on iPhone is the usual case.',
 
+
+    /* ---------- Poner tu foto ---------- */
+    'Poner tu foto': 'Setting your photo',
+    'Sale arriba a la izquierda en todas las pantallas y en tu tarjeta de Perfil.':
+      'It shows top left on every screen and on your Profile card.',
+    'Abre Perfil y toca tu círculo.': 'Open Profile and tap your circle.',
+    'El de la tarjeta de arriba, el que lleva la cámara pegada en la esquina. El resto de la tarjeta lleva a tus datos; el círculo, a la foto.':
+      'The one on the card at the top, with the camera stuck in its corner. The rest of the card takes you to your data; the circle takes you to the photo.',
+    'Abrir Perfil': 'Open Profile',
+    'Elige una del carrete.': 'Pick one from your camera roll.',
+    'Se recorta en cuadrado desde el centro y se reduce, así que da igual si es apaisada: no te va a salir la cara aplastada.':
+      'It is cropped square from the middle and scaled down, so it does not matter if it is landscape: your face will not come out squashed.',
+    'Para cambiarla o quitarla, vuelve a tocarla.': 'To change it or remove it, tap it again.',
+    'Con una foto puesta, el círculo pregunta antes: elegir otra o quitarla.':
+      'With a photo set, the circle asks first: pick another or remove it.',
+    'Sin foto no se queda vacío: sale la inicial de tu nombre sobre un grafito. La foto se guarda en este dispositivo como el resto, pesa unos quince kilobytes y no sale de aquí salvo que tengas la sincronización puesta.':
+      'With no photo it is not left empty: your name initial shows on graphite. The photo is saved on this device like everything else, it weighs about fifteen kilobytes and it does not leave here unless you have sync switched on.',
+
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

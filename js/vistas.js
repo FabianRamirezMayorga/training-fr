@@ -79,10 +79,17 @@
     return html`
       <div class="card tarjeta-premium perfil-cab" data-a="datos" role="button" tabindex="0">
         <div class="row" style="gap:12px;align-items:center">
-          <!-- El lápiz dice que esto se edita. Un icono de cámara sería mentir:
-               aquí no hay foto que cambiar, la inicial sale del nombre. -->
-          <span class="pc-avatar">${raw(inicial || icon('perfil'))}
-            <i class="pc-lapiz">${raw(icon('edit'))}</i></span>
+          <!-- Ahora sí hay foto que cambiar, así que la cámara deja de mentir y
+               el lápiz se va: un lápiz sobre una cara dice «edita tus datos», y lo
+               que hace este botón es cambiar la foto, que no es lo mismo.
+
+               Y es su propio botón dentro de la tarjeta: la tarjeta entera lleva
+               a tus datos, pero el avatar no —tocar una cara para acabar en un
+               formulario de altura y peso es justo lo que no espera nadie. -->
+          <button class="pc-avatar${raw(UI.fotoPerfil() ? ' con-foto' : '')}"
+                  data-a="foto" aria-label="${T('Cambiar la foto')}"
+                  data-t-aria="Cambiar la foto">${raw(UI.avatarHTML())}
+            <i class="pc-camara">${raw(icon('camara'))}</i></button>
           <span class="grow" style="min-width:0">
             <span class="pc-nombre">${nombre || T('Sin nombre')}</span>
             <!-- El correo, aquí y no tres listas más abajo: quién eres es una
@@ -284,7 +291,48 @@
       <p class="tiny pie-marca">Training FR</p>`;
   };
 
+  /* Elegir la foto. Con una puesta se pregunta antes de abrir la galería,
+     porque el otro camino —quitarla— no tiene dónde vivir si no es aquí:
+     escondido en un menú de los datos no lo encuentra nadie, y un gesto
+     mantenido no se descubre solo. */
+  function elegirFoto() {
+    UI.pedirFoto(192).then(function (dataUrl) {
+      Store.setSetting('foto', dataUrl);
+      render();
+      UI.toast(T('Foto puesta.'));
+    }).catch(function (e) {
+      if (e && e.message) UI.toast(e.message);
+    });
+  }
+
+  function tocarFoto() {
+    if (!UI.fotoPerfil()) { elegirFoto(); return; }
+    UI.modal(html`
+      <h2 class="conf-tit">${T('Tu foto')}</h2>
+      <p class="muted conf-txt">${T('Se queda en este dispositivo, como el resto de tus datos.')}</p>
+      <div class="stack" style="margin-top:18px">
+        <button class="btn primary block" data-x="otra">${raw(icon('camara'))} ${T('Elegir otra')}</button>
+        <button class="btn block vidrio" data-x="quitar">${T('Quitar la foto')}</button>
+      </div>`,
+      function (el) {
+        el.querySelector('[data-x=otra]').onclick = function () {
+          UI.closeModal();
+          elegirFoto();
+        };
+        el.querySelector('[data-x=quitar]').onclick = function () {
+          UI.closeModal();
+          Store.setSetting('foto', '');
+          render();
+          UI.toast(T('Foto quitada.'));
+        };
+      });
+  }
+
   V.perfil.mount = function (root) {
+    /* Con `bindAll`, que corta la propagación: la tarjeta entera lleva a los
+       datos y sin eso cambiar la foto abría el formulario detrás. */
+    bindAll(root, '[data-a=foto]', function () { tocarFoto(); });
+
     const ir = { datos: 'datos', objetivos: 'objetivos', nutricion: 'nutricion',
       alertas: 'alertas', entrenador: 'entrenador', musica: 'musica',
       cuenta: 'cuenta', ajustes: 'ajustes', usuarios: 'usuarios', version: 'version',

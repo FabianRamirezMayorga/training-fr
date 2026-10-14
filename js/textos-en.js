@@ -4519,6 +4519,34 @@
     'Ninguno de estos datos sale de tu dispositivo por darlo aquí: la ubicación se usa para la cuenta de kilómetros y se queda contigo, igual que el resto.':
       'None of this data leaves your device by giving it here: your location is used for the kilometre count and stays with you, like everything else.',
 
+    /* ---------- La foto de perfil ---------- */
+    'Cambiar la foto': 'Change the photo',
+    'Tu foto': 'Your photo',
+    'Se queda en este dispositivo, como el resto de tus datos.':
+      'It stays on this device, like the rest of your data.',
+    'Elegir otra': 'Pick another',
+    'Quitar la foto': 'Remove the photo',
+    'Foto puesta.': 'Photo set.',
+    'Foto quitada.': 'Photo removed.',
+
+    /* ---------- Permisos: galería, sonido y lo que contesta cada uno ------- */
+    'Galería': 'Photos',
+    'Elegir una foto del carrete, para tu perfil o para un plato.':
+      'Picking a photo from your camera roll, for your profile or for a plate.',
+    'Sonido': 'Sound',
+    'El pitido del descanso y de los avisos.': 'The rest and reminder beep.',
+    'Al usarlo': 'When you use it',
+    'Encender': 'Turn on',
+    'Ubicación concedida.': 'Location granted.',
+    'Cámara concedida.': 'Camera granted.',
+    'Movimiento concedido.': 'Motion granted.',
+    'No la has concedido.': 'You did not grant it.',
+    'Guardado permanente concedido.': 'Permanent storage granted.',
+    'El navegador no lo ha concedido. Lo da solo cuando usas la app a menudo.':
+      'The browser did not grant it. It only does once you use the app often.',
+    'Si no has oído nada, mira el interruptor de silencio del móvil.':
+      'If you heard nothing, check the silent switch on your phone.',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };
