@@ -8863,3 +8863,14 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
   .lc-ico{width:34px;height:34px}
   .lc-ico svg{width:17px;height:17px}
 }
+
+
+/* La franja de «toca renovar». Discreta mientras solo avisa y con el acento
+   cuando ya toca: es la diferencia entre un recordatorio y una tarea. */
+.franja-ciclo{display:flex;align-items:center;gap:11px;padding:11px 13px}
+.franja-ciclo .row-icon{flex:none;color:var(--dim)}
+.franja-ciclo .btn.sm{flex:none;padding:.4em .8em;font-size:.82rem}
+.franja-ciclo .btn.sm:not(.primary){background:none;color:var(--dim2);padding:.4em}
+.franja-ciclo .btn.sm:not(.primary) svg{width:13px;height:13px}
+.franja-ciclo.toca{border:1px solid color-mix(in srgb,var(--acc) 38%,transparent)}
+.franja-ciclo.toca .row-icon{color:var(--acc)}

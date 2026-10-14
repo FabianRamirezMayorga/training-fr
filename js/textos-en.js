@@ -4565,6 +4565,19 @@
     'Si no lo has oído, sube el volumen: el interruptor de silencio ya no lo tapa.':
       'If you did not hear it, turn the volume up: the silent switch no longer covers it.',
 
+    /* ---------- Cuando toca renovar ---------- */
+    'Toca renovar tu menú': 'Time to refresh your menu',
+    'Toca cambiar tus rutinas': 'Time to change your routines',
+    'Tu menú se renueva mañana': 'Your menu refreshes tomorrow',
+    'Tu menú se renueva en {n} días': 'Your menu refreshes in {n} days',
+    'Tus rutinas se renuevan mañana': 'Your routines change tomorrow',
+    'Tus rutinas se renuevan en {n} días': 'Your routines change in {n} days',
+    '{n} días. Comer lo mismo acaba en comer peor.':
+      '{n} days old. Eating the same ends in eating worse.',
+    '{n} días. El cuerpo ya se ha adaptado.':
+      '{n} days old. Your body has already adapted.',
+    'Renovar': 'Refresh',
+
     /* ---------- El correo de ejemplo ---------- */
     'tucorreo@ejemplo.com': 'youremail@example.com'
   };

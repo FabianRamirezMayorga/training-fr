@@ -109,6 +109,17 @@
       ],
       ver: ['c-reloj', 'p-applewatch', 'g-medir'] },
 
+    { id: 'g-ciclos', titulo: 'Por qué el plan se renueva solo',
+      resumen: 'Quince días el menú, cuatro semanas las rutinas, y por qué no es el mismo plazo',
+      cuerpo: [
+        'Ni un menú ni un plan de entrenamiento caducan como la leche, pero los dos dejan de servir. La app lleva la cuenta y te avisa *tres días antes*, porque un plan que cambia de golpe te pilla con la compra hecha.',
+        '*El menú, cada quince días.* Es lo que aguanta la variedad antes de que comer se convierta en un trámite, y es corto porque cambiarlo no cuesta nada: mañana comes otra cosa y ya.',
+        '*Las rutinas, cada cuatro semanas.* Cambiarlas sí cuesta: hay que volver a aprender con qué peso vas en cada ejercicio, y tu progreso se mide comparándote contigo mismo en el mismo movimiento. Cambiarlas cada dos semanas sería borrar la referencia justo cuando empieza a valer. Cuatro semanas es lo que tarda el cuerpo en adaptarse a un estímulo y dejar de responder igual.',
+        'El aviso sale en la portada y trae dos botones: renovar, que te lleva a hacerlo, y dejarlo para mañana. Lo que no se puede es apagarlo para siempre, porque entonces el plazo no significaría nada.',
+        'Nada se cambia a tus espaldas: la app avisa y propone, pero el plan nuevo lo guardas tú. Tus rutinas viejas no se borran solas.'
+      ],
+      ver: ['g-plan', 'g-comida'] },
+
     { id: 'g-medir', titulo: 'Qué hace la app con el GPS',
       resumen: 'De dónde salen los kilómetros y por qué tira la mitad de los puntos',
       cuerpo: [

@@ -183,6 +183,43 @@
     return fuera;
   }
 
+  /* Lo que de verdad come, por veces repetidas.
+
+     Es el dato que le faltaba al menu. Hasta ahora se le proponia comida
+     correcta pero ajena: pensada desde sus calorias y sus alergias, sin saber
+     que el desayuna avena cinco dias de cada siete. Y un plan de comidas que no
+     se parece a lo que uno come se abandona la primera semana —no por malo,
+     por extraño—, con el agravante de que la lista de la compra se llena de
+     cosas que luego se pudren en la nevera.
+
+     Se agrupa por el nombre del plato normalizado, porque «Pollo a la plancha»
+     y «pollo plancha» son lo mismo escrito dos dias distintos. Solo cuenta lo
+     que se repite: una cosa comida una vez no es una costumbre. */
+  function frecuentes(dias, cuantos) {
+    const desde = Date.now() - (dias || 30) * 86400000;
+    const cuenta = {};
+    todas().forEach(function (c) {
+      if (c.t < desde) return;
+      const bruto = String(c.plato || '').trim();
+      if (bruto.length < 3) return;
+      const clave = g.I18N && I18N.norm ? I18N.norm(bruto) : bruto.toLowerCase();
+      if (!cuenta[clave]) cuenta[clave] = { nombre: bruto, veces: 0 };
+      cuenta[clave].veces++;
+    });
+    return Object.keys(cuenta)
+      .map(function (k) { return cuenta[k]; })
+      .filter(function (x) { return x.veces >= 2; })
+      .sort(function (a, b) { return b.veces - a.veces; })
+      .slice(0, cuantos || 12);
+  }
+
+  /* En una linea, para meterlo en lo que se le cuenta a la IA. */
+  function resumenFrecuentes(dias) {
+    return frecuentes(dias).map(function (x) {
+      return x.nombre + ' (x' + x.veces + ')';
+    }).join(', ');
+  }
+
   function vaciar() { localStorage.removeItem(CLAVE); }
 
   /* ---------- la foto ----------
@@ -234,6 +271,7 @@
   }
 
   g.Comidas = {
+    frecuentes: frecuentes, resumenFrecuentes: resumenFrecuentes,
     hoy: hoy, todas: todas, del: del, anotar: anotar, borrar: borrar,
     ultimos: ultimos, porDias: porDias, vaciar: vaciar, claveDia: claveDia,
     marcada: marcada, seLleva: seLleva, actualizar: actualizar,

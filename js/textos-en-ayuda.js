@@ -1312,6 +1312,22 @@
     'Con la app abierta desde su icono: *Ajustes del iPhone › Aplicaciones › Training FR*. Desde Safari: la *Aa* de la barra de direcciones › *Configuración para este sitio web*. El candado que se suele buscar no existe cuando la app está instalada en la pantalla de inicio.':
       'With the app opened from its icon: *iPhone Settings › Apps › Training FR*. From Safari: the *Aa* in the address bar › *Settings for this website*. The padlock people look for does not exist once the app is installed on the home screen.',
 
+
+    /* ---------- Por que el plan se renueva solo ---------- */
+    'Por qué el plan se renueva solo': 'Why your plan refreshes itself',
+    'Quince días el menú, cuatro semanas las rutinas, y por qué no es el mismo plazo':
+      'Fifteen days for the menu, four weeks for the routines, and why they are not the same',
+    'Ni un menú ni un plan de entrenamiento caducan como la leche, pero los dos dejan de servir. La app lleva la cuenta y te avisa *tres días antes*, porque un plan que cambia de golpe te pilla con la compra hecha.':
+      'Neither a menu nor a training plan goes off like milk, but both stop working. The app keeps count and warns you *three days ahead*, because a plan that changes all at once catches you with the shopping already done.',
+    '*El menú, cada quince días.* Es lo que aguanta la variedad antes de que comer se convierta en un trámite, y es corto porque cambiarlo no cuesta nada: mañana comes otra cosa y ya.':
+      '*The menu, every fifteen days.* That is how long the variety lasts before eating turns into a chore, and it is short because changing it costs nothing: tomorrow you eat something else and that is that.',
+    '*Las rutinas, cada cuatro semanas.* Cambiarlas sí cuesta: hay que volver a aprender con qué peso vas en cada ejercicio, y tu progreso se mide comparándote contigo mismo en el mismo movimiento. Cambiarlas cada dos semanas sería borrar la referencia justo cuando empieza a valer. Cuatro semanas es lo que tarda el cuerpo en adaptarse a un estímulo y dejar de responder igual.':
+      '*The routines, every four weeks.* Changing those does cost: you have to learn again what weight you are on for each exercise, and your progress is measured by comparing you with yourself on the same movement. Changing them every two weeks would wipe the reference just as it starts to be worth something. Four weeks is how long the body takes to adapt to a stimulus and stop responding the same.',
+    'El aviso sale en la portada y trae dos botones: renovar, que te lleva a hacerlo, y dejarlo para mañana. Lo que no se puede es apagarlo para siempre, porque entonces el plazo no significaría nada.':
+      'The notice shows on the home screen with two buttons: refresh, which takes you there, and leave it for tomorrow. What you cannot do is switch it off for good, because then the deadline would mean nothing.',
+    'Nada se cambia a tus espaldas: la app avisa y propone, pero el plan nuevo lo guardas tú. Tus rutinas viejas no se borran solas.':
+      'Nothing is changed behind your back: the app warns and proposes, but you are the one who saves the new plan. Your old routines are not deleted on their own.',
+
   };
 
   /* Se fusiona con el general. Si alguna frase estuviera en los dos —no debería,

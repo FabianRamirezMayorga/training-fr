@@ -1573,6 +1573,10 @@
       ':' + (Store.settings().medicacionDicho || '') +
       ':' + (g.Perfil && Perfil.franjas ? Perfil.franjas().map(function (f) {
         return f.desde; }).join(',') : '') +
+      /* Lo que come habitualmente entra en la clave: si no, apuntar una
+         semana de comidas y volver a pedir el menu devolvia el de antes, el
+         que todavia no sabia que desayunas avena. */
+      ':' + (g.Comidas ? Comidas.resumenFrecuentes(30) : '') +
       ':' + (opciones.variante || 0);
     const guardado = leerCache(clave, 72);
     if (guardado && !opciones.forzar) return Promise.resolve(guardado);
@@ -1592,10 +1596,26 @@
        es una preferencia suya, es una circunstancia de esta semana. */
     const extra = String(opciones.extra || '').trim();
 
+    /* Lo que de verdad come, sacado de lo que lleva apuntado. Es lo que
+       separa un menú correcto de un menú suyo: hasta ahora se le proponia
+       comida bien calculada pero ajena, y un plan que no se parece a lo que uno
+       come se abandona la primera semana. No por malo: por extraño. */
+    const suyo = g.Comidas ? Comidas.resumenFrecuentes(30) : '';
+
     const prompt = contexto({ progreso: true, comida: true }) + '\n\n' +
       (extra ? 'PARA ESTE MENÚ EN CONCRETO PIDE: ' + extra + '. Manda sobre lo ' +
         'demás salvo sus alergias y sus condiciones de salud.' +
         String.fromCharCode(10) : '') +
+      (suyo ? 'LO QUE COME NORMALMENTE, de lo que lleva apuntado el último mes y ' +
+        'ordenado por veces repetidas: ' + suyo + '.' + String.fromCharCode(10) +
+        '- MONTA EL MENÚ SOBRE ESTO. Lo que ya come es lo que sabe cocinar, lo que ' +
+        'compra y lo que le gusta, y cuesta cero empezar mañana. Un menú de ' +
+        'alimentos que no ha probado nunca se abandona la primera semana y de paso ' +
+        'llena la nevera de cosas que se pudren.' + String.fromCharCode(10) +
+        '- Pero no lo copies: añade dos o tres cosas nuevas por semana, y corrige lo ' +
+        'que esté desequilibrado. Si come bien pero siempre lo mismo, lo que falta es ' +
+        'variedad; si lo que repite no le llega a la proteína o le sobra de grasa, ' +
+        'dilo y cambia esa pieza, no el menú entero.' + String.fromCharCode(10) : '') +
       /* En gramos y en g/kg. Los gramos son lo que hay que comer; los g/kg son
          con lo que un dietista comprueba de un vistazo si la cifra tiene
          sentido para esa persona, y sin ellos el modelo no tiene forma de

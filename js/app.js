@@ -193,6 +193,44 @@
     'entrenador', 'musica', 'cuenta', 'ajustes', 'usuarios', 'version', 'ayuda',
     'suplementos', 'reloj', 'medir', 'lugar', 'conexiones', 'permisos'];
 
+  /* El aviso de que toca renovar. Sale solo unos días de cada ciclo —tres
+     antes y hasta que lo cambias— y no en todas las pantallas: en la portada,
+     que es donde uno decide qué hace hoy.
+
+     Con botón para hacerlo y botón para dejarlo. Lo segundo importa tanto como
+     lo primero: un aviso que no se puede quitar deja de leerse a la tercera
+     vez, y este no se silencia para siempre —vuelve mañana— porque si se
+     pudiera apagar del todo el plazo no significaría nada. */
+  function franjaCiclo() {
+    if (!g.Ciclos) return '';
+    const pend = Ciclos.pendientes();
+    if (!pend.length) return '';
+    const x = pend[0];
+    const esMenu = x.que === 'menu';
+
+    const titulo = x.toca
+      ? (esMenu ? T('Toca renovar tu menú') : T('Toca cambiar tus rutinas'))
+      : (esMenu
+        ? Tp(x.quedan, 'Tu menú se renueva mañana', 'Tu menú se renueva en {n} días')
+        : Tp(x.quedan, 'Tus rutinas se renuevan mañana', 'Tus rutinas se renuevan en {n} días'));
+
+    const porque = esMenu
+      ? Tn('{n} días. Comer lo mismo acaba en comer peor.', { n: x.edad })
+      : Tn('{n} días. El cuerpo ya se ha adaptado.', { n: x.edad });
+
+    return html`
+      <div class="card franja-ciclo${raw(x.toca ? ' toca' : '')}">
+        <span class="row-icon">${raw(icon(esMenu ? 'nutricion' : 'dumbbell'))}</span>
+        <span class="grow" style="min-width:0">
+          <b style="display:block;font-size:.88rem">${titulo}</b>
+          <span class="tiny">${porque}</span>
+        </span>
+        <button class="btn sm primary" data-ciclo="${x.que}">${T('Renovar')}</button>
+        <button class="btn sm" data-ciclo-no="${x.que}"
+                aria-label="${T('Ahora no')}" data-t-aria="Ahora no">${raw(icon('close'))}</button>
+      </div>`;
+  }
+
   /* ================= dónde entrenas ================= */
 
   /* Cuenta cuántos ejercicios del catálogo puedes hacer en cada sitio */
@@ -1364,6 +1402,7 @@
       <div class="muelle"></div>
       ${raw(resumenSemanaHTML(st))}
 
+      ${raw(franjaCiclo())}
       ${raw(Modo.franjaInvitado())}
 
       <!-- Aquí no va ninguna tarjeta del día. Lo que toca hoy —haya rutina o no
@@ -2051,6 +2090,14 @@
     bind(root, '[data-a=cerrarSaludo]', function () { Saludo.descartar(); render(); });
     bind(root, '[data-a=irCuenta]', function () { go('cuenta'); });
     bind(root, '[data-a=resume]', function () { go('entrenar'); });
+    bindAll(root, '[data-ciclo]', function (el) {
+      go(el.getAttribute('data-ciclo') === 'menu' ? 'nutricion' : 'plan');
+    });
+    bindAll(root, '[data-ciclo-no]', function (el) {
+      Ciclos.aplazar(el.getAttribute('data-ciclo-no'));
+      render();
+    });
+
     bind(root, '[data-a=empezarlibre]', function () {
       Workout.startLibre();
       go('entrenar');
@@ -5006,6 +5053,9 @@
       });
       const n = p.preview.length;
       p.preview = null;
+      /* La cuenta de las cuatro semanas empieza aquí, no el día que instalaste
+         la app: lo que envejece es *este* plan. */
+      if (g.Ciclos) Ciclos.marcarRenovado('rutina');
       UI.toast(Tn('Plan guardado: {n} rutinas creadas', { n: n }));
       go('rutinas');
       Offline.precargarRutinas();
