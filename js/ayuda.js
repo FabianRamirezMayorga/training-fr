@@ -546,7 +546,7 @@
         { t: 'Mira cómo queda y pulsa *Crear la lista*.',
           d: 'Primero se te enseña el resumen por zonas. Si no te convence, se vuelve a pedir sin guardar nada. Al guardarla le pones nombre —viene uno propuesto— para reconocerla luego entre las demás.' },
         { t: 'En cada cosa ves lo que hace falta y cómo se vende.',
-          d: 'Arriba, lo que te vas a comer. Debajo y en gris, el envase más pequeño que hay, cuando es mayor que eso. Separados a propósito: juntarlos hacía que una compra de un día pareciera la de una semana.' },
+          d: 'Arriba, lo que te vas a comer. Debajo y en gris, el envase más pequeño que hay, cuando es mayor que eso. Separados a propósito: juntarlos hacía que una compra de un día pareciera la de una semana. Y va en cantidad de compra, no de plato: lo que se vende por piezas sale en piezas —un plátano, tres papas—, porque 86 g de papa no se pueden pedir en ningún sitio.' },
         { t: 'Ve tachando mientras compras.',
           d: 'Lo tachado se queda guardado: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Lo comprado no desaparece, se apaga, porque la lista también sirve para ver lo que ya llevas.' },
         { t: 'Si algo no lo vas a llevar, toca el botón de la derecha.',
@@ -554,7 +554,7 @@
         { t: 'Y el cambio llega al menú si quieres.',
           d: 'Después de sustituir se te pregunta si lo cambio también en los platos. Se pregunta y no se hace solo porque reescribe comidas que tú no has tocado: quien cambia una marca de arroz por otra no quiere que le reescriban la semana.' },
         { t: 'Las que tengas a medias están debajo del todo.',
-          d: 'Una lista no se abandona porque cambies de menú: se sigue comprando con ella. Ahí salen todas, con lo que llevas tachado de cada una, y se abren tocándolas.' }
+          d: 'Una lista no se abandona porque cambies de menú: se sigue comprando con ella. Ahí salen todas, con lo que llevas tachado de cada una, y se abren tocándolas. Desliza una hacia la izquierda y aparecen sus dos botones: renombrarla o borrarla.' }
       ],
       cierre: 'La lista se guarda aparte del menú, así que sustituir algo en el súper no te toca el plan salvo que lo digas. Y *Rehacer* empieza de cero cuando cambies de menú o de semana.',
       ver: ['g-ciclos', 'c-pais'] },

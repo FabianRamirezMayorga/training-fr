@@ -4656,6 +4656,10 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'Eliminar': 'Delete',
+    'Eliminar la lista': 'Delete the list',
+    'Se va {nombre} y lo que lleves tachado de ella. El menú no se toca.':
+      '{nombre} goes, along with whatever you had ticked off it. The menu is untouched.',
     'Lista montada para {menu}, de {dias}.': 'List built for {menu}, for {dias}.',
     '{cosas} en {zonas}': '{cosas} across {zonas}',
     '{n} zona': '{n} aisle',

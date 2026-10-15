@@ -8972,6 +8972,32 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
    pegue un salto al pasar de meses a días. */
 .rod-total{margin-bottom:18px}
 
+/* ---- deslizar una fila para ver sus acciones ----
+   Las dos que casi nunca se usan —renombrar y borrar— no pueden ocupar sitio
+   en la fila: se descubren con el gesto de siempre y, mientras tanto, la lista
+   se lee limpia. */
+.desliza{position:relative;overflow:hidden}
+.desliza + .desliza{border-top:1px solid var(--line)}
+.desliza-fondo{position:absolute;top:0;right:0;bottom:0;display:flex}
+/* Setenta y seis y no ochenta y cuatro: con los dos botones anchos la fila se
+   desplazaba tanto que el nombre de la lista salía de la pantalla, y entonces
+   no se ve cuál estás a punto de borrar. */
+.desliza-acc{display:flex;align-items:center;justify-content:center;width:76px;
+  padding:0;border:0;cursor:pointer;color:#fff;font:600 .82rem var(--sans);
+  letter-spacing:-.01em}
+.desliza-acc.renombrar{background:var(--dim2)}
+.desliza-acc.borrar{background:var(--bad)}
+.desliza-cara{position:relative;background:var(--card);touch-action:pan-y;
+  transition:transform .24s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.desliza.abierta .desliza-cara{transform:translateX(-152px)}
+/* La fila de dentro ya no pinta su propia raya: la pone el contenedor, que es
+   quien sabe dónde acaba una y empieza otra cuando una está desplazada. */
+.desliza .list-row+.list-row::before,
+.desliza-cara>.list-row::before{display:none}
+@media (prefers-reduced-motion:reduce){
+  .desliza-cara{transition:none}
+}
+
 /* Lo que se hizo, en una frase. Con el selector y el rodillo todavía en
    pantalla no se sabía si lo de arriba era lo pedido o lo que ibas a pedir. */
 .previa-cab{padding:14px 15px;margin-bottom:4px}

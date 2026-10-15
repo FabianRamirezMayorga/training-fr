@@ -1376,8 +1376,8 @@
     /* ---------- La lista de la compra ---------- */
     'En cada cosa ves lo que hace falta y cómo se vende.':
       'On each item you see what you need and how it is sold.',
-    'Arriba, lo que te vas a comer. Debajo y en gris, el envase más pequeño que hay, cuando es mayor que eso. Separados a propósito: juntarlos hacía que una compra de un día pareciera la de una semana.':
-      'On top, what you are going to eat. Below and in grey, the smallest pack there is, when it is bigger than that. Kept apart on purpose: putting them together made one day\'s shopping read like a week\'s.',
+    'Arriba, lo que te vas a comer. Debajo y en gris, el envase más pequeño que hay, cuando es mayor que eso. Separados a propósito: juntarlos hacía que una compra de un día pareciera la de una semana. Y va en cantidad de compra, no de plato: lo que se vende por piezas sale en piezas —un plátano, tres papas—, porque 86 g de papa no se pueden pedir en ningún sitio.':
+      'On top, what you are going to eat. Below and in grey, the smallest pack there is, when it is bigger than that. Kept apart on purpose: putting them together made one day\'s shopping read like a week\'s. And it is shopping quantity, not plate quantity: what is sold by the piece comes in pieces —one banana, three potatoes— because you cannot ask for 86 g of potato anywhere.',
     '¿Por qué la lista pone 160 g y debajo «bandeja de 500 g»?':
       'Why does the list say 160 g and then "500 g tray" underneath?',
     'Porque son dos cosas distintas y conviene ver las dos. El primero es lo que te vas a comer, sumado de los platos. El segundo es cómo lo vende la tienda, que casi nunca coincide.':
@@ -1392,8 +1392,8 @@
       'First whether you count in days, weeks or months, then you spin the wheel: two weeks is fourteen days and the app does that sum. The pencil at the end is for the number that fits none of the three. If you ask for twenty days from a seven-day menu, the amounts are multiplied before rounding.',
     'Las que tengas a medias están debajo del todo.':
       'The ones you have half done are right at the bottom.',
-    'Una lista no se abandona porque cambies de menú: se sigue comprando con ella. Ahí salen todas, con lo que llevas tachado de cada una, y se abren tocándolas.':
-      'You do not drop a list because you switch menus: you carry on shopping with it. They are all there, with what you have ticked off each one, and they open with a tap.',
+    'Una lista no se abandona porque cambies de menú: se sigue comprando con ella. Ahí salen todas, con lo que llevas tachado de cada una, y se abren tocándolas. Desliza una hacia la izquierda y aparecen sus dos botones: renombrarla o borrarla.':
+      'You do not drop a list because you switch menus: you carry on shopping with it. They are all there, with what you have ticked off each one, and they open with a tap. Swipe one to the left and its two buttons appear: rename it or delete it.',
     '¿Por qué mi menú de cinco días pone treinta?':
       'Why does my five-day menu say thirty?',
     'Porque debajo del nombre no te dice lo que trae el menú, sino lo que vas a comprar: los días que has pedido y las comidas que salen de repetirlo hasta cubrirlos.':

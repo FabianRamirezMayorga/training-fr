@@ -3433,6 +3433,82 @@
     };
   }
 
+  /* Deslizar una fila para descubrir sus acciones.
+
+     Hecho a mano y no con una librería porque lo único delicado es una cosa:
+     distinguir el gesto del scroll de la página. Se decide en los primeros
+     ocho píxeles —si manda la vertical, esto no va con nosotros y se suelta—
+     y el resto es mover una capa. Con `touch-action: pan-y` el navegador se
+     queda el scroll vertical y nos deja a nosotros el horizontal, que es
+     exactamente el reparto que hace falta. */
+  function montarDeslizables(root, alCerrar) {
+    const cajas = [].slice.call(root.querySelectorAll('.desliza'));
+    if (!cajas.length) return null;
+
+    function cerrar(menos) {
+      cajas.forEach(function (c) { if (c !== menos) c.classList.remove('abierta'); });
+    }
+
+    cajas.forEach(function (caja) {
+      const cara = caja.querySelector('.desliza-cara');
+      const fondo = caja.querySelector('.desliza-fondo');
+      let x0 = 0, y0 = 0, dx = 0, activo = false, decidido = false;
+
+      function ancho() { return fondo.offsetWidth || 152; }
+
+      function fin() {
+        if (!activo) return;
+        activo = false;
+        cara.style.transition = '';
+        cara.style.transform = '';
+        if (!decidido) return;
+        /* Pasado el 40 % se queda abierta. Menos que eso y lo más probable es
+           que fuera un roce al desplazar la página. */
+        const abrir = Math.abs(dx) > ancho() * 0.4;
+        caja.classList.toggle('abierta', abrir);
+        if (abrir) cerrar(caja);
+        caja.dataset.recien = abrir || dx ? '1' : '';
+        setTimeout(function () { caja.dataset.recien = ''; }, 350);
+      }
+
+      cara.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        x0 = e.clientX; y0 = e.clientY; dx = 0;
+        activo = true; decidido = false;
+      });
+
+      cara.addEventListener('pointermove', function (e) {
+        if (!activo) return;
+        const ax = e.clientX - x0, ay = e.clientY - y0;
+        if (!decidido) {
+          if (Math.abs(ax) < 8 && Math.abs(ay) < 8) return;
+          /* Manda la vertical: es scroll de la página, no un deslizamiento. */
+          if (Math.abs(ay) >= Math.abs(ax)) { activo = false; return; }
+          decidido = true;
+          cara.style.transition = 'none';
+        }
+        const base = caja.classList.contains('abierta') ? -ancho() : 0;
+        dx = Math.max(-ancho() - 16, Math.min(0, base + ax));
+        cara.style.transform = 'translateX(' + dx + 'px)';
+        e.preventDefault();
+      }, { passive: false });
+
+      cara.addEventListener('pointerup', fin);
+      cara.addEventListener('pointercancel', fin);
+      cara.addEventListener('pointerleave', fin);
+
+      /* Y con el teclado: al llegar el foco a un botón de detrás, la fila se
+         abre sola. Un gesto que no se puede hacer sin dedo dejaría las dos
+         acciones fuera del alcance de quien navega tabulando. */
+      fondo.addEventListener('focusin', function () {
+        caja.classList.add('abierta');
+        cerrar(caja);
+      });
+    });
+
+    return { cerrarTodas: function () { cerrar(null); if (alCerrar) alCerrar(); } };
+  }
+
   let compraMenu = '';
   let compraUnidad = 'dia';
   let compraCuanto = 0;
@@ -3696,16 +3772,28 @@
           ${raw(vivas.map(function (l) {
             const n = ListaCompra.cuenta(l);
             const pc = n.total ? Math.round(n.hechas / n.total * 100) : 0;
-            return '<button class="list-row tap compra-guardada" data-abrirlista="' +
-              esc(l.menuId) + '">' +
-              '<span class="grow"><span class="list-row-title">' +
-                esc(l.nombre || l.menuNombre || T('Menú')) + '</span>' +
-              '<span class="list-row-sub">' +
-                esc(Tp(l.dias, '{n} día', '{n} días')) + ' · ' +
-                esc(Tn('{a} de {b}', { a: n.hechas, b: n.total })) + '</span>' +
-              '<span class="prog compra-prog"><i style="width:' + pc + '%"></i></span>' +
-              '</span>' +
-              '<span class="chevron">' + icon('chevron') + '</span></button>';
+            /* Las acciones van detrás y se descubren deslizando, como en el
+               correo del teléfono. Dos botones más en cada fila ensuciarían la
+               pantalla para algo que se usa una vez de cada veinte. */
+            return '<div class="desliza">' +
+              '<div class="desliza-fondo">' +
+                '<button class="desliza-acc renombrar" data-renombrarlista="' +
+                  esc(l.menuId) + '">' + esc(T('Renombrar')) + '</button>' +
+                '<button class="desliza-acc borrar" data-borrarlista="' +
+                  esc(l.menuId) + '">' + esc(T('Eliminar')) + '</button>' +
+              '</div>' +
+              '<div class="desliza-cara">' +
+                '<button class="list-row tap compra-guardada" data-abrirlista="' +
+                  esc(l.menuId) + '">' +
+                '<span class="grow"><span class="list-row-title">' +
+                  esc(l.nombre || l.menuNombre || T('Menú')) + '</span>' +
+                '<span class="list-row-sub">' +
+                  esc(Tp(l.dias, '{n} día', '{n} días')) + ' · ' +
+                  esc(Tn('{a} de {b}', { a: n.hechas, b: n.total })) + '</span>' +
+                '<span class="prog compra-prog"><i style="width:' + pc + '%"></i></span>' +
+                '</span>' +
+                '<span class="chevron">' + icon('chevron') + '</span></button>' +
+              '</div></div>';
           }).join(''))}
         </div>` : '')}`;
   };
@@ -3721,10 +3809,59 @@
       render();
     });
 
+    const deslizables = montarDeslizables(root);
+
+    bindAll(root, '[data-renombrarlista]', function (el) {
+      const id = el.getAttribute('data-renombrarlista');
+      const l = ListaCompra.de(id);
+      if (!l) return;
+      UI.modal(html`
+        <h2>${T('Ponle nombre')}</h2>
+        <input id="cp-ren" type="text" maxlength="40"
+               value="${l.nombre || l.menuNombre || ''}">
+        <button class="btn primary block" id="cp-ren-ok" style="margin-top:14px">
+          ${T('Guardar')}</button>`,
+        function (caja) {
+          const campo = caja.querySelector('#cp-ren');
+          setTimeout(function () { campo.focus(); campo.select(); }, 80);
+          const guardar = function () {
+            const n = campo.value.trim();
+            UI.closeModal();
+            if (!n) return;
+            ListaCompra.renombrar(id, n);
+            render();
+          };
+          caja.querySelector('#cp-ren-ok').onclick = guardar;
+          campo.onkeydown = function (e) { if (e.key === 'Enter') guardar(); };
+        });
+    });
+
+    bindAll(root, '[data-borrarlista]', function (el) {
+      const id = el.getAttribute('data-borrarlista');
+      const l = ListaCompra.de(id);
+      if (!l) return;
+      UI.confirm(T('Eliminar la lista'),
+        Tn('Se va {nombre} y lo que lleves tachado de ella. El menú no se toca.',
+          { nombre: l.nombre || l.menuNombre || T('Menú') }),
+        T('Eliminar'), true).then(function (si) {
+          if (!si) return;
+          ListaCompra.borrar(id);
+          if (compraVer === id) compraVer = '';
+          render();
+        });
+    });
+
     bindAll(root, '[data-abrirlista]', function (el) {
       /* Irse a otra lista con una generándose dejaría el botón pensando en una
          pantalla que ya no es esa. */
       if (compraPensando) return;
+      /* Con las acciones a la vista, el toque las cierra en vez de entrar: es
+         lo que espera quien acaba de deslizar y se ha arrepentido. */
+      const caja = el.closest('.desliza');
+      if (caja && (caja.classList.contains('abierta') || caja.dataset.recien)) {
+        if (deslizables) deslizables.cerrarTodas();
+        return;
+      }
       compraVer = el.getAttribute('data-abrirlista');
       compraPreview = null;
       render();

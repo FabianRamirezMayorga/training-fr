@@ -3752,6 +3752,15 @@
       'ordenada por días obliga a dar cuatro vueltas.' + SALTO +
       '- En "cuanto" va LO QUE HACE FALTA, sumado y sin inflar: si salen 320 g de pollo, ' +
       'pon 320 g. Nunca subas esa cifra al formato de la tienda.' + SALTO +
+      '- Pero en CANTIDAD DE COMPRA, no de plato. Dos cosas:' + SALTO +
+      '  a) Lo que se compra por piezas va EN PIEZAS ENTERAS, nunca en gramos: plátanos, ' +
+      'papas, tomates, cebollas, aguacates, huevos, naranjas, limones, zanahorias, ' +
+      'lechugas, panes. "Papa criolla: 86 g" no se puede comprar y no dice nada; son ' +
+      'unas 3 papas criollas. "Plátano maduro: 194 g" es 1 plátano. Redondea SIEMPRE ' +
+      'hacia arriba a la pieza entera, y si ayuda pon el peso detrás entre paréntesis.' + SALTO +
+      '  b) En crudo y con lo que se tira: cáscara, hueso, piel, vaina. Si el plato dice ' +
+      '"100 g de arroz cocido" o "150 g de pechuga a la plancha", eso no es lo que pesa ' +
+      'en la balanza de la tienda: conviértelo.' + SALTO +
       '- En "venta" va cómo se vende, y SOLO si el envase más pequeño es mayor que lo que ' +
       'hace falta: 320 g de pollo → venta "bandeja de 500 g". Si lo que hace falta ya pasa ' +
       'del envase, deja "venta" vacío. Así se ve lo que se come y lo que va a sobrar, que ' +

@@ -150,8 +150,16 @@
     }).sort(function (a, b) { return (b.t || 0) - (a.t || 0); });
   }
 
+  function renombrar(menuId, nombre) {
+    const l = de(menuId);
+    if (!l) return;
+    l.nombre = String(nombre || '').trim();
+    poner(menuId, l);
+  }
+
   g.ListaCompra = {
     de: de, poner: poner, borrar: borrar, generar: generar, vivas: vivas,
+    renombrar: renombrar,
     marcar: marcar, limpiarMarcas: limpiarMarcas, cuenta: cuenta,
     sustituir: sustituir, deshacerSustitucion: deshacerSustitucion
   };
