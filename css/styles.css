@@ -9063,6 +9063,11 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .compra-cambiar:active{background:var(--card2);color:var(--txt)}
 .compra-caja{cursor:pointer;background:none}
 .compra-cuanto{font-style:normal;color:var(--dim2);font-size:.86rem}
+/* El formato de venta, debajo: lo que hace falta y lo que te llevas no son el
+   mismo número, y ponerlos juntos en la misma línea era lo que hacía que la
+   compra de un día se leyera como la de una semana. */
+.compra-venta{display:block;margin-top:2px;font-size:.76rem;color:var(--dim2);
+  opacity:.8}
 /* Lo que venia antes, debajo y pequeno: sin eso, la lista dice pavo y nadie
    recuerda que el menu hablaba de pollo. */
 .compra-antes{display:block;font-size:.72rem;color:var(--dim2);margin-top:2px}

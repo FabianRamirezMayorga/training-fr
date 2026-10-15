@@ -4656,6 +4656,7 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'se vende en {venta}': 'sold in {venta}',
     'Días, semanas o meses': 'Days, weeks or months',
     'Para reconocerla cuando tengas varias a medias.':
       'So you know which is which when you have several on the go.',

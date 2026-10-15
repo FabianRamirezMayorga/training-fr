@@ -545,6 +545,8 @@
           d: 'La saca el entrenador de los propios platos del menú, sin tocarlo: suma las raciones de todos los días, redondea a lo que de verdad se vende —560 g de avena son un paquete de kilo— y lo agrupa por zonas. Queda guardada en ese menú.' },
         { t: 'Mira cómo queda y pulsa *Crear la lista*.',
           d: 'Primero se te enseña el resumen por zonas. Si no te convence, se vuelve a pedir sin guardar nada. Al guardarla le pones nombre —viene uno propuesto— para reconocerla luego entre las demás.' },
+        { t: 'En cada cosa ves lo que hace falta y cómo se vende.',
+          d: 'Arriba, lo que te vas a comer. Debajo y en gris, el envase más pequeño que hay, cuando es mayor que eso. Separados a propósito: juntarlos hacía que una compra de un día pareciera la de una semana.' },
         { t: 'Ve tachando mientras compras.',
           d: 'Lo tachado se queda guardado: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Lo comprado no desaparece, se apaga, porque la lista también sirve para ver lo que ya llevas.' },
         { t: 'Si algo no lo vas a llevar, toca el botón de la derecha.',
@@ -796,6 +798,11 @@
   /* ================= preguntas ================= */
 
   const PREGUNTAS = [
+    { id: 'p-dosnumeros', q: '¿Por qué la lista pone 160 g y debajo «bandeja de 500 g»?',
+      a: ['Porque son dos cosas distintas y conviene ver las dos. El primero es lo que te vas a comer, sumado de los platos. El segundo es cómo lo vende la tienda, que casi nunca coincide.',
+        'Antes solo salía el segundo, y eso hacía que la compra de un día se leyera como la de una semana: cinco carnes redondeadas a su envase son dos kilos de carne para una cena. El número que manda es el primero; el segundo solo te avisa de lo que va a sobrar.'],
+      ver: ['c-compra'] },
+
     { id: 'p-menudias', q: '¿Por qué mi menú de cinco días pone treinta?',
       a: ['Porque debajo del nombre no te dice lo que trae el menú, sino lo que vas a comprar: los días que has pedido y las comidas que salen de repetirlo hasta cubrirlos.',
         'El menú sigue siendo de cinco días. Lo que cambia es la compra, y es el número que importa cuando estás decidiendo cuánto llevarte.'],

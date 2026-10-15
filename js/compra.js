@@ -72,7 +72,16 @@
                  pasar es que un día no se vea nada. */
               const que = typeof c === 'string' ? c : String(c.que || '');
               const cuanto = typeof c === 'string' ? '' : String(c.cuanto || '');
-              return { que: que, cuanto: cuanto, hecho: false, antes: '' };
+              /* Cómo se vende va aparte de cuánto hace falta: juntarlos es lo
+                 que hacía que la compra de un día saliera con dos kilos de
+                 carne, porque cada cosa se redondeaba a su envase y nadie veía
+                 ya cuánto se iba a comer de verdad. */
+              /* Y si viene redactado —«se vende por libra»— se le quita el
+                 arranque: la fila ya pone «se vende en» delante, y juntos
+                 salía «se vende en se vende por libra». */
+              const venta = (typeof c === 'string' ? '' : String(c.venta || ''))
+                .replace(/^\s*(se\s+vende\s+(en|por)?|viene\s+en)\s*/i, '').trim();
+              return { que: que, cuanto: cuanto, venta: venta, hecho: false, antes: '' };
             }).filter(function (c) { return c.que; })
           };
         }).filter(function (z) { return z.cosas.length; })

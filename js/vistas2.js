@@ -3557,6 +3557,11 @@
                   (c.hecho ? icon('check') : '') + '</button>' +
                 '<span class="grow compra-txt">' + esc(c.que) +
                   (c.cuanto ? ' <i class="compra-cuanto">' + esc(c.cuanto) + '</i>' : '') +
+                  /* Cómo se vende, debajo y en gris. Es la diferencia entre
+                     «la app se ha vuelto loca» y «esto es lo que hace falta y
+                     así es como lo venden». */
+                  (c.venta ? '<span class="compra-venta">' +
+                    esc(Tn('se vende en {venta}', { venta: c.venta })) + '</span>' : '') +
                   (c.antes ? '<span class="compra-antes">' +
                     esc(Tn('antes: {que}', { que: c.antes })) + '</span>' : '') +
                 '</span>' +

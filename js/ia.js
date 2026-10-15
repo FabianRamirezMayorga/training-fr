@@ -3664,28 +3664,62 @@
     const p = Perfil.datos ? Perfil.datos() : {};
     /* Los días los pide el usuario y pueden no ser los del menú: un menú de
        siete días da una compra de veinte si eso es lo que va a durar. La cuenta
-       de cuantas vueltas son se la damos hecha, que es aritmética, y lo que se
-       le pide a ella es que redondee a formatos de venta sobre el total. */
+       de cuantas vueltas son se la damos hecha, que es aritmética. */
     const n = Math.max(1, Number(diasPedidos) || dias.length);
     const vueltas = n / dias.length;
 
+    /* La escala, calculada aquí y no preguntada: lo que come al día sale de
+       sumar las comidas del menú, y es la única barandilla que impide que una
+       compra de un día salga con dos kilos de carne. Sin este número delante,
+       «redondea a lo que se vende» convierte 160 g de pollo en una libra, y
+       cinco carnes distintas en dos kilos y cuarto para una cena. */
+    let kcal = 0, comidas = 0;
+    dias.forEach(function (d) {
+      (d.comidas || []).forEach(function (co) {
+        kcal += Number(co.kcal) || 0;
+        comidas++;
+      });
+    });
+    const kcalDia = dias.length ? Math.round(kcal / dias.length) : 0;
+    const comidasDia = dias.length ? Math.round(comidas / dias.length) : 0;
+
+    /* Concordar en el propio prompt. «PARA 1 DÍAS» y «repetirlo 1 veces» no
+       dan una lista peor, pero un texto mal escrito es un texto al que se
+       atiende menos, y este se lo lee una máquina entrenada con lenguaje. */
+    const dd = function (k) { return k + (k === 1 ? ' día' : ' días'); };
+
     const prompt = PERSONA + SALTO + SALTO +
-      'Esta es la comida de ' + dias.length + ' días:' + SALTO + texto + SALTO + SALTO +
-      'Saca la lista de la compra PARA ' + n + ' DÍAS. El menú cubre ' + dias.length +
-      ', así que es repetirlo ' + (Math.round(vueltas * 100) / 100) + ' veces: multiplica ' +
-      'las cantidades por esa cifra ANTES de redondear.' + SALTO +
+      'Esta es la comida de ' + dd(dias.length) + ':' + SALTO + texto + SALTO + SALTO +
+      'Saca la lista de la compra PARA ' + dd(n).toUpperCase() + '.' +
+      (vueltas === 1 ? '' : ' El menú cubre ' + dd(dias.length) + ', así que es repetirlo ' +
+        (Math.round(vueltas * 100) / 100) + ' veces: multiplica las cantidades por esa cifra.') +
+      SALTO + SALTO +
+      (kcalDia ? 'ESCALA, para que no se te vaya la mano: come ' + kcalDia + ' kcal al ' +
+        'día en ' + comidasDia + ' comidas. Esta compra son ' + dd(n) + ', o sea unas ' +
+        (kcalDia * n) + ' kcal en total, para UNA persona. Si lo que sumas da de comer a ' +
+        'una familia, te has pasado.' + SALTO + SALTO : '') +
+      'REGLAS:' + SALTO +
+      '- SOLO lo que esté escrito en los platos de arriba. Si un alimento no sale ahí, ' +
+      'no va en la lista. No completes la despensa ni añadas lo que «pega» con el menú: ' +
+      'una lista con cosas que no se van a comer es una lista que no sirve.' + SALTO +
       '- SUMA las cantidades de un mismo alimento en todos los días y da el total de una ' +
       'vez. Ochenta gramos de avena siete días no son siete líneas de avena, son 560 g.' + SALTO +
       '- Agrupa por zona del supermercado, que es como se recorre una tienda. Una lista ' +
       'ordenada por días obliga a dar cuatro vueltas.' + SALTO +
-      '- Redondea a lo que de verdad se vende: si salen 560 g de avena, pon 1 kg y ya ' +
-      'sobrará; si salen 13 huevos, pon una docena y media o dos docenas.' + SALTO +
+      '- En "cuanto" va LO QUE HACE FALTA, sumado y sin inflar: si salen 320 g de pollo, ' +
+      'pon 320 g. Nunca subas esa cifra al formato de la tienda.' + SALTO +
+      '- En "venta" va cómo se vende, y SOLO si el envase más pequeño es mayor que lo que ' +
+      'hace falta: 320 g de pollo → venta "bandeja de 500 g". Si lo que hace falta ya pasa ' +
+      'del envase, deja "venta" vacío. Así se ve lo que se come y lo que va a sobrar, que ' +
+      'son dos cosas distintas y mezclarlas es lo que hace que una compra de un día ' +
+      'parezca la de una semana.' + SALTO +
       '- Lo que todo el mundo tiene en casa —sal, aceite, especias— solo si el menú lo ' +
       'usa en cantidad.' + SALTO +
-      (p.pais ? 'Con los nombres y los formatos de venta de ' + p.pais + '.' + SALTO : '') +
+      (p.pais ? '- Con los nombres y los formatos de venta de ' + p.pais + '.' + SALTO : '') +
       SALTO +
       'Devuelve JSON: {"compra":[{"zona":"Fruta y verdura|Carne y pescado|Lácteos y huevos|' +
-      'Despensa|Congelados|Otros","cosas":["alimento con la cantidad total"]}]}';
+      'Despensa|Congelados|Otros","cosas":[{"que":"nombre del alimento","cuanto":"lo que ' +
+      'hace falta","venta":"cómo se vende, o vacío"}]}]}';
 
     return llamarJSON(prompt, { maxTokens: 4096, temperatura: 0.2 });
   }

@@ -1374,6 +1374,16 @@
 
 
     /* ---------- La lista de la compra ---------- */
+    'En cada cosa ves lo que hace falta y cómo se vende.':
+      'On each item you see what you need and how it is sold.',
+    'Arriba, lo que te vas a comer. Debajo y en gris, el envase más pequeño que hay, cuando es mayor que eso. Separados a propósito: juntarlos hacía que una compra de un día pareciera la de una semana.':
+      'On top, what you are going to eat. Below and in grey, the smallest pack there is, when it is bigger than that. Kept apart on purpose: putting them together made one day\'s shopping read like a week\'s.',
+    '¿Por qué la lista pone 160 g y debajo «bandeja de 500 g»?':
+      'Why does the list say 160 g and then "500 g tray" underneath?',
+    'Porque son dos cosas distintas y conviene ver las dos. El primero es lo que te vas a comer, sumado de los platos. El segundo es cómo lo vende la tienda, que casi nunca coincide.':
+      'Because they are two different things and both are worth seeing. The first is what you are going to eat, added up from the dishes. The second is how the shop sells it, which hardly ever matches.',
+    'Antes solo salía el segundo, y eso hacía que la compra de un día se leyera como la de una semana: cinco carnes redondeadas a su envase son dos kilos de carne para una cena. El número que manda es el primero; el segundo solo te avisa de lo que va a sobrar.':
+      'It used to show only the second, and that made one day\'s shopping read like a week\'s: five meats each rounded up to its pack is two kilos of meat for one dinner. The number that counts is the first; the second only warns you what will be left over.',
     'Dos rodillos, como la hora y los minutos del despertador: el número en uno y días, semanas o meses en el otro. Tres semanas son veintiún días, y esa cuenta la hace la app. Más de un mes no te deja, y es aposta: el menú se cambia cada treinta días, así que una compra más larga sería la de un menú que ya no vas a comer. El lápiz de debajo es para escribirlo a mano.':
       'Two wheels, like the hours and minutes on an alarm clock: the number on one, days, weeks or months on the other. Three weeks is twenty-one days, and the app does that sum. It will not let you go past one month, and that is on purpose: the menu changes every thirty days, so a longer shop would be for a menu you are no longer going to eat. The pencil below is for typing it by hand.',
     'Primero se te enseña el resumen por zonas. Si no te convence, se vuelve a pedir sin guardar nada. Al guardarla le pones nombre —viene uno propuesto— para reconocerla luego entre las demás.':
