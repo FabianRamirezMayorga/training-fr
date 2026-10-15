@@ -4656,6 +4656,12 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'Lista montada para {menu}, de {dias}.': 'List built for {menu}, for {dias}.',
+    '{cosas} en {zonas}': '{cosas} across {zonas}',
+    '{n} zona': '{n} aisle',
+    '{n} zonas': '{n} aisles',
+    'Descártala para cambiar de menú o de días. Hasta que no pulses «Crear la lista» no se guarda nada.':
+      'Discard it to change the menu or the days. Nothing is saved until you tap “Create the list”.',
     'La clave {n} de tu lista no vale. Bórrala en la bóveda y prueba otra vez.':
       'Key {n} on your list is not valid. Delete it in the vault and try again.',
     '{n} de tus claves de Gemini no valen. Bórralas en la bóveda y prueba otra vez.':

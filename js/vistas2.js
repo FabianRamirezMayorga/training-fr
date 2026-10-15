@@ -3285,6 +3285,14 @@
     let ops = [];
     let alElegir = null;
     let tic = 0, quieto = 0, ultimo = null, vDesde = 0, vHasta = -1;
+    /* Si el dedo ha tocado este rodillo desde que se llenó.
+
+       Hace falta porque colocarlo emite eventos de scroll como los del dedo, y
+       si al repintarse la pantalla el rodillo aún no tenía altura, el scroll
+       se quedaba en cero, el temporizador confirmaba el primer valor y eso se
+       daba por una elección: pedías la lista de siete días, descartabas la
+       previa y volvías al asistente con un día puesto sin haber tocado nada. */
+    let tocado = false;
 
     function lejos(o) {
       o.style.transform = 'scale(.58)';
@@ -3324,6 +3332,8 @@
     }
 
     function irA(i, suave) {
+      /* Esto sí es una elección: la ha pedido alguien tocando algo. */
+      tocado = true;
       const j = Math.max(0, Math.min(ops.length - 1, i));
       pista.scrollTo({ top: j * ROD_ALTO, behavior: suave ? 'smooth' : 'auto' });
       /* Y se confirma por nuestra cuenta al llegar. Mover el rodillo desde un
@@ -3337,6 +3347,9 @@
 
     function confirmar() {
       if (!ops.length) return;
+      /* Sin dedo de por medio no hay elección que confirmar: solo se repinta.
+         El valor bueno es el que se puso al llenarlo. */
+      if (!tocado) { pintar(); return; }
       const i = Math.max(0, Math.min(ops.length - 1,
         Math.round(pista.scrollTop / ROD_ALTO)));
       const v = ops[i].getAttribute('data-v');
@@ -3360,6 +3373,10 @@
       quieto = setTimeout(confirmar, 130);
     }, { passive: true });
 
+    ['pointerdown', 'touchstart', 'wheel'].forEach(function (ev) {
+      pista.addEventListener(ev, function () { tocado = true; }, { passive: true });
+    });
+
     pista.addEventListener('keydown', function (e) {
       const d = e.key === 'ArrowUp' ? -1 : e.key === 'ArrowDown' ? 1 : 0;
       if (!d) return;
@@ -3372,6 +3389,7 @@
        manda, no el usuario. */
     function poner(lista, valor) {
       ultimo = String(valor);
+      tocado = false;
       vDesde = 0;
       vHasta = -1;
       pista.innerHTML = lista.map(function (o) {
@@ -3562,6 +3580,57 @@
           'cambias cualquier cosa por otra.')}</p>`;
     }
 
+    /* ---- la previa: el qué ya está decidido, falta el sí ----
+
+       Con el selector y el rodillo todavía en pantalla no se sabe qué estás
+       mirando: ¿lo de arriba es lo que pediste o lo que vas a pedir? Y tocarlos
+       ahí no tenía efecto sobre la lista que ya está montada. Así que aquí se
+       cuenta lo que se hizo, en una frase, y lo único que queda son las tres
+       decisiones que de verdad tienes delante. */
+    if (compraPreview) {
+      const n = ListaCompra.cuenta(compraPreview);
+      return html`${raw(atras)}
+
+        <div class="card previa-cab">
+          <p class="previa-que">${Tn('Lista montada para {menu}, de {dias}.',
+            { menu: compraPreview.menuNombre || menu.nombre,
+              dias: Tp(compraPreview.dias, '{n} día', '{n} días') })}</p>
+          <p class="previa-cuenta">${Tn('{cosas} en {zonas}', {
+            cosas: Tp(n.total, '{n} cosa', '{n} cosas'),
+            zonas: Tp(compraPreview.zonas.length, '{n} zona', '{n} zonas') })}</p>
+        </div>
+
+        <div class="list-title">${T('Así queda')}</div>
+        ${raw(compraPreview.zonas.map(function (z) {
+          return '<div class="card compra-prev"><b class="compra-prev-z">' +
+            esc(T(z.zona || T('Otros'))) + '</b><p>' +
+            esc(z.cosas.map(function (c) {
+              return c.que + (c.cuanto ? ' (' + c.cuanto + ')' : '');
+            }).join(' · ')) + '</p></div>';
+        }).join(''))}
+
+        ${raw(compraPensando ? html`
+          <div class="row" style="gap:9px;margin-top:16px">
+            <button class="btn primary grow btn-arranque" disabled>
+              ${raw(icon('chispa'))} ${T('Sumando los platos…')}</button>
+            <button class="btn vidrio" data-a="cancelargen">${T('Cancelar')}</button>
+          </div>` : html`
+          <button class="btn primary block" data-a="guardarlista"
+                  style="margin-top:16px">${raw(icon('check'))}
+            ${T('Crear la lista')}</button>
+          <!-- Rehacer pide otra con lo mismo; descartar la tira y te devuelve
+               a elegir. Son las dos únicas salidas que hay, y poner un
+               «modificar» aparte sería el mismo botón con otro nombre. -->
+          <div class="row previa-mas">
+            <button class="btn sm vidrio grow" data-a="generarlista">
+              ${raw(icon('actualizar'))} ${T('Rehacer')}</button>
+            <button class="btn sm vidrio grow" data-a="descartarprevia">
+              ${T('Descartar')}</button>
+          </div>
+          <p class="tiny previa-nota">${T('Descártala para cambiar de menú o de días. ' +
+            'Hasta que no pulses «Crear la lista» no se guarda nada.')}</p>`)}`;
+    }
+
     /* ---- el asistente: de qué menú, para cuántos días ---- */
     const uni = unidadPorId(compraUnidad);
     const tope = topeDe(uni);
@@ -3604,39 +3673,18 @@
       <p class="rod-total" id="rod-total">${raw(uni.factor === 1 ? '&nbsp;'
         : esc(Tp(dias, '= {n} día', '= {n} días')))}</p>
 
-      ${raw(compraPreview ? html`
-        <div class="list-title">${T('Así queda')}</div>
-        ${raw(compraPreview.zonas.map(function (z) {
-          return '<div class="card compra-prev"><b class="compra-prev-z">' +
-            esc(T(z.zona || T('Otros'))) + '</b><p>' +
-            esc(z.cosas.map(function (c) {
-              return c.que + (c.cuanto ? ' (' + c.cuanto + ')' : '');
-            }).join(' · ')) + '</p></div>';
-        }).join(''))}
-        <!-- Y aqui tambien: rehacerla con la previa puesta apaga los mandos
-             igual, asi que tiene que decirlo y dejar salir igual. -->
-        <div class="row" style="gap:9px;margin-top:14px">
-          ${raw(compraPensando ? html`
-            <button class="btn primary grow btn-arranque" disabled>
-              ${raw(icon('chispa'))} ${T('Sumando los platos…')}</button>
-            <button class="btn vidrio" data-a="cancelargen">${T('Cancelar')}</button>` : html`
-            <button class="btn primary grow" data-a="guardarlista">${raw(icon('check'))}
-              ${T('Crear la lista')}</button>
-            <button class="btn vidrio" data-a="generarlista"
-              >${raw(icon('actualizar'))}</button>`)}
+      ${raw(compraPensando ? html`
+        <!-- Mientras piensa no se toca nada: cambiar de menú a mitad y que
+             luego llegue la lista del anterior es peor que esperar. Pero
+             encerrado tampoco se deja a nadie, así que la salida está aquí
+             y es explícita. -->
+        <div class="row" style="gap:9px">
+          <button class="btn primary grow btn-arranque" disabled>
+            ${raw(icon('chispa'))} ${T('Sumando los platos…')}</button>
+          <button class="btn vidrio" data-a="cancelargen">${T('Cancelar')}</button>
         </div>` : html`
-        ${raw(compraPensando ? html`
-          <!-- Mientras piensa no se toca nada: cambiar de menú a mitad y que
-               luego llegue la lista del anterior es peor que esperar. Pero
-               encerrado tampoco se deja a nadie, así que la salida está aquí
-               y es explícita. -->
-          <div class="row" style="gap:9px">
-            <button class="btn primary grow btn-arranque" disabled>
-              ${raw(icon('chispa'))} ${T('Sumando los platos…')}</button>
-            <button class="btn vidrio" data-a="cancelargen">${T('Cancelar')}</button>
-          </div>` : html`
-          <button class="btn primary block btn-arranque" data-a="generarlista">
-            ${raw(icon('chispa'))} ${T('Generar la lista')}</button>`)}`)}
+        <button class="btn primary block btn-arranque" data-a="generarlista">
+          ${raw(icon('chispa'))} ${T('Generar la lista')}</button>`)}
 
       <div id="compra-pensando"></div>
 
@@ -3686,6 +3734,12 @@
     bind(root, '[data-a=cancelargen]', function () {
       olvidarLoQuePensaba();
       render();
+    });
+
+    bind(root, '[data-a=descartarprevia]', function () {
+      compraPreview = null;
+      render();
+      window.scrollTo(0, 0);
     });
 
     bindAll(root, '[data-menu]', function (el) {

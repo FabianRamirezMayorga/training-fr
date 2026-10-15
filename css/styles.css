@@ -8972,6 +8972,15 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
    pegue un salto al pasar de meses a días. */
 .rod-total{margin-bottom:18px}
 
+/* Lo que se hizo, en una frase. Con el selector y el rodillo todavía en
+   pantalla no se sabía si lo de arriba era lo pedido o lo que ibas a pedir. */
+.previa-cab{padding:14px 15px;margin-bottom:4px}
+.previa-que{margin:0;font-size:1rem;font-weight:600;letter-spacing:-.01em;
+  line-height:1.35}
+.previa-cuenta{margin:3px 0 0;font-size:.84rem;color:var(--dim2)}
+.previa-mas{gap:9px;margin-top:9px}
+.previa-nota{margin-top:12px;text-align:center}
+
 /* Mientras el entrenador suma, los mandos se apagan y no admiten el dedo. No
    es solo que no respondan: tienen que PARECER apagados, porque un control que
    se ve normal y no hace nada se lee como que la app se ha colgado. */
