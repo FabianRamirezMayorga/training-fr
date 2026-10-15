@@ -1416,8 +1416,8 @@
       'If you have several menus saved, inside you can pick which one it comes from: sometimes you shop for the one starting on Monday, not the one finishing.',
     'Si ese menú aún no tiene lista, púlsale a *Generar la lista*.':
       'If that menu has no list yet, tap *Build the list*.',
-    'La saca el entrenador de los propios platos del menú, sin tocarlo: suma las raciones de todos los días, redondea a lo que de verdad se vende —560 g de avena son un paquete de kilo— y lo agrupa por zonas. Queda guardada en ese menú.':
-      'The coach works it out from the menu’s own dishes, without touching it: it adds up the portions across every day, rounds to what is actually sold —560 g of oats is a one-kilo bag— and groups it by aisle. It stays saved in that menu.',
+    'La saca el entrenador de los propios platos del menú, sin tocarlo: suma las raciones de todos los días, redondea a lo que de verdad se vende —560 g de avena son un paquete de kilo— y lo agrupa por zonas. Mientras suma, el menú y los rodillos se quedan quietos: cambiarlos a mitad acabaría dándote la lista del menú anterior. Si te arrepientes, el botón de al lado la cancela.':
+      'The coach works it out from the menu’s own dishes, without touching it: it adds up the portions across every day, rounds to what is actually sold —560 g of oats is a one-kilo bag— and groups it by aisle. While it adds up, the menu and the wheels stay put: changing them halfway would end up giving you the previous menu’s list. If you change your mind, the button next to it cancels.',
     'Di para cuántos días.': 'Say how many days.',
     'Hay atajos de una, dos, tres semanas y un mes, y un campo para escribir el número que quieras. Si pides veinte días de un menú de siete, se multiplican las cantidades antes de redondear.':
       'There are shortcuts for one, two, three weeks and a month, plus a field to type any number. If you ask for twenty days from a seven-day menu, the amounts are multiplied before rounding.',

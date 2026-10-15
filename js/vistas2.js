@@ -3578,11 +3578,11 @@
       <!-- En columnas y no apilados: con dos menús, uno encima de otro obliga a
            recordar lo que decía el de arriba para compararlo con el de abajo. Lo
            que se compara se pone al lado. -->
-      <div class="menus-grid">
+      <div class="menus-grid${raw(compraPensando ? ' esperando' : '')}">
         ${raw(lista.map(function (x) {
           const on = x.id === menu.id;
           return '<button class="menu-tarj' + (on ? ' on' : '') + '" data-menu="' +
-            esc(x.id) + '">' +
+            esc(x.id) + '"' + (compraPensando ? ' disabled' : '') + '>' +
             '<i class="menu-tic">' + icon('check') + '</i>' +
             '<b class="menu-nom">' + esc(x.nombre) + '</b>' +
             '<span class="menu-sub" data-sub="' + esc(x.id) + '">' +
@@ -3595,7 +3595,8 @@
            La unidad también es una elección de las de mirar y parar, no un
            mando aparte: con el mando arriba y el rodillo abajo eran dos
            gestos distintos para decir una sola cosa. -->
-      <div class="rodillo rodillo-doble" id="rod-dias">
+      <div class="rodillo rodillo-doble${raw(compraPensando ? ' esperando' : '')}"
+           id="rod-dias"${raw(compraPensando ? ' aria-disabled="true"' : '')}>
         <div class="rodillo-banda" aria-hidden="true"></div>
         <div class="rodillo-col rod-num"></div>
         <div class="rodillo-col rod-uni"></div>
@@ -3612,15 +3613,30 @@
               return c.que + (c.cuanto ? ' (' + c.cuanto + ')' : '');
             }).join(' · ')) + '</p></div>';
         }).join(''))}
+        <!-- Y aqui tambien: rehacerla con la previa puesta apaga los mandos
+             igual, asi que tiene que decirlo y dejar salir igual. -->
         <div class="row" style="gap:9px;margin-top:14px">
-          <button class="btn primary grow" data-a="guardarlista">${raw(icon('check'))}
-            ${T('Crear la lista')}</button>
-          <button class="btn vidrio" data-a="generarlista">${raw(icon('actualizar'))}</button>
+          ${raw(compraPensando ? html`
+            <button class="btn primary grow btn-arranque" disabled>
+              ${raw(icon('chispa'))} ${T('Sumando los platos…')}</button>
+            <button class="btn vidrio" data-a="cancelargen">${T('Cancelar')}</button>` : html`
+            <button class="btn primary grow" data-a="guardarlista">${raw(icon('check'))}
+              ${T('Crear la lista')}</button>
+            <button class="btn vidrio" data-a="generarlista"
+              >${raw(icon('actualizar'))}</button>`)}
         </div>` : html`
-        <button class="btn primary block btn-arranque" data-a="generarlista"
-                ${raw(compraPensando ? 'disabled' : '')}>
-          ${raw(icon('chispa'))} ${compraPensando
-            ? T('Sumando los platos…') : T('Generar la lista')}</button>`)}
+        ${raw(compraPensando ? html`
+          <!-- Mientras piensa no se toca nada: cambiar de menú a mitad y que
+               luego llegue la lista del anterior es peor que esperar. Pero
+               encerrado tampoco se deja a nadie, así que la salida está aquí
+               y es explícita. -->
+          <div class="row" style="gap:9px">
+            <button class="btn primary grow btn-arranque" disabled>
+              ${raw(icon('chispa'))} ${T('Sumando los platos…')}</button>
+            <button class="btn vidrio" data-a="cancelargen">${T('Cancelar')}</button>
+          </div>` : html`
+          <button class="btn primary block btn-arranque" data-a="generarlista">
+            ${raw(icon('chispa'))} ${T('Generar la lista')}</button>`)}`)}
 
       <div id="compra-pensando"></div>
 
@@ -3658,14 +3674,21 @@
     });
 
     bindAll(root, '[data-abrirlista]', function (el) {
+      /* Irse a otra lista con una generándose dejaría el botón pensando en una
+         pantalla que ya no es esa. */
+      if (compraPensando) return;
       compraVer = el.getAttribute('data-abrirlista');
       compraPreview = null;
       render();
       window.scrollTo(0, 0);
     });
 
-    bindAll(root, '[data-menu]', function (el) {
+    bind(root, '[data-a=cancelargen]', function () {
       olvidarLoQuePensaba();
+      render();
+    });
+
+    bindAll(root, '[data-menu]', function (el) {
       compraMenu = el.getAttribute('data-menu');
       compraPreview = null;
       render();
@@ -3723,8 +3746,7 @@
         rodUni.retitular(UNIDADES.map(function (u) { return palabraUnidad(u, n); }));
       }
       refrescarCifras();
-      if (compraPensando) { olvidarLoQuePensaba(); compraPreview = null; render(); }
-      else if (compraPreview) { compraPreview = null; render(); }
+      if (compraPreview) { compraPreview = null; render(); }
     });
 
     rodUni.al(function (v) {
@@ -3747,8 +3769,7 @@
          «semanas» al lado de un 1 canta. */
       rodUni.retitular(UNIDADES.map(function (u) { return palabraUnidad(u, cuanto); }));
       refrescarCifras();
-      if (compraPensando) { olvidarLoQuePensaba(); compraPreview = null; render(); }
-      else if (compraPreview) { compraPreview = null; render(); }
+      if (compraPreview) { compraPreview = null; render(); }
     });
 
     rodNum.poner(numerosDe(uni), cuanto);

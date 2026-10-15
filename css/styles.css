@@ -8971,6 +8971,13 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 /* El total en días deja su hueco aunque esté vacío, para que la pantalla no
    pegue un salto al pasar de meses a días. */
 .rod-total{margin-bottom:18px}
+
+/* Mientras el entrenador suma, los mandos se apagan y no admiten el dedo. No
+   es solo que no respondan: tienen que PARECER apagados, porque un control que
+   se ve normal y no hace nada se lee como que la app se ha colgado. */
+.menus-grid.esperando,.rodillo.esperando{opacity:.45;pointer-events:none;
+  transition:opacity .18s ease}
+.menus-grid.esperando .menu-tarj{box-shadow:none}
 /* Los días que salen de multiplicar, debajo y en pequeño. Con la unidad en
    días el renglón se queda vacío pero ocupa: si apareciera y desapareciera, la
    pantalla pegaría un salto cada vez que tocas el mando. */
