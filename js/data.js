@@ -503,17 +503,45 @@
       (grupos[mus] = grupos[mus] || []).push(e);
     });
 
+    /* El orden decide qué ejercicios existen para la IA, porque la lista se
+       corta y lo que queda fuera no se le puede pedir. Y estaba ordenada
+       alfabéticamente dentro de cada grupo: entre los compuestos de barra
+       ganaban los que empiezan por A, así que a «isquiotibiales» le salían
+       arrancadas, cargadas y muscle snatch, y ni un curl femoral ni un peso
+       muerto rumano; a «cuádriceps», envión y jerk con tijera, y ni una
+       sentadilla. Con «lo que no esté en el catálogo no existe» en el prompt,
+       eso no era un detalle de orden: era el menú entero.
+
+       Ahora manda la misma lista curada que usa el generador de la app, que
+       está escrita por músculo y en orden de calidad. Detrás, los compuestos
+       de barra y mancuerna. Y al final del todo, los levantamientos
+       olímpicos: son ejercicios de verdad, pero de otro deporte, y no se
+       recetan a quien pide un plan de hipertrofia. */
+    const OLIMPICO = /arrancada|cargada|clean|snatch|envi[oó]n|jerk|power clean|muscle snatch/i;
+
+    function calidad(ex, mus) {
+      const picks = (g.Planner && Planner.PICKS[mus]) || [];
+      const i = picks.indexOf(ex.id);
+      if (i !== -1) return 1000 - i;                       // curado, en su orden
+      let p = 0;
+      if (g.Planner && Planner.RECOMENDADOS.has(ex.id)) p += 120;
+      if (ex.mechanic === 'compound') p += 60;
+      const e = ORDEN_MATERIAL[ex.equipment];
+      p += (e === undefined ? 0 : (9 - e) * 6);
+      if (ex.category === 'olympic weightlifting') p -= 400;
+      if (OLIMPICO.test(ex.nameEs || ex.name || '')) p -= 400;
+      /* Las variantes de competición de powerlifting —con cadenas, con
+         bandas, desde pines— son para quien compite, no para un plan. */
+      if (/con cadenas|con bandas el|desde pins|off pins|press pin|board/i
+        .test(ex.nameEs || '')) p -= 200;
+      return p;
+    }
+
     return Object.keys(grupos).map(function (mus) {
       const cuantos = foco.indexOf(mus) !== -1 ? tope + 8 : tope;
       const lista = grupos[mus].slice().sort(function (a, b) {
-        const ca = a.mechanic === 'compound' ? 0 : 1;
-        const cb = b.mechanic === 'compound' ? 0 : 1;
-        if (ca !== cb) return ca - cb;
-        const ea = ORDEN_MATERIAL[a.equipment];
-        const eb = ORDEN_MATERIAL[b.equipment];
-        if ((ea === undefined ? 9 : ea) !== (eb === undefined ? 9 : eb)) {
-          return (ea === undefined ? 9 : ea) - (eb === undefined ? 9 : eb);
-        }
+        const d = calidad(b, mus) - calidad(a, mus);
+        if (d) return d;
         return String(a.nameEs).localeCompare(String(b.nameEs));
       }).slice(0, cuantos);
 

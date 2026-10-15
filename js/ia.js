@@ -2216,7 +2216,15 @@
     if (!dias.length) return Promise.reject(new Error(T('Elige al menos un día.')));
 
     const objetivo = Programa.OBJETIVOS[o.objetivo] || {};
-    const minimo = Store.MINIMO_EJERCICIOS || 6;
+    /* Cuántos ejercicios caben de verdad, calculado aquí y no dejado a ojo.
+       Antes se pedían entre seis y nueve fuera cual fuera el tiempo, en el
+       mismo prompt que decía «ajusta el número de ejercicios a ese tiempo de
+       verdad»: con media hora, nueve ejercicios no caben ni contándolos. Un
+       prompt que se contradice a sí mismo deja que el modelo elija a cuál de
+       las dos instrucciones hace caso. */
+    const utiles = Math.max(15, (o.minutos || 60) - 8);
+    const nMax = Math.max(3, Math.min(9, Math.round(utiles / 7)));
+    const nMin = Math.max(3, nMax - 2);
 
     /* los músculos que va a tocar la semana, para darle más catálogo de esos */
     const foco = o.foco && o.foco !== 'equilibrado' ? o.foco : '';
@@ -2261,10 +2269,52 @@
         'igual y le explicas el coste en una frase.\n' : '') +
       menuEjercicios(o.musculos || [], o.gear) + '\n' +
       'CÓMO TIENE QUE SER:\n' +
-      '- Cada sesión, entre ' + minimo + ' y ' + (minimo + 3) + ' ejercicios, los ' +
-      'básicos delante y el accesorio detrás.\n' +
-      '- Reparte los músculos entre los días para que nada se entrene dos días ' +
-      'seguidos sin descanso, mirando los días concretos que te ha dado.\n' +
+      '- Cada sesión, ' + (nMin === nMax ? nMin + ' ejercicios' :
+        'entre ' + nMin + ' y ' + nMax + ' ejercicios') + ', los básicos delante y ' +
+      'el accesorio detrás. Ese número sale del tiempo que tiene: no lo subas porque ' +
+      'te parezcan pocos.\n' +
+
+      /* Lo que más rinde por hora invertida y lo que no estaba escrito en
+         ningún sitio. Sin esta línea, pedir «un plan de cinco días» devuelve el
+         reparto de siempre —un músculo por día—, que es el que deja a cada
+         músculo descansando seis días para volver a estimularlo. */
+      '- FRECUENCIA: cada músculo, DOS VECES POR SEMANA como mínimo, repartido. El ' +
+      'estímulo de una sesión dura en torno a dos días, así que un músculo que se ' +
+      'entrena un solo día se pasa cinco sin nada. Con tres días o menos eso ' +
+      'significa cuerpo completo; con cuatro, torso y pierna dos veces; con cinco o ' +
+      'seis, empuje/tracción/pierna repetido. El día por músculo —lunes pecho, martes ' +
+      'espalda— no entra, por mucho que lo pida la costumbre. Si el reparto de sus ' +
+      'días te obliga a dejar algo a una sola vez, que sea un músculo pequeño y dilo ' +
+      'en las razones.\n' +
+
+      /* El reparto de volumen entre mitades no sale en ninguna cuenta por
+         músculo y es lo que acaba en hombros que duelen a los seis meses. */
+      '- EQUILIBRIO: en la semana, al menos tantas series de tirar como de empujar. ' +
+      'Pecho y hombro frontal se llevan todo el protagonismo solos; la espalda alta y ' +
+      'el deltoides posterior hay que ponerlos a propósito. Y en pierna, el femoral y ' +
+      'el glúteo no se sostienen con sentadillas: necesitan su bisagra de cadera y su ' +
+      'curl.\n' +
+
+      /* Un plan se arma por patrones de movimiento, no por una lista de
+         músculos: así es como no se queda fuera una mitad del cuerpo. */
+      '- PATRONES: en la semana tienen que estar los seis —empuje horizontal, empuje ' +
+      'vertical, tracción horizontal, tracción vertical, rodilla (sentadilla o zancada) ' +
+      'y cadera (peso muerto rumano, hip thrust o buenos días)—. Si falta uno, el plan ' +
+      'tiene un agujero aunque las series cuadren.\n' +
+
+      /* Sin esto, «reps: número» sale a ojo y acaba siendo 10 para todo. */
+      '- REPETICIONES según para qué sirve cada ejercicio: los básicos pesados de 5 a ' +
+      '8, el trabajo principal de hipertrofia de 8 a 12, el aislamiento y lo que no ' +
+      'carga articulación de 12 a 20. Si su objetivo es fuerza, los básicos bajan a 3 ' +
+      'o 5; si es resistencia, todo sube un escalón. No pongas el mismo número en ' +
+      'todos los ejercicios de una sesión: eso delata que no lo has pensado.\n' +
+      /* Matizado: con cuerpo completo en días seguidos esto chocaba con la
+         regla de frecuencia de arriba. Lo que no se repite en días pegados es
+         la carga pesada sobre el mismo sitio, no el músculo. */
+      '- Mira los días concretos que te ha dado: si entrena en días seguidos, el ' +
+      'trabajo PESADO de un mismo músculo no va dos días pegados. El segundo día ese ' +
+      'músculo puede volver, pero con menos carga, más repeticiones o en una versión ' +
+      'apoyada.\n' +
       '- Si arriba ves que lleva músculos abandonados o que nunca ha entrenado ' +
       'alguno, este plan es donde se arregla: méteselos y dilo en las razones.\n' +
       '- Si ves con qué cargas entrena, usa ESOS ejercicios donde encajen: ya sabe ' +
@@ -2330,14 +2380,15 @@
          decirle cuántas repeticiones se deja en la recámara cada semana, «sube
          peso» es una intención, no una instrucción. */
       '"progresion":[{"semana":"Semana 1","texto":"qué hacer esa semana, con números"}],\n' +
-      'La progresión son CINCO entradas, una por semana, y forman un bloque de cuatro ' +
-      'semanas subiendo más una de descarga. Cada entrada dice tres cosas con números: ' +
+      'La progresión son CINCO entradas, una por semana: tres subiendo, la cuarta de ' +
+      'descarga y la quinta volviendo a empezar más arriba. Cada entrada dice tres cosas con números: ' +
       'cuántas repeticiones debe dejarse sin hacer al acabar cada serie —es decir, a ' +
       'cuánto del fallo se queda—, qué sube esa semana respecto a la anterior (peso, ' +
       'repeticiones o series, una cosa, no tres) y en qué se nota que va bien. La ' +
-      'semana 1 se queda claramente lejos del fallo y la 4 es la más dura; la 5 es ' +
-      'descarga de verdad —alrededor de la mitad del volumen, con el mismo peso o algo ' +
-      'menos— y explica para qué sirve, que si no se la salta. Escríbelo en cristiano: ' +
+      'semana 1 se queda claramente lejos del fallo y la 3 es la más dura; la 4 es ' +
+      'descarga de verdad —alrededor de la mitad de las series, con el mismo peso o algo ' +
+      'menos— y explica para qué sirve, que si no se la salta; la 5 arranca otro bloque ' +
+      'con los pesos de la 3. Escríbelo en cristiano: ' +
       '«déjate 3 repeticiones en la recámara», no «RIR 3».\n' +
       '"cardio":"1-2 frases sobre qué hacer los días que no entrena, o cadena vacía",\n' +
       '"aviso":"lo que deba tener presente por sus limitaciones o su edad, y lo que no ' +
