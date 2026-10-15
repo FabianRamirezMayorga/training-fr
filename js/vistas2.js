@@ -3238,9 +3238,29 @@
      de las veces acabas cambiando algo. */
 
   /* Sesenta días de tope: por encima, lo que compras no cabe en una nevera y
-     la lista deja de ser una lista de la compra. */
+     la lista deja de ser una lista de la compra.
+
+     Y tres unidades, porque nadie compra pensando en días sueltos: se compra
+     «para la semana» o «para el mes». El rodillo cuenta en la unidad que elijas
+     y los días salen de multiplicar, que es cuenta de la casa y no de la IA. */
   const TOPE_DIAS = 60;
-  const ROD_ALTO = 44;
+  const ROD_ALTO = 38;
+  /* El singular y el plural van escritos, no se forman pegando una ese: en
+     inglés el plural de «mes» no es «meses» ni «monthes», y eso no se arregla
+     con una regla. */
+  const UNIDADES = [
+    { id: 'dia', label: 'Día', uno: 'día', varios: 'días', factor: 1 },
+    { id: 'semana', label: 'Semana', uno: 'semana', varios: 'semanas', factor: 7 },
+    { id: 'mes', label: 'Mes', uno: 'mes', varios: 'meses', factor: 30 }
+  ];
+
+  function palabraUnidad(u, n) { return n === 1 ? T(u.uno) : T(u.varios); }
+
+  function unidadPorId(id) {
+    return UNIDADES.filter(function (u) { return u.id === id; })[0] || UNIDADES[0];
+  }
+
+  function topeDe(u) { return Math.max(1, Math.floor(TOPE_DIAS / u.factor)); }
 
   /* El rodillo, como el del reloj de iOS. Un número que importa se elige
      mejor viéndolo entre sus vecinos que escribiéndolo: no hay teclado de por
@@ -3354,9 +3374,23 @@
   }
 
   let compraMenu = '';
-  let compraDias = 0;
+  let compraUnidad = 'dia';
+  let compraCuanto = 0;
+  let compraVer = '';
   let compraPreview = null;
   let compraPensando = false;
+
+  /* Lo que se lee debajo del nombre del menú, y que cambia con los días que
+     pidas: enseñar siempre «7 días · 28 comidas» cuando estás comprando para
+     uno es contestar a una pregunta que no has hecho. Las comidas salen de las
+     que trae el menú por día, que es una división, no una opinión. */
+  function subDeMenu(m, dias) {
+    const dd = (m.plan && m.plan.dias) || [];
+    const nc = dd.reduce(function (t, d) { return t + ((d.comidas || []).length); }, 0);
+    const porDia = dd.length ? nc / dd.length : 0;
+    return Tp(dias, '{n} día', '{n} días') + ' · ' +
+      Tp(Math.round(porDia * dias), '{n} comida', '{n} comidas');
+  }
 
   function menuDeCompra() {
     const lista = g.Menus ? Menus.lista() : [];
@@ -3366,6 +3400,40 @@
 
   function diasDelMenu(menu) {
     return ((menu && menu.plan && menu.plan.dias) || []).length || 7;
+  }
+
+  /* Los días de verdad: el número del rodillo por lo que vale su unidad. */
+  function diasPedidos(menu) {
+    const u = unidadPorId(compraUnidad);
+    const n = compraCuanto || Math.round(diasDelMenu(menu) / u.factor) || 1;
+    return Math.min(TOPE_DIAS, Math.max(1, n) * u.factor);
+  }
+
+  /* El lápiz: para los diecinueve días que no son ni semanas ni meses. Deja la
+     unidad en días, porque un número escrito a mano es un número de días. */
+  function pedirDias(menu) {
+    UI.modal(html`
+      <h2>${T('Para cuántos días')}</h2>
+      <p class="muted" style="margin-top:0">${Tn('Entre 1 y {n}.', { n: TOPE_DIAS })}</p>
+      <input id="cp-dias" type="number" inputmode="numeric" min="1" max="${raw(TOPE_DIAS)}"
+             value="${raw(diasPedidos(menu))}">
+      <button class="btn primary block" id="cp-dias-ok" style="margin-top:14px">
+        ${T('Vale')}</button>`,
+      function (el) {
+        const campo = el.querySelector('#cp-dias');
+        setTimeout(function () { campo.focus(); campo.select(); }, 80);
+        const guardar = function () {
+          const n = Math.round(Number(campo.value) || 0);
+          if (!n) { UI.closeModal(); return; }
+          compraUnidad = 'dia';
+          compraCuanto = Math.min(TOPE_DIAS, Math.max(1, n));
+          compraPreview = null;
+          UI.closeModal();
+          render();
+        };
+        el.querySelector('#cp-dias-ok').onclick = guardar;
+        campo.onkeydown = function (e) { if (e.key === 'Enter') guardar(); };
+      });
   }
 
   V.compra = function () {
@@ -3386,12 +3454,15 @@
         </div>`;
     }
 
-    const guardada = g.ListaCompra ? ListaCompra.de(menu.id) : null;
+    const guardada = g.ListaCompra && compraVer ? ListaCompra.de(compraVer) : null;
 
     /* ---- la lista ya hecha: lo que se mira en el supermercado ---- */
     if (guardada && !compraPreview) {
       const n = ListaCompra.cuenta(guardada);
-      return html`${raw(atras)}
+      return html`
+        <button class="btn sm ghost" data-a="volverasistente" style="margin-bottom:10px">
+          ${raw(icon('back'))} ${T('Lista de la compra')}</button>
+        <h1>${guardada.menuNombre || menu.nombre}</h1>
         <p class="muted">${Tn('{menu} · {dias}',
           { menu: guardada.menuNombre || menu.nombre,
             dias: Tp(guardada.dias, '{n} día', '{n} días') })}</p>
@@ -3434,53 +3505,62 @@
     }
 
     /* ---- el asistente: de qué menú, para cuántos días ---- */
-    const base = diasDelMenu(menu);
-    const dias = Math.min(TOPE_DIAS, compraDias || base);
-    const atajos = [base, base * 2, base * 3, 30].filter(function (v, i, a) {
-      return v <= TOPE_DIAS && a.indexOf(v) === i;
-    });
+    const uni = unidadPorId(compraUnidad);
+    const tope = topeDe(uni);
+    const cuanto = Math.min(tope, Math.max(1, compraCuanto || Math.round(
+      diasDelMenu(menu) / uni.factor) || 1));
+    const dias = cuanto * uni.factor;
+    const vivas = g.ListaCompra ? ListaCompra.vivas() : [];
 
     return html`${raw(atras)}
       <p class="muted">${T('Dime de qué menú y para cuántos días, y el entrenador monta ' +
         'la lista sumando los platos.')}</p>
 
       <div class="list-title">${T('De qué menú')}</div>
-      <div class="list">
+      <!-- En columnas y no apilados: con dos menús, uno encima de otro obliga a
+           recordar lo que decía el de arriba para compararlo con el de abajo. Lo
+           que se compara se pone al lado. -->
+      <div class="menus-grid">
         ${raw(lista.map(function (x) {
-          const dd = (x.plan && x.plan.dias) || [];
-          const nc = dd.reduce(function (t, d) { return t + ((d.comidas || []).length); }, 0);
           const on = x.id === menu.id;
-          return '<button class="list-row menu-op' + (on ? ' on' : '') + '"' +
-            (lista.length > 1 ? ' data-menu="' + esc(x.id) + '"' : ' disabled') + '>' +
-            '<span class="grow">' +
-              '<span class="list-row-title">' + esc(x.nombre) + '</span>' +
-              '<span class="list-row-sub">' +
-                esc(Tp(dd.length, '{n} día', '{n} días')) + ' · ' +
-                esc(Tp(nc, '{n} comida', '{n} comidas')) + '</span>' +
-            '</span>' +
-            '<i class="menu-tic">' + icon('check') + '</i></button>';
+          return '<button class="menu-tarj' + (on ? ' on' : '') + '" data-menu="' +
+            esc(x.id) + '">' +
+            '<i class="menu-tic">' + icon('check') + '</i>' +
+            '<b class="menu-nom">' + esc(x.nombre) + '</b>' +
+            '<span class="menu-sub" data-sub="' + esc(x.id) + '">' +
+              esc(subDeMenu(x, dias)) + '</span></button>';
         }).join(''))}
       </div>
 
       <div class="list-title">${T('Para cuántos días')}</div>
+      <!-- La unidad delante del rodillo: quien compra «para la semana» no quiere
+           buscar el 7 entre sesenta números. Y el lápiz al final, para el número
+           que no cae redondo en ninguna de las tres. -->
+      <div class="segmento segmento-auto">
+        ${raw(UNIDADES.map(function (u) {
+          return '<button class="' + (u.id === uni.id ? 'on' : '') +
+            '" data-uni="' + u.id + '">' + esc(T(u.label)) + '</button>';
+        }).join(''))}
+        <button class="seg-lapiz" data-a="diasamano"
+                aria-label="${T('Escribir los días')}" title="${T('Escribir los días')}"
+          >${raw(icon('edit'))}</button>
+      </div>
+
       <div class="rodillo" id="rod-dias">
         <div class="rodillo-banda" aria-hidden="true"></div>
         <div class="rodillo-pista" tabindex="0" role="spinbutton"
              aria-label="${T('Para cuántos días')}" aria-valuemin="1"
-             aria-valuemax="${raw(TOPE_DIAS)}" aria-valuenow="${raw(dias)}">
-          ${raw(Array.from({ length: TOPE_DIAS }, function (_, i) {
+             aria-valuemax="${raw(tope)}" aria-valuenow="${raw(cuanto)}">
+          ${raw(Array.from({ length: tope }, function (_, i) {
             return '<button class="rodillo-op" data-v="' + (i + 1) + '">' +
               (i + 1) + '</button>';
           }).join(''))}
         </div>
-        <span class="rodillo-unidad" aria-hidden="true">${T('días')}</span>
+        <span class="rodillo-unidad" aria-hidden="true" id="rod-uni"
+          >${palabraUnidad(uni, cuanto)}</span>
       </div>
-      <div class="rodillo-atajos">
-        ${raw(atajos.map(function (nd) {
-          return '<button class="rod-atajo' + (nd === dias ? ' on' : '') +
-            '" data-dias="' + nd + '">' + nd + '</button>';
-        }).join(''))}
-      </div>
+      <p class="rod-total" id="rod-total">${raw(uni.factor === 1 ? '&nbsp;'
+        : esc(Tp(dias, '= {n} día', '= {n} días')))}</p>
 
       ${raw(compraPreview ? html`
         <div class="list-title">${T('Así queda')}</div>
@@ -3501,7 +3581,28 @@
           ${raw(icon('chispa'))} ${compraPensando
             ? T('Sumando los platos…') : T('Generar la lista')}</button>`)}
 
-      <div id="compra-pensando"></div>`;
+      <div id="compra-pensando"></div>
+
+      ${raw(vivas.length ? html`
+        <!-- Y las que ya tienes, debajo. Una lista a medias no se abandona
+             porque cambies de menú: se sigue comprando. -->
+        <div class="list-title" style="margin-top:20px">${T('Tus listas')}</div>
+        <div class="list">
+          ${raw(vivas.map(function (l) {
+            const n = ListaCompra.cuenta(l);
+            const pc = n.total ? Math.round(n.hechas / n.total * 100) : 0;
+            return '<button class="list-row tap compra-guardada" data-abrirlista="' +
+              esc(l.menuId) + '">' +
+              '<span class="grow"><span class="list-row-title">' +
+                esc(l.menuNombre || T('Menú')) + '</span>' +
+              '<span class="list-row-sub">' +
+                esc(Tp(l.dias, '{n} día', '{n} días')) + ' · ' +
+                esc(Tn('{a} de {b}', { a: n.hechas, b: n.total })) + '</span>' +
+              '<span class="prog compra-prog"><i style="width:' + pc + '%"></i></span>' +
+              '</span>' +
+              '<span class="chevron">' + icon('chevron') + '</span></button>';
+          }).join(''))}
+        </div>` : '')}`;
   };
 
   V.compra.mount = function (root) {
@@ -3510,38 +3611,70 @@
     const menu = menuDeCompra();
     if (!menu) return;
 
+    bind(root, '[data-a=volverasistente]', function () {
+      compraVer = '';
+      render();
+    });
+
+    bindAll(root, '[data-abrirlista]', function (el) {
+      compraVer = el.getAttribute('data-abrirlista');
+      compraPreview = null;
+      render();
+      window.scrollTo(0, 0);
+    });
+
     bindAll(root, '[data-menu]', function (el) {
       compraMenu = el.getAttribute('data-menu');
       compraPreview = null;
-      compraDias = 0;
       render();
     });
 
-    function marcarAtajos(n) {
-      [].forEach.call(root.querySelectorAll('[data-dias]'), function (el) {
-        el.classList.toggle('on', Number(el.getAttribute('data-dias')) === n);
-      });
-    }
+    const uni = unidadPorId(compraUnidad);
 
-    const rodillo = montarRodillo(root, compraDias || diasDelMenu(menu), function (n) {
-      compraDias = n;
-      marcarAtajos(n);
-      /* Mover el rodillo no repinta la pantalla: repintarla se llevaría por
-         delante el propio rodillo que estás tocando. Solo si había una lista
-         en pantalla, que con otros días ya no vale. */
-      if (compraPreview) { compraPreview = null; render(); }
-    });
-
-    bindAll(root, '[data-dias]', function (el) {
-      const n = Number(el.getAttribute('data-dias'));
-      if (rodillo) { rodillo.ir(n); return; }
-      compraDias = n;
+    bindAll(root, '[data-uni]', function (el) {
+      const nueva = unidadPorId(el.getAttribute('data-uni'));
+      /* Al cambiar de unidad se conservan los días, no el número: de 14 días a
+         semanas se sale en 2, no en 14 semanas. */
+      compraCuanto = Math.min(topeDe(nueva),
+        Math.max(1, Math.round(diasPedidos(menu) / nueva.factor)));
+      compraUnidad = nueva.id;
       compraPreview = null;
       render();
     });
 
+    bind(root, '[data-a=diasamano]', function () { pedirDias(menu); });
+
+    /* Lo que cambia al mover el rodillo se reescribe en su sitio. Repintar la
+       pantalla entera se llevaría por delante el rodillo que tienes bajo el
+       dedo, y además te mandaría arriba del todo. */
+    function refrescarCifras(cuanto) {
+      const dias = cuanto * uni.factor;
+      [].forEach.call(root.querySelectorAll('[data-sub]'), function (el) {
+        const m = (g.Menus ? Menus.lista() : []).filter(function (x) {
+          return x.id === el.getAttribute('data-sub');
+        })[0];
+        if (m) el.textContent = subDeMenu(m, dias);
+      });
+      const u = root.querySelector('#rod-uni');
+      if (u) u.textContent = palabraUnidad(uni, cuanto);
+      const tot = root.querySelector('#rod-total');
+      if (tot) {
+        tot.innerHTML = uni.factor === 1 ? '&nbsp;'
+          : esc(Tp(dias, '= {n} día', '= {n} días'));
+      }
+    }
+
+    const rodillo = montarRodillo(root, Math.min(topeDe(uni), Math.max(1,
+      compraCuanto || Math.round(diasDelMenu(menu) / uni.factor) || 1)), function (n) {
+      compraCuanto = n;
+      refrescarCifras(n);
+      if (compraPreview) { compraPreview = null; render(); }
+    });
+    if (rodillo) refrescarCifras(Math.min(topeDe(uni), Math.max(1,
+      compraCuanto || Math.round(diasDelMenu(menu) / uni.factor) || 1)));
+
     bind(root, '[data-a=generarlista]', function () {
-      const n = compraDias || diasDelMenu(menu);
+      const n = diasPedidos(menu);
       compraPensando = true;
       render();
       ListaCompra.generar(menu, n).then(function (l) {
@@ -3559,7 +3692,11 @@
       if (!compraPreview) return;
       ListaCompra.poner(menu.id, compraPreview);
       compraPreview = null;
+      /* Y se abre: la guardas para comprar con ella, no para verla en una lista
+         de listas. */
+      compraVer = menu.id;
       render();
+      window.scrollTo(0, 0);
       UI.toast(T('Lista guardada.'));
     });
 
@@ -3568,14 +3705,15 @@
         T('Se pierde lo que lleves tachado y las sustituciones que hayas hecho.'),
         T('Rehacer'), true).then(function (si) {
           if (!si) return;
-          ListaCompra.borrar(menu.id);
+          ListaCompra.borrar(compraVer || menu.id);
           compraPreview = null;
+          compraVer = '';
           render();
         });
     });
 
     bind(root, '[data-a=limpiarmarcas]', function () {
-      ListaCompra.limpiarMarcas(menu.id);
+      ListaCompra.limpiarMarcas(compraVer || menu.id);
       render();
     });
 

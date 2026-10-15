@@ -128,8 +128,18 @@
     poner(menuId, l);
   }
 
+  /* Todas las listas vivas, de más nueva a más vieja, con el id del menú
+     dentro. La pantalla las necesita para enseñártelas juntas: tener dos listas
+     a medias y que solo se vea la del menú que esté activo era esconderlas. */
+  function vivas() {
+    const todo = todas();
+    return Object.keys(todo).map(function (id) {
+      return Object.assign({ menuId: id }, todo[id]);
+    }).sort(function (a, b) { return (b.t || 0) - (a.t || 0); });
+  }
+
   g.ListaCompra = {
-    de: de, poner: poner, borrar: borrar, generar: generar,
+    de: de, poner: poner, borrar: borrar, generar: generar, vivas: vivas,
     marcar: marcar, limpiarMarcas: limpiarMarcas, cuenta: cuenta,
     sustituir: sustituir, deshacerSustitucion: deshacerSustitucion
   };

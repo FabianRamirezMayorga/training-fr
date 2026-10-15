@@ -1374,6 +1374,18 @@
 
 
     /* ---------- La lista de la compra ---------- */
+    'Primero si cuentas por días, por semanas o por meses, y luego giras el rodillo: dos semanas son catorce días y esa cuenta la hace la app. El lápiz del final es para el número que no cae redondo en ninguna de las tres. Si pides veinte días de un menú de siete, se multiplican las cantidades antes de redondear.':
+      'First whether you count in days, weeks or months, then you spin the wheel: two weeks is fourteen days and the app does that sum. The pencil at the end is for the number that fits none of the three. If you ask for twenty days from a seven-day menu, the amounts are multiplied before rounding.',
+    'Las que tengas a medias están debajo del todo.':
+      'The ones you have half done are right at the bottom.',
+    'Una lista no se abandona porque cambies de menú: se sigue comprando con ella. Ahí salen todas, con lo que llevas tachado de cada una, y se abren tocándolas.':
+      'You do not drop a list because you switch menus: you carry on shopping with it. They are all there, with what you have ticked off each one, and they open with a tap.',
+    '¿Por qué mi menú de cinco días pone treinta?':
+      'Why does my five-day menu say thirty?',
+    'Porque debajo del nombre no te dice lo que trae el menú, sino lo que vas a comprar: los días que has pedido y las comidas que salen de repetirlo hasta cubrirlos.':
+      'Because under the name it does not tell you what the menu brings, but what you are going to buy: the days you asked for and the meals that come from repeating it to cover them.',
+    'El menú sigue siendo de cinco días. Lo que cambia es la compra, y es el número que importa cuando estás decidiendo cuánto llevarte.':
+      'The menu is still five days. What changes is the shopping, and that is the number that matters when you are deciding how much to take home.',
     'La lista vive ahí dentro, encima de tus menús.':
       'The list lives in there, above your menus.',
     'Elige de qué menú.': 'Pick which menu.',

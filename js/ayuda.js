@@ -540,7 +540,7 @@
         { t: 'Elige de qué menú.',
           d: 'Cada uno te dice cuántos días cubre y cuántas comidas trae, que es lo que hace falta saber antes de comprar: a veces se compra para el que empieza el lunes, no para el que está acabando.' },
         { t: 'Di para cuántos días.',
-          d: 'El rodillo va de uno a sesenta y debajo están los saltos de una, dos y tres semanas y un mes. Si pides veinte días de un menú de siete, se multiplican las cantidades antes de redondear.' },
+          d: 'Primero si cuentas por días, por semanas o por meses, y luego giras el rodillo: dos semanas son catorce días y esa cuenta la hace la app. El lápiz del final es para el número que no cae redondo en ninguna de las tres. Si pides veinte días de un menú de siete, se multiplican las cantidades antes de redondear.' },
         { t: 'Púlsale a *Generar la lista*.',
           d: 'La saca el entrenador de los propios platos del menú, sin tocarlo: suma las raciones de todos los días, redondea a lo que de verdad se vende —560 g de avena son un paquete de kilo— y lo agrupa por zonas. Queda guardada en ese menú.' },
         { t: 'Mira cómo queda y pulsa *Crear la lista*.',
@@ -550,7 +550,9 @@
         { t: 'Si algo no lo vas a llevar, toca el botón de la derecha.',
           d: 'Escribes tú con qué lo cambias, o le preguntas al entrenador por cuál puedes cambiarlo: te da hasta tres opciones con la cantidad equivalente y lo que te mueve en tus números, y eliges una tocando.' },
         { t: 'Y el cambio llega al menú si quieres.',
-          d: 'Después de sustituir se te pregunta si lo cambio también en los platos. Se pregunta y no se hace solo porque reescribe comidas que tú no has tocado: quien cambia una marca de arroz por otra no quiere que le reescriban la semana.' }
+          d: 'Después de sustituir se te pregunta si lo cambio también en los platos. Se pregunta y no se hace solo porque reescribe comidas que tú no has tocado: quien cambia una marca de arroz por otra no quiere que le reescriban la semana.' },
+        { t: 'Las que tengas a medias están debajo del todo.',
+          d: 'Una lista no se abandona porque cambies de menú: se sigue comprando con ella. Ahí salen todas, con lo que llevas tachado de cada una, y se abren tocándolas.' }
       ],
       cierre: 'La lista se guarda aparte del menú, así que sustituir algo en el súper no te toca el plan salvo que lo digas. Y *Rehacer* empieza de cero cuando cambies de menú o de semana.',
       ver: ['g-ciclos', 'c-pais'] },
@@ -794,6 +796,10 @@
   /* ================= preguntas ================= */
 
   const PREGUNTAS = [
+    { id: 'p-menudias', q: '¿Por qué mi menú de cinco días pone treinta?',
+      a: ['Porque debajo del nombre no te dice lo que trae el menú, sino lo que vas a comprar: los días que has pedido y las comidas que salen de repetirlo hasta cubrirlos.',
+        'El menú sigue siendo de cinco días. Lo que cambia es la compra, y es el número que importa cuando estás decidiendo cuánto llevarte.'],
+      ver: ['c-compra'] },
     { id: 'p-noinstala', q: '¿Por qué no me sale el botón de instalar?',
       a: ['Porque no todos los navegadores lo tienen. El botón que instala de una vez lo dan Chrome y Edge, en Android y en el ordenador; ahí la app te lo ofrece sola.',
         'En el iPhone ese botón no existe en ningún sitio: Apple obliga a añadirla a mano desde Compartir. La app te enseña los pasos en vez del botón.',

@@ -4655,6 +4655,12 @@
     'Otros': 'Other',
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
+    'Tus listas': 'Your lists',
+    'Menú': 'Menu',
+    'Escribir los días': 'Type the days',
+    'Entre 1 y {n}.': 'Between 1 and {n}.',
+    '= {n} día': '= {n} day',
+    '= {n} días': '= {n} days',
     'Sale de tu menú: cuando tengas uno generado, aquí estará lo que hay que comprar.':
       'It comes from your menu: once you have one generated, this is where the shopping will be.',
     '{menu} · {dias}': '{menu} · {dias}',
