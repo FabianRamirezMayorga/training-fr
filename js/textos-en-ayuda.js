@@ -1374,6 +1374,14 @@
 
 
     /* ---------- La lista de la compra ---------- */
+    '¿Cómo sé que la compra me da la proteína del mes?':
+      'How do I know the shopping covers the month’s protein?',
+    'Porque la cifra sale de tu propio menú, no de un cálculo aparte: se suma la proteína de todas sus comidas, se divide entre sus días y se multiplica por los días que pides. Esa cantidad se le da al entrenador como objetivo de la compra, con la tabla para que la sume él mismo antes de darte la lista.':
+      'Because the figure comes from your own menu, not from a separate calculation: the protein in all its meals is added up, divided by its days and multiplied by the days you ask for. That amount is given to the coach as the shopping target, along with the table so it can add it up itself before handing you the list.',
+    'Y todo va en crudo. La carne y el pescado pierden como un 25 % de peso al cocinarse, así que 150 g de pechuga ya hecha salen de unos 200 g crudos: lo que se compra son los 200. Con el arroz y las legumbres pasa al revés, 100 g cocidos son unos 33 en seco.':
+      'And everything is raw weight. Meat and fish lose about 25 % of their weight when cooked, so 150 g of cooked chicken breast comes from about 200 g raw: what you buy is the 200. With rice and pulses it works the other way, 100 g cooked is about 33 g dry.',
+    'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.':
+      'It is the thing that goes wrong most often, and you cannot see it by looking at the list —it looks like a lot of food—: you only see it by adding up.',
     'Lo que falte lo añades tú.': 'Whatever is missing, you add it.',
     'Con «Añadir algo» al final: dices qué es, cuánto si quieres, y en qué zona del súper va, para que te caiga donde vas a pasar y no en un cajón de sastre al final. Y para quitar algo de la lista, desliza su fila hacia la izquierda.':
       'With “Add something” at the end: you say what it is, how much if you want, and which aisle it goes in, so it lands where you will be walking and not in a catch-all at the bottom. And to take something off the list, swipe its row to the left.',

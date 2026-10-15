@@ -3717,14 +3717,20 @@
        compra de un día salga con dos kilos de carne. Sin este número delante,
        «redondea a lo que se vende» convierte 160 g de pollo en una libra, y
        cinco carnes distintas en dos kilos y cuarto para una cena. */
-    let kcal = 0, comidas = 0;
+    let kcal = 0, prot = 0, comidas = 0;
     dias.forEach(function (d) {
       (d.comidas || []).forEach(function (co) {
         kcal += Number(co.kcal) || 0;
+        prot += Number(co.prot) || 0;
         comidas++;
       });
     });
     const kcalDia = dias.length ? Math.round(kcal / dias.length) : 0;
+    /* La proteína del propio menú, sumada aquí. Es la cifra que la compra tiene
+       que cubrir y es la que más se falla: una lista de treinta días con tres
+       kilos de pollo y poco más se queda en la mitad de lo que toca, y eso no
+       se ve mirando la lista —parece mucha comida—, solo se ve sumando. */
+    const protDia = dias.length ? Math.round(prot / dias.length) : 0;
     const comidasDia = dias.length ? Math.round(comidas / dias.length) : 0;
 
     /* Concordar en el propio prompt. «PARA 1 DÍAS» y «repetirlo 1 veces» no
@@ -3742,6 +3748,14 @@
         'día en ' + comidasDia + ' comidas. Esta compra son ' + dd(n) + ', o sea unas ' +
         (kcalDia * n) + ' kcal en total, para UNA persona. Si lo que sumas da de comer a ' +
         'una familia, te has pasado.' + SALTO + SALTO : '') +
+      (protDia ? 'Y LA PROTEÍNA, que es lo que más se queda corto: el menú lleva ' +
+        protDia + ' g al día, o sea ' + (protDia * n) + ' g en toda esta compra.' + SALTO +
+        'ANTES DE RESPONDER, suma la proteína de lo que hayas puesto y comprueba que ' +
+        'llega a esos ' + (protDia * n) + ' g. Por cada 100 g en crudo: pollo 23, pavo 24, ' +
+        'res magra 21, cerdo magro 21, pescado blanco 20, atún 23, huevo 6 por unidad, ' +
+        'leche 3,4 por cada 100 ml, yogur griego 9, queso fresco 12, lentejas secas 24, ' +
+        'garbanzos secos 19. Si no llega, SUBE las cantidades hasta que llegue; no es una ' +
+        'lista válida si deja la mitad de la proteína sin comprar.' + SALTO + SALTO : '') +
       'REGLAS:' + SALTO +
       '- SOLO lo que esté escrito en los platos de arriba. Si un alimento no sale ahí, ' +
       'no va en la lista. No completes la despensa ni añadas lo que «pega» con el menú: ' +
@@ -3758,9 +3772,12 @@
       'lechugas, panes. "Papa criolla: 86 g" no se puede comprar y no dice nada; son ' +
       'unas 3 papas criollas. "Plátano maduro: 194 g" es 1 plátano. Redondea SIEMPRE ' +
       'hacia arriba a la pieza entera, y si ayuda pon el peso detrás entre paréntesis.' + SALTO +
-      '  b) En crudo y con lo que se tira: cáscara, hueso, piel, vaina. Si el plato dice ' +
-      '"100 g de arroz cocido" o "150 g de pechuga a la plancha", eso no es lo que pesa ' +
-      'en la balanza de la tienda: conviértelo.' + SALTO +
+      '  b) En CRUDO, y con lo que se tira: cáscara, hueso, piel, vaina. La carne y el ' +
+      'pescado pierden en torno a un 25 % de peso al cocinarse, así que van al revés de ' +
+      'lo que parece: 150 g de pechuga ya hecha salen de unos 200 g crudos, y lo que se ' +
+      'compra son los 200. El arroz, la pasta y las legumbres van al contrario: 100 g ' +
+      'cocidos son unos 33 g en seco. Si el menú no dice si el peso es crudo o cocido, ' +
+      'da por hecho que es el del plato —cocinado— y conviértelo.' + SALTO +
       '- En "venta" va cómo se vende, y SOLO si el envase más pequeño es mayor que lo que ' +
       'hace falta: 320 g de pollo → venta "bandeja de 500 g". Si lo que hace falta ya pasa ' +
       'del envase, deja "venta" vacío. Así se ve lo que se come y lo que va a sobrar, que ' +

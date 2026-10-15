@@ -800,6 +800,12 @@
   /* ================= preguntas ================= */
 
   const PREGUNTAS = [
+    { id: 'p-protecompra', q: '¿Cómo sé que la compra me da la proteína del mes?',
+      a: ['Porque la cifra sale de tu propio menú, no de un cálculo aparte: se suma la proteína de todas sus comidas, se divide entre sus días y se multiplica por los días que pides. Esa cantidad se le da al entrenador como objetivo de la compra, con la tabla para que la sume él mismo antes de darte la lista.',
+        'Y todo va en crudo. La carne y el pescado pierden como un 25 % de peso al cocinarse, así que 150 g de pechuga ya hecha salen de unos 200 g crudos: lo que se compra son los 200. Con el arroz y las legumbres pasa al revés, 100 g cocidos son unos 33 en seco.',
+        'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.'],
+      ver: ['c-compra'] },
+
     { id: 'p-dosnumeros', q: '¿Por qué la lista pone 160 g y debajo «bandeja de 500 g»?',
       a: ['Porque son dos cosas distintas y conviene ver las dos. El primero es lo que te vas a comer, sumado de los platos. El segundo es cómo lo vende la tienda, que casi nunca coincide.',
         'Antes solo salía el segundo, y eso hacía que la compra de un día se leyera como la de una semana: cinco carnes redondeadas a su envase son dos kilos de carne para una cena. El número que manda es el primero; el segundo solo te avisa de lo que va a sobrar.'],
