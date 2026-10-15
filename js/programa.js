@@ -240,17 +240,33 @@
        por semana, que es de lo que iba todo esto. Cuando el pecho salía solo
        en A y el bíceps solo en C, un plan de tres días dejaba medio cuerpo a
        una vez. */
+    /* El día único lleva los seis patrones y nada más. Quien entrena una vez
+       por semana no puede permitirse que ese día le falte el tirón vertical o
+       el empuje por encima de la cabeza: no hay un segundo día donde ponerlo.
+       Las plantillas A, B y C reparten porque hay dónde repartir; esta no. */
+    fullUnico: { nombre: 'Cuerpo completo', huecos: [
+      h(P.sen, 'quadriceps', 'principal'), h(P.emH, 'chest', 'principal'),
+      h(P.trV, 'lats', 'principal'), h(P.bis, 'hamstrings', 'accesorio'),
+      h(P.emV, 'shoulders', 'accesorio'), h(P.trH, 'middle back', 'accesorio')] },
+
     fullA: { nombre: 'Cuerpo completo A', huecos: [
       h(P.sen, 'quadriceps', 'principal'), h(P.emH, 'chest', 'principal'),
       h(P.trH, 'middle back', 'principal'), h(P.bis, 'hamstrings', 'accesorio'),
       h(P.lat, 'shoulders', 'accesorio'), h(P.ant, 'abdominals', 'accesorio')] },
+    /* La bisagra de cadera va de principal aquí y no de accesorio en A, para
+       que los tres principales de A y los tres de B sumen exactamente los seis
+       patrones fundamentales. Con dos días y poco tiempo el recorte se queda
+       solo con los principales, y así lo que sobrevive sigue siendo un plan
+       entero en vez de uno sin nada de femoral. El glúteo no se queda sin: el
+       peso muerto rumano es suyo también, y en C tiene su empuje de cadera. */
     fullB: { nombre: 'Cuerpo completo B', huecos: [
-      h(P.cad, 'glutes', 'principal'), h(P.trV, 'lats', 'principal'),
+      h(P.bis, 'hamstrings', 'principal'), h(P.trV, 'lats', 'principal'),
       h(P.emV, 'shoulders', 'principal'), h(P.zan, 'quadriceps', 'accesorio'),
-      h(P.cbi, 'biceps', 'accesorio'), h(P.etr, 'triceps', 'accesorio')] },
+      h(P.cad, 'glutes', 'accesorio'), h(P.cbi, 'biceps', 'accesorio'),
+      h(P.etr, 'triceps', 'accesorio')] },
     fullC: { nombre: 'Cuerpo completo C', huecos: [
-      h(P.bis, 'hamstrings', 'principal'), h(P.emH, 'chest', 'principal'),
-      h(P.trV, 'lats', 'principal'), h(P.cad, 'glutes', 'accesorio'),
+      h(P.cad, 'glutes', 'principal'), h(P.emH, 'chest', 'principal'),
+      h(P.trH, 'middle back', 'principal'), h(P.cuf, 'hamstrings', 'accesorio'),
       h(P.exc, 'quadriceps', 'accesorio'), h(P.gem, 'calves', 'accesorio')] },
 
     superior: { nombre: 'Tren superior', huecos: [
@@ -295,7 +311,7 @@
      semana en cada músculo es lo que más rinde, así que hasta cuatro días
      manda el cuerpo completo o el torso/pierna, no el músculo por día. */
   function repartoSemanal(dias) {
-    if (dias <= 1) return ['fullA'];
+    if (dias <= 1) return ['fullUnico'];
     if (dias === 2) return ['fullA', 'fullB'];
     /* Tres días es cuerpo completo para todo el mundo, no solo para novatos.
        Empuje/tracción/pierna en tres días deja los doce músculos a una vez por
@@ -541,7 +557,20 @@
         const cfg = obj[hueco.rol];
         const estatico = ex.force === 'static';
         const reps = estatico ? 40 : cfg.reps + (hueco.rol === 'accesorio' ? sexo.repsExtra : 0);
-        const rest = Math.round(cfg.rest * (hueco.rol === 'accesorio' ? sexo.descanso : 1) / 5) * 5;
+        let rest = Math.round(cfg.rest * (hueco.rol === 'accesorio' ? sexo.descanso : 1) / 5) * 5;
+        /* Dos minutos como mínimo en lo que carga la columna. El objetivo de
+           hipertrofia pone noventa segundos a todo, y noventa en una sentadilla
+           pesada deja la siguiente serie corta de fuerza: lo dice el auditor de
+           la app, que lo marcaba como fallo, y lo dice el encargo que la app le
+           hace a la IA —«no se recorta»—. Eran tres criterios distintos para la
+           misma decisión. */
+        if (ex.mechanic === 'compound' && AXIALES_PROG.indexOf(hueco.patron) !== -1) {
+          /* También de accesorio. Un peso muerto rumano cansa lo que cansa
+             esté primero o cuarto en la hoja, y con setenta y cinco segundos la
+             serie siguiente sale corta de fuerza. El sitio en la sesión cambia
+             el orden, no la factura. */
+          rest = Math.max(rest, hueco.rol === 'principal' ? 150 : 120);
+        }
 
         sumarVolumen(volumen, ex, hueco.musculo, cfg.series, directas);
         ejercicios.push({
@@ -683,6 +712,17 @@
 
   const TOPE_SERIES = 5;
 
+  /* Los que comprimen la columna con el peso encima. Misma lista que usa el
+     auditor: si cada uno tiene la suya, acaban discutiendo. */
+  const AXIALES_PROG = ['sentadilla', 'bisagra de cadera'];
+
+  /* Los patrones que no pueden faltar en una semana. Al recortar por tiempo se
+     quitaba el único ejercicio de bisagra de cadera que había, y un plan sin
+     bisagra deja el femoral y el glúteo sin nada por mucho que cuadren las
+     series. */
+  const FUNDAMENTALES = ['sentadilla', 'bisagra de cadera', 'empuje horizontal',
+    'empuje vertical', 'traccion horizontal', 'traccion vertical'];
+
   function cuadrarVolumen(sesiones, meta, minutos, calentamiento) {
     /* Hasta cincuenta ajustes: con una sesión llena el bucle se para solo
        mucho antes, y el tope está para que un plan raro no lo deje colgado. */
@@ -765,11 +805,39 @@
         ses.ejercicios.forEach(function (e) {
           cuantos[e.musculo] = (cuantos[e.musculo] || 0) + 1;
         });
-        const fuera = accesorios.slice().sort(function (a, b) {
+        /* Y nunca el único de un patrón fundamental: con dos días y poco
+           tiempo, el recorte se llevaba la bisagra de cadera y el plan salía
+           sin nada de femoral ni de glúteo. Si no queda otra cosa que quitar,
+           entonces sí, pero es el último de la fila. */
+        const porPatron = {};
+        ses.ejercicios.forEach(function (e) {
+          porPatron[e.patron] = (porPatron[e.patron] || 0) + 1;
+        });
+        const prescindible = function (e) {
+          return FUNDAMENTALES.indexOf(e.patron) === -1 || porPatron[e.patron] > 1;
+        };
+        const orden = accesorios.slice().sort(function (a, b) {
+          const pa = prescindible(a) ? 0 : 1;
+          const pb = prescindible(b) ? 0 : 1;
+          if (pa !== pb) return pa - pb;
           return (cuantos[b.musculo] || 0) - (cuantos[a.musculo] || 0) ||
             ses.ejercicios.indexOf(b) - ses.ejercicios.indexOf(a);
-        })[0];
-        ses.ejercicios.splice(ses.ejercicios.indexOf(fuera), 1);
+        });
+        const fuera = orden[0];
+        /* Si lo único que queda por quitar es el único ejercicio de un
+           patrón fundamental, antes que amputarlo se le bajan series a los
+           básicos. Con un día a la semana y descansos de fuerza, recortar
+           por ejercicios dejaba la sesión sin tirón horizontal ni empuje
+           vertical: seis patrones a tres series valen más que tres patrones
+           a cinco cuando solo entrenas una vez. */
+        if (!prescindible(fuera) &&
+            ses.ejercicios.some(function (e) { return e.sets > 3; })) {
+          const altos = ses.ejercicios.filter(function (e) { return e.sets > 3; })
+            .sort(function (a, b) { return b.sets - a.sets; });
+          altos[0].sets--;
+        } else {
+          ses.ejercicios.splice(ses.ejercicios.indexOf(fuera), 1);
+        }
       } else if (ses.ejercicios.some(function (e) { return e.sets > 3; })) {
         /* Media hora de verdad: con tres ejercicios y nada que quitar, lo que
            queda es bajar de cuatro series a tres. Una sesión que cabe es la
@@ -1162,6 +1230,11 @@
     sugerir: sugerir,
     crear: crear, aRutinas: aRutinas, lesionesDe: lesionesDe,
     leer: leer, frase: frase, nombreSesion: nombreSesion,
-    OBJETIVOS: OBJETIVOS, LESIONES: LESIONES
+    OBJETIVOS: OBJETIVOS, LESIONES: LESIONES,
+    /* La vara con la que el generador decide si un músculo va corto. La exporta
+       para que el auditor mida igual: con dos varas distintas, la app se
+       suspendía a sí misma —sacaba seis series de gemelo porque le parecían
+       bastantes y acto seguido las marcaba como fallo—. */
+    metaDe: metaDe, VOLUMEN_MIN: VOLUMEN_MIN
   };
 })(window);

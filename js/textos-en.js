@@ -4656,6 +4656,9 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'Tres básicos pesados el mismo día': 'Three heavy lifts on the same day',
+    '{lista} caen juntos en {donde}, y el tercero se hace con la espalda baja ya cargada de los dos anteriores':
+      '{lista} land together on {donde}, and the third is done with your lower back already loaded by the other two',
     'Sin barra ni bandas no hay de dónde tirar, así que la espalda se queda sin trabajo directo y el plan se te va a ir hacia el empuje. Una barra de puerta o unas bandas con anclaje lo arreglan por poco dinero; mientras tanto, cuenta con que esto es un plan a medias.':
       'With no bar and no bands there is nothing to pull against, so your back gets no direct work and the plan will drift towards pushing. A doorway bar or anchored bands fix it cheaply; until then, treat this as half a plan.',
     'Con este material no hay remo ni curl en el catálogo, así que la espalda y el bíceps se quedan sin trabajo directo. Si puedes anclar la banda a una puerta, el remo sale; si no, es el hueco que tiene este plan.':

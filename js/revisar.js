@@ -45,6 +45,11 @@
 
   /* Los que cargan la columna de pie. Dos de estos el mismo día dejan la
      espalda baja frita para el segundo, que se hace peor y con más riesgo. */
+  function minimoDe(musculo) {
+    return g.Programa && Programa.metaDe
+      ? Math.min(MINIMO, Programa.metaDe(musculo, MINIMO)) : MINIMO;
+  }
+
   const AXIALES = ['sentadilla', 'bisagra de cadera'];
 
   function ejerciciosDe(ses) { return ses.ejercicios || ses.exercises || []; }
@@ -106,7 +111,11 @@
     GRANDES.forEach(function (m) {
       const n = directas[m] || 0;
       if (!n) return;
-      if (n < MINIMO) cortos.push({ m: m, n: n });
+      /* El mínimo de cada músculo, no uno para todos: un gemelo con seis
+         series está servido y un cuádriceps con seis no. Lo decide Programa,
+         que es quien monta el plan, para que las dos partes de la app no
+         discutan entre ellas delante del usuario. */
+      if (n < minimoDe(m)) cortos.push({ m: m, n: n });
       else if (n > MAXIMO) pasados.push({ m: m, n: n });
     });
 
@@ -117,7 +126,7 @@
 
     if (cortos.length) {
       /* Muy por debajo del mínimo es otra cosa que rozarlo por una serie */
-      const hondo = cortos.filter(function (x) { return x.n < MINIMO * 0.7; }).length;
+      const hondo = cortos.filter(function (x) { return x.n < minimoDe(x.m) * 0.7; }).length;
       hallazgos.push({
         id: 'poco', gravedad: (cortos.length >= 3 || hondo >= 2) ? 2 : 1,
         peso: Math.min(2.5, 0.5 + cortos.length * 0.25 + hondo * 0.15),
@@ -182,14 +191,19 @@
           AXIALES.indexOf(Alt.patron(ex)) !== -1 &&
           (ex.equipment === 'barbell' || ex.equipment === 'dumbbell');
       });
-      if (pesados.length >= 2) {
+      /* Tres, no dos. Sentadilla y peso muerto rumano el mismo día son el día
+         de pierna de cualquier plan que se precie, y marcarlo como fallo de
+         gravedad tres salía contradiciendo al propio encargo que la app le hace
+         a la IA —«como mucho dos de esos por sesión»— y suspendiendo los planes
+         que ella misma genera. Lo que de verdad no se sostiene es el tercero. */
+      if (pesados.length >= 3) {
         hallazgos.push({
           id: 'axial:' + i, gravedad: 3,
-          titulo: T('Dos básicos pesados el mismo día'),
-          dato: Tn('{lista} caen juntos en {donde}, y el segundo se hace con la espalda ' +
-            'baja ya cargada',
+          titulo: T('Tres básicos pesados el mismo día'),
+          dato: Tn('{lista} caen juntos en {donde}, y el tercero se hace con la espalda ' +
+            'baja ya cargada de los dos anteriores',
             { lista: pesados.map(nombre).join(T(' y ')), donde: tituloSesion(s, i) }),
-          arreglo: { tipo: 'mover', exId: pesados[1].exId, dia: i }
+          arreglo: { tipo: 'mover', exId: pesados[2].exId, dia: i }
         });
       }
     });
