@@ -9002,6 +9002,21 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
   .desliza-cara{transition:none}
 }
 
+/* ---- lo que trae la compra ----
+   Tres barras y tres cifras. Una lista parece siempre mucha comida; lo único
+   que dice si llega es la suma, y hasta ahora no estaba a la vista. */
+.bal{padding:13px 15px;margin-bottom:4px}
+.bal-cab{font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--dim2);margin-bottom:9px}
+.bal-fila{display:flex;align-items:center;gap:10px;padding:4px 0}
+.bal-que{flex:0 0 74px;font-size:.88rem}
+.bal-barra{flex:1 1 auto;height:5px;margin:0}
+.bal-cifra{flex:0 0 auto;font-size:.82rem;color:var(--dim2);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.bal-fila.corto .bal-cifra{color:var(--warn)}
+.bal-fila.corto .prog i{background:var(--warn)}
+.bal-aviso{margin:9px 0 0;font-size:.82rem;line-height:1.4;color:var(--warn)}
+
 /* Lo que se hizo, en una frase. Con el selector y el rodillo todavía en
    pantalla no se sabía si lo de arriba era lo pedido o lo que ibas a pedir. */
 .previa-cab{padding:14px 15px;margin-bottom:4px}

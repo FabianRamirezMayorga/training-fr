@@ -3853,9 +3853,14 @@
       '=== FORMATO ===' + SALTO +
       'Devuelve JSON: {"compra":[{"zona":"Fruta y verdura|Carne y pescado|Lácteos y ' +
       'huevos|Despensa|Congelados|Otros","cosas":[{"que":"nombre del alimento",' +
-      '"racion":número,"unidad":"g|ml|unidad","veces":número,"venta":"cómo se ' +
-      'vende, o vacío"}]}]}' + SALTO +
-      '"racion" y "veces" son números a secas, sin texto ni unidades dentro.';
+      '"racion":número,"unidad":"g|ml|unidad","veces":número,"prot":número,' +
+      '"carbo":número,"grasa":número,"venta":"cómo se vende, o vacío"}]}]}' + SALTO +
+      '"racion" y "veces" son números a secas, sin texto ni unidades dentro.' + SALTO +
+      '"prot", "carbo" y "grasa" son lo que aporta UNA ración, en gramos, sacado de las ' +
+      'tablas de arriba. Para 200 g de pollo: prot 46, carbo 0, grasa 4. Para 3 huevos: ' +
+      'prot 18, carbo 0, grasa 15. No los sumes ni los multipliques: una ración, los tres ' +
+      'números, y ya. La app los multiplica por las veces y comprueba si la compra llega a ' +
+      'lo que come el menú.';
 
     return llamarJSON(prompt, { maxTokens: 4096, temperatura: 0.2 });
   }

@@ -4656,6 +4656,10 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    '{a} de {b} g': '{a} of {b} g',
+    'Al día, lo que trae esta compra': 'Per day, what this shop brings',
+    'Se queda corta de proteína para lo que come tu menú. Dale a «Rehacer», y si vuelve a pasar sube tú las cantidades de la carne o el pescado.':
+      'It falls short on protein for what your menu eats. Tap “Redo”, and if it happens again raise the meat or fish amounts yourself.',
     '{n} unidad': '{n} unit',
     '{n} unidades': '{n} units',
     '{n} ml': '{n} ml',

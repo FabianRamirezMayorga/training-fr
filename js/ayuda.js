@@ -803,6 +803,7 @@
     { id: 'p-protecompra', q: '¿Cómo sé que la compra me da lo que come el menú?',
       a: ['Porque las cifras salen de tu propio menú: se suman la proteína, los hidratos y la grasa de todas sus comidas y se reparten entre sus días. Y porque el entrenador ya no multiplica nada: de cada alimento dice solo dos cosas —cuánto lleva una ración y cuántas raciones hay— y la multiplicación la hace la app. Doscientos gramos de pollo treinta veces son seis kilos, siempre.',
         'Y todo va en crudo. La carne y el pescado pierden como un 25 % de peso al cocinarse, así que 150 g de pechuga ya hecha salen de unos 200 g crudos: lo que se compra son los 200. Con el arroz y las legumbres pasa al revés, 100 g cocidos son unos 33 en seco.',
+        'Y porque ya no hay que fiarse: arriba de la lista salen las tres cifras al día, lo que trae frente a lo que pide tu menú, sumadas por la app. Si la proteína se queda por debajo del 85 %, te lo dice en ámbar y te sugiere rehacerla.',
         'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.'],
       ver: ['c-compra'] },
 

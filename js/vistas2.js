@@ -3512,6 +3512,35 @@
     return { cerrarTodas: function () { cerrar(null); if (alCerrar) alCerrar(); } };
   }
 
+  /* Lo que trae la compra frente a lo que come el menú, en una tarjeta.
+
+     Esto existe porque sin ello no había forma de saber si una lista estaba
+     bien: parece mucha comida, y la única manera de ver que se queda en la
+     mitad de la proteína del mes es sumarla. Ahora la suma la app y se lee de
+     un vistazo, con las tres cifras al día, que es como se piensa la comida. */
+  function balanceHTML(lista) {
+    const b = g.ListaCompra ? ListaCompra.balance(lista) : null;
+    if (!b) return '';
+    const fila = function (etiqueta, trae, pide) {
+      const pc = pide ? Math.min(100, Math.round(trae / pide * 100)) : 0;
+      const mal = pide && trae < pide * 0.85;
+      return '<div class="bal-fila' + (mal ? ' corto' : '') + '">' +
+        '<span class="bal-que">' + esc(etiqueta) + '</span>' +
+        '<span class="prog bal-barra"><i style="width:' + pc + '%"></i></span>' +
+        '<span class="bal-cifra">' + esc(Tn('{a} de {b} g', { a: trae, b: pide })) +
+        '</span></div>';
+    };
+    return '<div class="card bal">' +
+      '<div class="bal-cab">' + esc(T('Al día, lo que trae esta compra')) + '</div>' +
+      fila(T('Proteína'), b.traeDia.prot, b.pideDia.prot) +
+      fila(T('Hidratos'), b.traeDia.carbo, b.pideDia.carbo) +
+      fila(T('Grasa'), b.traeDia.grasa, b.pideDia.grasa) +
+      (b.corto ? '<p class="bal-aviso">' + esc(T('Se queda corta de proteína para lo que ' +
+        'come tu menú. Dale a «Rehacer», y si vuelve a pasar sube tú las cantidades de ' +
+        'la carne o el pescado.')) + '</p>' : '') +
+      '</div>';
+  }
+
   let compraMenu = '';
   let compraUnidad = 'dia';
   let compraCuanto = 0;
@@ -3630,6 +3659,8 @@
             raw(n.total ? Math.round(n.hechas / n.total * 100) : 0)}%"></i></div>
         </div>
 
+        ${raw(balanceHTML(guardada))}
+
         ${raw(guardada.zonas.map(function (z, zi) {
           return (z.zona ? '<div class="list-title">' + esc(T(z.zona)) + '</div>'
             : '<div style="height:14px"></div>') +
@@ -3691,6 +3722,8 @@
             cosas: Tp(n.total, '{n} cosa', '{n} cosas'),
             zonas: Tp(compraPreview.zonas.length, '{n} zona', '{n} zonas') })}</p>
         </div>
+
+        ${raw(balanceHTML(compraPreview))}
 
         <div class="list-title">${T('Así queda')}</div>
         ${raw(compraPreview.zonas.map(function (z) {

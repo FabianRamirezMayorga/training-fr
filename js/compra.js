@@ -84,9 +84,28 @@
     return IA.listaDeCompra(menu.plan, dias).then(function (r) {
       const zonas = (r && r.compra) || [];
       if (!zonas.length) throw new Error(T('No he podido sacar la lista de ese menú.'));
+      /* El objetivo se guarda con la lista: es del menú y de los días que
+         pediste, y si luego cambias de menú la lista vieja sigue sabiendo
+         contra qué se medía. */
+      const dd = (menu.plan && menu.plan.dias) || [];
+      let op = 0, oc = 0, og = 0;
+      dd.forEach(function (d) {
+        (d.comidas || []).forEach(function (co) {
+          op += Number(co.prot) || 0;
+          oc += Number(co.carbo) || 0;
+          og += Number(co.grasa) || 0;
+        });
+      });
+      const vueltas = dd.length ? dias / dd.length : 0;
+
       return {
         menuId: menu.id,
         menuNombre: menu.nombre,
+        objetivo: dd.length ? {
+          prot: Math.round(op * vueltas),
+          carbo: Math.round(oc * vueltas),
+          grasa: Math.round(og * vueltas)
+        } : null,
         /* El nombre se lo pone el usuario al guardarla; hasta entonces vale el
            del menú, que es de donde sale. */
         nombre: '',
@@ -110,12 +129,61 @@
                  salía «se vende en se vende por libra». */
               const venta = (typeof c === 'string' ? '' : String(c.venta || ''))
                 .replace(/^\s*(se\s+vende\s+(en|por)?|viene\s+en)\s*/i, '').trim();
-              return { que: que, cuanto: cuanto, venta: venta, hecho: false, antes: '' };
+              /* Lo que aporta esto en todo el periodo. La IA da lo de UNA
+                 ración —que es consulta de tabla, lo suyo— y aquí se multiplica
+                 por las veces. Con eso la app puede decir sola si la compra
+                 llega a lo que come el menú, en vez de fiarse. */
+              const veces = typeof c === 'string' ? 0 : Number(c.veces) || 0;
+              const mac = typeof c === 'string' ? null : {
+                prot: Math.round((Number(c.prot) || 0) * veces),
+                carbo: Math.round((Number(c.carbo) || 0) * veces),
+                grasa: Math.round((Number(c.grasa) || 0) * veces)
+              };
+              return { que: que, cuanto: cuanto, venta: venta, hecho: false, antes: '',
+                mac: mac && (mac.prot || mac.carbo || mac.grasa) ? mac : null };
             }).filter(function (c) { return c.que; })
           };
         }).filter(function (z) { return z.cosas.length; })
       };
     });
+  }
+
+  /* Lo que trae la lista, frente a lo que come el menú. Sale de sumar lo de
+     cada cosa, que ya viene multiplicado: aritmética pura sobre números que
+     están guardados. Devuelve null cuando no hay con qué comparar —listas
+     viejas, o una IA que no mandó los macros—, porque medio balance confunde
+     más que ninguno. */
+  function balance(lista, dias) {
+    if (!lista || !lista.objetivo) return null;
+    let p = 0, cb = 0, g = 0, con = 0, total = 0;
+    (lista.zonas || []).forEach(function (z) {
+      (z.cosas || []).forEach(function (c) {
+        total++;
+        if (!c.mac) return;
+        con++;
+        p += c.mac.prot || 0;
+        cb += c.mac.carbo || 0;
+        g += c.mac.grasa || 0;
+      });
+    });
+    /* Con menos de la mitad de las cosas medidas, el total no significa nada. */
+    if (!total || con < total / 2) return null;
+    const n = Math.max(1, Number(dias || lista.dias) || 1);
+    return {
+      dias: n,
+      trae: { prot: p, carbo: cb, grasa: g },
+      pide: lista.objetivo,
+      /* Al día, que es como se piensa la comida. */
+      traeDia: { prot: Math.round(p / n), carbo: Math.round(cb / n), grasa: Math.round(g / n) },
+      pideDia: {
+        prot: Math.round(lista.objetivo.prot / n),
+        carbo: Math.round(lista.objetivo.carbo / n),
+        grasa: Math.round(lista.objetivo.grasa / n)
+      },
+      /* Corto de verdad es quedarse por debajo del 85 %: por encima de eso la
+         diferencia cabe en el margen de las tablas y de lo que sobra. */
+      corto: lista.objetivo.prot > 0 && p < lista.objetivo.prot * 0.85
+    };
   }
 
   /* ---------- en el súper ---------- */
@@ -218,6 +286,7 @@
   g.ListaCompra = {
     de: de, poner: poner, borrar: borrar, generar: generar, vivas: vivas,
     renombrar: renombrar, anadirCosa: anadirCosa, quitarCosa: quitarCosa,
+    balance: balance,
     marcar: marcar, limpiarMarcas: limpiarMarcas, cuenta: cuenta,
     sustituir: sustituir, deshacerSustitucion: deshacerSustitucion
   };

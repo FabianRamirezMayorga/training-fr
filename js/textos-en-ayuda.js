@@ -1374,6 +1374,8 @@
 
 
     /* ---------- La lista de la compra ---------- */
+    'Y porque ya no hay que fiarse: arriba de la lista salen las tres cifras al día, lo que trae frente a lo que pide tu menú, sumadas por la app. Si la proteína se queda por debajo del 85 %, te lo dice en ámbar y te sugiere rehacerla.':
+      'And because you no longer have to take it on trust: the three daily figures are at the top of the list, what it brings against what your menu asks for, added up by the app. If protein falls below 85 %, it says so in amber and suggests redoing it.',
     '¿Cómo sé que la compra me da lo que come el menú?':
       'How do I know the shopping covers what the menu eats?',
     'Porque las cifras salen de tu propio menú: se suman la proteína, los hidratos y la grasa de todas sus comidas y se reparten entre sus días. Y porque el entrenador ya no multiplica nada: de cada alimento dice solo dos cosas —cuánto lleva una ración y cuántas raciones hay— y la multiplicación la hace la app. Doscientos gramos de pollo treinta veces son seis kilos, siempre.':
