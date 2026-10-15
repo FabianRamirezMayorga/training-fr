@@ -4656,6 +4656,8 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'No hay nada que guardar: la lista ya está guardada y lo que taches también. Puedes salir del súper, volver a entrar y seguir donde lo dejaste.':
+      'There is nothing to save: the list is already saved, and so is whatever you tick. You can leave the shop, come back and carry on where you left off.',
     'Añadir algo': 'Add something',
     'Qué falta': 'What is missing',
     'Cuánto (opcional)': 'How much (optional)',

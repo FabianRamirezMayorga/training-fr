@@ -3661,9 +3661,15 @@
         <button class="btn vidrio block compra-anadir" data-a="anadircosa">
           ${raw(icon('plus'))} ${T('Añadir algo')}</button>
 
-        <p class="tiny" style="margin-top:14px">${T('Lo tachado se guarda: puedes salir del ' +
-          'súper, volver a entrar y seguir donde lo dejaste. Y con el botón de la derecha ' +
-          'cambias cualquier cosa por otra.')}</p>`;
+        <!-- La salida, aquí abajo. La de arriba sigue estando, pero con treinta
+             y ocho cosas en medio queda a un scroll entero de distancia: justo
+             cuando acabas de leer la última es cuando quieres cerrar. -->
+        <button class="btn primary block compra-listo" data-a="volverasistente">
+          ${raw(icon('check'))} ${T('Listo')}</button>
+
+        <p class="tiny" style="margin-top:14px">${T('No hay nada que guardar: la lista ya ' +
+          'está guardada y lo que taches también. Puedes salir del súper, volver a entrar ' +
+          'y seguir donde lo dejaste.')}</p>`;
     }
 
     /* ---- la previa: el qué ya está decidido, falta el sí ----
@@ -3814,9 +3820,13 @@
     const menu = menuDeCompra();
     if (!menu) return;
 
-    bind(root, '[data-a=volverasistente]', function () {
+    /* bindAll y no bind: la salida está arriba y abajo —con treinta y ocho
+       cosas en medio, la de arriba queda a un scroll entero— y `bind` solo ata
+       la primera que encuentra, así que la de abajo no hacía nada. */
+    bindAll(root, '[data-a=volverasistente]', function () {
       compraVer = '';
       render();
+      window.scrollTo(0, 0);
     });
 
     const deslizables = montarDeslizables(root);
