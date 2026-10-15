@@ -1374,6 +1374,10 @@
 
 
     /* ---------- La lista de la compra ---------- */
+    'Dos rodillos, como la hora y los minutos del despertador: el número en uno y días, semanas o meses en el otro. Tres semanas son veintiún días, y esa cuenta la hace la app. Más de un mes no te deja, y es aposta: el menú se cambia cada treinta días, así que una compra más larga sería la de un menú que ya no vas a comer. El lápiz de debajo es para escribirlo a mano.':
+      'Two wheels, like the hours and minutes on an alarm clock: the number on one, days, weeks or months on the other. Three weeks is twenty-one days, and the app does that sum. It will not let you go past one month, and that is on purpose: the menu changes every thirty days, so a longer shop would be for a menu you are no longer going to eat. The pencil below is for typing it by hand.',
+    'Primero se te enseña el resumen por zonas. Si no te convence, se vuelve a pedir sin guardar nada. Al guardarla le pones nombre —viene uno propuesto— para reconocerla luego entre las demás.':
+      'First you get the summary by aisle. If you are not convinced, it asks again without saving anything. When you save it you give it a name —one comes suggested— so you can tell it from the others later.',
     'Primero si cuentas por días, por semanas o por meses, y luego giras el rodillo: dos semanas son catorce días y esa cuenta la hace la app. El lápiz del final es para el número que no cae redondo en ninguna de las tres. Si pides veinte días de un menú de siete, se multiplican las cantidades antes de redondear.':
       'First whether you count in days, weeks or months, then you spin the wheel: two weeks is fourteen days and the app does that sum. The pencil at the end is for the number that fits none of the three. If you ask for twenty days from a seven-day menu, the amounts are multiplied before rounding.',
     'Las que tengas a medias están debajo del todo.':

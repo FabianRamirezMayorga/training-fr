@@ -4656,6 +4656,9 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'Días, semanas o meses': 'Days, weeks or months',
+    'Para reconocerla cuando tengas varias a medias.':
+      'So you know which is which when you have several on the go.',
     'Menú': 'Menu',
     'Escribir los días': 'Type the days',
     'Entre 1 y {n}.': 'Between 1 and {n}.',

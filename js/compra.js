@@ -58,6 +58,9 @@
       return {
         menuId: menu.id,
         menuNombre: menu.nombre,
+        /* El nombre se lo pone el usuario al guardarla; hasta entonces vale el
+           del menú, que es de donde sale. */
+        nombre: '',
         dias: dias,
         t: Date.now(),
         zonas: zonas.map(function (z) {

@@ -3237,21 +3237,23 @@
      para mirar y no para usar: en el súper decides tú cuánto compras y la mitad
      de las veces acabas cambiando algo. */
 
-  /* Sesenta días de tope: por encima, lo que compras no cabe en una nevera y
-     la lista deja de ser una lista de la compra.
+  /* El tope es el mes, y no por capricho: el menú se cambia cada treinta días,
+     así que una compra más larga que eso sería la compra de un menú que ya no
+     vas a comer. Por eso cada unidad llega hasta donde llega: un mes, cuatro
+     semanas, treinta y un días.
 
-     Y tres unidades, porque nadie compra pensando en días sueltos: se compra
+     Y tres unidades porque nadie compra pensando en días sueltos: se compra
      «para la semana» o «para el mes». El rodillo cuenta en la unidad que elijas
      y los días salen de multiplicar, que es cuenta de la casa y no de la IA. */
-  const TOPE_DIAS = 60;
+  const TOPE_DIAS = 31;
   const ROD_ALTO = 38;
   /* El singular y el plural van escritos, no se forman pegando una ese: en
      inglés el plural de «mes» no es «meses» ni «monthes», y eso no se arregla
      con una regla. */
   const UNIDADES = [
-    { id: 'dia', label: 'Día', uno: 'día', varios: 'días', factor: 1 },
-    { id: 'semana', label: 'Semana', uno: 'semana', varios: 'semanas', factor: 7 },
-    { id: 'mes', label: 'Mes', uno: 'mes', varios: 'meses', factor: 30 }
+    { id: 'dia', uno: 'día', varios: 'días', factor: 1, tope: 31 },
+    { id: 'semana', uno: 'semana', varios: 'semanas', factor: 7, tope: 4 },
+    { id: 'mes', uno: 'mes', varios: 'meses', factor: 30, tope: 1 }
   ];
 
   function palabraUnidad(u, n) { return n === 1 ? T(u.uno) : T(u.varios); }
@@ -3260,22 +3262,29 @@
     return UNIDADES.filter(function (u) { return u.id === id; })[0] || UNIDADES[0];
   }
 
-  function topeDe(u) { return Math.max(1, Math.floor(TOPE_DIAS / u.factor)); }
+  function topeDe(u) { return u.tope; }
 
-  /* El rodillo, como el del reloj de iOS. Un número que importa se elige
-     mejor viéndolo entre sus vecinos que escribiéndolo: no hay teclado de por
-     medio, se pasa de 14 a 15 sin volver a empezar, y la unidad está fija al
-     lado como el «a.m.» del despertador.
+  /* Un rodillo, como una columna del reloj de iOS. Un número que importa se
+     elige mejor viéndolo entre sus vecinos que escribiéndolo: no hay teclado de
+     por medio, se pasa de 14 a 15 sin volver a empezar, y al lado está la
+     unidad, girando igual, como el «a.m.» del despertador.
+
+     Las opciones se le dan desde fuera y se las puede cambiar en caliente, que
+     es lo que hace falta aquí: la unidad decide cuántos números hay —31 días,
+     4 semanas, 1 mes— y rehacer la pantalla entera para eso se llevaría por
+     delante el rodillo de al lado, que es justo el que estás tocando.
 
      Sin rotateX a propósito. La perspectiva sobre un contenedor que a la vez
      hace scroll y snap va mal en WebKit —desajusta el punto de parada—, y el
      fundido de los bordes con una máscara, más la escala por distancia al
      centro, dan el mismo efecto sin esa deuda. */
-  function montarRodillo(caja, valor, alElegir) {
-    const pista = caja.querySelector('.rodillo-pista');
-    const ops = [].slice.call(caja.querySelectorAll('.rodillo-op'));
-    if (!pista || !ops.length) return null;
-    let tic = 0, quieto = 0, ultimo = valor, vDesde = 0, vHasta = -1;
+  function montarRodillo(col, etiqueta) {
+    col.innerHTML = '<div class="rodillo-pista" tabindex="0" role="spinbutton"' +
+      ' aria-label="' + esc(etiqueta || '') + '"></div>';
+    const pista = col.firstChild;
+    let ops = [];
+    let alElegir = null;
+    let tic = 0, quieto = 0, ultimo = null, vDesde = 0, vHasta = -1;
 
     function lejos(o) {
       o.style.transform = 'scale(.58)';
@@ -3284,16 +3293,17 @@
     }
 
     function pintar() {
+      if (!ops.length) return;
       const centro = pista.scrollTop / ROD_ALTO;
-      /* Solo la ventana visible: tocar los sesenta en cada cuadro de scroll se
-         nota en el móvil. Pero hay que devolver a su sitio los que salen de
-         ella: con un impulso largo el navegador se salta cuadros, y los que
-         quedaron a medio camino se quedaban grandes y opacos en mitad de la
-         lista, como si hubiera dos números elegidos. */
+      /* Solo la ventana visible: tocar los treinta y uno en cada cuadro de
+         scroll se nota en el móvil. Pero hay que devolver a su sitio los que
+         salen de ella: con un impulso largo el navegador se salta cuadros, y
+         los que quedaron a medio camino se quedaban grandes y opacos en mitad
+         de la lista, como si hubiera dos números elegidos. */
       const desde = Math.max(0, Math.floor(centro) - 3);
       const hasta = Math.min(ops.length - 1, Math.ceil(centro) + 3);
       for (let i = vDesde; i <= vHasta; i++) {
-        if (i < desde || i > hasta) lejos(ops[i]);
+        if (ops[i] && (i < desde || i > hasta)) lejos(ops[i]);
       }
       for (let i = desde; i <= hasta; i++) {
         const d = Math.min(3, Math.abs(i - centro));
@@ -3317,26 +3327,27 @@
       const j = Math.max(0, Math.min(ops.length - 1, i));
       pista.scrollTo({ top: j * ROD_ALTO, behavior: suave ? 'smooth' : 'auto' });
       /* Y se confirma por nuestra cuenta al llegar. Mover el rodillo desde un
-         atajo o tocando un número no siempre emite eventos de scroll —depende
-         del navegador—, y sin ellos el rodillo se colocaba en el número bueno
-         mientras el valor elegido seguía siendo el de antes. Si el dedo lo
-         mueve mientras tanto, el temporizador del scroll pisa a este. */
+         botón no siempre emite eventos de scroll —depende del navegador—, y
+         sin ellos se colocaba en el valor bueno mientras el elegido seguía
+         siendo el de antes. Si el dedo lo mueve mientras tanto, el
+         temporizador del scroll pisa a este. */
       clearTimeout(quieto);
       quieto = setTimeout(confirmar, suave ? 420 : 0);
     }
 
     function confirmar() {
+      if (!ops.length) return;
       const i = Math.max(0, Math.min(ops.length - 1,
         Math.round(pista.scrollTop / ROD_ALTO)));
-      const n = Number(ops[i].getAttribute('data-v'));
-      pista.setAttribute('aria-valuenow', n);
+      const v = ops[i].getAttribute('data-v');
+      pista.setAttribute('aria-valuenow', v);
       /* Y se repinta aquí también, que esto corre con un temporizador: si el
          scroll acabó con la pestaña en segundo plano, el cuadro de animación
-         no llegó a correr y el rodillo se quedaba señalando otro número. */
+         no llegó a correr y el rodillo se quedaba señalando otro valor. */
       pintar();
-      if (n === ultimo) return;
-      ultimo = n;
-      alElegir(n);
+      if (v === ultimo) return;
+      ultimo = v;
+      if (alElegir) alElegir(v);
     }
 
     pista.addEventListener('scroll', function () {
@@ -3356,21 +3367,52 @@
       irA(Math.round(pista.scrollTop / ROD_ALTO) + d, true);
     });
 
-    ops.forEach(function (o, i) {
-      o.addEventListener('click', function () { irA(i, true); });
-    });
+    /* Llena el rodillo. `lista` son {v, txt}; `valor` es el v que queda en el
+       centro. Reponer las opciones no avisa a nadie: es la pantalla la que
+       manda, no el usuario. */
+    function poner(lista, valor) {
+      ultimo = String(valor);
+      vDesde = 0;
+      vHasta = -1;
+      pista.innerHTML = lista.map(function (o) {
+        return '<button class="rodillo-op" data-v="' + esc(String(o.v)) + '">' +
+          esc(String(o.txt)) + '</button>';
+      }).join('');
+      ops = [].slice.call(pista.querySelectorAll('.rodillo-op'));
+      ops.forEach(function (o, i) {
+        o.addEventListener('click', function () { irA(i, true); });
+      });
+      pista.setAttribute('aria-valuemin', 1);
+      pista.setAttribute('aria-valuemax', lista.length);
+      pista.setAttribute('aria-valuenow', String(valor));
+      const i0 = Math.max(0, lista.map(function (o) { return String(o.v); })
+        .indexOf(String(valor)));
+      colocar(i0);
+      /* Y otra vez en el cuadro siguiente. Si la pantalla se acaba de repintar,
+         el rodillo todavía no tiene altura y fijarle el scroll no hace nada: el
+         snap lo dejaba en el primero y el rodillo acababa marcando 1 día
+         mientras el elegido de verdad era otro —y, al confirmarlo, se llevaba
+         por delante la lista que acabas de generar—. */
+      requestAnimationFrame(function () { colocar(i0); });
+    }
 
-    const i0 = Math.max(0, ops.map(function (o) { return o.getAttribute('data-v'); })
-      .indexOf(String(valor)));
-    colocar(i0);
-    /* Y otra vez en el cuadro siguiente. Si la pantalla se acaba de repintar,
-       el rodillo todavía no tiene altura y fijarle el scroll no hace nada: el
-       snap lo dejaba en el primer número y el rodillo acababa marcando 1 día
-       mientras el elegido de verdad era otro —y, al confirmarlo, se llevaba
-       por delante la lista que acabas de generar—. */
-    requestAnimationFrame(function () { colocar(i0); });
+    /* Reescribe lo que se lee sin tocar la posición: la unidad pasa de «día» a
+       «días» en cuanto el número deja de ser uno, y eso no es moverse. */
+    function retitular(textos) {
+      ops.forEach(function (o, i) {
+        if (textos[i] != null) o.textContent = textos[i];
+      });
+    }
 
-    return { ir: function (n) { irA(n - 1, true); } };
+    return {
+      poner: poner, retitular: retitular,
+      al: function (f) { alElegir = f; },
+      ir: function (v) {
+        const i = ops.map(function (o) { return o.getAttribute('data-v'); })
+          .indexOf(String(v));
+        if (i >= 0) irA(i, true);
+      }
+    };
   }
 
   let compraMenu = '';
@@ -3409,8 +3451,33 @@
     return Math.min(TOPE_DIAS, Math.max(1, n) * u.factor);
   }
 
-  /* El lápiz: para los diecinueve días que no son ni semanas ni meses. Deja la
-     unidad en días, porque un número escrito a mano es un número de días. */
+  /* El nombre se pide al guardar y no antes: hasta que no has visto lo que te
+     sale no sabes si esto es «la compra del mes» o «lo del finde en casa de mi
+     madre». Viene propuesto para que baste con darle a guardar. */
+  function pedirNombre(menu, dias, alDar) {
+    const propuesto = menu.nombre + ' · ' + Tp(dias, '{n} día', '{n} días');
+    UI.modal(html`
+      <h2>${T('Ponle nombre')}</h2>
+      <p class="muted" style="margin-top:0">${T('Para reconocerla cuando tengas ' +
+        'varias a medias.')}</p>
+      <input id="cp-nom" type="text" maxlength="40" value="${propuesto}">
+      <button class="btn primary block" id="cp-nom-ok" style="margin-top:14px">
+        ${T('Crear la lista')}</button>`,
+      function (el) {
+        const campo = el.querySelector('#cp-nom');
+        setTimeout(function () { campo.focus(); campo.select(); }, 80);
+        const guardar = function () {
+          const n = campo.value.trim() || propuesto;
+          UI.closeModal();
+          alDar(n);
+        };
+        el.querySelector('#cp-nom-ok').onclick = guardar;
+        campo.onkeydown = function (e) { if (e.key === 'Enter') guardar(); };
+      });
+  }
+
+  /* El lápiz: para los días que no son ni semanas ni meses. Deja la unidad en
+     días, porque un número escrito a mano es un número de días. */
   function pedirDias(menu) {
     UI.modal(html`
       <h2>${T('Para cuántos días')}</h2>
@@ -3462,7 +3529,7 @@
       return html`
         <button class="btn sm ghost" data-a="volverasistente" style="margin-bottom:10px">
           ${raw(icon('back'))} ${T('Lista de la compra')}</button>
-        <h1>${guardada.menuNombre || menu.nombre}</h1>
+        <h1>${guardada.nombre || guardada.menuNombre || menu.nombre}</h1>
         <p class="muted">${Tn('{menu} · {dias}',
           { menu: guardada.menuNombre || menu.nombre,
             dias: Tp(guardada.dias, '{n} día', '{n} días') })}</p>
@@ -3533,34 +3600,21 @@
       </div>
 
       <div class="list-title">${T('Para cuántos días')}</div>
-      <!-- La unidad delante del rodillo: quien compra «para la semana» no quiere
-           buscar el 7 entre sesenta números. Y el lápiz al final, para el número
-           que no cae redondo en ninguna de las tres. -->
-      <div class="segmento segmento-auto">
-        ${raw(UNIDADES.map(function (u) {
-          return '<button class="' + (u.id === uni.id ? 'on' : '') +
-            '" data-uni="' + u.id + '">' + esc(T(u.label)) + '</button>';
-        }).join(''))}
-        <button class="seg-lapiz" data-a="diasamano"
-                aria-label="${T('Escribir los días')}" title="${T('Escribir los días')}"
-          >${raw(icon('edit'))}</button>
-      </div>
-
-      <div class="rodillo" id="rod-dias">
+      <!-- Dos columnas que giran, como la hora y los minutos del despertador.
+           La unidad también es una elección de las de mirar y parar, no un
+           mando aparte: con el mando arriba y el rodillo abajo eran dos
+           gestos distintos para decir una sola cosa. -->
+      <div class="rodillo rodillo-doble" id="rod-dias">
         <div class="rodillo-banda" aria-hidden="true"></div>
-        <div class="rodillo-pista" tabindex="0" role="spinbutton"
-             aria-label="${T('Para cuántos días')}" aria-valuemin="1"
-             aria-valuemax="${raw(tope)}" aria-valuenow="${raw(cuanto)}">
-          ${raw(Array.from({ length: tope }, function (_, i) {
-            return '<button class="rodillo-op" data-v="' + (i + 1) + '">' +
-              (i + 1) + '</button>';
-          }).join(''))}
-        </div>
-        <span class="rodillo-unidad" aria-hidden="true" id="rod-uni"
-          >${palabraUnidad(uni, cuanto)}</span>
+        <div class="rodillo-col rod-num"></div>
+        <div class="rodillo-col rod-uni"></div>
       </div>
       <p class="rod-total" id="rod-total">${raw(uni.factor === 1 ? '&nbsp;'
         : esc(Tp(dias, '= {n} día', '= {n} días')))}</p>
+      <!-- El lápiz, debajo y en pequeño: con el rodillo a mano casi nunca hace
+           falta, y cuando hace falta no se busca mucho. -->
+      <button class="rod-mano" data-a="diasamano">${raw(icon('edit'))}
+        ${T('Escribir los días')}</button>
 
       ${raw(compraPreview ? html`
         <div class="list-title">${T('Así queda')}</div>
@@ -3594,7 +3648,7 @@
             return '<button class="list-row tap compra-guardada" data-abrirlista="' +
               esc(l.menuId) + '">' +
               '<span class="grow"><span class="list-row-title">' +
-                esc(l.menuNombre || T('Menú')) + '</span>' +
+                esc(l.nombre || l.menuNombre || T('Menú')) + '</span>' +
               '<span class="list-row-sub">' +
                 esc(Tp(l.dias, '{n} día', '{n} días')) + ' · ' +
                 esc(Tn('{a} de {b}', { a: n.hechas, b: n.total })) + '</span>' +
@@ -3629,25 +3683,16 @@
       render();
     });
 
-    const uni = unidadPorId(compraUnidad);
-
-    bindAll(root, '[data-uni]', function (el) {
-      const nueva = unidadPorId(el.getAttribute('data-uni'));
-      /* Al cambiar de unidad se conservan los días, no el número: de 14 días a
-         semanas se sale en 2, no en 14 semanas. */
-      compraCuanto = Math.min(topeDe(nueva),
-        Math.max(1, Math.round(diasPedidos(menu) / nueva.factor)));
-      compraUnidad = nueva.id;
-      compraPreview = null;
-      render();
-    });
-
     bind(root, '[data-a=diasamano]', function () { pedirDias(menu); });
+
+    let uni = unidadPorId(compraUnidad);
+    let cuanto = Math.min(uni.tope, Math.max(1,
+      compraCuanto || Math.round(diasDelMenu(menu) / uni.factor) || 1));
 
     /* Lo que cambia al mover el rodillo se reescribe en su sitio. Repintar la
        pantalla entera se llevaría por delante el rodillo que tienes bajo el
        dedo, y además te mandaría arriba del todo. */
-    function refrescarCifras(cuanto) {
+    function refrescarCifras() {
       const dias = cuanto * uni.factor;
       [].forEach.call(root.querySelectorAll('[data-sub]'), function (el) {
         const m = (g.Menus ? Menus.lista() : []).filter(function (x) {
@@ -3655,8 +3700,6 @@
         })[0];
         if (m) el.textContent = subDeMenu(m, dias);
       });
-      const u = root.querySelector('#rod-uni');
-      if (u) u.textContent = palabraUnidad(uni, cuanto);
       const tot = root.querySelector('#rod-total');
       if (tot) {
         tot.innerHTML = uni.factor === 1 ? '&nbsp;'
@@ -3664,14 +3707,65 @@
       }
     }
 
-    const rodillo = montarRodillo(root, Math.min(topeDe(uni), Math.max(1,
-      compraCuanto || Math.round(diasDelMenu(menu) / uni.factor) || 1)), function (n) {
+    const colNum = root.querySelector('.rod-num');
+    const colUni = root.querySelector('.rod-uni');
+    if (colNum && colUni) montarLosDos(colNum, colUni);
+
+    function montarLosDos(colNum, colUni) {
+    const rodNum = montarRodillo(colNum, T('Para cuántos días'));
+    const rodUni = montarRodillo(colUni, T('Días, semanas o meses'));
+
+    function numerosDe(u, n) {
+      return Array.from({ length: u.tope }, function (_, i) {
+        return { v: i + 1, txt: i + 1 };
+      });
+    }
+
+    function unidadesCon(n) {
+      return UNIDADES.map(function (u) { return { v: u.id, txt: palabraUnidad(u, n) }; });
+    }
+
+    rodNum.al(function (v) {
+      const n = Number(v);
+      const antes = cuanto;
+      cuanto = n;
       compraCuanto = n;
-      refrescarCifras(n);
+      /* El plural de la columna de al lado cambia al pasar por el uno, y eso
+         no es moverla: se reescribe lo que pone, sin tocar dónde está. */
+      if ((antes === 1) !== (n === 1)) {
+        rodUni.retitular(UNIDADES.map(function (u) { return palabraUnidad(u, n); }));
+      }
+      refrescarCifras();
       if (compraPreview) { compraPreview = null; render(); }
     });
-    if (rodillo) refrescarCifras(Math.min(topeDe(uni), Math.max(1,
-      compraCuanto || Math.round(diasDelMenu(menu) / uni.factor) || 1)));
+
+    rodUni.al(function (v) {
+      const nueva = unidadPorId(v);
+      if (nueva.id === uni.id) return;
+      /* Al cambiar de unidad se conservan los días, no el número: de 14 días a
+         semanas se sale en 2, no en 14 semanas. Y si no caben, se queda en el
+         tope de esa unidad, que es lo que hay. */
+      const dias = cuanto * uni.factor;
+      uni = nueva;
+      compraUnidad = nueva.id;
+      cuanto = Math.min(nueva.tope, Math.max(1, Math.round(dias / nueva.factor)));
+      compraCuanto = cuanto;
+      /* Y los números se rehacen aquí, sin repintar la pantalla: repintarla se
+         llevaría por delante el rodillo de la unidad, que es el que acabas de
+         soltar. */
+      rodNum.poner(numerosDe(nueva), cuanto);
+      /* Y el plural de la propia columna que acabas de soltar: al pasar de
+         siete dias a una semana el numero cae a 1, y dejarlo diciendo
+         «semanas» al lado de un 1 canta. */
+      rodUni.retitular(UNIDADES.map(function (u) { return palabraUnidad(u, cuanto); }));
+      refrescarCifras();
+      if (compraPreview) { compraPreview = null; render(); }
+    });
+
+    rodNum.poner(numerosDe(uni), cuanto);
+    rodUni.poner(unidadesCon(cuanto), uni.id);
+    refrescarCifras();
+    }
 
     bind(root, '[data-a=generarlista]', function () {
       const n = diasPedidos(menu);
@@ -3690,14 +3784,16 @@
 
     bind(root, '[data-a=guardarlista]', function () {
       if (!compraPreview) return;
-      ListaCompra.poner(menu.id, compraPreview);
-      compraPreview = null;
-      /* Y se abre: la guardas para comprar con ella, no para verla en una lista
-         de listas. */
-      compraVer = menu.id;
-      render();
-      window.scrollTo(0, 0);
-      UI.toast(T('Lista guardada.'));
+      pedirNombre(menu, compraPreview.dias, function (nombre) {
+        ListaCompra.poner(menu.id, Object.assign({}, compraPreview, { nombre: nombre }));
+        compraPreview = null;
+        /* Y se abre: la guardas para comprar con ella, no para verla en una
+           lista de listas. */
+        compraVer = menu.id;
+        render();
+        window.scrollTo(0, 0);
+        UI.toast(T('Lista guardada.'));
+      });
     });
 
     bind(root, '[data-a=otralista]', function () {
