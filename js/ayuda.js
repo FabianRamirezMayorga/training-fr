@@ -801,7 +801,7 @@
 
   const PREGUNTAS = [
     { id: 'p-protecompra', q: '¿Cómo sé que la compra me da lo que come el menú?',
-      a: ['Porque las cifras salen de tu propio menú, no de un cálculo aparte: se suman la proteína, los hidratos y la grasa de todas sus comidas, se dividen entre sus días y se multiplican por los días que pides. Esos tres objetivos se le dan al entrenador, con las tablas por cada 100 g para que los sume él mismo antes de darte la lista.',
+      a: ['Porque las cifras salen de tu propio menú: se suman la proteína, los hidratos y la grasa de todas sus comidas y se reparten entre sus días. Y porque el entrenador ya no multiplica nada: de cada alimento dice solo dos cosas —cuánto lleva una ración y cuántas raciones hay— y la multiplicación la hace la app. Doscientos gramos de pollo treinta veces son seis kilos, siempre.',
         'Y todo va en crudo. La carne y el pescado pierden como un 25 % de peso al cocinarse, así que 150 g de pechuga ya hecha salen de unos 200 g crudos: lo que se compra son los 200. Con el arroz y las legumbres pasa al revés, 100 g cocidos son unos 33 en seco.',
         'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.'],
       ver: ['c-compra'] },

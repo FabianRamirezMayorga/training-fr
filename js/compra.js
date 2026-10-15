@@ -41,6 +41,35 @@
     guardar(todo);
   }
 
+  /* Lo que hay que comprar de una cosa, calculado aquí.
+
+     La IA dice dos números —cuánto lleva una ración y cuántas raciones hay— y
+     la multiplicación se hace en esta función. No es desconfianza gratuita:
+     pedírsela a ella daba listas que se quedaban en la mitad de la proteína
+     del mes, y reforzar el encargo con tablas y con la cifra objetivo delante
+     no lo arregló —salía incluso peor—. Leer «pechuga 200 g» en un plato es
+     comprensión y es suya; 200 por 30 es una cuenta y es nuestra. */
+  function cuantoHace(c) {
+    const racion = Number(c.racion) || 0;
+    const veces = Number(c.veces) || 0;
+    if (!racion || !veces) return String(c.cuanto || '');
+    const total = racion * veces;
+    const u = String(c.unidad || 'g').toLowerCase();
+
+    if (u === 'unidad' || u === 'unidades' || u === 'u') {
+      /* Hacia arriba: media docena de huevos y media no se puede comprar. */
+      const n = Math.ceil(total);
+      return Tp(n, '{n} unidad', '{n} unidades');
+    }
+    if (u === 'ml' || u === 'l') {
+      const ml = u === 'l' ? total * 1000 : total;
+      return ml >= 1000 ? Tn('{n} l', { n: Math.round(ml / 100) / 10 })
+        : Tn('{n} ml', { n: Math.round(ml) });
+    }
+    return total >= 1000 ? Tn('{n} kg', { n: Math.round(total / 100) / 10 })
+      : Tn('{n} g', { n: Math.round(total) });
+  }
+
   /* ---------- generar ----------
      Esto sí es para la IA, y conviene decir por qué: hay que leer platos
      escritos en castellano corriente, entender que «80 g de avena» siete veces
@@ -71,7 +100,7 @@
                  aceptan los dos: el formato lo decide ella y lo que no puede
                  pasar es que un día no se vea nada. */
               const que = typeof c === 'string' ? c : String(c.que || '');
-              const cuanto = typeof c === 'string' ? '' : String(c.cuanto || '');
+              const cuanto = typeof c === 'string' ? '' : cuantoHace(c);
               /* Cómo se vende va aparte de cuánto hace falta: juntarlos es lo
                  que hacía que la compra de un día saliera con dos kilos de
                  carne, porque cada cosa se redondeaba a su envase y nadie veía

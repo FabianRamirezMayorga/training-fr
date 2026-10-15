@@ -3699,10 +3699,21 @@
     const dias = (plan && plan.dias) || [];
     if (!dias.length) return Promise.reject(new Error(T('Ese menú no tiene días.')));
 
+    /* Con los macros de CADA comida, no solo el total del día. Son los que
+       permiten sacar la ración cuando el plato no la dice o la dice mal: una
+       comida de 45 g de proteína a base de pollo son unos 195 g de pollo
+       crudo, y esa cuenta no se puede hacer sin tener delante los 45. */
     const texto = dias.map(function (d) {
-      return (d.dia || '') + ': ' + (d.comidas || []).map(function (c) {
-        return c.plato || '';
-      }).filter(Boolean).join(' | ');
+      return (d.dia || '') + ':' + SALTO + (d.comidas || []).map(function (c) {
+        if (!c.plato) return '';
+        const m = [];
+        if (c.kcal) m.push(c.kcal + ' kcal');
+        if (c.prot) m.push(c.prot + ' g de proteína');
+        if (c.carbo) m.push(c.carbo + ' g de hidratos');
+        if (c.grasa) m.push(c.grasa + ' g de grasa');
+        return '  - ' + (c.comida ? c.comida + ': ' : '') + c.plato +
+          (m.length ? ' (' + m.join(', ') + ')' : '');
+      }).filter(Boolean).join(SALTO);
     }).join(SALTO);
 
     const p = Perfil.datos ? Perfil.datos() : {};
@@ -3742,68 +3753,109 @@
        atiende menos, y este se lo lee una máquina entrenada con lenguaje. */
     const dd = function (k) { return k + (k === 1 ? ' día' : ' días'); };
 
+    /* El prompt va por partes y en este orden porque es el orden en que se
+       trabaja: primero qué se come, luego cuánto hace falta, luego cómo se
+       convierte eso en cantidades de tienda, y al final cómo se escribe.
+
+       Lo que NO se le pide, a propósito, es multiplicar. Daba listas con la
+       mitad de la proteína del mes, y reforzar el encargo con la cifra
+       objetivo delante y tablas para sumar no lo arregló: salía igual o peor.
+       Ahora da dos números por alimento —lo que lleva una ración y cuántas
+       raciones hay— y la cuenta la hace la app. Leer un plato es comprensión
+       y es suya; 200 por 30 es aritmética y es nuestra. */
     const prompt = PERSONA + SALTO + SALTO +
-      'Esta es la comida de ' + dd(dias.length) + ':' + SALTO + texto + SALTO + SALTO +
-      'Saca la lista de la compra PARA ' + dd(n).toUpperCase() + '.' +
-      (vueltas === 1 ? '' : ' El menú cubre ' + dd(dias.length) + ', así que es repetirlo ' +
-        (Math.round(vueltas * 100) / 100) + ' veces: multiplica las cantidades por esa cifra.') +
-      SALTO + SALTO +
-      (kcalDia ? 'ESCALA, para que no se te vaya la mano: come ' + kcalDia + ' kcal al ' +
-        'día en ' + comidasDia + ' comidas. Esta compra son ' + dd(n) + ', o sea unas ' +
-        (kcalDia * n) + ' kcal en total, para UNA persona. Si lo que sumas da de comer a ' +
-        'una familia, te has pasado.' + SALTO + SALTO : '') +
-      (protDia ? 'Y LOS MACROS, que es donde más se falla. Al día el menú lleva ' +
-        protDia + ' g de proteína, ' + carboDia + ' g de carbohidrato y ' + grasaDia +
-        ' g de grasa. En toda esta compra: ' + (protDia * n) + ' g de proteína, ' +
-        (carboDia * n) + ' g de carbohidrato y ' + (grasaDia * n) + ' g de grasa.' + SALTO +
-        'ANTES DE RESPONDER suma los tres sobre lo que hayas puesto y comprueba que ' +
-        'llegan. Por cada 100 g EN CRUDO o EN SECO:' + SALTO +
-        '  Proteína: pollo 23, pavo 24, res magra 21, cerdo magro 21, pescado blanco 20, ' +
-        'atún 23, huevo 6 por unidad, leche 3,4 por 100 ml, yogur griego 9, queso fresco 12, ' +
-        'lentejas secas 24, garbanzos secos 19, avena 13, pan 8.' + SALTO +
-        '  Carbohidrato: arroz seco 78, pasta seca 75, avena 60, pan 50, harina 72, ' +
-        'lentejas secas 60, garbanzos secos 61, papa 17, yuca 38, plátano maduro 23, ' +
-        'fruta 10 a 15, leche 4,8 por 100 ml, verdura 4.' + SALTO +
-        '  Grasa: aceite 100, mantequilla 81, frutos secos 55, maní 49, aguacate 15, ' +
-        'queso curado 25, queso fresco 8, huevo 5 por unidad, carne magra 3 a 8, cerdo 10, ' +
-        'salmón 13, pescado blanco 1, leche entera 3,5 por 100 ml, desnatada 0,2.' + SALTO +
-        'Si alguno no llega, SUBE las cantidades de lo que lo aporte hasta que llegue. Una ' +
-        'lista que deja la mitad de la proteína sin comprar no sirve, y una que no trae con ' +
-        'qué llenar los hidratos deja al día a medias.' + SALTO + SALTO : '') +
-      'REGLAS:' + SALTO +
-      '- SOLO lo que esté escrito en los platos de arriba. Si un alimento no sale ahí, ' +
-      'no va en la lista. No completes la despensa ni añadas lo que «pega» con el menú: ' +
-      'una lista con cosas que no se van a comer es una lista que no sirve.' + SALTO +
-      '- SUMA las cantidades de un mismo alimento en todos los días y da el total de una ' +
-      'vez. Ochenta gramos de avena siete días no son siete líneas de avena, son 560 g.' + SALTO +
-      '- Agrupa por zona del supermercado, que es como se recorre una tienda. Una lista ' +
-      'ordenada por días obliga a dar cuatro vueltas.' + SALTO +
-      '- En "cuanto" va LO QUE HACE FALTA, sumado y sin inflar: si salen 320 g de pollo, ' +
-      'pon 320 g. Nunca subas esa cifra al formato de la tienda.' + SALTO +
-      '- Pero en CANTIDAD DE COMPRA, no de plato. Dos cosas:' + SALTO +
-      '  a) Lo que se compra por piezas va EN PIEZAS ENTERAS, nunca en gramos: plátanos, ' +
-      'papas, tomates, cebollas, aguacates, huevos, naranjas, limones, zanahorias, ' +
-      'lechugas, panes. "Papa criolla: 86 g" no se puede comprar y no dice nada; son ' +
-      'unas 3 papas criollas. "Plátano maduro: 194 g" es 1 plátano. Redondea SIEMPRE ' +
-      'hacia arriba a la pieza entera, y si ayuda pon el peso detrás entre paréntesis.' + SALTO +
-      '  b) En CRUDO, y con lo que se tira: cáscara, hueso, piel, vaina. La carne y el ' +
-      'pescado pierden en torno a un 25 % de peso al cocinarse, así que van al revés de ' +
-      'lo que parece: 150 g de pechuga ya hecha salen de unos 200 g crudos, y lo que se ' +
-      'compra son los 200. El arroz, la pasta y las legumbres van al contrario: 100 g ' +
-      'cocidos son unos 33 g en seco. Si el menú no dice si el peso es crudo o cocido, ' +
-      'da por hecho que es el del plato —cocinado— y conviértelo.' + SALTO +
-      '- En "venta" va cómo se vende, y SOLO si el envase más pequeño es mayor que lo que ' +
-      'hace falta: 320 g de pollo → venta "bandeja de 500 g". Si lo que hace falta ya pasa ' +
-      'del envase, deja "venta" vacío. Así se ve lo que se come y lo que va a sobrar, que ' +
-      'son dos cosas distintas y mezclarlas es lo que hace que una compra de un día ' +
-      'parezca la de una semana.' + SALTO +
+      '=== QUÉ COME ===' + SALTO +
+      'Este es su menú, de ' + dd(dias.length) + ', con los macros de cada comida:' +
+      SALTO + texto + SALTO + SALTO +
+
+      '=== QUÉ HAY QUE SACAR ===' + SALTO +
+      'La lista de la compra PARA ' + dd(n).toUpperCase() + '.' +
+      (vueltas === 1 ? '' : ' El menú cubre ' + dd(dias.length) + ', así que se repite ' +
+        (Math.round(vueltas * 100) / 100) + ' veces.') + SALTO + SALTO +
+
+      (kcalDia ? 'Para UNA persona que come ' + kcalDia + ' kcal al día en ' + comidasDia +
+        ' comidas. En total, esta compra tiene que dar de comer ' + (kcalDia * n) +
+        ' kcal.' + SALTO : '') +
+      (protDia ? 'Y tiene que traer, en todo el periodo: ' + (protDia * n) +
+        ' g de proteína, ' + (carboDia * n) + ' g de hidratos y ' + (grasaDia * n) +
+        ' g de grasa. Al día: ' + protDia + ' / ' + carboDia + ' / ' + grasaDia + '.' +
+        SALTO : '') + SALTO +
+
+      '=== CÓMO SE SACA LA RACIÓN ===' + SALTO +
+      'Para cada alimento necesitas dos números: cuánto lleva UNA ración y cuántas ' +
+      'raciones hay en todo el periodo.' + SALTO + SALTO +
+      '1. La ración sale de LOS MACROS DE ESA COMIDA, no de lo que parezca el plato. ' +
+      'Cada comida lleva su proteína escrita arriba. Si una comida pide 45 g de proteína ' +
+      'y la fuente es pollo, son unos 195 g de pollo CRUDO (45 entre 0,23). Si el plato ' +
+      'da una cantidad que no cuadra con sus macros, MANDA EL MACRO: el plato es una ' +
+      'frase, el número es el objetivo.' + SALTO +
+      '   Atajo para 40 g de proteína: 175 g de pollo, 190 de res magra, 190 de cerdo ' +
+      'magro, 200 de pescado blanco, 175 de atún, 7 huevos, 445 g de yogur griego, ' +
+      '1,2 l de leche, 165 g de lentejas secas.' + SALTO + SALTO +
+      '2. EN CRUDO SIEMPRE. La carne y el pescado pierden en torno a un 25 % al ' +
+      'cocinarse: 150 g de pechuga ya hecha salen de unos 200 g crudos, y lo que se ' +
+      'compra son los 200 (cocido por 1,33 = crudo). El arroz, la pasta y las legumbres ' +
+      'van al revés: 100 g cocidos son unos 33 g en seco; las legumbres, unos 40. Si el ' +
+      'menú no dice si el peso es crudo o cocido, da por hecho que es el del plato ' +
+      '—cocinado— y conviertes.' + SALTO +
+      '   Y con lo que se tira: cáscara, hueso, piel, vaina.' + SALTO + SALTO +
+      '3. "veces" son las raciones de TODO el periodo. Si sale en el desayuno de cada ' +
+      'día y la compra es de ' + dd(n) + ', veces = ' + n + '. Si sale tres días de cada ' +
+      dias.length + ', veces = ' + Math.round(3 * vueltas) + '. Un alimento, UNA línea: ' +
+      'si aparece en dos comidas del mismo día, suma las dos raciones en una (pollo en ' +
+      'comida y cena a 150 g son racion 300, veces ' + n + ').' + SALTO + SALTO +
+      '4. NO MULTIPLIQUES racion por veces. Ese total lo calcula la app.' + SALTO + SALTO +
+
+      '=== TABLAS, POR CADA 100 g EN CRUDO O EN SECO ===' + SALTO +
+      'Proteína: pollo 23, pavo 24, res magra 21, cerdo magro 21, cordero 20, pescado ' +
+      'blanco 20, salmón 20, atún 23, gambas 20, huevo 6 por unidad, leche 3,4 por ' +
+      '100 ml, yogur griego 9, yogur normal 4, queso fresco 12, queso curado 25, ' +
+      'lentejas secas 24, garbanzos secos 19, frijol seco 21, avena 13, arroz 7, ' +
+      'pasta 12, pan 8, frutos secos 20, proteína en polvo 80.' + SALTO +
+      'Hidratos: arroz seco 78, pasta seca 75, harina 72, pan 50, avena 60, lentejas ' +
+      'secas 60, garbanzos secos 61, frijol seco 60, papa 17, yuca 38, plátano maduro ' +
+      '23, plátano verde 32, boniato 20, maíz 19, fruta 10 a 15, verdura 4, leche 4,8 ' +
+      'por 100 ml, yogur 5, azúcar 100.' + SALTO +
+      'Grasa: aceite 100, mantequilla 81, frutos secos 55, maní 49, aguacate 15, queso ' +
+      'curado 25, queso fresco 8, huevo 5 por unidad, pollo sin piel 2, res magra 5, ' +
+      'cerdo magro 6, salmón 13, atún 1, pescado blanco 1, leche entera 3,5 por 100 ml, ' +
+      'desnatada 0,2.' + SALTO + SALTO +
+
+      '=== CÓMO SE COMPRA ===' + SALTO +
+      '- Lo que se cuenta por piezas va con unidad "unidad", NUNCA en gramos: huevos, ' +
+      'plátanos, papas, tomates, cebollas, aguacates, naranjas, limones, zanahorias, ' +
+      'lechugas, panes. "Papa criolla: 86 g" no se puede pedir en ningún sitio.' + SALTO +
+      '  Pesos típicos para convertir: huevo 55 g, plátano 120, papa mediana 150, papa ' +
+      'criolla 25, tomate 120, cebolla 150, aguacate hass 200, manzana 180, naranja 180, ' +
+      'limón 60, zanahoria 80, lechuga 300, rebanada de pan 30.' + SALTO +
+      '- SOLO lo que esté escrito en los platos. Si un alimento no sale ahí, no va en la ' +
+      'lista. No completes la despensa ni añadas lo que "pega" con el menú.' + SALTO +
+      '- Agrupa por zona del supermercado, que es como se recorre una tienda.' + SALTO +
       '- Lo que todo el mundo tiene en casa —sal, aceite, especias— solo si el menú lo ' +
       'usa en cantidad.' + SALTO +
+      '- "venta" es cómo se vende, y SOLO si el envase más pequeño es mayor que lo que ' +
+      'hace falta: 320 g de pollo, venta "bandeja de 500 g". Si lo que hace falta ya ' +
+      'pasa del envase, déjalo vacío.' + SALTO +
       (p.pais ? '- Con los nombres y los formatos de venta de ' + p.pais + '.' + SALTO : '') +
-      SALTO +
-      'Devuelve JSON: {"compra":[{"zona":"Fruta y verdura|Carne y pescado|Lácteos y huevos|' +
-      'Despensa|Congelados|Otros","cosas":[{"que":"nombre del alimento","cuanto":"lo que ' +
-      'hace falta","venta":"cómo se vende, o vacío"}]}]}';
+      (p.dieta && p.dieta !== 'omnivora'
+        ? '- Dieta ' + (Perfil.DIETA[p.dieta] || p.dieta) + '.' + SALTO : '') +
+      (p.alergias ? '- NO PUEDE COMER: ' + p.alergias + '. Nada de eso entra en la lista.' +
+        SALTO : '') + SALTO +
+
+      '=== ANTES DE RESPONDER ===' + SALTO +
+      'Multiplica mentalmente cada racion por sus veces, pasa el resultado por las ' +
+      'tablas de arriba y suma los tres macros de toda la lista. Tienen que dar cerca ' +
+      'de ' + (protDia * n) + ' g de proteína, ' + (carboDia * n) + ' g de hidratos y ' +
+      (grasaDia * n) + ' g de grasa. Si alguno se queda corto, SUBE las raciones de lo ' +
+      'que lo aporte hasta que cuadre. Una lista con la mitad de la proteína del mes no ' +
+      'es una lista, es un descuido con forma de lista.' + SALTO + SALTO +
+
+      '=== FORMATO ===' + SALTO +
+      'Devuelve JSON: {"compra":[{"zona":"Fruta y verdura|Carne y pescado|Lácteos y ' +
+      'huevos|Despensa|Congelados|Otros","cosas":[{"que":"nombre del alimento",' +
+      '"racion":número,"unidad":"g|ml|unidad","veces":número,"venta":"cómo se ' +
+      'vende, o vacío"}]}]}' + SALTO +
+      '"racion" y "veces" son números a secas, sin texto ni unidades dentro.';
 
     return llamarJSON(prompt, { maxTokens: 4096, temperatura: 0.2 });
   }
