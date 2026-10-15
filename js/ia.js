@@ -276,17 +276,31 @@
     return l[i];
   }
 
-  /* Pasa a la siguiente. Devuelve false cuando ya no queda ninguna por probar,
-     que es cuando toca rendirse de verdad. */
+  /* Pasa a la siguiente, dando la vuelta al llegar al final.
+
+     Antes paraba en la última y devolvía false para siempre, y eso rompía la
+     rotación entera en cuanto se agotaban todas una vez: el índice se quedaba
+     clavado en la cuarta clave, y al día siguiente —con las otras tres ya
+     repuestas— preguntaba por la cuarta, comía el 429 y se rendía diciendo que
+     estaban todas agotadas sin haber probado ninguna más.
+
+     Quien corta el bucle es el contador de vueltas de quien llama, que prueba
+     cada clave una vez y para. Aquí solo se avanza. */
   function rotarClave(id) {
     const c = config();
     const l = comoLista(c.claves[id]);
     if (l.length < 2) return false;
-    const i = (Number(c.claveIdx[id]) || 0) + 1;
-    if (i >= l.length) return false;
-    c.claveIdx[id] = i;
+    c.claveIdx[id] = ((Number(c.claveIdx[id]) || 0) + 1) % l.length;
     guardarCrudo(c);
     return true;
+  }
+
+  /* Cuál está en uso, para poder decirlo en los errores: «la clave 2 no vale»
+     se arregla solo; «la clave no vale», con cuatro puestas, no. */
+  function numClaveDe(id) {
+    const c = config();
+    return (Math.min(comoLista(c.claves[id]).length - 1,
+      Math.max(0, Number((c.claveIdx || {})[id]) || 0))) + 1;
   }
 
   function anadirClave(id, clave) {
@@ -885,11 +899,14 @@
               /no longer available|not found|is not supported/i.test(msg);
             if (retirado && i < modelos.length - 1) return intentar(i + 1);
 
-            if (r.status === 400 && /API key/i.test(msg)) throw new Error(T('La clave de la IA no es válida.'));
-            if (r.status === 400) {
-              throw new Error(Tn('Gemini rechazó la petición ({msg}). Prueba a elegir otro modelo ' +
-                'en la bóveda de claves.', { msg: msg }));
-            }
+            /* Que la clave no valga es problema de ESA clave, no de las
+               demás. Antes esto cortaba aquí mismo: con cuatro claves puestas,
+               una revocada en medio dejaba sin probar las dos de detrás. Un 400
+               por cualquier otra cosa sí se queda, que ese es del prompt y
+               cambiar de clave solo gastaría cuota para el mismo fallo. */
+            const malaClave = r.status === 403 ||
+              (r.status === 400 && /API.?key|API_KEY_INVALID/i.test(msg));
+
             /* La cuota va por modelo, no por clave: el flash del día tiene un
                límite corto y los de la generación anterior uno mucho más ancho.
                Rendirse al primer 429 dejaba sin IA a quien sí podía usarla con
@@ -906,13 +923,36 @@
                la vez —la píldora del inicio y el menú— comparten el módulo: con
                una variable suelta, la segunda heredaba las vueltas de la
                primera y se rendía antes de tiempo. */
-            if (r.status === 429 || (retirado && huboCuota)) {
+            /* De qué iban los fallos por el camino, para poder contarlo al
+               final: no es lo mismo «se acabó la cuota» que «tienes una clave
+               que no vale», y con cuatro puestas no hay forma de distinguirlo
+               si no se dice. El número se lee AQUÍ, antes de rotar: después ya
+               apunta a otra. */
+            const malas = (opciones._malas || 0) + (malaClave ? 1 : 0);
+            const mala1 = opciones._mala1 || (malaClave ? numClaveDe('gemini') : 0);
+
+            if (r.status === 429 || (retirado && huboCuota) || malaClave) {
               const vueltas = (opciones._clave || 0) + 1;
               if (vueltas < clavesDe('gemini').length && rotarClave('gemini')) {
                 return llamarGemini(prompt,
-                  Object.assign({}, opciones, { _clave: vueltas }),
+                  Object.assign({}, opciones,
+                    { _clave: vueltas, _malas: malas, _mala1: mala1 }),
                   claveDe('gemini'), modeloIA);
               }
+            }
+
+            /* Probadas todas. Si por el camino alguna no valía, eso es lo
+               primero que hay que contar: lo otro se arregla esperando y esto
+               hay que ir a arreglarlo. */
+            if (malas) {
+              if (clavesDe('gemini').length < 2) {
+                throw new Error(T('La clave de la IA no es válida.'));
+              }
+              throw new Error(malas === 1
+                ? Tn('La clave {n} de tu lista no vale. Bórrala en la bóveda y prueba ' +
+                  'otra vez.', { n: mala1 })
+                : Tn('{n} de tus claves de Gemini no valen. Bórralas en la bóveda y ' +
+                  'prueba otra vez.', { n: malas }));
             }
 
             if (r.status === 429) {
@@ -933,6 +973,10 @@
             if (retirado) {
               throw new Error(T('El modelo elegido ya no está disponible. Abre la bóveda y ' +
                 'pulsa «Ver los suyos» para refrescar la lista con los que admite tu clave.'));
+            }
+            if (r.status === 400) {
+              throw new Error(Tn('Gemini rechazó la petición ({msg}). Prueba a elegir otro ' +
+                'modelo en la bóveda de claves.', { msg: msg }));
             }
             throw new Error(msg);
           }

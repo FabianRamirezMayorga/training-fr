@@ -4656,6 +4656,10 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'La clave {n} de tu lista no vale. Bórrala en la bóveda y prueba otra vez.':
+      'Key {n} on your list is not valid. Delete it in the vault and try again.',
+    '{n} de tus claves de Gemini no valen. Bórralas en la bóveda y prueba otra vez.':
+      '{n} of your Gemini keys are not valid. Delete them in the vault and try again.',
     'se vende en {venta}': 'sold in {venta}',
     'Días, semanas o meses': 'Days, weeks or months',
     'Para reconocerla cuando tengas varias a medias.':
