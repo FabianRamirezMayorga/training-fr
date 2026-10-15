@@ -150,6 +150,35 @@
     }).sort(function (a, b) { return (b.t || 0) - (a.t || 0); });
   }
 
+  /* ---------- lo que falta y lo que sobra ----------
+     Una lista hecha por otro siempre se queda corta en algo: el papel de
+     cocina, lo que se acabó ayer, lo que no sale en ningún plato. Si no se
+     puede añadir, acabas con la lista de la app en una mano y una nota en la
+     otra, que es justo lo que esto viene a evitar. */
+  function anadirCosa(menuId, zona, que, cuanto) {
+    const l = de(menuId);
+    if (!l) return;
+    que = String(que || '').trim();
+    if (!que) return;
+    const nombre = String(zona || '').trim() || 'Otros';
+    let z = l.zonas.filter(function (x) { return x.zona === nombre; })[0];
+    if (!z) { z = { zona: nombre, cosas: [] }; l.zonas.push(z); }
+    /* `mio` queda marcado para distinguir lo tuyo de lo que sacó el entrenador:
+       rehacer la lista no debería llevarse por delante lo que añadiste tú. */
+    z.cosas.push({ que: que, cuanto: String(cuanto || '').trim(), venta: '',
+      hecho: false, antes: '', mio: true });
+    poner(menuId, l);
+  }
+
+  function quitarCosa(menuId, zi, ci) {
+    const l = de(menuId);
+    if (!l || !l.zonas[zi] || !l.zonas[zi].cosas[ci]) return;
+    l.zonas[zi].cosas.splice(ci, 1);
+    /* Una zona sin nada no es una zona: solo es un rótulo por el que pasar. */
+    if (!l.zonas[zi].cosas.length) l.zonas.splice(zi, 1);
+    poner(menuId, l);
+  }
+
   function renombrar(menuId, nombre) {
     const l = de(menuId);
     if (!l) return;
@@ -159,7 +188,7 @@
 
   g.ListaCompra = {
     de: de, poner: poner, borrar: borrar, generar: generar, vivas: vivas,
-    renombrar: renombrar,
+    renombrar: renombrar, anadirCosa: anadirCosa, quitarCosa: quitarCosa,
     marcar: marcar, limpiarMarcas: limpiarMarcas, cuenta: cuenta,
     sustituir: sustituir, deshacerSustitucion: deshacerSustitucion
   };

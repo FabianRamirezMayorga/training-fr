@@ -549,6 +549,8 @@
           d: 'Arriba, lo que te vas a comer. Debajo y en gris, el envase más pequeño que hay, cuando es mayor que eso. Separados a propósito: juntarlos hacía que una compra de un día pareciera la de una semana. Y va en cantidad de compra, no de plato: lo que se vende por piezas sale en piezas —un plátano, tres papas—, porque 86 g de papa no se pueden pedir en ningún sitio.' },
         { t: 'Ve tachando mientras compras.',
           d: 'Lo tachado se queda guardado: puedes salir del súper, volver a entrar y seguir donde lo dejaste. Lo comprado no desaparece, se apaga, porque la lista también sirve para ver lo que ya llevas.' },
+        { t: 'Lo que falte lo añades tú.',
+          d: 'Con «Añadir algo» al final: dices qué es, cuánto si quieres, y en qué zona del súper va, para que te caiga donde vas a pasar y no en un cajón de sastre al final. Y para quitar algo de la lista, desliza su fila hacia la izquierda.' },
         { t: 'Si algo no lo vas a llevar, toca el botón de la derecha.',
           d: 'Escribes tú con qué lo cambias, o le preguntas al entrenador por cuál puedes cambiarlo: te da hasta tres opciones con la cantidad equivalente y lo que te mueve en tus números, y eliges una tocando.' },
         { t: 'Y el cambio llega al menú si quieres.',

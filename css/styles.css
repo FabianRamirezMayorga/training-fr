@@ -8989,7 +8989,10 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .desliza-acc.borrar{background:var(--bad)}
 .desliza-cara{position:relative;background:var(--card);touch-action:pan-y;
   transition:transform .24s cubic-bezier(.2,.8,.2,1);will-change:transform}
-.desliza.abierta .desliza-cara{transform:translateX(-152px)}
+.desliza.abierta .desliza-cara{transform:translateX(calc(-1 * var(--desliza-ancho, 152px)))}
+.compra-anadir{margin-top:12px}
+.compra-anadir svg{width:15px;height:15px;fill:none;stroke:currentColor;
+  stroke-width:2.2;stroke-linecap:round}
 /* La fila de dentro ya no pinta su propia raya: la pone el contenedor, que es
    quien sabe dónde acaba una y empieza otra cuando una está desplazada. */
 .desliza .list-row+.list-row::before,

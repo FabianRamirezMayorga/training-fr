@@ -3455,6 +3455,9 @@
       let x0 = 0, y0 = 0, dx = 0, activo = false, decidido = false;
 
       function ancho() { return fondo.offsetWidth || 152; }
+      /* El desplazamiento lo decide cada fila, que no todas llevan los mismos
+         botones: dos en una lista, uno en una cosa de la compra. */
+      caja.style.setProperty('--desliza-ancho', ancho() + 'px');
 
       function fin() {
         if (!activo) return;
@@ -3608,7 +3611,7 @@
       const n = ListaCompra.cuenta(guardada);
       return html`
         <button class="btn sm ghost" data-a="volverasistente" style="margin-bottom:10px">
-          ${raw(icon('back'))} ${T('Lista de la compra')}</button>
+          ${raw(icon('back'))} ${T('Tus listas')}</button>
         <h1>${guardada.nombre || guardada.menuNombre || menu.nombre}</h1>
         <p class="muted">${Tn('{menu} · {dias}',
           { menu: guardada.menuNombre || menu.nombre,
@@ -3631,7 +3634,11 @@
           return (z.zona ? '<div class="list-title">' + esc(T(z.zona)) + '</div>'
             : '<div style="height:14px"></div>') +
             '<div class="list">' + z.cosas.map(function (c, ci) {
-              return '<div class="list-row compra-fila' + (c.hecho ? ' ya' : '') + '">' +
+              return '<div class="desliza"><div class="desliza-fondo">' +
+                '<button class="desliza-acc borrar" data-borrarcosa="' + zi + ',' + ci +
+                  '">' + esc(T('Quitar')) + '</button></div>' +
+                '<div class="desliza-cara">' +
+                '<div class="list-row compra-fila' + (c.hecho ? ' ya' : '') + '">' +
                 '<button class="compra-caja" data-marcar="' + zi + ',' + ci + '" ' +
                   'aria-label="' + esc(T('Marcar')) + '">' +
                   (c.hecho ? icon('check') : '') + '</button>' +
@@ -3647,9 +3654,12 @@
                 '</span>' +
                 '<button class="compra-cambiar" data-cambiar="' + zi + ',' + ci + '" ' +
                   'aria-label="' + esc(T('Sustituir')) + '">' + icon('cambiar') + '</button>' +
-              '</div>';
+              '</div></div></div>';
             }).join('') + '</div>';
         }).join(''))}
+
+        <button class="btn vidrio block compra-anadir" data-a="anadircosa">
+          ${raw(icon('plus'))} ${T('Añadir algo')}</button>
 
         <p class="tiny" style="margin-top:14px">${T('Lo tachado se guarda: puedes salir del ' +
           'súper, volver a entrar y seguir donde lo dejaste. Y con el botón de la derecha ' +
@@ -4024,6 +4034,14 @@
     });
 
     bindAll(root, '[data-marcar]', function (el) {
+      /* Con el botón de quitar a la vista, el toque lo cierra en vez de tachar:
+         tachar sin querer lo que ibas a borrar es de las cosas que no se
+         perdonan en mitad de un pasillo. */
+      const caja0 = el.closest('.desliza');
+      if (caja0 && (caja0.classList.contains('abierta') || caja0.dataset.recien)) {
+        if (deslizables) deslizables.cerrarTodas();
+        return;
+      }
       const p = el.getAttribute('data-marcar').split(',');
       const l = ListaCompra.de(menu.id);
       const c = l.zonas[p[0]].cosas[p[1]];
@@ -4046,6 +4064,53 @@
     bindAll(root, '[data-cambiar]', function (el) {
       const p = el.getAttribute('data-cambiar').split(',');
       hojaSustituir(menu, Number(p[0]), Number(p[1]));
+    });
+
+    bindAll(root, '[data-borrarcosa]', function (el) {
+      const p = el.getAttribute('data-borrarcosa').split(',');
+      ListaCompra.quitarCosa(compraVer || menu.id, Number(p[0]), Number(p[1]));
+      render();
+    });
+
+    bind(root, '[data-a=anadircosa]', function () {
+      const id = compraVer || menu.id;
+      const l = ListaCompra.de(id);
+      if (!l) return;
+      /* Con la zona delante y no detrás: lo que importa de añadir algo a mano
+         es que caiga donde vas a pasar, no al final de todo en un cajón de
+         sastre que te obliga a dar otra vuelta al súper. */
+      const zonas = l.zonas.map(function (z) { return z.zona; })
+        .filter(function (z, i, a) { return z && a.indexOf(z) === i; });
+      if (zonas.indexOf('Otros') === -1) zonas.push('Otros');
+      UI.modal(html`
+        <h2>${T('Añadir algo')}</h2>
+        <input id="cp-que" type="text" maxlength="60"
+               placeholder="${T('Qué falta')}">
+        <div class="row" style="gap:9px;margin-top:9px">
+          <input id="cp-cuanto" class="grow" type="text" maxlength="24"
+                 placeholder="${T('Cuánto (opcional)')}" style="margin:0">
+          <select id="cp-zona" class="grow" style="margin:0">
+            ${raw(zonas.map(function (z) {
+              return '<option value="' + esc(z) + '">' + esc(T(z)) + '</option>';
+            }).join(''))}
+          </select>
+        </div>
+        <button class="btn primary block" id="cp-add-ok" style="margin-top:14px">
+          ${T('Añadir')}</button>`,
+        function (caja) {
+          const que = caja.querySelector('#cp-que');
+          setTimeout(function () { que.focus(); }, 80);
+          const guardar = function () {
+            const q = que.value.trim();
+            if (!q) { UI.closeModal(); return; }
+            ListaCompra.anadirCosa(id, caja.querySelector('#cp-zona').value, q,
+              caja.querySelector('#cp-cuanto').value);
+            UI.closeModal();
+            render();
+          };
+          caja.querySelector('#cp-add-ok').onclick = guardar;
+          que.onkeydown = function (e) { if (e.key === 'Enter') guardar(); };
+        });
     });
   };
 

@@ -1374,6 +1374,9 @@
 
 
     /* ---------- La lista de la compra ---------- */
+    'Lo que falte lo añades tú.': 'Whatever is missing, you add it.',
+    'Con «Añadir algo» al final: dices qué es, cuánto si quieres, y en qué zona del súper va, para que te caiga donde vas a pasar y no en un cajón de sastre al final. Y para quitar algo de la lista, desliza su fila hacia la izquierda.':
+      'With “Add something” at the end: you say what it is, how much if you want, and which aisle it goes in, so it lands where you will be walking and not in a catch-all at the bottom. And to take something off the list, swipe its row to the left.',
     'En cada cosa ves lo que hace falta y cómo se vende.':
       'On each item you see what you need and how it is sold.',
     'Arriba, lo que te vas a comer. Debajo y en gris, el envase más pequeño que hay, cuando es mayor que eso. Separados a propósito: juntarlos hacía que una compra de un día pareciera la de una semana. Y va en cantidad de compra, no de plato: lo que se vende por piezas sale en piezas —un plátano, tres papas—, porque 86 g de papa no se pueden pedir en ningún sitio.':

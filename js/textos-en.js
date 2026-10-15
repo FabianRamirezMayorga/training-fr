@@ -4656,6 +4656,9 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'Añadir algo': 'Add something',
+    'Qué falta': 'What is missing',
+    'Cuánto (opcional)': 'How much (optional)',
     'Eliminar': 'Delete',
     'Eliminar la lista': 'Delete the list',
     'Se va {nombre} y lo que lleves tachado de ella. El menú no se toca.':
