@@ -540,7 +540,7 @@
         { t: 'Elige de qué menú.',
           d: 'Cada uno te dice cuántos días cubre y cuántas comidas trae, que es lo que hace falta saber antes de comprar: a veces se compra para el que empieza el lunes, no para el que está acabando.' },
         { t: 'Di para cuántos días.',
-          d: 'Dos rodillos, como la hora y los minutos del despertador: el número en uno y días, semanas o meses en el otro. Tres semanas son veintiún días, y esa cuenta la hace la app. Más de un mes no te deja, y es aposta: el menú se cambia cada treinta días, así que una compra más larga sería la de un menú que ya no vas a comer. El lápiz de debajo es para escribirlo a mano.' },
+          d: 'Dos rodillos, como la hora y los minutos del despertador: el número en uno y días, semanas o meses en el otro. Tres semanas son veintiún días, y esa cuenta la hace la app. Más de un mes no te deja, y es aposta: el menú se cambia cada treinta días, así que una compra más larga sería la de un menú que ya no vas a comer.' },
         { t: 'Púlsale a *Generar la lista*.',
           d: 'La saca el entrenador de los propios platos del menú, sin tocarlo: suma las raciones de todos los días, redondea a lo que de verdad se vende —560 g de avena son un paquete de kilo— y lo agrupa por zonas. Queda guardada en ese menú.' },
         { t: 'Mira cómo queda y pulsa *Crear la lista*.',

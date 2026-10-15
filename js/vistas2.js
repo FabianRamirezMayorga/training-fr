@@ -3421,6 +3421,19 @@
   let compraVer = '';
   let compraPreview = null;
   let compraPensando = false;
+  /* Qué petición es la buena. Sin esto, cambiar de menú mientras la IA
+     pensaba te dejaba el botón en «Sumando los platos…» hasta que contestara
+     —y contestaba con la lista del menú anterior, que es peor que no
+     contestar—. */
+  let compraVuelta = 0;
+
+  /* Lo que estuviera pensando deja de valer. No se puede abortar la llamada a
+     medias, así que se marca y lo que llegue tarde se tira. */
+  function olvidarLoQuePensaba() {
+    if (!compraPensando) return;
+    compraVuelta++;
+    compraPensando = false;
+  }
 
   /* Lo que se lee debajo del nombre del menú, y que cambia con los días que
      pidas: enseñar siempre «7 días · 28 comidas» cuando estás comprando para
@@ -3472,33 +3485,6 @@
           alDar(n);
         };
         el.querySelector('#cp-nom-ok').onclick = guardar;
-        campo.onkeydown = function (e) { if (e.key === 'Enter') guardar(); };
-      });
-  }
-
-  /* El lápiz: para los días que no son ni semanas ni meses. Deja la unidad en
-     días, porque un número escrito a mano es un número de días. */
-  function pedirDias(menu) {
-    UI.modal(html`
-      <h2>${T('Para cuántos días')}</h2>
-      <p class="muted" style="margin-top:0">${Tn('Entre 1 y {n}.', { n: TOPE_DIAS })}</p>
-      <input id="cp-dias" type="number" inputmode="numeric" min="1" max="${raw(TOPE_DIAS)}"
-             value="${raw(diasPedidos(menu))}">
-      <button class="btn primary block" id="cp-dias-ok" style="margin-top:14px">
-        ${T('Vale')}</button>`,
-      function (el) {
-        const campo = el.querySelector('#cp-dias');
-        setTimeout(function () { campo.focus(); campo.select(); }, 80);
-        const guardar = function () {
-          const n = Math.round(Number(campo.value) || 0);
-          if (!n) { UI.closeModal(); return; }
-          compraUnidad = 'dia';
-          compraCuanto = Math.min(TOPE_DIAS, Math.max(1, n));
-          compraPreview = null;
-          UI.closeModal();
-          render();
-        };
-        el.querySelector('#cp-dias-ok').onclick = guardar;
         campo.onkeydown = function (e) { if (e.key === 'Enter') guardar(); };
       });
   }
@@ -3616,10 +3602,6 @@
       </div>
       <p class="rod-total" id="rod-total">${raw(uni.factor === 1 ? '&nbsp;'
         : esc(Tp(dias, '= {n} día', '= {n} días')))}</p>
-      <!-- El lápiz, debajo y en pequeño: con el rodillo a mano casi nunca hace
-           falta, y cuando hace falta no se busca mucho. -->
-      <button class="rod-mano" data-a="diasamano">${raw(icon('edit'))}
-        ${T('Escribir los días')}</button>
 
       ${raw(compraPreview ? html`
         <div class="list-title">${T('Así queda')}</div>
@@ -3683,12 +3665,12 @@
     });
 
     bindAll(root, '[data-menu]', function (el) {
+      olvidarLoQuePensaba();
       compraMenu = el.getAttribute('data-menu');
       compraPreview = null;
       render();
     });
 
-    bind(root, '[data-a=diasamano]', function () { pedirDias(menu); });
 
     let uni = unidadPorId(compraUnidad);
     let cuanto = Math.min(uni.tope, Math.max(1,
@@ -3741,7 +3723,8 @@
         rodUni.retitular(UNIDADES.map(function (u) { return palabraUnidad(u, n); }));
       }
       refrescarCifras();
-      if (compraPreview) { compraPreview = null; render(); }
+      if (compraPensando) { olvidarLoQuePensaba(); compraPreview = null; render(); }
+      else if (compraPreview) { compraPreview = null; render(); }
     });
 
     rodUni.al(function (v) {
@@ -3764,7 +3747,8 @@
          «semanas» al lado de un 1 canta. */
       rodUni.retitular(UNIDADES.map(function (u) { return palabraUnidad(u, cuanto); }));
       refrescarCifras();
-      if (compraPreview) { compraPreview = null; render(); }
+      if (compraPensando) { olvidarLoQuePensaba(); compraPreview = null; render(); }
+      else if (compraPreview) { compraPreview = null; render(); }
     });
 
     rodNum.poner(numerosDe(uni), cuanto);
@@ -3774,13 +3758,17 @@
 
     bind(root, '[data-a=generarlista]', function () {
       const n = diasPedidos(menu);
+      const mia = ++compraVuelta;
       compraPensando = true;
       render();
       ListaCompra.generar(menu, n).then(function (l) {
+        /* Si mientras tanto has tocado algo, esto ya no es lo que pediste. */
+        if (mia !== compraVuelta) return;
         compraPensando = false;
         compraPreview = l;
         render();
       }).catch(function (e) {
+        if (mia !== compraVuelta) return;
         compraPensando = false;
         render();
         UI.toast((e && e.message) || T('No he podido sacar la lista de ese menú.'));
@@ -3789,12 +3777,17 @@
 
     bind(root, '[data-a=guardarlista]', function () {
       if (!compraPreview) return;
+      /* Al menú del que salió la lista y no al que esté marcado ahora: no
+         deberían diferir —cambiar de menú tira la previa—, pero guardar la
+         compra de un menú dentro de otro es de las cosas que no se notan hasta
+         que estás en el súper con la lista equivocada. */
+      const suyo = compraPreview.menuId || menu.id;
       pedirNombre(menu, compraPreview.dias, function (nombre) {
-        ListaCompra.poner(menu.id, Object.assign({}, compraPreview, { nombre: nombre }));
+        ListaCompra.poner(suyo, Object.assign({}, compraPreview, { nombre: nombre }));
         compraPreview = null;
         /* Y se abre: la guardas para comprar con ella, no para verla en una
            lista de listas. */
-        compraVer = menu.id;
+        compraVer = suyo;
         render();
         window.scrollTo(0, 0);
         UI.toast(T('Lista guardada.'));

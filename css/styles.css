@@ -8968,13 +8968,9 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .rod-uni .rodillo-op{justify-content:flex-start;padding-left:12px;
   font-size:17px;font-weight:500;letter-spacing:0;color:var(--dim)}
 .rod-uni .rodillo-op.eje{color:var(--txt);font-weight:600}
-/* El lápiz, debajo y discreto: con el rodillo a mano casi nunca hace falta. */
-.rod-mano{display:flex;align-items:center;gap:6px;margin:0 auto 16px;
-  padding:7px 12px;background:none;border:0;border-radius:var(--r-xs);
-  color:var(--dim);font:600 .85rem var(--sans);cursor:pointer}
-.rod-mano:active{background:var(--card2)}
-.rod-mano svg{width:14px;height:14px;fill:none;stroke:currentColor;
-  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* El total en días deja su hueco aunque esté vacío, para que la pantalla no
+   pegue un salto al pasar de meses a días. */
+.rod-total{margin-bottom:18px}
 /* Los días que salen de multiplicar, debajo y en pequeño. Con la unidad en
    días el renglón se queda vacío pero ocupa: si apareciera y desapareciera, la
    pantalla pegaría un salto cada vez que tocas el mando. */
