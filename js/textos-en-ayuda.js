@@ -1374,10 +1374,10 @@
 
 
     /* ---------- La lista de la compra ---------- */
-    '¿Cómo sé que la compra me da la proteína del mes?':
-      'How do I know the shopping covers the month’s protein?',
-    'Porque la cifra sale de tu propio menú, no de un cálculo aparte: se suma la proteína de todas sus comidas, se divide entre sus días y se multiplica por los días que pides. Esa cantidad se le da al entrenador como objetivo de la compra, con la tabla para que la sume él mismo antes de darte la lista.':
-      'Because the figure comes from your own menu, not from a separate calculation: the protein in all its meals is added up, divided by its days and multiplied by the days you ask for. That amount is given to the coach as the shopping target, along with the table so it can add it up itself before handing you the list.',
+    '¿Cómo sé que la compra me da lo que come el menú?':
+      'How do I know the shopping covers what the menu eats?',
+    'Porque las cifras salen de tu propio menú, no de un cálculo aparte: se suman la proteína, los hidratos y la grasa de todas sus comidas, se dividen entre sus días y se multiplican por los días que pides. Esos tres objetivos se le dan al entrenador, con las tablas por cada 100 g para que los sume él mismo antes de darte la lista.':
+      'Because the figures come from your own menu, not from a separate calculation: the protein, carbs and fat in all its meals are added up, divided by its days and multiplied by the days you ask for. Those three targets are given to the coach, along with the per-100 g tables so it can add them up itself before handing you the list.',
     'Y todo va en crudo. La carne y el pescado pierden como un 25 % de peso al cocinarse, así que 150 g de pechuga ya hecha salen de unos 200 g crudos: lo que se compra son los 200. Con el arroz y las legumbres pasa al revés, 100 g cocidos son unos 33 en seco.':
       'And everything is raw weight. Meat and fish lose about 25 % of their weight when cooked, so 150 g of cooked chicken breast comes from about 200 g raw: what you buy is the 200. With rice and pulses it works the other way, 100 g cooked is about 33 g dry.',
     'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.':

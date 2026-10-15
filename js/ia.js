@@ -3717,11 +3717,13 @@
        compra de un día salga con dos kilos de carne. Sin este número delante,
        «redondea a lo que se vende» convierte 160 g de pollo en una libra, y
        cinco carnes distintas en dos kilos y cuarto para una cena. */
-    let kcal = 0, prot = 0, comidas = 0;
+    let kcal = 0, prot = 0, carbo = 0, grasa = 0, comidas = 0;
     dias.forEach(function (d) {
       (d.comidas || []).forEach(function (co) {
         kcal += Number(co.kcal) || 0;
         prot += Number(co.prot) || 0;
+        carbo += Number(co.carbo) || 0;
+        grasa += Number(co.grasa) || 0;
         comidas++;
       });
     });
@@ -3731,6 +3733,8 @@
        kilos de pollo y poco más se queda en la mitad de lo que toca, y eso no
        se ve mirando la lista —parece mucha comida—, solo se ve sumando. */
     const protDia = dias.length ? Math.round(prot / dias.length) : 0;
+    const carboDia = dias.length ? Math.round(carbo / dias.length) : 0;
+    const grasaDia = dias.length ? Math.round(grasa / dias.length) : 0;
     const comidasDia = dias.length ? Math.round(comidas / dias.length) : 0;
 
     /* Concordar en el propio prompt. «PARA 1 DÍAS» y «repetirlo 1 veces» no
@@ -3748,14 +3752,24 @@
         'día en ' + comidasDia + ' comidas. Esta compra son ' + dd(n) + ', o sea unas ' +
         (kcalDia * n) + ' kcal en total, para UNA persona. Si lo que sumas da de comer a ' +
         'una familia, te has pasado.' + SALTO + SALTO : '') +
-      (protDia ? 'Y LA PROTEÍNA, que es lo que más se queda corto: el menú lleva ' +
-        protDia + ' g al día, o sea ' + (protDia * n) + ' g en toda esta compra.' + SALTO +
-        'ANTES DE RESPONDER, suma la proteína de lo que hayas puesto y comprueba que ' +
-        'llega a esos ' + (protDia * n) + ' g. Por cada 100 g en crudo: pollo 23, pavo 24, ' +
-        'res magra 21, cerdo magro 21, pescado blanco 20, atún 23, huevo 6 por unidad, ' +
-        'leche 3,4 por cada 100 ml, yogur griego 9, queso fresco 12, lentejas secas 24, ' +
-        'garbanzos secos 19. Si no llega, SUBE las cantidades hasta que llegue; no es una ' +
-        'lista válida si deja la mitad de la proteína sin comprar.' + SALTO + SALTO : '') +
+      (protDia ? 'Y LOS MACROS, que es donde más se falla. Al día el menú lleva ' +
+        protDia + ' g de proteína, ' + carboDia + ' g de carbohidrato y ' + grasaDia +
+        ' g de grasa. En toda esta compra: ' + (protDia * n) + ' g de proteína, ' +
+        (carboDia * n) + ' g de carbohidrato y ' + (grasaDia * n) + ' g de grasa.' + SALTO +
+        'ANTES DE RESPONDER suma los tres sobre lo que hayas puesto y comprueba que ' +
+        'llegan. Por cada 100 g EN CRUDO o EN SECO:' + SALTO +
+        '  Proteína: pollo 23, pavo 24, res magra 21, cerdo magro 21, pescado blanco 20, ' +
+        'atún 23, huevo 6 por unidad, leche 3,4 por 100 ml, yogur griego 9, queso fresco 12, ' +
+        'lentejas secas 24, garbanzos secos 19, avena 13, pan 8.' + SALTO +
+        '  Carbohidrato: arroz seco 78, pasta seca 75, avena 60, pan 50, harina 72, ' +
+        'lentejas secas 60, garbanzos secos 61, papa 17, yuca 38, plátano maduro 23, ' +
+        'fruta 10 a 15, leche 4,8 por 100 ml, verdura 4.' + SALTO +
+        '  Grasa: aceite 100, mantequilla 81, frutos secos 55, maní 49, aguacate 15, ' +
+        'queso curado 25, queso fresco 8, huevo 5 por unidad, carne magra 3 a 8, cerdo 10, ' +
+        'salmón 13, pescado blanco 1, leche entera 3,5 por 100 ml, desnatada 0,2.' + SALTO +
+        'Si alguno no llega, SUBE las cantidades de lo que lo aporte hasta que llegue. Una ' +
+        'lista que deja la mitad de la proteína sin comprar no sirve, y una que no trae con ' +
+        'qué llenar los hidratos deja al día a medias.' + SALTO + SALTO : '') +
       'REGLAS:' + SALTO +
       '- SOLO lo que esté escrito en los platos de arriba. Si un alimento no sale ahí, ' +
       'no va en la lista. No completes la despensa ni añadas lo que «pega» con el menú: ' +
