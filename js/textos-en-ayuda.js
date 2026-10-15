@@ -442,8 +442,8 @@
       'Sex, age, weight, height and level. Volume, reps and effort all come from those. If something is off, fix it before generating.',
     'Paso 2: di cuándo puedes entrenar.':
       'Step 2: say when you can train.',
-    'Qué días y cuántos minutos tienes. Ponlo realista: es mejor un plan de tres días que cumples que uno de cinco que no.':
-      'Which days and how many minutes you have. Be realistic: a three-day plan you stick to beats a five-day plan you do not.',
+    'Qué días y cuántos minutos tienes. Ponlo realista: es mejor un plan de tres días que cumples que uno de cinco que no. Los minutos se respetan de verdad —si pones media hora, la sesión dura media hora— recortando primero los accesorios y solo al final las series de los básicos.':
+      'Which days and how many minutes you have. Be realistic: a three-day plan you stick to beats a five-day plan you do not. The minutes are honoured for real —put half an hour and the session lasts half an hour— by trimming the accessories first and the big lifts’ sets only at the end.',
     'Paso 3: di qué buscas.':
       'Step 3: say what you are after.',
     'Tu objetivo, el sitio donde entrenas y la zona en la que quieres poner el foco.':

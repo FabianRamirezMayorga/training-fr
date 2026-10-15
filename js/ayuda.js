@@ -335,7 +335,7 @@
             { t: 'Paso 1: repasa tus datos.',
               d: 'Sexo, edad, peso, altura y nivel. De ahí salen el volumen, las repeticiones y el esfuerzo. Si algo no cuadra, corrígelo antes de generar.' },
             { t: 'Paso 2: di cuándo puedes entrenar.',
-              d: 'Qué días y cuántos minutos tienes. Ponlo realista: es mejor un plan de tres días que cumples que uno de cinco que no.' },
+              d: 'Qué días y cuántos minutos tienes. Ponlo realista: es mejor un plan de tres días que cumples que uno de cinco que no. Los minutos se respetan de verdad —si pones media hora, la sesión dura media hora— recortando primero los accesorios y solo al final las series de los básicos.' },
             { t: 'Paso 3: di qué buscas.',
               d: 'Tu objetivo, el sitio donde entrenas y la zona en la que quieres poner el foco.' },
             { t: 'Paso 4: cuéntale lo que no cabe en ningún campo.',

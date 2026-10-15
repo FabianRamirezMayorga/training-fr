@@ -4656,6 +4656,23 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'Sin barra ni bandas no hay de dónde tirar, así que la espalda se queda sin trabajo directo y el plan se te va a ir hacia el empuje. Una barra de puerta o unas bandas con anclaje lo arreglan por poco dinero; mientras tanto, cuenta con que esto es un plan a medias.':
+      'With no bar and no bands there is nothing to pull against, so your back gets no direct work and the plan will drift towards pushing. A doorway bar or anchored bands fix it cheaply; until then, treat this as half a plan.',
+    'Con este material no hay remo ni curl en el catálogo, así que la espalda y el bíceps se quedan sin trabajo directo. Si puedes anclar la banda a una puerta, el remo sale; si no, es el hueco que tiene este plan.':
+      'With this kit there is no row or curl in the catalogue, so your back and biceps get no direct work. If you can anchor the band to a door, the row works; if not, that is the gap this plan has.',
+    'En tu plan: {ej} a {s}x{r}.': 'In your plan: {ej} at {s}x{r}.',
+    'Las series y los pesos que trae el plan. Coge cargas con las que acabes todas las series con la técnica limpia, nunca al fallo, y apúntalas: sin el peso de esta semana no hay con qué comparar las siguientes.':
+      'The sets and weights the plan comes with. Pick loads you finish every set with clean technique, never to failure, and write them down: without this week\u2019s weight there is nothing to compare the next ones to.',
+    'Las series y los pesos que trae el plan. Coge cargas con las que acabes todas las series dejando 1 o 2 repeticiones en recámara, y apúntalas: sin el peso de esta semana no hay con qué comparar las siguientes.':
+      'The sets and weights the plan comes with. Pick loads you finish every set leaving 1 or 2 reps in reserve, and write them down: without this week\u2019s weight there is nothing to compare the next ones to.',
+    'Las mismas series y el mismo peso, una repetición más en cada una. Cuando todas lleguen arriba del rango, el peso sube la semana que viene.':
+      'Same sets, same weight, one more rep on each. When they all reach the top of the range, the weight goes up next week.',
+    'La más dura: una serie más en los básicos —de {a} a {b}— o entre un 2 y un 5% de peso. Una cosa o la otra, no las dos.':
+      'The hardest one: one more set on the big lifts —from {a} to {b}— or 2 to 5% more weight. One or the other, not both.',
+    'Descarga: los mismos ejercicios a {a} series los básicos y {b} los accesorios, con un 10% menos de peso. No es perder una semana, es cuando el cuerpo consolida lo que llevas.':
+      'Deload: the same exercises at {a} sets for the big lifts and {b} for the accessories, with 10% less weight. It is not a week lost, it is when the body banks what you have built.',
+    'Vuelta a empezar con los pesos de la semana 3 y las series del principio. Si ya no suben dos semanas seguidas, cambia los accesorios y repite el bloque.':
+      'Start again with week 3\u2019s weights and the original sets. If they stop going up two weeks running, swap the accessories and repeat the block.',
     '{a} de {b} g': '{a} of {b} g',
     'Al día, lo que trae esta compra': 'Per day, what this shop brings',
     'Se queda corta de proteína para lo que come tu menú. Dale a «Rehacer», y si vuelve a pasar sube tú las cantidades de la carne o el pescado.':

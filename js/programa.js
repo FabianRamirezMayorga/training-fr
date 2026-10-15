@@ -120,8 +120,16 @@
       pistas: ['hombro', 'hombros', 'manguito', 'rotador', 'supraespinoso', 'clavicula', 'clavícula'],
       patronesFuera: ['remo al menton', 'fondo'],
       equipoFuera: { 'empuje vertical': ['barbell', 'e-z curl bar'] },
-      nota: 'Fuera el remo al mentón y los fondos, que son los que más pinzan. ' +
-        'El press por encima de la cabeza va con mancuernas, que dejan girar el hombro.'
+      /* Por nombre además del patrón. El press Arnold es de mancuernas y por
+         eso pasaba el filtro de material, pero gira el húmero con el brazo
+         cargado por encima de la cabeza, que es justo el gesto que no toca con
+         un manguito tocado. Lo mismo el press tras nuca y las elevaciones que
+         suben por encima del hombro. */
+      nombresFuera: 'arnold|tras nuca|detr[aá]s de la nuca|behind the neck|' +
+        'sobre la cabeza|above head|frontal.*sobre|pull over|pullover',
+      nota: 'Fuera el remo al mentón, los fondos y el press Arnold, que son los que ' +
+        'más pinzan. El press por encima de la cabeza va con mancuernas, que dejan ' +
+        'girar el hombro.'
     },
     lumbar: {
       label: 'Espalda baja',
@@ -191,6 +199,7 @@
     const equipoFuera = {};    // patrón -> [material]
     const conApoyo = {};       // patrón -> true (solo variantes guiadas o sentadas)
     const notas = [];
+    const nombres = [];       // trozos de nombre vetados por la lesión
     let sinMaximos = false;
 
     claves.forEach(function (k) {
@@ -201,12 +210,14 @@
         equipoFuera[p] = (equipoFuera[p] || []).concat(L.equipoFuera[p]);
       });
       (L.exigirApoyo || []).forEach(function (p) { conApoyo[p] = true; });
+      if (L.nombresFuera) nombres.push(L.nombresFuera);
       if (L.sinMaximos) sinMaximos = true;
       notas.push(L.label + ': ' + L.nota);
     });
 
     return { fuera: fuera, equipoFuera: equipoFuera, conApoyo: conApoyo,
-      notas: notas, sinMaximos: sinMaximos };
+      notas: notas, sinMaximos: sinMaximos,
+      nombresFuera: nombres.length ? new RegExp(nombres.join('|'), 'i') : null };
   }
 
   /* ---------- 5. Los días ----------
@@ -224,18 +235,23 @@
   function h(patron, musculo, rol) { return { patron: patron, musculo: musculo, rol: rol }; }
 
   const DIAS = {
+    /* Los tres cuerpo completo llevan empuje, tracción, pierna y un brazo. No
+       es por simetría: con tres días así, cada músculo sale dos o tres veces
+       por semana, que es de lo que iba todo esto. Cuando el pecho salía solo
+       en A y el bíceps solo en C, un plan de tres días dejaba medio cuerpo a
+       una vez. */
     fullA: { nombre: 'Cuerpo completo A', huecos: [
       h(P.sen, 'quadriceps', 'principal'), h(P.emH, 'chest', 'principal'),
       h(P.trH, 'middle back', 'principal'), h(P.bis, 'hamstrings', 'accesorio'),
       h(P.lat, 'shoulders', 'accesorio'), h(P.ant, 'abdominals', 'accesorio')] },
     fullB: { nombre: 'Cuerpo completo B', huecos: [
-      h(P.bis, 'hamstrings', 'principal'), h(P.trV, 'lats', 'principal'),
+      h(P.cad, 'glutes', 'principal'), h(P.trV, 'lats', 'principal'),
       h(P.emV, 'shoulders', 'principal'), h(P.zan, 'quadriceps', 'accesorio'),
-      h(P.cad, 'glutes', 'accesorio'), h(P.abd, 'abdominals', 'accesorio')] },
-    fullC: { nombre: 'Cuerpo completo C', huecos: [
-      h(P.zan, 'quadriceps', 'principal'), h(P.emH, 'chest', 'principal'),
-      h(P.trV, 'lats', 'principal'), h(P.cad, 'glutes', 'accesorio'),
       h(P.cbi, 'biceps', 'accesorio'), h(P.etr, 'triceps', 'accesorio')] },
+    fullC: { nombre: 'Cuerpo completo C', huecos: [
+      h(P.bis, 'hamstrings', 'principal'), h(P.emH, 'chest', 'principal'),
+      h(P.trV, 'lats', 'principal'), h(P.cad, 'glutes', 'accesorio'),
+      h(P.exc, 'quadriceps', 'accesorio'), h(P.gem, 'calves', 'accesorio')] },
 
     superior: { nombre: 'Tren superior', huecos: [
       h(P.emH, 'chest', 'principal'), h(P.trH, 'middle back', 'principal'),
@@ -247,9 +263,13 @@
       h(P.cad, 'glutes', 'principal'), h(P.zan, 'quadriceps', 'accesorio'),
       h(P.cuf, 'hamstrings', 'accesorio'), h(P.gem, 'calves', 'accesorio'),
       h(P.ant, 'abdominals', 'accesorio')] },
+    /* La segunda vuelta del torso tira de espalda, no de pecho. Con dos huecos
+       de pecho aquí y otros dos en el primer día salían once series de pecho
+       contra seis de dorsal, y el desequilibrio hacia el empuje es el que
+       acaba en hombros que duelen. */
     superior2: { nombre: 'Tren superior (volumen)', huecos: [
       h(P.trV, 'lats', 'principal'), h(P.emH, 'chest', 'principal'),
-      h(P.trH, 'middle back', 'accesorio'), h(P.apr, 'chest', 'accesorio'),
+      h(P.trH, 'middle back', 'accesorio'), h(P.apr, 'shoulders', 'accesorio'),
       h(P.lat, 'shoulders', 'accesorio'), h(P.etr, 'triceps', 'accesorio'),
       h(P.cbi, 'biceps', 'accesorio')] },
     inferior2: { nombre: 'Tren inferior (volumen)', huecos: [
@@ -274,13 +294,23 @@
   /* Qué se hace cada día según cuántos días se entrene. Dos estímulos por
      semana en cada músculo es lo que más rinde, así que hasta cuatro días
      manda el cuerpo completo o el torso/pierna, no el músculo por día. */
-  function repartoSemanal(dias, experiencia) {
-    const novato = experiencia === 'beginner';
+  function repartoSemanal(dias) {
     if (dias <= 1) return ['fullA'];
     if (dias === 2) return ['fullA', 'fullB'];
-    if (dias === 3) return novato ? ['fullA', 'fullB', 'fullC'] : ['empuje', 'traccion', 'pierna'];
+    /* Tres días es cuerpo completo para todo el mundo, no solo para novatos.
+       Empuje/tracción/pierna en tres días deja los doce músculos a una vez por
+       semana —medido sobre un plan generado—, que es justo lo que el comentario
+       de aquí abajo decía que había que evitar. La app se contradecía a sí
+       misma: predicaba dos estímulos y repartía uno. */
+    if (dias === 3) return ['fullA', 'fullB', 'fullC'];
     if (dias === 4) return ['superior', 'inferior', 'superior2', 'inferior2'];
-    if (dias === 5) return ['empuje', 'traccion', 'pierna', 'superior2', 'inferior2'];
+    /* Cinco días: empuje, tracción y pierna, y encima un torso y un tren
+       inferior. Cada músculo sale dos veces y ninguno tres. Las dos mezclas
+       que probé antes desequilibraban hacia un lado —con un quinto día de
+       empuje salían 18 series de pecho contra 5 de espalda media; con uno de
+       tracción, el doble de espalda que de pecho—, porque añadir un día
+       entero de una mitad del cuerpo nunca sale gratis. */
+    if (dias === 5) return ['empuje', 'traccion', 'pierna', 'superior', 'inferior'];
     return ['empuje', 'traccion', 'pierna', 'empuje', 'traccion', 'pierna'];
   }
 
@@ -306,6 +336,9 @@
   }
 
   function permitido(ex, hueco, r, gear, maxNivel) {
+    /* Los nombres vetados por una lesión, antes que nada: no hay patrón ni
+       material que los rescate. */
+    if (r.nombresFuera && r.nombresFuera.test(ex.nameEs || ex.name || '')) return false;
     if (!ex.images || ex.images.length < 2) return false;
     if (!Data.gearAllows(gear, ex.equipment)) return false;
     /* El campo «equipment» del catálogo marca como «body only» un remo invertido,
@@ -354,9 +387,18 @@
     let s = 0;
     const p = Alt.patron(ex);
     if (p === hueco.patron) s += 60;
+    /* El músculo del hueco tiene que ser de los que el ejercicio entrena de
+       verdad. Sin castigo por no estar, una «elevación de cadera en máquina
+       Smith» entraba de abdominal solo porque su patrón encajaba. */
     if ((ex.primaryMuscles || []).indexOf(hueco.musculo) !== -1) s += 30;
+    else if ((ex.secondaryMuscles || []).indexOf(hueco.musculo) !== -1) s -= 10;
+    else s -= 30;
     if (hueco.rol === 'principal') {
-      s += ex.mechanic === 'compound' ? 25 : -10;
+      /* Principal quiere decir compuesto. Con -10 un aislamiento podía ganar
+         si venía bien recomendado, y salía una patada de glúteo abriendo el
+         día de pierna a 4x8. Con -45 solo entra si no hay un compuesto
+         disponible, que es cuando de verdad no queda otra. */
+      s += ex.mechanic === 'compound' ? 25 : -45;
       s += (ex.equipment === 'barbell' || ex.equipment === 'dumbbell') ? 8 : 0;
     } else {
       s += ex.mechanic === 'isolation' ? 6 : 0;
@@ -364,7 +406,11 @@
     if (FUERZA.indexOf(ex.category) !== -1) s += 8;
     s += bonusCurado(ex, hueco.musculo);
     s += hombroQueToca(ex, hueco);
-    if (usados[ex.id]) s -= 70;                 // ya sale esta semana
+    /* Repetir en la semana penaliza, pero no descalifica: para hipertrofia
+       vale más el segundo mejor día con el buen ejercicio que un ejercicio
+       flojo por no repetir. Treinta puntos es justo la distancia que separa a
+       un ejercicio recomendado de uno del montón. */
+    if (usados[ex.id]) s -= 30;
     return s;
   }
 
@@ -382,24 +428,42 @@
     candidatos = candidatos.filter(function (ex) { return !ctx.delDia[ex.id]; });
     if (!candidatos.length) return null;
 
-    /* En el resto de la semana se evita repetir, pero si el catálogo da de sí
-       poco —peso corporal, bandas— vale más repetir un ejercicio otro día que
-       dejar el hueco vacío. */
-    const libres = candidatos.filter(function (ex) { return !ctx.usados[ex.id]; });
-    if (libres.length) candidatos = libres;
-
+    /* Repetir en la semana lo decide la puntuación, no un filtro. Antes esto
+       era un veto: bastaba con que quedara UN candidato sin usar —por malo que
+       fuera— para tirar a la basura todos los buenos, y el segundo día de
+       pierna se quedaba con los restos del primero. */
     candidatos.sort(function (a, b) {
       return puntuar(b, hueco, ctx.usados) - puntuar(a, hueco, ctx.usados);
     });
 
-    /* Se quedaba siempre con el mejor, así que el mismo perfil daba siempre el
-       mismo plan y «otra propuesta» devolvía lo idéntico: parecía una plantilla
-       porque se comportaba como una. Ahora rota entre los tres mejores y
-       desplazado por el hueco, para que cambien unos ejercicios y no todos a la
-       vez. Siguen siendo los tres que mejor puntúan: varía sin empeorar. */
+    /* Por defecto, el mejor. La rotación entre los tres primeros es para
+       «otra propuesta», y antes corría siempre: desplazada por el número de
+       hueco, el plan recién generado nunca empezaba por el mejor ejercicio
+       —salía un press inclinado con mancuernas donde tocaba press de banca—.
+       Variar cuando te lo piden es una virtud; variar sin que te lo pidan es
+       entregar el segundo mejor plan. */
     ctx.hueco = (ctx.hueco || 0) + 1;
+    if (!ctx.variante) return candidatos[0];
     const cuantos = Math.min(3, candidatos.length);
-    return candidatos[((ctx.variante || 0) + ctx.hueco) % cuantos];
+    return candidatos[(ctx.variante + ctx.hueco) % cuantos];
+  }
+
+  /* Cuando el material deja patrones enteros sin cubrir hay que decirlo con
+     nombre y apellidos. Un plan al que le falta toda la tracción no es un plan
+     con un hueco: es un plan que te va a dejar los hombros por delante del
+     resto, y eso no se arregla solo. */
+  function avisoDeMaterial(sinCubrir, gear) {
+    if (!sinCubrir.length) return [];
+    const tira = sinCubrir.filter(function (p) { return /traccion|curl de biceps/.test(p); });
+    if (!tira.length) return [];
+    return [gear === 'home'
+      ? T('Sin barra ni bandas no hay de dónde tirar, así que la espalda se queda ' +
+        'sin trabajo directo y el plan se te va a ir hacia el empuje. Una barra de ' +
+        'puerta o unas bandas con anclaje lo arreglan por poco dinero; mientras tanto, ' +
+        'cuenta con que esto es un plan a medias.')
+      : T('Con este material no hay remo ni curl en el catálogo, así que la espalda y ' +
+        'el bíceps se quedan sin trabajo directo. Si puedes anclar la banda a una puerta, ' +
+        'el remo sale; si no, es el hueco que tiene este plan.')];
   }
 
   /* ---------- 7. El programa ---------- */
@@ -435,7 +499,7 @@
     const objetivoSeries = Math.max(VOLUMEN_MIN, Math.min(VOLUMEN_MAX, Math.round(
       (VOLUMEN_BASE[experiencia] || 15) * obj.volumen * edad.factor)));
 
-    const plantillas = repartoSemanal(dias.length, experiencia);
+    const plantillas = repartoSemanal(dias.length);
     const porSesion = cabenEn(minutos, obj, edad.calentamiento);
     const foco = opts.foco || 'equilibrado';
 
@@ -453,21 +517,18 @@
       /* el énfasis elegido añade un hueco extra de esa zona */
       if (foco !== 'equilibrado') huecos = aplicarFoco(huecos, foco);
 
-      /* Cuando no cabe todo, se quedan los principales y los accesorios de los
-         músculos que menos trabajo llevan en la semana. Recortar siempre por el
-         final dejaría los brazos sin nada, que es el fallo clásico. */
+      /* No se recorta por un número estimado: se monta la plantilla entera y
+         luego manda el reloj. `cabenEn` calculaba los huecos al precio de un
+         ejercicio principal —cuatro series y hora y media de descanso— y los
+         accesorios cuestan la mitad, así que se quedaba corto siempre: salían
+         cinco ejercicios y cuarenta y ocho minutos de una hora pedida, con el
+         gemelo y la espalda media fuera del plan por falta de un sitio que sí
+         estaba. Lo que sobre lo quita recortarATiempo, que sabe qué duele
+         menos. El tope es para que una plantilla larga no se desmande. */
       const principales = huecos.filter(function (x) { return x.rol === 'principal'; });
-      let accesorios = huecos.filter(function (x) { return x.rol === 'accesorio'; });
-      const sitio = Math.max(principales.length, porSesion) - principales.length;
-      if (accesorios.length > sitio) {
-        accesorios = accesorios
-          .map(function (x, n) { return { x: x, n: n, v: volumen[x.musculo] || 0 }; })
-          .sort(function (a, b) { return a.v - b.v || a.n - b.n; })
-          .slice(0, Math.max(0, sitio))
-          .sort(function (a, b) { return a.n - b.n; })
-          .map(function (o) { return o.x; });
-      }
-      huecos = principales.concat(accesorios);
+      const accesorios = huecos.filter(function (x) { return x.rol === 'accesorio'; });
+      huecos = principales.concat(accesorios)
+        .slice(0, Math.max(principales.length, Math.min(9, porSesion + 3)));
 
       const ejercicios = [];
       ctx.delDia = {};
@@ -494,14 +555,21 @@
          tracción se quedan sin cubrir y la sesión podía acabar vacía: un día con
          cero ejercicios no es un día de descanso, es un plan roto. Se completa
          con lo que SÍ se pueda hacer, de los músculos que toquen ese día. */
-      if (ejercicios.length < 4) {
+      if (ejercicios.length < 3) {
+        /* Lo que falte, por orden de falta. Antes la lista de reserva empezaba
+           por pecho, así que un plan en casa —donde los huecos que se quedan
+           sin cubrir son siempre los de tracción, porque sin barra no hay de
+           dónde colgarse— se rellenaba con más empuje: flexiones donde faltaba
+           espalda. Eso no es completar un plan, es torcerlo. */
         const zonas = huecos.map(function (h) { return h.musculo; })
-          .filter(function (m, i, a) { return m && a.indexOf(m) === i; });
-        const rellenos = ['chest', 'quadriceps', 'abdominals', 'glutes', 'hamstrings',
-          'shoulders', 'triceps', 'calves'];
+          .filter(function (m, i, a) { return m && a.indexOf(m) === i; })
+          .sort(function (a, b) { return (volumen[a] || 0) - (volumen[b] || 0); });
+        const rellenos = ['middle back', 'lats', 'biceps', 'hamstrings', 'glutes',
+          'abdominals', 'quadriceps', 'calves', 'shoulders', 'triceps', 'chest']
+          .sort(function (a, b) { return (volumen[a] || 0) - (volumen[b] || 0); });
 
         zonas.concat(rellenos).forEach(function (m) {
-          if (ejercicios.length >= 4) return;
+          if (ejercicios.length >= 3) return;
           const ex = elegir(h(P.exc, m, 'accesorio'), ctx) ||
             elegir(h('', m, 'accesorio'), ctx);
           if (!ex) return;
@@ -530,6 +598,22 @@
       };
     });
 
+    /* Primero que quepa, y después que llegue: recortar lo que sobra libera el
+       tiempo con el que luego se rellena donde falta. */
+    sesiones.forEach(function (ses) { recortarATiempo(ses, minutos, edad.calentamiento); });
+    cuadrarVolumen(sesiones, objetivoSeries, minutos, edad.calentamiento);
+
+    /* Las dos cuentas se rehacen sobre el plan ya cuadrado: las de antes eran
+       de un plan que ya no existe. */
+    Object.keys(volumen).forEach(function (m) { delete volumen[m]; });
+    Object.keys(directas).forEach(function (m) { delete directas[m]; });
+    sesiones.forEach(function (ses) {
+      ses.ejercicios.forEach(function (e) {
+        const ex = Data.get(e.exId);
+        if (ex) sumarVolumen(volumen, ex, e.musculo, e.sets, directas);
+      });
+    });
+
     /* medias series por el trabajo indirecto: se redondea para enseñarlo */
     Object.keys(volumen).forEach(function (m) {
       volumen[m] = Math.round(volumen[m] * 2) / 2;
@@ -543,7 +627,7 @@
       s.ejercicios.forEach(function (e) { buscados[e.musculo] = true; });
     });
     const cortos = Object.keys(buscados).filter(function (m) {
-      return (volumen[m] || 0) < VOLUMEN_MIN;
+      return (directas[m] || 0) < Math.min(VOLUMEN_MIN, metaDe(m, objetivoSeries));
     });   /* en crudo: el nombre del musculo se traduce al leerlo, no aqui */
 
     const real = volumenReal(4);
@@ -563,11 +647,141 @@
       real: real,
       razones: razones(p, obj, edad, sexo, experiencia, objetivoSeries, dias.length,
         plantillas, cortos, minutos, volumen, real),
-      avisos: r.notas.concat(edad.notas, r.sinMaximos ? [] : []),
-      progresion: progresion(obj, r.sinMaximos),
+      avisos: r.notas.concat(edad.notas, avisoDeMaterial(sinCubrir, gear)),
+      progresion: progresion(obj, r.sinMaximos, sesiones),
       cardio: obj.cardio ? cardioTexto(p) : null,
       sinCubrir: sinCubrir
     };
+  }
+
+  /* ---------- cuadrar el plan con lo que se buscaba ----------
+
+     Hasta aquí el plan sale de las plantillas y del tiempo, y el objetivo de
+     series por semana solo servía para escribirlo en la ficha: se calculaba
+     quince y se generaban tres de tríceps. Un número que no manda sobre nada
+     es decoración.
+
+     Esto lo cierra. Mientras haya un músculo por debajo de lo suyo y quepa en
+     el tiempo que has dicho, se le sube una serie al ejercicio que menos lleve.
+     Se sube de uno en uno y siempre al más necesitado, que es como se reparte
+     algo escaso sin que se lo lleve el primero de la lista. */
+
+  /* Lo que de verdad necesita cada músculo. Un gemelo no pide lo mismo que un
+     cuádriceps, y pedirle al plan que iguale a todos gasta el tiempo en lo que
+     menos lo nota. */
+  const PEQUENOS = ['calves', 'abdominals', 'forearms', 'traps', 'lower back',
+    'adductors', 'abductors'];
+
+  function metaDe(musculo, meta) {
+    /* Seis series bastan para un gemelo o un lumbar, que además trabajan en
+       cada sentadilla y en cada peso muerto. Pedirles las mismas quince que a
+       un cuádriceps gasta el tiempo donde menos se nota y deja el plan
+       avisando de un problema que no existe. */
+    return PEQUENOS.indexOf(musculo) !== -1
+      ? Math.max(6, Math.round(meta * 0.5)) : meta;
+  }
+
+  const TOPE_SERIES = 5;
+
+  function cuadrarVolumen(sesiones, meta, minutos, calentamiento) {
+    /* Hasta cincuenta ajustes: con una sesión llena el bucle se para solo
+       mucho antes, y el tope está para que un plan raro no lo deje colgado. */
+    for (let vuelta = 0; vuelta < 50; vuelta++) {
+      const directas = {};
+      sesiones.forEach(function (ses) {
+        ses.ejercicios.forEach(function (e) {
+          const ex = Data.get(e.exId);
+          ((ex && ex.primaryMuscles && ex.primaryMuscles.length)
+            ? ex.primaryMuscles : [e.musculo]).forEach(function (m) {
+              directas[m] = (directas[m] || 0) + e.sets;
+            });
+        });
+      });
+
+      /* El más corto respecto a lo suyo, no el más corto en absoluto. */
+      let peorM = null, peorD = 0;
+      Object.keys(directas).forEach(function (m) {
+        const d = metaDe(m, meta) - directas[m];
+        if (d > peorD) { peorD = d; peorM = m; }
+      });
+      if (!peorM) return;
+
+      /* Dónde sumarle la serie: en la sesión que aún tenga hueco de tiempo, y
+         dentro de ella en el ejercicio de ese músculo que menos series lleve.
+         Así crece el accesorio antes que el básico, que es lo sensato: cinco
+         series de sentadilla pesada no se llevan igual que cinco de curl. */
+      let mejor = null;
+      sesiones.forEach(function (ses) {
+        if (ses.minutos >= minutos) return;
+        ses.ejercicios.forEach(function (e) {
+          if (e.sets >= TOPE_SERIES) return;
+          const ex = Data.get(e.exId);
+          const suyos = (ex && ex.primaryMuscles && ex.primaryMuscles.length)
+            ? ex.primaryMuscles : [e.musculo];
+          if (suyos.indexOf(peorM) === -1) return;
+          if (!mejor || e.sets < mejor.e.sets) mejor = { ses: ses, e: e };
+        });
+      });
+      if (!mejor) return;
+
+      mejor.e.sets++;
+      mejor.ses.minutos = duracion(mejor.ses.ejercicios, calentamiento);
+      /* Si al sumarla se pasa del tiempo, se deshace y se deja estar: el plan
+         tiene que caber en lo que has dicho que tienes. */
+      if (mejor.ses.minutos > minutos) {
+        mejor.e.sets--;
+        mejor.ses.minutos = duracion(mejor.ses.ejercicios, calentamiento);
+        return;
+      }
+    }
+  }
+
+  /* Y al revés: lo que no cabe, se recorta. Pedías treinta minutos y salía una
+     sesión de cuarenta y siete, porque el suelo de cuatro ejercicios y el
+     calentamiento mandaban por encima de lo que habías pedido. Primero se
+     quitan series a los accesorios, que es lo que menos duele, y solo después
+     se quita el último accesorio entero. Nunca se baja de tres ejercicios ni
+     se tocan los principales: por debajo de eso ya no es una sesión corta,
+     es otra cosa. */
+  function recortarATiempo(ses, minutos, calentamiento) {
+    let guarda = 0;
+    while (ses.minutos > minutos && guarda++ < 60) {
+      const accesorios = ses.ejercicios.filter(function (e) { return e.rol === 'accesorio'; });
+      /* El orden importa, y es este: primero se le quita una serie al
+         accesorio más cargado, luego se va un accesorio entero, y solo cuando
+         ya no queda ninguno se tocan los básicos. Al revés salían siete
+         ejercicios con el press de banca a tres series, cuando con seis el
+         press se queda a cuatro: lo que sobra en una sesión apretada es el
+         séptimo ejercicio, no la cuarta serie del básico. */
+      const bajables = accesorios.filter(function (e) { return e.sets > 3; });
+      if (bajables.length) {
+        bajables.sort(function (a, b) { return b.sets - a.sets; });
+        bajables[0].sets--;
+      } else if (accesorios.length && ses.ejercicios.length > 3) {
+        /* Se va el segundo ejercicio del músculo que más lleve en la sesión,
+           no el último de la lista: por el final estaban el gemelo y el
+           abdominal, que son los que nadie entrena si se les quita el sitio. */
+        const cuantos = {};
+        ses.ejercicios.forEach(function (e) {
+          cuantos[e.musculo] = (cuantos[e.musculo] || 0) + 1;
+        });
+        const fuera = accesorios.slice().sort(function (a, b) {
+          return (cuantos[b.musculo] || 0) - (cuantos[a.musculo] || 0) ||
+            ses.ejercicios.indexOf(b) - ses.ejercicios.indexOf(a);
+        })[0];
+        ses.ejercicios.splice(ses.ejercicios.indexOf(fuera), 1);
+      } else if (ses.ejercicios.some(function (e) { return e.sets > 3; })) {
+        /* Media hora de verdad: con tres ejercicios y nada que quitar, lo que
+           queda es bajar de cuatro series a tres. Una sesión que cabe es la
+           que se hace. */
+        const altos = ses.ejercicios.filter(function (e) { return e.sets > 3; })
+          .sort(function (a, b) { return b.sets - a.sets; });
+        altos[0].sets--;
+      } else {
+        break;
+      }
+      ses.minutos = duracion(ses.ejercicios, calentamiento);
+    }
   }
 
   /* Volumen efectivo: el músculo que trabaja de verdad suma la serie entera y
@@ -809,21 +1023,58 @@
   }
 
   /* ---------- 9. Progresión: sin esto no hay resultados ---------- */
-  function progresion(obj, prudente) {
+  /* La progresión, con los números de TU plan.
+
+     Antes eran cinco párrafos fijos, iguales para todo el mundo: «añade una
+     serie», «sube un 2 o un 5%». Eso describe una progresión, no la da. Quien
+     lo lee tiene que traducirlo a su plan cada semana, y lo que no se traduce
+     solo no se hace. Ahora cada semana dice las series que tocan y sobre qué
+     ejercicio, sacadas del plan recién montado. */
+  function progresion(obj, prudente, sesiones) {
+    const princ = obj.principal.series;
+    const acc = obj.accesorio.series;
+    /* El básico que abre el plan sirve de ejemplo: es el que todo el mundo
+       reconoce de su propia hoja. */
+    let ejemplo = '';
+    let repsP = obj.principal.reps;
+    (sesiones || []).some(function (ses) {
+      return (ses.ejercicios || []).some(function (e) {
+        if (e.rol !== 'principal') return false;
+        const ex = Data.get(e.exId);
+        if (!ex) return false;
+        ejemplo = ex.nameEs || ex.name || '';
+        repsP = e.reps;
+        return true;
+      });
+    });
+
+    const conEjemplo = function (txt, series) {
+      return ejemplo ? txt + ' ' + Tn('En tu plan: {ej} a {s}x{r}.',
+        { ej: ejemplo, s: series, r: repsP }) : txt;
+    };
+
     return [
-      { semana: 'Semana 1', texto: prudente
-        ? 'Coge las cargas con las que completas todas las series con la técnica limpia, ' +
-          'nunca al fallo. Apunta el peso de cada ejercicio.'
-        : 'Coge las cargas con las que completas todas las series con la técnica limpia, ' +
-          'dejando 1 o 2 repeticiones en recámara. Apunta el peso de cada ejercicio.' },
-      { semana: 'Semana 2', texto: 'Mismo peso, una repetición más por serie. Si todas las ' +
-        'series llegan arriba del rango, sube peso en la siguiente.' },
-      { semana: 'Semana 3', texto: 'Sube entre un 2 y un 5% en los básicos, o añade una serie ' +
-        'al ejercicio que mejor notes. Es la semana más dura del bloque.' },
-      { semana: 'Semana 4', texto: 'Descarga: mismos ejercicios con la mitad de series y un ' +
-        '10% menos de peso. No es perder tiempo, es cuando el cuerpo consolida lo ganado.' },
-      { semana: 'Semana 5', texto: 'Vuelta a empezar con los pesos de la semana 3. Si ya no ' +
-        'suben, cambia los accesorios y repite el bloque.' }
+      { semana: 'Semana 1', texto: conEjemplo(prudente
+        ? T('Las series y los pesos que trae el plan. Coge cargas con las que acabes ' +
+          'todas las series con la técnica limpia, nunca al fallo, y apúntalas: sin el ' +
+          'peso de esta semana no hay con qué comparar las siguientes.')
+        : T('Las series y los pesos que trae el plan. Coge cargas con las que acabes ' +
+          'todas las series dejando 1 o 2 repeticiones en recámara, y apúntalas: sin el ' +
+          'peso de esta semana no hay con qué comparar las siguientes.'), princ) },
+      { semana: 'Semana 2', texto: conEjemplo(T('Las mismas series y el mismo peso, una ' +
+        'repetición más en cada una. Cuando todas lleguen arriba del rango, el peso sube ' +
+        'la semana que viene.'), princ) },
+      { semana: 'Semana 3', texto: conEjemplo(Tn('La más dura: una serie más en los ' +
+        'básicos —de {a} a {b}— o entre un 2 y un 5% de peso. Una cosa o la otra, no las ' +
+        'dos.', { a: princ, b: princ + 1 }), princ + 1) },
+      { semana: 'Semana 4', texto: conEjemplo(Tn('Descarga: los mismos ejercicios a {a} ' +
+        'series los básicos y {b} los accesorios, con un 10% menos de peso. No es perder ' +
+        'una semana, es cuando el cuerpo consolida lo que llevas.',
+        { a: Math.max(2, Math.round(princ / 2)), b: Math.max(1, Math.round(acc / 2)) }),
+        Math.max(2, Math.round(princ / 2))) },
+      { semana: 'Semana 5', texto: conEjemplo(T('Vuelta a empezar con los pesos de la ' +
+        'semana 3 y las series del principio. Si ya no suben dos semanas seguidas, cambia ' +
+        'los accesorios y repite el bloque.'), princ) }
     ];
   }
 
