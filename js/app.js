@@ -1488,17 +1488,70 @@
   /* ---------- de qué va una rutina ----------
      La zona sale de los ejercicios que tiene, no de su nombre: así una rutina
      llamada "Lunes" sigue sabiendo que es de pierna. */
+  /* Cómo se llama lo que hay en una rutina.
+
+     Antes era «el grupo que más ejercicios tenga» y punto. Con dos de pecho,
+     dos de espalda, uno de hombro y uno de tríceps salía «Pecho» por desempate
+     alfabético, y una sesión de torso entero quedaba anunciada como un día de
+     pecho; con un día de tirón salía «Espalda» aunque llevara bíceps y hombro
+     posterior. El nombre es lo primero que se lee en la tarjeta: si miente,
+     todo el esquema de la semana deja de tener sentido al leerlo.
+
+     Ahora se mira el reparto de verdad. Un grupo que se lleva la mayoría manda;
+     dos que se reparten casi todo se nombran los dos; y cuando está repartido
+     entre tres o más, el nombre honesto es la región —torso, pierna o cuerpo
+     completo—, no uno de ellos elegido a dedo. */
+  const ARRIBA = ['pecho', 'espalda', 'hombro', 'brazo'];
+
   function zonaDeRutina(r) {
     const cuenta = {};
+    let total = 0;
     (r.exercises || []).forEach(function (re) {
       const ex = Data.get(re.exId);
       if (!ex) return;
-      (ex.groups || []).forEach(function (g2) { cuenta[g2] = (cuenta[g2] || 0) + 1; });
+      (ex.groups || []).forEach(function (g2) {
+        cuenta[g2] = (cuenta[g2] || 0) + 1;
+        total++;
+      });
     });
-    const ids = Object.keys(cuenta).sort(function (a2, b2) { return cuenta[b2] - cuenta[a2]; });
+    const ids = Object.keys(cuenta).sort(function (a2, b2) {
+      return cuenta[b2] - cuenta[a2] || a2.localeCompare(b2);
+    });
     if (!ids.length) return null;
-    const gr = I18N.GROUPS.find(function (x) { return x.id === ids[0]; });
-    return gr ? { id: gr.id, label: gr.label, cuantos: cuenta[ids[0]] } : null;
+
+    const eti = function (id) {
+      const gr = I18N.GROUPS.find(function (x) { return x.id === id; });
+      return gr ? gr.label : id;
+    };
+
+    /* Uno solo se lo lleva casi todo: ese es el nombre. */
+    if (ids.length === 1 || cuenta[ids[0]] >= total * 0.6) {
+      return { id: ids[0], label: eti(ids[0]), cuantos: cuenta[ids[0]] };
+    }
+
+    /* Dos que suman casi todo: los dos, y en ese orden. El core no cuenta para
+       bautizar nada —nadie llama a un día «pierna y core»— pero tampoco estorba. */
+    const sinCore = ids.filter(function (x) { return x !== 'core'; });
+    if (sinCore.length === 2 &&
+        (cuenta[sinCore[0]] + cuenta[sinCore[1]]) >= total * 0.75) {
+      /* El grande delante, no el que tenga un ejercicio más: «espalda y
+         brazo» es como se llama ese día en cualquier gimnasio, y «brazo y
+         espalda» suena a que el día va de brazo. */
+      const RANGO = ['pierna', 'espalda', 'pecho', 'hombro', 'brazo', 'core'];
+      const par = sinCore.slice().sort(function (x, y) {
+        return RANGO.indexOf(x) - RANGO.indexOf(y);
+      });
+      return { id: par[0], cuantos: cuenta[par[0]],
+        label: Tn('{a} y {b}', { a: T(eti(par[0])), b: T(eti(par[1])).toLowerCase() }) };
+    }
+
+    /* Repartido entre tres o más: manda la región. */
+    const arriba = sinCore.some(function (x) { return ARRIBA.indexOf(x) !== -1; });
+    const abajo = sinCore.indexOf('pierna') !== -1;
+    if (arriba && abajo) return { id: 'full', label: 'Cuerpo completo', cuantos: total };
+    if (arriba) return { id: 'torso', label: 'Torso', cuantos: total };
+    if (abajo) return { id: 'pierna', label: 'Pierna', cuantos: total };
+    return { id: ids[0], label: eti(ids[0]), cuantos: cuenta[ids[0]] };
   }
 
   /* Los músculos que toca de verdad, de más a menos presentes */

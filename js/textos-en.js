@@ -4656,6 +4656,9 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'Entra para que el brazo lleve lo mismo por los dos lados.':
+      'It is here so the arm gets the same on both sides.',
+    '{a} y {b}': '{a} and {b}',
     'Tres básicos pesados el mismo día': 'Three heavy lifts on the same day',
     '{lista} caen juntos en {donde}, y el tercero se hace con la espalda baja ya cargada de los dos anteriores':
       '{lista} land together on {donde}, and the third is done with your lower back already loaded by the other two',

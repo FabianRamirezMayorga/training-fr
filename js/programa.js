@@ -630,7 +630,17 @@
     /* Primero que quepa, y después que llegue: recortar lo que sobra libera el
        tiempo con el que luego se rellena donde falta. */
     sesiones.forEach(function (ses) { recortarATiempo(ses, minutos, edad.calentamiento); });
+    sesiones.forEach(function (ses) {
+      ctx.delDia = {};
+      ses.ejercicios.forEach(function (e) { ctx.delDia[e.exId] = true; });
+      equilibrarBrazo(ses, ctx, obj, sexo, minutos, edad.calentamiento);
+    });
     cuadrarVolumen(sesiones, objetivoSeries, minutos, edad.calentamiento);
+    /* El orden es lo último que se toca, cuando ya se sabe qué ejercicios se
+       quedan en la sesión. */
+    sesiones.forEach(function (ses) {
+      ses.ejercicios = agruparPorMusculo(ses.ejercicios);
+    });
 
     /* Las dos cuentas se rehacen sobre el plan ya cuadrado: las de antes eran
        de un plan que ya no existe. */
@@ -681,6 +691,107 @@
       cardio: obj.cardio ? cardioTexto(p) : null,
       sinCubrir: sinCubrir
     };
+  }
+
+  /* Los ejercicios de un mismo músculo, seguidos.
+
+     Las plantillas alternan a propósito —pecho, espalda, hombro, dorsal— y eso
+     salía a la hoja tal cual: press, jalón, press, remo. Para fuerza es
+     defendible, porque cada músculo descansa más entre series. Para
+     hipertrofia, que es a lo que viene casi todo el mundo, es peor: se pierde
+     la congestión y el segundo ejercicio de pecho empieza de cero.
+
+     Se agrupa respetando dos cosas: el primer ejercicio de la sesión sigue
+     siendo el más pesado —se entra fresco al básico— y dentro de cada músculo
+     va antes el compuesto que el aislamiento. El orden de los músculos lo
+     marca su primer ejercicio, que es el que la plantilla puso delante por
+     algo. */
+  /* Por GRUPO y no por músculo. Dorsal y espalda media son dos músculos
+     distintos en el catálogo y la misma espalda en el gimnasio: agrupando por
+     músculo, una dominada y un remo seguían saliendo separados por un press de
+     hombro en medio, que es justo lo que rompe la congestión. Dentro del
+     grupo, primero los compuestos y después el aislamiento. */
+  function grupoDe(musculo) {
+    const gr = (g.I18N && I18N.GROUPS || []).filter(function (x) {
+      return (x.muscles || []).indexOf(musculo) !== -1;
+    })[0];
+    return gr ? gr.id : musculo || '';
+  }
+
+  function agruparPorMusculo(ejercicios) {
+    /* Dos bloques, y dentro de cada uno agrupado por grupo muscular: primero
+       todo lo compuesto y luego todo el aislamiento.
+
+       Agrupar a secas dejaba una apertura de pecho por delante de un press
+       militar, que es cambiar un problema por otro: se gana congestión y se
+       pierde el básico fresco. Así se cumplen las dos cosas —los dos de
+       espalda seguidos, luego los empujes, y el aislamiento al cierre— que es
+       como se escribe un día de gimnasio de toda la vida. */
+    const bloque = function (lista) {
+      const orden = [];
+      const grupos = {};
+      lista.forEach(function (e) {
+        const k = grupoDe(e.musculo);
+        if (!grupos[k]) { grupos[k] = []; orden.push(k); }
+        grupos[k].push(e);
+      });
+      const salida = [];
+      orden.forEach(function (k) {
+        grupos[k].sort(function (a, b) {
+          return (a.rol === 'principal' ? 0 : 1) - (b.rol === 'principal' ? 0 : 1);
+        });
+        grupos[k].forEach(function (e) { salida.push(e); });
+      });
+      return salida;
+    };
+
+    const compuesto = function (e) {
+      const ex = Data.get(e.exId);
+      return !!(ex && ex.mechanic === 'compound');
+    };
+    return bloque(ejercicios.filter(compuesto))
+      .concat(bloque(ejercicios.filter(function (e) { return !compuesto(e); })));
+  }
+
+  /* El brazo no cojea de un lado. Si la sesión lleva tríceps directo y no
+     bíceps —o al revés— queda un día de torso con medio brazo, que se ve a
+     simple vista en la hoja y resta confianza en todo lo demás. Se mira al
+     final, cuando ya se sabe qué ha sobrevivido al recorte. */
+  function equilibrarBrazo(ses, ctx, obj, sexo, minutos, calentamiento) {
+    const tiene = function (m) {
+      return ses.ejercicios.some(function (e) { return e.musculo === m; });
+    };
+    /* Solo en los días de torso completo. En un día de empuje el bíceps no
+       pinta nada y en uno de tirón el tríceps tampoco: ahí el equilibrio se
+       mide en la semana, no en la sesión. Sin esta condición aparecía un
+       «fondo para tríceps» detrás de tres curls en el día de espalda, que es
+       peor que el problema que venía a resolver. */
+    const empuja = ses.ejercicios.some(function (e) {
+      return e.musculo === 'chest' || e.musculo === 'shoulders';
+    });
+    const tira = ses.ejercicios.some(function (e) {
+      return e.musculo === 'lats' || e.musculo === 'middle back';
+    });
+    if (!empuja || !tira) return;
+
+    const falta = tiene('triceps') && !tiene('biceps') ? 'biceps'
+      : tiene('biceps') && !tiene('triceps') ? 'triceps' : '';
+    if (!falta) return;
+    const hueco = h(falta === 'biceps' ? P.cbi : P.etr, falta, 'accesorio');
+    const ex = elegir(hueco, ctx);
+    if (!ex) return;
+    const cfg = obj.accesorio;
+    const candidato = {
+      exId: ex.id, patron: hueco.patron, musculo: falta, rol: 'accesorio',
+      sets: cfg.series, reps: cfg.reps + sexo.repsExtra, weight: 0,
+      rest: Math.round(cfg.rest * sexo.descanso / 5) * 5,
+      note: T('Entra para que el brazo lleve lo mismo por los dos lados.')
+    };
+    const prueba = ses.ejercicios.concat([candidato]);
+    if (duracion(prueba, calentamiento) > minutos) return;
+    ctx.usados[ex.id] = true;
+    ses.ejercicios = prueba;
+    ses.minutos = duracion(prueba, calentamiento);
   }
 
   /* ---------- cuadrar el plan con lo que se buscaba ----------
