@@ -1059,9 +1059,18 @@
               return '<div class="tiny">✓ ' + esc(t) + '</div>';
             }).join(''))}
           </div>
-          <p class="tiny" style="margin:9px 0 0">${raw(Tn('Estos cambios ya están en el ' +
-          'plan de arriba. Se guardan con él; para que lleguen a tus rutinas pulsa {boton}.',
-          { boton: '<b>' + esc(T('Guardar mis rutinas')) + '</b>' }))}</p>
+          <!-- Y el botón aquí mismo. Estaba al final del todo, a cuatro
+               pantallas de scroll por debajo de la gráfica, la semana y la
+               progresión: quien aplicaba un cambio no lo veía, salía de la
+               pantalla creyendo que ya estaba, y al volver el plan se releía de
+               las rutinas sin nada de lo aplicado. Aplicar y guardar son el
+               mismo gesto y tienen que estar en el mismo sitio. -->
+          <button class="btn primary block" data-a="guardar" style="margin-top:11px">
+            ${raw(icon('check'))} ${vivas().length
+              ? T('Actualizar mis rutinas') : T('Guardar mis rutinas')}</button>
+          <p class="tiny" style="margin:9px 0 0">${T('Hasta que no pulses ahí, esto vive ' +
+            'solo en esta pantalla: si sales, el plan se vuelve a leer de tus rutinas y ' +
+            'los cambios no estarán.')}</p>
         </div>` : '')}
 
       ${raw(r.consejo ? html`

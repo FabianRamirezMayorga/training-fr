@@ -1900,6 +1900,7 @@
     'Otra propuesta': 'Another suggestion',
     'Actualizar mis rutinas': 'Update my routines',
     'Guardar mis rutinas': 'Save my routines',
+    'Hasta que no pulses ahí, esto vive solo en esta pantalla: si sales, el plan se vuelve a leer de tus rutinas y los cambios no estarán.': 'Until you tap there, this only lives on this screen: if you leave, the plan is read again from your routines and the changes will not be there.',
     'Este plan ya está en tus rutinas: se reescribe esa {n}, no se añaden otras. El resto de tus rutinas no se toca.':
       'This plan is already in your routines: that {n} gets rewritten, no others are added. The rest of your routines aren\'t touched.',
     'Este plan ya está en tus rutinas: se reescriben esas {n}, no se añaden otras. El resto de tus rutinas no se toca.':

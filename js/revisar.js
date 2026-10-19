@@ -980,11 +980,17 @@
       }
 
       if (a.tipo === 'anadir' && (a.musculos || a.musculo)) {
-        /* Solo los dos más cortos: siete cambios de golpe no los aplica nadie y
-           encima alargan todas las sesiones. */
+        /* Antes eran solo los dos más cortos, para no abrumar con siete cambios
+           de golpe. El razonamiento era bueno y el resultado malo: se le decía
+           «cuatro músculos por debajo del mínimo» y se le ofrecían dos arreglos,
+           así que aplicaba los dos, volvía a auditar y seguía saliendo el mismo
+           fallo. Un aviso que no se puede quitar del todo deja de leerse.
+
+           Cuatro es el equilibrio: cubre el caso normal —los brazos y un par de
+           zonas chicas— sin convertir la lista en un formulario. */
         const lista = (a.musculos || [a.musculo]).slice()
           .sort(function (x, y) { return (rev.directas[x] || 0) - (rev.directas[y] || 0); })
-          .slice(0, 2);
+          .slice(0, 4);
         lista.forEach(function (m) {
           /* Si ya hay un ejercicio de ese músculo con pocas series, sale más a
              cuenta subirle las series que meter otro ejercicio: la sesión no se
