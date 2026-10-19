@@ -1525,33 +1525,41 @@
     };
 
     /* Uno solo se lo lleva casi todo: ese es el nombre. */
-    if (ids.length === 1 || cuenta[ids[0]] >= total * 0.6) {
+    if (ids.length === 1 || cuenta[ids[0]] >= total * 0.75) {
       return { id: ids[0], label: eti(ids[0]), cuantos: cuenta[ids[0]] };
     }
 
-    /* Dos que suman casi todo: los dos, y en ese orden. El core no cuenta para
-       bautizar nada —nadie llama a un día «pierna y core»— pero tampoco estorba. */
-    const sinCore = ids.filter(function (x) { return x !== 'core'; });
-    if (sinCore.length === 2 &&
-        (cuenta[sinCore[0]] + cuenta[sinCore[1]]) >= total * 0.75) {
-      /* El grande delante, no el que tenga un ejercicio más: «espalda y
-         brazo» es como se llama ese día en cualquier gimnasio, y «brazo y
-         espalda» suena a que el día va de brazo. */
-      const RANGO = ['pierna', 'espalda', 'pecho', 'hombro', 'brazo', 'core'];
-      const par = sinCore.slice().sort(function (x, y) {
-        return RANGO.indexOf(x) - RANGO.indexOf(y);
-      });
-      return { id: par[0], cuantos: cuenta[par[0]],
-        label: Tn('{a} y {b}', { a: T(eti(par[0])), b: T(eti(par[1])).toLowerCase() }) };
-    }
+    /* Si no, se dicen los grupos. «Torso» es verdad pero no informa: con tres
+       días de torso en la semana, la tarjeta pone tres veces lo mismo y no hay
+       forma de saber cuál es cuál sin abrirla. Mejor «pecho · espalda · brazo»,
+       que es lo que uno quiere leer de un vistazo el lunes por la mañana.
 
-    /* Repartido entre tres o más: manda la región. */
-    const arriba = sinCore.some(function (x) { return ARRIBA.indexOf(x) !== -1; });
-    const abajo = sinCore.indexOf('pierna') !== -1;
+       Tres como mucho: con cuatro no cabe en la tarjeta, y los tres primeros
+       ya dicen de qué va el día. El core no entra en el nombre —nadie llama a
+       su día «pierna y core»— salvo que sea lo único que haya. */
+    const RANGO = ['pierna', 'espalda', 'pecho', 'hombro', 'brazo', 'core'];
+    const sinCore = ids.filter(function (x) { return x !== 'core'; });
+    const lista = (sinCore.length ? sinCore : ids).slice().sort(function (x, y) {
+      /* Por peso en la sesión y, a igualdad, por el orden de siempre. */
+      return cuenta[y] - cuenta[x] || RANGO.indexOf(x) - RANGO.indexOf(y);
+    });
+
+    /* Arriba y abajo a la vez ya no es «pecho y pierna»: es cuerpo completo.
+       Pero hace falta peso de verdad en las dos mitades: un día de pierna con
+       un solo Bird-Dog —que el catálogo cuenta como espalda— salía anunciado
+       como cuerpo completo, y de eso no tiene nada. */
+    const pesa = function (x) { return cuenta[x] >= 2 || cuenta[x] >= total * 0.25; };
+    const arriba = lista.some(function (x) {
+      return ARRIBA.indexOf(x) !== -1 && pesa(x);
+    });
+    const abajo = lista.indexOf('pierna') !== -1 && pesa('pierna');
     if (arriba && abajo) return { id: 'full', label: 'Cuerpo completo', cuantos: total };
-    if (arriba) return { id: 'torso', label: 'Torso', cuantos: total };
-    if (abajo) return { id: 'pierna', label: 'Pierna', cuantos: total };
-    return { id: ids[0], label: eti(ids[0]), cuantos: cuenta[ids[0]] };
+
+    return { id: lista[0], cuantos: cuenta[lista[0]],
+      label: lista.slice(0, 3).map(function (x, i) {
+        const e = T(eti(x));
+        return i ? e.toLowerCase() : e;
+      }).join(' · ') };
   }
 
   /* Los músculos que toca de verdad, de más a menos presentes */
