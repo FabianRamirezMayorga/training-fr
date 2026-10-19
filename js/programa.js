@@ -718,6 +718,16 @@
     return gr ? gr.id : musculo || '';
   }
 
+  /* De qué grupo es un ejercicio de la lista. En un plan recién montado el
+     músculo viene escrito en el hueco; en una rutina guardada a mano no hay
+     más que el id, así que se saca del catálogo. La misma función tiene que
+     servir para los dos o volvemos a tener dos criterios. */
+  function grupoDeEjercicio(e) {
+    if (e.musculo) return grupoDe(e.musculo);
+    const ex = Data.get(e.exId);
+    return grupoDe(((ex && ex.primaryMuscles) || [])[0] || '');
+  }
+
   function agruparPorMusculo(ejercicios) {
     /* Dos bloques, y dentro de cada uno agrupado por grupo muscular: primero
        todo lo compuesto y luego todo el aislamiento.
@@ -731,7 +741,7 @@
       const orden = [];
       const grupos = {};
       lista.forEach(function (e) {
-        const k = grupoDe(e.musculo);
+        const k = grupoDeEjercicio(e);
         if (!grupos[k]) { grupos[k] = []; orden.push(k); }
         grupos[k].push(e);
       });
@@ -1346,6 +1356,8 @@
        para que el auditor mida igual: con dos varas distintas, la app se
        suspendía a sí misma —sacaba seis series de gemelo porque le parecían
        bastantes y acto seguido las marcaba como fallo—. */
-    metaDe: metaDe, VOLUMEN_MIN: VOLUMEN_MIN
+    metaDe: metaDe, VOLUMEN_MIN: VOLUMEN_MIN,
+    /* La presta el auditor para arreglar rutinas que no ha montado él. */
+    agruparSesion: agruparPorMusculo
   };
 })(window);

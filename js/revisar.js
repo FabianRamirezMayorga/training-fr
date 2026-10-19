@@ -214,8 +214,16 @@
 
   function esPesado(e) {
     const ex = Data.get(e.exId);
-    return !!(ex && ex.mechanic === 'compound' &&
-      GRANDES_PATRONES.indexOf(Alt.patron(ex)) !== -1);
+    if (!ex || ex.mechanic !== 'compound') return false;
+    const p = Alt.patron(ex);
+    if (GRANDES_PATRONES.indexOf(p) !== -1) return true;
+    /* El remo falta en la lista de arriba, y un remo con barra inclinado pesa
+       y cansa lo que una dominada. Pero meter la tracción horizontal entera
+       ascendía también el face pull, que es de polea y de deltoides
+       posterior: la diferencia no está en el patrón sino en lo que pesa, y
+       eso lo dice el material. */
+    return p === 'traccion horizontal' &&
+      (ex.equipment === 'barbell' || ex.equipment === 'dumbbell');
   }
 
   /* Un hallazgo por sesión, no uno por ejercicio mal puesto. Sacándolos sueltos,
@@ -247,6 +255,75 @@
             return Tn('{que} es el {n}.º, detrás de {tras}',
               { que: nombre(t.e), n: t.k + 1, tras: nombre(t.tras) });
           }).join('; ') }),
+        arreglo: { tipo: 'orden', dia: i }
+      });
+    });
+  }
+
+  /* El rebote de un grupo a otro y vuelta.
+
+     El orden de la hoja salía alternando —dominada, press militar, remo, cruce
+     de poleas— porque las plantillas alternan por dentro. Para fuerza se
+     defiende; para hipertrofia rompe la congestión: el segundo ejercicio de
+     espalda empieza de cero porque entre medias hubo un press.
+
+     Se mide contando vueltas: cada vez que el grupo cambia respecto al
+     anterior es una. Con los ejercicios agrupados, las vueltas son como mucho
+     tantas como grupos haya; si hay más, es que se va y se vuelve. */
+  function grupoEj(e) {
+    const ex = Data.get(e.exId);
+    const m = (e.musculo) || ((ex && ex.primaryMuscles) || [])[0] || '';
+    const gr = (g.I18N && I18N.GROUPS || []).filter(function (x) {
+      return (x.muscles || []).indexOf(m) !== -1;
+    })[0];
+    return gr ? gr.id : m;
+  }
+
+  function reglaRebote(sesiones, hallazgos) {
+    sesiones.forEach(function (s, i) {
+      const lista = ejerciciosDe(s);
+      if (lista.length < 4) return;
+
+      /* Se mide dentro de cada bloque. Un día bien montado pone los
+         compuestos delante y el aislamiento detrás, así que el pecho sale dos
+         veces —press arriba, apertura abajo— y eso no es rebotar: es la
+         estructura correcta. Lo que molesta es ir y volver dentro del mismo
+         bloque.
+
+         Y el criterio es exacto, no un umbral: en una lista agrupada hay
+         tantos tramos seguidos como grupos distintos. Si hay un tramo de más,
+         es que un grupo aparece en dos sitios con otro en medio. */
+      const esAislado = function (e) {
+        const ex = Data.get(e.exId);
+        return !!(ex && ex.mechanic === 'isolation');
+      };
+      const bloques = [lista.filter(function (e) { return !esAislado(e); }),
+        lista.filter(esAislado)];
+
+      const sueltos = [];
+      let tramosDeMas = 0;
+      bloques.forEach(function (bl) {
+        if (bl.length < 3) return;
+        const gs = bl.map(grupoEj);
+        let tramos = 1;
+        for (let k = 1; k < gs.length; k++) {
+          if (gs[k] === gs[k - 1]) continue;
+          tramos++;
+          /* ¿vuelve a un grupo que ya había dejado? */
+          if (gs.indexOf(gs[k]) < k - 1) sueltos.push(nombre(bl[k]));
+        }
+        const distintos = gs.filter(function (x, k, a) { return a.indexOf(x) === k; });
+        if (tramos > distintos.length) tramosDeMas += tramos - distintos.length;
+      });
+      if (!tramosDeMas || !sueltos.length) return;
+
+      hallazgos.push({
+        id: 'rebote:' + i, gravedad: 2,
+        titulo: T('Los ejercicios van saltando de músculo en músculo'),
+        dato: Tn('en {donde}, {lista} vuelve a un músculo que ya habías dejado: el ' +
+          'segundo ejercicio de esa zona empieza de cero, sin la congestión del ' +
+          'primero',
+          { donde: tituloSesion(s, i), lista: sueltos.slice(0, 3).join(', ') }),
         arreglo: { tipo: 'orden', dia: i }
       });
     });
@@ -532,6 +609,7 @@
       reglaEquilibrio(sesiones, hallazgos);
     }
     reglaOrden(sesiones, hallazgos);
+    reglaRebote(sesiones, hallazgos);
     reglaIntruso(sesiones, hallazgos);
     reglaDescansos(sesiones, hallazgos);
 
@@ -768,7 +846,12 @@
           else if (x && x.mechanic === 'compound') compuestos.push(e);
           else aislados.push(e);
         });
-        const nuevo = pesados.concat(compuestos, aislados);
+        /* Y dentro de cada bloque, agrupados por grupo muscular, con la misma
+           funcion que usa el generador: separar por tipo y dejar el rebote
+           dentro —dominada, press, remo— arreglaba media cosa. */
+        const agrupar = g.Programa && Programa.agruparSesion
+          ? Programa.agruparSesion : function (x) { return x; };
+        const nuevo = agrupar(pesados).concat(agrupar(compuestos), agrupar(aislados));
 
         const igual = nuevo.every(function (e, k) { return lista[k] === e; });
         if (igual) return;

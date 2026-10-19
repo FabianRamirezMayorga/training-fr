@@ -2417,6 +2417,37 @@
     'y no baja su nota. Si aun así merece un comentario, va en el consejo final, no ' +
     'entre los puntos.\n';
 
+  /* Un cambio ya decidido, escrito para que la IA lo entienda.
+
+     Esto salía vacío en cuanto el cambio no era de quitar o poner un ejercicio:
+     un reordenamiento llegaba como «1) orden:» y nada más, y acto seguido se le
+     pedía «devuelve EXACTAMENTE estos». Le estábamos pidiendo que copiara algo
+     que no le habíamos dicho. Solo se ve ejecutándolo: leyendo el código
+     parece que imprime el cambio, porque para los dos tipos más frecuentes
+     sí lo hace. */
+  function describirCambio(c) {
+    const leer = function (x) {
+      return typeof x === 'string' ? x : (g.Programa ? Programa.leer(x) : '');
+    };
+    if (c.accion === 'orden' && (c.lista || []).length) {
+      return 'orden: dejar ' + leer(c.sobre) + ' en este orden — ' +
+        c.lista.map(leer).join(' → ');
+    }
+    if (c.accion === 'series' && c.series) {
+      return 'series: ' + leer(c.sobre) + ' pasa a ' + c.series + ' series';
+    }
+    if (c.accion === 'descanso' && c.valor) {
+      return 'descanso: ' + leer(c.sobre) + ' sube a ' + c.valor + ' segundos';
+    }
+    const partes = [];
+    if (c.quitar) partes.push('quitar ' + leer(c.quitar));
+    if (c.poner) {
+      partes.push('poner ' + leer(c.poner) +
+        (c.series ? ' ' + c.series + 'x' + (c.reps || '') : ''));
+    }
+    return c.accion + ': ' + (partes.join(' y ') || leer(c.sobre) || '');
+  }
+
   /* ---------- auditar UNA rutina ----------
      Lo mismo que se le hace al programa entero, pero sobre una rutina suelta:
      la que uno ya tiene montada y quiere pasar por otro par de ojos. Los
@@ -2479,10 +2510,7 @@
         ? '- CAMBIOS YA DECIDIDOS por la app a partir de esos fallos, comprobados ' +
           'contra el catálogo y su material:\n' +
           arreglos.map(function (c, i) {
-            return '  ' + (i + 1) + ') ' + c.accion + ': ' +
-              (c.quitar ? 'quitar ' + c.quitar : '') +
-              (c.quitar && c.poner ? ' y ' : '') +
-              (c.poner ? 'poner ' + c.poner : '');
+            return '  ' + (i + 1) + ') ' + describirCambio(c);
           }).join('\n') + '\n' +
           '  Devuelve EXACTAMENTE estos en "cambios", en el mismo orden y con los ' +
           'mismos nombres; tú solo escribes el "porque".\n'

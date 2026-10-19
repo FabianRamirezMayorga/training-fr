@@ -4656,6 +4656,10 @@
 
     /* ---------- La compra: generar, comprar, sustituir ---------- */
     'Tus listas': 'Your lists',
+    'Los ejercicios van saltando de músculo en músculo':
+      'The exercises keep hopping from muscle to muscle',
+    'en {donde}, {lista} vuelve a un músculo que ya habías dejado: el segundo ejercicio de esa zona empieza de cero, sin la congestión del primero':
+      'on {donde}, {lista} goes back to a muscle you had already left: the second exercise for that area starts from scratch, without the pump from the first',
     'Entra para que el brazo lleve lo mismo por los dos lados.':
       'It is here so the arm gets the same on both sides.',
     '{a} y {b}': '{a} and {b}',
