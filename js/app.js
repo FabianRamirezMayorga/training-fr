@@ -3516,7 +3516,7 @@
 
     function filaHTML(f, i) {
       return html`
-        <div class="serie-fila detalle" data-fila="${i}">
+        <div class="ap-fila" data-fila="${i}">
           <span class="sf-n">${i + 1}</span>
           ${raw(detallado ? html`
             <label class="sf-campo">
@@ -3524,14 +3524,15 @@
                      value="${f.weight}" data-f="weight"
                      aria-label="${Tn('Peso de la serie {n}', { n: i + 1 })}">
               <span>${unidad}</span>
-            </label>` : '')}
+            </label>
+            <span class="ap-sep">×</span>` : '')}
           <label class="sf-campo">
             <input type="number" inputmode="numeric" step="1" min="0"
                    value="${f.reps}" data-f="reps"
                    aria-label="${Tn('Repeticiones de la serie {n}', { n: i + 1 })}">
             <span>${T('reps')}</span>
           </label>
-          <button class="btn icon sm" data-f="quita" aria-label="${T('Quitar esta serie')}">
+          <button class="ap-x" data-f="quita" aria-label="${T('Quitar esta serie')}">
             ${raw(icon('close'))}</button>
         </div>`;
     }
@@ -3554,24 +3555,31 @@
            rutina de donde sacarlo, así que se pregunta: guardar «un ejercicio
            hecho» a secas no dejaba con qué contar nada. -->
       ${raw(!soloEjercicio ? '' : html`
-        <div class="serie-fila detalle" style="margin-top:4px">
-          <label class="sf-campo">
-            <input type="number" inputmode="numeric" step="1" min="1" max="20"
-                   value="${series0}" id="ap-series" aria-label="${T('Cuántas series')}">
-            <span>${T('series')}</span>
-          </label>
-          <span class="sf-n" style="opacity:.5">×</span>
-          <label class="sf-campo">
-            <input type="number" inputmode="numeric" step="1" min="1"
-                   value="${reps0}" id="ap-reps" aria-label="${T('Cuántas repeticiones')}">
-            <span>${T('reps')}</span>
-          </label>
+        <div class="list ap-grupo">
+          <div class="ap-fila" style="padding-left:14px">
+            <label class="sf-campo">
+              <input type="number" inputmode="numeric" step="1" min="1" max="20"
+                     value="${series0}" id="ap-series" aria-label="${T('Cuántas series')}">
+              <span>${T('series')}</span>
+            </label>
+            <span class="ap-sep">×</span>
+            <label class="sf-campo">
+              <input type="number" inputmode="numeric" step="1" min="1"
+                     value="${reps0}" id="ap-reps" aria-label="${T('Cuántas repeticiones')}">
+              <span>${T('reps')}</span>
+            </label>
+          </div>
         </div>`)}
 
+      <!-- El botón de añadir va DENTRO del grupo y fuera del contenedor que se
+           repinta: así cierra la lista como una fila más —que es lo que es— y
+           de paso conserva su manejador cuando las filas se vuelven a pintar. -->
       ${raw(soloEjercicio ? '' : html`
-        <div class="stack" id="ap-filas">${raw(filas.map(filaHTML).join(''))}</div>
-        <button class="btn block" data-a="otra" style="margin-top:8px">
-          ${raw(icon('plus'))} ${T('Otra serie')}</button>`)}
+        <div class="list ap-grupo">
+          <div id="ap-filas">${raw(filas.map(filaHTML).join(''))}</div>
+          <button class="ap-mas" data-a="otra">
+            ${raw(icon('plus'))} ${T('Otra serie')}</button>
+        </div>`)}
 
       <button class="btn primary block" data-a="guardar" style="margin-top:14px">
         ${raw(icon('check'))} ${T('Apuntarlo')}</button>
@@ -3719,16 +3727,15 @@
     function cuerpoHTML() {
       return entries.map(function (e, j) {
         return html`
-          <div class="card" data-ent="${j}" style="padding:11px">
-            <div class="row between" style="gap:8px;margin-bottom:7px">
-              <b class="grow" style="font-size:.9rem;min-width:0">${e.name ||
-                (Data.get(e.exId) || {}).nameEs || e.exId}</b>
-              <button class="btn icon sm danger" data-quitaej="${j}"
+          <div class="list ap-grupo" data-ent="${j}">
+            <div class="ap-cab">
+              <b>${e.name || (Data.get(e.exId) || {}).nameEs || e.exId}</b>
+              <button class="ap-quita" data-quitaej="${j}"
                       aria-label="${T('Quitar este ejercicio')}">${raw(icon('trash'))}</button>
             </div>
             ${raw(e.sets.map(function (st, i) {
               return html`
-                <div class="serie-fila detalle" data-fila="${i}">
+                <div class="ap-fila" data-fila="${i}">
                   <span class="sf-n">${i + 1}</span>
                   ${raw(detallado ? html`
                     <label class="sf-campo">
@@ -3736,18 +3743,19 @@
                              value="${st.weight}" data-f="weight"
                              aria-label="${Tn('Peso de la serie {n}', { n: i + 1 })}">
                       <span>${unidad}</span>
-                    </label>` : '')}
+                    </label>
+                    <span class="ap-sep">×</span>` : '')}
                   <label class="sf-campo">
                     <input type="number" inputmode="numeric" step="1" min="0"
                            value="${st.reps}" data-f="reps"
                            aria-label="${Tn('Repeticiones de la serie {n}', { n: i + 1 })}">
                     <span>${T('reps')}</span>
                   </label>
-                  <button class="btn icon sm" data-f="quita"
+                  <button class="ap-x" data-f="quita"
                           aria-label="${T('Quitar esta serie')}">${raw(icon('close'))}</button>
                 </div>`;
             }).join(''))}
-            <button class="btn block sm ghost" data-otra="${j}" style="margin-top:6px">
+            <button class="ap-mas" data-otra="${j}">
               ${raw(icon('plus'))} ${T('Otra serie')}</button>
           </div>`;
       }).join('');
@@ -3757,7 +3765,7 @@
       <h2>${T('Retocar lo registrado')}</h2>
       <p class="muted">${Tn('{que} · {cuando}',
         { que: Store.nombreDeSesion(ses), cuando: UI.fecha(ses.start) })}</p>
-      <div class="stack" id="ed-cuerpo">${raw(cuerpoHTML())}</div>
+      <div id="ed-cuerpo" style="margin-top:12px">${raw(cuerpoHTML())}</div>
       <button class="btn primary block" data-a="guardar" style="margin-top:14px">
         ${raw(icon('check'))} ${T('Guardar los cambios')}</button>
       <button class="btn danger block" data-a="borrar" style="margin-top:8px">

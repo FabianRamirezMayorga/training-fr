@@ -993,7 +993,7 @@
            contrario —ya lo miró, y el plan no ha cambiado desde entonces—,
            así que se dice antes de enseñarlo y con la fecha delante. -->
       ${raw(r.deCache ? html`
-        <div class="card" style="border-color:var(--dim3)">
+        <div class="card" data-avisocache style="border-color:var(--dim3)">
           <div class="row" style="gap:9px;align-items:flex-start">
             <span style="flex:none;opacity:.65">${raw(icon('reloj'))}</span>
             <div class="grow">
@@ -1754,12 +1754,43 @@
 
   function afinar(rehacer) {
     if (!IA.activa()) { go('claves'); UI.toast(T('Elige proveedor de IA y pon su clave')); return; }
+
+    /* Con el plan sin tocar, la auditoría sale de la caché y se resuelve al
+       instante: se repintaba algo idéntico a lo que ya había en pantalla, sin
+       siquiera un parpadeo. Desde fuera, un botón que no hace nada.
+
+       Hacer que llame de verdad sería peor —gastaría cuota para recibir los
+       mismos fallos contados de otra forma, que es justo lo que hace el botón
+       de debajo y por eso avisa de que cuesta una llamada—. Lo que faltaba no
+       era trabajo, era respuesta: se dice que no hay nada nuevo y se lleva la
+       vista al aviso con la fecha, que es la explicación. */
+    const antes = est.ia;
+    let mismo = false;
+
     est.cargandoIA = true;
     render();
     IA.afinarPrograma(est.prog, rehacer)
-      .then(function (r) { est.ia = r; })
+      .then(function (r) {
+        /* Por la marca de tiempo, y si no la hay, por el texto. Un dictamen
+           guardado antes de que la cache apuntara el cuando no la trae, y ese
+           es justo el que tiene en pantalla quien actualiza: sin la segunda
+           comprobacion, el primer toque despues de actualizar seguiria sin
+           decir nada, que es el fallo que se viene a arreglar. */
+        mismo = !!(r && r.deCache && antes && antes.deCache &&
+          ((r.deCacheT && r.deCacheT === antes.deCacheT) ||
+            (r.veredicto && r.veredicto === antes.veredicto)));
+        est.ia = r;
+      })
       .catch(function (e) { UI.toast(e.message); })
-      .then(function () { est.cargandoIA = false; guardarEstado(); render(); });
+      .then(function () {
+        est.cargandoIA = false;
+        guardarEstado();
+        render();
+        if (!mismo) return;
+        UI.toast(T('Tu plan no ha cambiado: es la misma auditoría.'));
+        const aviso = document.querySelector('[data-avisocache]');
+        if (aviso) aviso.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
   }
 
   /* ---------- aplicar lo que propone el entrenador ----------

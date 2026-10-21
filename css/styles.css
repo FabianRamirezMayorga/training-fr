@@ -9138,3 +9138,86 @@ html[data-theme="light"] .vista-inicio .semana-caja::after,
 .sust-op p{margin:6px 0 0;font-size:.84rem;line-height:1.45;color:var(--dim)}
 .sust-igual{flex:none;font-size:.7rem;font-weight:700;letter-spacing:.04em;
   text-transform:uppercase;color:var(--acc)}
+
+/* ---------- apuntar un ejercicio y retocar lo registrado ----------
+
+   Lista agrupada, al modo de Ajustes de iOS: un grupo por ejercicio, su
+   nombre arriba, una fila por serie separadas por un pelo, y la última fila
+   para añadir otra.
+
+   Antes cada serie era una `.serie-fila` entera. En la pantalla de entrenar
+   esa pieza manda, y debe: es LO que se toca, una sola a la vez, con el
+   pulgar y sudando. Aquí hay seis a la vez dentro de otra tarjeta, y seis
+   piezas protagonistas apiladas no son seis protagonistas: son un
+   formulario. Lo que manda aquí es la lista.
+
+   El color va solo donde distingue algo: el verde en «otra serie» porque
+   añade, el rojo solo al pulsar un borrado. Las papeleras en reposo son
+   grises; si todo lo que se puede romper va en rojo, el rojo deja de
+   querer decir nada. */
+
+.ap-grupo { overflow: hidden; }
+.ap-grupo + .ap-grupo { margin-top: 11px; }
+
+.ap-cab {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 13px 10px 15px;
+  background: color-mix(in srgb, #fff 3%, transparent);
+}
+.ap-cab b {
+  flex: 1 1 auto; min-width: 0;
+  font-size: .92rem; letter-spacing: -.01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Las dos papeleras: la del ejercicio y la de la serie. Misma idea, distinto
+   peso, porque quitar un ejercicio entero es más grave que quitar una serie
+   y la mano tiene que notarlo antes de pulsar. */
+.ap-quita, .ap-x {
+  flex: none; display: flex; align-items: center; justify-content: center;
+  border: 0; background: transparent; cursor: pointer; color: var(--dim2);
+  border-radius: 50%;
+  transition: color .18s ease, background .18s ease, opacity .18s ease;
+}
+.ap-quita { width: 30px; height: 30px; }
+.ap-x { width: 28px; height: 28px; opacity: .45; margin-left: auto; }
+/* Los iconos de linea -la cruz, el mas- se dibujan con el trazo del texto, y
+   sin esto salen invisibles: un boton de 28x28 que no pinta nada. La papelera
+   no lo necesitaba porque va rellena, y por eso el fallo solo se veia en dos
+   de los tres botones. */
+.ap-quita svg, .ap-x svg, .ap-mas svg {
+  fill: none; stroke: currentcolor; stroke-width: 2.2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.ap-quita svg { width: 15px; height: 15px; }
+.ap-x svg { width: 13px; height: 13px; }
+.ap-quita:active, .ap-x:active {
+  opacity: 1; color: var(--bad);
+  background: color-mix(in srgb, var(--bad) 15%, transparent);
+}
+
+.ap-fila {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 11px 8px 15px; position: relative;
+}
+/* El pelo va en todas y no solo entre ellas: también separa de la cabecera,
+   que es donde más falta hace para que el nombre no parezca una fila más. */
+.ap-fila::before, .ap-mas::before {
+  content: ""; position: absolute; top: 0; left: 15px; right: 0;
+  height: 1px; background: var(--line); transform: scaleY(.5);
+}
+/* Sin tope, el campo de repeticiones solo se comia 242 px de los 340 de la
+   fila: un recuadro enorme con un numero de dos cifras pegado a un lado. Con
+   dos campos -peso y reps- se reparten y el tope no llega a notarse. */
+.ap-fila .sf-campo { padding: 6px 8px; max-width: 128px; }
+.ap-sep { flex: none; color: var(--dim2); opacity: .4; font-size: .82rem; }
+
+.ap-mas {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 11px; position: relative;
+  border: 0; background: transparent; cursor: pointer;
+  color: var(--acc); font-size: .86rem; font-weight: 600;
+  transition: background .18s ease;
+}
+.ap-mas svg { width: 14px; height: 14px; }
+.ap-mas:active { background: color-mix(in srgb, var(--acc) 10%, transparent); }

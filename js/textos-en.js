@@ -60,6 +60,7 @@
     'Añadido a favoritos': 'Added to favourites',
     'Quitado de favoritos': 'Removed from favourites',
     'Añadir a rutina': 'Add to a routine',
+    'Tu plan no ha cambiado: es la misma auditoría.': 'Your plan has not changed: this is the same audit.',
     'Cuántas series y con cuántas repeticiones. Sin peso, que es como tienes puesto el registro: de ahí salen las series de la semana y el reparto por músculo.': 'How many sets and with how many reps. No weight, which is how you have logging set up: this is where your weekly sets and the split by muscle come from.',
     'Cuántas series': 'How many sets',
     'Cuántas repeticiones': 'How many reps',
