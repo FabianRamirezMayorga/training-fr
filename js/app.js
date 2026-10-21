@@ -3166,10 +3166,14 @@
   function alternativasHTML(ex) {
     if (!window.Alt) return '';
     const gear = Store.settings().gear || '';
-    let lista = Alt.para(ex, { limite: 8, soloDisponible: !!gear });
+    /* Lo que ya se hace hoy no es un recambio de nada. Se pregunta también
+       aquí y no solo en la hoja de «cambiar» porque esta lista se pinta
+       dentro del entrenamiento, debajo del ejercicio en curso. */
+    const hoy = Alt.enCurso();
+    let lista = Alt.para(ex, { limite: 8, soloDisponible: !!gear, excluir: hoy });
     let fuera = false;
     if (lista.length < 2) {
-      lista = Alt.para(ex, { limite: 8, gear: '' }).filter(function (a) {
+      lista = Alt.para(ex, { limite: 8, gear: '', excluir: hoy }).filter(function (a) {
         return !gear || !Data.gearAllows(gear, a.ex.equipment);
       });
       fuera = lista.length > 0;

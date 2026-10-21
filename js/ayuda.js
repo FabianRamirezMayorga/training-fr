@@ -380,7 +380,7 @@
         { t: 'Apunta lo que de verdad hiciste.',
           d: 'Si sacaste ocho en vez de diez, pon ocho. De ahí sale la propuesta de la próxima vez, y una cifra inflada hoy es un peso que no podrás mover la semana que viene.' },
         { t: 'Si un ejercicio no puedes hacerlo, cámbialo ahí mismo.',
-          d: '*Otra opción* te propone recambios que trabajan lo mismo con otro material, y las series que ya llevas marcadas no se pierden. *Cómo se hace* enseña la técnica sin salir del entrenamiento.' },
+          d: '*Otra opción* te propone recambios que trabajan lo mismo con otro material, y las series que ya llevas marcadas no se pierden. Nunca te ofrece algo que ya esté en la sesión de hoy. *Cómo se hace* enseña la técnica sin salir del entrenamiento.' },
         { t: 'Termina cuando esté todo marcado.',
           d: 'El botón de terminar se enciende en verde cuando ya no queda nada por marcar. Se suma al historial, a los récords, al volumen levantado y a la constancia.' }
       ],
@@ -806,6 +806,12 @@
         'Y porque ya no hay que fiarse: arriba de la lista salen las tres cifras al día, lo que trae frente a lo que pide tu menú, sumadas por la app. Si la proteína se queda por debajo del 85 %, te lo dice en ámbar y te sugiere rehacerla.',
         'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.'],
       ver: ['c-compra'] },
+
+    { id: 'p-recambiohoy', q: '¿Por qué no me ofrece como recambio un ejercicio que sí sé hacer?',
+      a: ['Si ese ejercicio ya está en la sesión de hoy, no te lo ofrece a propósito. Cambiar la sentadilla por la prensa que tienes tres ejercicios más abajo no es un recambio: es hacer la prensa dos veces y quedarte sin el trabajo que hacía la sentadilla.',
+        'Pasaba justo al revés de lo que parece. El recambio de un básico suele ser el accesorio que lo acompaña —mismo músculo, mismo movimiento, otra máquina—, así que era lo primero que salía y con buena nota.',
+        'Si de verdad quieres hacerlo dos veces, añádelo con *Añadir otro ejercicio a esta sesión*: ahí no se te quita nada.'],
+      ver: ['c-entrenar'] },
 
     { id: 'p-dosnumeros', q: '¿Por qué la lista pone 160 g y debajo «bandeja de 500 g»?',
       a: ['Porque son dos cosas distintas y conviene ver las dos. El primero es lo que te vas a comer, sumado de los platos. El segundo es cómo lo vende la tienda, que casi nunca coincide.',

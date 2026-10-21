@@ -1443,10 +1443,12 @@
 
   function cambiarSheet(ex, rerender) {
     const gear = Store.settings().gear || '';
-    let lista = g.Alt ? Alt.para(ex, { limite: 10, soloDisponible: !!gear }) : [];
+    const hoy = g.Alt ? Alt.enCurso() : [];
+    let lista = g.Alt
+      ? Alt.para(ex, { limite: 10, soloDisponible: !!gear, excluir: hoy }) : [];
     let fuera = false;
     if (lista.length < 2 && g.Alt) {
-      lista = Alt.para(ex, { limite: 10, gear: '' });
+      lista = Alt.para(ex, { limite: 10, gear: '', excluir: hoy });
       fuera = true;
     }
 

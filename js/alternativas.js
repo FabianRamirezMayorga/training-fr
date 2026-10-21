@@ -167,17 +167,40 @@
     return T('Trabajo parecido');
   }
 
+  /* Los ejercicios de la sesión que está en marcha ahora mismo, por id.
+
+     Vacío si no se está entrenando, que es lo que hace que esto se pueda
+     llamar desde cualquier pantalla sin preguntar antes. */
+  function enCurso() {
+    const a = (g.Store && Store.active && Store.active()) || null;
+    return ((a && a.entries) || []).map(function (e) { return e.exId; });
+  }
+
   /* Alternativas a un ejercicio, de más a menos parecida.
-     opts: {gear, limite, porMaterial, soloDisponible, minimo} */
+     opts: {gear, limite, porMaterial, soloDisponible, minimo, excluir}
+
+     `excluir` son ids que no valen como recambio aunque puntuen altísimo.
+     Nació de un caso concreto: un día de pierna con sentadilla y prensa, se
+     pide recambio de la sentadilla y lo primero que sale es la prensa —que
+     estaba tres ejercicios más abajo en esa misma sesión—. Puntuaba la
+     primera por buenos motivos (mismo patrón, mismo músculo, otro material),
+     y justamente por eso: el recambio ideal de un básico suele ser el
+     accesorio que ya le acompaña. Cambiar uno por otro no es un recambio,
+     es hacer el mismo ejercicio dos veces.
+
+     El auditor ya lo filtraba por su cuenta con su propio mapa de «ya
+     puestos». Esto sube el criterio al motor para que no haya dos. */
   function para(ex, opts) {
     if (!ex) return [];
     opts = opts || {};
     const gear = opts.gear === undefined ? (Store.settings().gear || '') : opts.gear;
     const minimo = opts.minimo === undefined ? 20 : opts.minimo;
+    const vetados = {};
+    (opts.excluir || []).forEach(function (id) { if (id) vetados[id] = true; });
     const encontradas = [];
 
     Data.all().forEach(function (c) {
-      if (c.id === ex.id) return;
+      if (c.id === ex.id || vetados[c.id]) return;
       if (opts.soloDisponible && gear && !Data.gearAllows(gear, c.equipment)) return;
       const s = puntuar(ex, c, gear);
       if (s < minimo) return;
@@ -202,5 +225,6 @@
     return salida.slice(0, opts.limite || 12);
   }
 
-  g.Alt = { para: para, patron: patron, familia: familia, PATRONES: PATRONES };
+  g.Alt = { para: para, patron: patron, familia: familia, PATRONES: PATRONES,
+    enCurso: enCurso };
 })(window);

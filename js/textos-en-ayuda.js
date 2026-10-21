@@ -504,8 +504,8 @@
       'If you got eight instead of ten, put eight. Next time’s suggestion comes from that, and a number inflated today is a weight you will not be able to move next week.',
     'Si un ejercicio no puedes hacerlo, cámbialo ahí mismo.':
       'If you cannot do an exercise, swap it right there.',
-    '*Otra opción* te propone recambios que trabajan lo mismo con otro material, y las series que ya llevas marcadas no se pierden. *Cómo se hace* enseña la técnica sin salir del entrenamiento.':
-      '*Another option* suggests replacements that work the same thing with different kit, and the sets you have already ticked are not lost. *How it is done* shows the technique without leaving the workout.',
+    '*Otra opción* te propone recambios que trabajan lo mismo con otro material, y las series que ya llevas marcadas no se pierden. Nunca te ofrece algo que ya esté en la sesión de hoy. *Cómo se hace* enseña la técnica sin salir del entrenamiento.':
+      '*Another option* suggests replacements that work the same thing with different kit, and the sets you have already ticked are not lost. It never offers you something that is already in today\'s session. *How it is done* shows the technique without leaving the workout.',
     'Termina cuando esté todo marcado.':
       'Finish when everything is ticked.',
     'El botón de terminar se enciende en verde cuando ya no queda nada por marcar. Se suma al historial, a los récords, al volumen levantado y a la constancia.':
@@ -1391,6 +1391,14 @@
       'On each item you see what you need and how it is sold.',
     'Arriba, lo que te vas a comer. Debajo y en gris, el envase más pequeño que hay, cuando es mayor que eso. Separados a propósito: juntarlos hacía que una compra de un día pareciera la de una semana. Y va en cantidad de compra, no de plato: lo que se vende por piezas sale en piezas —un plátano, tres papas—, porque 86 g de papa no se pueden pedir en ningún sitio.':
       'On top, what you are going to eat. Below and in grey, the smallest pack there is, when it is bigger than that. Kept apart on purpose: putting them together made one day\'s shopping read like a week\'s. And it is shopping quantity, not plate quantity: what is sold by the piece comes in pieces —one banana, three potatoes— because you cannot ask for 86 g of potato anywhere.',
+    '¿Por qué no me ofrece como recambio un ejercicio que sí sé hacer?':
+      'Why does it not offer me a replacement exercise that I do know how to do?',
+    'Si ese ejercicio ya está en la sesión de hoy, no te lo ofrece a propósito. Cambiar la sentadilla por la prensa que tienes tres ejercicios más abajo no es un recambio: es hacer la prensa dos veces y quedarte sin el trabajo que hacía la sentadilla.':
+      'If that exercise is already in today\'s session, it is left out on purpose. Swapping the squat for the leg press you have three exercises further down is not a replacement: it is doing the leg press twice and losing the work the squat was doing.',
+    'Pasaba justo al revés de lo que parece. El recambio de un básico suele ser el accesorio que lo acompaña —mismo músculo, mismo movimiento, otra máquina—, así que era lo primero que salía y con buena nota.':
+      'It went exactly the other way round from how it looks. The replacement for a big lift is usually the accessory that goes with it —same muscle, same movement, another machine— so it came out first and with a good score.',
+    'Si de verdad quieres hacerlo dos veces, añádelo con *Añadir otro ejercicio a esta sesión*: ahí no se te quita nada.':
+      'If you really do want to do it twice, add it with *Add another exercise to this session*: nothing is taken away from you there.',
     '¿Por qué la lista pone 160 g y debajo «bandeja de 500 g»?':
       'Why does the list say 160 g and then "500 g tray" underneath?',
     'Porque son dos cosas distintas y conviene ver las dos. El primero es lo que te vas a comer, sumado de los platos. El segundo es cómo lo vende la tienda, que casi nunca coincide.':
