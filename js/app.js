@@ -3531,7 +3531,7 @@
                    aria-label="${Tn('Repeticiones de la serie {n}', { n: i + 1 })}">
             <span>${T('reps')}</span>
           </label>
-          <button class="sf-chk" data-f="quita" aria-label="${T('Quitar esta serie')}">
+          <button class="btn icon sm" data-f="quita" aria-label="${T('Quitar esta serie')}">
             ${raw(icon('close'))}</button>
         </div>`;
     }
@@ -3539,13 +3539,34 @@
     UI.modal(html`
       <h2>${Tn('He hecho «{que}»', { que: ex.nameEs })}</h2>
       <p class="muted">${raw(esc(soloEjercicio
-        ? T('Tienes el registro puesto en «marcar el ejercicio y ya», así que no hay ' +
-            'nada que rellenar: cuenta como un ejercicio hecho hoy.')
+        ? T('Cuántas series y con cuántas repeticiones. Sin peso, que es como tienes ' +
+            'puesto el registro: de ahí salen las series de la semana y el reparto ' +
+            'por músculo.')
         : (detallado
           ? T('Lo que hiciste de verdad, no lo que tenías pensado. De ahí salen los ' +
               'récords y el volumen.')
           : T('Las series que hiciste y con cuántas repeticiones. Sin peso, que es ' +
               'como tienes puesto el registro.'))))}</p>
+
+      <!-- «Marcar el ejercicio y ya» no quiere decir que no haya series: quiere
+           decir que no se marcan una a una mientras entrenas. La rutina lleva
+           su 3×12 igual y eso es lo que se guarda al terminar. Aquí no hay
+           rutina de donde sacarlo, así que se pregunta: guardar «un ejercicio
+           hecho» a secas no dejaba con qué contar nada. -->
+      ${raw(!soloEjercicio ? '' : html`
+        <div class="serie-fila detalle" style="margin-top:4px">
+          <label class="sf-campo">
+            <input type="number" inputmode="numeric" step="1" min="1" max="20"
+                   value="${series0}" id="ap-series" aria-label="${T('Cuántas series')}">
+            <span>${T('series')}</span>
+          </label>
+          <span class="sf-n" style="opacity:.5">×</span>
+          <label class="sf-campo">
+            <input type="number" inputmode="numeric" step="1" min="1"
+                   value="${reps0}" id="ap-reps" aria-label="${T('Cuántas repeticiones')}">
+            <span>${T('reps')}</span>
+          </label>
+        </div>`)}
 
       ${raw(soloEjercicio ? '' : html`
         <div class="stack" id="ap-filas">${raw(filas.map(filaHTML).join(''))}</div>
@@ -3603,14 +3624,22 @@
 
         el.querySelector('[data-a=guardar]').onclick = function () {
           leer();
+          const nSer = soloEjercicio
+            ? Math.min(20, Math.max(1, Number(el.querySelector('#ap-series').value) || 0))
+            : 0;
+          const nRep = soloEjercicio
+            ? Math.max(0, Number(el.querySelector('#ap-reps').value) || 0)
+            : 0;
           const sets = soloEjercicio
-            ? [{ weight: 0, reps: 0, done: true }]
+            ? Array.from({ length: nSer }, function () {
+              return { weight: 0, reps: nRep, done: true };
+            })
             : filas.filter(function (f) { return f.reps > 0 || f.weight > 0; })
               .map(function (f) {
                 return { weight: detallado ? f.weight : 0, reps: f.reps, done: true };
               });
 
-          if (!sets.length) {
+          if (!sets.length || (soloEjercicio && !nRep)) {
             UI.toast(T('Pon al menos una serie con repeticiones.'));
             return;
           }
@@ -3659,6 +3688,181 @@
       ? Tn('Apuntado: {que}, {v}', { que: ex.nameEs, v: UI.kg(vol) })
       : Tn('Apuntado: {que}', { que: ex.nameEs }));
     go('progreso');
+  }
+
+  /* ---- Retocar o borrar algo ya registrado ----
+
+     Lo que se apunta se apunta mal de vez en cuando: una serie de más, un
+     peso con un cero de sobra, una prueba para ver cómo iba la pantalla. El
+     historial tenía papelera desde siempre, pero solo en su lista, y borrar
+     entero no sirve cuando lo que sobra es una serie.
+
+     Vale para cualquier sesión, venga de una rutina o apuntada a mano: por
+     dentro son lo mismo y partirlo en dos editores sería tener dos sitios
+     donde arreglar el mismo fallo. */
+  function editarSesion(id, alTerminar) {
+    const ses = Store.sessions().filter(function (x) { return x.id === id; })[0];
+    if (!ses) return;
+    const aj = Store.settings();
+    const detallado = (aj.registro || 'detallado') === 'detallado';
+    const unidad = aj.unit === 'lb' ? 'lb' : 'kg';
+
+    /* Copia de trabajo: hasta que no se pulse guardar no se toca nada. Si
+       editáramos la sesión de verdad, cancelar no podría deshacerlo. */
+    let entries = (ses.entries || []).map(function (e) {
+      return { exId: e.exId, name: e.name, sets: (e.sets || []).map(function (x) {
+        return { weight: Number(x.weight) || 0, reps: Number(x.reps) || 0,
+          done: x.done !== false };
+      }) };
+    });
+
+    function cuerpoHTML() {
+      return entries.map(function (e, j) {
+        return html`
+          <div class="card" data-ent="${j}" style="padding:11px">
+            <div class="row between" style="gap:8px;margin-bottom:7px">
+              <b class="grow" style="font-size:.9rem;min-width:0">${e.name ||
+                (Data.get(e.exId) || {}).nameEs || e.exId}</b>
+              <button class="btn icon sm danger" data-quitaej="${j}"
+                      aria-label="${T('Quitar este ejercicio')}">${raw(icon('trash'))}</button>
+            </div>
+            ${raw(e.sets.map(function (st, i) {
+              return html`
+                <div class="serie-fila detalle" data-fila="${i}">
+                  <span class="sf-n">${i + 1}</span>
+                  ${raw(detallado ? html`
+                    <label class="sf-campo">
+                      <input type="number" inputmode="decimal" step="0.5" min="0"
+                             value="${st.weight}" data-f="weight"
+                             aria-label="${Tn('Peso de la serie {n}', { n: i + 1 })}">
+                      <span>${unidad}</span>
+                    </label>` : '')}
+                  <label class="sf-campo">
+                    <input type="number" inputmode="numeric" step="1" min="0"
+                           value="${st.reps}" data-f="reps"
+                           aria-label="${Tn('Repeticiones de la serie {n}', { n: i + 1 })}">
+                    <span>${T('reps')}</span>
+                  </label>
+                  <button class="btn icon sm" data-f="quita"
+                          aria-label="${T('Quitar esta serie')}">${raw(icon('close'))}</button>
+                </div>`;
+            }).join(''))}
+            <button class="btn block sm ghost" data-otra="${j}" style="margin-top:6px">
+              ${raw(icon('plus'))} ${T('Otra serie')}</button>
+          </div>`;
+      }).join('');
+    }
+
+    UI.modal(html`
+      <h2>${T('Retocar lo registrado')}</h2>
+      <p class="muted">${Tn('{que} · {cuando}',
+        { que: Store.nombreDeSesion(ses), cuando: UI.fecha(ses.start) })}</p>
+      <div class="stack" id="ed-cuerpo">${raw(cuerpoHTML())}</div>
+      <button class="btn primary block" data-a="guardar" style="margin-top:14px">
+        ${raw(icon('check'))} ${T('Guardar los cambios')}</button>
+      <button class="btn danger block" data-a="borrar" style="margin-top:8px">
+        ${raw(icon('trash'))} ${T('Borrar el entrenamiento entero')}</button>
+      <button class="btn ghost block" data-a="cancelar" style="margin-top:8px">${T('Cancelar')}</button>`,
+      function (el) {
+        const caja = el.querySelector('#ed-cuerpo');
+
+        /* Igual que al apuntar: se lee antes de repintar o se pierde lo
+           que acabaras de escribir arriba. */
+        function leer() {
+          caja.querySelectorAll('[data-ent]').forEach(function (bloque) {
+            const j = Number(bloque.dataset.ent);
+            if (!entries[j]) return;
+            bloque.querySelectorAll('[data-fila]').forEach(function (fila) {
+              const i = Number(fila.dataset.fila);
+              const st = entries[j].sets[i];
+              if (!st) return;
+              const p = fila.querySelector('[data-f=weight]');
+              const r = fila.querySelector('[data-f=reps]');
+              if (p) st.weight = Math.max(0, Number(p.value) || 0);
+              if (r) st.reps = Math.max(0, Number(r.value) || 0);
+            });
+          });
+        }
+
+        function pintar() {
+          caja.innerHTML = cuerpoHTML();
+          caja.querySelectorAll('[data-quitaej]').forEach(function (b) {
+            b.onclick = function () {
+              leer();
+              entries.splice(Number(b.dataset.quitaej), 1);
+              pintar();
+            };
+          });
+          caja.querySelectorAll('[data-otra]').forEach(function (b) {
+            b.onclick = function () {
+              leer();
+              const e = entries[Number(b.dataset.otra)];
+              if (!e || e.sets.length >= 12) return;
+              const fin = e.sets[e.sets.length - 1] || { weight: 0, reps: 12 };
+              e.sets.push({ weight: fin.weight, reps: fin.reps, done: true });
+              pintar();
+            };
+          });
+          caja.querySelectorAll('[data-f=quita]').forEach(function (b) {
+            b.onclick = function () {
+              leer();
+              const bloque = b.closest('[data-ent]');
+              const e = entries[Number(bloque.dataset.ent)];
+              /* Un ejercicio sin series no existe: se quita entero y se dice
+                 con el otro botón, que es el que se entiende. */
+              if (!e || e.sets.length < 2) return;
+              e.sets.splice(Number(b.closest('[data-fila]').dataset.fila), 1);
+              pintar();
+            };
+          });
+        }
+        pintar();
+
+        function cerrar() { UI.closeModal(); if (alTerminar) alTerminar(); }
+
+        el.querySelector('[data-a=cancelar]').onclick = function () { UI.closeModal(); };
+
+        el.querySelector('[data-a=borrar]').onclick = function () {
+          UI.confirm(T('Borrar entrenamiento'),
+            T('Se eliminará de tu historial y de las estadísticas.'), 'Borrar', true)
+            .then(function (ok) {
+              if (!ok) return;
+              Store.deleteSession(id);
+              UI.closeModal();
+              UI.toast(T('Entrenamiento borrado'));
+              if (alTerminar) alTerminar();
+            });
+        };
+
+        el.querySelector('[data-a=guardar]').onclick = function () {
+          leer();
+          const limpias = entries.filter(function (e) { return e.sets.length; });
+          if (!limpias.length) {
+            /* Vaciarlo del todo es borrarlo, y así se dice en vez de guardar
+               un entrenamiento fantasma de cero series. */
+            UI.confirm(T('Borrar entrenamiento'),
+              T('No queda ningún ejercicio, así que se borra el entrenamiento entero.'),
+              'Borrar', true).then(function (ok) {
+                if (!ok) return;
+                Store.deleteSession(id);
+                UI.closeModal();
+                UI.toast(T('Entrenamiento borrado'));
+                if (alTerminar) alTerminar();
+              });
+            return;
+          }
+          const copia = Object.assign({}, ses, { entries: limpias });
+          Store.actualizarSesion(id, {
+            entries: limpias,
+            setsDone: limpias.reduce(function (n, e) {
+              return n + e.sets.filter(function (x) { return x.done; }).length;
+            }, 0),
+            volume: Store.volumeOf(copia)
+          });
+          UI.toast(T('Cambios guardados'));
+          cerrar();
+        };
+      });
   }
 
   function pickRoutineSheet(ex) {
@@ -8207,6 +8411,8 @@
        técnica; el entrenamiento las necesita igual y no tiene sentido tener
        dos versiones que se separen con el tiempo. */
     alternativasHTML: alternativasHTML, guiaHTML: guiaHTML,
+    /* Lo usan la hoja del día y el historial, que viven en otro archivo. */
+    editarSesion: editarSesion,
     /* el nombre del plan sin el día delante, que la pantalla de Programa
        necesita para agrupar igual que la de Rutinas */
     nombreRutina: nombreRutina, tituloRutina: tituloRutina,

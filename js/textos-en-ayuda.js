@@ -1404,8 +1404,8 @@
       'With *Add another exercise to this session*, or from any exercise page with *Add to what I am training*. It goes into the session for today and counts there like any other: sets, volume, records and consistency. It does not touch the saved routine, only today.',
     '¿Cómo apunto un ejercicio que hice fuera de una rutina?':
       'How do I note down an exercise I did outside a routine?',
-    'Desde la ficha del ejercicio, con *Lo he hecho*. Te pide lo que pida tu forma de registrar —peso y repeticiones, solo las series, o nada si lo tienes en «marcar el ejercicio y ya»— y lo guarda como hecho ahora mismo.':
-      'From the exercise page, with *I have done this*. It asks for whatever your logging style asks for —weight and reps, just the sets, or nothing if you have it on “tick the exercise and that is it”— and saves it as done right now.',
+    'Desde la ficha del ejercicio, con *Lo he hecho*. Te pide lo que pida tu forma de registrar —peso y repeticiones, o solo las repeticiones, o cuántas series y de cuántas si lo tienes en «marcar el ejercicio y ya»— y lo guarda como hecho ahora mismo.':
+      'From the exercise page, with *I have done this*. It asks for whatever your logging style asks for —weight and reps, or just the reps, or how many sets and of how many if you have it on “tick the exercise and that is it”— and saves it as done right now.',
     'Cuenta igual que lo entrenado en una rutina: historial, volumen, récords y constancia. Arranca con los números de la última vez, que casi siempre son los mismos, y así se resuelve en dos toques.':
       'It counts just like anything trained in a routine: history, volume, records and consistency. It starts with last time\'s numbers, which are nearly always the same, so it takes two taps.',
     'Si apuntas varios el mismo día se juntan en uno solo. Tres ejercicios sueltos un martes son un entrenamiento, no tres, y en el historial tres tarjetas de una línea no hay quien las lea.':
@@ -1422,6 +1422,16 @@
       'The score and the faults do NOT come from there: the app works those out every time, so they always talk about the plan as it stands now. What is stored is only how it is explained.',
     'Aplica cualquier cambio y la siguiente será nueva sola. Si quieres la misma auditoría contada de otra forma, abajo tienes *Pedir otra redacción*.':
       'Apply any change and the next one will be new by itself. If you want the same audit told a different way, there is *Ask for another write-up* below.',
+    '¿Puedo corregir o borrar un entrenamiento ya guardado?':
+      'Can I correct or delete a workout that is already saved?',
+    'Sí, con el lápiz. Está en la ficha del día —la que sale al tocar un día en Constancia— y también en cada línea del historial.':
+      'Yes, with the pencil. It is on the day card —the one that opens when you tap a day under Consistency— and also on every line of the history.',
+    'Dentro puedes cambiar el peso y las repeticiones de cualquier serie, quitar una serie suelta, quitar un ejercicio entero, o borrar el entrenamiento completo. Al guardar se recalculan las series hechas y el volumen, así que las gráficas y los récords se enteran.':
+      'Inside you can change the weight and reps of any set, remove a single set, remove a whole exercise, or delete the entire workout. On saving, the sets done and the volume are worked out again, so the charts and the records find out.',
+    'Sirve para cualquier entrenamiento, venga de una rutina o apuntado a mano: por dentro son lo mismo.':
+      'It works for any workout, whether it came from a routine or was noted by hand: inside they are the same thing.',
+    'Si quitas todos los ejercicios te pregunta si lo que quieres es borrarlo, porque un entrenamiento de cero series no es nada y en el historial solo estorba.':
+      'If you remove every exercise it asks whether you meant to delete it, because a workout with zero sets is nothing and only gets in the way in the history.',
     '¿Por qué la lista pone 160 g y debajo «bandeja de 500 g»?':
       'Why does the list say 160 g and then "500 g tray" underneath?',
     'Porque son dos cosas distintas y conviene ver las dos. El primero es lo que te vas a comer, sumado de los platos. El segundo es cómo lo vende la tienda, que casi nunca coincide.':

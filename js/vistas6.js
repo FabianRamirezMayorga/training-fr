@@ -1294,7 +1294,14 @@
             return (e.sets || []).some(function (x) { return x.done; });
           });
           return '<div class="card">' +
-            '<div style="font-weight:700">' + esc(Store.nombreDeSesion(s)) + '</div>' +
+            '<div class="row between" style="gap:8px">' +
+            '<div class="grow" style="font-weight:700;min-width:0">' +
+            esc(Store.nombreDeSesion(s)) + '</div>' +
+            /* Se mira aquí porque es aquí donde uno se da cuenta de que lo
+               apuntó mal. La papelera del historial queda a dos pantallas. */
+            '<button class="btn icon sm" data-edses="' + esc(s.id) + '" aria-label="' +
+            esc(T('Retocar lo registrado')) + '">' + icon('edit') + '</button>' +
+            '</div>' +
             '<div class="tiny" style="margin-top:2px">' + esc(lineaSesion(s)) + '</div>' +
             franjaHorasHTML(s) +
             chipsMusculosHTML(s) +
@@ -1311,6 +1318,13 @@
       <button class="btn block" data-cerrar style="margin-top:14px">${T('Vale')}</button>`,
       function (el) {
         el.querySelector('[data-cerrar]').onclick = UI.closeModal;
+        el.querySelectorAll('[data-edses]').forEach(function (b) {
+          b.onclick = function () {
+            const id = b.dataset.edses;
+            UI.closeModal();
+            if (g.App && App.editarSesion) App.editarSesion(id, function () { render(); });
+          };
+        });
       });
   }
 
@@ -1329,6 +1343,8 @@
               : '')}
             ${raw(chipsMusculosHTML(s))}
           </div>
+          <button class="btn icon sm" data-edses="${s.id}"
+                  aria-label="${T('Retocar lo registrado')}">${raw(icon('edit'))}</button>
           <button class="btn icon sm danger" data-delses="${s.id}"
                   aria-label="${T('Borrar')}">${raw(icon('trash'))}</button>
         </div>
@@ -1511,6 +1527,9 @@
     bindAll(root, '[data-ses]', function (el) {
       const d = root.querySelector('[data-detail="' + el.dataset.ses + '"]');
       if (d) d.hidden = !d.hidden;
+    });
+    bindAll(root, '[data-edses]', function (el) {
+      if (g.App && App.editarSesion) App.editarSesion(el.dataset.edses, function () { render(); });
     });
     bindAll(root, '[data-delses]', function (el) {
       UI.confirm(T('Borrar entrenamiento'), T('Se eliminará de tu historial y de las estadísticas.'),

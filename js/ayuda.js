@@ -809,8 +809,15 @@
         'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.'],
       ver: ['c-compra'] },
 
+    { id: 'p-retocar', q: '¿Puedo corregir o borrar un entrenamiento ya guardado?',
+      a: ['Sí, con el lápiz. Está en la ficha del día —la que sale al tocar un día en Constancia— y también en cada línea del historial.',
+        'Dentro puedes cambiar el peso y las repeticiones de cualquier serie, quitar una serie suelta, quitar un ejercicio entero, o borrar el entrenamiento completo. Al guardar se recalculan las series hechas y el volumen, así que las gráficas y los récords se enteran.',
+        'Sirve para cualquier entrenamiento, venga de una rutina o apuntado a mano: por dentro son lo mismo.',
+        'Si quitas todos los ejercicios te pregunta si lo que quieres es borrarlo, porque un entrenamiento de cero series no es nada y en el historial solo estorba.'],
+      ver: ['c-entrenar'] },
+
     { id: 'p-apuntarsuelto', q: '¿Cómo apunto un ejercicio que hice fuera de una rutina?',
-      a: ['Desde la ficha del ejercicio, con *Lo he hecho*. Te pide lo que pida tu forma de registrar —peso y repeticiones, solo las series, o nada si lo tienes en «marcar el ejercicio y ya»— y lo guarda como hecho ahora mismo.',
+      a: ['Desde la ficha del ejercicio, con *Lo he hecho*. Te pide lo que pida tu forma de registrar —peso y repeticiones, o solo las repeticiones, o cuántas series y de cuántas si lo tienes en «marcar el ejercicio y ya»— y lo guarda como hecho ahora mismo.',
         'Cuenta igual que lo entrenado en una rutina: historial, volumen, récords y constancia. Arranca con los números de la última vez, que casi siempre son los mismos, y así se resuelve en dos toques.',
         'Si apuntas varios el mismo día se juntan en uno solo. Tres ejercicios sueltos un martes son un entrenamiento, no tres, y en el historial tres tarjetas de una línea no hay quien las lea.',
         'Si estás entrenando, el botón cambia: pasa a ser *Añadir a lo que estoy entrenando* y lo mete en la sesión en curso.'],
