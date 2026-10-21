@@ -48,6 +48,9 @@
     ordenes: '',
     gear: '',
     falloIA: '',
+    /* El de la auditoría va aparte del de montar el plan: son dos fallos
+       distintos y con uno solo salía el aviso equivocado en la otra pantalla. */
+    falloAudit: '',
     todoAbierto: false,
     molestias: '',
     notas: '',
@@ -1110,7 +1113,21 @@
           ${T('Pedir otra redacción')}</button>
         <p class="tiny" style="margin:6px 0 0">${T('Los fallos serán los mismos —son ' +
         'cuentas sobre el plan—; lo que cambia es cómo están explicados. Gasta una ' +
-        'llamada a la IA.')}</p>` : '')}`;
+        'llamada a la IA.')}</p>` : '')}
+
+      <!-- Cuando la llamada no sale, lo de arriba se queda tal cual estaba: el
+           dictamen guardado, con su aviso de que es el guardado. Pedir otra
+           redacción y que la pantalla siga diciendo «esta es la del 18 de
+           octubre» se lee como que el botón te devuelve la caché a propósito.
+           Lo que pasó fue que no pudo, y eso hay que decirlo aquí, donde se
+           pulsó, y no en un aviso que se va solo a los tres segundos. -->
+      ${raw(est.falloAudit ? html`
+        <div class="card aviso-seguridad" style="margin-top:10px">
+          <b>${T('No he podido pedir otra redacción')}</b>
+          <p style="margin:7px 0 0;font-size:.9rem">${est.falloAudit}</p>
+          <p class="tiny" style="margin:9px 0 0">${T('Lo de arriba sigue siendo lo que ya ' +
+          'había: no se ha perdido nada, pero tampoco se ha cambiado.')}</p>
+        </div>` : '')}`;
   }
 
   /* Un plan abierto tiene que poder cerrarse. Sin esto, tocar uno por error
@@ -1767,6 +1784,7 @@
     const antes = est.ia;
     let mismo = false;
 
+    est.falloAudit = '';
     est.cargandoIA = true;
     render();
     IA.afinarPrograma(est.prog, rehacer)
@@ -1781,7 +1799,10 @@
             (r.veredicto && r.veredicto === antes.veredicto)));
         est.ia = r;
       })
-      .catch(function (e) { UI.toast(e.message); })
+      .catch(function (e) {
+        UI.toast(e.message);
+        est.falloAudit = e.message;
+      })
       .then(function () {
         est.cargandoIA = false;
         guardarEstado();

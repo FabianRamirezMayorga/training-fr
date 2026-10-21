@@ -60,6 +60,8 @@
     'Añadido a favoritos': 'Added to favourites',
     'Quitado de favoritos': 'Removed from favourites',
     'Añadir a rutina': 'Add to a routine',
+    'No he podido pedir otra redacción': 'I could not ask for another write-up',
+    'Lo de arriba sigue siendo lo que ya había: no se ha perdido nada, pero tampoco se ha cambiado.': 'What is above is still what was already there: nothing has been lost, but nothing has changed either.',
     'Tu plan no ha cambiado: es la misma auditoría.': 'Your plan has not changed: this is the same audit.',
     'Cuántas series y con cuántas repeticiones. Sin peso, que es como tienes puesto el registro: de ahí salen las series de la semana y el reparto por músculo.': 'How many sets and with how many reps. No weight, which is how you have logging set up: this is where your weekly sets and the split by muscle come from.',
     'Cuántas series': 'How many sets',
