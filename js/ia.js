@@ -329,6 +329,9 @@
     if (l.length) c.claves[id] = l; else delete c.claves[id];
     /* El indice puede haberse quedado señalando a una clave que ya no existe. */
     c.claveIdx[id] = 0;
+    /* Y lo apuntado sobre la cuota va por número de clave: quitada una del
+       medio, el apunte de la 3 pasa a hablar de otra. Se tira entero. */
+    olvidarCuotas();
     guardarCrudo(c);
     return l.length;
   }
@@ -483,6 +486,88 @@
       todo[modelo][campo] = false;
       localStorage.setItem(LIMITES, JSON.stringify(todo));
     } catch (e) { /* nada */ }
+  }
+
+  /* ---------- qué cuota está agotada ----------
+
+     La cuota gratis de Gemini va por clave Y por modelo, y se repone sola: la
+     del minuto en un minuto, la del día a medianoche en California.
+
+     Sin memoria de esto, cada pregunta repetía el camino entero. Medido con
+     cuatro claves puestas y la cuota diaria gastada en las tres primeras: trece
+     viajes a Google por pregunta, doce de ellos a puertas que ya se sabía que
+     estaban cerradas. La respuesta acababa llegando —por eso no se veía como
+     un fallo, sino como lentitud— pero cada una costaba medio minuto.
+
+     Lo que lo multiplicaba era justo lo que lo arreglaba: añadir claves. Cada
+     clave nueva añade cuatro viajes más al peor caso. */
+  const CUOTA = 'trainingfr.ia.cuota';
+
+  function cuotas() {
+    try { return JSON.parse(localStorage.getItem(CUOTA) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+
+  function guardarCuotas(todo) {
+    const ahora = Date.now();
+    /* De paso se tira lo caducado: si no, el apunte de hace tres semanas sigue
+       ocupando sitio en un almacén que ya se llena con el catálogo. */
+    Object.keys(todo).forEach(function (k) {
+      if (!(todo[k] > ahora)) delete todo[k];
+    });
+    try { localStorage.setItem(CUOTA, JSON.stringify(todo)); } catch (e) { /* nada */ }
+  }
+
+  function agotado(nClave, modelo) {
+    return (cuotas()[nClave + '|' + modelo] || 0) > Date.now();
+  }
+
+  function libreEn(nClave, modelo) {
+    return cuotas()[nClave + '|' + modelo] || 0;
+  }
+
+  /* La cuota diaria de Google se repone a medianoche en California. Se apunta
+     una hora antes a propósito: adelantarse cuesta un viaje de más, quedarse
+     corto cuesta una hora sin IA teniéndola. */
+  function proximoDiaGoogle() {
+    const ahora = Date.now();
+    const d = new Date(ahora);
+    d.setUTCHours(7, 0, 0, 0);
+    if (d.getTime() <= ahora) d.setUTCDate(d.getUTCDate() + 1);
+    return d.getTime();
+  }
+
+  /* Cuándo vuelve a haber cuota. Google lo dice él mismo en `retryDelay`
+     cuando es el límite por minuto; para el diario hay que mirar el texto. */
+  function cuandoVuelve(j, msg) {
+    const det = (j && j.error && j.error.details) || [];
+    for (let k = 0; k < det.length; k++) {
+      const d = det[k] || {};
+      if (/RetryInfo/i.test(String(d['@type'] || '')) && d.retryDelay) {
+        const seg = parseFloat(String(d.retryDelay));
+        /* Dos segundos de propina: si se vuelve clavado en el límite, Google
+           contesta otro 429 y se ha gastado el viaje para nada. */
+        if (seg > 0) return Date.now() + Math.min(seg * 1000 + 2000, 864e5);
+      }
+    }
+    if (/per.?day|daily|requests per day/i.test(String(msg || ''))) return proximoDiaGoogle();
+    return Date.now() + 60000;
+  }
+
+  function apuntarCuota(nClave, modelo, j, msg) {
+    const todo = cuotas();
+    todo[nClave + '|' + modelo] = cuandoVuelve(j, msg);
+    guardarCuotas(todo);
+  }
+
+  /* Respondió: lo que supiéramos de esa puerta ya no vale. */
+  function cuotaOK(nClave, modelo) {
+    const todo = cuotas();
+    if (todo[nClave + '|' + modelo]) { delete todo[nClave + '|' + modelo]; guardarCuotas(todo); }
+  }
+
+  function olvidarCuotas() {
+    try { localStorage.removeItem(CUOTA); } catch (e) { /* nada */ }
   }
 
   /* ---------- qué modelos hay disponibles ----------
@@ -786,6 +871,32 @@
        agotada. El motivo que se cuenta tiene que ser el que manda. */
     let huboCuota = false;
 
+    /* Las puertas que ya sabemos cerradas no se llaman. */
+    const lista = clavesDe('gemini');
+    const nClave = Math.max(1, lista.indexOf(c.clave) + 1);
+    const libres = modelos.filter(function (m) { return !agotado(nClave, m); });
+
+    if (!libres.length) {
+      /* Esta clave está gastada entera: se pasa a la siguiente sin gastar un
+         viaje en comprobarlo. */
+      const vueltas = (opciones._clave || 0) + 1;
+      if (vueltas < lista.length && rotarClave('gemini')) {
+        return llamarGemini(prompt,
+          Object.assign({}, opciones, { _clave: vueltas }),
+          claveDe('gemini'), modeloIA);
+      }
+      /* Gastadas todas. No se rinde a ciegas: se prueba la que antes se repone,
+         porque lo apuntado puede estar mal —el reloj del móvil, una cuota que
+         Google amplía, un apunte de una clave que ya no es esa— y una app que
+         se niega a llamar por una nota suya propia no hay forma de desatascarla.
+         Un viaje para comprobarlo, no dieciséis. */
+      modelos.sort(function (x, y) { return libreEn(nClave, x) - libreEn(nClave, y); });
+      modelos.length = 1;
+    } else {
+      modelos.length = 0;
+      libres.forEach(function (m) { modelos.push(m); });
+    }
+
     /* si el modelo elegido ya no existe, se prueba el siguiente */
     function intentar(i) {
       if (i >= modelos.length) return Promise.reject(new Error(T('Ningún modelo disponible respondió.')));
@@ -911,7 +1022,11 @@
                límite corto y los de la generación anterior uno mucho más ancho.
                Rendirse al primer 429 dejaba sin IA a quien sí podía usarla con
                otro modelo. */
-            if (r.status === 429) huboCuota = true;
+            if (r.status === 429) {
+              huboCuota = true;
+              /* Para no volver a llamar a esta puerta hasta que se reponga. */
+              apuntarCuota(nClave, modelos[i], j, msg);
+            }
             if (r.status === 429 && i < modelos.length - 1) return intentar(i + 1);
 
             /* Agotados todos los modelos con esta clave, se prueba la
@@ -980,6 +1095,8 @@
             }
             throw new Error(msg);
           }
+
+          cuotaOK(nClave, modelos[i]);
 
           const cand = j && j.candidates && j.candidates[0];
           const partes = (cand && cand.content && cand.content.parts) || [];

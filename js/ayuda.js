@@ -832,8 +832,9 @@
     { id: 'p-cuota', q: '¿Qué hago cuando se agota la cuota de la IA?',
       a: ['Ponerle otra clave. La cuota gratis de Google va *por clave y por día*, no por persona, así que con dos o tres puestas la app salta sola a la siguiente cuando una se acaba, y tú no te enteras.',
         'Se añaden en Ajustes › Bóveda de claves, en *Claves de repuesto*. Son gratis y se sacan en un minuto en la misma página de siempre.',
-        'La app prueba primero todos los modelos con la clave que esté en uso —cada modelo tiene su propia cuota— y solo cuando se le acaban todos cambia de clave. Y se queda en la que funcione, para no gastar un viaje de ida y vuelta en la agotada cada vez que preguntas.',
-        'Al abrir la app al día siguiente vuelve a la primera, porque la cuota se repone sola y quedarse en la última sería desperdiciar las otras.'],
+        'La app prueba los modelos con la clave en uso —cada modelo tiene su propia cuota— y solo cuando se le acaban todos cambia de clave.',
+        'Y se acuerda de cuál se agotó y hasta cuándo. Esto es lo que hace que no se note: con cuatro claves puestas y la cuota del día gastada en tres, cada pregunta volvía a llamar a las doce puertas cerradas antes de dar con la buena. Trece viajes a Google, medio minuto de espera, y acababa respondiendo: por eso parecía lentitud y no un fallo. Ahora el primer tropiezo del día cuesta eso y los demás van directos.',
+        'Lo apuntado caduca solo: lo del minuto en un minuto —Google dice cuándo— y lo del día a medianoche en California. Al abrir la app vuelve a empezar por la primera clave, porque la cuota se repone sola, pero ya no gasta nada en comprobarlo.'],
       ver: ['c-ia'] },
 
     { id: 'p-raciones', q: '¿Por qué las calorías de la carta salen con un rango?',

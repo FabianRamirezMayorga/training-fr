@@ -1367,13 +1367,12 @@
       'Give it another key. Google\u2019s free quota goes *per key and per day*, not per person, so with two or three in place the app moves to the next one by itself when one runs out, and you never notice.',
     'Se añaden en Ajustes › Bóveda de claves, en *Claves de repuesto*. Son gratis y se sacan en un minuto en la misma página de siempre.':
       'You add them in Settings › Key vault, under *Spare keys*. They are free and take a minute to get on the same page as always.',
-    'La app prueba primero todos los modelos con la clave que esté en uso —cada modelo tiene su propia cuota— y solo cuando se le acaban todos cambia de clave. Y se queda en la que funcione, para no gastar un viaje de ida y vuelta en la agotada cada vez que preguntas.':
-      'The app first tries every model with the key in use —each model has its own quota— and only changes key once they are all spent. And it stays on the one that works, so it does not waste a round trip on the exhausted one every time you ask.',
-    'Al abrir la app al día siguiente vuelve a la primera, porque la cuota se repone sola y quedarse en la última sería desperdiciar las otras.':
-      'When you open the app the next day it goes back to the first one, because the quota refills by itself and staying on the last one would waste the others.',
-
-
-    /* ---------- La lista de la compra ---------- */
+    'La app prueba los modelos con la clave en uso —cada modelo tiene su propia cuota— y solo cuando se le acaban todos cambia de clave.':
+      'The app tries the models with the key in use —each model has its own quota— and only changes key when it runs out of all of them.',
+    'Y se acuerda de cuál se agotó y hasta cuándo. Esto es lo que hace que no se note: con cuatro claves puestas y la cuota del día gastada en tres, cada pregunta volvía a llamar a las doce puertas cerradas antes de dar con la buena. Trece viajes a Google, medio minuto de espera, y acababa respondiendo: por eso parecía lentitud y no un fallo. Ahora el primer tropiezo del día cuesta eso y los demás van directos.':
+      'And it remembers which one ran out and until when. That is what makes it unnoticeable: with four keys set and the daily quota spent on three of them, every question went back to knocking on the twelve closed doors before finding the good one. Thirteen trips to Google, half a minute of waiting, and it did answer in the end: that is why it looked like slowness and not like a fault. Now the first stumble of the day costs that and the rest go straight through.',
+    'Lo apuntado caduca solo: lo del minuto en un minuto —Google dice cuándo— y lo del día a medianoche en California. Al abrir la app vuelve a empezar por la primera clave, porque la cuota se repone sola, pero ya no gasta nada en comprobarlo.':
+      'What it notes down expires on its own: the per-minute one in a minute —Google says when— and the daily one at midnight in California. When you open the app it starts again from the first key, because the quota refills by itself, but it no longer spends anything checking.',
     'Y porque ya no hay que fiarse: arriba de la lista salen las tres cifras al día, lo que trae frente a lo que pide tu menú, sumadas por la app. Si la proteína se queda por debajo del 85 %, te lo dice en ámbar y te sugiere rehacerla.':
       'And because you no longer have to take it on trust: the three daily figures are at the top of the list, what it brings against what your menu asks for, added up by the app. If protein falls below 85 %, it says so in amber and suggests redoing it.',
     '¿Cómo sé que la compra me da lo que come el menú?':
