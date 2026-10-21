@@ -379,6 +379,8 @@
           d: 'Qué marcas depende de cómo tengas puesto el registro en Ajustes: cada serie con su peso, cada serie a secas, o el ejercicio entero de una vez. El descanso arranca solo al marcar, y el cronómetro te acompaña por toda la app: puedes salir a mirar otra cosa sin perderlo.' },
         { t: 'Apunta lo que de verdad hiciste.',
           d: 'Si sacaste ocho en vez de diez, pon ocho. De ahí sale la propuesta de la próxima vez, y una cifra inflada hoy es un peso que no podrás mover la semana que viene.' },
+        { t: 'Puedes meter un ejercicio que no estaba.',
+          d: 'Con *Añadir otro ejercicio a esta sesión*, o desde la ficha de cualquier ejercicio con *Añadir a lo que estoy entrenando*. Entra en la sesión de hoy y cuenta en ella como uno más: series, volumen, récords y constancia. No toca la rutina guardada, solo lo de hoy.' },
         { t: 'Si un ejercicio no puedes hacerlo, cámbialo ahí mismo.',
           d: '*Otra opción* te propone recambios que trabajan lo mismo con otro material, y las series que ya llevas marcadas no se pierden. Nunca te ofrece algo que ya esté en la sesión de hoy. *Cómo se hace* enseña la técnica sin salir del entrenamiento.' },
         { t: 'Termina cuando esté todo marcado.',
@@ -807,6 +809,13 @@
         'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.'],
       ver: ['c-compra'] },
 
+    { id: 'p-apuntarsuelto', q: '¿Cómo apunto un ejercicio que hice fuera de una rutina?',
+      a: ['Desde la ficha del ejercicio, con *Lo he hecho*. Te pide lo que pida tu forma de registrar —peso y repeticiones, solo las series, o nada si lo tienes en «marcar el ejercicio y ya»— y lo guarda como hecho ahora mismo.',
+        'Cuenta igual que lo entrenado en una rutina: historial, volumen, récords y constancia. Arranca con los números de la última vez, que casi siempre son los mismos, y así se resuelve en dos toques.',
+        'Si apuntas varios el mismo día se juntan en uno solo. Tres ejercicios sueltos un martes son un entrenamiento, no tres, y en el historial tres tarjetas de una línea no hay quien las lea.',
+        'Si estás entrenando, el botón cambia: pasa a ser *Añadir a lo que estoy entrenando* y lo mete en la sesión en curso.'],
+      ver: ['c-entrenar', 'g-registro'] },
+
     { id: 'p-recambiohoy', q: '¿Por qué no me ofrece como recambio un ejercicio que sí sé hacer?',
       a: ['Si ese ejercicio ya está en la sesión de hoy, no te lo ofrece a propósito. Cambiar la sentadilla por la prensa que tienes tres ejercicios más abajo no es un recambio: es hacer la prensa dos veces y quedarte sin el trabajo que hacía la sentadilla.',
         'Pasaba justo al revés de lo que parece. El recambio de un básico suele ser el accesorio que lo acompaña —mismo músculo, mismo movimiento, otra máquina—, así que era lo primero que salía y con buena nota.',
@@ -828,6 +837,13 @@
         'Y si abriste el enlace dentro de WhatsApp, Instagram o parecidos, ahí no se puede instalar de ninguna manera: hay que abrirlo antes en el navegador de verdad.',
         'También desaparece cuando ya la tienes instalada, que es lo normal si arrancaste desde el icono.'],
       ver: ['c-instalar'] },
+
+    { id: 'p-auditoriaigual', q: '¿Por qué la auditoría sale al instante y dice lo mismo que la vez pasada?',
+      a: ['Porque es la misma: se guarda contra el plan, y si el plan no ha cambiado se enseña la que ya estaba en vez de preguntarle otra vez a la IA. Arriba del dictamen te dice de qué día es.',
+        'Se hace a propósito por dos razones. La primera es que el mismo plan merece el mismo dictamen: pidiéndolo cuatro veces salían cuatro redacciones distintas y desde fuera eso se lee como que cambia de opinión. La segunda es la cuota, que es limitada y gratis.',
+        'La nota y los fallos NO salen de ahí: esos los calcula la app cada vez, así que siempre hablan del plan tal y como está ahora. Lo guardado es solo cómo está explicado.',
+        'Aplica cualquier cambio y la siguiente será nueva sola. Si quieres la misma auditoría contada de otra forma, abajo tienes *Pedir otra redacción*.'],
+      ver: ['c-ia'] },
 
     { id: 'p-cuota', q: '¿Qué hago cuando se agota la cuota de la IA?',
       a: ['Ponerle otra clave. La cuota gratis de Google va *por clave y por día*, no por persona, así que con dos o tres puestas la app salta sola a la siguiente cuando una se acaba, y tú no te enteras.',

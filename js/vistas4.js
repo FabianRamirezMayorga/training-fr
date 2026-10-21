@@ -987,6 +987,26 @@
         <button class="btn sm ghost" data-a="olvidaIA">${T('Descartar')}</button>
       </div>
 
+      <!-- Esto iba en letra pequena debajo del boton, cuatro parrafos mas
+           abajo, y nadie llegaba: el dictamen salía al instante y se leía como
+           que la IA no había mirado nada. Lo que pasa de verdad es lo
+           contrario —ya lo miró, y el plan no ha cambiado desde entonces—,
+           así que se dice antes de enseñarlo y con la fecha delante. -->
+      ${raw(r.deCache ? html`
+        <div class="card" style="border-color:var(--dim3)">
+          <div class="row" style="gap:9px;align-items:flex-start">
+            <span style="flex:none;opacity:.65">${raw(icon('reloj'))}</span>
+            <div class="grow">
+              <b>${r.deCacheT
+                ? Tn('Esta auditoría es la del {cuando}', { cuando: UI.fecha(r.deCacheT) })
+                : T('Esta auditoría ya estaba hecha')}</b>
+              <p class="tiny" style="margin:4px 0 0">${T('Tu plan no ha cambiado desde ' +
+                'entonces, así que el dictamen es el mismo: sale guardado en vez de ' +
+                'preguntarle otra vez a la IA. Aplica un cambio y la próxima será nueva.')}</p>
+            </div>
+          </div>
+        </div>` : '')}
+
       <div class="card">
         ${raw(nota > 0 ? html`
           <div class="row" style="gap:12px;align-items:center;margin-bottom:10px">
@@ -1082,9 +1102,8 @@
       <button class="btn block" data-a="afinar" style="margin-top:12px">
         ${raw(icon('chispa'))} ${T('Auditar otra vez')}</button>
       <p class="tiny" style="margin:7px 0 0">${r.deCache
-        ? T('Este dictamen es el que ya se hizo para este plan: mientras no lo cambies, ' +
-          'volver a pulsar enseña lo mismo en vez de inventarse otra cosa. En cuanto ' +
-          'apliques un cambio, se rehace solo.')
+        ? T('Mientras no cambies el plan, volver a pulsar enseña lo mismo en vez de ' +
+          'inventarse otra cosa.')
         : T('Se guarda para este plan. Si aplicas cambios, la próxima auditoría será nueva.')}</p>
       ${raw(r.deCache ? html`
         <button class="btn ghost block sm" data-a="reafinar" style="margin-top:8px">

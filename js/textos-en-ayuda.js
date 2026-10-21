@@ -1398,6 +1398,30 @@
       'It went exactly the other way round from how it looks. The replacement for a big lift is usually the accessory that goes with it —same muscle, same movement, another machine— so it came out first and with a good score.',
     'Si de verdad quieres hacerlo dos veces, añádelo con *Añadir otro ejercicio a esta sesión*: ahí no se te quita nada.':
       'If you really do want to do it twice, add it with *Add another exercise to this session*: nothing is taken away from you there.',
+    'Puedes meter un ejercicio que no estaba.':
+      'You can bring in an exercise that was not there.',
+    'Con *Añadir otro ejercicio a esta sesión*, o desde la ficha de cualquier ejercicio con *Añadir a lo que estoy entrenando*. Entra en la sesión de hoy y cuenta en ella como uno más: series, volumen, récords y constancia. No toca la rutina guardada, solo lo de hoy.':
+      'With *Add another exercise to this session*, or from any exercise page with *Add to what I am training*. It goes into the session for today and counts there like any other: sets, volume, records and consistency. It does not touch the saved routine, only today.',
+    '¿Cómo apunto un ejercicio que hice fuera de una rutina?':
+      'How do I note down an exercise I did outside a routine?',
+    'Desde la ficha del ejercicio, con *Lo he hecho*. Te pide lo que pida tu forma de registrar —peso y repeticiones, solo las series, o nada si lo tienes en «marcar el ejercicio y ya»— y lo guarda como hecho ahora mismo.':
+      'From the exercise page, with *I have done this*. It asks for whatever your logging style asks for —weight and reps, just the sets, or nothing if you have it on “tick the exercise and that is it”— and saves it as done right now.',
+    'Cuenta igual que lo entrenado en una rutina: historial, volumen, récords y constancia. Arranca con los números de la última vez, que casi siempre son los mismos, y así se resuelve en dos toques.':
+      'It counts just like anything trained in a routine: history, volume, records and consistency. It starts with last time\'s numbers, which are nearly always the same, so it takes two taps.',
+    'Si apuntas varios el mismo día se juntan en uno solo. Tres ejercicios sueltos un martes son un entrenamiento, no tres, y en el historial tres tarjetas de una línea no hay quien las lea.':
+      'If you note down several on the same day they are joined into one. Three loose exercises on a Tuesday are one workout, not three, and three one-line cards in the history are unreadable.',
+    'Si estás entrenando, el botón cambia: pasa a ser *Añadir a lo que estoy entrenando* y lo mete en la sesión en curso.':
+      'If you are training, the button changes: it becomes *Add to what I am training* and puts it into the session in progress.',
+    '¿Por qué la auditoría sale al instante y dice lo mismo que la vez pasada?':
+      'Why does the audit come up instantly and say the same as last time?',
+    'Porque es la misma: se guarda contra el plan, y si el plan no ha cambiado se enseña la que ya estaba en vez de preguntarle otra vez a la IA. Arriba del dictamen te dice de qué día es.':
+      'Because it is the same one: it is stored against the plan, and if the plan has not changed the stored one is shown instead of asking the AI again. Above the verdict it tells you which day it is from.',
+    'Se hace a propósito por dos razones. La primera es que el mismo plan merece el mismo dictamen: pidiéndolo cuatro veces salían cuatro redacciones distintas y desde fuera eso se lee como que cambia de opinión. La segunda es la cuota, que es limitada y gratis.':
+      'This is on purpose, for two reasons. The first is that the same plan deserves the same verdict: asking four times produced four different write-ups, and from the outside that reads as changing its mind. The second is the quota, which is limited and free.',
+    'La nota y los fallos NO salen de ahí: esos los calcula la app cada vez, así que siempre hablan del plan tal y como está ahora. Lo guardado es solo cómo está explicado.':
+      'The score and the faults do NOT come from there: the app works those out every time, so they always talk about the plan as it stands now. What is stored is only how it is explained.',
+    'Aplica cualquier cambio y la siguiente será nueva sola. Si quieres la misma auditoría contada de otra forma, abajo tienes *Pedir otra redacción*.':
+      'Apply any change and the next one will be new by itself. If you want the same audit told a different way, there is *Ask for another write-up* below.',
     '¿Por qué la lista pone 160 g y debajo «bandeja de 500 g»?':
       'Why does the list say 160 g and then "500 g tray" underneath?',
     'Porque son dos cosas distintas y conviene ver las dos. El primero es lo que te vas a comer, sumado de los platos. El segundo es cómo lo vende la tienda, que casi nunca coincide.':

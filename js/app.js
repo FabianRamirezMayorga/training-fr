@@ -3074,6 +3074,7 @@
     const fav = Store.isFav(ex.id);
     const guia = Tecnica.para(ex);
     const marcos = Data.frames(ex);
+    const entrenando = !!(g.Workout && Workout.isActive());
 
     return html`
       <button class="btn sm ghost" data-a="atras" style="margin-bottom:10px">${raw(icon('back'))} ${T('Volver')}</button>
@@ -3106,6 +3107,19 @@
         <a class="btn" href="${Data.youtube(ex)}" target="_blank" rel="noopener noreferrer"
            aria-label="${T('Buscar vídeo en YouTube')}">${raw(icon('youtube'))}</a>
       </div>
+
+      <!-- «Añadir a rutina» es para mañana; esto es para hoy. Son dos cosas
+           distintas y antes solo estaba la primera: quien encontraba aquí un
+           ejercicio que acababa de hacer, o que quería meter en la sesión que
+           tenía a medias, no tenía por dónde. El botón dice lo que va a pasar,
+           que no es lo mismo entrenando que fuera. -->
+      <button class="btn block" data-a="hice" style="margin-top:8px">
+        ${raw(icon('check'))} ${entrenando
+          ? T('Añadir a lo que estoy entrenando') : T('Lo he hecho')}</button>
+      <p class="tiny" style="margin:7px 0 0">${entrenando
+        ? T('Entra en la sesión de hoy y cuenta en ella, como uno más de la rutina.')
+        : T('Lo apunta como hecho ahora mismo, con tus series, y cuenta para el ' +
+            'historial, el volumen y los récords.')}</p>
 
       ${raw(g.Musculos ? Musculos.mapa(ex.primaryMuscles, ex.secondaryMuscles) : '')}
 
@@ -3322,6 +3336,15 @@
       UI.toast(on ? T('Añadido a favoritos') : T('Quitado de favoritos'));
     });
     bind(root, '[data-a=addrutina]', function () { pickRoutineSheet(ex); });
+    bind(root, '[data-a=hice]', function () {
+      if (g.Workout && Workout.isActive()) {
+        Workout.anadir(ex);
+        go('entrenar');
+        UI.toast(Tn('«{que}» añadido a lo de hoy', { que: ex.nameEs }));
+        return;
+      }
+      apuntarSheet(ex);
+    });
     bindAll(root, '[data-ex]', function (el) { go('ejercicio', el.dataset.ex); window.scrollTo(0, 0); });
     /* Se traduce sola al abrir: el botón estaba dentro de un bloque plegado y
        casi nadie llegaba a pulsarlo. */
@@ -3466,6 +3489,178 @@
   }
 
   /* Hoja para añadir un ejercicio a una rutina existente o nueva */
+  /* ---- Apuntar un ejercicio hecho fuera de la pantalla de entrenar ----
+
+     Lo que pide depende de cómo tenga puesto el registro, igual que al
+     entrenar: pedir peso a quien eligió «marcar el ejercicio y ya» sería
+     devolverle por otra puerta lo que ya dijo que no quería.
+
+     Se arranca con lo de la última vez. Casi siempre es lo mismo, y así esto
+     se resuelve en dos toques en vez de escribiendo cuatro números. */
+  function apuntarSheet(ex) {
+    const aj = Store.settings();
+    const modo = aj.registro || 'detallado';
+    const unidad = aj.unit === 'lb' ? 'lb' : 'kg';
+    const ultima = Store.lastPerformance(ex.id);
+    const prog = g.Progresion ? Progresion.sugerir(ex.id, 3, 12) : null;
+    const peso0 = (prog && prog.peso) ||
+      (ultima && ultima.sets.length ? Number(ultima.sets[0].weight) || 0 : 0);
+    const reps0 = (ultima && ultima.sets.length && Number(ultima.sets[0].reps)) || 12;
+    const series0 = Math.min(8, Math.max(1, (ultima && ultima.sets.length) || 3));
+
+    let filas = [];
+    for (let k = 0; k < series0; k++) filas.push({ weight: peso0, reps: reps0 });
+
+    const detallado = modo === 'detallado';
+    const soloEjercicio = modo === 'ejercicio';
+
+    function filaHTML(f, i) {
+      return html`
+        <div class="serie-fila detalle" data-fila="${i}">
+          <span class="sf-n">${i + 1}</span>
+          ${raw(detallado ? html`
+            <label class="sf-campo">
+              <input type="number" inputmode="decimal" step="0.5" min="0"
+                     value="${f.weight}" data-f="weight"
+                     aria-label="${Tn('Peso de la serie {n}', { n: i + 1 })}">
+              <span>${unidad}</span>
+            </label>` : '')}
+          <label class="sf-campo">
+            <input type="number" inputmode="numeric" step="1" min="0"
+                   value="${f.reps}" data-f="reps"
+                   aria-label="${Tn('Repeticiones de la serie {n}', { n: i + 1 })}">
+            <span>${T('reps')}</span>
+          </label>
+          <button class="sf-chk" data-f="quita" aria-label="${T('Quitar esta serie')}">
+            ${raw(icon('close'))}</button>
+        </div>`;
+    }
+
+    UI.modal(html`
+      <h2>${Tn('He hecho «{que}»', { que: ex.nameEs })}</h2>
+      <p class="muted">${raw(esc(soloEjercicio
+        ? T('Tienes el registro puesto en «marcar el ejercicio y ya», así que no hay ' +
+            'nada que rellenar: cuenta como un ejercicio hecho hoy.')
+        : (detallado
+          ? T('Lo que hiciste de verdad, no lo que tenías pensado. De ahí salen los ' +
+              'récords y el volumen.')
+          : T('Las series que hiciste y con cuántas repeticiones. Sin peso, que es ' +
+              'como tienes puesto el registro.'))))}</p>
+
+      ${raw(soloEjercicio ? '' : html`
+        <div class="stack" id="ap-filas">${raw(filas.map(filaHTML).join(''))}</div>
+        <button class="btn block" data-a="otra" style="margin-top:8px">
+          ${raw(icon('plus'))} ${T('Otra serie')}</button>`)}
+
+      <button class="btn primary block" data-a="guardar" style="margin-top:14px">
+        ${raw(icon('check'))} ${T('Apuntarlo')}</button>
+      <button class="btn ghost block" data-a="cancelar" style="margin-top:8px">${T('Cancelar')}</button>`,
+      function (el) {
+        const caja = el.querySelector('#ap-filas');
+
+        /* Lo escrito se lee ANTES de volver a pintar: si no, añadir una serie
+           borraba los números que acabaras de corregir en las de arriba. */
+        function leer() {
+          if (!caja) return;
+          caja.querySelectorAll('[data-fila]').forEach(function (fila) {
+            const i = Number(fila.dataset.fila);
+            if (!filas[i]) return;
+            const p = fila.querySelector('[data-f=weight]');
+            const r = fila.querySelector('[data-f=reps]');
+            if (p) filas[i].weight = Math.max(0, Number(p.value) || 0);
+            if (r) filas[i].reps = Math.max(0, Number(r.value) || 0);
+          });
+        }
+
+        function pintar() {
+          if (!caja) return;
+          caja.innerHTML = filas.map(filaHTML).join('');
+          caja.querySelectorAll('[data-f=quita]').forEach(function (b) {
+            b.onclick = function () {
+              leer();
+              /* Nunca se queda sin ninguna: una hoja vacía no se puede guardar
+                 y el botón de quitar dejaría de tener sentido. */
+              if (filas.length < 2) return;
+              filas.splice(Number(b.closest('[data-fila]').dataset.fila), 1);
+              pintar();
+            };
+          });
+        }
+        pintar();
+
+        const otra = el.querySelector('[data-a=otra]');
+        if (otra) {
+          otra.onclick = function () {
+            leer();
+            if (filas.length >= 12) return;
+            const fin = filas[filas.length - 1] || { weight: peso0, reps: reps0 };
+            filas.push({ weight: fin.weight, reps: fin.reps });
+            pintar();
+          };
+        }
+
+        el.querySelector('[data-a=cancelar]').onclick = function () { UI.closeModal(); };
+
+        el.querySelector('[data-a=guardar]').onclick = function () {
+          leer();
+          const sets = soloEjercicio
+            ? [{ weight: 0, reps: 0, done: true }]
+            : filas.filter(function (f) { return f.reps > 0 || f.weight > 0; })
+              .map(function (f) {
+                return { weight: detallado ? f.weight : 0, reps: f.reps, done: true };
+              });
+
+          if (!sets.length) {
+            UI.toast(T('Pon al menos una serie con repeticiones.'));
+            return;
+          }
+          UI.closeModal();
+          apuntarHecho(ex, sets);
+        };
+      });
+  }
+
+  /* Guarda el apunte. Si ya hay uno de hoy, se le añade en vez de abrir otro:
+     tres ejercicios sueltos un martes son un entrenamiento, no tres, y en el
+     historial tres tarjetas de una línea no hay quien las lea. */
+  function apuntarHecho(ex, sets) {
+    const ahora = Date.now();
+    const entry = { exId: ex.id, name: ex.nameEs, sets: sets };
+    const hoy = Store.dayKey(ahora);
+    const suelta = Store.sessions().filter(function (x) {
+      return x.suelto && Store.dayKey(x.start) === hoy;
+    })[0];
+
+    function cuenta(ses) {
+      return ses.entries.reduce(function (n, e) {
+        return n + e.sets.filter(function (x) { return x.done; }).length;
+      }, 0);
+    }
+
+    if (suelta) {
+      const entries = suelta.entries.concat([entry]);
+      const copia = Object.assign({}, suelta, { entries: entries });
+      Store.actualizarSesion(suelta.id, {
+        entries: entries, end: ahora,
+        setsDone: cuenta(copia), volume: Store.volumeOf(copia)
+      });
+    } else {
+      const ses = {
+        routineId: null, routineName: T('Apuntado a mano'), suelto: true,
+        start: ahora, end: ahora, entries: [entry]
+      };
+      ses.setsDone = cuenta(ses);
+      ses.volume = Store.volumeOf(ses);
+      Store.addSession(ses);
+    }
+
+    const vol = sets.reduce(function (n, x) { return n + x.weight * x.reps; }, 0);
+    UI.toast(vol
+      ? Tn('Apuntado: {que}, {v}', { que: ex.nameEs, v: UI.kg(vol) })
+      : Tn('Apuntado: {que}', { que: ex.nameEs }));
+    go('progreso');
+  }
+
   function pickRoutineSheet(ex) {
     const rutinas = Store.routines();
     UI.modal(html`

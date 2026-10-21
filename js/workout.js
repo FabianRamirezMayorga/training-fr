@@ -1791,6 +1791,11 @@
   g.Workout = {
     start: start, startLibre: startLibre, cargar: cargar, view: view, mount: mount,
     isActive: isActive, finish: finish, discard: discard, reiniciar: reiniciar, stopTimers: stopTimers,
-    pintarBanner: pintarBanner
+    pintarBanner: pintarBanner,
+    /* Ya existía, pero solo la veía el botón de «Añadir otro ejercicio» de
+       esta misma pantalla. Desde la ficha de un ejercicio no había forma de
+       meterlo en lo que se está entrenando, que es justo donde uno se entera
+       de que quiere hacerlo. */
+    anadir: añadirEjercicio
   };
 })(window);

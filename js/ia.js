@@ -454,6 +454,13 @@
     return c.v;
   }
 
+  /* Cuándo se guardó esto. Hace falta para poder decirlo: un dictamen que
+     aparece al instante y sin fecha se lee como que no se ha mirado nada. */
+  function cuandoCache(clave) {
+    const c = cache()[clave];
+    return c ? c.t : 0;
+  }
+
   function escribirCache(clave, valor) {
     try {
       const c = cache();
@@ -2082,6 +2089,7 @@
       guardado.nota = rev.nota;
       guardado.revision = rev;
       guardado.deCache = true;
+      guardado.deCacheT = cuandoCache(claveCache);
       return Promise.resolve(guardado);
     }
 
@@ -2657,6 +2665,7 @@
       guardado.nota = rev.nota;
       guardado.revision = rev;
       guardado.deCache = true;
+      guardado.deCacheT = cuandoCache(claveCache);
       return Promise.resolve(guardado);
     }
 
@@ -2764,6 +2773,7 @@
         guardado.nota = rev.nota;
         guardado.revision = rev;
         guardado.deCache = true;
+        guardado.deCacheT = cuandoCache(claveCache);
         return Promise.resolve(guardado);
       }
     }
