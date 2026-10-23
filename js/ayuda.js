@@ -821,6 +821,13 @@
         'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.'],
       ver: ['c-compra'] },
 
+    { id: 'p-borrador', q: 'Generé un plan y se me queda ahí puesto. ¿Cómo empiezo de cero?',
+      a: ['Con *Descartar y empezar de cero*, en la propia tarjeta del plan. Un toque, y te deja el formulario en blanco para montar otro.',
+        'Un plan recién generado es un *borrador*: está en pantalla pero no en tus rutinas. No sale en «hoy», no cuenta en tu progreso y no lo verás en otro dispositivo. Existe para que lo mires antes de decidir, y por eso tirarlo no rompe nada: tus rutinas guardadas se quedan donde estaban.',
+        'Pasa a ser tuyo de verdad cuando lo guardas en rutinas, y entonces ya no hay tarjeta de borrador: aparece abajo con los demás planes.',
+        'El botón *Nuevo* de arriba hace lo mismo si no hay nada montado todavía. Si lo hay, te avisa antes, porque empezar otro se lleva el borrador por delante.'],
+      ver: ['c-rutina', 'g-plan'] },
+
     { id: 'p-diabrazo', q: '¿Puedo tener un día solo de hombro y brazo?',
       a: ['Sí, con cinco días. Al generar el programa, en *Priorizar una zona* elige *Brazo* u *Hombro*: con cinco días eso ya no añade un ejercicio suelto, te da el cuarto día entero.',
         'La semana queda así: empuje, espalda y bíceps, pierna, hombro y brazo, y un quinto día de torso y pierna. Ese quinto día no es relleno: recoge el pecho, el dorsal y la pierna que se quedan sin segunda vuelta al dedicarle un día al brazo.',

@@ -1448,6 +1448,16 @@
       '*The day is named after its muscles*: «Chest, shoulder and triceps», not «Push». «Push» and «pull» are what the patterns are called inside, but you need gym knowledge to translate «pull» into «back and biceps». The name comes from what is actually in the day, so it cannot lie: if the day ended up without triceps because there was no room, it does not name them. With more than three muscles the usual name stays —«Upper body», «Full body»— because a list of five is not a name.',
     'Y valen monte el plan quien lo monte: la calculadora elige ejercicios con reglas y la IA los elige leyendo tu historial, pero cómo se escriben los números y en qué orden va el día es lo mismo en los dos. Durante un tiempo no fue así —el plan montado con IA se saltaba todo esto— y era el que peor se leía de los tres.':
       'And they hold whoever built the plan: the calculator picks exercises with rules and the AI picks them by reading your history, but how the numbers are written and what order the day goes in is the same for both. For a while it was not so —the AI-built plan skipped all of this— and it was the worst-reading of the three.',
+    'Generé un plan y se me queda ahí puesto. ¿Cómo empiezo de cero?':
+      'I generated a plan and it just sits there. How do I start from scratch?',
+    'Con *Descartar y empezar de cero*, en la propia tarjeta del plan. Un toque, y te deja el formulario en blanco para montar otro.':
+      'With *Discard and start from scratch*, on the plan card itself. One tap, and it leaves you a blank form to build another one.',
+    'Un plan recién generado es un *borrador*: está en pantalla pero no en tus rutinas. No sale en «hoy», no cuenta en tu progreso y no lo verás en otro dispositivo. Existe para que lo mires antes de decidir, y por eso tirarlo no rompe nada: tus rutinas guardadas se quedan donde estaban.':
+      'A freshly generated plan is a *draft*: it is on screen but not in your routines. It does not show up under today, it does not count towards your progress, and you will not see it on another device. It exists so you can look it over before deciding, which is why throwing it away breaks nothing: your saved routines stay where they were.',
+    'Pasa a ser tuyo de verdad cuando lo guardas en rutinas, y entonces ya no hay tarjeta de borrador: aparece abajo con los demás planes.':
+      'It becomes really yours when you save it to routines, and then there is no draft card any more: it appears below with the other plans.',
+    'El botón *Nuevo* de arriba hace lo mismo si no hay nada montado todavía. Si lo hay, te avisa antes, porque empezar otro se lleva el borrador por delante.':
+      'The *New* button at the top does the same when nothing is built yet. If something is, it warns you first, because starting another one takes the draft with it.',
     '¿Puedo tener un día solo de hombro y brazo?':
       'Can I have a day for shoulders and arms only?',
     'Sí, con cinco días. Al generar el programa, en *Priorizar una zona* elige *Brazo* u *Hombro*: con cinco días eso ya no añade un ejercicio suelto, te da el cuarto día entero.':

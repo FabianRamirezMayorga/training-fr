@@ -501,12 +501,19 @@
           <div class="row between" style="align-items:flex-start">
             <div class="grow">
               <b>${est.prog.nombreIA || T('Plan recién montado')}</b>
-              <div class="tiny" style="margin-top:2px">${Tp(est.prog.sesiones.length, '{n} sesión', '{n} sesiones')}
-                \u00b7 ${est.prog.porIA ? T('montado con IA') : T('montado con la calculadora')}
-                \u00b7 <span style="color:var(--warn)">${T('sin pasar a tus rutinas')}</span></div>
+              <div class="tiny" style="margin-top:2px"><span
+                style="color:var(--warn)">${T('Borrador')}</span>
+                \u00b7 ${Tp(est.prog.sesiones.length, '{n} sesión', '{n} sesiones')}
+                \u00b7 ${est.prog.porIA ? T('montado con IA') : T('montado con la calculadora')}</div>
             </div>
             <button class="btn sm" data-a="verplan">${T('Ver')}</button>
           </div>
+          <!-- Decir que es un borrador no basta: «sin pasar a tus
+               rutinas» era jerga de la propia app. Lo que hace falta
+               saber es que no sirve de nada hasta guardarlo, y que
+               tirarlo no rompe nada. -->
+          <p class="tiny" style="margin:8px 0 10px">${T('Todavía no está en tus rutinas: no sale en «hoy», no cuenta en tu progreso y no lo verás en el móvil hasta que lo guardes.')}</p>
+          <button class="btn block sm" data-a="tirarplan">${raw(icon('trash'))} ${T('Descartar y empezar de cero')}</button>
         </div>` : '')}
 
       ${raw(orden.length ? html`
@@ -1433,8 +1440,11 @@
         const caja = document.querySelector('#generar');
         if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
-      est.creando = true;
-      if (!est.prog) { render(); setTimeout(bajar, 60); return; }
+      /* Esto estaba antes de preguntar, así que decir que no dejaba la
+         pantalla contradiciéndose: el generador abierto y, encima, el plan
+         viejo todavía puesto arriba en «lo que ya tienes». Abrir el
+         generador es consecuencia de decir que sí, no de pulsar el botón. */
+      if (!est.prog) { est.creando = true; render(); setTimeout(bajar, 60); return; }
 
       const sinGuardar = !vivas().length;
       const limpiar = function () {
@@ -1453,6 +1463,37 @@
       }
       limpiar();
     });
+    /* Tirar el borrador y quedarse delante del formulario vacío.
+
+       Antes esto solo existía detrás de «Nuevo» y de «Cancelar», que son
+       los dos sitios donde nadie lo busca —lo que uno mira para deshacerse de
+       algo es ese algo—, y por el camino leía dos veces que «se pierde», que
+       suena a romper algo cuando lo único que pasa es que un borrador deja de
+       estorbar.
+
+       Y acaba abriendo el generador en vez de dejar la pantalla en blanco:
+       nadie descarta un plan para quedarse mirando el hueco, lo descarta para
+       hacer otro. */
+    bind(root, '[data-a=tirarplan]', function () {
+      /* Sin triángulo rojo: no se rompe nada. Un borrador que nunca llegó a
+         tus rutinas no vale más que el papel en que se escribe, y pintarlo de
+         peligro es enseñar a tener miedo de un botón que conviene pulsar. */
+      UI.confirm(T('Descartar y empezar de cero'),
+        T('Se borra solo este borrador. Tus rutinas guardadas no se tocan, y te dejo el formulario en blanco para montar otro.'),
+        T('Descartar y empezar de cero'), false, 'plus').then(function (ok) {
+          if (!ok) return;
+          est.prog = null; est.ia = null; est.aplicados = []; est.guardadas = [];
+          est.recuperado = false; est.abierto = {};
+          est.creando = true;
+          guardarEstado();
+          render();
+          setTimeout(function () {
+            const caja = document.querySelector('#generar');
+            if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 60);
+        });
+    });
+
     bind(root, '[data-a=verplan]', function () {
       const caja = document.querySelector('.stats');
       if (caja) caja.scrollIntoView({ behavior: 'smooth', block: 'start' });

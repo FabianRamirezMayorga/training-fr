@@ -2183,6 +2183,14 @@
     'Espalda': 'Back',
     'Brazo': 'Arms',
     'Core': 'Core',
+    'Borrador':
+      'Draft',
+    'Todavía no está en tus rutinas: no sale en «hoy», no cuenta en tu progreso y no lo verás en el móvil hasta que lo guardes.':
+      'It is not in your routines yet: it does not show up under today, it does not count towards your progress, and you will not see it on your phone until you save it.',
+    'Descartar y empezar de cero':
+      'Discard and start from scratch',
+    'Se borra solo este borrador. Tus rutinas guardadas no se tocan, y te dejo el formulario en blanco para montar otro.':
+      'Only this draft is deleted. Your saved routines are left alone, and you get a blank form to build another one.',
     '{lista} (pediste {n} días y propuso más)':
       '{lista} (you asked for {n} days and it proposed more)',
     '{que} (no se propone sin alguien delante)':
