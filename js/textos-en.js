@@ -2183,6 +2183,8 @@
     'Espalda': 'Back',
     'Brazo': 'Arms',
     'Core': 'Core',
+    '{lista} (pediste {n} días y propuso más)':
+      '{lista} (you asked for {n} days and it proposed more)',
     '{que} (no se propone sin alguien delante)':
       '{que} (not suggested without someone watching)',
     'Hombro y brazo': 'Shoulders and arms',

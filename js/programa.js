@@ -772,7 +772,11 @@
        la hoja subiendo al final: no sabía qué tenía delante cada ejercicio. */
     sesiones.forEach(function (ses) { sanear(ses, edad.calentamiento); });
     cuadrarVolumen(sesiones, objetivoSeries, minutos, edad.calentamiento);
-    sesiones.forEach(titular);
+    /* Con la función a pelo, forEach le pasa además el índice, y desde que
+       titular() tiene un segundo parámetro eso valía «forzar» a partir del
+       segundo día: la mitad de los planes perdieron su «Tren superior» y
+       «Cuerpo completo B» sin que nadie lo pidiera. */
+    sesiones.forEach(function (ses) { titular(ses); });
 
     /* Las dos cuentas se rehacen sobre el plan ya cuadrado: las de antes eran
        de un plan que ya no existe. */
@@ -1073,8 +1077,11 @@
     return ses;
   }
 
-  function titular(ses) {
-    ses.zonas = zonasDeSesion(ses.ejercicios);
+  /* forzar: que el nombre salga sí o sí de los músculos, sin dejar que mande
+     el de la plantilla. Lo usa el plan montado con IA, donde la plantilla no es
+     una plantilla sino lo que a la IA le pareció llamar al día. */
+  function titular(ses, forzar) {
+    ses.zonas = zonasDeSesion(ses.ejercicios, forzar);
     ses.nombre = nombreSesion(ses);
     return ses;
   }
@@ -1551,13 +1558,28 @@
      para eso ya está «Tren superior», que se entiende sin saber jerga. */
   const ZONA_SUELTA = { biceps: 1, triceps: 1 };
 
-  function zonasDeSesion(ejercicios) {
+  function zonasDeSesion(ejercicios, forzar) {
     const vistas = [];
+    const series = {};
     (ejercicios || []).forEach(function (e) {
       const z = ZONA_SUELTA[e.musculo] ? e.musculo : grupoDe(e.musculo);
-      if (z && vistas.indexOf(z) === -1) vistas.push(z);
+      if (!z) return;
+      series[z] = (series[z] || 0) + (Number(e.sets) || 0);
+      if (vistas.indexOf(z) === -1) vistas.push(z);
     });
-    return vistas.length && vistas.length <= 3 ? vistas : null;
+    if (!vistas.length) return null;
+    if (vistas.length <= 3) return vistas;
+    /* Con más de tres, normalmente se deja el nombre de la plantilla: «Tren
+       superior» se entiende y es verdad.
+
+       Pero cuando la plantilla la ha escrito la IA, ese nombre es prosa suya y
+       sí puede mentir: devolvió un «Descanso Activo» de cinco ejercicios y
+       dieciocho series. Ahí se fuerza el nombre a las tres zonas con más
+       series, que siempre es verdad aunque se deje algo fuera. */
+    if (!forzar) return null;
+    return vistas.slice().sort(function (a, b) {
+      return (series[b] || 0) - (series[a] || 0);
+    }).slice(0, 3);
   }
 
   /* Se guardan las claves y se traducen al pintar, no al generar: si no, un

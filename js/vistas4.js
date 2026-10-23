@@ -1599,8 +1599,27 @@
       });
     };
 
+    /* Un día elegido, una sesión.
+
+       La IA devuelve los días que le parece —le pedí cinco y mandó siete— y
+       antes se guardaban todos: los que sobraban buscaban su hueco en
+       est.dias[5] y est.dias[6], que no existen, caían al primero por el
+       «o el primero» del final, y el plan salía con tres lunes. También
+       podían chocar dos si nombraba el mismo día dos veces.
+
+       Ahora los días se van repartiendo de la lista de los pedidos: si la IA
+       nombra uno que está libre, se respeta; si no, le toca el siguiente
+       libre; y cuando no quedan, la sesión sobra y se dice. El día que eliges
+       no es una sugerencia. */
+    const libres = est.dias.slice();
+    const sobran = [];
     const sesiones = (r.sesiones || []).map(function (ses, i) {
-      const dia = est.dias.indexOf(ses.dia) !== -1 ? ses.dia : est.dias[i] || est.dias[0];
+      if (!libres.length) {
+        sobran.push(ses.nombre || T('Sesión'));
+        return null;
+      }
+      const pedido = libres.indexOf(ses.dia);
+      const dia = libres.splice(pedido !== -1 ? pedido : 0, 1)[0];
       const vistos = {};
       const ejercicios = [];
 
@@ -1665,7 +1684,10 @@
       /* El mínimo de la app son 6 ejercicios, pero la calculadora monta días de
          5 con sesiones de una hora: exigir 6 aquí podía tirar un día entero que
          la propia app habría dado por bueno. Con cuatro ya es una sesión. */
-      if (ejercicios.length < 4) return null;
+      /* Si la sesión se cae, el día vuelve a la bolsa: si no, se quedaba
+         cogido por una sesión que no existe y el plan salía con un día menos
+         de los que pediste. */
+      if (ejercicios.length < 4) { libres.unshift(dia); return null; }
 
       const minutos = ejercicios.reduce(function (n, e) {
         return n + Math.round(e.sets * (e.rest + 35) / 60);
@@ -1681,11 +1703,16 @@
         plantilla: ses.nombre || '',
         ejercicios: ejercicios,
         minutos: minutos + base.calentamiento
-      }, base.calentamiento));
+      }, base.calentamiento), true);
     }).filter(Boolean);
 
     /* si no ha salido ni una sesión aprovechable, se queda la de la calculadora */
     if (!sesiones.length) return null;
+
+    if (sobran.length) {
+      descartados.push(Tn('{lista} (pediste {n} días y propuso más)',
+        { lista: sobran.join(', '), n: est.dias.length }));
+    }
 
     const prog = Object.assign({}, base);
     prog.sesiones = sesiones;
