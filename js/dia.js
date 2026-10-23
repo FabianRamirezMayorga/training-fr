@@ -262,7 +262,7 @@
               'loading="lazy">' +
               '<div class="grow"><div style="font-weight:600;font-size:.85rem">' +
               (k + 1) + '. ' + esc(ex ? ex.nameEs : re.exId) + '</div>' +
-              '<div class="tiny">' + re.sets + ' × ' + re.reps +
+              '<div class="tiny">' + re.sets + ' × ' + UI.reps(re) +
               (ex && ex.primaryMuscles.length
                 ? ' · ' + esc(ex.primaryMuscles.map(I18N.muscle).join(', ')) : '') +
               '</div></div></button>';

@@ -340,7 +340,7 @@
                       <img src="${Data.img(e.ex, 0)}" alt="" loading="lazy">
                       <div class="grow">
                         <div style="font-weight:600;font-size:.85rem">${k + 1}. ${e.ex.nameEs}</div>
-                        <div class="tiny">${e.sets} × ${e.reps} · ${e.rest}s de descanso${raw(
+                        <div class="tiny">${e.sets} × ${UI.reps(e)} · ${e.rest}s de descanso${raw(
                           e.ex.primaryMuscles.length
                             ? ' · ' + esc(e.ex.primaryMuscles.map(I18N.muscle).join(', ')) : '')}</div>
                         ${raw(e.note ? '<div class="tiny" style="margin-top:3px;opacity:.85">' +

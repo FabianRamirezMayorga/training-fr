@@ -1432,6 +1432,54 @@
       'It works for any workout, whether it came from a routine or was noted by hand: inside they are the same thing.',
     'Si quitas todos los ejercicios te pregunta si lo que quieres es borrarlo, porque un entrenamiento de cero series no es nada y en el historial solo estorba.':
       'If you remove every exercise it asks whether you meant to delete it, because a workout with zero sets is nothing and only gets in the way in the history.',
+    'Cómo está escrita la hoja':
+      'How the sheet is written',
+    'El rango, la forma del día y su nombre':
+      'The rep range, the shape of the day and its name',
+    'Un plan generado se nota a la primera ojeada, y casi nunca por los ejercicios: por cómo están escritos los números. Tres cosas se deciden solas para que la hoja se lea como la de un entrenador.':
+      'A generated plan shows at first glance, and hardly ever because of the exercises: it is how the numbers are written. Three things are decided for you so the sheet reads like a coach wrote it.',
+    '*Las repeticiones van en rango*: *4 × 6-8*, no *4 × 8*. Un número solo no dice qué hacer el día que salen nueve. El rango lleva la regla dentro: te mueves dentro de él y, cuando llegas arriba en todas las series, sube el peso. El techo es el número que usa la progresión para decidir si has cumplido, así que el rango no cambia ningún cálculo; solo dice lo que ya había.':
+      '*Reps come as a range*: *4 × 6-8*, not *4 × 8*. A single number does not tell you what to do the day nine come out. The range carries the rule inside it: you work within it and, when you hit the top on every set, you add weight. The top is the number progression uses to decide whether you met the target, so the range changes no calculation; it just says out loud what was already there.',
+    'Y un rango de verdad cae en los números de siempre —5, 6, 8, 10, 12, 15, 20—. Nadie pone 3 × 13: los números de en medio salen de hacer cuentas y delatan a la máquina en cada línea.':
+      'And a real range lands on the usual numbers —5, 6, 8, 10, 12, 15, 20. Nobody writes 3 × 13: the in-between numbers come from arithmetic and give the machine away on every line.',
+    '*El día baja, nunca sube*: ningún ejercicio lleva más series que el que tiene delante. A la séptima serie se llega más cansado que a la primera, y la hoja tiene que decirlo. El básico puede llegar a cinco series y el accesorio a cuatro, así que no verás cinco series de curl martillo al cierre de un día que abre con ocho de press.':
+      '*The day comes down, never up*: no exercise carries more sets than the one before it. You reach the seventh set more tired than the first, and the sheet has to say so. The main lift can reach five sets and an accessory four, so you will not see five sets of hammer curls closing a day that opens with eight sets of pressing.',
+    '*El día se llama por sus músculos*: «Pecho, hombro y tríceps», no «Empuje». «Empuje» y «tracción» es como se llaman los patrones por dentro, pero hay que saber de gimnasio para traducir «tracción» a «espalda y bíceps». El nombre sale de lo que hay colocado de verdad, así que no puede mentir: si el día acabó sin tríceps porque no cabía, no lo nombra. Cuando son más de tres músculos se queda el nombre de siempre —«Tren superior», «Cuerpo completo»—, porque una lista de cinco no es un nombre.':
+      '*The day is named after its muscles*: «Chest, shoulder and triceps», not «Push». «Push» and «pull» are what the patterns are called inside, but you need gym knowledge to translate «pull» into «back and biceps». The name comes from what is actually in the day, so it cannot lie: if the day ended up without triceps because there was no room, it does not name them. With more than three muscles the usual name stays —«Upper body», «Full body»— because a list of five is not a name.',
+    '¿Por qué pone 4 × 6-8 y no 4 × 8?':
+      'Why does it say 4 × 6-8 and not 4 × 8?',
+    'Porque un número solo no te dice qué hacer cuando hoy salen nueve, ni cuándo subir el peso. El rango sí: te mueves dentro de él y, el día que llegas arriba en todas las series, subes.':
+      'Because a single number does not tell you what to do when nine come out today, nor when to add weight. A range does: you work within it and, the day you hit the top on every set, you go up.',
+    'El techo del rango es el número que había antes, el mismo que mira la progresión para decidir si has cumplido. Así que no has perdido nada ni se calcula nada distinto: lo que se ha ganado es que la hoja ahora dice la regla en vez de callarla.':
+      'The top of the range is the number that was there before, the same one progression looks at to decide whether you met the target. So nothing was lost and nothing is calculated differently: what you gain is that the sheet now states the rule instead of keeping it quiet.',
+    'Y al apuntar, una serie dentro del rango ya no sale marcada como corregida. Diez repeticiones cuando la hoja pide 10-12 no es haberla cambiado: es estar dentro.':
+      'And when you log, a set inside the range is no longer flagged as corrected. Ten reps when the sheet asks for 10-12 is not a change: it is being inside the range.',
+    'Donde no hay rango es porque no lo hay: un 5 × 5 de fuerza es un 5 × 5, y una plancha lleva segundos, no repeticiones. Y si cambias las repeticiones a mano, el rango se va: lo que has escrito es un número tuyo, no el techo de nada.':
+      'Where there is no range it is because there is none: a strength 5 × 5 is a 5 × 5, and a plank takes seconds, not reps. And if you change the reps by hand the range goes away: what you wrote is a number of your own, not the top of anything.',
+    '¿Por qué mi día ya no se llama «Empuje»?':
+      'Why is my day no longer called «Push»?',
+    'Porque ahora se llama por lo que entrena: «Pecho, hombro y tríceps». «Empuje» es correcto y es como se llama el patrón por dentro, pero hay que saber de gimnasio para traducirlo, y el nombre del día es lo primero que se lee de la hoja —en el calendario es lo único que se ve—.':
+      'Because now it is named after what it trains: «Chest, shoulder and triceps». «Push» is correct and it is what the pattern is called inside, but you need gym knowledge to translate it, and the name of the day is the first thing you read on the sheet —in the calendar it is the only thing you see.',
+    'El nombre sale de los ejercicios que acabaron en el día, no de la plantilla, así que no puede mentir: si el tríceps se cayó por falta de tiempo, el nombre no lo pone.':
+      'The name comes from the exercises that ended up in the day, not from the template, so it cannot lie: if triceps dropped out for lack of time, the name does not mention it.',
+    'Cuando el día toca más de tres músculos se queda el nombre de antes —«Tren superior», «Cuerpo completo A»—: «Pecho, espalda, hombro, bíceps y tríceps» no es un nombre, es un inventario.':
+      'When the day touches more than three muscles the old name stays —«Upper body», «Full body A»: «Chest, back, shoulder, biceps and triceps» is not a name, it is an inventory.',
+    '¿Por qué los últimos ejercicios del día llevan menos series?':
+      'Why do the last exercises of the day carry fewer sets?',
+    'Porque a la séptima serie se llega más cansado que a la primera, y la hoja tiene que decirlo. El básico va primero y es el que más series lleva; a partir de ahí el día baja y nunca vuelve a subir.':
+      'Because you reach the seventh set more tired than the first, and the sheet has to say so. The main lift goes first and carries the most sets; from there the day comes down and never goes back up.',
+    'Antes no era así, y no por decisión: al cuadrar el volumen semanal la app sumaba series donde faltaban sin mirar el orden, y salían días de 4-4-3-3-4-4. Ocho series de tríceps al cierre de un día que ya abre con ocho de press, y leído de arriba abajo parece que el plan se anima al final.':
+      'It did not use to be like that, and not by choice: when squaring the weekly volume the app added sets where they were missing without looking at the order, and days came out as 4-4-3-3-4-4. Eight sets of triceps closing a day that already opens with eight of pressing, and read top to bottom it looks as if the plan perks up at the end.',
+    'El volumen semanal sigue cuadrándose igual: lo que cambió es dónde se pone. Si la cola del día está plana —tres accesorios a tres series— y hace falta volumen, suben los tres juntos, que es lo que hace cualquiera con tiempo de sobra.':
+      'The weekly volume is still squared the same: what changed is where it goes. If the tail of the day is flat —three accessories at three sets— and volume is needed, the three go up together, which is what anyone with spare time does.',
+    '¿Por qué el día de pierna acaba con un abdominal?':
+      'Why does leg day end with an ab exercise?',
+    'Porque el abdomen trabaja de verdad el día que más peso mueves, y porque al final de un día de pierna ya no queda fuerza para nada pesado pero sí para esto. Sale en uno de cada cuatro días de pierna, no en todos.':
+      'Because the midsection really works on the day you move the most weight, and because at the end of a leg day there is no strength left for anything heavy but there is for this. It shows up on one leg day in four, not on all of them.',
+    'Lo que sí cambió es cuál. Antes era trabajo de antirrotación y salía un Bird-Dog: perfecto en una consulta de fisioterapia y flojo detrás de una sentadilla y un peso muerto. Ahora es flexión de tronco —elevaciones de cadera o de piernas—, que es trabajo de abdomen de gimnasio y progresa añadiendo recorrido o peso, como el resto de la hoja.':
+      'What did change is which one. It used to be antirotation work and a Bird-Dog came out: perfect in a physio clinic and weak behind a squat and a deadlift. Now it is trunk flexion —hip or leg raises— which is gym ab work and progresses by adding range or weight, like the rest of the sheet.',
+    'La antirrotación no desapareció: se queda en los días de cuerpo completo, donde sí pega.':
+      'Antirotation did not disappear: it stays on the full-body days, where it does fit.',
     '¿Por qué el plan nunca me pone cargadas ni arrancadas?':
       'Why does the plan never give me cleans or snatches?',
     'Porque no se pueden proponer a ciegas. Una cargada o una arrancada se aprenden con alguien delante: mal hechas no es que rindan menos, es que se cobran la espalda o el hombro. Proponerlas de primer ejercicio del día, con cuatro series pesadas y sin que nadie te mire, es la clase de sugerencia que no se puede hacer por pantalla.':

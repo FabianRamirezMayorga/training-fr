@@ -231,7 +231,7 @@
                     <img src="${Data.img(e.ex, 0)}" alt="" loading="lazy">
                     <div class="grow">
                       <div style="font-weight:600;font-size:.85rem">${k + 1}. ${e.ex.nameEs}</div>
-                      <div class="tiny">${e.fila.sets} × ${e.fila.reps} · ${e.fila.rest}s${raw(
+                      <div class="tiny">${e.fila.sets} × ${UI.reps(e.fila)} · ${e.fila.rest}s${raw(
                         e.comoVenia && I18N.norm(e.comoVenia) !== I18N.norm(e.ex.nameEs)
                           ? ' · ' + Tn('en el papel: {que}',
                               { que: '<b>' + esc(e.comoVenia) + '</b>' }) : '')}</div>

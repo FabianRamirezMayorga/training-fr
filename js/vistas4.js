@@ -881,7 +881,7 @@
                 <img src="${ex ? Data.img(ex, 0) : Data.PLACEHOLDER}" alt="" loading="lazy">
                 <span class="grow">
                   <span class="ejer-nom">${ex ? ex.nameEs : e.exId}</span>
-                  <span class="ejer-meta">${e.sets} × ${e.reps}
+                  <span class="ejer-meta">${e.sets} × ${UI.reps(e)}
                     <i>·</i> ${Tn('{n}s de descanso', { n: e.rest })}</span>
                   ${raw(e.note
                     ? '<span class="ejer-nota">' + esc(T(e.note)) + '</span>' : '')}

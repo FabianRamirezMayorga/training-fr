@@ -29,6 +29,7 @@
         exId: re.exId,
         name: ex ? ex.nameEs : re.exId,
         targetReps: re.reps,
+        targetRepsMin: re.repsMin || 0,
         /* Cuántas series pide la rutina. Se guarda aparte del array porque el
            array es lo que HIZO y esto es lo que pedía: sin las dos no hay forma
            de saber si cuatro series son las de siempre o las que se quedó
@@ -65,9 +66,25 @@
     return Number(entry.targetSets) || (entry.sets || []).length;
   }
 
+  /* Lo que pide la rutina, escrito igual que en la hoja. */
+  function objetivoReps(entry) {
+    return UI.reps({ reps: entry.targetReps, repsMin: entry.targetRepsMin });
+  }
+
+  /* Diez repeticiones cuando la hoja pide 10-12 no es haberla corregido: es
+     estar dentro. Antes se comparaba contra un número único y marcaba como
+     cambiada cualquier serie que no cayera justo en el techo, que con rango es
+     casi cualquiera. */
+  function enRango(entry, n) {
+    const techo = Number(entry.targetReps) || 0;
+    const suelo = Number(entry.targetRepsMin) || techo;
+    n = Number(n) || 0;
+    return n >= Math.min(suelo, techo) && n <= techo;
+  }
+
   function tocado(entry) {
     return (entry.sets || []).length !== seriesPlan(entry) ||
-      repsReales(entry) !== (Number(entry.targetReps) || 0);
+      !enRango(entry, repsReales(entry));
   }
 
   /* ---------- corregir lo que de verdad hizo ----------
@@ -94,10 +111,15 @@
   function objetivoHTML(entry, conReps) {
     const reps = repsReales(entry);
     const cambiado = tocado(entry);
+    /* Arriba va la prescripción, con su rango: es «lo que te propongo». El
+       número suelto del selector de abajo es otra cosa —lo que vas a hacer— y
+       un rango no se puede pulsar con un más y un menos. Cuando ya lo has
+       corregido manda lo que hiciste, que es lo que había antes. */
     return '<div class="objetivo' + (cambiado ? ' corregido' : '') + '">' +
-      '<b>' + entry.sets.length + ' × ' + reps + '</b>' +
+      '<b>' + entry.sets.length + ' × ' +
+        UI.esc(cambiado ? String(reps) : objetivoReps(entry)) + '</b>' +
       '<span>' + UI.esc(cambiado ? Tn('lo que has hecho · pedía {n}',
-        { n: seriesPlan(entry) + ' × ' + (Number(entry.targetReps) || 0) })
+        { n: seriesPlan(entry) + ' × ' + objetivoReps(entry) })
         : T('lo que te propongo')) + '</span>' +
       '<span class="obj-pasos">' +
         pasoHTML('serie', entry.sets.length, Tp(entry.sets.length, 'serie', 'series'),
@@ -747,7 +769,7 @@
                dato es un sitio de mas. -->
           ${raw(objetivoHTML(entry, false))}` : html`
           <div class="objetivo">
-            <b>${entry.sets.length} × ${entry.targetReps}</b>
+            <b>${entry.sets.length} × ${objetivoReps(entry)}</b>
             <span>${T('lo que te propongo')}${raw(entry.rest
               ? ' · ' + UI.esc(Tn('descanso {n} s', { n: entry.rest })) : '')}</span>
           </div>`)}
@@ -764,7 +786,7 @@
                  Y ya no es un <button> con cosas dentro: un boton dentro de
                  otro boton no es HTML valido y el navegador lo desarma. La
                  fila es una caja, y marcar es su propio boton. */
-              const cambiado = Number(s.reps) !== Number(entry.targetReps);
+              const cambiado = !enRango(entry, s.reps);
               return html`
                 <div class="serie-fila ${s.done ? 'on' : ''}" data-set="${i}">
                   <span class="sf-n">${i + 1}</span>
@@ -857,7 +879,7 @@
               <div class="grow">
                 <div style="font-weight:600;font-size:.86rem">${(exx && exx.nameEs) || e.name}</div>
                 <div class="tiny">${Tn('{d}/{t} series · objetivo {r} reps',
-                  { d: d, t: e.sets.length, r: e.targetReps })}</div>
+                  { d: d, t: e.sets.length, r: objetivoReps(e) })}</div>
               </div>
               ${raw(d === e.sets.length ? '<span class="chip solid">' +
                 UI.esc(T('Hecho')) + '</span>' : '')}
@@ -1498,6 +1520,7 @@
       exId: nuevo.id,
       name: nuevo.nameEs,
       targetReps: e.targetReps,
+      targetRepsMin: e.targetRepsMin || 0,
       rest: e.rest,
       note: e.note,
       sets: Array.from({ length: Math.max(1, e.sets.length - hechas) }, function () {

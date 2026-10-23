@@ -1658,7 +1658,7 @@
           return x.name + ' (' + ((x.days || []).join('/') || 'sin día') + '): ' +
             x.exercises.map(function (e) {
               const ex = Data.get(e.exId);
-              return (ex ? ex.nameEs : e.exId) + ' ' + e.sets + 'x' + e.reps;
+              return (ex ? ex.nameEs : e.exId) + ' ' + e.sets + 'x' + UI.reps(e);
             }).join(', ');
         }).join(' | '));
       } else {
@@ -2581,7 +2581,7 @@
   function revisarRutina(r) {
     const lista = (r.exercises || []).map(function (e, i) {
       const ex = Data.get(e.exId);
-      return (i + 1) + ') ' + (ex ? ex.nameEs : e.exId) + ' ' + e.sets + 'x' + e.reps +
+      return (i + 1) + ') ' + (ex ? ex.nameEs : e.exId) + ' ' + e.sets + 'x' + UI.reps(e) +
         ' descanso ' + e.rest + 's' +
         (ex && ex.primaryMuscles.length
           ? ' (' + ex.primaryMuscles.map(I18N.muscle).join(', ') + ')' : '');
@@ -2698,7 +2698,7 @@
       return (i + 1) + ') ' + s.nombre + ' [' + s.minutos + ' min]: ' +
         s.ejercicios.map(function (e) {
           const ex = Data.get(e.exId);
-          return (ex ? ex.nameEs : e.exId) + ' ' + e.sets + 'x' + e.reps +
+          return (ex ? ex.nameEs : e.exId) + ' ' + e.sets + 'x' + UI.reps(e) +
             ' (' + e.patron + ', ' + I18N.muscle(e.musculo) + ')';
         }).join('; ');
     }).join('\n');

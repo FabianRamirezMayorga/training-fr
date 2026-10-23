@@ -86,6 +86,26 @@
     }, REPS_REALES[0]);
   }
 
+  /* El rango que se escribe en la hoja: «4 × 6-8», no «4 × 8».
+
+     Un número solo no dice qué hacer cuando hoy salen nueve: ¿subo el peso?,
+     ¿me quedo?, ¿estaba mal la hoja? El rango lleva la regla dentro —cuando
+     llegas arriba en todas las series, sube el peso— y es como está escrito
+     cualquier programa de verdad. La otra mitad de la razón es la misma que la
+     de los números redondos de aquí arriba: «3 × 12» se lee como una orden de
+     una máquina y «3 × 10-12» como una indicación de alguien.
+
+     El techo del rango es el número de siempre, el mismo que ya usaba la
+     progresión para decidir si habías cumplido: así el rango es nuevo solo en
+     la hoja y ningún cálculo cambia de resultado. El suelo es el escalón
+     anterior de la escala, que para eso está. Y devuelve 0 —sin rango— para
+     lo que no está en la escala: los estáticos llevan segundos, y cuarenta
+     segundos no son «20-40». */
+  function repsAbajo(n) {
+    const i = REPS_REALES.indexOf(Number(n));
+    return i > 0 ? REPS_REALES[i - 1] : 0;
+  }
+
   /* ---------- 2. La edad manda en la recuperación ---------- */
   function porEdad(edad) {
     edad = Number(edad) || 0;
@@ -301,11 +321,19 @@
       h(P.emV, 'shoulders', 'principal'), h(P.trV, 'lats', 'accesorio'),
       h(P.lat, 'shoulders', 'accesorio'), h(P.cbi, 'biceps', 'accesorio'),
       h(P.etr, 'triceps', 'accesorio')] },
+    /* El abdominal de este día era de antirrotación, y con eso el cierre de
+       la pierna salía siendo un Bird-Dog: perfecto en una consulta de
+       fisioterapia y flojo detrás de una sentadilla y un peso muerto. Con
+       flexión de tronco salen elevaciones de cadera y de piernas —medido:
+       treinta y seis y veintisiete veces sobre los 144 planes—, que es trabajo
+       de abdomen de gimnasio y progresa añadiendo recorrido o peso, como el
+       resto de la hoja. La antirrotación se queda en los días de cuerpo
+       completo, donde sí pega. */
     inferior: { nombre: 'Tren inferior', huecos: [
       h(P.sen, 'quadriceps', 'principal'), h(P.bis, 'hamstrings', 'principal'),
       h(P.cad, 'glutes', 'principal'), h(P.zan, 'quadriceps', 'accesorio'),
       h(P.cuf, 'hamstrings', 'accesorio'), h(P.gem, 'calves', 'accesorio'),
-      h(P.ant, 'abdominals', 'accesorio')] },
+      h(P.abd, 'abdominals', 'accesorio')] },
     /* La segunda vuelta del torso tira de espalda, no de pecho. Con dos huecos
        de pecho aquí y otros dos en el primer día salían once series de pecho
        contra seis de dorsal, y el desequilibrio hacia el empuje es el que
@@ -628,7 +656,7 @@
         sumarVolumen(volumen, ex, hueco.musculo, cfg.series, directas);
         ejercicios.push({
           exId: ex.id, patron: hueco.patron, musculo: hueco.musculo, rol: hueco.rol,
-          sets: cfg.series, reps: reps, weight: 0, rest: rest,
+          sets: cfg.series, reps: reps, repsMin: repsAbajo(reps), weight: 0, rest: rest,
           note: notaDeEjercicio(hueco, ex, edad, r, estatico)
         });
       });
@@ -661,7 +689,8 @@
           sumarVolumen(volumen, ex, m, cfg.series, directas);
           ejercicios.push({
             exId: ex.id, patron: Alt.patron(ex), musculo: m, rol: 'accesorio',
-            sets: cfg.series, reps: repsRedondas(cfg.reps + sexo.repsExtra), weight: 0,
+            sets: cfg.series, reps: repsRedondas(cfg.reps + sexo.repsExtra),
+            repsMin: repsAbajo(repsRedondas(cfg.reps + sexo.repsExtra)), weight: 0,
             rest: Math.round(cfg.rest * sexo.descanso / 5) * 5,
             note: T('Entra para que el día no se quede corto con el material que tienes.')
           });
@@ -688,11 +717,21 @@
       ses.ejercicios.forEach(function (e) { ctx.delDia[e.exId] = true; });
       equilibrarBrazo(ses, ctx, obj, sexo, minutos, edad.calentamiento);
     });
-    cuadrarVolumen(sesiones, objetivoSeries, minutos, edad.calentamiento);
-    /* El orden es lo último que se toca, cuando ya se sabe qué ejercicios se
-       quedan en la sesión. */
+    /* El orden, antes de repartir series.
+
+       Estaba al final, con el argumento de que no se puede ordenar hasta saber
+       qué ejercicios se quedan —cierto—, pero eso lo decide recortarATiempo,
+       que ya ha pasado. Cuadrar el volumen sin saber el orden es el que dejaba
+       la hoja subiendo al final: no sabía qué tenía delante cada ejercicio. */
     sesiones.forEach(function (ses) {
       ses.ejercicios = agruparPorMusculo(ses.ejercicios);
+      bajarEscalones(ses, edad.calentamiento);
+    });
+    cuadrarVolumen(sesiones, objetivoSeries, minutos, edad.calentamiento);
+    /* Y el nombre al final de todo, cuando la hoja ya no se mueve. */
+    sesiones.forEach(function (ses) {
+      ses.zonas = zonasDeSesion(ses.ejercicios);
+      ses.nombre = nombreSesion(ses);
     });
 
     /* Las dos cuentas se rehacen sobre el plan ya cuadrado: las de antes eran
@@ -846,7 +885,8 @@
     const cfg = obj.accesorio;
     const candidato = {
       exId: ex.id, patron: hueco.patron, musculo: falta, rol: 'accesorio',
-      sets: cfg.series, reps: repsRedondas(cfg.reps + sexo.repsExtra), weight: 0,
+      sets: cfg.series, reps: repsRedondas(cfg.reps + sexo.repsExtra),
+      repsMin: repsAbajo(repsRedondas(cfg.reps + sexo.repsExtra)), weight: 0,
       rest: Math.round(cfg.rest * sexo.descanso / 5) * 5,
       note: T('Entra para que el brazo lleve lo mismo por los dos lados.')
     };
@@ -884,7 +924,28 @@
       ? Math.max(6, Math.round(meta * 0.5)) : meta;
   }
 
-  const TOPE_SERIES = 5;
+  /* Cuántas series puede llegar a llevar un ejercicio después de cuadrar el
+     volumen. Es una serie por encima de lo que pide su rol, y no un tope
+     único para todos.
+
+     Con un tope único de cinco, cuadrar el volumen llenaba el día entero
+     hasta arriba y el martes salía 5-5-5-5-5-4: veintinueve series, y cinco de
+     ellas de curl martillo. La forma se perdía —un día plano no es un día que
+     baja— y el número dejaba de ser creíble, porque a nadie le pone su
+     entrenador cinco series de curl martillo.
+
+     Así el básico puede llegar a cinco y el accesorio a cuatro, que es el
+     margen que de verdad hay, y el volumen que falte se busca en otro día o
+     se queda sin cubrir y el auditor lo dice.
+
+     Probé dejar que el accesorio de delante llegara también a cinco cuando el
+     anterior lleva cinco —la forma seguía bajando, así que era gratis— y
+     medí: sesenta y tres series más en los 144 planes, misma nota y los
+     mismos músculos cortos. No lo compraba nada, así que fuera: un
+     condicional que no mueve ningún número es deuda. */
+  function topeDe(e) {
+    return e.rol === 'principal' ? 5 : 4;
+  }
 
   /* Los que comprimen la columna con el peso encima. Misma lista que usa el
      auditor: si cada uno tiene la suya, acaban discutiendo. */
@@ -897,7 +958,59 @@
   const FUNDAMENTALES = ['sentadilla', 'bisagra de cadera', 'empuje horizontal',
     'empuje vertical', 'traccion horizontal', 'traccion vertical'];
 
+  /* La hoja se lee de arriba abajo y va de más a menos.
+
+     Agrupar por músculo puede dejar un básico detrás de un accesorio
+     compuesto —un press de hombros a cuatro series después de un jalón a
+     tres— y entonces el día sube al final, que es justo lo contrario de lo
+     que pasa en el gimnasio: a la séptima serie se llega más cansado que a la
+     primera, y la hoja tiene que decirlo.
+
+     Baja lo que sobresale, nunca por debajo de las tres series del accesorio,
+     y se hace ANTES de cuadrar el volumen para que las series que suelta se
+     coloquen en otro sitio en lugar de perderse. */
+  function bajarEscalones(ses, calentamiento) {
+    for (let i = 1; i < ses.ejercicios.length; i++) {
+      const e = ses.ejercicios[i];
+      const previo = ses.ejercicios[i - 1].sets;
+      if (e.sets > previo) e.sets = Math.max(3, previo);
+    }
+    ses.minutos = duracion(ses.ejercicios, calentamiento);
+  }
+
+  /* Qué hay que subir para darle una serie más al ejercicio número i sin que
+     la hoja deje de bajar. Devuelve la lista de ejercicios a subir, o null si
+     no se puede.
+
+     Hace falta porque la cola de un día es plana a propósito —los accesorios
+     van todos a tres— y en una cola plana ningún ejercicio puede crecer solo:
+     a cada uno lo frena el de delante, que lleva lo mismo. Medí el efecto en
+     un plan de cuatro días y setenta y cinco minutos: bíceps, tríceps y
+     abdomen se quedaban en seis series de quince con el día a 67 minutos de
+     75 y ningún ejercicio en su tope. Sitio había; lo que no había era forma
+     de usarlo.
+
+     Así que se sube el bloque entero: el ejercicio y todos los de delante que
+     lleven lo mismo. Sale más caro en minutos y arregla varios músculos de
+     una vez, que es exactamente lo que hace alguien con una hora y cuarto y un
+     plan de cuatro días. */
+  function bloqueQueSube(ses, i) {
+    const objetivo = ses.ejercicios[i].sets + 1;
+    const lista = [];
+    for (let k = i; k >= 0; k--) {
+      const e = ses.ejercicios[k];
+      /* En cuanto uno ya lleva lo que queremos, la forma se mantiene sola. */
+      if (e.sets >= objetivo) break;
+      if (e.sets + 1 > topeDe(e)) return null;
+      lista.push(e);
+    }
+    return lista.length ? lista : null;
+  }
+
   function cuadrarVolumen(sesiones, meta, minutos, calentamiento) {
+    /* Los sitios donde ya se probó y no cabía, para no volver a intentarlo en
+       cada vuelta. */
+    const vetados = {};
     /* Hasta cincuenta ajustes: con una sesión llena el bucle se para solo
        mucho antes, y el tope está para que un plan raro no lo deje colgado. */
     for (let vuelta = 0; vuelta < 50; vuelta++) {
@@ -912,40 +1025,56 @@
         });
       });
 
-      /* El más corto respecto a lo suyo, no el más corto en absoluto. */
-      let peorM = null, peorD = 0;
-      Object.keys(directas).forEach(function (m) {
-        const d = metaDe(m, meta) - directas[m];
-        if (d > peorD) { peorD = d; peorM = m; }
-      });
-      if (!peorM) return;
+      /* Los más cortos respecto a lo suyo, no los más cortos en absoluto, y
+         por orden de falta.
+
+         Antes se cogía solo el peor y, si a ese no se le podía sumar nada, el
+         bucle se paraba del todo: un músculo sin hueco dejaba sin cuadrar a
+         los otros once. Ahora si el peor no tiene dónde crecer se prueba el
+         siguiente, y solo se para cuando no cabe una serie en ninguna parte. */
+      const faltan = Object.keys(directas).map(function (m) {
+        return { m: m, d: metaDe(m, meta) - directas[m] };
+      }).filter(function (x) { return x.d > 0; })
+        .sort(function (a, b) { return b.d - a.d; });
+      if (!faltan.length) return;
 
       /* Dónde sumarle la serie: en la sesión que aún tenga hueco de tiempo, y
          dentro de ella en el ejercicio de ese músculo que menos series lleve.
          Así crece el accesorio antes que el básico, que es lo sensato: cinco
          series de sentadilla pesada no se llevan igual que cinco de curl. */
       let mejor = null;
-      sesiones.forEach(function (ses) {
-        if (ses.minutos >= minutos) return;
-        ses.ejercicios.forEach(function (e) {
-          if (e.sets >= TOPE_SERIES) return;
-          const ex = Data.get(e.exId);
-          const suyos = (ex && ex.primaryMuscles && ex.primaryMuscles.length)
-            ? ex.primaryMuscles : [e.musculo];
-          if (suyos.indexOf(peorM) === -1) return;
-          if (!mejor || e.sets < mejor.e.sets) mejor = { ses: ses, e: e };
+      faltan.some(function (f) {
+        sesiones.forEach(function (ses) {
+          if (ses.minutos >= minutos) return;
+          ses.ejercicios.forEach(function (e, i) {
+            const ex = Data.get(e.exId);
+            const suyos = (ex && ex.primaryMuscles && ex.primaryMuscles.length)
+              ? ex.primaryMuscles : [e.musculo];
+            if (suyos.indexOf(f.m) === -1) return;
+            if (vetados[ses.dia + '|' + i]) return;
+            const bloque = bloqueQueSube(ses, i);
+            if (!bloque) return;
+            if (!mejor || e.sets < mejor.e.sets) {
+              mejor = { ses: ses, i: i, e: e, bloque: bloque };
+            }
+          });
         });
+        return !!mejor;
       });
       if (!mejor) return;
 
-      mejor.e.sets++;
+      mejor.bloque.forEach(function (e) { e.sets++; });
       mejor.ses.minutos = duracion(mejor.ses.ejercicios, calentamiento);
-      /* Si al sumarla se pasa del tiempo, se deshace y se deja estar: el plan
-         tiene que caber en lo que has dicho que tienes. */
+      /* Si al sumarla se pasa del tiempo, se deshace y se veta ESE sitio, no
+         el plan entero.
+
+         Antes aquí había un return y cuadrar se paraba del todo en cuanto un
+         sitio no cabía, aunque en otro día sobrara media hora. Un bloque de
+         tres cuesta tres series; a lo mejor no cabe, y el de al lado de una sí. */
       if (mejor.ses.minutos > minutos) {
-        mejor.e.sets--;
+        mejor.bloque.forEach(function (e) { e.sets--; });
         mejor.ses.minutos = duracion(mejor.ses.ejercicios, calentamiento);
-        return;
+        vetados[mejor.ses.dia + '|' + mejor.i] = true;
       }
     }
   }
@@ -1330,9 +1459,63 @@
   /* El nombre de una sesión, en el idioma de ahora. El día y la plantilla
      viajan aparte dentro de la sesión, así que se rehace al leerlo; si viene de
      un plan viejo que no los lleva, se usa lo que se guardó. */
+  /* El nombre del día, dicho en músculos.
+
+     «Empuje» y «Tracción» es como se llaman los patrones por dentro, pero
+     fuera no dicen nada: hay que saber de gimnasio para traducir «tracción»
+     a «espalda y bíceps». Y el nombre del día es lo primero que se lee de la
+     hoja, y en el calendario es lo único que se ve.
+
+     Se saca de lo que hay colocado y no de la plantilla, así que no puede
+     mentir: si el día acabó sin tríceps porque no cabía, no lo nombra. El
+     orden es el de la propia hoja —manda el primer ejercicio de cada
+     músculo—, que es el que ya decidió agruparPorMusculo.
+
+     Bíceps y tríceps van sueltos en vez de como «brazo»: «espalda y bíceps»
+     es como se llama ese día en todas partes, y «espalda y brazo» no.
+
+     Con más de tres zonas se queda el nombre de la plantilla: «Pecho,
+     espalda, hombro, bíceps y tríceps» no es un nombre, es un inventario, y
+     para eso ya está «Tren superior», que se entiende sin saber jerga. */
+  const ZONA_SUELTA = { biceps: 1, triceps: 1 };
+
+  function zonasDeSesion(ejercicios) {
+    const vistas = [];
+    (ejercicios || []).forEach(function (e) {
+      const z = ZONA_SUELTA[e.musculo] ? e.musculo : grupoDe(e.musculo);
+      if (z && vistas.indexOf(z) === -1) vistas.push(z);
+    });
+    return vistas.length && vistas.length <= 3 ? vistas : null;
+  }
+
+  /* Se guardan las claves y se traducen al pintar, no al generar: si no, un
+     plan hecho en español seguía en español al cambiar de idioma. */
+  function etiquetaZona(z) {
+    if (ZONA_SUELTA[z]) return I18N.muscle(z);
+    const gr = ((g.I18N && I18N.GROUPS) || []).filter(function (x) {
+      return x.id === z;
+    })[0];
+    return gr ? T(gr.label) : z;
+  }
+
+  function unirZonas(zonas) {
+    const t = zonas.map(etiquetaZona);
+    /* En medio de la frase va en minúscula, en los dos idiomas. */
+    const baja = function (s) {
+      return s ? s.charAt(0).toLocaleLowerCase() + s.slice(1) : s;
+    };
+    if (t.length === 1) return t[0];
+    if (t.length === 2) return Tn('{a} y {b}', { a: t[0], b: baja(t[1]) });
+    return Tn('{a}, {b} y {c}', { a: t[0], b: baja(t[1]), c: baja(t[2]) });
+  }
+
   function nombreSesion(s) {
     if (!s) return '';
-    if (!s.dia || !s.plantilla) return s.nombre || '';
+    if (!s.dia) return s.nombre || '';
+    if (s.zonas && s.zonas.length) {
+      return UI.diaLargo(s.dia) + ' · ' + unirZonas(s.zonas);
+    }
+    if (!s.plantilla) return s.nombre || '';
     return UI.diaLargo(s.dia) + ' · ' + T(s.plantilla);
   }
 
@@ -1348,7 +1531,8 @@
           ' · calienta ' + prog.calentamiento + ' min antes.',
         days: [s.dia],
         exercises: s.ejercicios.map(function (e) {
-          return { exId: e.exId, sets: e.sets, reps: e.reps, weight: 0, rest: e.rest, note: e.note };
+          return { exId: e.exId, sets: e.sets, reps: e.reps, repsMin: e.repsMin || 0,
+            weight: 0, rest: e.rest, note: e.note };
         })
       };
     });

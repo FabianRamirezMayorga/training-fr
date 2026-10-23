@@ -156,6 +156,17 @@
       ],
       ver: ['c-dias', 'c-rutina'] },
 
+    { id: 'g-hoja', titulo: 'Cómo está escrita la hoja',
+      resumen: 'El rango, la forma del día y su nombre',
+      cuerpo: [
+        'Un plan generado se nota a la primera ojeada, y casi nunca por los ejercicios: por cómo están escritos los números. Tres cosas se deciden solas para que la hoja se lea como la de un entrenador.',
+        '*Las repeticiones van en rango*: *4 × 6-8*, no *4 × 8*. Un número solo no dice qué hacer el día que salen nueve. El rango lleva la regla dentro: te mueves dentro de él y, cuando llegas arriba en todas las series, sube el peso. El techo es el número que usa la progresión para decidir si has cumplido, así que el rango no cambia ningún cálculo; solo dice lo que ya había.',
+        'Y un rango de verdad cae en los números de siempre —5, 6, 8, 10, 12, 15, 20—. Nadie pone 3 × 13: los números de en medio salen de hacer cuentas y delatan a la máquina en cada línea.',
+        '*El día baja, nunca sube*: ningún ejercicio lleva más series que el que tiene delante. A la séptima serie se llega más cansado que a la primera, y la hoja tiene que decirlo. El básico puede llegar a cinco series y el accesorio a cuatro, así que no verás cinco series de curl martillo al cierre de un día que abre con ocho de press.',
+        '*El día se llama por sus músculos*: «Pecho, hombro y tríceps», no «Empuje». «Empuje» y «tracción» es como se llaman los patrones por dentro, pero hay que saber de gimnasio para traducir «tracción» a «espalda y bíceps». El nombre sale de lo que hay colocado de verdad, así que no puede mentir: si el día acabó sin tríceps porque no cabía, no lo nombra. Cuando son más de tres músculos se queda el nombre de siempre —«Tren superior», «Cuerpo completo»—, porque una lista de cinco no es un nombre.'
+      ],
+      ver: ['c-rutina', 'g-plan', 'g-peso'] },
+
     { id: 'g-nota', titulo: 'La nota de tu plan',
       resumen: 'De dónde sale y por qué no la pone una IA',
       cuerpo: [
@@ -808,6 +819,31 @@
         'Y porque ya no hay que fiarse: arriba de la lista salen las tres cifras al día, lo que trae frente a lo que pide tu menú, sumadas por la app. Si la proteína se queda por debajo del 85 %, te lo dice en ámbar y te sugiere rehacerla.',
         'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.'],
       ver: ['c-compra'] },
+
+    { id: 'p-rango', q: '¿Por qué pone 4 × 6-8 y no 4 × 8?',
+      a: ['Porque un número solo no te dice qué hacer cuando hoy salen nueve, ni cuándo subir el peso. El rango sí: te mueves dentro de él y, el día que llegas arriba en todas las series, subes.',
+        'El techo del rango es el número que había antes, el mismo que mira la progresión para decidir si has cumplido. Así que no has perdido nada ni se calcula nada distinto: lo que se ha ganado es que la hoja ahora dice la regla en vez de callarla.',
+        'Y al apuntar, una serie dentro del rango ya no sale marcada como corregida. Diez repeticiones cuando la hoja pide 10-12 no es haberla cambiado: es estar dentro.',
+        'Donde no hay rango es porque no lo hay: un 5 × 5 de fuerza es un 5 × 5, y una plancha lleva segundos, no repeticiones. Y si cambias las repeticiones a mano, el rango se va: lo que has escrito es un número tuyo, no el techo de nada.'],
+      ver: ['g-hoja', 'g-peso'] },
+
+    { id: 'p-nombredia', q: '¿Por qué mi día ya no se llama «Empuje»?',
+      a: ['Porque ahora se llama por lo que entrena: «Pecho, hombro y tríceps». «Empuje» es correcto y es como se llama el patrón por dentro, pero hay que saber de gimnasio para traducirlo, y el nombre del día es lo primero que se lee de la hoja —en el calendario es lo único que se ve—.',
+        'El nombre sale de los ejercicios que acabaron en el día, no de la plantilla, así que no puede mentir: si el tríceps se cayó por falta de tiempo, el nombre no lo pone.',
+        'Cuando el día toca más de tres músculos se queda el nombre de antes —«Tren superior», «Cuerpo completo A»—: «Pecho, espalda, hombro, bíceps y tríceps» no es un nombre, es un inventario.'],
+      ver: ['g-hoja', 'g-plan'] },
+
+    { id: 'p-formadia', q: '¿Por qué los últimos ejercicios del día llevan menos series?',
+      a: ['Porque a la séptima serie se llega más cansado que a la primera, y la hoja tiene que decirlo. El básico va primero y es el que más series lleva; a partir de ahí el día baja y nunca vuelve a subir.',
+        'Antes no era así, y no por decisión: al cuadrar el volumen semanal la app sumaba series donde faltaban sin mirar el orden, y salían días de 4-4-3-3-4-4. Ocho series de tríceps al cierre de un día que ya abre con ocho de press, y leído de arriba abajo parece que el plan se anima al final.',
+        'El volumen semanal sigue cuadrándose igual: lo que cambió es dónde se pone. Si la cola del día está plana —tres accesorios a tres series— y hace falta volumen, suben los tres juntos, que es lo que hace cualquiera con tiempo de sobra.'],
+      ver: ['g-hoja', 'g-reparto'] },
+
+    { id: 'p-coreenpierna', q: '¿Por qué el día de pierna acaba con un abdominal?',
+      a: ['Porque el abdomen trabaja de verdad el día que más peso mueves, y porque al final de un día de pierna ya no queda fuerza para nada pesado pero sí para esto. Sale en uno de cada cuatro días de pierna, no en todos.',
+        'Lo que sí cambió es cuál. Antes era trabajo de antirrotación y salía un Bird-Dog: perfecto en una consulta de fisioterapia y flojo detrás de una sentadilla y un peso muerto. Ahora es flexión de tronco —elevaciones de cadera o de piernas—, que es trabajo de abdomen de gimnasio y progresa añadiendo recorrido o peso, como el resto de la hoja.',
+        'La antirrotación no desapareció: se queda en los días de cuerpo completo, donde sí pega.'],
+      ver: ['g-hoja', 'g-reparto'] },
 
     { id: 'p-olimpicos', q: '¿Por qué el plan nunca me pone cargadas ni arrancadas?',
       a: ['Porque no se pueden proponer a ciegas. Una cargada o una arrancada se aprenden con alguien delante: mal hechas no es que rindan menos, es que se cobran la espalda o el hombro. Proponerlas de primer ejercicio del día, con cuatro series pesadas y sin que nadie te mire, es la clase de sugerencia que no se puede hacer por pantalla.',

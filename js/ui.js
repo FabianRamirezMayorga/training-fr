@@ -463,6 +463,15 @@
     return (g.Idioma && Idioma.actual() === 'en') ? t : t.replace('.', ',');
   }
 
+  /* «6-8» cuando la rutina trae rango, y el número a secas cuando no: un
+     estático lleva segundos, y una rutina escrita a mano no tiene rango
+     porque nadie se lo ha pedido. */
+  function reps(e) {
+    const r = Number((e && e.reps) || 0);
+    const min = Number((e && e.repsMin) || 0);
+    return min && min < r ? min + '–' + r : String(r);
+  }
+
   function kg(n) {
     return num(n) + ' ' + (Store.settings().unit === 'lb' ? 'lb' : 'kg');
   }
@@ -1148,7 +1157,7 @@
     deslizables: deslizables, cerrarDeslizadas: cerrarDeslizadas,
     toast: toast, modal: modal, closeModal: closeModal, confirm: confirm,
     rodillo: rodillo, alFinal: alFinal,
-    num: num, dec: dec, kg: kg, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
+    num: num, dec: dec, kg: kg, reps: reps, mmss: mmss, fecha: fecha, fechaCorta: fechaCorta,
     diaCorto: diaCorto,
     beep: beep, DAY_NAMES: DAY_NAMES, diaLargo: diaLargo, diasLargos: diasLargos,
     claveDeDia: claveDeDia,

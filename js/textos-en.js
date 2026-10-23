@@ -2183,6 +2183,7 @@
     'Espalda': 'Back',
     'Brazo': 'Arms',
     'Core': 'Core',
+    '{a}, {b} y {c}': '{a}, {b} and {c}',
 
     /* ---------- Objetivos: la pantalla ---------- */
     'Se actualizan solos con lo que entrenas y con tus pesajes. No hay que apuntar nada a mano.':

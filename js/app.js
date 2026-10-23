@@ -2045,7 +2045,7 @@
                   <img src="${ex ? Data.img(ex, 0) : Data.PLACEHOLDER}" alt="" loading="lazy">
                   <div class="grow">
                     <div style="font-weight:600;font-size:.85rem">${k + 1}. ${ex ? ex.nameEs : re.exId}</div>
-                    <div class="tiny">${re.sets} × ${re.reps}${raw(ex && ex.primaryMuscles.length
+                    <div class="tiny">${re.sets} × ${UI.reps(re)}${raw(ex && ex.primaryMuscles.length
                       ? ' · ' + esc(ex.primaryMuscles.map(I18N.muscle).join(', ')) : '')}</div>
                   </div>
                 </button>`;
@@ -3002,7 +3002,7 @@
               <img src="${ex ? Data.img(ex, 0) : Data.PLACEHOLDER}" alt="" loading="lazy">
               <div class="grow">
                 <div style="font-weight:600;font-size:.86rem">${ex ? ex.nameEs : e.exId}</div>
-                <div class="tiny">${I18N.muscle(e.muscle)} · ${e.sets}×${e.reps}${raw(
+                <div class="tiny">${I18N.muscle(e.muscle)} · ${e.sets}×${UI.reps(e)}${raw(
                   ex ? ' · ' + esc(I18N.equip(ex.equipment)) : '')}</div>
               </div>
             </div>`;
@@ -5453,7 +5453,7 @@
                       <img src="${ex ? Data.img(ex, 0) : Data.PLACEHOLDER}" alt="" loading="lazy">
                       <div class="grow">
                         <div style="font-weight:600;font-size:.84rem">${ex ? ex.nameEs : re.exId}</div>
-                        <div class="tiny">${re.sets} × ${re.reps} · ${Tn('descanso {n}s',
+                        <div class="tiny">${re.sets} × ${UI.reps(re)} · ${Tn('descanso {n}s',
                           { n: re.rest })} ·
                           ${ex ? I18N.muscle(ex.primaryMuscles[0]) : ''}</div>
                       </div>
@@ -5722,7 +5722,7 @@
                 <img src="${Data.img(x.ex, 0)}" alt="" loading="lazy">
                 <div class="grow">
                   <div style="font-weight:600;font-size:.86rem">${i + 1}. ${x.ex.nameEs}</div>
-                  <div class="tiny">${x.fila.sets} × ${x.fila.reps} ·
+                  <div class="tiny">${x.fila.sets} × ${UI.reps(x.fila)} ·
                     ${Tn('descanso {n}s', { n: x.fila.rest })}${raw(x.porque
                       ? ' · <span style="color:var(--acc)">' + esc(x.porque) + '</span>' : '')}</div>
                 </div>
@@ -6178,7 +6178,11 @@
     root.querySelectorAll('input[data-f]').forEach(function (inp) {
       inp.onchange = function () {
         const v = Number(inp.value) || 0;
-        draft.exercises[Number(inp.dataset.i)][inp.dataset.f] = v;
+        const fila = draft.exercises[Number(inp.dataset.i)];
+        fila[inp.dataset.f] = v;
+        /* Si cambia las reps a mano, el rango que venía del plan ya no vale:
+           lo que ha escrito es un número suyo, no el techo de nada. */
+        if (inp.dataset.f === 'reps') fila.repsMin = 0;
         autoguardar();
       };
     });
