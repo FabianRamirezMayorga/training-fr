@@ -215,6 +215,56 @@
     return r;
   }
 
+  /* ---------- nombres escritos, no traducidos ----------
+
+     El catálogo de fuera trae su español hecho a máquina palabra por palabra,
+     y en los nombres largos se nota: «Elevación de deltoides brazo above
+     cabeza de pie recto frontal con mancuernas» —setenta y siete caracteres,
+     con un «above» sin traducir dentro—. También hay «extended range» y
+     «supinated» sueltos.
+
+     Son pocos y se arreglan a mano, que es más honrado que una regla: no hay
+     forma de deducir «pájaro» de «rear delt raise» sin saber de gimnasio.
+     Aquí van solo los que estaban rotos de verdad; un nombre largo pero bien
+     escrito se queda como está. */
+  const NOMBRES = {
+    'Standing_Dumbbell_Straight-Arm_Front_Delt_Raise_Above_Head': 'Elevación frontal por encima de la cabeza con mancuernas',
+    'Bent_Over_Dumbbell_Rear_Delt_Raise_With_Head_On_Bench': 'Pájaro con mancuernas apoyando la frente',
+    'Dumbbell_Lying_One-Arm_Rear_Lateral_Raise': 'Pájaro tumbado de lado con mancuerna',
+    'Dumbbell_Lying_Rear_Lateral_Raise': 'Pájaro tumbado boca abajo con mancuernas',
+    'Extended_Range_One-Arm_Kettlebell_Floor_Press': 'Press de suelo a un brazo con pesa rusa',
+    'One_Arm_Supinated_Dumbbell_Triceps_Extension': 'Extensión de tríceps a un brazo, palma al frente',
+    'Standing_Bent-Over_Two-Arm_Dumbbell_Triceps_Extension': 'Patada de tríceps a dos brazos de pie',
+    'Standing_Bent-Over_One-Arm_Dumbbell_Triceps_Extension': 'Patada de tríceps a un brazo de pie',
+    'Seated_Bent-Over_Two-Arm_Dumbbell_Triceps_Extension': 'Patada de tríceps a dos brazos sentado',
+    'Seated_Bent-Over_One-Arm_Dumbbell_Triceps_Extension': 'Patada de tríceps a un brazo sentado',
+    'Lying_Close-Grip_Barbell_Triceps_Extension_Behind_The_Head': 'Press francés tras la nuca con barra',
+    'Standing_One-Arm_Dumbbell_Curl_Over_Incline_Bench': 'Curl concentrado sobre banco inclinado',
+    'Seated_Two-Arm_Palms-Up_Low-Pulley_Wrist_Curl': 'Curl de muñeca en polea baja',
+    'Seated_One-Arm_Dumbbell_Palms-Down_Wrist_Curl': 'Curl de muñeca inverso con mancuerna',
+    'Seated_One-Arm_Dumbbell_Palms-Up_Wrist_Curl': 'Curl de muñeca con mancuerna',
+    'Standing_Palms-Up_Barbell_Behind_The_Back_Wrist_Curl': 'Curl de muñeca tras la espalda con barra',
+    'Dumbbell_Seated_One-Leg_Calf_Raise': 'Gemelo sentado a una pierna con mancuerna',
+    'Smith_Machine_Behind_the_Back_Shrug': 'Encogimiento tras la espalda en multipower',
+    'Palms-Up_Barbell_Wrist_Curl_Over_A_Bench': 'Curl de muñeca sobre banco con barra',
+    'Seated_Bent-Over_Rear_Delt_Raise': 'Pájaro sentado con mancuernas',
+    'Lying_Rear_Delt_Raise': 'Pájaro tumbado boca abajo',
+    'Barbell_Rear_Delt_Row': 'Remo al cuello para deltoides posterior',
+    'Cable_Rope_Rear-Delt_Rows': 'Remo a la cara en polea',
+    'Hyperextensions_Back_Extensions': 'Extensión lumbar en banco',
+    'Hyperextensions_With_No_Hyperextension_Bench': 'Extensión lumbar en el suelo',
+    'Full_Range-Of-Motion_Lat_Pulldown': 'Jalón al pecho con recorrido completo',
+    'Step-up_with_Knee_Raise': 'Subida al cajón con elevación de rodilla',
+    'One_Arm_Pronated_Dumbbell_Triceps_Extension': 'Extensión de tríceps a un brazo, agarre prono',
+    'Dumbbell_Tricep_Extension_-Pronated_Grip': 'Extensión de tríceps con mancuerna, agarre prono',
+    'Hang_Snatch_-_Below_Knees': 'Arrancada colgante por debajo de la rodilla',
+    'Hang_Clean_-_Below_the_Knees': 'Cargada colgante por debajo de la rodilla',
+    'Stride_Jump_Crossover': 'Salto cruzado alterno',
+    'Chair_Leg_Extended_Stretch': 'Estiramiento de pierna estirada en silla',
+    'yoga_warrior_one': 'Guerrero I (Virabhadrasana I)',
+    'yoga_warrior_two': 'Guerrero II (Virabhadrasana II)'
+  };
+
   function prepare(raw) {
     list = raw.map(function (ex) {
       const e = Object.assign({}, ex);
@@ -231,7 +281,7 @@
 
          Sale enumerable a propósito, para que lo que se serialice —una rutina
          compartida, una copia de seguridad— siga llevando su nombre. */
-      const nombreEs = ex.nameEs || I18N.name(ex.name);
+      const nombreEs = NOMBRES[ex.id] || ex.nameEs || I18N.name(ex.name);
       Object.defineProperty(e, 'nameEs', {
         enumerable: true, configurable: true,
         get: function () {

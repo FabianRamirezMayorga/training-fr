@@ -809,6 +809,12 @@
         'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.'],
       ver: ['c-compra'] },
 
+    { id: 'p-olimpicos', q: '¿Por qué el plan nunca me pone cargadas ni arrancadas?',
+      a: ['Porque no se pueden proponer a ciegas. Una cargada o una arrancada se aprenden con alguien delante: mal hechas no es que rindan menos, es que se cobran la espalda o el hombro. Proponerlas de primer ejercicio del día, con cuatro series pesadas y sin que nadie te mire, es la clase de sugerencia que no se puede hacer por pantalla.',
+        'Esto entra también en las variantes con agarre de cargada, que son las que se colaban: una sentadilla frontal con ese agarre pide una muñeca y un hombro que casi nadie tiene.',
+        'No están prohibidos: si los entrenas, búscalos en Ejercicios y añádelos tú a la rutina. Lo que no hace la app es ponerlos por su cuenta.'],
+      ver: ['c-rutina', 'c-auditar'] },
+
     { id: 'p-retocar', q: '¿Puedo corregir o borrar un entrenamiento ya guardado?',
       a: ['Sí, con el lápiz. Está en la ficha del día —la que sale al tocar un día en Constancia— y también en cada línea del historial.',
         'Dentro puedes cambiar el peso y las repeticiones de cualquier serie, quitar una serie suelta, quitar un ejercicio entero, o borrar el entrenamiento completo. Al guardar se recalculan las series hechas y el volumen, así que las gráficas y los récords se enteran.',

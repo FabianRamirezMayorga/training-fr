@@ -1432,6 +1432,14 @@
       'It works for any workout, whether it came from a routine or was noted by hand: inside they are the same thing.',
     'Si quitas todos los ejercicios te pregunta si lo que quieres es borrarlo, porque un entrenamiento de cero series no es nada y en el historial solo estorba.':
       'If you remove every exercise it asks whether you meant to delete it, because a workout with zero sets is nothing and only gets in the way in the history.',
+    '¿Por qué el plan nunca me pone cargadas ni arrancadas?':
+      'Why does the plan never give me cleans or snatches?',
+    'Porque no se pueden proponer a ciegas. Una cargada o una arrancada se aprenden con alguien delante: mal hechas no es que rindan menos, es que se cobran la espalda o el hombro. Proponerlas de primer ejercicio del día, con cuatro series pesadas y sin que nadie te mire, es la clase de sugerencia que no se puede hacer por pantalla.':
+      'Because they cannot be suggested blind. A clean or a snatch is learned with someone watching: done badly they do not just perform worse, they cost you a back or a shoulder. Suggesting them as the first exercise of the day, four heavy sets, with nobody looking, is the kind of suggestion a screen should not make.',
+    'Esto entra también en las variantes con agarre de cargada, que son las que se colaban: una sentadilla frontal con ese agarre pide una muñeca y un hombro que casi nadie tiene.':
+      'This also covers the clean-grip variants, which were the ones slipping through: a front squat with that grip asks for a wrist and a shoulder that hardly anyone has.',
+    'No están prohibidos: si los entrenas, búscalos en Ejercicios y añádelos tú a la rutina. Lo que no hace la app es ponerlos por su cuenta.':
+      'They are not banned: if you train them, look them up under Exercises and add them to the routine yourself. What the app does not do is put them there on its own.',
     '¿Por qué la lista pone 160 g y debajo «bandeja de 500 g»?':
       'Why does the list say 160 g and then "500 g tray" underneath?',
     'Porque son dos cosas distintas y conviene ver las dos. El primero es lo que te vas a comer, sumado de los platos. El segundo es cómo lo vende la tienda, que casi nunca coincide.':

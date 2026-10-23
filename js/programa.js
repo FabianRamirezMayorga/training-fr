@@ -38,15 +38,15 @@
       resumen: 'Se mantiene la carga alta para conservar músculo y se acorta el ' +
         'descanso; la grasa la quita el déficit de calorías, no las mancuernas ligeras.',
       principal: { series: 4, reps: 8, rest: 90 },
-      accesorio: { series: 3, reps: 14, rest: 50 },
+      accesorio: { series: 3, reps: 15, rest: 50 },
       rpe: 8, volumen: 0.9, cardio: true
     },
     mantener: {
       label: 'Tonificar y mantenerme',
       resumen: 'Recomposición: mismo trabajo de fuerza con algo más de repeticiones ' +
         'y algo de acondicionamiento.',
-      principal: { series: 4, reps: 9, rest: 105 },
-      accesorio: { series: 3, reps: 13, rest: 60 },
+      principal: { series: 4, reps: 10, rest: 105 },
+      accesorio: { series: 3, reps: 12, rest: 60 },
       rpe: 8, volumen: 0.95, cardio: true
     },
     fuerza: {
@@ -58,6 +58,33 @@
       rpe: 8, volumen: 0.85, cardio: false
     }
   };
+
+  /* Las repeticiones que escribe una persona.
+
+     Nadie pone 3x13. Se pone 3x12, o 3x15, o 3x10. Los números de en medio
+     salen de hacer cuentas —una base más un ajuste— y delatan a la máquina
+     en cada línea de la hoja: medido sobre 3.351 colocaciones, casi la mitad
+     caían en 9, 13 o 14.
+
+     No es cosmetica. Una hoja que pone 3x13 se lee como generada, y lo que se
+     lee como generado no se sigue. Los rangos de verdad son los de siempre y
+     caben en siete números; la diferencia entre 13 y 12 no la nota ningún
+     músculo, y la de leerlo sí.
+
+     Se aplica al final, cuando ya se han sumado todos los ajustes, para que
+     ninguno pueda volver a sacar un número raro por detrás. */
+  const REPS_REALES = [5, 6, 8, 10, 12, 15, 20];
+
+  function repsRedondas(n) {
+    n = Math.round(Number(n) || 0);
+    if (n <= 0) return 0;
+    return REPS_REALES.reduce(function (mejor, r) {
+      /* A igual distancia gana el de abajo: 11 es 10 y no 12. Subir
+         repeticiones baja la carga, y de las dos equivocaciones posibles esa
+         es la que estropea el estímulo. */
+      return Math.abs(r - n) < Math.abs(mejor - n) ? r : mejor;
+    }, REPS_REALES[0]);
+  }
 
   /* ---------- 2. La edad manda en la recuperación ---------- */
   function porEdad(edad) {
@@ -399,9 +426,33 @@
     return 0;
   }
 
+  /* Levantamientos olímpicos y sus derivados.
+
+     El auditor ya los descartaba, y el catálogo que se le enseña a la IA
+     también. El único que no: el que monta el plan. Resultado medido sobre
+     144 planes: «Sentadilla frontal clean agarre» abría el día de pierna 72
+     veces. Es una sentadilla frontal con agarre de cargada, y ese agarre pide
+     una muñeca y un hombro que casi nadie tiene; de primer ejercicio del día,
+     con cuatro series pesadas, no es exigente: es una lesión esperando.
+
+     No se vetan del todo —quien los quiera puede buscarlos—, pero no los
+     propone la app sola. */
+  const OLIMPICOS = new RegExp([
+    'clean', 'snatch', 'jerk', 'arrancada', 'cargada', 'dos tiempos',
+    'muscle snatch', 'power ', 'envion'
+  ].join('|'), 'i');
+
+  function esOlimpico(ex) {
+    const n = (ex.nameEs || '') + ' ' + (ex.name || '');
+    return OLIMPICOS.test(n);
+  }
+
   function puntuar(ex, hueco, usados) {
     let s = 0;
     const p = Alt.patron(ex);
+    /* Tan grande que no lo remonta ningún bonus: solo entra si literalmente
+       no queda ningún otro ejercicio para ese hueco. */
+    if (esOlimpico(ex)) s -= 400;
     if (p === hueco.patron) s += 60;
     /* El músculo del hueco tiene que ser de los que el ejercicio entrena de
        verdad. Sin castigo por no estar, una «elevación de cadera en máquina
@@ -556,7 +607,9 @@
 
         const cfg = obj[hueco.rol];
         const estatico = ex.force === 'static';
-        const reps = estatico ? 40 : cfg.reps + (hueco.rol === 'accesorio' ? sexo.repsExtra : 0);
+        /* Los estáticos llevan segundos, no repeticiones: ese 40 no se toca. */
+        const reps = estatico ? 40
+          : repsRedondas(cfg.reps + (hueco.rol === 'accesorio' ? sexo.repsExtra : 0));
         let rest = Math.round(cfg.rest * (hueco.rol === 'accesorio' ? sexo.descanso : 1) / 5) * 5;
         /* Dos minutos como mínimo en lo que carga la columna. El objetivo de
            hipertrofia pone noventa segundos a todo, y noventa en una sentadilla
@@ -608,7 +661,7 @@
           sumarVolumen(volumen, ex, m, cfg.series, directas);
           ejercicios.push({
             exId: ex.id, patron: Alt.patron(ex), musculo: m, rol: 'accesorio',
-            sets: cfg.series, reps: cfg.reps + sexo.repsExtra, weight: 0,
+            sets: cfg.series, reps: repsRedondas(cfg.reps + sexo.repsExtra), weight: 0,
             rest: Math.round(cfg.rest * sexo.descanso / 5) * 5,
             note: T('Entra para que el día no se quede corto con el material que tienes.')
           });
@@ -793,7 +846,7 @@
     const cfg = obj.accesorio;
     const candidato = {
       exId: ex.id, patron: hueco.patron, musculo: falta, rol: 'accesorio',
-      sets: cfg.series, reps: cfg.reps + sexo.repsExtra, weight: 0,
+      sets: cfg.series, reps: repsRedondas(cfg.reps + sexo.repsExtra), weight: 0,
       rest: Math.round(cfg.rest * sexo.descanso / 5) * 5,
       note: T('Entra para que el brazo lleve lo mismo por los dos lados.')
     };
