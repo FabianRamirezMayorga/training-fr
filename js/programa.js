@@ -356,6 +356,33 @@
       h(P.trV, 'lats', 'principal'), h(P.trH, 'middle back', 'principal'),
       h(P.trH, 'lats', 'accesorio'), h(P.cbi, 'biceps', 'accesorio'),
       h(P.cbi, 'biceps', 'accesorio'), h(P.lum, 'lower back', 'accesorio')] },
+    /* El día de hombro y brazo, y su pareja.
+
+       En el reparto normal de cinco días los brazos van siempre colgados al
+       final de un día de empuje o de tracción, nunca solos. Eso hace que la
+       semana se lea como tres días estirados a cinco en vez de cinco días
+       distintos, y es la diferencia que se nota al comparar con cualquier
+       rutina de gimnasio escrita por una persona.
+
+       Los tres huecos de hombro no son un error: hombroQueToca reparte entre
+       lateral, posterior y frontal según lo que ya haya trabajado ese día, y
+       aquí detrás de un press militar tocan la lateral y la posterior, que es
+       justo la que va corta en casi cualquier plan. */
+    hombroBrazo: { nombre: 'Hombro y brazo', huecos: [
+      h(P.emV, 'shoulders', 'principal'), h(P.lat, 'shoulders', 'accesorio'),
+      h(P.lat, 'shoulders', 'accesorio'), h(P.cbi, 'biceps', 'accesorio'),
+      h(P.etr, 'triceps', 'accesorio'), h(P.cbi, 'biceps', 'accesorio'),
+      h(P.etr, 'triceps', 'accesorio')] },
+
+    /* El quinto día recoge lo que el día de brazo deja sin segunda vuelta:
+       pecho, dorsal y la pierna que no cabe en un solo día. Sin este día, dar
+       un día entero al brazo dejaría al cuádriceps y al pecho a una sola vez
+       por semana, que es lo que la app lleva diciendo que hay que evitar. */
+    torsoPierna: { nombre: 'Torso y pierna', huecos: [
+      h(P.emH, 'chest', 'principal'), h(P.trV, 'lats', 'principal'),
+      h(P.zan, 'quadriceps', 'accesorio'), h(P.cad, 'glutes', 'accesorio'),
+      h(P.cuf, 'hamstrings', 'accesorio'), h(P.abd, 'abdominals', 'accesorio')] },
+
     pierna: { nombre: 'Pierna', huecos: [
       h(P.sen, 'quadriceps', 'principal'), h(P.bis, 'hamstrings', 'principal'),
       h(P.cad, 'glutes', 'accesorio'), h(P.exc, 'quadriceps', 'accesorio'),
@@ -365,7 +392,7 @@
   /* Qué se hace cada día según cuántos días se entrene. Dos estímulos por
      semana en cada músculo es lo que más rinde, así que hasta cuatro días
      manda el cuerpo completo o el torso/pierna, no el músculo por día. */
-  function repartoSemanal(dias) {
+  function repartoSemanal(dias, foco) {
     if (dias <= 1) return ['fullUnico'];
     if (dias === 2) return ['fullA', 'fullB'];
     /* Tres días es cuerpo completo para todo el mundo, no solo para novatos.
@@ -381,7 +408,20 @@
        empuje salían 18 series de pecho contra 5 de espalda media; con uno de
        tracción, el doble de espalda que de pecho—, porque añadir un día
        entero de una mitad del cuerpo nunca sale gratis. */
-    if (dias === 5) return ['empuje', 'traccion', 'pierna', 'superior', 'inferior'];
+    if (dias === 5) {
+      /* Con el foco puesto en el hombro o en el brazo, el cuarto día es suyo
+         entero en vez de un ejercicio extra colgado al final.
+
+         El foco solo añadía un accesorio, que para «quiero brazo» es muy poco:
+         un curl más no cambia una semana. Aquí sí, y se paga: el cuádriceps
+         pasa de dos días a dos huecos repartidos entre el día de pierna y el
+         de torso, y los gemelos se quedan a una vez. Es el cambio que hace
+         cualquier rutina con día de brazo, y por eso va detrás de pedirlo. */
+      if (foco === 'brazo' || foco === 'hombro') {
+        return ['empuje', 'traccion', 'pierna', 'hombroBrazo', 'torsoPierna'];
+      }
+      return ['empuje', 'traccion', 'pierna', 'superior', 'inferior'];
+    }
     return ['empuje', 'traccion', 'pierna', 'empuje', 'traccion', 'pierna'];
   }
 
@@ -594,9 +634,10 @@
     const objetivoSeries = Math.max(VOLUMEN_MIN, Math.min(VOLUMEN_MAX, Math.round(
       (VOLUMEN_BASE[experiencia] || 15) * obj.volumen * edad.factor)));
 
-    const plantillas = repartoSemanal(dias.length);
-    const porSesion = cabenEn(minutos, obj, edad.calentamiento);
     const foco = opts.foco || 'equilibrado';
+    const plantillas = repartoSemanal(dias.length, foco);
+    const focoConDia = plantillas.indexOf('hombroBrazo') !== -1;
+    const porSesion = cabenEn(minutos, obj, edad.calentamiento);
 
     const usados = {};
     const ctx = { gear: gear, r: r, maxNivel: maxNivel, usados: usados,
@@ -609,8 +650,14 @@
       const plantilla = DIAS[plantillas[i % plantillas.length]];
       let huecos = plantilla.huecos.slice();
 
-      /* el énfasis elegido añade un hueco extra de esa zona */
-      if (foco !== 'equilibrado') huecos = aplicarFoco(huecos, foco);
+      /* El énfasis elegido añade un hueco extra de esa zona, salvo cuando el
+         reparto ya le ha dado un día entero: entonces sumar además un curl al
+         día de empuje es meter bíceps donde no pinta nada, y de paso dejaba ese
+         día con cuatro músculos y sin nombre legible —volvía a llamarse
+         «Empuje»—. Quien pide brazo ya tiene su día de brazo. */
+      if (foco !== 'equilibrado' && !focoConDia) {
+        huecos = aplicarFoco(huecos, foco);
+      }
 
       /* No se recorta por un número estimado: se monta la plantilla entera y
          luego manda el reloj. `cabenEn` calculaba los huecos al precio de un
@@ -723,16 +770,9 @@
        qué ejercicios se quedan —cierto—, pero eso lo decide recortarATiempo,
        que ya ha pasado. Cuadrar el volumen sin saber el orden es el que dejaba
        la hoja subiendo al final: no sabía qué tenía delante cada ejercicio. */
-    sesiones.forEach(function (ses) {
-      ses.ejercicios = agruparPorMusculo(ses.ejercicios);
-      bajarEscalones(ses, edad.calentamiento);
-    });
+    sesiones.forEach(function (ses) { sanear(ses, edad.calentamiento); });
     cuadrarVolumen(sesiones, objetivoSeries, minutos, edad.calentamiento);
-    /* Y el nombre al final de todo, cuando la hoja ya no se mueve. */
-    sesiones.forEach(function (ses) {
-      ses.zonas = zonasDeSesion(ses.ejercicios);
-      ses.nombre = nombreSesion(ses);
-    });
+    sesiones.forEach(titular);
 
     /* Las dos cuentas se rehacen sobre el plan ya cuadrado: las de antes eran
        de un plan que ya no existe. */
@@ -1005,6 +1045,38 @@
       lista.push(e);
     }
     return lista.length ? lista : null;
+  }
+
+  /* ---------- las reglas de cómo se escribe una hoja ----------
+
+     Da igual quién haya elegido los ejercicios —la calculadora o la IA—: en
+     qué orden van, cómo bajan las series y cómo se escriben las
+     repeticiones es regla, no opinión. Tenerlo en dos sitios era tenerlo mal
+     en uno de los dos, y así fue: el plan montado con IA se quedó sin nada de
+     esto —sin rango, sin escala, sin forma y sin filtro— y acabó siendo el
+     que peor se leía de los tres caminos.
+
+     Va en dos trozos porque entre uno y otro hay que cuadrar el volumen:
+     sanear necesita ir antes —cuadrar no sabe bajar si no sabe el orden— y
+     el título después, cuando la hoja ya no se mueve. */
+  function sanear(ses, calentamiento) {
+    (ses.ejercicios || []).forEach(function (e) {
+      const ex = Data.get(e.exId);
+      /* Los estáticos llevan segundos, no repeticiones: ni se redondean ni
+         llevan rango. */
+      if (ex && ex.force === 'static') { e.repsMin = 0; return; }
+      e.reps = repsRedondas(e.reps);
+      e.repsMin = repsAbajo(e.reps);
+    });
+    ses.ejercicios = agruparPorMusculo(ses.ejercicios || []);
+    bajarEscalones(ses, calentamiento);
+    return ses;
+  }
+
+  function titular(ses) {
+    ses.zonas = zonasDeSesion(ses.ejercicios);
+    ses.nombre = nombreSesion(ses);
+    return ses;
   }
 
   function cuadrarVolumen(sesiones, meta, minutos, calentamiento) {
@@ -1595,6 +1667,9 @@
        bastantes y acto seguido las marcaba como fallo—. */
     metaDe: metaDe, VOLUMEN_MIN: VOLUMEN_MIN,
     /* La presta el auditor para arreglar rutinas que no ha montado él. */
-    agruparSesion: agruparPorMusculo
+    agruparSesion: agruparPorMusculo,
+    /* Y estas, el plan montado con IA: elige ella los ejercicios, pero cómo se
+       escribe la hoja lo manda la misma regla que a la calculadora. */
+    sanear: sanear, titular: titular, esOlimpico: esOlimpico
   };
 })(window);

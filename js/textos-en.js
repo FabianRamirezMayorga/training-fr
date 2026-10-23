@@ -2183,6 +2183,12 @@
     'Espalda': 'Back',
     'Brazo': 'Arms',
     'Core': 'Core',
+    '{que} (no se propone sin alguien delante)':
+      '{que} (not suggested without someone watching)',
+    'Hombro y brazo': 'Shoulders and arms',
+    'Torso y pierna': 'Torso and legs',
+    'Con cinco días, «hombro» y «brazo» no añaden un ejercicio: le dan un día entero. El resto añade un ejercicio de esa zona a los días que ya la tocan.':
+      'With five days, «shoulder» and «arm» do not add an exercise: they get a whole day. The rest add one exercise of that area to the days that already train it.',
     '{a}, {b} y {c}': '{a}, {b} and {c}',
 
     /* ---------- Objetivos: la pantalla ---------- */

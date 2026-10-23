@@ -680,6 +680,9 @@
           <span class="tiny nowrap">${T(focoActual().label)}</span>
         </summary>
         <div class="fino-cuerpo">
+          <!-- Sin esta linea el dia de brazo no lo encuentra nadie: la opcion
+               ya estaba y lo unico que hacia era colar un curl de mas. -->
+          <p class="tiny" style="margin:0 0 8px">${T('Con cinco días, «hombro» y «brazo» no añaden un ejercicio: le dan un día entero. El resto añade un ejercicio de esa zona a los días que ya la tocan.')}</p>
           <div class="filtro-lista">
             ${raw(FOCOS.map(function (f) {
               return opcion('foco', f.id, T(f.label), est.foco === f.id, '');
@@ -1615,6 +1618,15 @@
           descartados.push(Tn('{que} (tus limitaciones)', { que: ex.nameEs }));
           return;
         }
+        /* El mismo veto que en la calculadora. Una cargada o una sentadilla
+           frontal con agarre de cargada no se proponen por pantalla, y que lo
+           haya elegido la IA no las hace más seguras: si acaso menos, porque
+           aquí nadie ha comprobado nada. */
+        if (Programa.esOlimpico(ex)) {
+          descartados.push(Tn('{que} (no se propone sin alguien delante)',
+            { que: ex.nameEs }));
+          return;
+        }
         vistos[ex.id] = true;
 
         const sets = Math.min(8, Math.max(1, Number(f.series) || 3));
@@ -1659,13 +1671,17 @@
         return n + Math.round(e.sets * (e.rest + 35) / 60);
       }, 0);
 
-      return {
+      /* El nombre que propone la IA se queda de plantilla —es su idea del
+         día— pero el que se lee sale de los músculos que han acabado dentro,
+         igual que en la calculadora: así no puede llamarse «Pecho y tríceps»
+         un día al que se le cayeron los dos ejercicios de tríceps. */
+      return Programa.titular(Programa.sanear({
         dia: dia,
         nombre: UI.diaLargo(dia) + ' · ' + (ses.nombre || T('Sesión')),
         plantilla: ses.nombre || '',
         ejercicios: ejercicios,
         minutos: minutos + base.calentamiento
-      };
+      }, base.calentamiento));
     }).filter(Boolean);
 
     /* si no ha salido ni una sesión aprovechable, se queda la de la calculadora */

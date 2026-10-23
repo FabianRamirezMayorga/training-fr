@@ -163,7 +163,8 @@
         '*Las repeticiones van en rango*: *4 × 6-8*, no *4 × 8*. Un número solo no dice qué hacer el día que salen nueve. El rango lleva la regla dentro: te mueves dentro de él y, cuando llegas arriba en todas las series, sube el peso. El techo es el número que usa la progresión para decidir si has cumplido, así que el rango no cambia ningún cálculo; solo dice lo que ya había.',
         'Y un rango de verdad cae en los números de siempre —5, 6, 8, 10, 12, 15, 20—. Nadie pone 3 × 13: los números de en medio salen de hacer cuentas y delatan a la máquina en cada línea.',
         '*El día baja, nunca sube*: ningún ejercicio lleva más series que el que tiene delante. A la séptima serie se llega más cansado que a la primera, y la hoja tiene que decirlo. El básico puede llegar a cinco series y el accesorio a cuatro, así que no verás cinco series de curl martillo al cierre de un día que abre con ocho de press.',
-        '*El día se llama por sus músculos*: «Pecho, hombro y tríceps», no «Empuje». «Empuje» y «tracción» es como se llaman los patrones por dentro, pero hay que saber de gimnasio para traducir «tracción» a «espalda y bíceps». El nombre sale de lo que hay colocado de verdad, así que no puede mentir: si el día acabó sin tríceps porque no cabía, no lo nombra. Cuando son más de tres músculos se queda el nombre de siempre —«Tren superior», «Cuerpo completo»—, porque una lista de cinco no es un nombre.'
+        '*El día se llama por sus músculos*: «Pecho, hombro y tríceps», no «Empuje». «Empuje» y «tracción» es como se llaman los patrones por dentro, pero hay que saber de gimnasio para traducir «tracción» a «espalda y bíceps». El nombre sale de lo que hay colocado de verdad, así que no puede mentir: si el día acabó sin tríceps porque no cabía, no lo nombra. Cuando son más de tres músculos se queda el nombre de siempre —«Tren superior», «Cuerpo completo»—, porque una lista de cinco no es un nombre.',
+        'Y valen monte el plan quien lo monte: la calculadora elige ejercicios con reglas y la IA los elige leyendo tu historial, pero cómo se escriben los números y en qué orden va el día es lo mismo en los dos. Durante un tiempo no fue así —el plan montado con IA se saltaba todo esto— y era el que peor se leía de los tres.'
       ],
       ver: ['c-rutina', 'g-plan', 'g-peso'] },
 
@@ -819,6 +820,13 @@
         'Y porque ya no hay que fiarse: arriba de la lista salen las tres cifras al día, lo que trae frente a lo que pide tu menú, sumadas por la app. Si la proteína se queda por debajo del 85 %, te lo dice en ámbar y te sugiere rehacerla.',
         'Es lo que más se falla, y no se ve mirando la lista —parece mucha comida—: solo se ve sumando.'],
       ver: ['c-compra'] },
+
+    { id: 'p-diabrazo', q: '¿Puedo tener un día solo de hombro y brazo?',
+      a: ['Sí, con cinco días. Al generar el programa, en *Priorizar una zona* elige *Brazo* u *Hombro*: con cinco días eso ya no añade un ejercicio suelto, te da el cuarto día entero.',
+        'La semana queda así: empuje, espalda y bíceps, pierna, hombro y brazo, y un quinto día de torso y pierna. Ese quinto día no es relleno: recoge el pecho, el dorsal y la pierna que se quedan sin segunda vuelta al dedicarle un día al brazo.',
+        'Se paga en algo, y conviene saberlo: el gemelo baja a una vez por semana y la espalda media se queda con menos trabajo directo. Es el cambio que hace cualquier rutina con día de brazo, y por eso va detrás de pedirlo y no de serie.',
+        'Con menos de cinco días no cabe: dedicar uno de cuatro al brazo deja medio cuerpo a una vez por semana. Ahí el foco sigue haciendo lo de siempre, añadir un ejercicio de esa zona a los días que ya la tocan.'],
+      ver: ['c-rutina', 'g-hoja'] },
 
     { id: 'p-rango', q: '¿Por qué pone 4 × 6-8 y no 4 × 8?',
       a: ['Porque un número solo no te dice qué hacer cuando hoy salen nueve, ni cuándo subir el peso. El rango sí: te mueves dentro de él y, el día que llegas arriba en todas las series, subes.',
