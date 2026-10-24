@@ -1893,10 +1893,6 @@
          de los que pediste. */
       if (ejercicios.length < 4) { libres.unshift(dia); return null; }
 
-      const minutos = ejercicios.reduce(function (n, e) {
-        return n + Math.round(e.sets * (e.rest + 35) / 60);
-      }, 0);
-
       /* El nombre que propone la IA se queda de plantilla —es su idea del
          día— pero el que se lee sale de los músculos que han acabado dentro,
          igual que en la calculadora: así no puede llamarse «Pecho y tríceps»
@@ -1906,8 +1902,11 @@
         nombre: UI.diaLargo(dia) + ' · ' + (ses.nombre || T('Sesión')),
         plantilla: ses.nombre || '',
         ejercicios: ejercicios,
-        minutos: minutos + base.calentamiento
-      }, base.calentamiento), true);
+        /* Lo calcula sanear(), que es quien sabe la fórmula. Aquí había una
+           segunda cuenta con (descanso + 35) cuando duracion() usa 45: dos
+           fórmulas para el mismo minuto, y la de la vista siempre por debajo. */
+        minutos: 0
+      }, base.calentamiento, est.minutos), true);
     }).filter(Boolean);
 
     /* si no ha salido ni una sesión aprovechable, se queda la de la calculadora */

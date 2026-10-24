@@ -846,7 +846,8 @@
       a: ['La app, no la IA. Una semana tiene que llevar los seis movimientos: empuje horizontal y vertical, tracción horizontal y vertical, rodilla —sentadilla o zancada— y cadera —peso muerto o empuje de cadera—. Si falta uno, el plan tiene un agujero aunque las series cuadren, y el agujero lo paga quien entrena.',
         'Al entrenador con IA se le pide en el encargo, pero pedir no es garantizar. Así que cuando termina de montarlo, la app lo repasa: si falta un movimiento lo pone ella, con el ejercicio que te tocaría de la calculadora. Y si el día ya está lleno de minutos, en vez de rendirse cambia el accesorio que más se repite esa semana —la tercera extensión de tríceps— por el que falta.',
         'Nunca pasa en silencio. Lo que añade o cambia sale escrito debajo del plan, con el ejercicio, el día y el movimiento que faltaba. Un plan que se corrige solo y se calla es peor que uno incompleto: el incompleto al menos se ve.',
-        'Y si de verdad no cabe —dos días de media hora no dan para seis movimientos— te lo dice y te propone qué cambiar: más minutos por sesión o un día más. No te lo tapa con un ejercicio de mentira.'],
+        'Y si de verdad no cabe —dos días de media hora no dan para seis movimientos— te lo dice y te propone qué cambiar: más minutos por sesión o un día más. No te lo tapa con un ejercicio de mentira.',
+        'Lo mismo con el tiempo: la sesión que monta la IA se recorta a los minutos que pediste, igual que la de la calculadora. Antes no pasaba por ese recorte y podía devolverte setenta minutos de los sesenta que habías pedido.'],
       ver: ['g-plan', 'p-reparto'] },
 
     { id: 'p-dibujo', q: '¿Por qué los ejercicios de mi plan han cambiado de dibujo?',
@@ -873,7 +874,8 @@
     { id: 'p-nombredia', q: '¿Por qué mi día ya no se llama «Empuje»?',
       a: ['Porque ahora se llama por lo que entrena: «Pecho, hombro y tríceps». «Empuje» es correcto y es como se llama el patrón por dentro, pero hay que saber de gimnasio para traducirlo, y el nombre del día es lo primero que se lee de la hoja —en el calendario es lo único que se ve—.',
         'El nombre sale de los ejercicios que acabaron en el día, no de la plantilla, así que no puede mentir: si el tríceps se cayó por falta de tiempo, el nombre no lo pone.',
-        'Cuando el día toca más de tres músculos se queda el nombre de antes —«Tren superior», «Cuerpo completo A»—: «Pecho, espalda, hombro, bíceps y tríceps» no es un nombre, es un inventario.'],
+        'Cuando el día toca más de tres músculos se queda el nombre de antes —«Tren superior», «Cuerpo completo A»—: «Pecho, espalda, hombro, bíceps y tríceps» no es un nombre, es un inventario.',
+        'Y el nombre de la tarjeta de una rutina guardada —«Lunes · espalda · pecho · brazo»— se cuenta igual, por series. Antes contaba ejercicios, y así dos curls pesaban más que un remo: un día con ocho series de espalda podía acabar llamándose día de brazo, con la lista de músculos justo debajo diciendo lo contrario.'],
       ver: ['g-hoja', 'g-plan'] },
 
     { id: 'p-formadia', q: '¿Por qué los últimos ejercicios del día llevan menos series?',

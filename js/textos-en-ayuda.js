@@ -1478,6 +1478,10 @@
       'And when you log, a set inside the range is no longer flagged as corrected. Ten reps when the sheet asks for 10-12 is not a change: it is being inside the range.',
     'Donde no hay rango es porque no lo hay: un 5 × 5 de fuerza es un 5 × 5, y una plancha lleva segundos, no repeticiones. Y si cambias las repeticiones a mano, el rango se va: lo que has escrito es un número tuyo, no el techo de nada.':
       'Where there is no range it is because there is none: a strength 5 × 5 is a 5 × 5, and a plank takes seconds, not reps. And if you change the reps by hand the range goes away: what you wrote is a number of your own, not the top of anything.',
+    'Y el nombre de la tarjeta de una rutina guardada —«Lunes · espalda · pecho · brazo»— se cuenta igual, por series. Antes contaba ejercicios, y así dos curls pesaban más que un remo: un día con ocho series de espalda podía acabar llamándose día de brazo, con la lista de músculos justo debajo diciendo lo contrario.':
+      'And the title on a saved routine card —Monday · back · chest · arms— is counted the same way, by sets. It used to count exercises, so two curls outweighed one row: a day with eight sets of back work could end up called an arm day, with the muscle list right below it saying the opposite.',
+    'Lo mismo con el tiempo: la sesión que monta la IA se recorta a los minutos que pediste, igual que la de la calculadora. Antes no pasaba por ese recorte y podía devolverte setenta minutos de los sesenta que habías pedido.':
+      'The same goes for time: the session the AI builds is trimmed to the minutes you asked for, just like the calculator one. It used to skip that trim and could hand you seventy minutes of the sixty you asked for.',
     '¿Quién garantiza que el plan me entrene el cuerpo entero?':
       'Who guarantees that the plan trains my whole body?',
     'La app, no la IA. Una semana tiene que llevar los seis movimientos: empuje horizontal y vertical, tracción horizontal y vertical, rodilla —sentadilla o zancada— y cadera —peso muerto o empuje de cadera—. Si falta uno, el plan tiene un agujero aunque las series cuadren, y el agujero lo paga quien entrena.':

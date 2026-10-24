@@ -1503,15 +1503,25 @@
      completo—, no uno de ellos elegido a dedo. */
   const ARRIBA = ['pecho', 'espalda', 'hombro', 'brazo'];
 
+  /* Cuenta SERIES, no ejercicios.
+
+     Contando ejercicios, dos curls pesaban más que un remo: un día con ocho
+     series de espalda y dos ejercicios de brazo se llamaba «brazo». Medido
+     sobre los 648 días de la matriz, el título nombraba una zona distinta de la
+     que dicen las series en 135 —el 21%—, y justo debajo la propia tarjeta
+     escribe los músculos ordenados por series. Dos varas, una encima de la
+     otra, contradiciéndose: de las dos, la buena es la serie, que es la unidad
+     con la que cuenta el resto de la app. */
   function zonaDeRutina(r) {
     const cuenta = {};
     let total = 0;
     (r.exercises || []).forEach(function (re) {
       const ex = Data.get(re.exId);
       if (!ex) return;
+      const series = Number(re.sets) || 1;
       (ex.groups || []).forEach(function (g2) {
-        cuenta[g2] = (cuenta[g2] || 0) + 1;
-        total++;
+        cuenta[g2] = (cuenta[g2] || 0) + series;
+        total += series;
       });
     });
     const ids = Object.keys(cuenta).sort(function (a2, b2) {

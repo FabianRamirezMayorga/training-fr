@@ -1139,7 +1139,13 @@
      Va en dos trozos porque entre uno y otro hay que cuadrar el volumen:
      sanear necesita ir antes —cuadrar no sabe bajar si no sabe el orden— y
      el título después, cuando la hoja ya no se mueve. */
-  function sanear(ses, calentamiento) {
+  /* minutos: el tope de la sesión, opcional. La calculadora recorta aparte
+     —después de cuadrar el volumen, que es cuando sabe qué sobra—, pero el plan
+     montado con IA no pasaba por ningún recorte: devolvía siete ejercicios y
+     veínticuatro series y se enseñaban setenta minutos de los sesenta pedidos.
+     Se le pasa aquí y no se llama a recortarATiempo desde la vista, porque dos
+     sitios que deciden lo mismo acaban siempre discrepando. */
+  function sanear(ses, calentamiento, minutos) {
     (ses.ejercicios || []).forEach(function (e) {
       const ex = Data.get(e.exId);
       /* Los estáticos llevan segundos, no repeticiones: ni se redondean ni
@@ -1150,6 +1156,7 @@
     });
     ses.ejercicios = agruparPorMusculo(ses.ejercicios || []);
     bajarEscalones(ses, calentamiento);
+    if (minutos) recortarATiempo(ses, minutos, calentamiento);
     return ses;
   }
 
