@@ -378,8 +378,13 @@
        pecho, dorsal y la pierna que no cabe en un solo día. Sin este día, dar
        un día entero al brazo dejaría al cuádriceps y al pecho a una sola vez
        por semana, que es lo que la app lleva diciendo que hay que evitar. */
+    /* Aquí van los DOS tirones, y por eso este día tiene siete huecos.
+       Con uno solo se queda a una vez por semana el que falte: con el vertical
+       era la espalda media, y al cambiarlo al horizontal pasó a ser el dorsal,
+       36 planes de 36. Cambiar de sitio un agujero no es taparlo. */
     torsoPierna: { nombre: 'Torso y pierna', huecos: [
       h(P.emH, 'chest', 'principal'), h(P.trV, 'lats', 'principal'),
+      h(P.trH, 'middle back', 'accesorio'),
       h(P.zan, 'quadriceps', 'accesorio'), h(P.cad, 'glutes', 'accesorio'),
       h(P.cuf, 'hamstrings', 'accesorio'), h(P.abd, 'abdominals', 'accesorio')] },
 
@@ -389,10 +394,73 @@
       h(P.cuf, 'hamstrings', 'accesorio'), h(P.gem, 'calves', 'accesorio')] }
   };
 
+  /* ---------- cómo se reparte la semana ----------
+     Hasta aquí lo decidía la app sola, y eso vale mientras haya un usuario.
+     Con más de uno deja de valer: cada cual llega con su costumbre —el que
+     lleva años con empuje/tracción/pierna, el que quiere su día de brazo, el
+     que solo se ve capaz de cuerpo completo— y un reparto impuesto es un plan
+     que no se sigue, por bueno que sea en el papel.
+
+     El automático se queda de defecto, así que quien no sepa de esto —o no
+     quiera saber— recibe exactamente lo mismo que antes. Los demás son para
+     quien ya tiene una idea de cómo quiere su semana.
+
+     minDias: por debajo de eso el reparto deja medio cuerpo a una vez por
+     semana, así que no se ofrece y, si llega igual, se cae al automático. */
+  const ESTRUCTURAS = [
+    { id: 'auto', label: 'Automático', dias: [1, 2, 3, 4, 5, 6, 7],
+      sub: 'La app reparte según los días que elijas' },
+    { id: 'ept', label: 'Empuje, tracción y pierna', dias: [6],
+      sub: 'El clásico de gimnasio, cada rueda dos veces',
+      porque: 'Son tres días distintos, así que hacen falta 6 para que cada uno salga dos veces. Con 3 días deja los doce músculos a una vez por semana y con 5 deja la pierna.' },
+    { id: 'torso', label: 'Torso y pierna', dias: [4, 5],
+      sub: 'Un día arriba, el siguiente abajo',
+      porque: 'Entre 4 y 5 días. Con menos sale mejor el cuerpo completo, y con 6 la pierna se lleva la mitad del plan.' },
+    { id: 'zonas', label: 'Con día de hombro y brazo', dias: [5, 6],
+      sub: 'Empuje, tracción, pierna, un día entero de hombro y brazo, y un torso y pierna',
+      porque: 'Hacen falta 5 días: dar uno entero al brazo con menos deja el pecho y la pierna a una vez por semana.' },
+    { id: 'full', label: 'Cuerpo completo', dias: [1, 2, 3, 4],
+      sub: 'Todo el cuerpo cada día',
+      porque: 'Hasta 4 días: con más, la pierna sale en todos y se lleva la mitad del plan.' }
+  ];
+
+  /* Los que tienen sentido con los días que ha elegido. La pantalla pinta
+     estos y enseña el resto apagados con su porqué: esconder una opción sin
+     decir por qué no está es la forma más rápida de que te acusen de que
+     falta algo. */
+  function estructurasPara(dias) {
+    return ESTRUCTURAS.filter(function (e) { return e.dias.indexOf(dias) !== -1; });
+  }
+
+  function ciclo(lista, dias) {
+    const out = [];
+    for (let i = 0; i < dias; i++) out.push(lista[i % lista.length]);
+    return out;
+  }
+
+  function reparoPedido(estructura, dias) {
+    const e = ESTRUCTURAS.filter(function (x) { return x.id === estructura; })[0];
+    if (!e || e.id === 'auto' || e.dias.indexOf(dias) === -1) return null;
+    if (e.id === 'ept') return ciclo(['empuje', 'traccion', 'pierna'], dias);
+    if (e.id === 'torso') return ciclo(['superior', 'inferior', 'superior2', 'inferior2'], dias);
+    if (e.id === 'full') return ciclo(['fullA', 'fullB', 'fullC'], dias);
+    if (e.id === 'zonas') {
+      const base = ['empuje', 'traccion', 'pierna', 'hombroBrazo', 'torsoPierna'];
+      return dias <= 5 ? base : base.concat(ciclo(['inferior2', 'superior2'], dias - 5));
+    }
+    return null;
+  }
+
   /* Qué se hace cada día según cuántos días se entrene. Dos estímulos por
      semana en cada músculo es lo que más rinde, así que hasta cuatro días
      manda el cuerpo completo o el torso/pierna, no el músculo por día. */
-  function repartoSemanal(dias, foco) {
+  function repartoSemanal(dias, foco, estructura) {
+    /* Lo que ha pedido el usuario manda sobre lo que la app elegiría. Si no
+       encaja con los días que tiene, se cae al automático: darle un reparto
+       peor que el de antes por haber pedido algo que no cabe es cobrarle la
+       preferencia en forma de plan malo. */
+    const pedido = reparoPedido(estructura, dias);
+    if (pedido) return pedido;
     if (dias <= 1) return ['fullUnico'];
     if (dias === 2) return ['fullA', 'fullB'];
     /* Tres días es cuerpo completo para todo el mundo, no solo para novatos.
@@ -515,7 +583,7 @@
     return OLIMPICOS.test(n);
   }
 
-  function puntuar(ex, hueco, usados) {
+  function puntuar(ex, hueco, usados, repetir) {
     let s = 0;
     const p = Alt.patron(ex);
     /* Tan grande que no lo remonta ningún bonus: solo entra si literalmente
@@ -545,7 +613,13 @@
        vale más el segundo mejor día con el buen ejercicio que un ejercicio
        flojo por no repetir. Treinta puntos es justo la distancia que separa a
        un ejercicio recomendado de uno del montón. */
-    if (usados[ex.id]) s -= 30;
+    /* Repetir en la semana o variar es gusto, no técnica: hay quien quiere el
+       mismo press de banca el lunes y el jueves para ver si sube, y hay quien
+       se aburre de verlo dos veces. Por defecto se varía, que es lo de
+       siempre; con «repetir los básicos» el principal de cada patrón prefiere
+       volver y los accesorios siguen variando, que es como está escrita
+       cualquier rutina de gimnasio de las de toda la vida. */
+    if (usados[ex.id]) s += repetir && hueco.rol === 'principal' ? 25 : -30;
     return s;
   }
 
@@ -568,7 +642,8 @@
        fuera— para tirar a la basura todos los buenos, y el segundo día de
        pierna se quedaba con los restos del primero. */
     candidatos.sort(function (a, b) {
-      return puntuar(b, hueco, ctx.usados) - puntuar(a, hueco, ctx.usados);
+      return puntuar(b, hueco, ctx.usados, ctx.repetir) -
+        puntuar(a, hueco, ctx.usados, ctx.repetir);
     });
 
     /* Por defecto, el mejor. La rotación entre los tres primeros es para
@@ -635,13 +710,14 @@
       (VOLUMEN_BASE[experiencia] || 15) * obj.volumen * edad.factor)));
 
     const foco = opts.foco || 'equilibrado';
-    const plantillas = repartoSemanal(dias.length, foco);
+    const plantillas = repartoSemanal(dias.length, foco, opts.estructura);
     const focoConDia = plantillas.indexOf('hombroBrazo') !== -1;
     const porSesion = cabenEn(minutos, obj, edad.calentamiento);
 
     const usados = {};
     const ctx = { gear: gear, r: r, maxNivel: maxNivel, usados: usados,
-      variante: Number(opts.variante) || 0, hueco: 0, delDia: {} };
+      variante: Number(opts.variante) || 0, hueco: 0, delDia: {},
+      repetir: !!opts.repetir };
     const volumen = {};
     const directas = {};
     const sinCubrir = [];
@@ -1699,6 +1775,7 @@
     crear: crear, aRutinas: aRutinas, lesionesDe: lesionesDe,
     leer: leer, frase: frase, nombreSesion: nombreSesion,
     OBJETIVOS: OBJETIVOS, LESIONES: LESIONES,
+    ESTRUCTURAS: ESTRUCTURAS, estructurasPara: estructurasPara,
     /* La vara con la que el generador decide si un músculo va corto. La exporta
        para que el auditor mida igual: con dos varas distintas, la app se
        suspendía a sí misma —sacaba seis series de gemelo porque le parecían

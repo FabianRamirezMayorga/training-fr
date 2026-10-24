@@ -2354,6 +2354,12 @@
     /* los músculos que va a tocar la semana, para darle más catálogo de esos */
     const foco = o.foco && o.foco !== 'equilibrado' ? o.foco : '';
 
+    /* En palabras, no con el id: el modelo no sabe qué es 'zonas'. */
+    const estr = (Programa.ESTRUCTURAS || []).filter(function (e) {
+      return e.id === o.estructura && e.id !== 'auto';
+    })[0];
+    const reparto = estr ? T(estr.label) + ' (' + T(estr.sub) + ')' : '';
+
     const gset = Data.GEAR[o.gear] || {};
     const prompt = contexto({
       progreso: true, cargas: true, comida: true, favoritos: true, rutinas: true,
@@ -2392,6 +2398,16 @@
         'eso, hazlo lo más parecido que se pueda y dile en las razones por qué no ha ' +
         'podido ser tal cual. Si choca con su objetivo pero no es peligroso, se lo das ' +
         'igual y le explicas el coste en una frase.\n' : '') +
+      /* Si ha elegido reparto, eso manda sobre la regla de frecuencia de
+         abajo, que es la que la app aplicaría por su cuenta. La calculadora le
+         hace caso; si la IA no, el ajuste es mentira la mitad de las veces. */
+      (reparto ? 'REPARTO DE LA SEMANA QUE HA ELEGIDO ÉL: ' + reparto +
+        '. Esto manda sobre la norma de frecuencia de más abajo: móntale esos ' +
+        'días y no otros. Si con ese reparto algún músculo se queda a una vez por ' +
+        'semana, díselo en las razones en vez de cambiarle el reparto.\n' : '') +
+      (o.repetir ? 'QUIERE REPETIR LOS BÁSICOS: el ejercicio principal de cada ' +
+        'patrón va el mismo en sus dos días —el mismo press de banca, la misma ' +
+        'sentadilla— para poder ver si sube. Los accesorios sí varían.\n' : '') +
       menuEjercicios(o.musculos || [], o.gear) + '\n' +
       'CÓMO TIENE QUE SER:\n' +
       '- Cada sesión, ' + (nMin === nMax ? nMin + ' ejercicios' :

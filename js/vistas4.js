@@ -37,6 +37,17 @@
     minutos: 60,
     objetivo: '',
     foco: 'equilibrado',
+    /* El reparto de la semana y si los básicos se repiten son de la persona,
+       no del plan: quien entrena empuje/tracción/pierna lo quiere siempre. Por
+       eso el defecto es el de antes —'auto' y variar— y quien no toque nada
+       recibe exactamente lo mismo que recibía. */
+    estructura: 'auto',
+    repetir: false,
+    /* Qué desplegables están abiertos. Cada toque dentro de uno repinta el
+       formulario —para que la etiqueta del resumen diga la verdad— y sin esto
+       el panel se cerraba de golpe al elegir: tenías que volver a abrirlo para
+       ver qué habías marcado. No se guarda en disco: es de esta visita. */
+    abiertas: {},
     nombre: '',
     prog: null,
     ia: null,
@@ -62,7 +73,8 @@
     try {
       const x = JSON.parse(localStorage.getItem(CLAVE) || 'null');
       if (!x || x.v !== 1) return;
-      ['dias', 'minutos', 'objetivo', 'foco', 'nombre', 'prog', 'ia'].forEach(function (k) {
+      ['dias', 'minutos', 'objetivo', 'foco', 'estructura', 'repetir',
+        'nombre', 'prog', 'ia'].forEach(function (k) {
         if (x[k] !== undefined && x[k] !== null) est[k] = x[k];
       });
       est.aplicados = x.aplicados || [];
@@ -76,6 +88,7 @@
       localStorage.setItem(CLAVE, JSON.stringify({
         v: 1, ts: Date.now(),
         dias: est.dias, minutos: est.minutos, objetivo: est.objetivo, foco: est.foco,
+        estructura: est.estructura, repetir: est.repetir,
         nombre: est.nombre, prog: est.prog, ia: est.ia, aplicados: est.aplicados,
         guardadas: est.guardadas
       }));
@@ -182,6 +195,22 @@
 
      La explicación va en cada fila y no al pie del grupo: al pie solo salía la
      del elegido, así que comparar dos objetivos era tocarlos por turnos. */
+  /* El reparto elegido, y los que no caben con los días de ahora. Si cambia
+     los días y su reparto deja de caber, el generador se cae al automático
+     —lo hace repartoSemanal—, así que la etiqueta tiene que decir eso mismo y
+     no seguir enseñando lo que ya no se va a aplicar. */
+  function estructuraActual() {
+    const caben = Programa.estructurasPara(est.dias.length);
+    return caben.filter(function (e) { return e.id === est.estructura; })[0] || caben[0];
+  }
+
+  function noCaben() {
+    const caben = Programa.estructurasPara(est.dias.length);
+    return Programa.ESTRUCTURAS.filter(function (e) {
+      return e.porque && caben.indexOf(e) === -1;
+    });
+  }
+
   function opcion(attr, valor, texto, activo, sub) {
     return '<button class="filtro-op' + (activo ? ' on' : '') + '" data-' + attr + '="' +
       esc(valor) + '"><span class="grow"><span class="op-et">' + esc(texto) + '</span>' +
@@ -619,7 +648,7 @@
       <!-- Plegado y con lo elegido a la derecha: contestada la pregunta, las
            otras tres opciones no pintan nada ocupando pantalla. Se cierra solo
            al elegir porque el formulario se repinta y nace cerrado. -->
-      <details class="plegable-fino fila-plegable" data-mas="gear">
+      <details class="plegable-fino fila-plegable" data-mas="gear" ${raw(est.abiertas.gear ? 'open' : '')}>
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="grow">${T('Dónde entrenas')}</span>
@@ -662,7 +691,7 @@
            suelto al pie del grupo y solo el del elegido: para comparar dos había
            que tocarlos por turnos y leer abajo cada vez. Y plegado tras elegir,
            que son cuatro explicaciones y ya has decidido. -->
-      <details class="plegable-fino fila-plegable" data-mas="obj" style="margin-top:9px">
+      <details class="plegable-fino fila-plegable" data-mas="obj" ${raw(est.abiertas.obj ? 'open' : '')} style="margin-top:9px">
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="grow">${T('Tu objetivo')}</span>
@@ -680,7 +709,7 @@
 
       <!-- Plegada: es opcional y casi siempre se queda en «Equilibrado», así
            que ocho zonas abiertas eran ocho renglones para no tocar nada. -->
-      <details class="plegable-fino fila-plegable" data-mas="foco">
+      <details class="plegable-fino fila-plegable" data-mas="foco" ${raw(est.abiertas.foco ? 'open' : '')}>
         <summary>
           <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
           <span class="grow">${T('Priorizar una zona')}</span>
@@ -694,6 +723,41 @@
             ${raw(FOCOS.map(function (f) {
               return opcion('foco', f.id, T(f.label), est.foco === f.id, '');
             }).join(''))}
+          </div>
+        </div>
+      </details>
+
+      <!-- El reparto de la semana. Va plegado y en «Automático»: la mayoría no
+           tiene por qué saber qué es un empuje/tracción/pierna, y para quien sí
+           lo sabe, que la app elija por él es motivo para no usarla. Solo se
+           ofrecen los que funcionan con los días elegidos, y los que no caben
+           se dicen con su porqué en vez de desaparecer sin explicación. -->
+      <details class="plegable-fino fila-plegable" data-mas="estructura" ${raw(est.abiertas.estructura ? 'open' : '')}>
+        <summary>
+          <span class="chevron down sec-flecha">${raw(icon('chevron'))}</span>
+          <span class="grow">${T('Cómo repartir la semana')}</span>
+          <span class="tiny nowrap">${T(estructuraActual().label)}</span>
+        </summary>
+        <div class="fino-cuerpo">
+          <div class="filtro-lista">
+            ${raw(Programa.estructurasPara(est.dias.length).map(function (e) {
+              return opcion('estr', e.id, T(e.label), est.estructura === e.id, T(e.sub));
+            }).join(''))}
+          </div>
+          ${raw(noCaben().length ? html`
+            <p class="tiny" style="margin:9px 0 0">${T('Con los días que has elegido, estos repartos dejan músculos a una vez por semana, así que no se ofrecen:')}</p>
+            <ul class="tiny" style="margin:4px 0 0;padding-left:18px">
+              ${raw(noCaben().map(function (e) {
+                return '<li><b>' + esc(T(e.label)) + '</b> — ' + esc(T(e.porque)) + '</li>';
+              }).join(''))}
+            </ul>` : '')}
+
+          <div class="hr"></div>
+          <div class="filtro-lista">
+            ${raw(opcion('rep', 'no', T('Variar'), !est.repetir,
+              T('Un ejercicio distinto en cada hueco de la semana. Es lo de siempre.')))}
+            ${raw(opcion('rep', 'si', T('Repetir los básicos'), !!est.repetir,
+              T('El mismo básico en sus dos días, para ver si sube. Los accesorios siguen variando.')))}
           </div>
         </div>
       </details>`;
@@ -1384,21 +1448,12 @@
       }
     }
 
+    root.querySelectorAll('details[data-mas]').forEach(function (d) {
+      d.addEventListener('toggle', function () { est.abiertas[d.dataset.mas] = d.open; });
+    });
+
     bind(root, '[data-a=editarperfil]', function () { go('datos'); });
     bind(root, '[data-a=plangenerico]', function () { go('plan'); });
-
-    bindAll(root, '[data-dia]', function (el) {
-      const d = el.dataset.dia;
-      const i = est.dias.indexOf(d);
-      if (i === -1) {
-        if (est.dias.length >= 6) { UI.toast(T('Seis días es el máximo recomendable')); return; }
-        est.dias.push(d);
-        est.dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
-      } else est.dias.splice(i, 1);
-      el.classList.toggle('on', i === -1);
-      const chip = root.querySelector('.chip.solid');
-      if (chip) chip.textContent = Tp(est.dias.length, '{n} día', '{n} días');
-    });
 
     /* Todos repintan sin moverse del sitio. Antes solo lo hacía el material, y
        elegir objetivo o minutos te devolvía al principio del formulario: en un
@@ -1412,6 +1467,21 @@
         window.scrollTo(0, pos);
       };
     };
+    /* Los días también repintan. Antes bastaba con refrescar a mano el chip
+       de «N días» porque no dependía nada más de ellos; desde que el reparto de
+       la semana es una preferencia, los días deciden qué repartos se pueden
+       ofrecer, y tocar el quinto día sin repintar dejaba «Con día de hombro y
+       brazo» escondido justo en el momento en que empezaba a tener sentido. */
+    bindAll(root, '[data-dia]', enElSitio(function (el) {
+      const d = el.dataset.dia;
+      const i = est.dias.indexOf(d);
+      if (i === -1) {
+        if (est.dias.length >= 6) { UI.toast(T('Seis días es el máximo recomendable')); return; }
+        est.dias.push(d);
+        est.dias.sort(function (a, b) { return DIAS.indexOf(a) - DIAS.indexOf(b); });
+      } else est.dias.splice(i, 1);
+    }));
+
     bindAll(root, '[data-min]', enElSitio(function (el) {
       est.minutos = Number(el.dataset.min);
     }));
@@ -1421,6 +1491,12 @@
     }));
     bindAll(root, '[data-foco]', enElSitio(function (el) {
       est.foco = el.dataset.foco;
+    }));
+    bindAll(root, '[data-estr]', enElSitio(function (el) {
+      est.estructura = el.dataset.estr;
+    }));
+    bindAll(root, '[data-rep]', enElSitio(function (el) {
+      est.repetir = el.dataset.rep === 'si';
     }));
     bindAll(root, '[data-gear]', enElSitio(function (el) {
       est.gear = el.dataset.gear;
@@ -1845,7 +1921,8 @@
     /* la calculadora primero: garantiza una forma válida y es la red si algo falla */
     const base = Programa.crear({
       dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(),
-      foco: est.foco, gear: gearActual(), variante: est.variante
+      foco: est.foco, gear: gearActual(), variante: est.variante,
+      estructura: est.estructura, repetir: est.repetir
     });
 
     est.cargandoPlan = true;
@@ -1856,7 +1933,11 @@
       dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(), foco: est.foco,
       gear: gearActual(), objetivoSeries: base.objetivoSeries,
       lesiones: base.lesiones, musculos: Object.keys(base.volumen || {}),
-      molestias: est.molestias, notas: est.notas, ordenes: est.ordenes
+      molestias: est.molestias, notas: est.notas, ordenes: est.ordenes,
+      /* El reparto que ha pedido vale igual para la IA que para la
+         calculadora: si no, eliges «con día de hombro y brazo», generas con IA
+         y te llega otra cosa sin que nadie te diga por qué. */
+      estructura: estructuraActual().id, repetir: est.repetir
     }).then(function (r) {
       const prog = fusionarIA(base, r);
       if (!prog) {
@@ -1904,7 +1985,8 @@
     est.variante = (est.variante || 0) + 1;
     est.prog = Programa.crear({
       dias: est.dias, minutos: est.minutos, objetivo: objetivoActual(),
-      foco: est.foco, gear: gearActual(), variante: est.variante
+      foco: est.foco, gear: gearActual(), variante: est.variante,
+      estructura: est.estructura, repetir: est.repetir
     });
     est.ia = null;
     est.aplicados = [];

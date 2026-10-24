@@ -2183,6 +2183,42 @@
     'Espalda': 'Back',
     'Brazo': 'Arms',
     'Core': 'Core',
+    'Cómo repartir la semana':
+      'How to split the week',
+    'Con los días que has elegido, estos repartos dejan músculos a una vez por semana, así que no se ofrecen:':
+      'With the days you picked, these splits leave muscles at once a week, so they are not offered:',
+    'Repetir los básicos':
+      'Repeat the main lifts',
+    'El mismo básico en sus dos días, para ver si sube. Los accesorios siguen variando.':
+      'The same main lift on both of its days, so you can see it going up. The accessories still vary.',
+    'Variar':
+      'Vary',
+    'Un ejercicio distinto en cada hueco de la semana. Es lo de siempre.':
+      'A different exercise in every slot of the week. This is the usual.',
+    'Automático':
+      'Automatic',
+    'La app reparte según los días que elijas':
+      'The app splits it by the days you pick',
+    'Empuje, tracción y pierna':
+      'Push, pull and legs',
+    'El clásico de gimnasio, cada rueda dos veces':
+      'The gym classic, each turn of the wheel twice',
+    'Son tres días distintos, así que hacen falta 6 para que cada uno salga dos veces. Con 3 días deja los doce músculos a una vez por semana y con 5 deja la pierna.':
+      'They are three different days, so you need 6 for each to come round twice. With 3 days it leaves all twelve muscles at once a week, and with 5 it leaves the legs.',
+    'Un día arriba, el siguiente abajo':
+      'One day upper, the next lower',
+    'Entre 4 y 5 días. Con menos sale mejor el cuerpo completo, y con 6 la pierna se lleva la mitad del plan.':
+      'Between 4 and 5 days. With fewer, full body comes out better, and with 6 the legs take half the plan.',
+    'Con día de hombro y brazo':
+      'With a shoulder and arm day',
+    'Empuje, tracción, pierna, un día entero de hombro y brazo, y un torso y pierna':
+      'Push, pull, legs, a whole day of shoulders and arms, and an upper and lower',
+    'Hacen falta 5 días: dar uno entero al brazo con menos deja el pecho y la pierna a una vez por semana.':
+      'You need 5 days: giving a whole one to arms with fewer leaves the chest and the legs at once a week.',
+    'Todo el cuerpo cada día':
+      'The whole body every day',
+    'Hasta 4 días: con más, la pierna sale en todos y se lleva la mitad del plan.':
+      'Up to 4 days: with more, the legs appear on every one and take half the plan.',
     'Por músculo':
       'By muscle',
     'Lo que decide si un plan está equilibrado no es la zona, es el músculo: la espalda son cuatro y el pecho es uno.':

@@ -1478,6 +1478,18 @@
       'And when you log, a set inside the range is no longer flagged as corrected. Ten reps when the sheet asks for 10-12 is not a change: it is being inside the range.',
     'Donde no hay rango es porque no lo hay: un 5 × 5 de fuerza es un 5 × 5, y una plancha lleva segundos, no repeticiones. Y si cambias las repeticiones a mano, el rango se va: lo que has escrito es un número tuyo, no el techo de nada.':
       'Where there is no range it is because there is none: a strength 5 × 5 is a 5 × 5, and a plank takes seconds, not reps. And if you change the reps by hand the range goes away: what you wrote is a number of your own, not the top of anything.',
+    '¿Puedo elegir cómo se reparte mi semana?':
+      'Can I choose how my week is split?',
+    'Sí. En «¿Qué buscas?», dentro de *Cómo repartir la semana*. Viene en «Automático», que es la app repartiendo según los días que hayas elegido, y debajo están los repartos de toda la vida: empuje/tracción/pierna, torso y pierna, cuerpo completo, y uno con un día entero de hombro y brazo.':
+      'Yes. Under What are you after?, inside *How to split the week*. It starts on Automatic, which is the app splitting it by the days you picked, and below are the classic splits: push/pull/legs, upper and lower, full body, and one with a whole day for shoulders and arms.',
+    'No salen todos siempre, y no es un fallo: cada reparto necesita unos días mínimos para que no deje medio cuerpo a una vez por semana. Empuje, tracción y pierna son tres días distintos, así que hacen falta seis para que cada uno salga dos veces. El día de hombro y brazo necesita cinco. Los que no caben aparecen debajo apagados, con el motivo escrito.':
+      'They do not all show up every time, and that is not a bug: each split needs a minimum number of days so it does not leave half the body at once a week. Push, pull and legs are three different days, so you need six for each to come round twice. The shoulder and arm day needs five. The ones that do not fit appear below, greyed out, with the reason written out.',
+    'Si cambias los días y tu reparto deja de caber, la app vuelve al automático y la etiqueta de arriba te lo dice. No se te queda puesto un reparto que no se va a aplicar.':
+      'If you change the days and your split no longer fits, the app goes back to automatic and the label at the top says so. You are never left with a split that is not going to be applied.',
+    'Ahí mismo está *Repetir los básicos*: con eso, el ejercicio principal de cada patrón es el mismo en sus dos días —el mismo press de banca el lunes y el jueves— para que puedas ver si sube. Los accesorios siguen variando. Por defecto se varía todo, que es lo que hacía la app hasta ahora.':
+      'Right there is *Repeat the main lifts*: with that, the main exercise of each pattern is the same on both of its days —the same bench press on Monday and Thursday— so you can see it going up. The accessories still vary. By default everything varies, which is what the app did until now.',
+    'Las dos cosas valen igual para el plan que monta la IA: va en lo que se le pide, así que no te monta un reparto distinto del que elegiste.':
+      'Both apply to the plan the AI builds as well: they go into what it is asked for, so it will not build you a different split from the one you chose.',
     '¿Por qué mi plan lleva tanta espalda?':
       'Why does my plan have so much back work?',
     'Casi siempre no la lleva: la lleva el nombre. «Espalda» es una zona de cuatro músculos —dorsal, espalda media, trapecio y lumbar— y «pecho» es uno solo, así que cualquier día con un remo o un jalón se llama espalda y en la barra de zonas la espalda sale siempre más alta. Es aritmética de la etiqueta, no del plan.':

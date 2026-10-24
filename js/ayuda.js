@@ -842,6 +842,14 @@
         'Donde no hay rango es porque no lo hay: un 5 × 5 de fuerza es un 5 × 5, y una plancha lleva segundos, no repeticiones. Y si cambias las repeticiones a mano, el rango se va: lo que has escrito es un número tuyo, no el techo de nada.'],
       ver: ['g-hoja', 'g-peso'] },
 
+    { id: 'p-reparto', q: '¿Puedo elegir cómo se reparte mi semana?',
+      a: ['Sí. En «¿Qué buscas?», dentro de *Cómo repartir la semana*. Viene en «Automático», que es la app repartiendo según los días que hayas elegido, y debajo están los repartos de toda la vida: empuje/tracción/pierna, torso y pierna, cuerpo completo, y uno con un día entero de hombro y brazo.',
+        'No salen todos siempre, y no es un fallo: cada reparto necesita unos días mínimos para que no deje medio cuerpo a una vez por semana. Empuje, tracción y pierna son tres días distintos, así que hacen falta seis para que cada uno salga dos veces. El día de hombro y brazo necesita cinco. Los que no caben aparecen debajo apagados, con el motivo escrito.',
+        'Si cambias los días y tu reparto deja de caber, la app vuelve al automático y la etiqueta de arriba te lo dice. No se te queda puesto un reparto que no se va a aplicar.',
+        'Ahí mismo está *Repetir los básicos*: con eso, el ejercicio principal de cada patrón es el mismo en sus dos días —el mismo press de banca el lunes y el jueves— para que puedas ver si sube. Los accesorios siguen variando. Por defecto se varía todo, que es lo que hacía la app hasta ahora.',
+        'Las dos cosas valen igual para el plan que monta la IA: va en lo que se le pide, así que no te monta un reparto distinto del que elegiste.'],
+      ver: ['g-plan', 'p-espalda'] },
+
     { id: 'p-espalda', q: '¿Por qué mi plan lleva tanta espalda?',
       a: ['Casi siempre no la lleva: la lleva el nombre. «Espalda» es una zona de cuatro músculos —dorsal, espalda media, trapecio y lumbar— y «pecho» es uno solo, así que cualquier día con un remo o un jalón se llama espalda y en la barra de zonas la espalda sale siempre más alta. Es aritmética de la etiqueta, no del plan.',
         'La cuenta que decide está justo debajo de la barra, en «Por músculo»: ahí cada músculo va contra lo que le toca a él, y es la misma vara con la que el generador decide si algo va corto. Es normal que la espalda salga alta por zona y por debajo del pecho por músculo: eso es un plan equilibrado, no uno cargado.',
