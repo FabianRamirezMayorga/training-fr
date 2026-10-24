@@ -1674,6 +1674,22 @@
     });
     prog.volumen = volumen;
     prog.directas = directas;
+
+    /* Y qué músculos se quedan cortos, con la misma vara que usa crear().
+
+       Esto antes no se rehacía, y el plan montado con IA se quedaba con la
+       lista de cortos del plan de la calculadora que lleva debajo —que es de
+       otro plan, con otros ejercicios—. Es decir: la app dejaba de medir justo
+       donde más falta hace, porque la calculadora se cuadra el volumen ella
+       sola y la IA no tiene quien se lo cuadre. */
+    const meta = prog.objetivoSeries || VOLUMEN_MIN;
+    const buscados = {};
+    prog.sesiones.forEach(function (ses) {
+      ses.ejercicios.forEach(function (e) { if (e.musculo) buscados[e.musculo] = true; });
+    });
+    prog.cortos = Object.keys(buscados).filter(function (m) {
+      return (directas[m] || 0) < Math.min(VOLUMEN_MIN, metaDe(m, meta));
+    });
     return volumen;
   }
 

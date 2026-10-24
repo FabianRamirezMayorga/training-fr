@@ -2183,6 +2183,14 @@
     'Espalda': 'Back',
     'Brazo': 'Arms',
     'Core': 'Core',
+    'Por músculo':
+      'By muscle',
+    'Lo que decide si un plan está equilibrado no es la zona, es el músculo: la espalda son cuatro y el pecho es uno.':
+      'What decides whether a plan is balanced is not the zone, it is the muscle: the back is four of them and the chest is one.',
+    'La barra son las series, para poder compararlas entre sí; el segundo número es lo que le toca a ese músculo, que no es lo mismo para todos; y el ámbar avisa de lo que no llega al mínimo. Cuentan solo las series que apuntan a ese músculo: el trabajo indirecto —el bíceps en un remo— suma, pero no se cuenta aquí.':
+      'The bar is the sets, so you can compare them against each other; the second number is what that muscle needs, which is not the same for every one; and amber flags whatever does not reach the minimum. Only the sets aimed at that muscle are counted: indirect work —the biceps in a row— adds up, but is not counted here.',
+    'Una zona de cuatro músculos se lleva más series que una de uno sin que eso sea desequilibrio: la cuenta que lo dice está justo debajo.':
+      'A zone made of four muscles takes more sets than one made of a single muscle without that being an imbalance: the count that settles it is right below.',
     'Borrador':
       'Draft',
     'Todavía no está en tus rutinas: no sale en «hoy», no cuenta en tu progreso y no lo verás en el móvil hasta que lo guardes.':

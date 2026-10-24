@@ -842,6 +842,13 @@
         'Donde no hay rango es porque no lo hay: un 5 × 5 de fuerza es un 5 × 5, y una plancha lleva segundos, no repeticiones. Y si cambias las repeticiones a mano, el rango se va: lo que has escrito es un número tuyo, no el techo de nada.'],
       ver: ['g-hoja', 'g-peso'] },
 
+    { id: 'p-espalda', q: '¿Por qué mi plan lleva tanta espalda?',
+      a: ['Casi siempre no la lleva: la lleva el nombre. «Espalda» es una zona de cuatro músculos —dorsal, espalda media, trapecio y lumbar— y «pecho» es uno solo, así que cualquier día con un remo o un jalón se llama espalda y en la barra de zonas la espalda sale siempre más alta. Es aritmética de la etiqueta, no del plan.',
+        'La cuenta que decide está justo debajo de la barra, en «Por músculo»: ahí cada músculo va contra lo que le toca a él, y es la misma vara con la que el generador decide si algo va corto. Es normal que la espalda salga alta por zona y por debajo del pecho por músculo: eso es un plan equilibrado, no uno cargado.',
+        'Si el plan lo ha montado la IA, ahí sí puede haber de más: elige ella los ejercicios y nadie le cuadra el volumen por detrás, que es lo que la calculadora sí hace. Por eso la cuenta por músculo se hace igual lo monte quien lo monte, y lo que se queda por debajo sale en ámbar.',
+        'Y si quieres otro reparto, pídeselo: en «¿Le pides algo concreto al entrenador?» escribes «espalda solo dos días» y eso manda por encima de cualquier norma suya. La calculadora no lee texto; la IA sí.'],
+      ver: ['g-plan', 'p-nombredia'] },
+
     { id: 'p-nombredia', q: '¿Por qué mi día ya no se llama «Empuje»?',
       a: ['Porque ahora se llama por lo que entrena: «Pecho, hombro y tríceps». «Empuje» es correcto y es como se llama el patrón por dentro, pero hay que saber de gimnasio para traducirlo, y el nombre del día es lo primero que se lee de la hoja —en el calendario es lo único que se ve—.',
         'El nombre sale de los ejercicios que acabaron en el día, no de la plantilla, así que no puede mentir: si el tríceps se cayó por falta de tiempo, el nombre no lo pone.',

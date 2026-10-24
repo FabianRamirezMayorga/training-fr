@@ -2406,15 +2406,19 @@
       '- FRECUENCIA: cada músculo, DOS VECES POR SEMANA como mínimo, repartido. El ' +
       'estímulo de una sesión dura en torno a dos días, así que un músculo que se ' +
       'entrena un solo día se pasa cinco sin nada. Con tres días o menos eso ' +
-      'significa cuerpo completo; con cuatro, torso y pierna dos veces; con cinco o ' +
-      'seis, empuje/tracción/pierna repetido. El día por músculo —lunes pecho, martes ' +
+      'significa cuerpo completo; con cuatro, torso y pierna dos veces; con cinco, ' +
+      'empuje, tracción y pierna y luego un torso y un tren inferior; con seis, ' +
+      'empuje/tracción/pierna dos veces. Con cinco días NO repartas la espalda ' +
+      'entre tres sesiones distintas: cada mitad del cuerpo sale dos veces y ninguna ' +
+      'tres. El día por músculo —lunes pecho, martes ' +
       'espalda— no entra, por mucho que lo pida la costumbre. Si el reparto de sus ' +
       'días te obliga a dejar algo a una sola vez, que sea un músculo pequeño y dilo ' +
       'en las razones.\n' +
 
       /* El reparto de volumen entre mitades no sale en ninguna cuenta por
          músculo y es lo que acaba en hombros que duelen a los seis meses. */
-      '- EQUILIBRIO: en la semana, al menos tantas series de tirar como de empujar. ' +
+      '- EQUILIBRIO: en la semana, al menos tantas series de tirar como de empujar, ' +
+      'y tantas, no el doble. ' +
       'Pecho y hombro frontal se llevan todo el protagonismo solos; la espalda alta y ' +
       'el deltoides posterior hay que ponerlos a propósito. Y en pierna, el femoral y ' +
       'el glúteo no se sostienen con sentadillas: necesitan su bisagra de cadera y su ' +

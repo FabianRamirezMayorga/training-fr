@@ -836,7 +836,63 @@
           ? T('Todo el plan cae en una sola zona. Para una semana completa conviene ' +
             'repartir más.')
           : T('La cifra grande son series por semana; el porcentaje, qué parte del total ' +
-            'se lleva esa zona.')}</p>
+            'se lleva esa zona.') + ' ' + T('Una zona de cuatro músculos se lleva más series que una de uno sin que eso sea desequilibrio: la cuenta que lo dice está justo debajo.')}</p>
+      </div>`;
+  }
+
+  /* ---------- el plan medido por músculo ----------
+     La barra de zonas compara un barrio con una casa: «espalda» son cuatro
+     músculos y «pecho» es uno, así que la espalda sale siempre más alta y el
+     plan parece cargado de espalda cuando por músculo va por debajo del pecho.
+     Medido sobre los 144 planes de la matriz: espalda 19,8 series por semana
+     contra 10,6 de pecho —casi el doble—, y en cambio 6,6 por músculo contra
+     10,6. La barra no miente, pero se lee al revés de lo que dice.
+
+     Esta es la cuenta que sí decide, y es la misma que usa el generador para
+     saber si un músculo va corto: no hay dos varas. */
+  function tablaMusculos(prog) {
+    const directas = prog.directas || {};
+    const meta = prog.objetivoSeries || 12;
+    const filas = Object.keys(directas).map(function (m) {
+      const suya = Programa.metaDe(m, meta);
+      return { label: I18N.muscle(m), series: Math.round(directas[m] * 10) / 10,
+        meta: suya,
+        corto: (directas[m] || 0) < Math.min(Programa.VOLUMEN_MIN, suya) };
+    }).filter(function (f) { return f.series > 0; })
+      .sort(function (a, b) { return b.series - a.series; });
+
+    if (filas.length < 3) return '';
+
+    /* La barra va contra la mayor del plan y no contra la meta de cada uno,
+       como en la tarjeta de zonas. Contra su propia meta salia el gemelo al
+       75% en ambar justo encima del gluteo al 53% en verde —porque al gemelo
+       le tocan ocho series y al gluteo quince—, y una barra mas larga marcada
+       en rojo al lado de una mas corta que no lo esta es de las cosas que te
+       hacen dejar de creerte la pantalla. Asi cada pieza dice una cosa sola:
+       la barra, cuantas series; el numero, cuantas le tocan; el ambar, que no
+       llega al minimo. */
+    const mayor = filas[0].series;
+
+    return html`
+      <div class="list-title">${T('Por músculo')}</div>
+      <p class="tiny" style="margin:-4px 0 10px">${T('Lo que decide si un plan está equilibrado no es la zona, es el músculo: la espalda son cuatro y el pecho es uno.')}</p>
+
+      <div class="card">
+        <div class="comp">
+          ${raw(filas.map(function (f) {
+            return html`
+              <div class="comp-fila">
+                <span class="comp-nom">${f.label}</span>
+                <span class="comp-pista">
+                  <i style="width:${Math.round(f.series / mayor * 100)}%"></i>
+                </span>
+                <span class="comp-num" ${raw(f.corto ? 'style="color:var(--warn)"' : '')}>
+                  ${UI.dec(f.series)}
+                  <span class="comp-pct">${Tn('de {n}', { n: f.meta })}</span></span>
+              </div>`;
+          }).join(''))}
+        </div>
+        <p class="tiny" style="margin:11px 0 0">${T('La barra son las series, para poder compararlas entre sí; el segundo número es lo que le toca a ese músculo, que no es lo mismo para todos; y el ámbar avisa de lo que no llega al mínimo. Cuentan solo las series que apuntan a ese músculo: el trabajo indirecto —el bíceps en un remo— suma, pero no se cuenta aquí.')}</p>
       </div>`;
   }
 
@@ -851,9 +907,16 @@
       const m = (ex && (ex.primaryMuscles || [])[0]) || e.musculo;
       if (m) porMusculo[m] = (porMusculo[m] || 0) + e.sets;
     });
-    const musculos = Object.keys(porMusculo)
-      .sort(function (a, b) { return porMusculo[b] - porMusculo[a]; })
-      .slice(0, 3).map(I18N.muscle).join(' · ');
+    /* Cortaba a tres sin decirlo, y eso pasa en 447 de 648 días —756 músculos
+       escondidos—: el día se leía como si entrenara tres cosas cuando entrenaba
+       cinco. Y como las series suelen empatar, los tres que salían no eran los
+       que más llevan sino los tres primeros de la lista. */
+    const ordenados = Object.keys(porMusculo)
+      .sort(function (a, b) { return porMusculo[b] - porMusculo[a]; });
+    const vistos = ordenados.slice(0, 3).map(I18N.muscle).join(' · ');
+    const musculos = ordenados.length > 3
+      ? Tn('{lista} y {n} más', { lista: vistos, n: ordenados.length - 3 })
+      : vistos;
 
     /* si el plan está guardado, el día se puede entrenar desde aquí */
     const suya = (prog.deRutinas || est.guardadas.length)
@@ -1208,6 +1271,7 @@
         </div>` : '')}
 
       ${raw(barraVolumen(prog))}
+      ${raw(tablaMusculos(prog))}
 
       <div class="list-head">
         <span class="list-title">${T('Tu semana')}</span>
