@@ -388,6 +388,41 @@
       h(P.zan, 'quadriceps', 'accesorio'), h(P.cad, 'glutes', 'accesorio'),
       h(P.cuf, 'hamstrings', 'accesorio'), h(P.abd, 'abdominals', 'accesorio')] },
 
+    /* ---- El reparto clásico de gimnasio ----
+       Pecho y tríceps, espalda y bíceps, pierna, hombro y abdomen, y un quinto
+       día de torso con brazos. Es el reparto con el que ha entrenado medio
+       mundo, y tiene una razón que no sale en la cuenta de series: cada día se
+       entiende solo. Se sabe qué toca el jueves sin abrir nada.
+
+       Lo que cuesta está medido y escrito en su aviso: la pierna sale un solo
+       día. La app no lo esconde, pero tampoco se lo prohibe a nadie. */
+    pechoTriceps: { nombre: 'Pecho y tríceps', huecos: [
+      h(P.emH, 'chest', 'principal'), h(P.emH, 'chest', 'principal'),
+      h(P.apr, 'chest', 'accesorio'),
+      h(P.etr, 'triceps', 'accesorio'), h(P.etr, 'triceps', 'accesorio')] },
+
+    espaldaBiceps: { nombre: 'Espalda y bíceps', huecos: [
+      h(P.trV, 'lats', 'principal'), h(P.trH, 'middle back', 'principal'),
+      h(P.trV, 'lats', 'accesorio'), h(P.trH, 'lats', 'accesorio'),
+      h(P.cbi, 'biceps', 'accesorio'), h(P.cbi, 'biceps', 'accesorio')] },
+
+    /* Tres huecos de hombro no son un error: hombroQueToca reparte entre
+       lateral y posterior según lo que ya haya ese día, y detrás de un press
+       militar toca justo la posterior, que es la que va corta en casi
+       cualquier plan. */
+    hombroAbdomen: { nombre: 'Hombro y abdomen', huecos: [
+      h(P.emV, 'shoulders', 'principal'), h(P.lat, 'shoulders', 'accesorio'),
+      h(P.lat, 'shoulders', 'accesorio'), h(P.abd, 'abdominals', 'accesorio'),
+      h(P.ant, 'abdominals', 'accesorio')] },
+
+    /* El quinto día es la segunda vuelta del torso: lo que el lunes y el
+       martes dejaron a una sola vez. Sin él, el pecho y la espalda se
+       quedarían a un día igual que la pierna. */
+    torsoBrazo: { nombre: 'Torso y brazo', huecos: [
+      h(P.emH, 'chest', 'principal'), h(P.trH, 'middle back', 'principal'),
+      h(P.trV, 'lats', 'accesorio'),
+      h(P.cbi, 'biceps', 'accesorio'), h(P.etr, 'triceps', 'accesorio')] },
+
     pierna: { nombre: 'Pierna', huecos: [
       h(P.sen, 'quadriceps', 'principal'), h(P.bis, 'hamstrings', 'principal'),
       h(P.cad, 'glutes', 'accesorio'), h(P.exc, 'quadriceps', 'accesorio'),
@@ -419,6 +454,10 @@
     { id: 'zonas', label: 'Con día de hombro y brazo', dias: [5, 6],
       sub: 'Empuje, tracción, pierna, un día entero de hombro y brazo, y un torso y pierna',
       porque: 'Hacen falta 5 días: dar uno entero al brazo con menos deja el pecho y la pierna a una vez por semana.' },
+    { id: 'clasico', label: 'Clásico de gimnasio', dias: [5],
+      sub: 'Pecho y tríceps · espalda y bíceps · pierna · hombro y abdomen · torso y brazo',
+      aviso: 'Con este reparto la pierna y el hombro salen un solo día de los cinco. El volumen cuadra, pero el estímulo les llega una vez por semana en vez de dos: es el precio de que cada día se entienda solo.',
+      porque: 'Son cinco días distintos: hace falta elegir exactamente 5.' },
     { id: 'full', label: 'Cuerpo completo', dias: [1, 2, 3, 4],
       sub: 'Todo el cuerpo cada día',
       porque: 'Hasta 4 días: con más, la pierna sale en todos y se lleva la mitad del plan.' }
@@ -444,6 +483,9 @@
     if (e.id === 'ept') return ciclo(['empuje', 'traccion', 'pierna'], dias);
     if (e.id === 'torso') return ciclo(['superior', 'inferior', 'superior2', 'inferior2'], dias);
     if (e.id === 'full') return ciclo(['fullA', 'fullB', 'fullC'], dias);
+    if (e.id === 'clasico') {
+      return ['pechoTriceps', 'espaldaBiceps', 'pierna', 'hombroAbdomen', 'torsoBrazo'];
+    }
     if (e.id === 'zonas') {
       const base = ['empuje', 'traccion', 'pierna', 'hombroBrazo', 'torsoPierna'];
       return dias <= 5 ? base : base.concat(ciclo(['inferior2', 'superior2'], dias - 5));
@@ -557,7 +599,11 @@
     if (hueco.patron !== 'elevacion lateral') return 0;
     const n = I18N.norm(ex.nameEs || ex.name || '');
     if (/frontal|sobre cabeza|above cabeza/.test(n)) return -40;
-    if (/posterior/.test(n)) return 14;
+    /* «Pájaro» es como lo llama el catálogo: pájaro con mancuernas, pájaro
+       sentado, pájaro tumbado. Buscando solo «posterior» no encontraba ni uno
+       de los cinco que hay, y el día de hombro acababa con dos elevaciones
+       laterales y ninguna posterior —que es justo la que va corta—. */
+    if (/posterior|pajaro|reverse fly|rear delt/.test(n)) return 14;
     if (/lateral/.test(n)) return 12;
     return 0;
   }
@@ -593,7 +639,20 @@
     /* El músculo del hueco tiene que ser de los que el ejercicio entrena de
        verdad. Sin castigo por no estar, una «elevación de cadera en máquina
        Smith» entraba de abdominal solo porque su patrón encajaba. */
-    if ((ex.primaryMuscles || []).indexOf(hueco.musculo) !== -1) s += 30;
+    /* Y tiene que ser el PRIMERO, no estar en la lista.
+
+       El Bird-Dog trae primaryMuscles ['lower back','abdominals']: miraba el
+       array entero, se llevaba el hueco de abdomen con +30, y después el
+       volumen, el nombre del día y la tarjeta —que leen primaryMuscles[0]— lo
+       contaban como lumbar. Ganaba el hueco de un músculo y luego no contaba
+       para ese músculo: el día de hombro y abdomen salía llamándose «hombro y
+       core» con un ejercicio de lumbar dentro.
+
+       Estar en segunda posición sigue valiendo algo —es trabajo de verdad—,
+       pero no empata con el que lo tiene de primero. */
+    const prim = ex.primaryMuscles || [];
+    if (prim[0] === hueco.musculo) s += 30;
+    else if (prim.indexOf(hueco.musculo) !== -1) s += 10;
     else if ((ex.secondaryMuscles || []).indexOf(hueco.musculo) !== -1) s -= 10;
     else s -= 30;
     if (hueco.rol === 'principal') {
@@ -683,6 +742,11 @@
     const util = Math.max(15, minutos - calentamiento) * 60;
     const coste = obj.principal.series * (obj.principal.rest + 45);
     return Math.max(3, Math.min(8, Math.round(util / coste)));
+  }
+
+  function avisoDeReparto(estructura, dias) {
+    const e = ESTRUCTURAS.filter(function (x) { return x.id === estructura; })[0];
+    return e && e.aviso && e.dias.indexOf(dias) !== -1 ? [e.aviso] : [];
   }
 
   /* opts: {dias:[nombres], minutos, gear, objetivo, foco} — lo demás sale del perfil */
@@ -898,7 +962,11 @@
       real: real,
       razones: razones(p, obj, edad, sexo, experiencia, objetivoSeries, dias.length,
         plantillas, cortos, minutos, volumen, real),
-      avisos: r.notas.concat(edad.notas, avisoDeMaterial(sinCubrir, gear)),
+      /* Si el reparto que ha elegido tiene un precio, se dice en el plan y no
+         solo en el formulario: el formulario se lee una vez y el plan se mira
+         cada semana. */
+      avisos: r.notas.concat(edad.notas, avisoDeMaterial(sinCubrir, gear),
+        avisoDeReparto(opts.estructura, dias.length)),
       progresion: progresion(obj, r.sinMaximos, sesiones),
       cardio: obj.cardio ? cardioTexto(p) : null,
       sinCubrir: sinCubrir

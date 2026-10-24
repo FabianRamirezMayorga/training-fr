@@ -2183,6 +2183,18 @@
     'Espalda': 'Back',
     'Brazo': 'Arms',
     'Core': 'Core',
+    'Clásico de gimnasio':
+      'Classic gym split',
+    'Pecho y tríceps · espalda y bíceps · pierna · hombro y abdomen · torso y brazo':
+      'Chest and triceps · back and biceps · legs · shoulders and abs · upper body and arms',
+    'Con este reparto la pierna y el hombro salen un solo día de los cinco. El volumen cuadra, pero el estímulo les llega una vez por semana en vez de dos: es el precio de que cada día se entienda solo.':
+      'With this split the legs and the shoulders come up on a single day out of five. The volume adds up, but the stimulus reaches them once a week instead of twice: that is the price of every day making sense on its own.',
+    'Son cinco días distintos: hace falta elegir exactamente 5.':
+      'They are five different days: you need to pick exactly 5.',
+    'Hombro y abdomen':
+      'Shoulders and abs',
+    'Torso y brazo':
+      'Upper body and arms',
     'Lo que le faltaba y le añadí':
       'What it was missing and I added',
     'Una semana entera tiene que llevar los seis movimientos. Estos no estaban, así que los he puesto yo con el ejercicio que te tocaría de la calculadora:':
