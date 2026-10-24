@@ -945,6 +945,24 @@
       return (directas[m] || 0) < Math.min(VOLUMEN_MIN, metaDe(m, objetivoSeries));
     });   /* en crudo: el nombre del musculo se traduce al leerlo, no aqui */
 
+    /* Y por qué van cortos, que no es lo mismo en todos. Un músculo con un
+       solo hueco en la semana no pasa de 6 series —ver topeDe()—, así que
+       añadir minutos no lo arregla: hace falta otro hueco. Decirle que suba el
+       tiempo es darle un consejo que no puede funcionar, y el que prueba un
+       consejo que no funciona deja de creerse los demás. */
+    const huecosPorMusculo = {};
+    sesiones.forEach(function (ses) {
+      ses.ejercicios.forEach(function (e) {
+        const ex = Data.get(e.exId);
+        ((ex && ex.primaryMuscles && ex.primaryMuscles.length)
+          ? ex.primaryMuscles : [e.musculo]).forEach(function (m) {
+            huecosPorMusculo[m] = (huecosPorMusculo[m] || 0) + 1;
+          });
+      });
+    });
+    const cortosDeHueco = cortos.filter(function (m) { return huecosPorMusculo[m] === 1; });
+    const cortosDeTiempo = cortos.filter(function (m) { return huecosPorMusculo[m] !== 1; });
+
     const real = volumenReal(4);
 
     return {
@@ -961,7 +979,7 @@
       lesiones: claves.map(function (k) { return LESIONES[k].label; }),
       real: real,
       razones: razones(p, obj, edad, sexo, experiencia, objetivoSeries, dias.length,
-        plantillas, cortos, minutos, volumen, real),
+        plantillas, cortos, minutos, volumen, real, cortosDeHueco, cortosDeTiempo),
       /* Si el reparto que ha elegido tiene un precio, se dice en el plan y no
          solo en el formulario: el formulario se lee una vez y el plan se mira
          cada semana. */
@@ -1131,8 +1149,18 @@
      medí: sesenta y tres series más en los 144 planes, misma nota y los
      mismos músculos cortos. No lo compraba nada, así que fuera: un
      condicional que no mueve ningún número es deuda. */
-  function topeDe(e) {
-    return e.rol === 'principal' ? 5 : 4;
+  /* holgura: dos series más de margen para el hueco Único de un músculo.
+
+     El tope de cuatro existe para que no salgan cinco series de curl martillo
+     teniendo el bíceps cubierto en otros tres sitios. Cuando ese hueco es el
+     único que tiene ese músculo en toda la semana, la razón desaparece: no hay
+     otro sitio de donde sacarlo, y capar ahí es garantizar que salga corto.
+
+     Medido generando con 180 minutos por sesión —tiempo de sobra—: abdominales,
+     gemelos, zona lumbar, dorsales, bíceps y tríceps se quedaban SIEMPRE en
+     exactamente 4 según el reparto, con el mínimo de la app en 8. */
+  function topeDe(e, holgura) {
+    return (e.rol === 'principal' ? 5 : 4) + (holgura || 0);
   }
 
   /* Los que comprimen la columna con el peso encima. Misma lista que usa el
@@ -1182,14 +1210,14 @@
      lleven lo mismo. Sale más caro en minutos y arregla varios músculos de
      una vez, que es exactamente lo que hace alguien con una hora y cuarto y un
      plan de cuatro días. */
-  function bloqueQueSube(ses, i) {
+  function bloqueQueSube(ses, i, holgura) {
     const objetivo = ses.ejercicios[i].sets + 1;
     const lista = [];
     for (let k = i; k >= 0; k--) {
       const e = ses.ejercicios[k];
       /* En cuanto uno ya lleva lo que queremos, la forma se mantiene sola. */
       if (e.sets >= objetivo) break;
-      if (e.sets + 1 > topeDe(e)) return null;
+      if (e.sets + 1 > topeDe(e, holgura)) return null;
       lista.push(e);
     }
     return lista.length ? lista : null;
@@ -1272,8 +1300,22 @@
          dentro de ella en el ejercicio de ese músculo que menos series lleve.
          Así crece el accesorio antes que el básico, que es lo sensato: cinco
          series de sentadilla pesada no se llevan igual que cinco de curl. */
+      /* Cuántos huecos tiene cada músculo en toda la semana. Con uno solo se le
+         da margen: ver topeDe(). */
+      const huecosDe = {};
+      sesiones.forEach(function (ses) {
+        ses.ejercicios.forEach(function (e) {
+          const ex = Data.get(e.exId);
+          ((ex && ex.primaryMuscles && ex.primaryMuscles.length)
+            ? ex.primaryMuscles : [e.musculo]).forEach(function (m) {
+              huecosDe[m] = (huecosDe[m] || 0) + 1;
+            });
+        });
+      });
+
       let mejor = null;
       faltan.some(function (f) {
+        const holgura = huecosDe[f.m] === 1 ? 2 : 0;
         sesiones.forEach(function (ses) {
           if (ses.minutos >= minutos) return;
           ses.ejercicios.forEach(function (e, i) {
@@ -1282,7 +1324,7 @@
               ? ex.primaryMuscles : [e.musculo];
             if (suyos.indexOf(f.m) === -1) return;
             if (vetados[ses.dia + '|' + i]) return;
-            const bloque = bloqueQueSube(ses, i);
+            const bloque = bloqueQueSube(ses, i, holgura);
             if (!bloque) return;
             if (!mejor || e.sets < mejor.e.sets) {
               mejor = { ses: ses, i: i, e: e, bloque: bloque };
@@ -1687,7 +1729,7 @@
     return Tn(x.t, v);
   }
 
-  function razones(p, obj, edad, sexo, experiencia, series, ndias, plantillas, cortos, minutos, volumenPlan, real) {
+  function razones(p, obj, edad, sexo, experiencia, series, ndias, plantillas, cortos, minutos, volumenPlan, real, cortosDeHueco, cortosDeTiempo) {
     const out = [];
     const nivel = { beginner: 'Principiante', intermediate: 'Intermedio', expert: 'Avanzado' };
 
@@ -1766,15 +1808,20 @@
 
     /* La aritmética del tiempo: en una hora no caben veinte series por músculo,
        y es mejor decirlo que repartir migajas y llamarlo programa. */
-    if (cortos && cortos.length) {
-      out.push(frase(cortos.length > 4
+    if (cortosDeTiempo && cortosDeTiempo.length) {
+      out.push(frase(cortosDeTiempo.length > 4
         ? 'Con {dias} días de {min} min no da tiempo a todo: {lista} y alguno más se ' +
-          'quedan por debajo de 8 series semanales. Si te importan, añade 15 min a la ' +
-          'sesión, otro día, o priorízalos con el selector de zona.'
+          'quedan por debajo de 8 series semanales. Con 15 min más por sesión, o con otro ' +
+          'día, entrarían.'
         : 'Con {dias} días de {min} min no da tiempo a todo: {lista} se quedan por debajo ' +
-          'de 8 series semanales. Si te importan, añade 15 min a la sesión, otro día, o ' +
-          'priorízalos con el selector de zona.',
-        { dias: ndias, min: minutos, lista: { musculos: cortos.slice(0, 4) } }));
+          'de 8 series semanales. Con 15 min más por sesión, o con otro día, entrarían.',
+        { dias: ndias, min: minutos, lista: { musculos: cortosDeTiempo.slice(0, 4) } }));
+    }
+    if (cortosDeHueco && cortosDeHueco.length) {
+      out.push(frase('{lista} salen una sola vez en toda la semana, así que no pasan de 6 ' +
+        'series por mucho tiempo que añadas: lo que hace falta es un hueco más, no más ' +
+        'minutos. Priorízalos con el selector de zona, o añade un día.',
+        { lista: { musculos: cortosDeHueco.slice(0, 4) } }));
     }
     return out;
   }

@@ -842,6 +842,13 @@
         'Donde no hay rango es porque no lo hay: un 5 × 5 de fuerza es un 5 × 5, y una plancha lleva segundos, no repeticiones. Y si cambias las repeticiones a mano, el rango se va: lo que has escrito es un número tuyo, no el techo de nada.'],
       ver: ['g-hoja', 'g-peso'] },
 
+    { id: 'p-cortos', q: '¿Por qué me salen cortos siempre los mismos músculos?',
+      a: ['Porque hay dos motivos distintos para ir corto y hasta ahora la app te daba el mismo para los dos. Si el músculo tiene dos o más huecos en la semana y se queda corto, es el reloj: con más minutos o un día más entra. Si solo tiene UNO, no es el reloj: un hueco no pasa de 6 series, y puedes añadir la hora que quieras que seguirá igual.',
+        'Eso explica que la zona lumbar, los gemelos y el abdomen salieran corti­tos en casi todos los planes: en la mayoría de repartos tienen un solo hueco. Medido generando con tres horas por sesión —tiempo de sobra— se quedaban exactamente igual. El plan te decía «añade 15 minutos», y añadir 15 minutos no podía cambiar nada.',
+        'Lo que sí funciona con esos es darles otro hueco: priorizar esa zona con el selector, que añade un ejercicio suyo, o añadir un día. Y ahora el plan te dice cuál de los dos casos es el tuyo, con los nombres.',
+        'De paso se levantó un tope: un ejercicio accesorio no pasaba de 4 series nunca. Ese tope existe para que no salgan cinco series de curl martillo teniendo el bíceps cubierto en otros tres sitios; cuando es el único hueco de ese músculo en toda la semana, la razón no vale, y ahora llega a 6.'],
+      ver: ['g-plan', 'p-reparto'] },
+
     { id: 'p-cuerpoentero', q: '¿Quién garantiza que el plan me entrene el cuerpo entero?',
       a: ['La app, no la IA. Una semana tiene que llevar los seis movimientos: empuje horizontal y vertical, tracción horizontal y vertical, rodilla —sentadilla o zancada— y cadera —peso muerto o empuje de cadera—. Si falta uno, el plan tiene un agujero aunque las series cuadren, y el agujero lo paga quien entrena.',
         'Al entrenador con IA se le pide en el encargo, pero pedir no es garantizar. Así que cuando termina de montarlo, la app lo repasa: si falta un movimiento lo pone ella, con el ejercicio que te tocaría de la calculadora. Y si el día ya está lleno de minutos, en vez de rendirse cambia el accesorio que más se repite esa semana —la tercera extensión de tríceps— por el que falta.',

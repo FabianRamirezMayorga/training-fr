@@ -2150,10 +2150,12 @@
       '{mus} ({n} sets a week, the plan asks you for {pide})',
     'Todavía no tienes entrenamientos guardados, así que el plan sale solo de tu perfil. En cuanto entrenes unas semanas, este análisis mira lo que de verdad haces y deja de hablar en general.':
       'You have no saved workouts yet, so the plan comes from your profile alone. Once you have trained for a few weeks, this analysis looks at what you actually do and stops speaking in general terms.',
-    'Con {dias} días de {min} min no da tiempo a todo: {lista} y alguno más se quedan por debajo de 8 series semanales. Si te importan, añade 15 min a la sesión, otro día, o priorízalos con el selector de zona.':
-      'With {dias} days of {min} min there is not time for everything: {lista} and a few more stay under 8 sets a week. If they matter to you, add 15 min to the session, another day, or prioritise them with the area selector.',
-    'Con {dias} días de {min} min no da tiempo a todo: {lista} se quedan por debajo de 8 series semanales. Si te importan, añade 15 min a la sesión, otro día, o priorízalos con el selector de zona.':
-      'With {dias} days of {min} min there is not time for everything: {lista} stay under 8 sets a week. If they matter to you, add 15 min to the session, another day, or prioritise them with the area selector.',
+    'Con {dias} días de {min} min no da tiempo a todo: {lista} y alguno más se quedan por debajo de 8 series semanales. Con 15 min más por sesión, o con otro día, entrarían.':
+      'With {dias} days of {min} min there is not time for everything: {lista} and a few more stay under 8 sets a week. With 15 min more per session, or with another day, they would fit.',
+    'Con {dias} días de {min} min no da tiempo a todo: {lista} se quedan por debajo de 8 series semanales. Con 15 min más por sesión, o con otro día, entrarían.':
+      'With {dias} days of {min} min there is not time for everything: {lista} stay under 8 sets a week. With 15 min more per session, or with another day, they would fit.',
+    '{lista} salen una sola vez en toda la semana, así que no pasan de 6 series por mucho tiempo que añadas: lo que hace falta es un hueco más, no más minutos. Priorízalos con el selector de zona, o añade un día.':
+      '{lista} come up only once in the whole week, so they do not go past 6 sets however much time you add: what is needed is one more slot, not more minutes. Prioritise them with the area selector, or add a day.',
     'Además del gimnasio: {pasos} pasos al día y dos sesiones de 25 a 35 min de cardio suave (el que te deje hablar) en los días que no entrenes. El cardio duro y el gimnasio el mismo día se pisan.':
       'On top of the gym: {pasos} steps a day and two 25-to-35-minute easy cardio sessions (the kind you can talk through) on the days you do not train. Hard cardio and the gym on the same day get in each other’s way.',
 
