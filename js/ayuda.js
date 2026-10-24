@@ -842,6 +842,12 @@
         'Donde no hay rango es porque no lo hay: un 5 × 5 de fuerza es un 5 × 5, y una plancha lleva segundos, no repeticiones. Y si cambias las repeticiones a mano, el rango se va: lo que has escrito es un número tuyo, no el techo de nada.'],
       ver: ['g-hoja', 'g-peso'] },
 
+    { id: 'p-dibujo', q: '¿Por qué los ejercicios de mi plan han cambiado de dibujo?',
+      a: ['Porque ahora casi todos traen la ilustración escrita para esta app —512 píxeles, guardada en el propio móvil— en vez de la foto de gimnasio que venía de fuera. El ejercicio es el mismo: la sentadilla con barra sigue siendo la sentadilla con barra. Tus marcas, tu historial y tus rutinas no se tocan, porque el identificador del ejercicio no cambia.',
+        'El cambio no es estético. Esa ilustración funciona sin conexión, y el nombre y las instrucciones están escritos en español, no traducidos palabra a palabra. Hasta ahora la mitad de lo que salía en los planes eran fotos que había que descargar.',
+        'Quedan dos con foto, la apertura inversa en máquina y el fondo para tríceps, porque no existe ilustración equivalente. Cuando no la hay no se pone una parecida: sería enseñarte otro ejercicio.'],
+      ver: ['g-plan'] },
+
     { id: 'p-reparto', q: '¿Puedo elegir cómo se reparte mi semana?',
       a: ['Sí. En «¿Qué buscas?», dentro de *Cómo repartir la semana*. Viene en «Automático», que es la app repartiendo según los días que hayas elegido, y debajo están los repartos de toda la vida: empuje/tracción/pierna, torso y pierna, cuerpo completo, y uno con un día entero de hombro y brazo.',
         'No salen todos siempre, y no es un fallo: cada reparto necesita unos días mínimos para que no deje medio cuerpo a una vez por semana. Empuje, tracción y pierna son tres días distintos, así que hacen falta seis para que cada uno salga dos veces. El día de hombro y brazo necesita cinco. Los que no caben aparecen debajo apagados, con el motivo escrito.',

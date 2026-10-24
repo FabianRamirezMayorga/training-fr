@@ -337,6 +337,41 @@
      Se apunta a dónde fue a parar y get() lo sigue encontrando. */
   const alias = {};
 
+  /* Cuando los dos catálogos llaman distinto al mismo ejercicio.
+
+     La lista va a mano a propósito. La probé automática, emparejando por
+     palabras del nombre, y proponía «Press de banca agarre medio» → «Press de
+     Banca INCLINADO con Agarre Cerrado», «Peso Muerto Rumano» → «Peso Muerto
+     con Pausa» y «Elevación Frontal» → «Elevación Lateral». Son otros
+     ejercicios: un emparejador que acierta casi siempre, en un catálogo, es un
+     emparejador que miente. Y esta es la misma leccion que ya aprendió
+     bonusCurado en programa.js.
+
+     La clave es el nombre en inglés normalizado del catálogo de fuera; el
+     valor, el id del catálogo en español. */
+  const GEMELO_ES = {
+    'barbell squat': 'es_squat',
+    'barbell bench press medium grip': 'es_bench_press',
+    'standing military press': 'es_ohp',
+    'bent over barbell row': 'es_barbell_row',
+    'stiff legged barbell deadlift': 'es_stiff_leg_deadlift',
+    'barbell hip thrust': 'es_hip_thrust',
+    'one arm dumbbell row': 'es_single_arm_db_row',
+    'wide grip lat pulldown': 'es_lat_pulldown',
+    'triceps pushdown': 'es_tricep_pushdown',
+    'side lateral raise': 'es_lateral_raise',
+    'leg extensions': 'es_leg_extension',
+    'lying leg curls': 'es_leg_curl',
+    'lying triceps press': 'es_ez_bar_lying_tricep_extension',
+    'seated triceps press': 'es_seated_dumbbell_tricep_extension',
+    'alternate hammer curl': 'es_hammer_curl',
+    'dumbbell flyes': 'es_db_fly',
+    'cable crossover': 'es_cable_fly',
+    'flat bench lying leg raise': 'es_lying_leg_raise',
+    'hyperextensions back extensions': 'es_machine_back_extension',
+    'smith machine hip raise': 'es_smith_machine_hip_thrust'
+  };
+
   function conExtras(raw) {
     let todo = raw;
 
@@ -359,14 +394,19 @@
          el escrito a mano. Por el español casaban 60; añadiendo el inglés, 101. */
       const porNombre = {};
       const porIngles = {};
+      const porId = {};
       enEspanol.forEach(function (e) {
         porNombre[I18N.norm(e.nameEs)] = e;
         if (e.name) porIngles[I18N.norm(e.name)] = e;
+        porId[e.id] = e;
       });
 
       const aprovechados = {};
       todo = todo.map(function (e) {
-        const mejor = porIngles[I18N.norm(e.name)] ||
+        /* La pareja escrita a mano manda sobre las dos búsquedas por nombre:
+           existe justamente porque el nombre no casa. */
+        const mejor = porId[GEMELO_ES[I18N.norm(e.name)]] ||
+          porIngles[I18N.norm(e.name)] ||
           porNombre[I18N.norm(e.nameEs || I18N.name(e.name))];
         if (!mejor) return e;
         aprovechados[mejor.id] = true;

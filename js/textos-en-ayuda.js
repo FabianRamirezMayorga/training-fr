@@ -1478,6 +1478,14 @@
       'And when you log, a set inside the range is no longer flagged as corrected. Ten reps when the sheet asks for 10-12 is not a change: it is being inside the range.',
     'Donde no hay rango es porque no lo hay: un 5 × 5 de fuerza es un 5 × 5, y una plancha lleva segundos, no repeticiones. Y si cambias las repeticiones a mano, el rango se va: lo que has escrito es un número tuyo, no el techo de nada.':
       'Where there is no range it is because there is none: a strength 5 × 5 is a 5 × 5, and a plank takes seconds, not reps. And if you change the reps by hand the range goes away: what you wrote is a number of your own, not the top of anything.',
+    '¿Por qué los ejercicios de mi plan han cambiado de dibujo?':
+      'Why have the exercises in my plan changed picture?',
+    'Porque ahora casi todos traen la ilustración escrita para esta app —512 píxeles, guardada en el propio móvil— en vez de la foto de gimnasio que venía de fuera. El ejercicio es el mismo: la sentadilla con barra sigue siendo la sentadilla con barra. Tus marcas, tu historial y tus rutinas no se tocan, porque el identificador del ejercicio no cambia.':
+      'Because almost all of them now carry the illustration drawn for this app —512 pixels, stored on the phone itself— instead of the gym photo that came from outside. The exercise is the same: the barbell back squat is still the barbell back squat. Your records, your history and your routines are untouched, because the exercise identifier does not change.',
+    'El cambio no es estético. Esa ilustración funciona sin conexión, y el nombre y las instrucciones están escritos en español, no traducidos palabra a palabra. Hasta ahora la mitad de lo que salía en los planes eran fotos que había que descargar.':
+      'The change is not cosmetic. That illustration works offline, and the name and the instructions are written in Spanish rather than translated word by word. Until now half of what showed up in the plans were photos that had to be downloaded.',
+    'Quedan dos con foto, la apertura inversa en máquina y el fondo para tríceps, porque no existe ilustración equivalente. Cuando no la hay no se pone una parecida: sería enseñarte otro ejercicio.':
+      'Two still have a photo, the reverse machine fly and the triceps dip, because no equivalent illustration exists. When there is none, a similar one is not put in its place: that would be showing you a different exercise.',
     '¿Puedo elegir cómo se reparte mi semana?':
       'Can I choose how my week is split?',
     'Sí. En «¿Qué buscas?», dentro de *Cómo repartir la semana*. Viene en «Automático», que es la app repartiendo según los días que hayas elegido, y debajo están los repartos de toda la vida: empuje/tracción/pierna, torso y pierna, cuerpo completo, y uno con un día entero de hombro y brazo.':
