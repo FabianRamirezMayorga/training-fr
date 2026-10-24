@@ -2183,6 +2183,28 @@
     'Espalda': 'Back',
     'Brazo': 'Arms',
     'Core': 'Core',
+    'Lo que le faltaba y le añadí':
+      'What it was missing and I added',
+    'Una semana entera tiene que llevar los seis movimientos. Estos no estaban, así que los he puesto yo con el ejercicio que te tocaría de la calculadora:':
+      'A whole week has to carry all six movements. These were not there, so I put them in myself with the exercise the calculator would give you:',
+    '{que}, el {dia} — faltaba {falta}':
+      '{que}, on {dia} — {falta} was missing',
+    'Esto falta y no he podido meterlo':
+      'This is missing and I could not fit it in',
+    'No cabe en los minutos que has pedido: {lista}. Sube el tiempo por sesión o añade un día, y vuelve a generarlo.':
+      'It does not fit in the minutes you asked for: {lista}. Raise the time per session or add a day, then generate it again.',
+    'Lo cambia la app: faltaba este movimiento en la semana.':
+      'Swapped in by the app: this movement was missing from the week.',
+    'Lo añade la app: faltaba este movimiento en la semana.':
+      'Added by the app: this movement was missing from the week.',
+    'la tracción horizontal':
+      'the horizontal pull',
+    'la tracción vertical':
+      'the vertical pull',
+    'la rodilla (sentadilla o zancada)':
+      'the knee (squat or lunge)',
+    'la cadera (peso muerto o empuje de cadera)':
+      'the hip (deadlift or hip thrust)',
     'Cómo repartir la semana':
       'How to split the week',
     'Con los días que has elegido, estos repartos dejan músculos a una vez por semana, así que no se ofrecen:':
@@ -4051,6 +4073,8 @@
     'sesión {n}': 'session {n}',
     'empuje horizontal': 'horizontal push',
     'empuje vertical': 'vertical push',
+    'el empuje horizontal': 'the horizontal push',
+    'el empuje vertical': 'the vertical push',
     'traccion horizontal': 'horizontal pull',
     'traccion vertical': 'vertical pull',
     'sentadilla': 'squat',

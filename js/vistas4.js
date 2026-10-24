@@ -1322,6 +1322,29 @@
           { lista: prog.descartados.map(T).join('; ') })}</p>
         </div>` : '')}
 
+      ${raw(prog.porIA && prog.anadidos && prog.anadidos.length ? html`
+        <div class="card">
+          <b>${T('Lo que le faltaba y le añadí')}</b>
+          <p class="tiny" style="margin:6px 0 4px">${T('Una semana entera tiene que llevar ' +
+          'los seis movimientos. Estos no estaban, así que los he puesto yo con el ' +
+          'ejercicio que te tocaría de la calculadora:')}</p>
+          <ul class="tiny" style="margin:0;padding-left:18px">
+            ${raw(prog.anadidos.map(function (a) {
+              return '<li>' + esc(Tn('{que}, el {dia} — faltaba {falta}',
+                { que: a.que, dia: UI.diaLargo(a.dia).toLocaleLowerCase('es'),
+                  falta: T(a.falta) })) + '</li>';
+            }).join(''))}
+          </ul>
+        </div>` : '')}
+
+      ${raw(prog.porIA && prog.sinSitio && prog.sinSitio.length ? html`
+        <div class="card aviso-seguridad">
+          <b>${T('Esto falta y no he podido meterlo')}</b>
+          <p class="tiny" style="margin:6px 0 0">${Tn('No cabe en los minutos que has ' +
+          'pedido: {lista}. Sube el tiempo por sesión o añade un día, y vuelve a ' +
+          'generarlo.', { lista: prog.sinSitio.map(T).join('; ') })}</p>
+        </div>` : '')}
+
       ${raw(bloqueIA())}
 
       ${raw(prog.avisos.length ? html`
@@ -1890,6 +1913,11 @@
     /* si no ha salido ni una sesión aprovechable, se queda la de la calculadora */
     if (!sesiones.length) return null;
 
+    /* Y aquí se garantiza lo que el prompt solo pide: los seis movimientos de
+       la semana. Lo que falte se rellena con el plan de la calculadora y se
+       dice debajo, con nombre y con el porqué. */
+    const relleno = Programa.completar(sesiones, base, est.minutos, base.calentamiento);
+
     if (sobran.length) {
       descartados.push(Tn('{lista} (pediste {n} días y propuso más)',
         { lista: sobran.join(', '), n: est.dias.length }));
@@ -1900,6 +1928,8 @@
     prog.porIA = true;
     prog.nombreIA = r.nombre || '';
     prog.descartados = descartados;
+    prog.anadidos = relleno.anadidos;
+    prog.sinSitio = relleno.sinSitio;
 
     if (r.razones && r.razones.length) prog.razones = r.razones.slice(0, 8);
     if (r.progresion && r.progresion.length) {

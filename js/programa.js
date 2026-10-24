@@ -1377,6 +1377,162 @@
     return Math.round(seg / 60) + calentamiento;
   }
 
+  /* ---------- que el plan cubra el cuerpo entero ----------
+
+     El prompt de la IA ya le pide los seis movimientos, pero pedir no es
+     garantizar. Un plan al que le falta toda la tracción vertical es un plan
+     con un agujero aunque las series cuadren, y el agujero lo paga quien
+     entrena, no quien lo montó. Así que se comprueba después y se rellena con
+     el plan de la calculadora, que por construcción los cubre todos.
+
+     No se le quita nada a lo que propuso la IA: se le añade. Y lo añadido se
+     dice en pantalla, porque un plan que se corrige solo y se calla es peor
+     que uno incompleto: el incompleto se ve.
+
+     Cada movimiento admite varios patrones porque una zancada cubre la
+     rodilla igual que una sentadilla, y un hip thrust la cadera igual que un
+     peso muerto. Lo que no cuenta es el aislamiento: una apertura no sustituye
+     a un press ni una extensión de cuádriceps a una sentadilla, y darlas por
+     buenas sería declarar cubierto lo que no lo está. */
+  const CUERPO = [
+    { label: 'el empuje horizontal', patrones: [P.emH, 'fondo'] },
+    { label: 'el empuje vertical', patrones: [P.emV] },
+    { label: 'la tracción horizontal', patrones: [P.trH] },
+    { label: 'la tracción vertical', patrones: [P.trV] },
+    { label: 'la rodilla (sentadilla o zancada)', patrones: [P.sen, P.zan] },
+    { label: 'la cadera (peso muerto o empuje de cadera)', patrones: [P.bis, P.cad] }
+  ];
+
+  /* Cuánto cuesta en minutos meter un ejercicio más, con la misma cuenta que
+     duracion(). Se mira ANTES de meterlo: recortarATiempo podría llevarse por
+     delante justo el que acaba de entrar, y entonces el agujero volvería
+     tapado en el papel y abierto en el gimnasio. */
+  function cuesta(sets, rest) {
+    return Math.round(sets * ((rest || 60) + 45) / 60);
+  }
+
+  function meter(ses, cand, calentamiento, hay, yaPuestos, mov) {
+    yaPuestos[cand.exId] = true;
+    mov.patrones.forEach(function (p) { if (cand.patron === p) hay[p] = true; });
+    sanear(ses, calentamiento);
+    titular(ses, true);
+  }
+
+  function completar(sesiones, base, minutos, calentamiento) {
+    const anadidos = [];
+    const sinSitio = [];
+    if (!sesiones || !sesiones.length || !base || !base.sesiones) {
+      return { anadidos: anadidos, sinSitio: sinSitio };
+    }
+
+    const hay = {};
+    const yaPuestos = {};
+    sesiones.forEach(function (s) {
+      (s.ejercicios || []).forEach(function (e) {
+        const p = e.patron || (Data.get(e.exId) ? Alt.patron(Data.get(e.exId)) : '');
+        if (p) hay[p] = true;
+        yaPuestos[e.exId] = true;
+      });
+    });
+
+    CUERPO.forEach(function (mov) {
+      const cubierto = mov.patrones.some(function (p) { return hay[p]; });
+      if (cubierto) return;
+
+      /* El candidato sale del plan de la calculadora para esta misma semana:
+         ya está filtrado por su material, su nivel y sus lesiones. */
+      let cand = null;
+      base.sesiones.some(function (s) {
+        return (s.ejercicios || []).some(function (e) {
+          if (mov.patrones.indexOf(e.patron) === -1) return false;
+          if (yaPuestos[e.exId]) return false;
+          cand = e;
+          return true;
+        });
+      });
+      if (!cand) { sinSitio.push(mov.label); return; }
+
+      /* Tres series, de accesorio, en el día que tenga hueco de tiempo. Se
+         prueba por el día más corto: es donde menos molesta. */
+      const sets = 3;
+      const coste = cuesta(sets, cand.rest);
+      const orden = sesiones.slice().sort(function (a, b) {
+        return (a.minutos || 0) - (b.minutos || 0);
+      });
+      const libre = orden.filter(function (s) {
+        return (s.minutos || 0) + coste <= minutos &&
+          !(s.ejercicios || []).some(function (e) { return e.exId === cand.exId; });
+      })[0];
+
+      const ex = Data.get(cand.exId);
+      const nombre = (ex && ex.nameEs) || cand.exId;
+
+      if (libre) {
+        libre.ejercicios.push(Object.assign({}, cand, {
+          sets: sets, rol: 'accesorio',
+          note: T('Lo añade la app: faltaba este movimiento en la semana.')
+        }));
+        meter(libre, cand, calentamiento, hay, yaPuestos, mov);
+        anadidos.push({ que: nombre, falta: mov.label, dia: libre.dia, cambio: '' });
+        return;
+      }
+
+      /* Sin hueco de tiempo se CAMBIA, no se abandona. Rendirse aquí dejaría el
+         agujero abierto y lo llamaría garantía, que es justo lo que no puede
+         hacer una regla.
+
+         La víctima es el accesorio cuyo patrón más se repite en la semana y que
+         no es el único de su movimiento: cambiar la tercera extensión de
+         tríceps por la única tracción vertical es obvio. Si el único candidato
+         fuera a dejar otro hueco, no se toca y se dice. */
+      const veces = {};
+      sesiones.forEach(function (s) {
+        (s.ejercicios || []).forEach(function (e) {
+          if (e.patron) veces[e.patron] = (veces[e.patron] || 0) + 1;
+        });
+      });
+      /* Y se elige por lo que CUESTA, no solo por lo que repite. Con las
+         mismas series, una dominada cuesta más minutos que un jalón de tríceps
+         porque descansa el doble: el primer intento cambiaba uno por otro y
+         dejaba el día en 63 minutos de los 60 pedidos. Una garantía que rompe
+         otra garantía no vale. */
+      const minimo = cuesta(3, cand.rest);
+      const candidatas = [];
+      sesiones.forEach(function (s) {
+        if ((s.ejercicios || []).some(function (e) { return e.exId === cand.exId; })) return;
+        (s.ejercicios || []).forEach(function (e) {
+          if (e.rol !== 'accesorio') return;
+          if ((veces[e.patron] || 0) < 2) return;
+          const sitio = (minutos - (s.minutos || 0)) + cuesta(e.sets, e.rest);
+          if (sitio < minimo) return;
+          candidatas.push({ e: e, s: s, repite: veces[e.patron] || 0 });
+        });
+      });
+      candidatas.sort(function (a, b) { return b.repite - a.repite; });
+      const elegida = candidatas[0];
+      if (!elegida) { sinSitio.push(mov.label); return; }
+      const victima = elegida.e;
+      const dueno = elegida.s;
+
+      const fuera = Data.get(victima.exId);
+      const i = dueno.ejercicios.indexOf(victima);
+      /* las series que quepan en lo que deja el que sale, nunca menos de tres:
+         por debajo de tres, la hoja deja de cumplir sus propias reglas */
+      const sitio = (minutos - (dueno.minutos || 0)) + cuesta(victima.sets, victima.rest);
+      let seriesCambio = topeDe(cand);
+      while (seriesCambio > 3 && cuesta(seriesCambio, cand.rest) > sitio) seriesCambio--;
+      dueno.ejercicios[i] = Object.assign({}, cand, {
+        sets: seriesCambio, rol: 'accesorio',
+        note: T('Lo cambia la app: faltaba este movimiento en la semana.')
+      });
+      meter(dueno, cand, calentamiento, hay, yaPuestos, mov);
+      anadidos.push({ que: nombre, falta: mov.label, dia: dueno.dia,
+        cambio: (fuera && fuera.nameEs) || victima.exId });
+    });
+
+    return { anadidos: anadidos, sinSitio: sinSitio };
+  }
+
   /* ---------- 8. Por qué este plan y no otro ---------- */
   /* Lo que de verdad ha entrenado, no lo que el plan propone: series por
      músculo y semana en las últimas cuatro. Sin esto el análisis habla de un
@@ -1785,6 +1941,9 @@
     agruparSesion: agruparPorMusculo,
     /* Y estas, el plan montado con IA: elige ella los ejercicios, pero cómo se
        escribe la hoja lo manda la misma regla que a la calculadora. */
-    sanear: sanear, titular: titular, esOlimpico: esOlimpico
+    sanear: sanear, titular: titular, esOlimpico: esOlimpico,
+    /* La cobertura del cuerpo entero es una regla, no una opinión, así que no
+       se le deja a la IA: se comprueba después. */
+    completar: completar, CUERPO: CUERPO
   };
 })(window);

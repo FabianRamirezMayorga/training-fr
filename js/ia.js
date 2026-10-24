@@ -2442,10 +2442,15 @@
 
       /* Un plan se arma por patrones de movimiento, no por una lista de
          músculos: así es como no se queda fuera una mitad del cuerpo. */
+      /* Se sigue pidiendo aunque ahora la app lo compruebe: que lo elija la IA
+         sale mejor que rellenarlo a posteriori, porque ella sabe en qué día
+         encaja. El relleno es la red, no el plan. */
       '- PATRONES: en la semana tienen que estar los seis —empuje horizontal, empuje ' +
       'vertical, tracción horizontal, tracción vertical, rodilla (sentadilla o zancada) ' +
       'y cadera (peso muerto rumano, hip thrust o buenos días)—. Si falta uno, el plan ' +
-      'tiene un agujero aunque las series cuadren.\n' +
+      'tiene un agujero aunque las series cuadren. Si falta alguno, la app lo ' +
+      'añade por su cuenta al terminar y se lo dice, así que es mejor que lo ' +
+      'coloques tú donde encaje.\n' +
 
       /* Sin esto, «reps: número» sale a ojo y acaba siendo 10 para todo. */
       '- REPETICIONES según para qué sirve cada ejercicio: los básicos pesados de 5 a ' +

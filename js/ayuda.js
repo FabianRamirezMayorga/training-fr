@@ -842,6 +842,13 @@
         'Donde no hay rango es porque no lo hay: un 5 × 5 de fuerza es un 5 × 5, y una plancha lleva segundos, no repeticiones. Y si cambias las repeticiones a mano, el rango se va: lo que has escrito es un número tuyo, no el techo de nada.'],
       ver: ['g-hoja', 'g-peso'] },
 
+    { id: 'p-cuerpoentero', q: '¿Quién garantiza que el plan me entrene el cuerpo entero?',
+      a: ['La app, no la IA. Una semana tiene que llevar los seis movimientos: empuje horizontal y vertical, tracción horizontal y vertical, rodilla —sentadilla o zancada— y cadera —peso muerto o empuje de cadera—. Si falta uno, el plan tiene un agujero aunque las series cuadren, y el agujero lo paga quien entrena.',
+        'Al entrenador con IA se le pide en el encargo, pero pedir no es garantizar. Así que cuando termina de montarlo, la app lo repasa: si falta un movimiento lo pone ella, con el ejercicio que te tocaría de la calculadora. Y si el día ya está lleno de minutos, en vez de rendirse cambia el accesorio que más se repite esa semana —la tercera extensión de tríceps— por el que falta.',
+        'Nunca pasa en silencio. Lo que añade o cambia sale escrito debajo del plan, con el ejercicio, el día y el movimiento que faltaba. Un plan que se corrige solo y se calla es peor que uno incompleto: el incompleto al menos se ve.',
+        'Y si de verdad no cabe —dos días de media hora no dan para seis movimientos— te lo dice y te propone qué cambiar: más minutos por sesión o un día más. No te lo tapa con un ejercicio de mentira.'],
+      ver: ['g-plan', 'p-reparto'] },
+
     { id: 'p-dibujo', q: '¿Por qué los ejercicios de mi plan han cambiado de dibujo?',
       a: ['Porque ahora casi todos traen la ilustración escrita para esta app —512 píxeles, guardada en el propio móvil— en vez de la foto de gimnasio que venía de fuera. El ejercicio es el mismo: la sentadilla con barra sigue siendo la sentadilla con barra. Tus marcas, tu historial y tus rutinas no se tocan, porque el identificador del ejercicio no cambia.',
         'El cambio no es estético. Esa ilustración funciona sin conexión, y el nombre y las instrucciones están escritos en español, no traducidos palabra a palabra. Hasta ahora la mitad de lo que salía en los planes eran fotos que había que descargar.',
