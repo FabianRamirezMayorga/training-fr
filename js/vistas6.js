@@ -225,10 +225,19 @@
     });
 
     /* curva de Bézier entre puntos, que queda menos angulosa que las rectas */
+    /* Y partida en tramos, porque un path tiene un color y hacen falta dos: el
+       tramo que toca un día de solo actividad va en azul, igual que su punto.
+       Con la línea entera en verde, el punto azul suelto encima se lee como un
+       fallo de pintado en vez de como un dato. El valor no cambia —sigue siendo
+       cero, que es la verdad—: lo que cambia es que ahora se ve de dónde sale
+       ese cero. */
     let d = 'M' + xy[0].x + ' ' + xy[0].y;
+    const tramos = [];
     for (let i = 1; i < xy.length; i++) {
       const a = xy[i - 1], b = xy[i], cx = (a.x + b.x) / 2;
-      d += ' C' + cx + ' ' + a.y + ' ' + cx + ' ' + b.y + ' ' + b.x + ' ' + b.y;
+      const curva = ' C' + cx + ' ' + a.y + ' ' + cx + ' ' + b.y + ' ' + b.x + ' ' + b.y;
+      d += curva;
+      tramos.push({ d: 'M' + a.x + ' ' + a.y + curva, act: a.act || b.act });
     }
     const area = d + ' L' + xy[xy.length - 1].x + ' ' + H + ' L' + xy[0].x + ' ' + H + ' Z';
     const ultimo = xy[xy.length - 1];
@@ -242,7 +251,14 @@
           </linearGradient>
         </defs>
         <path class="graf-area" d="${area}" fill="url(#gradGraf)"/>
-        <path class="graf-linea" d="${d}"/>
+        <!-- Los verdes primero y los azules después: donde dos tramos se tocan,
+             el que manda es el que dice que ese día hubo algo. -->
+        ${raw(tramos.filter(function (t) { return !t.act; }).map(function (t) {
+          return '<path class="graf-linea" d="' + t.d + '"/>';
+        }).join(''))}
+        ${raw(tramos.filter(function (t) { return t.act; }).map(function (t) {
+          return '<path class="graf-linea graf-act" d="' + t.d + '"/>';
+        }).join(''))}
         ${raw(xy.map(function (p) {
           return '<circle class="graf-p' + (p.act ? ' graf-act' : '') +
             '" cx="' + p.x + '" cy="' + p.y + '" r="' + (p.act ? 3.4 : 2.5) + '"/>';

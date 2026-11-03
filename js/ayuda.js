@@ -1079,6 +1079,12 @@
         'Si lo que quieres es recorrer varias semanas seguidas en vez de mirar un día suelto, eso está en el historial, al final de esa misma pantalla.'],
       ver: ['g-registro'] },
 
+    { id: 'p-grafazul', q: '¿Por qué hay un tramo azul en la gráfica?',
+      a: ['Porque ese día hiciste algo que no fueron series: una caminata, un partido, una clase. La gráfica cuenta series, así que ahí vale cero —y eso es verdad, no hubo series—, pero el cero de un día que saliste a andar no es el mismo cero que el de un día en el sofá. El azul lo distingue.',
+        'Antes solo se pintaba el punto, y un punto azul suelto sobre una línea verde parece un fallo de pintado más que un dato. Ahora el tramo de curva que entra y sale de ese día va del mismo azul, así que el punto forma parte de la línea.',
+        'El valor no cambia por estar en azul: esa cifra sigue siendo la de series, y los minutos de la actividad se ven en la tira de constancia de debajo, con el número en azul también.'],
+      ver: ['g-registro', 'p-periodo'] },
+
     { id: 'p-periodo', q: '¿Por qué Progreso me abre en la semana?',
       a: ['Porque al entrar la pregunta suele ser «¿cómo voy?», y eso es lo de estos días. Con tres meses por delante, una semana buena o mala no se nota en la curva y el mapa sale casi entero en gris.',
         'El mando de arriba cambia el periodo, y manda sobre toda la pantalla: la gráfica, la constancia, el reparto por zona y las cuatro cifras de arriba. La racha no, que una racha es de hoy y no de un periodo.',
