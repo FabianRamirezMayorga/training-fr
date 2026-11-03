@@ -189,14 +189,16 @@
       'It works the same on the week strip and on the month grid: they are the same map drawn two ways, depending on the period you have set at the top.',
     'Si lo que quieres es recorrer varias semanas seguidas en vez de mirar un día suelto, eso está en el historial, al final de esa misma pantalla.':
       'If what you want is to go through several weeks in a row rather than look at one day, that is in the history, at the bottom of that same screen.',
+    'Porque ese día hiciste algo que no fueron series: una caminata, un partido, una clase. El tramo de curva que entra y sale de ese día va en azul, y el punto sube: su alto son los minutos que duró.':
+      'Because that day you did something that was not sets: a walk, a match, a class. The stretch of curve going into and out of that day is blue, and the point rises: its height is the minutes it lasted.',
+    'Pero esos minutos van con SU propia regla, no con la de las series. El eje de la gráfica son series, y un rato de bici no se convierte en series sin inventarse el cambio. Así que el alto del azul sirve para comparar una actividad con otra —dos horas suben más que cuarenta minutos— pero no con el verde de al lado. Es lo mismo que hace la app con el trozo azul de las barras por zona.':
+      'But those minutes go by THEIR own scale, not the one for sets. The axis of the chart is sets, and a stint on the bike does not turn into sets without inventing the exchange rate. So the height of the blue is there to compare one activity with another —two hours rise higher than forty minutes— but not with the green next to it. It is the same thing the app does with the blue part of the zone bars.',
+    'Por eso el azul nunca llega más arriba del 60% de la gráfica: con la escala suelta, una caminata larga dibujaría un pico más alto que tu mejor día de pesas, y entonces el alto sí estaría diciendo algo que no es verdad.':
+      'That is why the blue never goes above 60% of the chart: with a free scale, a long walk would draw a higher peak than your best weights day, and then the height really would be saying something untrue.',
+    'Y el relleno de debajo no sube con el azul: el relleno es volumen de series, y de eso ese día hay cero. La línea azul pasa por encima del relleno, que se queda en el suelo.':
+      'And the fill underneath does not rise with the blue: the fill is volume from sets, and of that there is zero that day. The blue line passes above the fill, which stays on the floor.',
     '¿Por qué hay un tramo azul en la gráfica?':
       'Why is part of the chart blue?',
-    'Porque ese día hiciste algo que no fueron series: una caminata, un partido, una clase. La gráfica cuenta series, así que ahí vale cero —y eso es verdad, no hubo series—, pero el cero de un día que saliste a andar no es el mismo cero que el de un día en el sofá. El azul lo distingue.':
-      'Because that day you did something that was not sets: a walk, a match, a class. The chart counts sets, so it reads zero there —and that is true, there were no sets— but the zero of a day you went out walking is not the same zero as the zero of a day on the sofa. The blue tells them apart.',
-    'Antes solo se pintaba el punto, y un punto azul suelto sobre una línea verde parece un fallo de pintado más que un dato. Ahora el tramo de curva que entra y sale de ese día va del mismo azul, así que el punto forma parte de la línea.':
-      'Before, only the dot was painted, and a lone blue dot over a green line looks more like a rendering glitch than a piece of data. Now the stretch of curve going into and out of that day is the same blue, so the dot is part of the line.',
-    'El valor no cambia por estar en azul: esa cifra sigue siendo la de series, y los minutos de la actividad se ven en la tira de constancia de debajo, con el número en azul también.':
-      'The value does not change for being blue: that figure is still the one for sets, and the minutes of the activity are shown on the consistency strip below, with its number in blue as well.',
     '¿Por qué Progreso me abre en la semana?':
       'Why does Progress open on the week?',
     'Porque al entrar la pregunta suele ser «¿cómo voy?», y eso es lo de estos días. Con tres meses por delante, una semana buena o mala no se nota en la curva y el mapa sale casi entero en gris.':

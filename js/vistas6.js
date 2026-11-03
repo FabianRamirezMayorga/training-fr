@@ -82,12 +82,17 @@
     const dias = porDia(r.dias);
     const dato = function (d) { return porSeries ? d.series : d.volumen; };
 
-    /* `act` marca el punto en el que hubo algo pero no series: la línea
-       sigue valiendo cero, que es la verdad, y el punto se pinta en azul para
-       que el día no parezca vacío. */
+    /* `act` marca el punto en el que hubo algo pero no series. Su altura no
+       sale de `y` —que vale cero, y es la verdad: no hubo series— sino de los
+       minutos, con su propia regla. Ver grafica().
+
+       Antes se quedaba plantado en el suelo, y como los días de alrededor
+       también valen cero, el tramo azul salía siendo una recta: el punto
+       estaba pero la curva no. */
     if (r.paso === 'dia') {
       return dias.map(function (d) {
-        return { y: dato(d), etiqueta: UI.fechaCorta(d.t), act: !dato(d) && d.n > 0 };
+        return { y: dato(d), etiqueta: UI.fechaCorta(d.t),
+          act: !dato(d) && d.n > 0, min: d.minutos || 0 };
       });
     }
 
@@ -99,7 +104,8 @@
       out.push({
         y: suma,
         etiqueta: UI.fechaCorta(trozo[0].t),
-        act: !suma && trozo.some(function (d) { return d.n > 0; })
+        act: !suma && trozo.some(function (d) { return d.n > 0; }),
+        min: trozo.reduce(function (a2, d) { return a2 + (d.minutos || 0); }, 0)
       });
     }
     return out;
@@ -219,8 +225,29 @@
     const max = Math.max.apply(null, puntos.map(function (p) { return p.y; }).concat([1]));
     const paso = puntos.length > 1 ? (W - P * 2) / (puntos.length - 1) : 0;
 
+    /* Los días de solo actividad se miden con SU regla, no con la de las
+       series: el eje de esta gráfica son series, y un rato de bici no se
+       convierte en series sin inventarse el cambio. Así que los minutos se
+       escalan contra el mayor rato de actividad del periodo, igual que ya hace
+       la barra por zona: sirve para comparar una actividad con otra, no con el
+       verde de al lado.
+
+       Y se quedan por debajo del 60% del alto a propósito. Con la escala
+       suelta, una caminata de dos horas dibujaría un pico más alto que el día
+       de veinticuatro series, y entonces el alto sí estaría diciendo algo que
+       no es verdad. */
+    const TECHO_ACT = 0.6;
+    const maxMin = Math.max.apply(null, puntos.map(function (p) {
+      return p.act ? (p.min || 0) : 0;
+    }).concat([1]));
+
     const xy = puntos.map(function (p, i) {
-      return { x: P + i * paso, y: H - P - (p.y / max) * (H - P * 2), v: p.y,
+      const alto = p.act
+        ? ((p.min || 0) / maxMin) * TECHO_ACT
+        : (p.y / max);
+      return { x: P + i * paso, y: H - P - alto * (H - P * 2), v: p.y,
+        /* la altura que le tocaría por series, para el relleno */
+        ys: H - P - (p.y / max) * (H - P * 2),
         et: p.etiqueta, act: !!p.act };
     });
 
@@ -239,7 +266,17 @@
       d += curva;
       tramos.push({ d: 'M' + a.x + ' ' + a.y + curva, act: a.act || b.act });
     }
-    const area = d + ' L' + xy[xy.length - 1].x + ' ' + H + ' L' + xy[0].x + ' ' + H + ' Z';
+    /* El relleno va por las SERIES, no por la línea. Siguiendo la línea se
+       pintaba verde debajo del pico azul, y el relleno es lo que dice «esto es
+       volumen»: debajo de un día de actividad no hay ninguno. La línea azul
+       puede subir porque lleva su regla escrita al pie; el relleno no lleva
+       ninguna, así que se queda donde está la verdad. */
+    let da = 'M' + xy[0].x + ' ' + xy[0].ys;
+    for (let i = 1; i < xy.length; i++) {
+      const a = xy[i - 1], b = xy[i], cx = (a.x + b.x) / 2;
+      da += ' C' + cx + ' ' + a.ys + ' ' + cx + ' ' + b.ys + ' ' + b.x + ' ' + b.ys;
+    }
+    const area = da + ' L' + xy[xy.length - 1].x + ' ' + H + ' L' + xy[0].x + ' ' + H + ' Z';
     const ultimo = xy[xy.length - 1];
 
     return html`
@@ -755,7 +792,11 @@
         </div>
         ${raw(grafica(puntos, porSeries ? 'series' : 'kg'))}
         <div class="tiny" style="margin-top:8px">${r.paso === 'dia'
-          ? T('Un punto por día') : T('Un punto por semana')}</div>
+          ? T('Un punto por día') : T('Un punto por semana')}${raw(
+          puntos.some(function (p) { return p.act; })
+            ? ' · ' + esc(T('En azul, los días de actividad: su alto son minutos ' +
+              'con su propia escala, no series.'))
+            : '')}</div>
       </div>
 
       <div class="list-title">${T('Constancia')}</div>

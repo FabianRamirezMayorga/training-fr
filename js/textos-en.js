@@ -696,6 +696,8 @@
     'Series': 'Sets',
     'Volumen': 'Volume',
     'vs. antes': 'vs. before',
+    'En azul, los días de actividad: su alto son minutos con su propia escala, no series.':
+      'In blue, the activity days: their height is minutes on their own scale, not sets.',
     'Un punto por día': 'One dot per day',
     'Un punto por semana': 'One dot per week',
     'Constancia': 'Consistency',
